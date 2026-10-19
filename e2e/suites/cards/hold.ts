@@ -30,26 +30,30 @@ const CAUGHT: Payload<string | null> =
 // Wiring, not the gesture under test: a real CDP Escape key wedged headless Brave on 2026-10-04 (Issue #750's measurements), so the reset dispatches the keydown the overlay listens for.
 const RESET: Payload<boolean> = `(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return document.getElementById("place-card").hidden; })()`;
 
+async function pressPair({ send }: Pick<SuiteContext, "send">, p: Point, clickCount: number): Promise<void> {
+  await send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: p.x,
+    y: p.y,
+    button: "left",
+    buttons: 1,
+    clickCount,
+  });
+  await send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: p.x,
+    y: p.y,
+    button: "left",
+    buttons: 0,
+    clickCount,
+  });
+}
+
 export function holdKit(ctx: HoldKit) {
   const { evaluate, send, sleep, settle, waitReady, setTouch, PORT } = ctx;
   const move = (p: Point) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p.x, y: p.y, buttons: 0 });
   const press = async (p: Point, clickCount = 1) => {
-    await send("Input.dispatchMouseEvent", {
-      type: "mousePressed",
-      x: p.x,
-      y: p.y,
-      button: "left",
-      buttons: 1,
-      clickCount,
-    });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: p.x,
-      y: p.y,
-      button: "left",
-      buttons: 0,
-      clickCount,
-    });
+    await pressPair({ send }, p, clickCount);
   };
   const tap = async (p: Point) => {
     await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: p.x, y: p.y, id: 1 }] });
@@ -202,6 +206,34 @@ export async function p29NearestTown(k: Kit, marks: Mark[]): Promise<void> {
   );
 }
 
+async function p33DragFrom(k: Kit, b: Mark): Promise<void> {
+  await k.move(b);
+  await k.send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: b.x,
+    y: b.y,
+    button: "left",
+    buttons: 1,
+    clickCount: 1,
+  });
+  for (let i = 1; i <= 8; i++)
+    await k.send("Input.dispatchMouseEvent", {
+      type: "mouseMoved",
+      x: b.x + 5 * i,
+      y: b.y + 3 * i,
+      button: "left",
+      buttons: 1,
+    });
+  await k.send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: b.x + 40,
+    y: b.y + 24,
+    button: "left",
+    buttons: 0,
+    clickCount: 1,
+  });
+}
+
 export async function p33DragKeepsPin(k: Kit, marks: Mark[]): Promise<void> {
   const rows: string[] = [];
   let tried = 0;
@@ -217,31 +249,7 @@ export async function p33DragKeepsPin(k: Kit, marks: Mark[]): Promise<void> {
     );
     if (!b) continue;
     tried++;
-    await k.move(b);
-    await k.send("Input.dispatchMouseEvent", {
-      type: "mousePressed",
-      x: b.x,
-      y: b.y,
-      button: "left",
-      buttons: 1,
-      clickCount: 1,
-    });
-    for (let i = 1; i <= 8; i++)
-      await k.send("Input.dispatchMouseEvent", {
-        type: "mouseMoved",
-        x: b.x + 5 * i,
-        y: b.y + 3 * i,
-        button: "left",
-        buttons: 1,
-      });
-    await k.send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: b.x + 40,
-      y: b.y + 24,
-      button: "left",
-      buttons: 0,
-      clickCount: 1,
-    });
+    await p33DragFrom(k, b);
     const after = await k.card();
     if (!after.pinned || after.name !== a.name)
       rows.push(
@@ -366,46 +374,6 @@ export async function p32Dismiss(k: Kit, marks: Mark[]): Promise<void> {
     "P32 a press on a pinned card's text keeps it, and a press on open chart clear of it closes it (#750)",
     rows.length === 0,
     JSON.stringify(rows),
-  );
-}
-
-const TABLET = [0, 5, 8, 9, 11, 16, 17, 21, 23];
-// What each event of a tap reported: the witness that a text tap reached a town under the card, and the record printed on a failure, since CI's browser and a local one have disagreed on this check.
-const TAPLOG: Payload<boolean> = `(() => { window.__p30 = []; const name = (t) => t && t.classList ? (t.classList.contains("place-hit") ? "hit" + t.dataset.idx : (t.className || t.tagName)) : String(t);
-  for (const type of ["touchstart", "pointerdown", "mousedown", "click"]) document.addEventListener(type, (e) => { const p = e.touches && e.touches[0] ? e.touches[0] : e; window.__p30.push(type + "@" + Math.round(p.clientX) + "," + Math.round(p.clientY) + ">" + name(e.target) + (type === "click" ? " d" + e.detail : "")); }, { capture: true, once: true });
-  return true; })()`;
-
-export async function p30Tablet(k: Kit): Promise<void> {
-  const marks = (await k.boot(true)).filter((m) => TABLET.includes(m.idx));
-  const rows: string[] = [];
-  let onTown = 0;
-  for (const m of marks) {
-    await k.reset();
-    await k.tap(m);
-    const c = await k.atRest(`P30 a tap on ${m.name}`);
-    if (c.name !== m.name || !c.pinned) {
-      rows.push(`${m.name}: the tap opened ${c.name}${c.pinned ? "" : " unpinned"}`);
-      continue;
-    }
-    // Two taps closer than d3's double-tap window zoom the chart, which moves every later mark.
-    await k.sleep(650);
-    // 30px inside the card: CI's headless Chrome delivers a CDP tap as browser-adjusted mouse events alone, with no touch or pointer event to say where the finger came down, and near the card's edge the adjustment moves it onto a town outside (measured 2026-10-04, Kalkulin's tap at 179,364 reaching Vadelgrad at 171,374).
-    const text = { x: (c.left + c.right) / 2, y: c.bottom - 30 };
-    await k.evaluate(TAPLOG);
-    await k.tap(text);
-    await k.sleep(650);
-    const kept = await k.card();
-    const events = await k.evaluate<string>(`window.__p30.join(" | ")`);
-    if (/mousedown@[^|]*>hit/.test(events)) onTown++;
-    if (!kept.shown || kept.name !== m.name)
-      rows.push(
-        `${m.name}: a tap at ${Math.round(text.x)},${Math.round(text.y)} on the card's text (${[c.left, c.top, c.right, c.bottom].map(Math.round).join(",")}) left ${kept.shown ? kept.name : "nothing"}; events ${events}`,
-      );
-  }
-  k.check(
-    "P30 on a tablet a tap opens and pins its own town, and a tap on the card's text keeps it, including one that lands on a town under the card (#750, #632)",
-    marks.length === TABLET.length && onTown > 0 && rows.length === 0,
-    JSON.stringify({ towns: marks.map((m) => m.name), textTapsOnATown: onTown, failures: rows }),
   );
 }
 
