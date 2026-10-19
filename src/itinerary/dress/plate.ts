@@ -25,26 +25,8 @@ function grain(c: DressContext, id: string, seed: number): SvgNode[] {
   ];
 }
 
-function titleBand(c: DressContext, input: RibbonInput): SvgNode[] {
-  const { title, subtitle } = ribbonTitle(input);
-  const cx = RIBBON_W / 2;
-  const top = RIBBON_MARGIN;
-  const fit = Math.min(25, (RIBBON_W - 120) / Math.max(1, title.length) / 0.62);
-  const ruleY = top + 66;
+function subtitleLines(c: DressContext, subtitle: readonly string[], cx: number, top: number): SvgNode[] {
   return [
-    el(
-      "text",
-      {
-        x: cx,
-        y: top + 30,
-        "text-anchor": "middle",
-        "font-family": c.style.fontFamilyTitle,
-        "font-size": r1(fit),
-        "letter-spacing": 1.4,
-        fill: c.ink,
-      },
-      [title],
-    ),
     el(
       "text",
       {
@@ -71,6 +53,30 @@ function titleBand(c: DressContext, input: RibbonInput): SvgNode[] {
       },
       [subtitle[1] ?? ""],
     ),
+  ];
+}
+
+function titleBand(c: DressContext, input: RibbonInput): SvgNode[] {
+  const { title, subtitle } = ribbonTitle(input);
+  const cx = RIBBON_W / 2;
+  const top = RIBBON_MARGIN;
+  const fit = Math.min(25, (RIBBON_W - 120) / Math.max(1, title.length) / 0.62);
+  const ruleY = top + 66;
+  return [
+    el(
+      "text",
+      {
+        x: cx,
+        y: top + 30,
+        "text-anchor": "middle",
+        "font-family": c.style.fontFamilyTitle,
+        "font-size": r1(fit),
+        "letter-spacing": 1.4,
+        fill: c.ink,
+      },
+      [title],
+    ),
+    ...subtitleLines(c, subtitle, cx, top),
     el("path", {
       d: `M${cx - 190} ${ruleY}H${cx - 8}M${cx + 8} ${ruleY}H${cx + 190}M${cx - 6} ${ruleY}l6 -3.4l6 3.4l-6 3.4Z`,
       fill: c.ink,

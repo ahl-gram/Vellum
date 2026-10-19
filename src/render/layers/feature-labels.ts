@@ -18,6 +18,7 @@ import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
 import { reachPlacements } from "./river-label-placement.ts";
 import { placeRealmLabel } from "./realm-label-placement.ts";
+import type { World } from "../../world/types.ts";
 
 const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.temperateForest,
@@ -135,16 +136,21 @@ function placeRangeLabel(ctx: RenderCtx, range: string, blob: number[]): RangeFi
   return undefined;
 }
 
-function rangeLabelNodes(ctx: RenderCtx): SvgNode[] {
-  const { world, proj, style } = ctx;
-  const range = world.names.range;
-  if (!range) return [];
-  const k = proj.widthPx / 1500;
+function rangeBlob(world: World): number[] {
   const { w, h } = world.elev;
   const blob = largestBlob(w, h, (i) => {
     const b = world.biomes[i] as number;
     return b === BIOMES.alpine || b === BIOMES.snow;
   });
+  return blob;
+}
+
+function rangeLabelNodes(ctx: RenderCtx): SvgNode[] {
+  const { world, proj, style } = ctx;
+  const range = world.names.range;
+  if (!range) return [];
+  const k = proj.widthPx / 1500;
+  const blob = rangeBlob(world);
   if (blob.length < 10) return [];
   const fit = placeRangeLabel(ctx, range, blob);
   if (fit === undefined) return [];
