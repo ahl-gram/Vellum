@@ -124,40 +124,48 @@ function drawerArt(): {
   return { art, titleOf, pictureOf, forget, putArt, putName };
 }
 
-function drawerCuttings(
-  drawerEls: ChartDrawerEls,
-  deps: ChartDrawerDeps,
+function cutting(
+  item: TableItem,
+  seat: number,
   titleOf: ItemText,
   pictureOf: (item: TableItem) => HTMLElement,
-  forget: (item: TableItem) => void,
-): {
+  take: (seat: number) => void,
+): Row {
+  const li = document.createElement("li");
+  li.className = item.kind === "prospect" ? "prospect" : "";
+  li.style.setProperty("--tilt", `${((seat % 3) - 1) * 1.6}deg`);
+  const { label, b } = cuttingLabel(item, titleOf);
+  const off = offPress(item, seat, titleOf, take);
+  li.append(pictureOf(item), label, off);
+  return { li, label, title: b, off };
+}
+
+type DrawerCuttings = {
   rows: ReadonlyMap<string, Row>;
   render: () => void;
   commit: (next: ReadonlyArray<TableItem>) => void;
   items: Items;
   setItems: (next: ReadonlyArray<TableItem>) => void;
   setLanding: (next: string | null) => void;
-} {
+};
+
+function drawerCuttings(
+  drawerEls: ChartDrawerEls,
+  deps: ChartDrawerDeps,
+  titleOf: ItemText,
+  pictureOf: (item: TableItem) => HTMLElement,
+  forget: (item: TableItem) => void,
+): DrawerCuttings {
   let items: ReadonlyArray<TableItem> = [];
   const rows = new Map<string, Row>();
   let landing: string | null = null;
-
-  const cutting = (item: TableItem, seat: number): Row => {
-    const li = document.createElement("li");
-    li.className = item.kind === "prospect" ? "prospect" : "";
-    li.style.setProperty("--tilt", `${((seat % 3) - 1) * 1.6}deg`);
-    const { label, b } = cuttingLabel(item, titleOf);
-    const off = offPress(item, seat, titleOf, take);
-    li.append(pictureOf(item), label, off);
-    return { li, label, title: b, off };
-  };
 
   const render = (): void => {
     recount(drawerEls, deps, items);
     rows.clear();
     drawerEls.cuttings.replaceChildren(
       ...items.map((item, seat) => {
-        const row = cutting(item, seat);
+        const row = cutting(item, seat, titleOf, pictureOf, take);
         rows.set(keyOf(item), row);
         if (landing === keyOf(item)) settle(row.li);
         return row.li;
@@ -223,6 +231,23 @@ function drawerJolt(drawerEls: ChartDrawerEls, rows: ReadonlyMap<string, Row>) {
   return { joltWhenStill, clearCeremonies };
 }
 
+function patchArt(
+  item: TableItem,
+  rows: ReadonlyMap<string, Row>,
+  render: () => void,
+  pictureOf: (item: TableItem) => HTMLElement,
+  titleOf: ItemText,
+): void {
+  const row = rows.get(keyOf(item));
+  if (!row) {
+    render();
+    return;
+  }
+  row.li.replaceChildren(pictureOf(item), row.label, row.off);
+  row.title.textContent = titleOf(item);
+  row.off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
+}
+
 function drawerFill(
   deps: ChartDrawerDeps,
   items: Items,
@@ -236,17 +261,6 @@ function drawerFill(
 ) {
   let drawing = false;
   let refill = false;
-
-  const patchArt = (item: TableItem): void => {
-    const row = rows.get(keyOf(item));
-    if (!row) {
-      render();
-      return;
-    }
-    row.li.replaceChildren(pictureOf(item), row.label, row.off);
-    row.title.textContent = titleOf(item);
-    row.off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
-  };
 
   const fill = async (): Promise<void> => {
     if (!deps.drawThumb) return;
@@ -268,7 +282,7 @@ function drawerFill(
           }
           putArt(keyOf(item), drawn.url);
           putName(keyOf(item), drawn.title);
-          patchArt(item);
+          patchArt(item, rows, render, pictureOf, titleOf);
         }
       } while (refill); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     } finally {
