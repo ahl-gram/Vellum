@@ -29,6 +29,38 @@ export async function prlLink({ evaluate, send, check, sleep, PORT }: SuiteConte
   return orderHref;
 }
 
+async function prw2WarpedProof({
+  evaluate,
+  check,
+  sleep,
+}: Pick<SuiteContext, "evaluate" | "check" | "sleep">): Promise<void> {
+  let warpProof = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate<{
+        seed: number;
+        svg: boolean;
+        status: string | undefined;
+        hash: string;
+        stamp: string | null;
+      } | null>(
+        `(()=>{if(typeof window.__vellumPrintRoomState!=="function")return null;const st=window.__vellumPrintRoomState();const svg=document.querySelector("#pr-preview svg");return{seed:st.seed,svg:!!svg,status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash,stamp:svg?svg.getAttribute("data-vellum-coast-warp"):null};})()`,
+      );
+    } catch {}
+    if (s && s.svg && s.status === "" && s.seed === 42) {
+      warpProof = s;
+      break;
+    }
+    await sleep(50);
+  }
+  check(
+    "PRW2 the warped world Taken to the Print Room prints warped (stamp + coast= round-trip)",
+    !!warpProof && warpProof.stamp === "0.9" && /coast=90/.test(warpProof.hash),
+    warpProof ? `stamp=${warpProof.stamp} hash=${warpProof.hash}` : "no proof",
+  );
+}
+
 export async function prwWarp({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&legend=1&coast=90` });
   let exWarp = false;
@@ -60,29 +92,5 @@ export async function prwWarp({ evaluate, send, check, sleep, PORT }: SuiteConte
       ? warpHref.slice(warpHref.indexOf("#"))
       : "#seed=42&style=antique&legend=1&coast=90";
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/${warpHash}` });
-  let warpProof = null;
-  for (let i = 0; i < 200; i++) {
-    let s = null;
-    try {
-      s = await evaluate<{
-        seed: number;
-        svg: boolean;
-        status: string | undefined;
-        hash: string;
-        stamp: string | null;
-      } | null>(
-        `(()=>{if(typeof window.__vellumPrintRoomState!=="function")return null;const st=window.__vellumPrintRoomState();const svg=document.querySelector("#pr-preview svg");return{seed:st.seed,svg:!!svg,status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash,stamp:svg?svg.getAttribute("data-vellum-coast-warp"):null};})()`,
-      );
-    } catch {}
-    if (s && s.svg && s.status === "" && s.seed === 42) {
-      warpProof = s;
-      break;
-    }
-    await sleep(50);
-  }
-  check(
-    "PRW2 the warped world Taken to the Print Room prints warped (stamp + coast= round-trip)",
-    !!warpProof && warpProof.stamp === "0.9" && /coast=90/.test(warpProof.hash),
-    warpProof ? `stamp=${warpProof.stamp} hash=${warpProof.hash}` : "no proof",
-  );
+  await prw2WarpedProof({ evaluate, check, sleep });
 }

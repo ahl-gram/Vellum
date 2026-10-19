@@ -31,16 +31,7 @@ export async function pr10PlatesEnable({ evaluate, check, sleep }: SuiteContext)
   );
 }
 
-export async function pr12GrandPoster({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  const accepted = await evaluate<{ disabled: boolean; status: string }>(
-    `(()=>{window.__vellumLastPoster=undefined;const g=document.querySelector('[data-poster="grand"]');g.click();return{disabled:g.disabled,status:document.getElementById("pr-poster-status").textContent};})()`,
-  );
-  check(
-    "PR12 ordering a plate disables the counter and rolls the press",
-    accepted.disabled === true && /press is rolling/i.test(accepted.status),
-    JSON.stringify(accepted),
-  );
-
+async function pr13Poster({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
   let poster = null;
   for (let i = 0; i < 220; i++) {
     let s = null;
@@ -66,6 +57,20 @@ export async function pr12GrandPoster({ evaluate, check, sleep }: SuiteContext):
     }
     await sleep(50);
   }
+  return poster;
+}
+
+export async function pr12GrandPoster({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+  const accepted = await evaluate<{ disabled: boolean; status: string }>(
+    `(()=>{window.__vellumLastPoster=undefined;const g=document.querySelector('[data-poster="grand"]');g.click();return{disabled:g.disabled,status:document.getElementById("pr-poster-status").textContent};})()`,
+  );
+  check(
+    "PR12 ordering a plate disables the counter and rolls the press",
+    accepted.disabled === true && /press is rolling/i.test(accepted.status),
+    JSON.stringify(accepted),
+  );
+
+  const poster = await pr13Poster({ evaluate, sleep });
   check(
     "PR13 the Grand plate pulls a well-formed 4200px poster of the proof (counter re-opens, sheet named)",
     !!poster &&
