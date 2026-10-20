@@ -7,6 +7,7 @@ import { includeIgnoreFile } from "eslint/config";
 import css, { type CSSRuleDefinition } from "@eslint/css";
 import tseslint from "typescript-eslint";
 import * as prettier from "prettier";
+import { blockWitnesses } from "../../test-support/lint-block-witnesses.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -152,6 +153,32 @@ test("the two comment rules and the escape twin reach every TypeScript root the 
   for (const rule of ["vellum/css-comment-no-js-module", "vellum/css-comment-issue-form"])
     assert.deepEqual(sheet[rule], [2], `the sheets lost ${rule}, a comment rule's CSS sibling`);
   for (const rule of EVERY_ROOT) assert.equal(sheet[rule], undefined, `${rule} reaches a sheet`);
+});
+
+test("a line, block or doc comment on any TypeScript root may carry an em-dash (Issue #727)", async () => {
+  const dash = String.fromCharCode(0x2014);
+  const text = [
+    `// a line comment ${dash} here`,
+    `/* a block comment ${dash} here */`,
+    `/** a doc comment ${dash} here */`,
+    "export {};",
+    "",
+  ].join("\n");
+  for (const file of Object.values(ROOT_WITNESSES)) {
+    const [result] = await eslint.lintText(text, { filePath: join(ROOT, file) });
+    assert.deepEqual(result!.messages, [], `${file}: an em-dash in a comment is reported`);
+  }
+  const plain = text.replaceAll(dash, "-");
+  for (const { block, file } of blockWitnesses()) {
+    const [withDash, withHyphen] = await Promise.all(
+      [text, plain].map((t) => eslint.lintText(t, { filePath: join(ROOT, file) })),
+    );
+    assert.deepEqual(
+      withDash![0]!.messages,
+      withHyphen![0]!.messages,
+      `${file}, a witness of the block "${block}": an em-dash in a comment is reported`,
+    );
+  }
 });
 
 const RULEBOOK = "handbook/specs/rulebook.md";

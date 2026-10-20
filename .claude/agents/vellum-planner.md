@@ -69,4 +69,4 @@ An implementer that hits a stop condition, or a skeptic finding that is about th
 
 ## Never
 
-Never write production code or tests, commit, push, open a pull request, comment on an issue, or touch the roadmap Project. Never run the full local e2e lanes. No em-dashes anywhere you write, except inside inline backticks or a fenced code block.
+Never write production code or tests, commit, push, open a pull request, comment on an issue, or touch the roadmap Project. Never run the full local e2e lanes. No em-dashes anywhere you write, except inside inline backticks or a fenced code block, or in a comment in code or a stylesheet.
