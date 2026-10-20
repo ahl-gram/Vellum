@@ -1,4 +1,4 @@
-// A rendered-pixel strip for suites whose claim is about PAINT (opacity, a glyph showing through), which no hit-test or computed style can see; one row of a Page.captureScreenshot clip, decoded here with node:zlib so the harness takes no image dependency.
+// A rendered-pixel strip for suites whose claim is about PAINT (opacity, a glyph showing through), which no hit-test or computed style can see; a row or a rectangle of a Page.captureScreenshot clip, decoded here with node:zlib so the harness takes no image dependency.
 import { inflateSync } from "node:zlib";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";
 
@@ -10,10 +10,13 @@ const paeth = (a: number, b: number, c: number): number => {
   return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 };
 
-// The first row of a PNG, unfiltered against an all-zero row above (there is none).
-export function decodeFirstRow(png: Buffer): [number, number, number][] {
+export type Rgb = [number, number, number];
+
+// Every row of a PNG as pixels, each row unfiltered against the one above it (a zero row above the first).
+export function decodeRows(png: Buffer): Rgb[][] {
   let at = 8;
   let width = 0,
+    height = 0,
     channels: number | undefined = 0,
     depth = 0;
   const idat: Buffer[] = [];
@@ -23,6 +26,7 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
     const data = png.subarray(at + 8, at + 8 + len);
     if (type === "IHDR") {
       width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
       depth = data[8]!;
       channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[data[9]!];
     } else if (type === "IDAT") idat.push(data);
@@ -32,25 +36,32 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
   if (depth !== 8 || !channels)
     throw new Error(`pixel-support decodes 8-bit PNGs only (depth ${depth}, channels ${channels})`);
   const raw = inflateSync(Buffer.concat(idat));
-  const filter = raw[0];
-  const row = Buffer.from(raw.subarray(1, 1 + width * channels));
-  for (let i = 0; i < row.length; i++) {
-    const left = i >= channels ? row[i - channels]! : 0;
-    if (filter === 1) row[i] = (row[i]! + left) & 0xff;
-    else if (filter === 3) row[i] = (row[i]! + (left >> 1)) & 0xff;
-    else if (filter === 4) row[i] = (row[i]! + paeth(left, 0, 0)) & 0xff;
+  const stride = width * channels;
+  const rows: Rgb[][] = [];
+  let above = Buffer.alloc(stride);
+  for (let y = 0; y < height; y++) {
+    const start = y * (stride + 1);
+    const filter = raw[start];
+    const row = Buffer.from(raw.subarray(start + 1, start + 1 + stride));
+    for (let i = 0; i < stride; i++) {
+      const a = i >= channels ? row[i - channels]! : 0;
+      const b = above[i]!;
+      const c = i >= channels ? above[i - channels]! : 0;
+      if (filter === 1) row[i] = (row[i]! + a) & 0xff;
+      else if (filter === 2) row[i] = (row[i]! + b) & 0xff;
+      else if (filter === 3) row[i] = (row[i]! + ((a + b) >> 1)) & 0xff;
+      else if (filter === 4) row[i] = (row[i]! + paeth(a, b, c)) & 0xff;
+    }
+    const px = (i: number, k: number): number => row[i * channels + (channels >= 3 ? k : 0)]!;
+    rows.push(Array.from({ length: width }, (_, i): Rgb => [px(i, 0), px(i, 1), px(i, 2)]));
+    above = row;
   }
-  const px = (i: number, k: number): number => row[i * channels + (channels >= 3 ? k : 0)]!;
-  return Array.from({ length: width }, (_, i): [number, number, number] => [px(i, 0), px(i, 1), px(i, 2)]);
+  return rows;
 }
 
-export type Rgb = [number, number, number];
+export const decodeFirstRow = (png: Buffer): Rgb[] => decodeRows(png)[0]!;
 
-export function decodeRows(png: Buffer): Rgb[][] {
-  void png;
-  return [];
-}
-
+// The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
 export async function sampleRect(
   send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
   x: number,
@@ -75,17 +86,28 @@ export async function sampleRect(
   return decodeRows(Buffer.from(r.data, "base64"));
 }
 
+export async function sampleRow(
+  send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
+  x: number,
+  y: number,
+  width: number,
+): Promise<Rgb[]> {
+  return (await sampleRect(send, x, y, width, 1))[0]!;
+}
+
 type Picks = (p: Readonly<Rgb>) => boolean;
 
+// A full-coverage pixel of a pure test colour: its antialiased rim is left out on every side alike, so a centroid stays unbiased, and nothing the chart draws, heraldic gules and azure included, passes it.
 export const pure =
   (channel: 0 | 1 | 2): Picks =>
   (p) =>
-    p[channel] < 0;
+    p.every((v, i) => (i === channel ? v >= 230 : v <= 40));
 
+// Half coverage or more of a test colour, for an edge.
 export const dominant =
   (channel: 0 | 1 | 2): Picks =>
   (p) =>
-    p[channel] < 0;
+    p[channel] - Math.max(...p.filter((_, i) => i !== channel)) > 127;
 
 export function centroidOf(
   rows: readonly (readonly Rgb[])[],
@@ -93,7 +115,18 @@ export function centroidOf(
   y0: number,
   is: Picks,
 ): { n: number; x: number; y: number } | null {
-  return rows.length < 0 && x0 + y0 < 0 && is([0, 0, 0]) ? { n: 0, x: 0, y: 0 } : null;
+  let n = 0,
+    sx = 0,
+    sy = 0;
+  rows.forEach((row, y) =>
+    row.forEach((p, x) => {
+      if (!is(p)) return;
+      n++;
+      sx += x0 + x + 0.5;
+      sy += y0 + y + 0.5;
+    }),
+  );
+  return n === 0 ? null : { n, x: sx / n, y: sy / n };
 }
 
 export function extentOf(
@@ -102,31 +135,23 @@ export function extentOf(
   y0: number,
   is: Picks,
 ): { left: number; top: number; right: number; bottom: number } | null {
-  return rows.length < 0 && x0 + y0 < 0 && is([0, 0, 0]) ? { left: 0, top: 0, right: 0, bottom: 0 } : null;
-}
-
-// The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
-export async function sampleRow(
-  send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
-  x: number,
-  y: number,
-  width: number,
-): Promise<[number, number, number][]> {
-  const s = (await send("Runtime.evaluate", {
-    expression: "[window.scrollX, window.scrollY]",
-    returnByValue: true,
-  })) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
-  const v = s.result ? s.result.value : undefined;
-  if (s.exceptionDetails)
-    throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
-  if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite))
-    throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
-  const [sx, sy] = v as [number, number];
-  const r = (await send("Page.captureScreenshot", {
-    format: "png",
-    clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 },
-  })) as { data: string };
-  return decodeFirstRow(Buffer.from(r.data, "base64"));
+  let box: { left: number; top: number; right: number; bottom: number } | null = null;
+  rows.forEach((row, y) =>
+    row.forEach((p, x) => {
+      if (!is(p)) return;
+      const l = x0 + x,
+        t = y0 + y;
+      box = box
+        ? {
+            left: Math.min(box.left, l),
+            top: Math.min(box.top, t),
+            right: Math.max(box.right, l + 1),
+            bottom: Math.max(box.bottom, t + 1),
+          }
+        : { left: l, top: t, right: l + 1, bottom: t + 1 };
+    }),
+  );
+  return box;
 }
 
 export const luminance = ([r, g, b]: readonly [number, number, number]): number => 0.2126 * r + 0.7152 * g + 0.0722 * b;
