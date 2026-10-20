@@ -15,18 +15,28 @@ type Read = {
   v0: string | null;
   k: number;
   hashK: string | null;
+  glide: boolean;
 };
 
+// glide reads d3-transition's own bookkeeping: it keeps a node's scheduled and running transitions on __transition and deletes it when the last one ends, so no stalled frame can end a wait on it early.
 const READ =
   `(()=>{const s=window.__vellumRegion();const z=window.__vellumZoomState();const svg=document.querySelector("#map .region-inset svg");` +
   `return{band:s.band,committed:s.committed,redrafts:s.redrafts,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),` +
   `caption:document.getElementById("caption").textContent||"",pencil:!!document.querySelector("#map .survey-pencil"),` +
   `insets:document.querySelectorAll("#map .region-inset").length,u0:svg?svg.getAttribute("data-vellum-region-u0"):null,` +
-  `v0:svg?svg.getAttribute("data-vellum-region-v0"):null,k:z.k,hashK:new URLSearchParams(location.hash.slice(1)).get("k")};})()`;
+  `v0:svg?svg.getAttribute("data-vellum-region-v0"):null,k:z.k,hashK:new URLSearchParams(location.hash.slice(1)).get("k"),glide:!!document.getElementById("map-viewport").__transition};})()`;
+
+// Asks for 24 and goes straight home in the same task, so no settle runs at the deep camera and nothing is drafted.
+const CEILING = `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:24,x:W/2-12*W,y:H/2-12*H});const k=window.__vellumZoomState().k;window.__vellumZoomTo({k:1,x:0,y:0});return k;})()`;
+const LET_GO = `(()=>{document.getElementById("zoom-hold").click();return{glide:!!document.getElementById("map-viewport").__transition};})()`;
+const OUT_THEN_LET_GO = `(()=>{document.getElementById("zoom-out").click();document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,glide:!!document.getElementById("map-viewport").__transition,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
+const ZOOM_THEN_LET_GO = (target: Target21): string =>
+  `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:4,x:W/2-(${target.cx})*4*W,y:H/2-(${target.cy})*4*H});document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,pencil:!!document.querySelector("#map .survey-pencil"),pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
+const OUT_TWICE_THEN_LET_GO = `(()=>{const o=document.getElementById("zoom-out");o.click();o.click();document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,glide:!!document.getElementById("map-viewport").__transition,pencil:!!document.querySelector("#map .survey-pencil"),pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
 
 const read = (k: ZoomKit) => k.evaluate<Read>(READ);
 // Wiring only: ZH1 drove the real press with the mouse.
-const press = (k: ZoomKit) => k.evaluate(`document.getElementById("zoom-hold").click()`);
+const press = (k: ZoomKit) => k.evaluate<undefined>(`document.getElementById("zoom-hold").click()`);
 const marked = (r: Read): boolean => r.caption.endsWith("held");
 
 // Home, with the inset's fade run out, and the hold free whatever the last check left.
@@ -151,28 +161,62 @@ async function viaInk(k: ZoomKit): Promise<void> {
   await k.waitInked("zh4-ink");
 }
 
-async function letGoBy(k: ZoomKit, target: Target21, name: string, path: () => Promise<void>): Promise<string[]> {
+type Homed = { lit: Read; after: Read; ceiling: number };
+
+async function letGoBy(k: ZoomKit, target: Target21, path: () => Promise<void>): Promise<Homed> {
   const lit = await holdBandOne(k, target);
   await path();
   const after = await read(k);
-  const ok = lit.band === 1 && lit.committed && lit.pressed === "true" && after.pressed === "false" && !marked(after);
-  return ok ? [] : [`${name}: ${JSON.stringify({ lit, after })}`];
+  const ceiling = await k.evaluate<number>(CEILING);
+  return { lit, after, ceiling };
 }
 
-export async function zh4HomesLetGo(k: ZoomKit, target: Target21): Promise<void> {
-  const faults: string[] = [];
-  faults.push(...(await letGoBy(k, target, "the voiced home", () => viaHome(k))));
-  faults.push(...(await letGoBy(k, target, "a draw", () => viaDraw(k))));
-  faults.push(...(await letGoBy(k, target, "the turned sheet", () => viaTurn(k))));
+function homeCheck(k: ZoomKit, name: string, r: Homed): void {
+  k.check(
+    name,
+    r.lit.band === 1 &&
+      r.lit.committed &&
+      r.lit.pressed === "true" &&
+      r.after.pressed === "false" &&
+      !marked(r.after) &&
+      r.ceiling === 8,
+    JSON.stringify(r),
+  );
+}
+
+export async function zh4aVoicedHome(k: ZoomKit, target: Target21): Promise<void> {
+  const r = await letGoBy(k, target, () => viaHome(k));
+  homeCheck(
+    k,
+    "ZH4a the voiced home lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    r,
+  );
+}
+
+export async function zh4bDraw(k: ZoomKit, target: Target21): Promise<void> {
+  const r = await letGoBy(k, target, () => viaDraw(k));
+  homeCheck(k, "ZH4b a draw lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)", r);
+}
+
+export async function zh4cTurn(k: ZoomKit, target: Target21): Promise<void> {
+  const r = await letGoBy(k, target, () => viaTurn(k));
+  homeCheck(
+    k,
+    "ZH4c the turned sheet lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    r,
+  );
   await viaTurn(k);
-  faults.push(...(await letGoBy(k, target, "the survey ink", () => viaInk(k))));
+}
+
+export async function zh4dInk(k: ZoomKit, target: Target21): Promise<void> {
+  const r = await letGoBy(k, target, () => viaInk(k));
+  homeCheck(
+    k,
+    "ZH4d the survey ink lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    r,
+  );
   await k.evaluate(
     `(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  k.check(
-    "ZH4 every path that homes the camera lets the hold go first: the voiced home, a draw, the turned sheet and the survey ink (Issue #751)",
-    faults.length === 0,
-    faults.join(" | ") || "four cases, each lit before and unlit after",
   );
 }
 
@@ -230,8 +274,8 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
   const deep = await read(k);
   const big = await k.evaluate<Label | null>(FIRST_HAMLET(rest.name));
   const hashed = await settle<Read>(READ, (d) => d.hashK !== was.hashK, "zh6-held-hash");
-  await press(k);
-  const back = await settle<Read>(READ, (d) => Math.abs(d.k - 8) < 1e-6, "zh6-glide-back");
+  const letGo = await k.evaluate<{ glide: boolean }>(LET_GO);
+  const back = await settle<Read>(READ, (d) => !d.glide, "zh6-glide-back");
   await k.enterAt(24, target.cx, target.cy);
   const unheld = await read(k);
   const want = 24 / 6.5;
@@ -241,11 +285,13 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
       !!big &&
       Math.abs(big.h / rest.h / want - 1) < 0.02 &&
       hashed.hashK === "8.0000" &&
+      letGo.glide &&
+      Math.abs(back.k - 8) < 1e-6 &&
       back.band === 3 &&
       back.committed &&
       back.pressed === "false" &&
       unheld.k === 8,
-    JSON.stringify({ rest, big, want, deepK: deep.k, hashK: hashed.hashK, back, unheldK: unheld.k }),
+    JSON.stringify({ rest, big, want, deepK: deep.k, hashK: hashed.hashK, letGo, back, unheldK: unheld.k }),
   );
 }
 
@@ -255,24 +301,68 @@ export async function zh7LetGoMidGlide(k: ZoomKit, target: Target21): Promise<vo
   await k.enterAt(6.5, target.cx, target.cy);
   await k.waitRedraft(before);
   await press(k);
-  await k.enterAt(8, target.cx, target.cy);
+  await k.enterAt(24, target.cx, target.cy);
   const lit = await read(k);
-  // A d3 transition takes its first frame on the next timer tick, so two clicks in one task see the glide's target and not a frame of it: the let-go meets a glide in flight with the camera still at exactly 8.
-  await k.evaluate(
-    `(()=>{document.getElementById("zoom-in").click();document.getElementById("zoom-hold").click();})()`,
-  );
-  let agreed = 0;
-  const rest = await makeSettle(k)<Read>(
-    READ,
-    (d, last) => {
-      agreed = last && Math.abs(d.k - last.k) < 1e-9 ? agreed + 1 : 0;
-      return agreed >= 2;
-    },
-    "zh7-landing",
-  );
+  // One task, so no frame runs between the presses: the camera is still at 24 and "Stand off" has queued a glide toward 24 / 1.4 when the let-go reads it, the case where reading the camera instead of the glide's pending target lands at 24 / 1.4 * 8 / 24 = 5.71.
+  const now = await k.evaluate<{ k: number; glide: boolean; pressed: string | null }>(OUT_THEN_LET_GO);
+  const rest = await makeSettle(k)<Read>(READ, (d) => !d.glide, "zh7-landing");
   k.check(
-    "ZH7 letting go while a glide toward a deeper k is in flight lands the camera on 8, not on the glide's own end (Issue #751)",
-    lit.pressed === "true" && lit.k === 8 && Math.abs(rest.k - 8) < 1e-6 && rest.pressed === "false",
-    JSON.stringify({ lit: lit.k, rest }),
+    "ZH7 letting go while a glide out from above 8 is in flight lands the camera on 8, not further out (Issue #751)",
+    lit.pressed === "true" &&
+      lit.k === 24 &&
+      now.k === 24 &&
+      now.glide &&
+      now.pressed === "false" &&
+      Math.abs(rest.k - 8) < 1e-6 &&
+      rest.pressed === "false",
+    JSON.stringify({ lit: { k: lit.k, pressed: lit.pressed }, now, rest }),
+  );
+}
+
+export async function zh8LetGoGlidingOut(k: ZoomKit, target: Target21): Promise<void> {
+  await bandOneInset(k, target);
+  await press(k);
+  await k.enterAt(4, target.cx, target.cy);
+  const lit = await waitHashK(k, "4.0000", "zh8-held-settle");
+  // One task: two presses of "Stand off" queue a glide toward 4 / 1.96 and the let-go meets it before any frame, so a survey sent at the press would already show its pencil here; at 4 against the held band-1 sheet a settle would send band 2.
+  const now = await k.evaluate<{ k: number; glide: boolean; pencil: boolean; pressed: string | null }>(
+    OUT_TWICE_THEN_LET_GO,
+  );
+  const rest = await makeSettle(k)<Read>(READ, (d) => !d.glide, "zh8-landing");
+  k.check(
+    "ZH8 letting go while a glide toward a depth at or under 8 is in flight drafts nothing at the press, and the glide lands where it was headed (Issue #751)",
+    lit.band === 1 &&
+      lit.committed &&
+      lit.pressed === "true" &&
+      !lit.pencil &&
+      now.k === 4 &&
+      now.glide &&
+      !now.pencil &&
+      now.pressed === "false" &&
+      Math.abs(rest.k - 4 / 1.96) < 1e-6,
+    JSON.stringify({ lit, now, rest }),
+  );
+}
+
+export async function zh9LetGoJustMoved(k: ZoomKit, target: Target21): Promise<void> {
+  await bandOneInset(k, target);
+  await press(k);
+  const lit = await read(k);
+  // One task: the camera moves to 4, which arms its settle, and the let-go meets that armed settle; a settle at once would send band 2 here and show its pencil, and the armed one sends it 250 ms later with the hold off.
+  const now = await k.evaluate<{ k: number; pencil: boolean; pressed: string | null }>(ZOOM_THEN_LET_GO(target));
+  const landed = await k.waitRedraft(lit.redrafts);
+  k.check(
+    "ZH9 letting go just after the camera moved drafts nothing at the press, and the settle already armed drafts the band for where the camera stopped (Issue #751)",
+    lit.band === 1 &&
+      lit.committed &&
+      lit.pressed === "true" &&
+      !lit.pencil &&
+      now.k === 4 &&
+      !now.pencil &&
+      now.pressed === "false" &&
+      landed.redrafts > lit.redrafts &&
+      landed.band === 2 &&
+      landed.committed,
+    JSON.stringify({ lit, now, landed }),
   );
 }

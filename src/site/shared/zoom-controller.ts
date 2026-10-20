@@ -74,6 +74,8 @@ export interface ZoomController {
   glideTarget(): number | null;
   /** Move the camera's ceiling; the floor stays. */
   setScaleMax(max: number): void;
+  /** True while a glideBy glide is in flight or the settle debounce is armed. */
+  settlePending(): boolean;
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;
   getState(): ZoomState;
@@ -170,7 +172,8 @@ function zoomPaint(
   const setSettleTimer = (next: ReturnType<typeof setTimeout> | 0): void => {
     settleTimer = next;
   };
-  return { syncDblDuration, clearSettle, apply, setSettleTimer };
+  const settleArmed = (): boolean => settleTimer !== 0;
+  return { syncDblDuration, clearSettle, apply, setSettleTimer, settleArmed };
 }
 
 function listenZoom(
@@ -375,6 +378,28 @@ function zoomHome(
   };
 }
 
+function zoomExtent(scaleExtent: readonly [number, number]) {
+  let extent = scaleExtent;
+  const setMax = (max: number): readonly [number, number] => (extent = [extent[0], max]);
+  return { extentNow: (): readonly [number, number] => extent, setMax };
+}
+
+function zoomCeiling(
+  behavior: Behavior,
+  sel: Sel,
+  glideTargetK: () => number | null,
+  settleArmed: () => boolean,
+  extentNow: () => readonly [number, number],
+  setMax: (max: number) => readonly [number, number],
+): Pick<ZoomController, "setScaleMax" | "settlePending"> {
+  return {
+    setScaleMax(max: number) {
+      behavior.scaleExtent([...setMax(max)]);
+    },
+    settlePending: () => false,
+  };
+}
+
 export function createZoomController({
   viewportEl,
   targetEl,
@@ -393,12 +418,11 @@ export function createZoomController({
   const { prefersReduced, glideMsNow } = zoomMotion(reducedMotion, mq, glideMs);
   const DBLCLICK_MS = 250;
 
-  let extent: readonly [number, number] = scaleExtent;
-  const extentNow = (): readonly [number, number] => extent;
+  const { extentNow, setMax } = zoomExtent(scaleExtent);
 
   const behavior = zoomBehavior(extentNow, viewportExtent, prefersReduced, DBLCLICK_MS);
   const touch = zoomTouch(viewportEl, sel, behavior);
-  const { syncDblDuration, clearSettle, apply, setSettleTimer } = zoomPaint(
+  const { syncDblDuration, clearSettle, apply, setSettleTimer, settleArmed } = zoomPaint(
     behavior,
     prefersReduced,
     DBLCLICK_MS,
@@ -422,10 +446,7 @@ export function createZoomController({
     ...zoomFit(viewportExtent, extentNow, sel, behavior, glideTargetK, viewportEl, apply, glideTo),
     glideBy,
     glideTarget: glideTargetK,
-    setScaleMax(max: number) {
-      extent = [extent[0], max];
-      behavior.scaleExtent([extent[0], max]);
-    },
+    ...zoomCeiling(behavior, sel, glideTargetK, settleArmed, extentNow, setMax),
     ...zoomHome(clearSettle, setGlideTargetK, prefersReduced, sel, behavior, apply, glideMsNow, getState),
     getState,
   };

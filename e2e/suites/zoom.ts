@@ -47,15 +47,21 @@ import {
   z21Hamlets,
   z21bOneBandUp,
   zRestore,
+  type Target21,
 } from "./zoom/bands.ts";
 import {
   zh1HeldInsetStays,
   zh2LetGoSettles,
   zh3HeldWorld,
-  zh4HomesLetGo,
+  zh4aVoicedHome,
+  zh4bDraw,
+  zh4cTurn,
+  zh4dInk,
   zh5DraftDropped,
   zh6HeldCeiling,
   zh7LetGoMidGlide,
+  zh8LetGoGlidingOut,
+  zh9LetGoJustMoved,
 } from "./zoom/hold.ts";
 import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
@@ -102,14 +108,23 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const target21 = await z21Target(k);
   const deep21 = await z21Hamlets(k, target21);
   await z21bOneBandUp(k, target21, deep21);
+  await zHold(step, k, target21);
+  await step("Z restore", () => zRestore(k));
+}
+
+async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Target21): Promise<void> {
   await step("ZH1", () => zh1HeldInsetStays(k, target21));
   await step("ZH2", () => zh2LetGoSettles(k));
   await step("ZH3", () => zh3HeldWorld(k, target21));
-  await step("ZH4", () => zh4HomesLetGo(k, target21));
+  await step("ZH4a", () => zh4aVoicedHome(k, target21));
+  await step("ZH4b", () => zh4bDraw(k, target21));
+  await step("ZH4c", () => zh4cTurn(k, target21));
+  await step("ZH4d", () => zh4dInk(k, target21));
   await step("ZH5", () => zh5DraftDropped(k, target21));
   await step("ZH6", () => zh6HeldCeiling(k, target21));
   await step("ZH7", () => zh7LetGoMidGlide(k, target21));
-  await step("Z restore", () => zRestore(k));
+  await step("ZH8", () => zh8LetGoGlidingOut(k, target21));
+  await step("ZH9", () => zh9LetGoJustMoved(k, target21));
 }
 
 async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
