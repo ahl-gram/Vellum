@@ -1,0 +1,5434 @@
+[
+ {
+  "url": "/out/844/pages/crescent-17.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-crescent-17.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/crescent-11.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-crescent-11.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/texas-30.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-texas-30.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/texas-8.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-texas-8.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/japan-13.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-japan-13.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/japan-10.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-japan-10.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/japan-turned-13.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-japan-turned-13.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/texas-30-coast0.1.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-texas-30-coast0.1.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/texas-30-coast0.95.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-texas-30-coast0.95.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-1-equal.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-1-equal.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-1-varied.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-1-varied.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-12.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-12.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-35.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-35.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/type-island-3.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-type-island-3.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/type-citystate-13.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-type-citystate-13.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/type-continent-5.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-type-continent-5.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/share-1.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-share-1.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-in-texas-30.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-in-texas-30.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-1-coast0.1.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-1-coast0.1.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-1-coast0.95.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-1-coast0.95.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/border-archipelago-8.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-border-archipelago-8.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/border-continent-3.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-border-continent-3.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/example-texas.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-example-texas.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/example-100.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-example-100.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/count-wobble-1.html",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-count-wobble-1.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/overview-shapes.html",
+  "width": 1724,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/overview-shapes.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/overview-types.html",
+  "width": 1592,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/overview-types.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/overview-counts.html",
+  "width": 1592,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/overview-counts.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--hard--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--hard--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--hard--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--hard--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--hard--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--hard--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--hard--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--hard--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias35--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias35--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias35--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias35--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias35--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias35--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias35--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias35--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias70--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias70--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias70--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias70--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias70--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias70--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--bias70--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--bias70--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft-big--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft-big--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft-big--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft-big--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft-big--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft-big--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 398,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--crescent-17--soft-big--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=crescent-17--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--crescent-17--soft-big--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--hard--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--hard--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--hard--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--hard--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--hard--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--hard--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--hard--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--hard--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias35--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias35--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias35--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias35--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias35--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias35--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias35--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias35--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias70--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias70--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias70--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias70--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias70--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias70--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--bias70--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--bias70--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft-big--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft-big--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft-big--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft-big--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft-big--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft-big--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30--soft-big--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30--soft-big--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--hard--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--hard--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--hard--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--hard--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--hard--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--hard--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--hard--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--hard--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--hard--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias35--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias35--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias35--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias35--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias35--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias35--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias35--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias35--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias35--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias70--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias70--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias70--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias70--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias70--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias70--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--bias70--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--bias70--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--bias70--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft-big--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft-big--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft-big--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft-big--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft-big--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft-big--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--japan-13--soft-big--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=japan-13--soft-big--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--japan-13--soft-big--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control-pass--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control-pass--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control-pass--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control-pass--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control-pass--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control-pass--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--control-pass--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--control-pass--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--control-pass--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--soft--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--soft--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--soft--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--soft--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--soft--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--soft--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.1--soft--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.1--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.1--soft--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control-pass--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control-pass--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control-pass--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control-pass--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control-pass--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control-pass--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--control-pass--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--control-pass--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--control-pass--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--soft--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--soft--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--soft--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--soft--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--soft--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--soft--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 339,
+   "y": 310,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--texas-30-coast0.95--soft--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=texas-30-coast0.95--soft--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--texas-30-coast0.95--soft--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n2-varied-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n2-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n2-varied-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n5-varied-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n5-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n5-varied-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n20-varied-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n20-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n20-varied-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--count-1--n100-varied-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=count-1--n100-varied-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--count-1--n100-varied-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n20-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n20-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-island-3--n100-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-island-3--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-island-3--n100-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n20-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n20-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-citystate-13--n100-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-citystate-13--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-citystate-13--n100-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--control--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--control--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--control--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--control--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--control--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--control--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--control--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--control--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--control--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n20-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n20-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n20-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-measured--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-measured--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-measured--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-measured--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-measured--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-measured--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-measured--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-measured--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-measured--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-sunk--world-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--world-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-sunk--world-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-sunk--close-antique.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--close-antique.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-sunk--close-antique.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-sunk--world-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--world-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-sunk--world-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/full--type-continent-5--n100-equal-sunk--close-ink.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/844/pages/plate.html?f=type-continent-5--n100-equal-sunk--close-ink.svg&w=1040",
+  "width": 1040,
+  "height": 803,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/stills/crop2x--type-continent-5--n100-equal-sunk--close-ink.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 280,
+   "y": 221,
+   "width": 480,
+   "height": 360,
+   "scale": 2
+  }
+ }
+]

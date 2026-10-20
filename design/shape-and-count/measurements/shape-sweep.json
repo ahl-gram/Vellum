@@ -1,0 +1,7135 @@
+{
+ "sha": "581a6de3",
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+  39,
+  40
+ ],
+ "crescent": {
+  "mapType": "island",
+  "outlineShare": 0.12114583333333333,
+  "per": {
+   "dome (control)": [
+    {
+     "seed": 1,
+     "likeness": 0.2286130576562825,
+     "landBeyond": 0.7476256127450981,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.13611137843646745,
+     "landBeyond": 0.8375076593137255,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.2814241262030538,
+     "landBeyond": 0.7021292892156863,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.21001742457890601,
+     "landBeyond": 0.7645909926470589,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.24822895005815387,
+     "landBeyond": 0.7302772671568627,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.24787710087734752,
+     "landBeyond": 0.7305836397058824,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.2845846935074356,
+     "landBeyond": 0.6995251225490197,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.28733960961070115,
+     "landBeyond": 0.697265625,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.2844915131292616,
+     "landBeyond": 0.6996017156862745,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.24135997195934106,
+     "landBeyond": 0.7362898284313726,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.2633681732244141,
+     "landBeyond": 0.7172564338235294,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.2663949081026961,
+     "landBeyond": 0.7146905637254902,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.20848972906572033,
+     "landBeyond": 0.7660079656862745,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.22461964038727525,
+     "landBeyond": 0.7512254901960784,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.2593251075632045,
+     "landBeyond": 0.720703125,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2713957495692131,
+     "landBeyond": 0.7104779411764706,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.2475693955192335,
+     "landBeyond": 0.7308517156862745,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.28912022713209334,
+     "landBeyond": 0.6958103553921569,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.2731782722795413,
+     "landBeyond": 0.708984375,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.2950124323533714,
+     "landBeyond": 0.6910232843137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.20886097552650443,
+     "landBeyond": 0.7656632965686274,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.24345200477494558,
+     "landBeyond": 0.7344515931372549,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.20360237892948174,
+     "landBeyond": 0.7705652573529411,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.24397611520899193,
+     "landBeyond": 0.7339920343137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.2128351768775042,
+     "landBeyond": 0.7619868259803921,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.19414660462607053,
+     "landBeyond": 0.7794883578431373,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.2689813321867498,
+     "landBeyond": 0.7125076593137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.16930797675647122,
+     "landBeyond": 0.8036151960784313,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.23091894897817322,
+     "landBeyond": 0.7455575980392157,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.26943618050826196,
+     "landBeyond": 0.712124693627451,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.25299840792499556,
+     "landBeyond": 0.7261412377450981,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.22145197447835835,
+     "landBeyond": 0.7540977328431373,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.2340499668978013,
+     "landBeyond": 0.7427619485294118,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.26179278894114294,
+     "landBeyond": 0.7185968137254902,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.33368480512144605,
+     "landBeyond": 0.6606541053921569,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.1848778855804617,
+     "landBeyond": 0.7883731617647058,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.21717015499879713,
+     "landBeyond": 0.7580039828431373,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.22508561347677195,
+     "landBeyond": 0.7508042279411765,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.29724185927255414,
+     "landBeyond": 0.6892233455882353,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.17450421171320554,
+     "landBeyond": 0.7984834558823529,
+     "islands": 4,
+     "border": 0
+    }
+   ],
+   "soft": [
+    {
+     "seed": 1,
+     "likeness": 0.35139466554737286,
+     "landBeyond": 0.6473268995098039,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.35491028731014956,
+     "landBeyond": 0.6447227328431373,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.3477946493130875,
+     "landBeyond": 0.6500076593137255,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.3467183816259792,
+     "landBeyond": 0.6508118872549019,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.3562073983303975,
+     "landBeyond": 0.643765318627451,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.3471794286583742,
+     "landBeyond": 0.6504672181372549,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.35304680038204395,
+     "landBeyond": 0.6461014093137255,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.32574679943101,
+     "landBeyond": 0.6667432598039216,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.354081437583636,
+     "landBeyond": 0.6453354779411765,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.3437037599119778,
+     "landBeyond": 0.6530713848039216,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.3526333880762327,
+     "landBeyond": 0.6464077818627451,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.35470297976513787,
+     "landBeyond": 0.6448759191176471,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.35382262996941893,
+     "landBeyond": 0.6455269607843137,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.35191052410581364,
+     "landBeyond": 0.6469439338235294,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.3453371320037987,
+     "landBeyond": 0.6518458946078431,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.35237513364899953,
+     "landBeyond": 0.6465992647058824,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.34605298164265896,
+     "landBeyond": 0.6513097426470589,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.34902677789205044,
+     "landBeyond": 0.6490885416666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.35123998473864937,
+     "landBeyond": 0.6474417892156863,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.3529434236161516,
+     "landBeyond": 0.6461780024509803,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.3511884323375682,
+     "landBeyond": 0.6474800857843137,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.33705829054666264,
+     "landBeyond": 0.6580882352941176,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.35335702548817305,
+     "landBeyond": 0.6458716299019608,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.3562073983303975,
+     "landBeyond": 0.643765318627451,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.3353442425156474,
+     "landBeyond": 0.659390318627451,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.3527367174668653,
+     "landBeyond": 0.6463311887254902,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.3381191672648959,
+     "landBeyond": 0.6572840073529411,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.3541332109811119,
+     "landBeyond": 0.645297181372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.351549381773775,
+     "landBeyond": 0.6472120098039216,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.3521686010995724,
+     "landBeyond": 0.6467524509803921,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.3553250928016532,
+     "landBeyond": 0.6444163602941176,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.3542885549309778,
+     "landBeyond": 0.6451822916666666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.35330531142529614,
+     "landBeyond": 0.6459099264705882,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.34954082993560187,
+     "landBeyond": 0.6487055759803921,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.347589513336631,
+     "landBeyond": 0.6501608455882353,
+     "islands": 6,
+     "border": 0
+    }
+   ],
+   "hard": [
+    {
+     "seed": 1,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    }
+   ],
+   "bias 0.35": [
+    {
+     "seed": 1,
+     "likeness": 0.2747822331005687,
+     "landBeyond": 0.7076439950980392,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.20865469933792916,
+     "landBeyond": 0.7658547794117647,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.3309282224727546,
+     "landBeyond": 0.6627604166666666,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.3155040487333779,
+     "landBeyond": 0.6747089460784313,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.2996697247706422,
+     "landBeyond": 0.6872702205882353,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.3108298171589311,
+     "landBeyond": 0.6783854166666666,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.33574715244776343,
+     "landBeyond": 0.6590839460784313,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.3163841807909605,
+     "landBeyond": 0.6740196078431373,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.3303782727921566,
+     "landBeyond": 0.6631816789215687,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.2980977165267749,
+     "landBeyond": 0.6885340073529411,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.3186387668478666,
+     "landBeyond": 0.6722579656862745,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.3299785947651057,
+     "landBeyond": 0.6634880514705882,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.2825378431230535,
+     "landBeyond": 0.7012101715686274,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.2780945507037171,
+     "landBeyond": 0.7048866421568627,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.3057071228432385,
+     "landBeyond": 0.6824448529411765,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2974319522291827,
+     "landBeyond": 0.6890701593137255,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.2980977165267749,
+     "landBeyond": 0.6885340073529411,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.30229821658393086,
+     "landBeyond": 0.6851639093137255,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.32525071097141145,
+     "landBeyond": 0.6671262254901961,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.31555291408194347,
+     "landBeyond": 0.6746706495098039,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.2887918486171761,
+     "landBeyond": 0.696078431372549,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.31121806738245095,
+     "landBeyond": 0.6780790441176471,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.2993359503980629,
+     "landBeyond": 0.6875382965686274,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.30758722540151373,
+     "landBeyond": 0.6809512867647058,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.26693854189024824,
+     "landBeyond": 0.7142310049019608,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.25082997810270535,
+     "landBeyond": 0.7280177696078431,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.3265413139561016,
+     "landBeyond": 0.6661305147058824,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.2696637269663727,
+     "landBeyond": 0.7119332107843137,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.29099989064265663,
+     "landBeyond": 0.6942784926470589,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.2986689156979942,
+     "landBeyond": 0.6880744485294118,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.3540296681449763,
+     "landBeyond": 0.6453737745098039,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.2822592324402607,
+     "landBeyond": 0.7014399509803921,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.28897947299461346,
+     "landBeyond": 0.6959252450980392,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.3207040572792363,
+     "landBeyond": 0.6706495098039216,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.3394856278366112,
+     "landBeyond": 0.65625,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.25749183354637123,
+     "landBeyond": 0.7222732843137255,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.29629222942059225,
+     "landBeyond": 0.6899892769607843,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.3154063289258654,
+     "landBeyond": 0.6747855392156863,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.30671881341548907,
+     "landBeyond": 0.681640625,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.24022972405098753,
+     "landBeyond": 0.7372855392156863,
+     "islands": 2,
+     "border": 0
+    }
+   ],
+   "bias 0.7": [
+    {
+     "seed": 1,
+     "likeness": 0.3234184073838795,
+     "landBeyond": 0.6685431985294118,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.33655370216620123,
+     "landBeyond": 0.6584712009803921,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.34579723362213105,
+     "landBeyond": 0.6515012254901961,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.33938431283564024,
+     "landBeyond": 0.6563265931372549,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.3529434236161516,
+     "landBeyond": 0.6461780024509803,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.34661596958174906,
+     "landBeyond": 0.6508884803921569,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.3287311472949651,
+     "landBeyond": 0.6644454656862745,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.3501582097518204,
+     "landBeyond": 0.6482460171568627,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.3525817293003361,
+     "landBeyond": 0.6464460784313726,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.3509307293256027,
+     "landBeyond": 0.647671568627451,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.34697447989959307,
+     "landBeyond": 0.6506204044117647,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.3486158181333536,
+     "landBeyond": 0.6493949142156863,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.3312283867087656,
+     "landBeyond": 0.6625306372549019,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.3412103309853821,
+     "landBeyond": 0.6549479166666666,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.3303282999023364,
+     "landBeyond": 0.6632199754901961,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.34692325245303113,
+     "landBeyond": 0.6506587009803921,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.3472819264275117,
+     "landBeyond": 0.650390625,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.34395871281117185,
+     "landBeyond": 0.6528799019607843,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.353253601314432,
+     "landBeyond": 0.6459482230392157,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.34538823886947273,
+     "landBeyond": 0.6518075980392157,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.3437037599119778,
+     "landBeyond": 0.6530713848039216,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.34319414419539573,
+     "landBeyond": 0.6534543504901961,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.3559477774799954,
+     "landBeyond": 0.6439568014705882,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.3526333880762327,
+     "landBeyond": 0.6464077818627451,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.3468208092485549,
+     "landBeyond": 0.6507352941176471,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.3273865297402646,
+     "landBeyond": 0.6654794730392157,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.34288856026997305,
+     "landBeyond": 0.6536841299019608,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.35631127450980393,
+     "landBeyond": 0.6436887254901961,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.3474869687630788,
+     "landBeyond": 0.6502374387254902,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.3416167891506932,
+     "landBeyond": 0.6546415441176471,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.3551176583126076,
+     "landBeyond": 0.6445695465686274,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.3440607210626186,
+     "landBeyond": 0.6528033088235294,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.33720974136303566,
+     "landBeyond": 0.6579733455882353,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.34646238071702845,
+     "landBeyond": 0.6510033700980392,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.3473331811610743,
+     "landBeyond": 0.6503523284313726,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.3440097150013282,
+     "landBeyond": 0.6528416053921569,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.33918172880586855,
+     "landBeyond": 0.6564797794117647,
+     "islands": 5,
+     "border": 0
+    }
+   ]
+  },
+  "medianSeed": 17,
+  "lowSeed": 11
+ },
+ "texas": {
+  "mapType": "island",
+  "outlineShare": 0.190859375,
+  "per": {
+   "dome (control)": [
+    {
+     "seed": 1,
+     "likeness": 0.32027202072538863,
+     "landBeyond": 0.6212469362745098,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.32408820759312784,
+     "landBeyond": 0.6178385416666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.4609237825635145,
+     "landBeyond": 0.5073912377450981,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.36528028933092227,
+     "landBeyond": 0.5822610294117647,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.47695986088972614,
+     "landBeyond": 0.4957873774509804,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.44523218716767105,
+     "landBeyond": 0.5189950980392157,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.2880295706568098,
+     "landBeyond": 0.6508501838235294,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.3734209196563921,
+     "landBeyond": 0.5754825367647058,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.3813315263425377,
+     "landBeyond": 0.5689721200980392,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.3835346816886114,
+     "landBeyond": 0.567172181372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.3624515439112418,
+     "landBeyond": 0.5846354166666666,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.4291723630245031,
+     "landBeyond": 0.5311351102941176,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.3749957842905804,
+     "landBeyond": 0.5741804534313726,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.44007629543287063,
+     "landBeyond": 0.5228630514705882,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.3873953583339005,
+     "landBeyond": 0.5640318627450981,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.4617618586640852,
+     "landBeyond": 0.5067784926470589,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.4444129525968965,
+     "landBeyond": 0.5196078431372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.47375650665124347,
+     "landBeyond": 0.49808517156862747,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.4075608493008804,
+     "landBeyond": 0.5479090073529411,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.4020427112349118,
+     "landBeyond": 0.5522748161764706,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.384991677141013,
+     "landBeyond": 0.5659849877450981,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.3503129864538138,
+     "landBeyond": 0.594937193627451,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.4584153103201574,
+     "landBeyond": 0.5092294730392157,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.46281080693193644,
+     "landBeyond": 0.5060125612745098,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.3891444342226311,
+     "landBeyond": 0.5626148897058824,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.42687152206628637,
+     "landBeyond": 0.5328967524509803,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.5053723738138316,
+     "landBeyond": 0.4758348651960784,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.37268105450994915,
+     "landBeyond": 0.5760952818627451,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.4448224537529237,
+     "landBeyond": 0.5193014705882353,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.4329900530737057,
+     "landBeyond": 0.5282245710784313,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.4142990945988136,
+     "landBeyond": 0.5426240808823529,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.47535644495910834,
+     "landBeyond": 0.49693627450980393,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.41361256544502617,
+     "landBeyond": 0.5431602328431373,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.4435946462715105,
+     "landBeyond": 0.5202205882352942,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.3899969315741025,
+     "landBeyond": 0.5619255514705882,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.384709438576232,
+     "landBeyond": 0.5662147671568627,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.4675497642273496,
+     "landBeyond": 0.5025658700980392,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.48119891008174387,
+     "landBeyond": 0.49276194852941174,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.4069779480277461,
+     "landBeyond": 0.5483685661764706,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.30039550905843326,
+     "landBeyond": 0.6393229166666666,
+     "islands": 4,
+     "border": 0
+    }
+   ],
+   "soft": [
+    {
+     "seed": 1,
+     "likeness": 0.5087147985049773,
+     "landBeyond": 0.47353707107843135,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.45711222301644033,
+     "landBeyond": 0.5101868872549019,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.538955156273592,
+     "landBeyond": 0.4532015931372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.534206367125762,
+     "landBeyond": 0.4563419117647059,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.5528470767472863,
+     "landBeyond": 0.44412530637254904,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.5452546998180715,
+     "landBeyond": 0.44906556372549017,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.47578368203865923,
+     "landBeyond": 0.4966299019607843,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.4965312190287413,
+     "landBeyond": 0.48196231617647056,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.5439672801635992,
+     "landBeyond": 0.4499080882352941,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.5105594664690626,
+     "landBeyond": 0.4722732843137255,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.4895871392035075,
+     "landBeyond": 0.48682598039215685,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.5276528776978417,
+     "landBeyond": 0.4607077205882353,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.5024875621890548,
+     "landBeyond": 0.4778262867647059,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.5162897947039572,
+     "landBeyond": 0.4683670343137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.5015468473777254,
+     "landBeyond": 0.47847732843137253,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.5476009717582752,
+     "landBeyond": 0.44753370098039214,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.5504848830576156,
+     "landBeyond": 0.4456571691176471,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.5455475946775844,
+     "landBeyond": 0.4488740808823529,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.5132506866602331,
+     "landBeyond": 0.47043504901960786,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.5446107217276,
+     "landBeyond": 0.44948682598039214,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.5390132497829452,
+     "landBeyond": 0.45316329656862747,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.5269091045279203,
+     "landBeyond": 0.46120557598039214,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.5504259202920596,
+     "landBeyond": 0.4456954656862745,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.5138687757602762,
+     "landBeyond": 0.4700137867647059,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.5174749692931849,
+     "landBeyond": 0.46756280637254904,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.5239982057416268,
+     "landBeyond": 0.46315870098039214,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.5496009122006842,
+     "landBeyond": 0.4462316176470588,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.48904309715120525,
+     "landBeyond": 0.48720894607843135,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.533629250677099,
+     "landBeyond": 0.4567248774509804,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.5323611215515297,
+     "landBeyond": 0.4575674019607843,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.549718716740155,
+     "landBeyond": 0.44615502450980393,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.5171926168502531,
+     "landBeyond": 0.4677542892156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.5189448977310831,
+     "landBeyond": 0.4665670955882353,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.5469550369948777,
+     "landBeyond": 0.4479549632352941,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.5466616084977238,
+     "landBeyond": 0.44814644607843135,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.5424485472154964,
+     "landBeyond": 0.45090379901960786,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.548776781644127,
+     "landBeyond": 0.44676776960784315,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.5500722378526348,
+     "landBeyond": 0.4459252450980392,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.544435184483673,
+     "landBeyond": 0.4496017156862745,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.5160642570281124,
+     "landBeyond": 0.4685202205882353,
+     "islands": 4,
+     "border": 0
+    }
+   ],
+   "hard": [
+    {
+     "seed": 1,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    }
+   ],
+   "bias 0.35": [
+    {
+     "seed": 1,
+     "likeness": 0.39256071318782665,
+     "landBeyond": 0.5598575367647058,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.3522388059701492,
+     "landBeyond": 0.5932904411764706,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.5066518847006651,
+     "landBeyond": 0.4749540441176471,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.4498061946587959,
+     "landBeyond": 0.5155867034313726,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.5072088724584104,
+     "landBeyond": 0.47457107843137253,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.5009387770128484,
+     "landBeyond": 0.4788985906862745,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.33004926108374383,
+     "landBeyond": 0.6125536151960784,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.403200826019618,
+     "landBeyond": 0.5513556985294118,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.43430079155672824,
+     "landBeyond": 0.5272288602941176,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.429322675641565,
+     "landBeyond": 0.5310202205882353,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.4014643704238424,
+     "landBeyond": 0.552734375,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.469718817591925,
+     "landBeyond": 0.5009957107843137,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.4256241695223442,
+     "landBeyond": 0.5338541666666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.46675780687868756,
+     "landBeyond": 0.503140318627451,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.4341494301392993,
+     "landBeyond": 0.52734375,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.5038176385968794,
+     "landBeyond": 0.4769071691176471,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.4827611288914751,
+     "landBeyond": 0.4916513480392157,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.5075990089856894,
+     "landBeyond": 0.4743030024509804,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.4447712534108225,
+     "landBeyond": 0.5193397671568627,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.4905129236281212,
+     "landBeyond": 0.48617493872549017,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.4558634480788459,
+     "landBeyond": 0.5111060049019608,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.42532512935253813,
+     "landBeyond": 0.5340839460784313,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.5214957456336766,
+     "landBeyond": 0.46484375,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.5007730251049105,
+     "landBeyond": 0.47901348039215685,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.43435125246270756,
+     "landBeyond": 0.5271905637254902,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.46475533520155204,
+     "landBeyond": 0.5045955882352942,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.5364033765450709,
+     "landBeyond": 0.45488664215686275,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.4035389699807216,
+     "landBeyond": 0.5510876225490197,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.48513769488561853,
+     "landBeyond": 0.48996629901960786,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.4676554231613809,
+     "landBeyond": 0.5024892769607843,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.4836244541484716,
+     "landBeyond": 0.49103860294117646,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.4914398595258999,
+     "landBeyond": 0.48552389705882354,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.45456491490955797,
+     "landBeyond": 0.5120634191176471,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.48513769488561853,
+     "landBeyond": 0.48996629901960786,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.4613950820847373,
+     "landBeyond": 0.507046568627451,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.43223494695426123,
+     "landBeyond": 0.5287990196078431,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.5134753879278343,
+     "landBeyond": 0.47028186274509803,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.5041505257332596,
+     "landBeyond": 0.47667738970588236,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.45202649761379016,
+     "landBeyond": 0.5139399509803921,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.3672032193158954,
+     "landBeyond": 0.5806525735294118,
+     "islands": 2,
+     "border": 0
+    }
+   ],
+   "bias 0.7": [
+    {
+     "seed": 1,
+     "likeness": 0.4685541387508105,
+     "landBeyond": 0.5018382352941176,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.396854764107308,
+     "landBeyond": 0.5564108455882353,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.5337446392295538,
+     "landBeyond": 0.4566482843137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.517644431209053,
+     "landBeyond": 0.4674479166666667,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.5398270196774559,
+     "landBeyond": 0.45262714460784315,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.5411075411075411,
+     "landBeyond": 0.4517846200980392,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.39508623049548314,
+     "landBeyond": 0.557827818627451,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.45083804846802605,
+     "landBeyond": 0.5148207720588235,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.4867082376107647,
+     "landBeyond": 0.48885569852941174,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.470885345263006,
+     "landBeyond": 0.5001531862745098,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.4555515887183149,
+     "landBeyond": 0.5113357843137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.5095527251184834,
+     "landBeyond": 0.4729626225490196,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.47540983606557374,
+     "landBeyond": 0.49689797794117646,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.4971357226792009,
+     "landBeyond": 0.48154105392156865,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.4633358458059653,
+     "landBeyond": 0.5056295955882353,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.5347261434217956,
+     "landBeyond": 0.4559972426470588,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.534206367125762,
+     "landBeyond": 0.4563419117647059,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.5261089275687816,
+     "landBeyond": 0.46174172794117646,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.47615771751330604,
+     "landBeyond": 0.49636182598039214,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.5420401679337342,
+     "landBeyond": 0.451171875,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.5103915830030008,
+     "landBeyond": 0.47238817401960786,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.5045946045687715,
+     "landBeyond": 0.47637101715686275,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.5422151611438947,
+     "landBeyond": 0.45105698529411764,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.5147687163291844,
+     "landBeyond": 0.4694010416666667,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.48540824133785115,
+     "landBeyond": 0.48977481617647056,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.49950347567030784,
+     "landBeyond": 0.47989430147058826,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.556166265888011,
+     "landBeyond": 0.44198069852941174,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.44190981432360743,
+     "landBeyond": 0.521484375,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.5269662921348315,
+     "landBeyond": 0.4611672794117647,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.51,
+     "landBeyond": 0.47265625,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.5398270196774559,
+     "landBeyond": 0.45262714460784315,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.5083240843507214,
+     "landBeyond": 0.47380514705882354,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.4861121236421958,
+     "landBeyond": 0.4892769607843137,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.5354775534799638,
+     "landBeyond": 0.45549938725490197,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.5274811734292458,
+     "landBeyond": 0.46082261029411764,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.4965312190287413,
+     "landBeyond": 0.48196231617647056,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.5427987587981533,
+     "landBeyond": 0.45067401960784315,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.5406998715138689,
+     "landBeyond": 0.45205269607843135,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.49812596457705594,
+     "landBeyond": 0.4808517156862745,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.4499093139869839,
+     "landBeyond": 0.5155101102941176,
+     "islands": 1,
+     "border": 0
+    }
+   ]
+  },
+  "medianSeed": 30,
+  "lowSeed": 8
+ },
+ "japan": {
+  "mapType": "archipelago",
+  "outlineShare": 0.0593359375,
+  "per": {
+   "dome (control)": [
+    {
+     "seed": 1,
+     "likeness": 0.12630444368232815,
+     "landBeyond": 0.8601345486111112,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.12114118507681053,
+     "landBeyond": 0.865234375,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.08875207198673929,
+     "landBeyond": 0.8983289930555556,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.11229920650280627,
+     "landBeyond": 0.8740776909722222,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.10827749120185123,
+     "landBeyond": 0.8781467013888888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.08653937045089329,
+     "landBeyond": 0.9006618923611112,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.1596549636803874,
+     "landBeyond": 0.8282877604166666,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.1545299316994777,
+     "landBeyond": 0.8330620659722222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.19859228362877998,
+     "landBeyond": 0.7933485243055556,
+     "islands": 12,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.08428450146212621,
+     "landBeyond": 0.9030490451388888,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.11138506163886874,
+     "landBeyond": 0.875,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.05803571428571429,
+     "landBeyond": 0.9315863715277778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.16246966019417475,
+     "landBeyond": 0.82568359375,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.14464250149372634,
+     "landBeyond": 0.8423936631944444,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.1047092743873138,
+     "landBeyond": 0.8817816840277778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.16968556019130965,
+     "landBeyond": 0.8190646701388888,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.11635021609284708,
+     "landBeyond": 0.8700086805555556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.1354274707364054,
+     "landBeyond": 0.8512369791666666,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.14367444405750956,
+     "landBeyond": 0.8433159722222222,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.11138506163886874,
+     "landBeyond": 0.875,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.14038394761644923,
+     "landBeyond": 0.8464626736111112,
+     "islands": 15,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.1471556886227545,
+     "landBeyond": 0.8400065104166666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.16106060606060607,
+     "landBeyond": 0.8269856770833334,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.10614444497906943,
+     "landBeyond": 0.8803168402777778,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.1585445749130676,
+     "landBeyond": 0.8293185763888888,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.15586505103323445,
+     "landBeyond": 0.8318142361111112,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.12240015623474271,
+     "landBeyond": 0.8639865451388888,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.17063855789795296,
+     "landBeyond": 0.8181966145833334,
+     "islands": 12,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.08459143234572561,
+     "landBeyond": 0.9027235243055556,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.11074068705609509,
+     "landBeyond": 0.8756510416666666,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.11364627234413603,
+     "landBeyond": 0.8727213541666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.15621385102851681,
+     "landBeyond": 0.8314887152777778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.1152670644738757,
+     "landBeyond": 0.87109375,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.1404970977824081,
+     "landBeyond": 0.8463541666666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.16305777597895377,
+     "landBeyond": 0.8251410590277778,
+     "islands": 16,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.16164729661445174,
+     "landBeyond": 0.8264431423611112,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.13341221712764384,
+     "landBeyond": 0.8531901041666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.12459641913707074,
+     "landBeyond": 0.86181640625,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.1538345713712106,
+     "landBeyond": 0.8337131076388888,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.17231004589495155,
+     "landBeyond": 0.8166775173611112,
+     "islands": 8,
+     "border": 0
+    }
+   ],
+   "soft": [
+    {
+     "seed": 1,
+     "likeness": 0.21802479601568295,
+     "landBeyond": 0.7767469618055556,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.23404369531375813,
+     "landBeyond": 0.7634548611111112,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.22067647214994957,
+     "landBeyond": 0.7745225694444444,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.23404369531375813,
+     "landBeyond": 0.7634548611111112,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.21996391424326045,
+     "landBeyond": 0.7751193576388888,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.19441990959630073,
+     "landBeyond": 0.7969835069444444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.24500406173842404,
+     "landBeyond": 0.7545572916666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.24258148208204963,
+     "landBeyond": 0.7565104166666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.24231288840853824,
+     "landBeyond": 0.7567274305555556,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.20500052416395848,
+     "landBeyond": 0.7878146701388888,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.20392772977219167,
+     "landBeyond": 0.7887369791666666,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.1984673131060369,
+     "landBeyond": 0.79345703125,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.22509992006394883,
+     "landBeyond": 0.7708333333333334,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.22366530047373184,
+     "landBeyond": 0.7720269097222222,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.22824170540150665,
+     "landBeyond": 0.7682291666666666,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.23956648333872532,
+     "landBeyond": 0.7589518229166666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.2323237737871884,
+     "landBeyond": 0.7648654513888888,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.21634920634920635,
+     "landBeyond": 0.7781575520833334,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.22216905901116427,
+     "landBeyond": 0.7732747395833334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.21071202864967348,
+     "landBeyond": 0.7829318576388888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.2373647666720491,
+     "landBeyond": 0.7607421875,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.2075957346220518,
+     "landBeyond": 0.7855902777777778,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.24325347466334973,
+     "landBeyond": 0.7559678819444444,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.22503463710966642,
+     "landBeyond": 0.7708875868055556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.23444128228534608,
+     "landBeyond": 0.7631293402777778,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.2264070418778341,
+     "landBeyond": 0.7697482638888888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.2236001703214818,
+     "landBeyond": 0.7720811631944444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.23556917123508544,
+     "landBeyond": 0.76220703125,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.17995175281014217,
+     "landBeyond": 0.8097873263888888,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.23351397757149756,
+     "landBeyond": 0.7638888888888888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.21622050576658555,
+     "landBeyond": 0.7782660590277778,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.24500406173842404,
+     "landBeyond": 0.7545572916666666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.2261453944210358,
+     "landBeyond": 0.7699652777777778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.24473441983864855,
+     "landBeyond": 0.7547743055555556,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.21634920634920635,
+     "landBeyond": 0.7781575520833334,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.22151965993623804,
+     "landBeyond": 0.7738172743055556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.2245778511692324,
+     "landBeyond": 0.7712673611111112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.2325219815569376,
+     "landBeyond": 0.7647026909722222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.24231288840853824,
+     "landBeyond": 0.7567274305555556,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.24023521795425118,
+     "landBeyond": 0.7584092881944444,
+     "islands": 5,
+     "border": 0
+    }
+   ],
+   "hard": [
+    {
+     "seed": 1,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    }
+   ],
+   "bias 0.35": [
+    {
+     "seed": 1,
+     "likeness": 0.15796101344884905,
+     "landBeyond": 0.8298611111111112,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.1686746987951807,
+     "landBeyond": 0.8199869791666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.14072346548900908,
+     "landBeyond": 0.8461371527777778,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.1677248946004978,
+     "landBeyond": 0.8208550347222222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.14004463178775106,
+     "landBeyond": 0.8467881944444444,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.12785164107344354,
+     "landBeyond": 0.8586154513888888,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.2056957046205486,
+     "landBeyond": 0.7872178819444444,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.19584893882646692,
+     "landBeyond": 0.7957356770833334,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.22242901201744125,
+     "landBeyond": 0.7730577256944444,
+     "islands": 14,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.13162687669209944,
+     "landBeyond": 0.8549262152777778,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.14876074355386767,
+     "landBeyond": 0.8384874131944444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.10524038461538461,
+     "landBeyond": 0.8812391493055556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.1932419806913734,
+     "landBeyond": 0.7980143229166666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.171234970450377,
+     "landBeyond": 0.8176540798611112,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.1386329866270431,
+     "landBeyond": 0.84814453125,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.20468479798773778,
+     "landBeyond": 0.7880859375,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.15371875940981633,
+     "landBeyond": 0.8338216145833334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.17989119277355778,
+     "landBeyond": 0.8098415798611112,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.17332720869698362,
+     "landBeyond": 0.8157552083333334,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.14910526841947416,
+     "landBeyond": 0.8381618923611112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.17296800857186592,
+     "landBeyond": 0.8160807291666666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.1795884858125096,
+     "landBeyond": 0.8101128472222222,
+     "islands": 13,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.18371865506410587,
+     "landBeyond": 0.8064236111111112,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.15621385102851681,
+     "landBeyond": 0.8314887152777778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.197842851187995,
+     "landBeyond": 0.7939995659722222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.1887377837530379,
+     "landBeyond": 0.8019748263888888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.17326732673267325,
+     "landBeyond": 0.8158094618055556,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.2008462181362307,
+     "landBeyond": 0.7913953993055556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.12973610496830312,
+     "landBeyond": 0.8567708333333334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.15749458738230704,
+     "landBeyond": 0.8302951388888888,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.15516808200592935,
+     "landBeyond": 0.8324652777777778,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.1801334702258727,
+     "landBeyond": 0.8096245659722222,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.1708174178762414,
+     "landBeyond": 0.8180338541666666,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.19591114810383395,
+     "landBeyond": 0.7956814236111112,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.18317035512094698,
+     "landBeyond": 0.8069118923611112,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.19293238544963937,
+     "landBeyond": 0.7982855902777778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.17813765182186234,
+     "landBeyond": 0.8114149305555556,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.16618475117942474,
+     "landBeyond": 0.822265625,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.18671278133388394,
+     "landBeyond": 0.8037651909722222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.20291978441735126,
+     "landBeyond": 0.7896050347222222,
+     "islands": 5,
+     "border": 0
+    }
+   ],
+   "bias 0.7": [
+    {
+     "seed": 1,
+     "likeness": 0.19212818917237087,
+     "landBeyond": 0.7989908854166666,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.2088657516958511,
+     "landBeyond": 0.7845052083333334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.21128615838558407,
+     "landBeyond": 0.7824435763888888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.2170575467203134,
+     "landBeyond": 0.7775607638888888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.17242962056303549,
+     "landBeyond": 0.8165690104166666,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.1679028652712863,
+     "landBeyond": 0.8206922743055556,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.23769785721976958,
+     "landBeyond": 0.7604709201388888,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.22811047598696513,
+     "landBeyond": 0.7683376736111112,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.23410994202276145,
+     "landBeyond": 0.7634006076388888,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.1708174178762414,
+     "landBeyond": 0.8180338541666666,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.18591694609233944,
+     "landBeyond": 0.8044704861111112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.15662105051318173,
+     "landBeyond": 0.8311089409722222,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.2160918324164198,
+     "landBeyond": 0.7783745659722222,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.2089929003418354,
+     "landBeyond": 0.7843967013888888,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.20178786136232946,
+     "landBeyond": 0.7905815972222222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2271271485000534,
+     "landBeyond": 0.7691514756944444,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.19194275937159744,
+     "landBeyond": 0.7991536458333334,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.20994736842105263,
+     "landBeyond": 0.7835828993055556,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.20512686097714405,
+     "landBeyond": 0.7877061631944444,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.18567228841095468,
+     "landBeyond": 0.8046875,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.2059486964276347,
+     "landBeyond": 0.7870008680555556,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.20708847466526648,
+     "landBeyond": 0.7860243055555556,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.22725816784112748,
+     "landBeyond": 0.76904296875,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.20512686097714405,
+     "landBeyond": 0.7877061631944444,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.22850424838347672,
+     "landBeyond": 0.7680121527777778,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.2116692141464186,
+     "landBeyond": 0.7821180555555556,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.2146140434300206,
+     "landBeyond": 0.7796223958333334,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.22968708210751537,
+     "landBeyond": 0.7670355902777778,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.16730984056057682,
+     "landBeyond": 0.8212348090277778,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.20988369033208779,
+     "landBeyond": 0.7836371527777778,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.18996842486671153,
+     "landBeyond": 0.8008897569444444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.23384499785315585,
+     "landBeyond": 0.7636176215277778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.2153846153846154,
+     "landBeyond": 0.7789713541666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.23590129562926723,
+     "landBeyond": 0.7619357638888888,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.20880218740140918,
+     "landBeyond": 0.7845594618055556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.20791298865069358,
+     "landBeyond": 0.7853190104166666,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.2144215530903328,
+     "landBeyond": 0.77978515625,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.208484466172528,
+     "landBeyond": 0.7848307291666666,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.21744426203463432,
+     "landBeyond": 0.7772352430555556,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.2232095349579653,
+     "landBeyond": 0.7724066840277778,
+     "islands": 6,
+     "border": 0
+    }
+   ]
+  },
+  "medianSeed": 13,
+  "lowSeed": 10
+ },
+ "japan-turned": {
+  "mapType": "archipelago",
+  "outlineShare": 0.07173177083333333,
+  "per": {
+   "dome (control)": [
+    {
+     "seed": 1,
+     "likeness": 0.1716830617138942,
+     "landBeyond": 0.8096788194444444,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.16586316045775507,
+     "landBeyond": 0.8152126736111112,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.13550559666097514,
+     "landBeyond": 0.8449978298611112,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.11017853002550429,
+     "landBeyond": 0.87109375,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.1534496049335132,
+     "landBeyond": 0.8272026909722222,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.09249794651820754,
+     "landBeyond": 0.8900282118055556,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.15785655559317116,
+     "landBeyond": 0.8229166666666666,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.17133910660991242,
+     "landBeyond": 0.8100043402777778,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.165182265050859,
+     "landBeyond": 0.8158637152777778,
+     "islands": 12,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.16830958422799142,
+     "landBeyond": 0.8128797743055556,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.18872889771598808,
+     "landBeyond": 0.7937825520833334,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.12283087890441798,
+     "landBeyond": 0.85791015625,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.16865176217904912,
+     "landBeyond": 0.8125542534722222,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.1616769372604202,
+     "landBeyond": 0.8192274305555556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.18731402499504066,
+     "landBeyond": 0.7950846354166666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2231645634292137,
+     "landBeyond": 0.7630208333333334,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.1271126594793089,
+     "landBeyond": 0.853515625,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.21386198854129695,
+     "landBeyond": 0.7711588541666666,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.2280584765324442,
+     "landBeyond": 0.7587890625,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.1646154594542005,
+     "landBeyond": 0.81640625,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.17524912866329587,
+     "landBeyond": 0.8063151041666666,
+     "islands": 15,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.15729685309614733,
+     "landBeyond": 0.8234592013888888,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.14835955487336916,
+     "landBeyond": 0.8321940104166666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.18379153481012658,
+     "landBeyond": 0.79833984375,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.14347805320724077,
+     "landBeyond": 0.8370225694444444,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.1922808764940239,
+     "landBeyond": 0.79052734375,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.1784888013782919,
+     "landBeyond": 0.8032769097222222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.1751337554606587,
+     "landBeyond": 0.8064236111111112,
+     "islands": 12,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.07881218457101659,
+     "landBeyond": 0.9051106770833334,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.17744553189396547,
+     "landBeyond": 0.8042534722222222,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.19234025598884408,
+     "landBeyond": 0.7904730902777778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.18707854026180087,
+     "landBeyond": 0.7953016493055556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.1527831278890601,
+     "landBeyond": 0.8278537326388888,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.17174040720438527,
+     "landBeyond": 0.8096245659722222,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.19198406771222304,
+     "landBeyond": 0.7907986111111112,
+     "islands": 16,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.1600445779629809,
+     "landBeyond": 0.82080078125,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.15802457192609073,
+     "landBeyond": 0.82275390625,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.09214908079010994,
+     "landBeyond": 0.8904079861111112,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.2207322047725882,
+     "landBeyond": 0.76513671875,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.1342145158233845,
+     "landBeyond": 0.8462999131944444,
+     "islands": 8,
+     "border": 0
+    }
+   ],
+   "soft": [
+    {
+     "seed": 1,
+     "likeness": 0.2736606905357238,
+     "landBeyond": 0.7209201388888888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.2627775726567857,
+     "landBeyond": 0.7297092013888888,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.28143231815019,
+     "landBeyond": 0.7147352430555556,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.2841817304081961,
+     "landBeyond": 0.7125651041666666,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.22610877803953702,
+     "landBeyond": 0.7604709201388888,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.2207322047725882,
+     "landBeyond": 0.76513671875,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.2440114315406599,
+     "landBeyond": 0.7452256944444444,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.2786263618884854,
+     "landBeyond": 0.7169596354166666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.25866147941748596,
+     "landBeyond": 0.7330729166666666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.2629774213969192,
+     "landBeyond": 0.7295464409722222,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.2546378786290745,
+     "landBeyond": 0.7363823784722222,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.2280584765324442,
+     "landBeyond": 0.7587890625,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.2531274535461921,
+     "landBeyond": 0.7376302083333334,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.2660497091485986,
+     "landBeyond": 0.72705078125,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.2605834035383319,
+     "landBeyond": 0.7314995659722222,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2949480744266551,
+     "landBeyond": 0.7041558159722222,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.2668536353053233,
+     "landBeyond": 0.7263997395833334,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.27685333333333334,
+     "landBeyond": 0.7183702256944444,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.2628441818757253,
+     "landBeyond": 0.7296549479166666,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.2684645544134789,
+     "landBeyond": 0.72509765625,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.254572132264319,
+     "landBeyond": 0.7364366319444444,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.2616462900505902,
+     "landBeyond": 0.7306315104166666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.2441407264979473,
+     "landBeyond": 0.7451171875,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.23924633780216367,
+     "landBeyond": 0.7492404513888888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.24946505923490422,
+     "landBeyond": 0.7406684027777778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.2742029911118207,
+     "landBeyond": 0.7204861111111112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.27318655605190384,
+     "landBeyond": 0.7212999131944444,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.22925652084616965,
+     "landBeyond": 0.7577582465277778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.1993888081759431,
+     "landBeyond": 0.7840711805555556,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.24349452033449331,
+     "landBeyond": 0.7456597222222222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.2802673796791444,
+     "landBeyond": 0.7156575520833334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.27685333333333334,
+     "landBeyond": 0.7183702256944444,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.2413024316897392,
+     "landBeyond": 0.7475043402777778,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.26705477639587194,
+     "landBeyond": 0.7262369791666666,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.2593235495239598,
+     "landBeyond": 0.7325303819444444,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.2621784057359764,
+     "landBeyond": 0.7301974826388888,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.23751679933836453,
+     "landBeyond": 0.7507052951388888,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.20506367342829818,
+     "landBeyond": 0.7789713541666666,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.2812951565426813,
+     "landBeyond": 0.71484375,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.24757686294945283,
+     "landBeyond": 0.7422417534722222,
+     "islands": 5,
+     "border": 0
+    }
+   ],
+   "hard": [
+    {
+     "seed": 1,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 3,
+     "border": 0
+    }
+   ],
+   "bias 0.35": [
+    {
+     "seed": 1,
+     "likeness": 0.21109874544718737,
+     "landBeyond": 0.7736002604166666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.20597420914769293,
+     "landBeyond": 0.7781575520833334,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.2156494363765614,
+     "landBeyond": 0.7695855034722222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.17162572183615543,
+     "landBeyond": 0.8097330729166666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.1783147947632641,
+     "landBeyond": 0.8034396701388888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.13901707978495648,
+     "landBeyond": 0.8414713541666666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.18151310269950155,
+     "landBeyond": 0.8004557291666666,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.21091497648070406,
+     "landBeyond": 0.7737630208333334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.21263232538114774,
+     "landBeyond": 0.7722439236111112,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.19657137145141942,
+     "landBeyond": 0.78662109375,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.21416979409676437,
+     "landBeyond": 0.7708875868055556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.14643489920030647,
+     "landBeyond": 0.8340928819444444,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.18731402499504066,
+     "landBeyond": 0.7950846354166666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.18344043499752843,
+     "landBeyond": 0.7986653645833334,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.2130624239967572,
+     "landBeyond": 0.7718641493055556,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.266920675239456,
+     "landBeyond": 0.7263454861111112,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.16049442559379545,
+     "landBeyond": 0.8203667534722222,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.2535867630118337,
+     "landBeyond": 0.7372504340277778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.24562955254942767,
+     "landBeyond": 0.7438693576388888,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.2030048741269283,
+     "landBeyond": 0.7808159722222222,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.21349282781691925,
+     "landBeyond": 0.771484375,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.19079830887838847,
+     "landBeyond": 0.7918836805555556,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.18872889771598808,
+     "landBeyond": 0.7937825520833334,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.196033371634111,
+     "landBeyond": 0.787109375,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.1802898836521396,
+     "landBeyond": 0.8015950520833334,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.2285626314979217,
+     "landBeyond": 0.7583550347222222,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.21521750164966244,
+     "landBeyond": 0.7699652777777778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.19002882990356895,
+     "landBeyond": 0.7925889756944444,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.12520562109319924,
+     "landBeyond": 0.85546875,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.19974943623152092,
+     "landBeyond": 0.7837456597222222,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.2178756740258419,
+     "landBeyond": 0.7676323784722222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.22166658161963565,
+     "landBeyond": 0.7643229166666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.18291417560156134,
+     "landBeyond": 0.7991536458333334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.21232529876443185,
+     "landBeyond": 0.7725151909722222,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.22123036115078556,
+     "landBeyond": 0.7647026909722222,
+     "islands": 12,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.20397284385214987,
+     "landBeyond": 0.7799479166666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.1890240874099826,
+     "landBeyond": 0.7935112847222222,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.11286199042439456,
+     "landBeyond": 0.8682725694444444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.23924633780216367,
+     "landBeyond": 0.7492404513888888,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.16083204034134987,
+     "landBeyond": 0.8200412326388888,
+     "islands": 8,
+     "border": 0
+    }
+   ],
+   "bias 0.7": [
+    {
+     "seed": 1,
+     "likeness": 0.24556474689142085,
+     "landBeyond": 0.7439236111111112,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.24686214259673975,
+     "landBeyond": 0.7428385416666666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.27115854306042264,
+     "landBeyond": 0.7229275173611112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.24194636094828034,
+     "landBeyond": 0.7469618055555556,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.202098815023097,
+     "landBeyond": 0.7816297743055556,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.18238838403792967,
+     "landBeyond": 0.7996419270833334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.2191780821917808,
+     "landBeyond": 0.7664930555555556,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.24575918409824124,
+     "landBeyond": 0.7437608506944444,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.24959549037006107,
+     "landBeyond": 0.7405598958333334,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.2358558744579806,
+     "landBeyond": 0.7521158854166666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.24020928305014505,
+     "landBeyond": 0.7484266493055556,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.18731402499504066,
+     "landBeyond": 0.7950846354166666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.22054550089217437,
+     "landBeyond": 0.7652994791666666,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.2199235668789809,
+     "landBeyond": 0.7658420138888888,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.23995235135695048,
+     "landBeyond": 0.7486436631944444,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.2894382506597727,
+     "landBeyond": 0.7084418402777778,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.20700781446937233,
+     "landBeyond": 0.7772352430555556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.27075371549893845,
+     "landBeyond": 0.7232530381944444,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.2566794393995066,
+     "landBeyond": 0.7347005208333334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.24033778883017304,
+     "landBeyond": 0.7483181423611112,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.24336535964684497,
+     "landBeyond": 0.7457682291666666,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.22642282669945188,
+     "landBeyond": 0.7601996527777778,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.2266113331283943,
+     "landBeyond": 0.7600368923611112,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.21386198854129695,
+     "landBeyond": 0.7711588541666666,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.22210311383358858,
+     "landBeyond": 0.7639431423611112,
+     "islands": 11,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.26324398480371464,
+     "landBeyond": 0.7293294270833334,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.24848769294952022,
+     "landBeyond": 0.7414822048611112,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.2039123001106306,
+     "landBeyond": 0.7800021701388888,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.1730034296913278,
+     "landBeyond": 0.8084309895833334,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.22260238994995404,
+     "landBeyond": 0.7635091145833334,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.24660244727935435,
+     "landBeyond": 0.7430555555555556,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.25760361401481324,
+     "landBeyond": 0.7339409722222222,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.21979925612676415,
+     "landBeyond": 0.7659505208333334,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.24136679456600643,
+     "landBeyond": 0.7474500868055556,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.24764187815936214,
+     "landBeyond": 0.7421875,
+     "islands": 10,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.2431716689168138,
+     "landBeyond": 0.7459309895833334,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.22210311383358858,
+     "landBeyond": 0.7639431423611112,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.152505656380879,
+     "landBeyond": 0.828125,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.2665855465030156,
+     "landBeyond": 0.7266167534722222,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.20119411971300988,
+     "landBeyond": 0.7824435763888888,
+     "islands": 4,
+     "border": 0
+    }
+   ]
+  },
+  "medianSeed": 15,
+  "lowSeed": 12
+ },
+ "texas-dome-box": {
+  "mapType": "island",
+  "outlineShare": 0.14178385416666667,
+  "per": {
+   "dome (control)": [
+    {
+     "seed": 1,
+     "likeness": 0.24826260036434789,
+     "landBeyond": 0.7181755514705882,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.24511222532557123,
+     "landBeyond": 0.7210477941176471,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.37035665345727936,
+     "landBeyond": 0.6170343137254902,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.28793205471822897,
+     "landBeyond": 0.6832107843137255,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.38202666865872337,
+     "landBeyond": 0.6083026960784313,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.3699507571550224,
+     "landBeyond": 0.6173406862745098,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.20133116883116883,
+     "landBeyond": 0.7625229779411765,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.27854181064270905,
+     "landBeyond": 0.6912913602941176,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.30321921668075513,
+     "landBeyond": 0.6703048406862745,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.3107442700768713,
+     "landBeyond": 0.6640625,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.24750505731625083,
+     "landBeyond": 0.7188648897058824,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.3413935614849188,
+     "landBeyond": 0.6393612132352942,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.2845785307596167,
+     "landBeyond": 0.6860830269607843,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.3356797343152119,
+     "landBeyond": 0.6438802083333334,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.31854465112964153,
+     "landBeyond": 0.6576669730392157,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.3687345096733622,
+     "landBeyond": 0.6182598039215687,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.32982317423806784,
+     "landBeyond": 0.6485523897058824,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.3818718255153869,
+     "landBeyond": 0.6084175857843137,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.356341642228739,
+     "landBeyond": 0.627719056372549,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.32118117546240094,
+     "landBeyond": 0.6555223651960784,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.2769092728715878,
+     "landBeyond": 0.6927083333333334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.2877527581526468,
+     "landBeyond": 0.6833639705882353,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.3626855227783302,
+     "landBeyond": 0.6228553921568627,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.36524979706294736,
+     "landBeyond": 0.6209022671568627,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.3149365649099115,
+     "landBeyond": 0.6606158088235294,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.3391603329714079,
+     "landBeyond": 0.6411228553921569,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.39990919753319965,
+     "landBeyond": 0.5952052696078431,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.3111158357251692,
+     "landBeyond": 0.6637561274509803,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.3507958528037383,
+     "landBeyond": 0.6320082720588235,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.34735270555676934,
+     "landBeyond": 0.6346890318627451,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.3207095945174186,
+     "landBeyond": 0.6559053308823529,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.3789363843029106,
+     "landBeyond": 0.6106004901960784,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.33192944564434845,
+     "landBeyond": 0.6468673406862745,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.3547524897480961,
+     "landBeyond": 0.6289445465686274,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.30524199238041483,
+     "landBeyond": 0.6686197916666666,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.30303563882236934,
+     "landBeyond": 0.6704580269607843,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.37228795015391464,
+     "landBeyond": 0.6155790441176471,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.37152494625250204,
+     "landBeyond": 0.6161534926470589,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.29659739986683953,
+     "landBeyond": 0.6758578431372549,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.23711926176067405,
+     "landBeyond": 0.7284007352941176,
+     "islands": 4,
+     "border": 0
+    }
+   ],
+   "soft": [
+    {
+     "seed": 1,
+     "likeness": 0.41446538476241446,
+     "landBeyond": 0.5847886029411765,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.40773854816618477,
+     "landBeyond": 0.5895756740196079,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.4125753989463236,
+     "landBeyond": 0.5861289828431373,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.41690281075285285,
+     "landBeyond": 0.5830652573529411,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.4030943081415191,
+     "landBeyond": 0.5929074754901961,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.40677515017869365,
+     "landBeyond": 0.5902650122549019,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.4121980077096294,
+     "landBeyond": 0.5863970588235294,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.4165773353751914,
+     "landBeyond": 0.5832950367647058,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.40881053914102955,
+     "landBeyond": 0.5888097426470589,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.4117130866081648,
+     "landBeyond": 0.5867417279411765,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.41581847401851996,
+     "landBeyond": 0.5838311887254902,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.413978905533476,
+     "landBeyond": 0.5851332720588235,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.41646887680882017,
+     "landBeyond": 0.5833716299019608,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.4150604252715313,
+     "landBeyond": 0.5843673406862745,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.4067216667300308,
+     "landBeyond": 0.5903033088235294,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.4169570711905947,
+     "landBeyond": 0.5830269607843137,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.40437241431662047,
+     "landBeyond": 0.5919883578431373,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.41587265143688057,
+     "landBeyond": 0.5837928921568627,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.4034136165370757,
+     "landBeyond": 0.5926776960784313,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.4169570711905947,
+     "landBeyond": 0.5830269607843137,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.41376279993886594,
+     "landBeyond": 0.5852864583333334,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.406240498631803,
+     "landBeyond": 0.5906479779411765,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.4102065706227609,
+     "landBeyond": 0.5878140318627451,
+     "islands": 8,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.4165231040159259,
+     "landBeyond": 0.5833333333333334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.4165773353751914,
+     "landBeyond": 0.5832950367647058,
+     "islands": 7,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.40875690081857985,
+     "landBeyond": 0.5888480392156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.4123058131989771,
+     "landBeyond": 0.5863204656862745,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.4169570711905947,
+     "landBeyond": 0.5830269607843137,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.41641465375339737,
+     "landBeyond": 0.5834099264705882,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.41646887680882017,
+     "landBeyond": 0.5833716299019608,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.4155476491066988,
+     "landBeyond": 0.5840226715686274,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.41381682014443466,
+     "landBeyond": 0.5852481617647058,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.4146276189019728,
+     "landBeyond": 0.5846737132352942,
+     "islands": 5,
+     "border": 0
+    }
+   ],
+   "hard": [
+    {
+     "seed": 1,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 1,
+     "landBeyond": 0,
+     "islands": 1,
+     "border": 0
+    }
+   ],
+   "bias 0.35": [
+    {
+     "seed": 1,
+     "likeness": 0.3449040418726374,
+     "landBeyond": 0.6366038602941176,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.3022101780812276,
+     "landBeyond": 0.6711473651960784,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.4105828980976707,
+     "landBeyond": 0.5875459558823529,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.3834735464572817,
+     "landBeyond": 0.6072303921568627,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.4106366755623332,
+     "landBeyond": 0.5875076593137255,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.4069891246482622,
+     "landBeyond": 0.5901118259803921,
+     "islands": 9,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.25058302632913104,
+     "landBeyond": 0.7160692401960784,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.3181688635553972,
+     "landBeyond": 0.6579733455882353,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.3643939673291788,
+     "landBeyond": 0.6215533088235294,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.357137617370892,
+     "landBeyond": 0.6271063112745098,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.30501181532818394,
+     "landBeyond": 0.6688112745098039,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.39054455259498666,
+     "landBeyond": 0.6020220588235294,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.3572371799574499,
+     "landBeyond": 0.6270297181372549,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.3695451012325573,
+     "landBeyond": 0.6176470588235294,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.36178278311434986,
+     "landBeyond": 0.6235447303921569,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.40956190476190474,
+     "landBeyond": 0.5882735906862745,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.38182021884453077,
+     "landBeyond": 0.6084558823529411,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.406240498631803,
+     "landBeyond": 0.5906479779411765,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.3835770108065662,
+     "landBeyond": 0.6071537990196079,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.4153310637646789,
+     "landBeyond": 0.5841758578431373,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.368127195415049,
+     "landBeyond": 0.6187193627450981,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.3638910391094401,
+     "landBeyond": 0.6219362745098039,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.40586648428891675,
+     "landBeyond": 0.5909160539215687,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.4002800484408114,
+     "landBeyond": 0.594937193627451,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.36263533917654855,
+     "landBeyond": 0.6228936887254902,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.3867920992466549,
+     "landBeyond": 0.6047794117647058,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.41646887680882017,
+     "landBeyond": 0.5833716299019608,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.3487770203769183,
+     "landBeyond": 0.633578431372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.3852864095844253,
+     "landBeyond": 0.6058900122549019,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.3781146411411971,
+     "landBeyond": 0.6112132352941176,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.40811355938653576,
+     "landBeyond": 0.5893075980392157,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.3977938120962563,
+     "landBeyond": 0.5967371323529411,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.3705089265871546,
+     "landBeyond": 0.6169194240196079,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.39531638886793874,
+     "landBeyond": 0.5985370710784313,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.3897089201877934,
+     "landBeyond": 0.6026348039215687,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.35644108805630914,
+     "landBeyond": 0.6276424632352942,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.40864963642593366,
+     "landBeyond": 0.5889246323529411,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.3987978224708907,
+     "landBeyond": 0.5960094975490197,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.3544053589077199,
+     "landBeyond": 0.6292126225490197,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.31456283085231107,
+     "landBeyond": 0.660922181372549,
+     "islands": 3,
+     "border": 0
+    }
+   ],
+   "bias 0.7": [
+    {
+     "seed": 1,
+     "likeness": 0.39953854300627883,
+     "landBeyond": 0.5954733455882353,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 2,
+     "likeness": 0.3944224609006972,
+     "landBeyond": 0.5991881127450981,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 3,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 4,
+     "likeness": 0.4113899908452853,
+     "landBeyond": 0.5869715073529411,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 5,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 6,
+     "likeness": 0.4151145446896393,
+     "landBeyond": 0.5843290441176471,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 7,
+     "likeness": 0.3506479284540975,
+     "landBeyond": 0.6321231617647058,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 8,
+     "likeness": 0.38767626762676266,
+     "landBeyond": 0.6041283700980392,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 9,
+     "likeness": 0.41690281075285285,
+     "landBeyond": 0.5830652573529411,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 10,
+     "likeness": 0.3981635429262394,
+     "landBeyond": 0.596469056372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 11,
+     "likeness": 0.37986201752750326,
+     "landBeyond": 0.6099111519607843,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 12,
+     "likeness": 0.40875690081857985,
+     "landBeyond": 0.5888480392156863,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 13,
+     "likeness": 0.41052912473315034,
+     "landBeyond": 0.5875842524509803,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 14,
+     "likeness": 0.4033603883789729,
+     "landBeyond": 0.5927159926470589,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 15,
+     "likeness": 0.4014468600863571,
+     "landBeyond": 0.5940946691176471,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 16,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 17,
+     "likeness": 0.4166315708870937,
+     "landBeyond": 0.5832567401960784,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 18,
+     "likeness": 0.4156018057999847,
+     "landBeyond": 0.583984375,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 19,
+     "likeness": 0.4033603883789729,
+     "landBeyond": 0.5927159926470589,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 20,
+     "likeness": 0.4169570711905947,
+     "landBeyond": 0.5830269607843137,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 21,
+     "likeness": 0.41149767299916074,
+     "landBeyond": 0.5868949142156863,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 22,
+     "likeness": 0.4038928517225679,
+     "landBeyond": 0.5923330269607843,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 23,
+     "likeness": 0.41441131498470946,
+     "landBeyond": 0.5848268995098039,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 24,
+     "likeness": 0.4066147120319331,
+     "landBeyond": 0.5903799019607843,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 25,
+     "likeness": 0.4117669502842535,
+     "landBeyond": 0.586703431372549,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 26,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 27,
+     "likeness": 0.4170113357843137,
+     "landBeyond": 0.5829886642156863,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 28,
+     "likeness": 0.38840525328330205,
+     "landBeyond": 0.6035922181372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 29,
+     "likeness": 0.4066147120319331,
+     "landBeyond": 0.5903799019607843,
+     "islands": 6,
+     "border": 0
+    },
+    {
+     "seed": 30,
+     "likeness": 0.41316885001718673,
+     "landBeyond": 0.5857077205882353,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 31,
+     "likeness": 0.4165231040159259,
+     "landBeyond": 0.5833333333333334,
+     "islands": 3,
+     "border": 0
+    },
+    {
+     "seed": 32,
+     "likeness": 0.40640085141966625,
+     "landBeyond": 0.5905330882352942,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 33,
+     "likeness": 0.4028283287837428,
+     "landBeyond": 0.5930989583333334,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 34,
+     "likeness": 0.41489809185117205,
+     "landBeyond": 0.5844822303921569,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 35,
+     "likeness": 0.4163062200956938,
+     "landBeyond": 0.5834865196078431,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 36,
+     "likeness": 0.41646887680882017,
+     "landBeyond": 0.5833716299019608,
+     "islands": 4,
+     "border": 0
+    },
+    {
+     "seed": 37,
+     "likeness": 0.4150604252715313,
+     "landBeyond": 0.5843673406862745,
+     "islands": 5,
+     "border": 0
+    },
+    {
+     "seed": 38,
+     "likeness": 0.41549349655700074,
+     "landBeyond": 0.5840609681372549,
+     "islands": 2,
+     "border": 0
+    },
+    {
+     "seed": 39,
+     "likeness": 0.4146276189019728,
+     "landBeyond": 0.5846737132352942,
+     "islands": 1,
+     "border": 0
+    },
+    {
+     "seed": 40,
+     "likeness": 0.4033071642583532,
+     "landBeyond": 0.5927542892156863,
+     "islands": 1,
+     "border": 0
+    }
+   ]
+  },
+  "medianSeed": 17,
+  "lowSeed": 19
+ }
+}

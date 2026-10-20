@@ -1,0 +1,3855 @@
+{
+ "sha": "581a6de3",
+ "from": 1,
+ "to": 60,
+ "cutoffs": [
+  1,
+  5,
+  10,
+  20,
+  50,
+  100
+ ],
+ "rows": [
+  {
+   "type": "archipelago",
+   "seed": 1,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 24,
+    "5": 14,
+    "10": 10,
+    "20": 8,
+    "50": 6,
+    "100": 5
+   },
+   "substantial": 2,
+   "largestShare": 0.8332248263888888
+  },
+  {
+   "type": "archipelago",
+   "seed": 2,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 37,
+    "5": 18,
+    "10": 16,
+    "20": 11,
+    "50": 7,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.8829752604166666
+  },
+  {
+   "type": "archipelago",
+   "seed": 3,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 29,
+    "5": 7,
+    "10": 6,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9424370659722222
+  },
+  {
+   "type": "archipelago",
+   "seed": 4,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 28,
+    "5": 9,
+    "10": 9,
+    "20": 6,
+    "50": 4,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9760199652777778
+  },
+  {
+   "type": "archipelago",
+   "seed": 5,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 27,
+    "5": 8,
+    "10": 7,
+    "20": 6,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.8963216145833334
+  },
+  {
+   "type": "archipelago",
+   "seed": 6,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 41,
+    "5": 20,
+    "10": 15,
+    "20": 10,
+    "50": 8,
+    "100": 6
+   },
+   "substantial": 4,
+   "largestShare": 0.4239908854166667
+  },
+  {
+   "type": "archipelago",
+   "seed": 7,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 45,
+    "5": 16,
+    "10": 8,
+    "20": 7,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9349500868055556
+  },
+  {
+   "type": "archipelago",
+   "seed": 8,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 40,
+    "5": 14,
+    "10": 11,
+    "20": 8,
+    "50": 6,
+    "100": 5
+   },
+   "substantial": 5,
+   "largestShare": 0.5530056423611112
+  },
+  {
+   "type": "archipelago",
+   "seed": 9,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 47,
+    "5": 21,
+    "10": 13,
+    "20": 12,
+    "50": 7,
+    "100": 6
+   },
+   "substantial": 4,
+   "largestShare": 0.8383246527777778
+  },
+  {
+   "type": "archipelago",
+   "seed": 10,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 43,
+    "5": 18,
+    "10": 13,
+    "20": 10,
+    "50": 9,
+    "100": 6
+   },
+   "substantial": 3,
+   "largestShare": 0.5380859375
+  },
+  {
+   "type": "archipelago",
+   "seed": 11,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 19,
+    "5": 7,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.7489149305555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 12,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 18,
+    "5": 7,
+    "10": 6,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9862738715277778
+  },
+  {
+   "type": "archipelago",
+   "seed": 13,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 31,
+    "5": 15,
+    "10": 13,
+    "20": 11,
+    "50": 8,
+    "100": 5
+   },
+   "substantial": 5,
+   "largestShare": 0.7568901909722222
+  },
+  {
+   "type": "archipelago",
+   "seed": 14,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 32,
+    "5": 16,
+    "10": 14,
+    "20": 8,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9666341145833334
+  },
+  {
+   "type": "archipelago",
+   "seed": 15,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 45,
+    "5": 11,
+    "10": 8,
+    "20": 6,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9391276041666666
+  },
+  {
+   "type": "archipelago",
+   "seed": 16,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 23,
+    "5": 11,
+    "10": 7,
+    "20": 5,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9822591145833334
+  },
+  {
+   "type": "archipelago",
+   "seed": 17,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 22,
+    "5": 11,
+    "10": 9,
+    "20": 8,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.8967013888888888
+  },
+  {
+   "type": "archipelago",
+   "seed": 18,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 32,
+    "5": 11,
+    "10": 9,
+    "20": 7,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9645724826388888
+  },
+  {
+   "type": "archipelago",
+   "seed": 19,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 30,
+    "5": 13,
+    "10": 8,
+    "20": 7,
+    "50": 7,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.927734375
+  },
+  {
+   "type": "archipelago",
+   "seed": 20,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 29,
+    "5": 11,
+    "10": 9,
+    "20": 5,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.6422526041666666
+  },
+  {
+   "type": "archipelago",
+   "seed": 21,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 35,
+    "5": 19,
+    "10": 17,
+    "20": 15,
+    "50": 9,
+    "100": 8
+   },
+   "substantial": 5,
+   "largestShare": 0.7315538194444444
+  },
+  {
+   "type": "archipelago",
+   "seed": 22,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 36,
+    "5": 16,
+    "10": 12,
+    "20": 9,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.7489149305555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 23,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 33,
+    "5": 16,
+    "10": 11,
+    "20": 9,
+    "50": 5,
+    "100": 5
+   },
+   "substantial": 3,
+   "largestShare": 0.7030707465277778
+  },
+  {
+   "type": "archipelago",
+   "seed": 24,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 28,
+    "5": 7,
+    "10": 6,
+    "20": 4,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.6083441840277778
+  },
+  {
+   "type": "archipelago",
+   "seed": 25,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 25,
+    "5": 10,
+    "10": 9,
+    "20": 7,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.6813693576388888
+  },
+  {
+   "type": "archipelago",
+   "seed": 26,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 27,
+    "5": 14,
+    "10": 10,
+    "20": 8,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9408094618055556
+  },
+  {
+   "type": "archipelago",
+   "seed": 27,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 34,
+    "5": 15,
+    "10": 9,
+    "20": 8,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9485134548611112
+  },
+  {
+   "type": "archipelago",
+   "seed": 28,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 39,
+    "5": 18,
+    "10": 13,
+    "20": 12,
+    "50": 9,
+    "100": 5
+   },
+   "substantial": 3,
+   "largestShare": 0.8589952256944444
+  },
+  {
+   "type": "archipelago",
+   "seed": 29,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 36,
+    "5": 18,
+    "10": 16,
+    "20": 10,
+    "50": 5,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.3773871527777778
+  },
+  {
+   "type": "archipelago",
+   "seed": 30,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 41,
+    "5": 17,
+    "10": 14,
+    "20": 10,
+    "50": 8,
+    "100": 7
+   },
+   "substantial": 5,
+   "largestShare": 0.7018771701388888
+  },
+  {
+   "type": "archipelago",
+   "seed": 31,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 24,
+    "5": 10,
+    "10": 7,
+    "20": 6,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.8084309895833334
+  },
+  {
+   "type": "archipelago",
+   "seed": 32,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 22,
+    "5": 12,
+    "10": 8,
+    "20": 6,
+    "50": 5,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.7303602430555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 33,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 29,
+    "5": 10,
+    "10": 8,
+    "20": 8,
+    "50": 7,
+    "100": 7
+   },
+   "substantial": 4,
+   "largestShare": 0.5464952256944444
+  },
+  {
+   "type": "archipelago",
+   "seed": 34,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 19,
+    "5": 9,
+    "10": 6,
+    "20": 5,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.5546875
+  },
+  {
+   "type": "archipelago",
+   "seed": 35,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 47,
+    "5": 24,
+    "10": 18,
+    "20": 16,
+    "50": 11,
+    "100": 10
+   },
+   "substantial": 6,
+   "largestShare": 0.5641276041666666
+  },
+  {
+   "type": "archipelago",
+   "seed": 36,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 18,
+    "5": 6,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.94970703125
+  },
+  {
+   "type": "archipelago",
+   "seed": 37,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 48,
+    "5": 16,
+    "10": 10,
+    "20": 5,
+    "50": 5,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.7844509548611112
+  },
+  {
+   "type": "archipelago",
+   "seed": 38,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 29,
+    "5": 14,
+    "10": 10,
+    "20": 7,
+    "50": 6,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.80615234375
+  },
+  {
+   "type": "archipelago",
+   "seed": 39,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 44,
+    "5": 20,
+    "10": 13,
+    "20": 9,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9348958333333334
+  },
+  {
+   "type": "archipelago",
+   "seed": 40,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 23,
+    "5": 12,
+    "10": 8,
+    "20": 8,
+    "50": 7,
+    "100": 5
+   },
+   "substantial": 3,
+   "largestShare": 0.6777886284722222
+  },
+  {
+   "type": "archipelago",
+   "seed": 41,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 34,
+    "5": 12,
+    "10": 10,
+    "20": 9,
+    "50": 6,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.4837782118055556
+  },
+  {
+   "type": "archipelago",
+   "seed": 42,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 42,
+    "5": 16,
+    "10": 14,
+    "20": 10,
+    "50": 8,
+    "100": 8
+   },
+   "substantial": 6,
+   "largestShare": 0.5203993055555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 43,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 41,
+    "5": 15,
+    "10": 12,
+    "20": 10,
+    "50": 7,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.8530815972222222
+  },
+  {
+   "type": "archipelago",
+   "seed": 44,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 28,
+    "5": 12,
+    "10": 10,
+    "20": 8,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 1,
+   "largestShare": 0.9499782986111112
+  },
+  {
+   "type": "archipelago",
+   "seed": 45,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 19,
+    "5": 10,
+    "10": 9,
+    "20": 9,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.4333224826388889
+  },
+  {
+   "type": "archipelago",
+   "seed": 46,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 29,
+    "5": 8,
+    "10": 6,
+    "20": 5,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 1,
+   "largestShare": 0.9626736111111112
+  },
+  {
+   "type": "archipelago",
+   "seed": 47,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 41,
+    "5": 18,
+    "10": 16,
+    "20": 10,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9258897569444444
+  },
+  {
+   "type": "archipelago",
+   "seed": 48,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 24,
+    "5": 10,
+    "10": 7,
+    "20": 6,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9403211805555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 49,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 28,
+    "5": 9,
+    "10": 6,
+    "20": 6,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9792209201388888
+  },
+  {
+   "type": "archipelago",
+   "seed": 50,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 23,
+    "5": 9,
+    "10": 8,
+    "20": 7,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.78515625
+  },
+  {
+   "type": "archipelago",
+   "seed": 51,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 54,
+    "5": 22,
+    "10": 14,
+    "20": 12,
+    "50": 6,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9611545138888888
+  },
+  {
+   "type": "archipelago",
+   "seed": 52,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 30,
+    "5": 12,
+    "10": 11,
+    "20": 7,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 1,
+   "largestShare": 0.95947265625
+  },
+  {
+   "type": "archipelago",
+   "seed": 53,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 26,
+    "5": 8,
+    "10": 5,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.6731228298611112
+  },
+  {
+   "type": "archipelago",
+   "seed": 54,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 22,
+    "5": 11,
+    "10": 11,
+    "20": 8,
+    "50": 6,
+    "100": 6
+   },
+   "substantial": 3,
+   "largestShare": 0.7266710069444444
+  },
+  {
+   "type": "archipelago",
+   "seed": 55,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 22,
+    "5": 16,
+    "10": 13,
+    "20": 10,
+    "50": 7,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.5077582465277778
+  },
+  {
+   "type": "archipelago",
+   "seed": 56,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 18,
+    "5": 11,
+    "10": 9,
+    "20": 7,
+    "50": 7,
+    "100": 6
+   },
+   "substantial": 3,
+   "largestShare": 0.6214192708333334
+  },
+  {
+   "type": "archipelago",
+   "seed": 57,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 31,
+    "5": 13,
+    "10": 8,
+    "20": 6,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.7298719618055556
+  },
+  {
+   "type": "archipelago",
+   "seed": 58,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 40,
+    "5": 15,
+    "10": 12,
+    "20": 8,
+    "50": 7,
+    "100": 7
+   },
+   "substantial": 4,
+   "largestShare": 0.7918836805555556
+  },
+  {
+   "type": "archipelago",
+   "seed": 59,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 47,
+    "5": 15,
+    "10": 14,
+    "20": 10,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.6714409722222222
+  },
+  {
+   "type": "archipelago",
+   "seed": 60,
+   "landFraction": 0.24,
+   "landCells": 18432,
+   "counts": {
+    "1": 25,
+    "5": 9,
+    "10": 7,
+    "20": 6,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.8755425347222222
+  },
+  {
+   "type": "island",
+   "seed": 1,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 4,
+    "10": 3,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9978936887254902
+  },
+  {
+   "type": "island",
+   "seed": 2,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 9,
+    "5": 8,
+    "10": 7,
+    "20": 6,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.8570772058823529
+  },
+  {
+   "type": "island",
+   "seed": 3,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 4,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9938342524509803
+  },
+  {
+   "type": "island",
+   "seed": 4,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 7,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9804304534313726
+  },
+  {
+   "type": "island",
+   "seed": 5,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 12,
+    "5": 6,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9303385416666666
+  },
+  {
+   "type": "island",
+   "seed": 6,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 17,
+    "5": 10,
+    "10": 10,
+    "20": 7,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9433976715686274
+  },
+  {
+   "type": "island",
+   "seed": 7,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9937576593137255
+  },
+  {
+   "type": "island",
+   "seed": 8,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9988511029411765
+  },
+  {
+   "type": "island",
+   "seed": 9,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 19,
+    "5": 11,
+    "10": 8,
+    "20": 7,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9819623161764706
+  },
+  {
+   "type": "island",
+   "seed": 10,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 8,
+    "5": 4,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9901577818627451
+  },
+  {
+   "type": "island",
+   "seed": 11,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 9,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9962852328431373
+  },
+  {
+   "type": "island",
+   "seed": 12,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 17,
+    "5": 4,
+    "10": 4,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9977022058823529
+  },
+  {
+   "type": "island",
+   "seed": 13,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 15,
+    "5": 10,
+    "10": 7,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9742647058823529
+  },
+  {
+   "type": "island",
+   "seed": 14,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 6,
+    "5": 3,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9986596200980392
+  },
+  {
+   "type": "island",
+   "seed": 15,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 6,
+    "10": 6,
+    "20": 4,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9922257965686274
+  },
+  {
+   "type": "island",
+   "seed": 16,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9915364583333334
+  },
+  {
+   "type": "island",
+   "seed": 17,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 3,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9991191789215687
+  },
+  {
+   "type": "island",
+   "seed": 18,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 4,
+    "10": 4,
+    "20": 4,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9929917279411765
+  },
+  {
+   "type": "island",
+   "seed": 19,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 6,
+    "10": 3,
+    "20": 3,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9937193627450981
+  },
+  {
+   "type": "island",
+   "seed": 20,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 9,
+    "5": 5,
+    "10": 5,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9966681985294118
+  },
+  {
+   "type": "island",
+   "seed": 21,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9697457107843137
+  },
+  {
+   "type": "island",
+   "seed": 22,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 16,
+    "5": 8,
+    "10": 6,
+    "20": 5,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9580269607843137
+  },
+  {
+   "type": "island",
+   "seed": 23,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 15,
+    "5": 11,
+    "10": 10,
+    "20": 5,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.6907552083333334
+  },
+  {
+   "type": "island",
+   "seed": 24,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 6,
+    "5": 3,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9664905024509803
+  },
+  {
+   "type": "island",
+   "seed": 25,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 16,
+    "5": 11,
+    "10": 7,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9809283088235294
+  },
+  {
+   "type": "island",
+   "seed": 26,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9710860906862745
+  },
+  {
+   "type": "island",
+   "seed": 27,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 6,
+    "5": 4,
+    "10": 4,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9975107230392157
+  },
+  {
+   "type": "island",
+   "seed": 28,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.7307368259803921
+  },
+  {
+   "type": "island",
+   "seed": 29,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 22,
+    "5": 11,
+    "10": 10,
+    "20": 8,
+    "50": 4,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9783241421568627
+  },
+  {
+   "type": "island",
+   "seed": 30,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 7,
+    "10": 6,
+    "20": 4,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9918811274509803
+  },
+  {
+   "type": "island",
+   "seed": 31,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 20,
+    "5": 9,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9722732843137255
+  },
+  {
+   "type": "island",
+   "seed": 32,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 4,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9997702205882353
+  },
+  {
+   "type": "island",
+   "seed": 33,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 4,
+    "10": 4,
+    "20": 4,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9820389093137255
+  },
+  {
+   "type": "island",
+   "seed": 34,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9988893995098039
+  },
+  {
+   "type": "island",
+   "seed": 35,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 17,
+    "5": 13,
+    "10": 7,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9678308823529411
+  },
+  {
+   "type": "island",
+   "seed": 36,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 5,
+    "10": 4,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9982000612745098
+  },
+  {
+   "type": "island",
+   "seed": 37,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 14,
+    "5": 6,
+    "10": 4,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9800091911764706
+  },
+  {
+   "type": "island",
+   "seed": 38,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 3,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9991574754901961
+  },
+  {
+   "type": "island",
+   "seed": 39,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 4,
+    "10": 4,
+    "20": 4,
+    "50": 4,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9895833333333334
+  },
+  {
+   "type": "island",
+   "seed": 40,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 18,
+    "5": 9,
+    "10": 5,
+    "20": 4,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9946384803921569
+  },
+  {
+   "type": "island",
+   "seed": 41,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 9,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9672181372549019
+  },
+  {
+   "type": "island",
+   "seed": 42,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 22,
+    "5": 9,
+    "10": 6,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9791283700980392
+  },
+  {
+   "type": "island",
+   "seed": 43,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 12,
+    "5": 7,
+    "10": 6,
+    "20": 6,
+    "50": 4,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9852558210784313
+  },
+  {
+   "type": "island",
+   "seed": 44,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 14,
+    "5": 7,
+    "10": 6,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9903492647058824
+  },
+  {
+   "type": "island",
+   "seed": 45,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 6,
+    "10": 4,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9967064950980392
+  },
+  {
+   "type": "island",
+   "seed": 46,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 3,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9582567401960784
+  },
+  {
+   "type": "island",
+   "seed": 47,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 12,
+    "5": 5,
+    "10": 4,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9972043504901961
+  },
+  {
+   "type": "island",
+   "seed": 48,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 6,
+    "10": 5,
+    "20": 5,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9929917279411765
+  },
+  {
+   "type": "island",
+   "seed": 49,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 15,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9904258578431373
+  },
+  {
+   "type": "island",
+   "seed": 50,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 19,
+    "5": 9,
+    "10": 8,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9451593137254902
+  },
+  {
+   "type": "island",
+   "seed": 51,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 13,
+    "5": 7,
+    "10": 5,
+    "20": 5,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.8539751838235294
+  },
+  {
+   "type": "island",
+   "seed": 52,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 5,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9606311274509803
+  },
+  {
+   "type": "island",
+   "seed": 53,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 6,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9989276960784313
+  },
+  {
+   "type": "island",
+   "seed": 54,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 6,
+    "5": 2,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9995404411764706
+  },
+  {
+   "type": "island",
+   "seed": 55,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9947533700980392
+  },
+  {
+   "type": "island",
+   "seed": 56,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 7,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9895067401960784
+  },
+  {
+   "type": "island",
+   "seed": 57,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 10,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9991191789215687
+  },
+  {
+   "type": "island",
+   "seed": 58,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 17,
+    "5": 10,
+    "10": 9,
+    "20": 8,
+    "50": 5,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9829963235294118
+  },
+  {
+   "type": "island",
+   "seed": 59,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 13,
+    "5": 8,
+    "10": 7,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9788602941176471
+  },
+  {
+   "type": "island",
+   "seed": 60,
+   "landFraction": 0.34,
+   "landCells": 26112,
+   "counts": {
+    "1": 11,
+    "5": 3,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9977405024509803
+  },
+  {
+   "type": "continent",
+   "seed": 1,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 12,
+    "5": 10,
+    "10": 7,
+    "20": 6,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9195538949275363
+  },
+  {
+   "type": "continent",
+   "seed": 2,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 6,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9988960597826086
+  },
+  {
+   "type": "continent",
+   "seed": 3,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 15,
+    "5": 7,
+    "10": 5,
+    "20": 5,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9782325634057971
+  },
+  {
+   "type": "continent",
+   "seed": 4,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9950464221014492
+  },
+  {
+   "type": "continent",
+   "seed": 5,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 12,
+    "5": 7,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9944519927536232
+  },
+  {
+   "type": "continent",
+   "seed": 6,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 22,
+    "5": 15,
+    "10": 10,
+    "20": 8,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9718070652173914
+  },
+  {
+   "type": "continent",
+   "seed": 7,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 9,
+    "5": 5,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9840636322463768
+  },
+  {
+   "type": "continent",
+   "seed": 8,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 9,
+    "5": 5,
+    "10": 5,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9939990942028986
+  },
+  {
+   "type": "continent",
+   "seed": 9,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9934329710144928
+  },
+  {
+   "type": "continent",
+   "seed": 10,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 17,
+    "5": 12,
+    "10": 11,
+    "20": 9,
+    "50": 5,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9844316123188406
+  },
+  {
+   "type": "continent",
+   "seed": 11,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 2,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9962069746376812
+  },
+  {
+   "type": "continent",
+   "seed": 12,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 14,
+    "5": 5,
+    "10": 5,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9934329710144928
+  },
+  {
+   "type": "continent",
+   "seed": 13,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 8,
+    "10": 4,
+    "20": 4,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 4,
+   "largestShare": 0.8460144927536232
+  },
+  {
+   "type": "continent",
+   "seed": 14,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 14,
+    "5": 8,
+    "10": 5,
+    "20": 5,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.9518512228260869
+  },
+  {
+   "type": "continent",
+   "seed": 15,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 4,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9973392210144928
+  },
+  {
+   "type": "continent",
+   "seed": 16,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 21,
+    "5": 15,
+    "10": 13,
+    "20": 10,
+    "50": 8,
+    "100": 7
+   },
+   "substantial": 3,
+   "largestShare": 0.9034476902173914
+  },
+  {
+   "type": "continent",
+   "seed": 17,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 9,
+    "5": 6,
+    "10": 6,
+    "20": 5,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9786571557971014
+  },
+  {
+   "type": "continent",
+   "seed": 18,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9334239130434783
+  },
+  {
+   "type": "continent",
+   "seed": 19,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 3,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9679857336956522
+  },
+  {
+   "type": "continent",
+   "seed": 20,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 6,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9969712409420289
+  },
+  {
+   "type": "continent",
+   "seed": 21,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 13,
+    "5": 7,
+    "10": 6,
+    "20": 5,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9920176630434783
+  },
+  {
+   "type": "continent",
+   "seed": 22,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 15,
+    "5": 9,
+    "10": 8,
+    "20": 6,
+    "50": 6,
+    "100": 6
+   },
+   "substantial": 3,
+   "largestShare": 0.464164402173913
+  },
+  {
+   "type": "continent",
+   "seed": 23,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 8,
+    "10": 6,
+    "20": 6,
+    "50": 6,
+    "100": 5
+   },
+   "substantial": 3,
+   "largestShare": 0.49269701086956524
+  },
+  {
+   "type": "continent",
+   "seed": 24,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 10,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9879698822463768
+  },
+  {
+   "type": "continent",
+   "seed": 25,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.508406929347826
+  },
+  {
+   "type": "continent",
+   "seed": 26,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9988677536231884
+  },
+  {
+   "type": "continent",
+   "seed": 27,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 18,
+    "5": 14,
+    "10": 13,
+    "20": 10,
+    "50": 5,
+    "100": 5
+   },
+   "substantial": 4,
+   "largestShare": 0.9507189764492754
+  },
+  {
+   "type": "continent",
+   "seed": 28,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 7,
+    "5": 6,
+    "10": 4,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.5472995923913043
+  },
+  {
+   "type": "continent",
+   "seed": 29,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 7,
+    "10": 6,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9828464673913043
+  },
+  {
+   "type": "continent",
+   "seed": 30,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 22,
+    "5": 14,
+    "10": 11,
+    "20": 10,
+    "50": 7,
+    "100": 4
+   },
+   "substantial": 1,
+   "largestShare": 0.9704766757246377
+  },
+  {
+   "type": "continent",
+   "seed": 31,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9864696557971014
+  },
+  {
+   "type": "continent",
+   "seed": 32,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 11,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9981317934782609
+  },
+  {
+   "type": "continent",
+   "seed": 33,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 11,
+    "5": 6,
+    "10": 5,
+    "20": 5,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.920516304347826
+  },
+  {
+   "type": "continent",
+   "seed": 34,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 11,
+    "10": 11,
+    "20": 9,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 2,
+   "largestShare": 0.9415194746376812
+  },
+  {
+   "type": "continent",
+   "seed": 35,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 12,
+    "5": 9,
+    "10": 8,
+    "20": 8,
+    "50": 7,
+    "100": 7
+   },
+   "substantial": 3,
+   "largestShare": 0.8947576992753623
+  },
+  {
+   "type": "continent",
+   "seed": 36,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 5,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9981317934782609
+  },
+  {
+   "type": "continent",
+   "seed": 37,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 14,
+    "5": 8,
+    "10": 6,
+    "20": 3,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9960654438405797
+  },
+  {
+   "type": "continent",
+   "seed": 38,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 12,
+    "10": 8,
+    "20": 7,
+    "50": 5,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.9555027173913043
+  },
+  {
+   "type": "continent",
+   "seed": 39,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 5,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9878000452898551
+  },
+  {
+   "type": "continent",
+   "seed": 40,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 5,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9966598731884058
+  },
+  {
+   "type": "continent",
+   "seed": 41,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 5,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9970844655797102
+  },
+  {
+   "type": "continent",
+   "seed": 42,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 11,
+    "5": 8,
+    "10": 7,
+    "20": 7,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9679857336956522
+  },
+  {
+   "type": "continent",
+   "seed": 43,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 16,
+    "5": 8,
+    "10": 8,
+    "20": 6,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9426800271739131
+  },
+  {
+   "type": "continent",
+   "seed": 44,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 6,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9436990489130435
+  },
+  {
+   "type": "continent",
+   "seed": 45,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 8,
+    "10": 4,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9941972373188406
+  },
+  {
+   "type": "continent",
+   "seed": 46,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 5,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9377547554347826
+  },
+  {
+   "type": "continent",
+   "seed": 47,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 4,
+    "5": 3,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9911401721014492
+  },
+  {
+   "type": "continent",
+   "seed": 48,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 10,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 3,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9946218297101449
+  },
+  {
+   "type": "continent",
+   "seed": 49,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 13,
+    "5": 7,
+    "10": 7,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.8653192934782609
+  },
+  {
+   "type": "continent",
+   "seed": 50,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 11,
+    "5": 6,
+    "10": 5,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9697124094202898
+  },
+  {
+   "type": "continent",
+   "seed": 51,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 7,
+    "5": 5,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9569180253623188
+  },
+  {
+   "type": "continent",
+   "seed": 52,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 7,
+    "5": 3,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9818557518115942
+  },
+  {
+   "type": "continent",
+   "seed": 53,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 17,
+    "5": 10,
+    "10": 8,
+    "20": 7,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.972854393115942
+  },
+  {
+   "type": "continent",
+   "seed": 54,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 8,
+    "5": 6,
+    "10": 4,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9733355978260869
+  },
+  {
+   "type": "continent",
+   "seed": 55,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 11,
+    "5": 6,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9879981884057971
+  },
+  {
+   "type": "continent",
+   "seed": 56,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 12,
+    "5": 6,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 3,
+   "largestShare": 0.9321784420289855
+  },
+  {
+   "type": "continent",
+   "seed": 57,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 5,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9945935235507246
+  },
+  {
+   "type": "continent",
+   "seed": 58,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 13,
+    "5": 9,
+    "10": 9,
+    "20": 6,
+    "50": 4,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9722882699275363
+  },
+  {
+   "type": "continent",
+   "seed": 59,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 4,
+    "5": 4,
+    "10": 3,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9990658967391305
+  },
+  {
+   "type": "continent",
+   "seed": 60,
+   "landFraction": 0.46,
+   "landCells": 35328,
+   "counts": {
+    "1": 19,
+    "5": 12,
+    "10": 9,
+    "20": 6,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.875396286231884
+  },
+  {
+   "type": "citystate",
+   "seed": 1,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 15,
+    "5": 11,
+    "10": 9,
+    "20": 7,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.975390625
+  },
+  {
+   "type": "citystate",
+   "seed": 2,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9876736111111111
+  },
+  {
+   "type": "citystate",
+   "seed": 3,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 5,
+    "5": 3,
+    "10": 3,
+    "20": 3,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9960503472222222
+  },
+  {
+   "type": "citystate",
+   "seed": 4,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 4,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9986545138888889
+  },
+  {
+   "type": "citystate",
+   "seed": 5,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 11,
+    "5": 8,
+    "10": 7,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9796875
+  },
+  {
+   "type": "citystate",
+   "seed": 6,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 6,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9781684027777777
+  },
+  {
+   "type": "citystate",
+   "seed": 7,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9913194444444444
+  },
+  {
+   "type": "citystate",
+   "seed": 8,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 4,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9979600694444445
+  },
+  {
+   "type": "citystate",
+   "seed": 9,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 2,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9990885416666667
+  },
+  {
+   "type": "citystate",
+   "seed": 10,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 12,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9986979166666666
+  },
+  {
+   "type": "citystate",
+   "seed": 11,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 9,
+    "5": 6,
+    "10": 5,
+    "20": 5,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9831597222222223
+  },
+  {
+   "type": "citystate",
+   "seed": 12,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 11,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9965711805555556
+  },
+  {
+   "type": "citystate",
+   "seed": 13,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 10,
+    "5": 5,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9950954861111111
+  },
+  {
+   "type": "citystate",
+   "seed": 14,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 2,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9999131944444445
+  },
+  {
+   "type": "citystate",
+   "seed": 15,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 5,
+    "5": 4,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9978732638888889
+  },
+  {
+   "type": "citystate",
+   "seed": 16,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 4,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9758680555555556
+  },
+  {
+   "type": "citystate",
+   "seed": 17,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 3,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9874131944444444
+  },
+  {
+   "type": "citystate",
+   "seed": 18,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 6,
+    "10": 6,
+    "20": 6,
+    "50": 4,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9537326388888889
+  },
+  {
+   "type": "citystate",
+   "seed": 19,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 4,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9987847222222223
+  },
+  {
+   "type": "citystate",
+   "seed": 20,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 2,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9957465277777777
+  },
+  {
+   "type": "citystate",
+   "seed": 21,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 9,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9980034722222222
+  },
+  {
+   "type": "citystate",
+   "seed": 22,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 2,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9999131944444445
+  },
+  {
+   "type": "citystate",
+   "seed": 23,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 2,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9999565972222222
+  },
+  {
+   "type": "citystate",
+   "seed": 24,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 4,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9651041666666667
+  },
+  {
+   "type": "citystate",
+   "seed": 25,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 4,
+    "5": 2,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.99921875
+  },
+  {
+   "type": "citystate",
+   "seed": 26,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 12,
+    "5": 7,
+    "10": 6,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9836371527777777
+  },
+  {
+   "type": "citystate",
+   "seed": 27,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 14,
+    "5": 8,
+    "10": 6,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9874131944444444
+  },
+  {
+   "type": "citystate",
+   "seed": 28,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 6,
+    "10": 6,
+    "20": 6,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9864583333333333
+  },
+  {
+   "type": "citystate",
+   "seed": 29,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 10,
+    "5": 8,
+    "10": 5,
+    "20": 5,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9863715277777778
+  },
+  {
+   "type": "citystate",
+   "seed": 30,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 5,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9805555555555555
+  },
+  {
+   "type": "citystate",
+   "seed": 31,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 9,
+    "5": 7,
+    "10": 5,
+    "20": 5,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9858506944444444
+  },
+  {
+   "type": "citystate",
+   "seed": 32,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 5,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9980034722222222
+  },
+  {
+   "type": "citystate",
+   "seed": 33,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 3,
+    "10": 2,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9987413194444444
+  },
+  {
+   "type": "citystate",
+   "seed": 34,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 4,
+    "10": 4,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9928385416666666
+  },
+  {
+   "type": "citystate",
+   "seed": 35,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 3,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9983506944444445
+  },
+  {
+   "type": "citystate",
+   "seed": 36,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 3,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9980034722222222
+  },
+  {
+   "type": "citystate",
+   "seed": 37,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9728298611111111
+  },
+  {
+   "type": "citystate",
+   "seed": 38,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 4,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9998263888888889
+  },
+  {
+   "type": "citystate",
+   "seed": 39,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9879340277777777
+  },
+  {
+   "type": "citystate",
+   "seed": 40,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 14,
+    "5": 11,
+    "10": 7,
+    "20": 5,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9809027777777778
+  },
+  {
+   "type": "citystate",
+   "seed": 41,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 5,
+    "5": 3,
+    "10": 3,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9800347222222222
+  },
+  {
+   "type": "citystate",
+   "seed": 42,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9772569444444444
+  },
+  {
+   "type": "citystate",
+   "seed": 43,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 4,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.94375
+  },
+  {
+   "type": "citystate",
+   "seed": 44,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 6,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9875
+  },
+  {
+   "type": "citystate",
+   "seed": 45,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 5,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9899305555555555
+  },
+  {
+   "type": "citystate",
+   "seed": 46,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 15,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9862847222222222
+  },
+  {
+   "type": "citystate",
+   "seed": 47,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 9,
+    "5": 4,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9701388888888889
+  },
+  {
+   "type": "citystate",
+   "seed": 48,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 5,
+    "10": 5,
+    "20": 4,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9924479166666667
+  },
+  {
+   "type": "citystate",
+   "seed": 49,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 4,
+    "10": 3,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9867621527777778
+  },
+  {
+   "type": "citystate",
+   "seed": 50,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 11,
+    "5": 10,
+    "10": 9,
+    "20": 9,
+    "50": 6,
+    "100": 4
+   },
+   "substantial": 3,
+   "largestShare": 0.8962673611111112
+  },
+  {
+   "type": "citystate",
+   "seed": 51,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 2,
+   "largestShare": 0.9293402777777777
+  },
+  {
+   "type": "citystate",
+   "seed": 52,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 5,
+    "10": 4,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9853732638888889
+  },
+  {
+   "type": "citystate",
+   "seed": 53,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 5,
+    "10": 5,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9901041666666667
+  },
+  {
+   "type": "citystate",
+   "seed": 54,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 1,
+    "5": 1,
+    "10": 1,
+    "20": 1,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 1
+  },
+  {
+   "type": "citystate",
+   "seed": 55,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 5,
+    "10": 3,
+    "20": 3,
+    "50": 2,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9896267361111111
+  },
+  {
+   "type": "citystate",
+   "seed": 56,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 8,
+    "5": 3,
+    "10": 3,
+    "20": 2,
+    "50": 2,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9961805555555555
+  },
+  {
+   "type": "citystate",
+   "seed": 57,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 7,
+    "5": 2,
+    "10": 2,
+    "20": 2,
+    "50": 1,
+    "100": 1
+   },
+   "substantial": 1,
+   "largestShare": 0.9982204861111111
+  },
+  {
+   "type": "citystate",
+   "seed": 58,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 10,
+    "5": 8,
+    "10": 7,
+    "20": 6,
+    "50": 5,
+    "100": 3
+   },
+   "substantial": 1,
+   "largestShare": 0.9717447916666667
+  },
+  {
+   "type": "citystate",
+   "seed": 59,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 11,
+    "5": 8,
+    "10": 7,
+    "20": 4,
+    "50": 3,
+    "100": 3
+   },
+   "substantial": 2,
+   "largestShare": 0.9677517361111111
+  },
+  {
+   "type": "citystate",
+   "seed": 60,
+   "landFraction": 0.3,
+   "landCells": 23040,
+   "counts": {
+    "1": 6,
+    "5": 4,
+    "10": 4,
+    "20": 3,
+    "50": 3,
+    "100": 2
+   },
+   "substantial": 1,
+   "largestShare": 0.9896267361111111
+  }
+ ]
+}

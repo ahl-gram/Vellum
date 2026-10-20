@@ -1,0 +1,142 @@
+[
+ {
+  "h": 900,
+  "seat": false,
+  "slipRight": 992,
+  "slipBottom": 710.921875,
+  "tab": [
+   979.203125,
+   700,
+   1024,
+   876
+  ],
+  "tabText": [
+   [
+    988,
+    731,
+    1002,
+    845
+   ],
+   [
+    1002,
+    747,
+    1016,
+    830
+   ]
+  ],
+  "kids": [],
+  "tabW": 44.796875,
+  "coverPx": 12.796875,
+  "textLeft": 988,
+  "textTopMin": 731,
+  "textBottomMax": 845,
+  "zTab": "19",
+  "zSlip": "20",
+  "tabText1": "The Drawer · the table is bare"
+ },
+ {
+  "h": 900,
+  "seat": true,
+  "slipRight": 992,
+  "slipBottom": 878,
+  "tab": [
+   979.203125,
+   700,
+   1024,
+   876
+  ],
+  "tabText": [
+   [
+    988,
+    731,
+    1002,
+    845
+   ],
+   [
+    1002,
+    747,
+    1016,
+    830
+   ]
+  ],
+  "kids": [],
+  "tabW": 44.796875,
+  "coverPx": 12.796875,
+  "textLeft": 988,
+  "textTopMin": 731,
+  "textBottomMax": 845,
+  "zTab": "19",
+  "zSlip": "20",
+  "tabText1": "The Drawer · the table is bare"
+ },
+ {
+  "h": 768,
+  "seat": false,
+  "slipRight": 992,
+  "slipBottom": 710.921875,
+  "tab": [
+   979.203125,
+   568,
+   1024,
+   744
+  ],
+  "tabText": [
+   [
+    988,
+    599,
+    1002,
+    713
+   ],
+   [
+    1002,
+    615,
+    1016,
+    698
+   ]
+  ],
+  "kids": [],
+  "tabW": 44.796875,
+  "coverPx": 12.796875,
+  "textLeft": 988,
+  "textTopMin": 599,
+  "textBottomMax": 713,
+  "zTab": "19",
+  "zSlip": "20",
+  "tabText1": "The Drawer · the table is bare"
+ },
+ {
+  "h": 768,
+  "seat": true,
+  "slipRight": 992,
+  "slipBottom": 746,
+  "tab": [
+   979.203125,
+   568,
+   1024,
+   744
+  ],
+  "tabText": [
+   [
+    988,
+    599,
+    1002,
+    713
+   ],
+   [
+    1002,
+    615,
+    1016,
+    698
+   ]
+  ],
+  "kids": [],
+  "tabW": 44.796875,
+  "coverPx": 12.796875,
+  "textLeft": 988,
+  "textTopMin": 599,
+  "textBottomMax": 713,
+  "zTab": "19",
+  "zSlip": "20",
+  "tabText1": "The Drawer · the table is bare"
+ }
+]

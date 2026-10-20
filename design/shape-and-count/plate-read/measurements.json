@@ -1,0 +1,2092 @@
+{
+ "contrast": [
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "label-shape",
+   "sel": "label[for=shape]",
+   "text": "shape",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 958,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-label-shape.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "label-islands",
+   "sel": "label[for=isles]",
+   "text": "islands",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-label-islands.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "label-sealevel",
+   "sel": "label[for=land]",
+   "text": "sea level",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.87,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1174,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-label-sealevel.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "word-sizes",
+   "sel": ".l-word",
+   "text": "sizes",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.87,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 683,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-word-sizes.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "seal-alike",
+   "sel": ".seal",
+   "text": "alike",
+   "color": "rgb(242, 232, 207)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#4a3826",
+   "groundShare": 0.86,
+   "inkExtreme": "#f2e8cf",
+   "ratioExtreme": 9.14,
+   "ratioP95": 9.14,
+   "nInk": 850,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-seal-alike.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "end-few-islands",
+   "sel": ".land-end-min",
+   "text": "few",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.84,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 440,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-end-few-islands.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "end-many-islands",
+   "sel": ".land-end-max",
+   "text": "many",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 662,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-end-many-islands.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "readout-seeds-choice",
+   "sel": "#isles-readout",
+   "text": "seed's choice",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1622,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-readout-seeds-choice.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "thumb-untouched",
+   "sel": "#isles",
+   "text": "",
+   "color": "rgb(16, 16, 16)",
+   "fs": "13.3333px",
+   "opacity": "1",
+   "ground": "#857257",
+   "groundShare": 0.45,
+   "inkExtreme": "#efefef",
+   "ratioExtreme": 4.02,
+   "ratioP95": 4.02,
+   "nInk": 1792,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-thumb-untouched.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "today-end-landrange-0",
+   "sel": "#land ~ .land-end, .l-ctl .land-end",
+   "text": "more land",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 1125,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-today-end-landrange-0.png"
+  },
+  {
+   "w": 1024,
+   "st": "a",
+   "name": "select-shape-text",
+   "sel": "#shape",
+   "text": "seed's choice",
+   "color": "rgb(74, 56, 38)",
+   "fs": "15.2px",
+   "opacity": "1",
+   "ground": "#433423",
+   "groundShare": 0.16,
+   "inkExtreme": "#413221",
+   "ratioExtreme": 1.03,
+   "ratioP95": null,
+   "nInk": 0,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1024-select-shape-text.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "stood-note",
+   "sel": ".stood-note",
+   "text": "the count holds the sea and the shore; set the islands back to the seed's choice to free them",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.87,
+   "inkExtreme": "#6a593f",
+   "ratioExtreme": 5.99,
+   "ratioP95": 5.9,
+   "nInk": 12162,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-stood-note.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "held-land",
+   "sel": "#land-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-held-land.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "held-coast",
+   "sel": "#coast-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-held-coast.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "end-few-stood",
+   "sel": ".stood .land-end-min",
+   "text": "more sea",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.86,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 4.11,
+   "ratioP95": 4.11,
+   "nInk": 838,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-end-few-stood.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "end-many-stood",
+   "sel": ".stood .land-end-max",
+   "text": "more land",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 4.11,
+   "ratioP95": 4.11,
+   "nInk": 1139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-end-many-stood.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "readout-about-20",
+   "sel": "#isles-readout",
+   "text": "about 20",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1354,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-readout-about-20.png"
+  },
+  {
+   "w": 1024,
+   "st": "c",
+   "name": "thumb-islands-touched",
+   "sel": "#isles",
+   "text": "",
+   "color": "rgb(16, 16, 16)",
+   "fs": "13.3333px",
+   "opacity": "1",
+   "ground": "#4a3826",
+   "groundShare": 0.5,
+   "inkExtreme": "#efefef",
+   "ratioExtreme": 9.69,
+   "ratioP95": 9.69,
+   "nInk": 1691,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1024-thumb-islands-touched.png"
+  },
+  {
+   "w": 1024,
+   "st": "d",
+   "name": "islands-note",
+   "sel": "#isles-note",
+   "text": "on a continent: one great land, and islets for the rest",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 7139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1024-islands-note.png"
+  },
+  {
+   "w": 1024,
+   "st": "d",
+   "name": "stood-note",
+   "sel": ".stood-note",
+   "text": "the count holds the sea and the shore; set the islands back to the seed's choice to free them",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.87,
+   "inkExtreme": "#6a593f",
+   "ratioExtreme": 5.99,
+   "ratioP95": 5.9,
+   "nInk": 12162,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1024-stood-note.png"
+  },
+  {
+   "w": 1024,
+   "st": "d",
+   "name": "held-land",
+   "sel": "#land-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1024-held-land.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "label-shape",
+   "sel": "label[for=shape]",
+   "text": "shape",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 958,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-label-shape.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "label-islands",
+   "sel": "label[for=isles]",
+   "text": "islands",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-label-islands.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "label-sealevel",
+   "sel": "label[for=land]",
+   "text": "sea level",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.87,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1174,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-label-sealevel.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "word-sizes",
+   "sel": ".l-word",
+   "text": "sizes",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.87,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 683,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-word-sizes.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "seal-alike",
+   "sel": ".seal",
+   "text": "alike",
+   "color": "rgb(242, 232, 207)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#4a3826",
+   "groundShare": 0.86,
+   "inkExtreme": "#f2e8cf",
+   "ratioExtreme": 9.14,
+   "ratioP95": 9.14,
+   "nInk": 850,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-seal-alike.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "end-few-islands",
+   "sel": ".land-end-min",
+   "text": "few",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.84,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 440,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-end-few-islands.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "end-many-islands",
+   "sel": ".land-end-max",
+   "text": "many",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 662,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-end-many-islands.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "readout-seeds-choice",
+   "sel": "#isles-readout",
+   "text": "seed's choice",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1622,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-readout-seeds-choice.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "thumb-untouched",
+   "sel": "#isles",
+   "text": "",
+   "color": "rgb(16, 16, 16)",
+   "fs": "13.3333px",
+   "opacity": "1",
+   "ground": "#857257",
+   "groundShare": 0.45,
+   "inkExtreme": "#efefef",
+   "ratioExtreme": 4.02,
+   "ratioP95": 4.02,
+   "nInk": 1792,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-thumb-untouched.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "today-end-landrange-0",
+   "sel": "#land ~ .land-end, .l-ctl .land-end",
+   "text": "more land",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 3.93,
+   "ratioP95": 3.93,
+   "nInk": 1125,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-today-end-landrange-0.png"
+  },
+  {
+   "w": 1440,
+   "st": "a",
+   "name": "select-shape-text",
+   "sel": "#shape",
+   "text": "seed's choice",
+   "color": "rgb(74, 56, 38)",
+   "fs": "15.2px",
+   "opacity": "1",
+   "ground": "#433423",
+   "groundShare": 0.17,
+   "inkExtreme": "#413221",
+   "ratioExtreme": 1.03,
+   "ratioP95": null,
+   "nInk": 0,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/a-1440-select-shape-text.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "stood-note",
+   "sel": ".stood-note",
+   "text": "the count holds the sea and the shore; set the islands back to the seed's choice to free them",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.87,
+   "inkExtreme": "#6a593f",
+   "ratioExtreme": 5.99,
+   "ratioP95": 5.9,
+   "nInk": 12162,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-stood-note.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "held-land",
+   "sel": "#land-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-held-land.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "held-coast",
+   "sel": "#coast-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-held-coast.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "end-few-stood",
+   "sel": ".stood .land-end-min",
+   "text": "more sea",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.86,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 4.11,
+   "ratioP95": 4.11,
+   "nInk": 838,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-end-few-stood.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "end-many-stood",
+   "sel": ".stood .land-end-max",
+   "text": "more land",
+   "color": "rgb(133, 114, 87)",
+   "fs": "11.52px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.85,
+   "inkExtreme": "#857257",
+   "ratioExtreme": 4.11,
+   "ratioP95": 4.11,
+   "nInk": 1139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-end-many-stood.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "readout-about-20",
+   "sel": "#isles-readout",
+   "text": "about 20",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.85,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 1354,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-readout-about-20.png"
+  },
+  {
+   "w": 1440,
+   "st": "c",
+   "name": "thumb-islands-touched",
+   "sel": "#isles",
+   "text": "",
+   "color": "rgb(16, 16, 16)",
+   "fs": "13.3333px",
+   "opacity": "1",
+   "ground": "#4a3826",
+   "groundShare": 0.5,
+   "inkExtreme": "#efefef",
+   "ratioExtreme": 9.69,
+   "ratioP95": 9.69,
+   "nInk": 1691,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/c-1440-thumb-islands-touched.png"
+  },
+  {
+   "w": 1440,
+   "st": "d",
+   "name": "islands-note",
+   "sel": "#isles-note",
+   "text": "on a continent: one great land, and islets for the rest",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f4ecd8",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.64,
+   "ratioP95": 5.64,
+   "nInk": 7139,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1440-islands-note.png"
+  },
+  {
+   "w": 1440,
+   "st": "d",
+   "name": "stood-note",
+   "sel": ".stood-note",
+   "text": "the count holds the sea and the shore; set the islands back to the seed's choice to free them",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.12px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.87,
+   "inkExtreme": "#6a593f",
+   "ratioExtreme": 5.99,
+   "ratioP95": 5.9,
+   "nInk": 12162,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1440-stood-note.png"
+  },
+  {
+   "w": 1440,
+   "st": "d",
+   "name": "held-land",
+   "sel": "#land-readout",
+   "text": "held",
+   "color": "rgb(107, 90, 64)",
+   "fs": "13.6px",
+   "opacity": "1",
+   "ground": "#f8f1e0",
+   "groundShare": 0.83,
+   "inkExtreme": "#6b5a40",
+   "ratioExtreme": 5.9,
+   "ratioP95": 5.9,
+   "nInk": 794,
+   "file": "/Users/ahl/CodeProjects/Vellum/out/844-plate-read/shots/contrast/d-1440-held-land.png"
+  }
+ ],
+ "landEnds_a_1024": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ]
+ ],
+ "landEnds_c_1024": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ]
+ ],
+ "landEnds_d_1024": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ]
+ ],
+ "landEnds_a_1440": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ]
+ ],
+ "landEnds_c_1440": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ]
+ ],
+ "landEnds_d_1440": [
+  [
+   "few",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "many",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "panel"
+  ],
+  [
+   "more sea",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "more land",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "calm",
+   "land-end land-end-min",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ],
+  [
+   "lobed",
+   "land-end land-end-max",
+   "rgb(133, 114, 87)",
+   "11.52px",
+   "1",
+   "stood"
+  ]
+ ],
+ "geo": [
+  {
+   "h": 900,
+   "st": "today",
+   "slip": [
+    608,
+    147,
+    992,
+    711
+   ],
+   "tab": [
+    979,
+    700,
+    1024,
+    876
+   ],
+   "overlapX": 12.8,
+   "overlapY": 10.9,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    451,
+    451
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 564.1875,
+   "innerH": 900,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    198,
+    224
+   ]
+  },
+  {
+   "h": 900,
+   "st": "a",
+   "slip": [
+    608,
+    147,
+    992,
+    822
+   ],
+   "tab": [
+    979,
+    700,
+    1024,
+    876
+   ],
+   "overlapX": 12.8,
+   "overlapY": 121.6,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    562,
+    562
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 674.90625,
+   "innerH": 900,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    309,
+    224
+   ]
+  },
+  {
+   "h": 900,
+   "st": "c",
+   "slip": [
+    608,
+    147,
+    992,
+    878
+   ],
+   "tab": [
+    979,
+    700,
+    1024,
+    876
+   ],
+   "overlapX": 12.8,
+   "overlapY": 176,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    620,
+    618
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 731.265625,
+   "innerH": 900,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    367,
+    224
+   ]
+  },
+  {
+   "h": 900,
+   "st": "d",
+   "slip": [
+    608,
+    147,
+    992,
+    878
+   ],
+   "tab": [
+    979,
+    700,
+    1024,
+    876
+   ],
+   "overlapX": 12.8,
+   "overlapY": 176,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    642,
+    618
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 731.265625,
+   "innerH": 900,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    389,
+    224
+   ]
+  },
+  {
+   "h": 768,
+   "st": "today",
+   "slip": [
+    608,
+    147,
+    992,
+    711
+   ],
+   "tab": [
+    979,
+    568,
+    1024,
+    744
+   ],
+   "overlapX": 12.8,
+   "overlapY": 142.9,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    451,
+    451
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 564.1875,
+   "innerH": 768,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    198,
+    224
+   ]
+  },
+  {
+   "h": 768,
+   "st": "a",
+   "slip": [
+    608,
+    147,
+    992,
+    746
+   ],
+   "tab": [
+    979,
+    568,
+    1024,
+    744
+   ],
+   "overlapX": 12.8,
+   "overlapY": 176,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    562,
+    486
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 599.265625,
+   "innerH": 768,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    309,
+    224
+   ]
+  },
+  {
+   "h": 768,
+   "st": "c",
+   "slip": [
+    608,
+    147,
+    992,
+    746
+   ],
+   "tab": [
+    979,
+    568,
+    1024,
+    744
+   ],
+   "overlapX": 12.8,
+   "overlapY": 176,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    620,
+    486
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 599.265625,
+   "innerH": 768,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    367,
+    224
+   ]
+  },
+  {
+   "h": 768,
+   "st": "d",
+   "slip": [
+    608,
+    147,
+    992,
+    746
+   ],
+   "tab": [
+    979,
+    568,
+    1024,
+    744
+   ],
+   "overlapX": 12.8,
+   "overlapY": 176,
+   "topAtOverlap": "DIV#.slip-body",
+   "bodyScroll": [
+    642,
+    486
+   ],
+   "bodyOverflow": "auto",
+   "slipH": 599.265625,
+   "innerH": 768,
+   "scrollWidth": 1024,
+   "clientWidth": 1024,
+   "panels": [
+    389,
+    224
+   ]
+  }
+ ],
+ "w640": [
+  {
+   "st": "today",
+   "mode": "desktop-window",
+   "g": {
+    "slip": [
+     608,
+     147,
+     992,
+     711
+    ],
+    "tab": [
+     979,
+     700,
+     1024,
+     876
+    ],
+    "overlapX": 12.8,
+    "overlapY": 10.9,
+    "topAtOverlap": null,
+    "bodyScroll": [
+     451,
+     451
+    ],
+    "bodyOverflow": "auto",
+    "slipH": 564.1875,
+    "innerH": 900,
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "panels": [
+     198,
+     224
+    ]
+   },
+   "sx": {
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "innerWidth": 640,
+    "maxScroll": 384
+   },
+   "sx2": {
+    "scrollX": 384,
+    "slipLeft": 608
+   }
+  },
+  {
+   "st": "a",
+   "mode": "desktop-window",
+   "g": {
+    "slip": [
+     608,
+     147,
+     992,
+     822
+    ],
+    "tab": [
+     979,
+     700,
+     1024,
+     876
+    ],
+    "overlapX": 12.8,
+    "overlapY": 121.6,
+    "topAtOverlap": null,
+    "bodyScroll": [
+     562,
+     562
+    ],
+    "bodyOverflow": "auto",
+    "slipH": 674.90625,
+    "innerH": 900,
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "panels": [
+     309,
+     224
+    ]
+   },
+   "sx": {
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "innerWidth": 640,
+    "maxScroll": 384
+   },
+   "sx2": {
+    "scrollX": 384,
+    "slipLeft": 608
+   }
+  },
+  {
+   "st": "d",
+   "mode": "desktop-window",
+   "g": {
+    "slip": [
+     608,
+     147,
+     992,
+     878
+    ],
+    "tab": [
+     979,
+     700,
+     1024,
+     876
+    ],
+    "overlapX": 12.8,
+    "overlapY": 176,
+    "topAtOverlap": null,
+    "bodyScroll": [
+     642,
+     618
+    ],
+    "bodyOverflow": "auto",
+    "slipH": 731.265625,
+    "innerH": 900,
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "panels": [
+     389,
+     224
+    ]
+   },
+   "sx": {
+    "scrollWidth": 1024,
+    "clientWidth": 640,
+    "innerWidth": 640,
+    "maxScroll": 384
+   },
+   "sx2": {
+    "scrollX": 384,
+    "slipLeft": 608
+   }
+  },
+  {
+   "st": "today",
+   "mode": "mobile-640x900",
+   "m": {
+    "scrollWidth": 1024,
+    "clientWidth": 1024,
+    "innerWidth": 1024,
+    "vv": 0.625,
+    "slip": [
+     608,
+     147,
+     384,
+     564
+    ],
+    "notice": true
+   }
+  },
+  {
+   "st": "d",
+   "mode": "mobile-640x900",
+   "m": {
+    "scrollWidth": 1024,
+    "clientWidth": 1024,
+    "innerWidth": 1024,
+    "vv": 0.625,
+    "slip": [
+     608,
+     147,
+     384,
+     599
+    ],
+    "notice": true
+   }
+  }
+ ],
+ "folio": [
+  {
+   "w": 1024,
+   "h": 900,
+   "s": 5,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "The Sundered Reaches of Brelde · Chart № 5",
+   "rect": [
+    26,
+    806,
+    384,
+    36
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     806,
+     371,
+     18
+    ],
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     824,
+     8,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     806,
+     384,
+     36,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     806,
+     384,
+     72,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  },
+  {
+   "w": 1024,
+   "h": 768,
+   "s": 5,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "The Sundered Reaches of Brelde · Chart № 5",
+   "rect": [
+    26,
+    674,
+    384,
+    36
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     674,
+     371,
+     18
+    ],
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     692,
+     8,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     674,
+     384,
+     36,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     674,
+     384,
+     72,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     768,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  },
+  {
+   "w": 1280,
+   "h": 800,
+   "s": 5,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "The Sundered Reaches of Brelde · Chart № 5",
+   "rect": [
+    26,
+    706,
+    384,
+    36
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     706,
+     371,
+     18
+    ],
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     724,
+     8,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     706,
+     384,
+     36,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     706,
+     384,
+     72,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1280,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1280,
+     800,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    864,
+    147
+   ]
+  },
+  {
+   "w": 1440,
+   "h": 900,
+   "s": 5,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "The Sundered Reaches of Brelde · Chart № 5",
+   "rect": [
+    26,
+    806,
+    384,
+    36
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     806,
+     371,
+     18
+    ],
+    [
+     "The Sundered Reaches of Brelde · Chart №",
+     26,
+     824,
+     8,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     806,
+     384,
+     36,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     806,
+     384,
+     72,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1440,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1440,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    1024,
+    147
+   ]
+  },
+  {
+   "w": 1024,
+   "h": 900,
+   "s": 30,
+   "t": "island",
+   "tag": "P.folio-title",
+   "text": "The Verdant Isle of Kre · Chart № 30",
+   "rect": [
+    26,
+    824,
+    323,
+    18
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Verdant Isle of Kre · Chart № 30",
+     26,
+     824,
+     323,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     824,
+     323,
+     18,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     824,
+     323,
+     54,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  },
+  {
+   "w": 1024,
+   "h": 900,
+   "s": 1,
+   "t": "archipelago",
+   "tag": "P.folio-title",
+   "text": "The Scattered Isles of Tzatlua · Chart № 1",
+   "rect": [
+    26,
+    824,
+    373,
+    18
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Scattered Isles of Tzatlua · Chart №",
+     26,
+     824,
+     373,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     824,
+     373,
+     18,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     824,
+     373,
+     54,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  },
+  {
+   "w": 1024,
+   "h": 900,
+   "s": 2,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "Terra Bru · Chart № 2",
+   "rect": [
+    26,
+    824,
+    254,
+    18
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "Terra Bru · Chart № 2",
+     26,
+     824,
+     194,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     824,
+     254,
+     18,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     824,
+     254,
+     54,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  },
+  {
+   "w": 1024,
+   "h": 900,
+   "s": 42,
+   "t": "continent",
+   "tag": "P.folio-title",
+   "text": "The Realm of Rahai · Chart № 42",
+   "rect": [
+    26,
+    824,
+    286,
+    18
+   ],
+   "font": "14.72px \"IM Fell English SC\", \"Iowan O",
+   "ls": "2.3552px",
+   "ws": "normal",
+   "textWrap": "wrap",
+   "fragments": [
+    [
+     "The Realm of Rahai · Chart № 42",
+     26,
+     824,
+     286,
+     18
+    ]
+   ],
+   "chain": [
+    [
+     "P.folio-title",
+     26,
+     824,
+     286,
+     18,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "DIV.chrome corner bl folio",
+     26,
+     824,
+     286,
+     54,
+     "384px",
+     "normal",
+     "fixed",
+     "block"
+    ],
+    [
+     "MAIN.",
+     0,
+     0,
+     1024,
+     0,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ],
+    [
+     "BODY.room chart-room",
+     0,
+     0,
+     1024,
+     900,
+     "none",
+     "normal",
+     "static",
+     "block"
+    ]
+   ],
+   "slip": [
+    608,
+    147
+   ]
+  }
+ ],
+ "consoleErrors": [],
+ "http4xx": []
+}

@@ -1,0 +1,65 @@
+/* Issue #849 mock: the stand-in for what Sub 6 adds to src/styles/explorer/broadside.css. Every value here is the round's pick, not ruled. */
+
+/* A plain word in the label column, for a row whose control is a group rather than one input (the sizes). */
+.broadside .l-label .l-word {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-brown);
+}
+
+/* An untouched islands slider: the thumb sits where the seed's own count would, drawn in the faded ink so it reads as not set. */
+.broadside .ledger > input[type="range"].untouched {
+  accent-color: var(--ink-faded);
+}
+
+/* The type's measured meaning of a count (D14), under the islands rows. */
+.broadside .isles-note {
+  grid-column: 2 / -1;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--ink-brown);
+  margin-top: -0.2rem;
+}
+.broadside .isles-note[hidden] {
+  display: none;
+}
+
+/* The stood-down sliders on a counted world: the ground swapped to the cream and a dashed hairline, never opacity, and the inputs stay pressable (`handbook/specs/ui-design.md`, a refusing press). The box is a subgrid so both tracks keep the ledger's one track column. */
+.broadside .ledger > .stood {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  gap: 0.5rem 0.6rem;
+  align-items: center;
+  background: var(--control-cream);
+  border: 1px dashed var(--line-tan);
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+}
+.broadside .stood > .land-end-min {
+  grid-column: 2;
+  justify-self: end;
+}
+.broadside .stood > input[type="range"] {
+  grid-column: 3;
+  width: 100%;
+  min-width: 4rem;
+  accent-color: var(--ink-dark);
+  margin: 0;
+}
+.broadside .stood > .land-end-max {
+  grid-column: 4;
+}
+.broadside .stood > .land-readout {
+  grid-column: 5;
+}
+.broadside .stood > .stood-note {
+  grid-column: 1 / -1;
+  padding: 0 0.6rem;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--ink-brown);
+}

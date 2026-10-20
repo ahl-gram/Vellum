@@ -1,0 +1,42 @@
+[
+  {
+    "url": "/out/844/pages/crescent-17.html",
+    "width": 1680,
+    "height": 900,
+    "mobile": false,
+    "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-crescent-17.png",
+    "waitMs": 2500,
+    "full": true,
+    "probe": "document.documentElement.scrollWidth"
+  },
+  {
+    "url": "/out/844/pages/texas-30.html",
+    "width": 1680,
+    "height": 900,
+    "mobile": false,
+    "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-texas-30.png",
+    "waitMs": 2500,
+    "full": true,
+    "probe": "document.documentElement.scrollWidth"
+  },
+  {
+    "url": "/out/844/pages/japan-13.html",
+    "width": 1680,
+    "height": 900,
+    "mobile": false,
+    "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-japan-13.png",
+    "waitMs": 2500,
+    "full": true,
+    "probe": "document.documentElement.scrollWidth"
+  },
+  {
+    "url": "/out/844/pages/overview-shapes.html",
+    "width": 1724,
+    "height": 900,
+    "mobile": false,
+    "out": "/Users/ahl/CodeProjects/Vellum/out/844/overview-shapes.png",
+    "waitMs": 2500,
+    "full": true,
+    "probe": "document.documentElement.scrollWidth"
+  }
+]

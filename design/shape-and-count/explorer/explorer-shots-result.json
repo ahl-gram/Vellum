@@ -1,0 +1,182 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-a-plain-1024.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,675],\"land\":[635,259,331,309],\"isles\":[744,446,84,16],\"landRange\":[744,512,84,16],\"coastRange\":[744,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-a-plain-1440.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"slip\":[1024,147,384,675],\"land\":[1051,259,331,309],\"isles\":[1160,446,84,16],\"landRange\":[1160,512,84,16],\"coastRange\":[1160,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[1395,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-a-plain-land-crop2x.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,675],\"land\":[635,259,331,309],\"isles\":[744,446,84,16],\"landRange\":[744,512,84,16],\"coastRange\":[744,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-b-shaped-1024.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,675],\"land\":[635,259,331,309],\"isles\":[744,446,84,16],\"landRange\":[744,512,84,16],\"coastRange\":[744,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-b-shaped-1440.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"slip\":[1024,147,384,675],\"land\":[1051,259,331,309],\"isles\":[1160,446,84,16],\"landRange\":[1160,512,84,16],\"coastRange\":[1160,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[1395,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-b-shaped-land-crop2x.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,675],\"land\":[635,259,331,309],\"isles\":[744,446,84,16],\"landRange\":[744,512,84,16],\"coastRange\":[744,541,84,16],\"stood\":null,\"slipScroll\":[562,562],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,323,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-c-counted-1024.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=1&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,731],\"land\":[635,259,331,367],\"isles\":[746,446,72,16],\"landRange\":[746,519,72,16],\"coastRange\":[746,548,72,16],\"stood\":[635,509,331,108],\"slipScroll\":[620,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,373,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-c-counted-1440.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=1&type=archipelago",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"slip\":[1024,147,384,731],\"land\":[1051,259,331,367],\"isles\":[1162,446,72,16],\"landRange\":[1162,519,72,16],\"coastRange\":[1162,548,72,16],\"stood\":[1051,509,331,108],\"slipScroll\":[620,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[1395,700,45,176],\"folioTitle\":[26,824,373,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-c-counted-land-crop2x.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=1&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,731],\"land\":[635,259,331,367],\"isles\":[746,446,72,16],\"landRange\":[746,519,72,16],\"coastRange\":[746,548,72,16],\"stood\":[635,509,331,108],\"slipScroll\":[620,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,824,373,18]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-d-counted-continent-1024.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,731],\"land\":[635,259,331,389],\"isles\":[746,446,72,16],\"landRange\":[746,541,72,16],\"coastRange\":[746,570,72,16],\"stood\":[635,531,331,108],\"slipScroll\":[642,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,806,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-d-counted-continent-1440.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"slip\":[1024,147,384,731],\"land\":[1051,259,331,389],\"isles\":[1162,446,72,16],\"landRange\":[1162,541,72,16],\"coastRange\":[1162,570,72,16],\"stood\":[1051,531,331,108],\"slipScroll\":[642,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[1395,700,45,176],\"folioTitle\":[26,806,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-d-counted-continent-land-crop2x.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,731],\"land\":[635,259,331,389],\"isles\":[746,446,72,16],\"landRange\":[746,541,72,16],\"coastRange\":[746,570,72,16],\"stood\":[635,531,331,108],\"slipScroll\":[642,618],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,806,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-d-counted-continent-1024x768.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,599],\"land\":[635,259,331,389],\"isles\":[746,446,72,16],\"landRange\":[746,541,72,16],\"coastRange\":[746,570,72,16],\"stood\":[635,531,331,108],\"slipScroll\":[642,486],\"shapeFont\":\"15.2px\",\"typeFont\":\"15.2px\",\"drawerTab\":[979,568,45,176],\"folioTitle\":[26,674,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-control-today-1024x900.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,564],\"land\":[635,259,331,198],\"isles\":null,\"landRange\":[737,401,90,16],\"coastRange\":[737,430,90,16],\"stood\":null,\"slipScroll\":[451,451],\"shapeFont\":null,\"typeFont\":\"15.2px\",\"drawerTab\":[979,700,45,176],\"folioTitle\":[26,806,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-control-today-1024x768.png",
+  "url": "http://127.0.0.1:58706/explorer/#seed=5&type=continent",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,564],\"land\":[635,259,331,198],\"isles\":null,\"landRange\":[737,401,90,16],\"coastRange\":[737,430,90,16],\"stood\":null,\"slipScroll\":[451,451],\"shapeFont\":null,\"typeFont\":\"15.2px\",\"drawerTab\":[979,568,45,176],\"folioTitle\":[26,674,384,36]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

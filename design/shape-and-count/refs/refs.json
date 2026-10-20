@@ -1,0 +1,74 @@
+{
+ "downloaded": "2026-10-19",
+ "terms": {
+  "page": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "read": "2026-10-19",
+  "quotes": [
+   "All versions of Natural Earth raster + vector map data found on this website are in the public domain.",
+   "No permission is needed to use Natural Earth.",
+   "Crediting the authors is unnecessary."
+  ]
+ },
+ "mirror": {
+  "repo": "https://github.com/nvkelso/natural-earth-vector",
+  "githubLicenceField": {
+   "key": "other",
+   "name": "Other",
+   "spdx_id": "NOASSERTION"
+  },
+  "read": "2026-10-19 with gh api repos/nvkelso/natural-earth-vector"
+ },
+ "files": [
+  {
+   "file": "natural-earth/ne_110m_admin_1_states_provinces.geojson",
+   "sourcePage": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/ (Admin 1, States, Provinces; version 5.1.1 on the page)",
+   "original": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_1_states_provinces.geojson",
+   "bytes": 183638,
+   "gitBlob": "9a5deadd82ba6f260985a426fb9276c19c3244bd",
+   "sha1": "666c2a7814861664c574bb8c7b3fddab45da1731",
+   "lastCommit": "117488dc884bad03366ff727eca013e434615127 (2022-05-05)",
+   "features": 51,
+   "coverage": "United States of America only",
+   "used": "Texas (US-TX): 1 ring of 79 vertices, lon -106.63 to -93.49, lat 25.84 to 36.50",
+   "licence": "public domain (terms page)",
+   "drawn": true
+  },
+  {
+   "file": "natural-earth/ne_110m_admin_0_countries.geojson",
+   "sourcePage": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/ (Admin 0, Countries; version 5.1.1 on the page)",
+   "original": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
+   "bytes": 838726,
+   "gitBlob": "1e6ab74c7042f97013be69ceec798be8e1aff27d",
+   "sha1": "960e31f7dc6a6720d1139e1c82165a2d5e2e98e7",
+   "lastCommit": "9380cca83db5f9aef52d5e762765100745f84b27 (2022-05-13)",
+   "features": 177,
+   "used": "Japan (JPN): 3 rings of 37, 16 and 12 vertices: Honshu and Kyushu as one ring (the strait closed at this scale), Hokkaido, Shikoku; lon 129.41 to 145.54, lat 31.03 to 45.55",
+   "licence": "public domain (terms page)",
+   "drawn": true
+  },
+  {
+   "file": "natural-earth/ne_50m_admin_0_countries.geojson",
+   "sourcePage": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/",
+   "original": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+   "bytes": 3083490,
+   "gitBlob": "9d99f26dc470fcdbd08b062c813005acbdf73ccb",
+   "sha1": "fc0928be6e7fdab3cf2b8e222f0e499209132d6e",
+   "features": 242,
+   "used": "read only, not drawn: Japan here is 34 rings (largest 385 vertices)",
+   "licence": "public domain (terms page)",
+   "drawn": false
+  },
+  {
+   "file": "natural-earth/ne_50m_admin_1_states_provinces.geojson",
+   "sourcePage": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/",
+   "original": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_1_states_provinces.geojson",
+   "bytes": 2325694,
+   "gitBlob": "1a362ae0bfbe1f2768071e58a2905a5561039703",
+   "sha1": "9dc46fc9dc36cf322dd14c245ef18be8fbf97ed0",
+   "features": 294,
+   "used": "read only, not drawn: Texas here is 6 rings (415 + 7 + 11 + 9 + 8 + 9 vertices)",
+   "licence": "public domain (terms page)",
+   "drawn": false
+  }
+ ]
+}
