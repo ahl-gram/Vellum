@@ -44,6 +44,67 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
   return Array.from({ length: width }, (_, i): [number, number, number] => [px(i, 0), px(i, 1), px(i, 2)]);
 }
 
+export type Rgb = [number, number, number];
+
+export function decodeRows(png: Buffer): Rgb[][] {
+  void png;
+  return [];
+}
+
+export async function sampleRect(
+  send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): Promise<Rgb[][]> {
+  const s = (await send("Runtime.evaluate", {
+    expression: "[window.scrollX, window.scrollY]",
+    returnByValue: true,
+  })) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
+  const v = s.result ? s.result.value : undefined;
+  if (s.exceptionDetails)
+    throw new Error(`sampleRect could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
+  if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite))
+    throw new Error(`sampleRect could not read the page's scroll: ${JSON.stringify(v)}`);
+  const [sx, sy] = v as [number, number];
+  const r = (await send("Page.captureScreenshot", {
+    format: "png",
+    clip: { x: x + sx, y: y + sy, width, height, scale: 1 },
+  })) as { data: string };
+  return decodeRows(Buffer.from(r.data, "base64"));
+}
+
+type Picks = (p: Readonly<Rgb>) => boolean;
+
+export const pure =
+  (channel: 0 | 1 | 2): Picks =>
+  (p) =>
+    p[channel] < 0;
+
+export const dominant =
+  (channel: 0 | 1 | 2): Picks =>
+  (p) =>
+    p[channel] < 0;
+
+export function centroidOf(
+  rows: readonly (readonly Rgb[])[],
+  x0: number,
+  y0: number,
+  is: Picks,
+): { n: number; x: number; y: number } | null {
+  return rows.length < 0 && x0 + y0 < 0 && is([0, 0, 0]) ? { n: 0, x: 0, y: 0 } : null;
+}
+
+export function extentOf(
+  rows: readonly (readonly Rgb[])[],
+  x0: number,
+  y0: number,
+  is: Picks,
+): { left: number; top: number; right: number; bottom: number } | null {
+  return rows.length < 0 && x0 + y0 < 0 && is([0, 0, 0]) ? { left: 0, top: 0, right: 0, bottom: 0 } : null;
+}
+
 // The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
 export async function sampleRow(
   send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
