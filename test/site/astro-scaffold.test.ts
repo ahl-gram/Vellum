@@ -805,6 +805,20 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
   }
 });
 
+function checkInlineScriptOrder(p: PageSpec, html: string): void {
+  if (p.prePaintScript !== undefined) {
+    assert.ok(html.includes(p.prePaintScript), `${p.route} carries the pre-paint veil script (${p.prePaintScript})`);
+    assert.ok(
+      html.indexOf(p.prePaintScript) < html.indexOf('class="landfall"'),
+      `${p.route}'s pre-paint script parses before the stage, so first paint wears the veil`,
+    );
+  }
+  assert.ok(
+    html.indexOf("<script") < html.indexOf("<footer>"),
+    `${p.route} script renders inside <main>, before the footer`,
+  );
+}
+
 test("each app page keeps its bundle-twin module script, rendered verbatim inside <main>", () => {
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
@@ -836,20 +850,7 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
       const expected = (p.scriptSrc === undefined ? 1 : 2) + (p.prePaintScript === undefined ? 0 : 1);
       assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
-      if (p.prePaintScript !== undefined) {
-        assert.ok(
-          html.includes(p.prePaintScript),
-          `${p.route} carries the pre-paint veil script (${p.prePaintScript})`,
-        );
-        assert.ok(
-          html.indexOf(p.prePaintScript) < html.indexOf('class="landfall"'),
-          `${p.route}'s pre-paint script parses before the stage, so first paint wears the veil`,
-        );
-      }
-      assert.ok(
-        html.indexOf("<script") < html.indexOf("<footer>"),
-        `${p.route} script renders inside <main>, before the footer`,
-      );
+      checkInlineScriptOrder(p, html);
       if (p.scriptSrc === undefined) {
         assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
         continue;
@@ -914,6 +915,37 @@ const ROADS: Record<string, ReadonlyArray<Road>> = {
 const roadOpening = (r: Road): string =>
   `<a${r.id ? ` id="${r.id}"` : ""} class="legend-btn${r.gold ? " gold" : ""}"${r.road ? ` data-road="${r.road}"` : ""} href="${r.href}"><span class="verb"${r.verbId ? ` id="${r.verbId}"` : ""}>`;
 
+function checkHomeStagesAndRoads(): void {
+  assert.ok(!page("index.html").includes(KIT_FOG), "home keeps its own stage dress (#461)");
+  assert.ok(
+    page("index.html").includes(KIT_GLASS(' id="lf-controls"')),
+    "home carries the kit's camera (#505), seated by its own id",
+  );
+  for (const [route, label] of STAGES) {
+    const html = page(route);
+    assert.ok(
+      html.includes(KIT_STAGE(label)),
+      `${route} carries the kit's stage: sheet > a keyboard-reachable gesture box > the transform target, named for the room`,
+    );
+    const stage = html.slice(html.indexOf('<div class="stage">'), html.indexOf('<div class="vignette top"'));
+    assert.ok(
+      stage.indexOf("</div></div></div>") < stage.indexOf('<p class="status"'),
+      `${route}'s status pill follows the sheet inside the stage`,
+    );
+    assert.ok(stage.includes("<noscript>"), `${route}'s scripts-off notice stands inside the stage`);
+  }
+  for (const p of PAGES) {
+    const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map(
+      (m) => m[0],
+    );
+    assert.deepEqual(
+      got,
+      (ROADS[p.route] ?? []).map(roadOpening),
+      `${p.route}'s roads out, in order, as the kit renders them`,
+    );
+  }
+}
+
 test("the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)", () => {
   const chartRooms = PAGES.filter((p) => p.chartRoom && p.dir !== "/gallery/");
   for (const p of PAGES.filter((q) => q.room)) {
@@ -944,34 +976,7 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
       `${p.route}'s folio leads with the world's name`,
     );
   }
-  assert.ok(!page("index.html").includes(KIT_FOG), "home keeps its own stage dress (#461)");
-  assert.ok(
-    page("index.html").includes(KIT_GLASS(' id="lf-controls"')),
-    "home carries the kit's camera (#505), seated by its own id",
-  );
-  for (const [route, label] of STAGES) {
-    const html = page(route);
-    assert.ok(
-      html.includes(KIT_STAGE(label)),
-      `${route} carries the kit's stage: sheet > a keyboard-reachable gesture box > the transform target, named for the room`,
-    );
-    const stage = html.slice(html.indexOf('<div class="stage">'), html.indexOf('<div class="vignette top"'));
-    assert.ok(
-      stage.indexOf("</div></div></div>") < stage.indexOf('<p class="status"'),
-      `${route}'s status pill follows the sheet inside the stage`,
-    );
-    assert.ok(stage.includes("<noscript>"), `${route}'s scripts-off notice stands inside the stage`);
-  }
-  for (const p of PAGES) {
-    const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map(
-      (m) => m[0],
-    );
-    assert.deepEqual(
-      got,
-      (ROADS[p.route] ?? []).map(roadOpening),
-      `${p.route}'s roads out, in order, as the kit renders them`,
-    );
-  }
+  checkHomeStagesAndRoads();
 });
 
 test("every road out names its destination by that route's name in the tree (Issue #668)", () => {

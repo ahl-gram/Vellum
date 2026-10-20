@@ -379,19 +379,12 @@ and the element parameters `no-param-reassign` lets a function write through, a 
 the accepted list holds by naming no e2e file: a read it doubts is written with a non-null mark or a
 real check.
 
-**One list stands outside the inline form: `eslint-suppressions.json`** (Alex, 2026-10-07,
-Issue #779). ESLint writes it and applies it on every lint run. It records, file by file, how many
-functions over `max-lines-per-function` and files over `max-lines` the one-time Prettier reformat
-left, in every TypeScript root, `e2e/` included, and nothing joins it: a new overrun fails the lint,
-and ESLint also fails on an entry no longer needed, so the change that splits an overrun runs
-`npx eslint --flag unstable_native_nodejs_ts_config --prune-suppressions .` and commits the smaller
-list. `test/repo/lint-config.test.ts` holds it to those two rules over tracked files, and to its
-counts at the reformat (`LIST_AT_REFORMAT`), so no file joins it and no count grows; a file that
-moves keeps its entry, and its ceiling there, under its new path, which is not a file joining; the
-change that splits an overrun lowers that file's ceiling there too. It counts overruns, not sizes, so it cannot
-see a listed file or function grow while already over its cap, nor a new overrun in a file whose
-other overrun is split in the same change; review holds those. Issue #814 splits the code until the
-list is empty, and then the file, this paragraph and its guards go.
+**No list stands outside the inline form.** ESLint applies its suppressions file
+(eslint-suppressions.json at the repo root) on every lint run, lifting, file by file, the findings
+of whatever rules it counts, so keep none: fix the code instead. `test/repo/lint-config.test.ts`
+fails while the file exists, and ESLint's `--suppress-all`, `--suppress-rule` and
+`--prune-suppressions` each write it, so a run of any of them reds the unit suite rather than
+quietly lifting a rule (Alex, 2026-10-18, Issue #814).
 
 ## The comment sweep
 
