@@ -108,8 +108,15 @@ and a version this build does not have. A surface shows the reason; it does not 
 **Founding agrees across platforms or refuses.** The cleanup reads the platform's own Unicode knowledge,
 and a character the platform does not know is refused rather than read, so two platforms that disagree
 about a newly assigned character refuse it on one and found it on the other, and never found two worlds.
-Keep founding free of any locale-sensitive call, the clock and randomness. What no guard can hold is a
-character whose classification Unicode itself revises.
+Keep founding free of any locale-sensitive call, the clock, randomness and any `Math` member that is not
+exact: `vellum/founding-locale-clock-free` (`foundingLocaleClockFree` in `scripts/lint/import-bounds.ts`)
+refuses them at lint time, and its approved lists are the list: `FOUNDING_GLOBALS` there, the built-ins
+founding may read, and `EXACT_MATH` in `scripts/lint/source-shape.ts`, the `Math` members, which the
+prospect rule shares and which does not grow for founding alone. A built-in joins `FOUNDING_GLOBALS` only
+with its reason, in the pull request that needs it. The rule reads the founding modules alone, never a
+module they import, so keep what founding calls from elsewhere (`hashString` in `src/core/rng.ts`,
+`defaultRecipe` in `src/world/generate.ts`) free of them too. What no guard can hold is a character whose
+classification Unicode itself revises.
 
 **What a surface may read from a founding.** `sentence` is the display form: the text to letter and to
 carry in a link, which founds itself again unchanged. A climate word here is a word that still sets the

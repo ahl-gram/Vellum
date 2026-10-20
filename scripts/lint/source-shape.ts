@@ -337,17 +337,10 @@ const hostModule = (source: Node): boolean => {
   return text === null || isBuiltin(text);
 };
 
-const prospectLibmClockFree: Rule.RuleModule = {
-  meta: {
-    type: "problem",
-    messages: {
-      power: `the prospect layer squares by multiplying: ** and **= are a library power whose last bits differ between platforms, and ${PINS}`,
-      libm: `the prospect layer reads Math only as an exact member written out, one of EXACT_MATH in scripts/lint/source-shape.ts: the rest are libm or entropy, and an alias or a computed key hides which member is read, and ${PINS}`,
-      host: `the prospect layer reads no global but a built-in PROSPECT_GLOBALS in scripts/lint/source-shape.ts approves, no locale member and no import.meta: anything else is a clock, entropy or the host, and ${PINS}; a built-in joins that list with its reason`,
-      module: `the prospect layer imports no Node built-in module and no import() source computed at run time: Node's modules are the host's clock, entropy and files, and ${PINS}`,
-      ambient: `the prospect layer declares no ambient binding: a declare line hides a global from this rule while the erased code still reads it, and ${PINS}`,
-    },
-  },
+type HostFreeMessages = Readonly<Record<"power" | "libm" | "host" | "module" | "ambient", string>>;
+
+export const hostFree = (approved: ReadonlySet<string>, messages: HostFreeMessages): Rule.RuleModule => ({
+  meta: { type: "problem", messages },
   create(context) {
     const report = (node: Node, messageId: string): void => context.report({ node, messageId });
     const source = (node: Node | null | undefined): void => {
@@ -380,13 +373,21 @@ const prospectLibmClockFree: Rule.RuleModule = {
         for (const ref of globalReads(context.sourceCode.getScope(program))) {
           const id = ref.identifier as Node;
           if (typeQueried(id.parent)) continue;
-          if (!PROSPECT_GLOBALS.has(ref.identifier.name)) report(id, "host");
+          if (!approved.has(ref.identifier.name)) report(id, "host");
           else if (ref.identifier.name === "Math" && !exactMath(id)) report(id, "libm");
         }
       },
     };
   },
-};
+});
+
+const prospectLibmClockFree = hostFree(PROSPECT_GLOBALS, {
+  power: `the prospect layer squares by multiplying: ** and **= are a library power whose last bits differ between platforms, and ${PINS}`,
+  libm: `the prospect layer reads Math only as an exact member written out, one of EXACT_MATH in scripts/lint/source-shape.ts: the rest are libm or entropy, and an alias or a computed key hides which member is read, and ${PINS}`,
+  host: `the prospect layer reads no global but a built-in PROSPECT_GLOBALS in scripts/lint/source-shape.ts approves, no locale member and no import.meta: anything else is a clock, entropy or the host, and ${PINS}; a built-in joins that list with its reason`,
+  module: `the prospect layer imports no Node built-in module and no import() source computed at run time: Node's modules are the host's clock, entropy and files, and ${PINS}`,
+  ambient: `the prospect layer declares no ambient binding: a declare line hides a global from this rule while the erased code still reads it, and ${PINS}`,
+});
 
 export default {
   rules: {
