@@ -345,7 +345,7 @@ test("CT9 the Explorer seats the table in exactly two places, the boot and the c
   assert.equal(
     [...app.matchAll(/chartTable\.restore\(/g)].length,
     2,
-    "the Explorer seats the table in some number of places other than the two #634 leaves",
+    "the Explorer seats the table in some number of places other than the two #634 leaves. BLIND SPOT, declared, erring toward passing: only src/site/explorer/app.ts is counted, so a seat written in src/site/explorer/app-wiring.ts, which is handed the table, passes unseen (Issue #814)",
   );
 });
 
@@ -377,7 +377,7 @@ test("CT11 EVERY road out that carries this page's address is rebuilt by the one
   const roads = [...app.matchAll(/^\s*(?:if \([^)]*\) )?(\w+)\.href = [^\n]*location\.hash[^\n]*$/gm)].map((m) => m[1]);
   assert.ok(
     roads.length >= 2,
-    `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape`,
+    `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape. BLIND SPOT, declared, erring toward passing: only app.ts is scanned, so a road written in src/site/explorer/app-wiring.ts, which imports the page's elements, passes unseen (Issue #814)`,
   );
   for (const road of new Set(roads)) {
     assert.match(

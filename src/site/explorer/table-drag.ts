@@ -116,10 +116,24 @@ function moveCarry(deps: TableDragDeps, c: Carry, at: Point, keep: (next: Carry)
   deps.receiving(over);
 }
 
-export function bindTableDrag(deps: TableDragDeps): void {
-  let carry: Carry | null = null;
+function dragRelease() {
   let dragged = false;
-  let owed: EventListener | null = null;
+  const swallowThisRelease = (): void => {
+    dragged = true;
+    setTimeout(() => {
+      dragged = false;
+    }, 0);
+  };
+  const swallowClick = (e: MouseEvent): void => {
+    if (!dragged) return;
+    dragged = false;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  };
+  return { swallowThisRelease, swallowClick };
+}
+
+function dragListeners(deps: TableDragDeps) {
   const bound: Array<readonly [EventTarget, string, EventListener]> = [];
   const listen = (target: EventTarget, type: string, fn: EventListener): void => {
     target.addEventListener(type, fn);
@@ -130,12 +144,29 @@ export function bindTableDrag(deps: TableDragDeps): void {
     document.body.classList.remove("sheet-drag");
     deps.receiving(false);
   };
-  const swallowThisRelease = (): void => {
-    dragged = true;
-    setTimeout(() => {
-      dragged = false;
-    }, 0);
+  const listenCarry = (onMove: (e: PointerEvent) => void, finish: (at: Point | null) => void): void => {
+    listen(document, "pointermove", onMove as EventListener);
+    listen(document, "pointerup", ((up: PointerEvent) => {
+      finish({ x: up.clientX, y: up.clientY });
+    }) as EventListener);
+    listen(document, "pointercancel", () => {
+      finish(null);
+    });
+    listen(document, "keydown", ((k: KeyboardEvent) => {
+      if (k.key === "Escape") finish(null);
+    }) as EventListener);
+    listen(window, "blur", () => {
+      finish(null);
+    });
   };
+  return { listenCarry, unlisten };
+}
+
+export function bindTableDrag(deps: TableDragDeps): void {
+  let carry: Carry | null = null;
+  const { swallowThisRelease, swallowClick } = dragRelease();
+  let owed: EventListener | null = null;
+  const { listenCarry, unlisten } = dragListeners(deps);
   const dropOwed = (): void => {
     if (owed) document.removeEventListener("pointerup", owed);
     owed = null;
@@ -172,28 +203,7 @@ export function bindTableDrag(deps: TableDragDeps): void {
     dropOwed();
     if (carry || !grabbable(e)) return;
     carry = { start: { x: e.clientX, y: e.clientY }, ghost: null, url: null, restore: null };
-    listen(document, "pointermove", onMove as EventListener);
-    listen(document, "pointerup", ((up: PointerEvent) => {
-      finish({ x: up.clientX, y: up.clientY });
-    }) as EventListener);
-    listen(document, "pointercancel", () => {
-      finish(null);
-    });
-    listen(document, "keydown", ((k: KeyboardEvent) => {
-      if (k.key === "Escape") finish(null);
-    }) as EventListener);
-    listen(window, "blur", () => {
-      finish(null);
-    });
+    listenCarry(onMove, finish);
   });
-  deps.handle.addEventListener(
-    "click",
-    (e) => {
-      if (!dragged) return;
-      dragged = false;
-      e.stopImmediatePropagation();
-      e.preventDefault();
-    },
-    { capture: true },
-  );
+  deps.handle.addEventListener("click", swallowClick, { capture: true });
 }

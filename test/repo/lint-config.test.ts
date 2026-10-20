@@ -47,16 +47,6 @@ const SIZE_CAPS = ["max-lines", "max-lines-per-function"];
 
 const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "e2e/split-proof.ts": [1, 0],
-  "src/site/explorer/app.ts": [1, 1],
-  "src/site/explorer/chart-drawer-bind.ts": [0, 2],
-  "src/site/explorer/lod-controller.ts": [0, 1],
-  "src/site/explorer/sheet-turn.ts": [0, 1],
-  "src/site/explorer/table-drag.ts": [0, 1],
-  "src/site/explorer/verso.ts": [0, 1],
-  "src/site/shared/living-chart/place-overlay.ts": [1, 1],
-  "src/site/print-room/app.ts": [0, 1],
-  "src/site/print-room/contents-markup.ts": [0, 1],
-  "src/site/reading-room/prospect-stage.ts": [0, 1],
   "test/site/astro-scaffold.test.ts": [0, 2],
 };
 

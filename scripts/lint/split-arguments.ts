@@ -3,6 +3,7 @@ import { repoPath } from "./source-shape.ts";
 
 export const SPLIT_FILES: readonly string[] = [
   "src/site/explorer/app.ts",
+  "src/site/explorer/app-wiring.ts",
   "src/site/explorer/chart-drawer-bind.ts",
   "src/site/explorer/controls.ts",
   "src/site/explorer/glass.ts",

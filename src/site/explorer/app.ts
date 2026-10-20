@@ -2,8 +2,6 @@
 import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "./worker-client.ts";
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
-import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts";
-import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { emitTable, parseTable, type TableItem } from "../shared/table-address.ts";
@@ -16,7 +14,6 @@ import {
   TRAVERSAL,
 } from "../shared/table-store.ts";
 import {
-  makeDogEar,
   surveyItemFrom,
   refusalLine,
   thumbJobFor,
@@ -27,24 +24,19 @@ import {
   type FilingSheet,
 } from "./chart-drawer.ts";
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
-import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
+import { draftDress, draftOverrides, pageGlass, wirePageControls, type DrawOverrides } from "./app-wiring.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
-import { createGlass } from "./glass.ts";
-import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../shared/living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
-import { pageBox } from "../shared/page-box.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { errorText } from "../shared/error-text.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
-import type { MapType } from "../../terrain/heightfield.ts";
-import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
@@ -52,14 +44,6 @@ import {
   $,
   seedInput,
   styleSel,
-  typeSel,
-  bandSel,
-  themeSel,
-  legendChk,
-  armsChk,
-  beastsChk,
-  landSlider,
-  coastSlider,
   status,
   mapDiv,
   mapViewport,
@@ -108,12 +92,6 @@ const tokenMs = (name: string, fallback: number): number => {
   const v = parseFloat(token(name));
   return Number.isFinite(v) ? v : fallback;
 };
-// The drawer's band is its LAYOUT seat, readable while it is shut and display:none, never its painted rect, which is all zeros shut and mid-slide while open.
-const drawerHeightPx = (): number =>
-  lengthPx(
-    getComputedStyle(chartDrawer).getPropertyValue("--chart-drawer-h"),
-    parseFloat(getComputedStyle(document.documentElement).fontSize),
-  );
 
 const tourOrder = createTourOrder({ runJob });
 
@@ -229,51 +207,13 @@ function syncHash(): void {
   orderLink.href = "../print-room/" + (location.hash || "");
 }
 
-const glass = createGlass({
-  mapViewport,
-  mapDiv,
-  runJob,
-  buildPlaceOverlay: lc.buildPlaceOverlay,
-  reclampCard: lc.reclampCard,
-  setCaption: (t) => {
-    caption.textContent = t;
-  },
-  // A failed survey reports on the status pill, the page's one error channel.
-  setError: (t) => {
-    status.textContent = t;
-  },
-  prefersReduce,
-  regionEligible,
-  syncHash,
-  decorateInset: (el: HTMLElement) => {
-    const committed = glass.committedSurvey();
-    const item = committed ? surveyItemFrom(committed) : null;
-    if (!item || !committed) return;
-    const ear = makeDogEar(earLabel(item), glass.cameraNow().k, () => {
-      chartTable.lay(item, committed.svg, committed.title);
-    });
-    el.appendChild(ear);
-    bindTableDrag({
-      handle: ear,
-      ghostUrl: () => URL.createObjectURL(new Blob([committed.svg], { type: "image/svg+xml" })),
-      band: () => bandOf(drawerHeightPx(), pageBox().h),
-      reveal: () => chartTable.reveal(),
-      receiving: (over) => {
-        chartTable.receiving(over);
-      },
-      file: (url) => chartTable.lay(item, committed.svg, committed.title, { url }),
-      prefersReduce,
-      settleMs: () => tokenMs("--paper-settle", 340),
-      settleEase: () => token("--ease-paper") || "ease-out",
-    });
-  },
-  buttons: {
-    touch: $("zoom-touch"),
-    zoomIn: $("zoom-in"),
-    zoomOut: $("zoom-out"),
-    reset: $("zoom-reset"),
-  },
-});
+const buttons = {
+  touch: $("zoom-touch"),
+  zoomIn: $("zoom-in"),
+  zoomOut: $("zoom-out"),
+  reset: $("zoom-reset"),
+};
+const glass = pageGlass({ lc, chartTable, regionEligible, syncHash, earLabel, prefersReduce, token, tokenMs, buttons });
 
 const room = bindRoom({
   frame: stageEl,
@@ -288,30 +228,6 @@ function writeFolio(res: { title: string; subtitle: string }, seed: number): voi
   folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
 }
 
-type DrawOverrides = { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number };
-
-function draftOverrides(seed: number): DrawOverrides {
-  const overrides: DrawOverrides = {};
-  if (typeSel.value) overrides.mapType = typeSel.value as MapType;
-  if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
-  if (touched.land) overrides.landFraction = sliderToLand(landSlider.value);
-  else syncAutoSlider(seed, overrides);
-  updateLandReadout();
-  if (touched.coast) overrides.coastWarp = sliderToCoast(coastSlider.value);
-  else parkCoastDefault();
-  updateCoastReadout();
-  return overrides;
-}
-
-function draftDress(): { style: StyleName; theme: ThemeName | ""; legend: boolean; arms: boolean; beasts: boolean } {
-  const style = styleSel.value as StyleName;
-  const theme = themeSel.value as ThemeName | "";
-  const legend = legendChk.checked;
-  const arms = armsChk.checked;
-  const beasts = beastsChk.checked;
-  return { style, theme, legend, arms, beasts };
-}
-
 function keepDraw(res: DrawResult, seed: number, t0: number): void {
   drawing = false;
   versoBtn.disabled = false;
@@ -324,6 +240,46 @@ function keepDraw(res: DrawResult, seed: number, t0: number): void {
   status.textContent = "";
   writeFolio(res, seed);
   caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+}
+
+function landInPlace(
+  res: DrawResult,
+  seed: number,
+  overrides: Readonly<DrawOverrides>,
+  style: StyleName,
+  theme: ThemeName | "",
+  legend: boolean,
+  arms: boolean,
+  beasts: boolean,
+  quiet: boolean,
+  deferArm: boolean,
+): void {
+  mapDiv.innerHTML = res.svg;
+  lc.buildPlaceOverlay(res.manifest);
+  lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
+  room.layout();
+  if (!quiet) startArrival(mapDiv.querySelector("svg"));
+  armOnLanding({
+    arm: surveyArm,
+    armed: agesChk.checked,
+    defer: deferArm,
+    clear: lc.clearAges,
+    rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
+  });
+  glass.syncZoom();
+  // Issue #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
+  glass.setWorld({
+    seed,
+    overrides,
+    render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
+    manifest: res.manifest,
+  });
+  syncHash();
+  if (pendingCamera) {
+    const cam = pendingCamera;
+    pendingCamera = null;
+    glass.applyCamera(cam);
+  }
 }
 
 function landDraw(
@@ -366,32 +322,7 @@ function landDraw(
       syncHash();
     });
   } else {
-    mapDiv.innerHTML = res.svg;
-    lc.buildPlaceOverlay(res.manifest);
-    lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
-    room.layout();
-    if (!quiet) startArrival(mapDiv.querySelector("svg"));
-    armOnLanding({
-      arm: surveyArm,
-      armed: agesChk.checked,
-      defer: deferArm,
-      clear: lc.clearAges,
-      rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
-    });
-    glass.syncZoom();
-    // Issue #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
-    glass.setWorld({
-      seed,
-      overrides,
-      render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
-      manifest: res.manifest,
-    });
-    syncHash();
-    if (pendingCamera) {
-      const cam = pendingCamera;
-      pendingCamera = null;
-      glass.applyCamera(cam);
-    }
+    landInPlace(res, seed, overrides, style, theme, legend, arms, beasts, quiet, deferArm);
   }
   // Issue #174/Issue #366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
   const armPaintsVerso = agesChk.checked && deferArm;
@@ -418,7 +349,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   status.textContent = "Drafting…";
   caption.textContent = "";
   syncHash();
-  const overrides = draftOverrides(seed);
+  const overrides = draftOverrides(seed, touched);
   const { style, theme, legend, arms, beasts } = draftDress();
   // Whether this draw TURNS is decided at the swap; capture the presence while the outgoing chart is still on screen.
   const hadChart = !!mapDiv.querySelector("svg");
@@ -443,24 +374,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     });
 }
 
-wireControls({
-  seedInput,
-  styleSel,
-  typeSel,
-  bandSel,
-  themeSel,
-  legendChk,
-  armsChk,
-  beastsChk,
-  landSlider,
-  coastSlider,
-  drawBtn: $("draw"),
-  randomBtn: $("random"),
-  touched,
-  draw,
-  onDocKeydown: lc.onDocKeydown,
-  onDocClick: lc.onDocClick,
-});
+wirePageControls(touched, draw, lc);
 wireFootnotes();
 
 versoBtn.addEventListener("click", () => {
