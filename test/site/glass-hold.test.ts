@@ -5,7 +5,7 @@ import { createHold, markCaption } from "../../src/site/explorer/glass-hold.ts";
 
 const TITLE = "The Environs of Paukilua · regional survey · band 1 · drawn in 900ms";
 
-function rig(initial: string) {
+function rig(initial: string, busy: () => boolean = () => false) {
   const press = new El("button");
   let caption = initial;
   const seen = {
@@ -19,6 +19,7 @@ function rig(initial: string) {
   };
   const hold = createHold({
     press,
+    busy,
     readCaption: () => caption,
     setCaption: (text) => {
       seen.writes++;
@@ -92,4 +93,18 @@ test("the mark is added once and stripped only from the end (Issue #751)", () =>
   assert.equal(markCaption("held up · A", false), "held up · A");
   assert.equal(markCaption("A · held · B", false), "A · held · B", "a mark mid-caption is not the mark");
   assert.equal(markCaption("A · held · B", true), "A · held · B · held");
+});
+
+test("a press while a world is being drawn is ignored and leaves nothing lit (Issue #751)", () => {
+  let drafting = true;
+  const r = rig("island · temperate · drawn in 547ms", () => drafting);
+  r.press.fire("click");
+  assert.equal(r.hold.held(), false);
+  assert.equal(r.press.getAttribute("aria-pressed"), "false", "the press stays unlit");
+  assert.equal(r.seen.hold, 0, "onHold never runs");
+  assert.equal(r.seen.writes, 0, "the caption is not touched");
+
+  drafting = false;
+  r.press.fire("click");
+  assert.equal(r.hold.held(), true, "once the world has landed the same press holds");
 });
