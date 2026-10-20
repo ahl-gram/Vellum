@@ -36,10 +36,10 @@ const OUT_TWICE_THEN_LET_GO = `(()=>{const o=document.getElementById("zoom-out")
 
 const read = (k: ZoomKit) => k.evaluate<Read>(READ);
 // Wiring only: ZH1 drove the real press with the mouse.
-const press = (k: ZoomKit) => k.evaluate<undefined>(`document.getElementById("zoom-hold").click()`);
+export const press = (k: ZoomKit) => k.evaluate<undefined>(`document.getElementById("zoom-hold").click()`);
 const marked = (r: Read): boolean => r.caption.endsWith("held");
 
-async function home(k: ZoomKit): Promise<void> {
+export async function home(k: ZoomKit): Promise<void> {
   const settle = makeSettle(k);
   // A stalled frame mid-glide (more than the 250ms settle debounce, measured on CI) settles at a deep k and drafts a survey that lands after the camera is home, so a home that finds a sheet committed goes again; Issue #938 files the product defect, and the loop goes with its fix.
   for (let i = 0; i < 4; i++) {

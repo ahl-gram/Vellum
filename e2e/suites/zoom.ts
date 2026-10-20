@@ -64,6 +64,14 @@ import {
   zh8LetGoGlidingOut,
   zh9LetGoJustMoved,
 } from "./zoom/hold.ts";
+import {
+  pickHamletWindow,
+  zh10aTownsOnDots,
+  zh10bHamletsOnDots,
+  zh11EarOnCorner,
+  zh12CardFlat,
+  zh13PrintKeepsSheet,
+} from "./zoom/registration.ts";
 import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
 
@@ -127,6 +135,12 @@ async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Ta
   await step("ZH7", () => zh7LetGoMidGlide(k, target21));
   await step("ZH8", () => zh8LetGoGlidingOut(k, target21));
   await step("ZH9", () => zh9LetGoJustMoved(k, target21));
+  await step("ZH10a", () => zh10aTownsOnDots(k));
+  const pick = await pickHamletWindow(k);
+  await step("ZH10b", () => zh10bHamletsOnDots(k, pick));
+  await step("ZH11", () => zh11EarOnCorner(k, pick));
+  await step("ZH12", () => zh12CardFlat(k, pick));
+  await step("ZH13", () => zh13PrintKeepsSheet(k, pick));
 }
 
 async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
