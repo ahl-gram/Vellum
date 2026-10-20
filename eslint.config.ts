@@ -173,6 +173,12 @@ export default defineConfig(
     rules: { "vellum/philology-no-entropy": "error" },
   },
   {
+    name: "the house's rules on the founding modules",
+    files: site("src/world/founding/**"),
+    plugins: { vellum },
+    rules: { "vellum/founding-locale-clock-free": "error" },
+  },
+  {
     name: "the house's rules on home's modules",
     files: site("src/site/home/**"),
     plugins: { vellum },

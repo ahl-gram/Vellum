@@ -1,6 +1,6 @@
 import type { Rule, Scope } from "eslint";
 import { dirname, resolve } from "node:path";
-import { inTypePosition, isModuleSource, repoPath, sourceBan, stringText } from "./source-shape.ts";
+import { hostFree, inTypePosition, isModuleSource, repoPath, sourceBan, stringText } from "./source-shape.ts";
 
 type Node = Rule.Node;
 
@@ -101,6 +101,17 @@ const philologyNoEntropy: Rule.RuleModule = {
     };
   },
 };
+
+const COVENANT =
+  "founding agrees across platforms or refuses, so one sentence founds one world in every browser (handbook/specs/engine-invariants.md, Founding a world from a sentence)";
+const FOUNDING_GLOBALS: ReadonlySet<string> = new Set(["Array", "Map", "Math", "Set", "undefined"]);
+const foundingLocaleClockFree = hostFree(FOUNDING_GLOBALS, {
+  power: `founding squares by multiplying: ** and **= are a library power whose last bits differ between platforms, and ${COVENANT}`,
+  libm: `founding reads Math only as an exact member written out, one of EXACT_MATH in scripts/lint/source-shape.ts: the rest are libm or chance, and an alias or a computed key hides which member is read, and ${COVENANT}`,
+  host: `founding reads no global but a built-in FOUNDING_GLOBALS in scripts/lint/import-bounds.ts approves, no locale member and no import.meta: anything else is the locale, the clock, chance or the host, and ${COVENANT}; a built-in joins that list with its reason`,
+  module: `founding imports no Node built-in module and no import() source computed at run time: Node's modules are the host's clock, entropy and files, and ${COVENANT}`,
+  ambient: `founding declares no ambient binding: a declare line hides a global from this rule while the erased code still reads it, and ${COVENANT}`,
+});
 
 export const ROOMS_UNDER_THE_EXPLORER: readonly string[] = ["src/site/explorer/portfolio/"];
 const glassBan = sourceBan(
@@ -284,6 +295,7 @@ export default {
     "world-no-philology": worldNoPhilology,
     "explorer-no-glass-keys": explorerNoGlassKeys,
     "philology-no-entropy": philologyNoEntropy,
+    "founding-locale-clock-free": foundingLocaleClockFree,
     "home-client-no-engine": homeClientNoEngine,
     "hunt-fixed-world": huntFixedWorld,
   },
