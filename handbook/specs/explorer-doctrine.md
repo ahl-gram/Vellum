@@ -155,8 +155,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   least sideways scroll (`revealLeft` in `src/site/home/station-flight.ts`).
 - **The zoom control is seated as a SIBLING of the stage, so it never rides the chart's own zoom.**
 - **The Explorer's Glass is wired by ID and never queries `[data-zoom]`**: the conductor looks the
-  presses up and hands them to `createGlass` as dependencies, so the ids live in
-  `src/site/explorer/app.ts`. The other chart rooms bind `[data-zoom]` through `bindGlassKeys` in
+  presses up and hands them to `createGlass` as dependencies, through `pageGlass` in
+  `src/site/explorer/app-wiring.ts`, so the ids live in `src/site/explorer/app.ts`. The other chart
+  rooms bind `[data-zoom]` through `bindGlassKeys` in
   `src/site/shared/glass-keys.ts`. One component wearing `data-zoom` everywhere is inert on the
   Explorer, and the failure is silent. `vellum/explorer-no-glass-keys` (`scripts/lint/import-bounds.ts`)
   refuses a `glass-keys` import and any `[data-zoom]` string under `src/site/explorer/` and
@@ -320,7 +321,8 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   meant for that town (measured for Issue #750 at 1024 across three seeds: 4 of 78 mouse presses and
   6 of 52 tablet taps). The wheel, the pan and the pinch are NOT the reason: a live card with nothing
   to scroll passed all three to the camera in the harness at 1024 and 1280 and on an emulated
-  tablet, because `cardShell`'s `stopPropagation` fires only on a card with a tail to scroll.
+  tablet, because the `stopPropagation` of `cardShell` in
+  `src/site/shared/living-chart/place-overlay-card.ts` fires only on a card with a tail to scroll.
   Whether a real tablet agrees is UNVERIFIABLE there, since the harness cannot see `touch-action`.
 - **A card with a tail to scroll stops touch and wheel reaching the camera, and one without does
   not.** d3-zoom is bound on the host's viewport, an ancestor of the card carrying
