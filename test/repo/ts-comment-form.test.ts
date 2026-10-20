@@ -154,6 +154,21 @@ test("the two comment rules and the escape twin reach every TypeScript root the 
   for (const rule of EVERY_ROOT) assert.equal(sheet[rule], undefined, `${rule} reaches a sheet`);
 });
 
+test("a line, block or doc comment on any TypeScript root may carry an em-dash (Issue #727)", async () => {
+  const dash = String.fromCharCode(0x2014);
+  const text = [
+    `// a line comment ${dash} here`,
+    `/* a block comment ${dash} here */`,
+    `/** a doc comment ${dash} here */`,
+    "export {};",
+    "",
+  ].join("\n");
+  for (const file of Object.values(ROOT_WITNESSES)) {
+    const [result] = await eslint.lintText(text, { filePath: join(ROOT, file) });
+    assert.deepEqual(result!.messages, [], `${file}: an em-dash in a comment is reported`);
+  }
+});
+
 const RULEBOOK = "handbook/specs/rulebook.md";
 const FILE_TOKEN = /^(?:e2e|public|scripts|src|test|test-support)\/\S+\.(?:css|ts)$/;
 const shortRule = (rule: string): string => rule.replace(/^@typescript-eslint\//, "");

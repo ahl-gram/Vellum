@@ -33,19 +33,6 @@ const oneLine: CSSRuleDefinition = {
   },
 };
 
-const noEmDash: CSSRuleDefinition = {
-  meta: { type: "problem", messages: { dash: "no em-dash in a CSS comment (Issue #648)" } },
-  create(context) {
-    return {
-      StyleSheet() {
-        for (const c of placed(context.sourceCode.comments)) {
-          if (c.value.includes("\u2014")) context.report({ loc: c.loc, messageId: "dash" });
-        }
-      },
-    };
-  },
-};
-
 const issueForm: CSSRuleDefinition = {
   meta: {
     type: "problem",
@@ -89,7 +76,6 @@ export default {
   meta: { name: "vellum" },
   rules: {
     "css-comment-one-line": oneLine,
-    "css-comment-no-em-dash": noEmDash,
     "css-comment-issue-form": issueForm,
     "css-comment-no-js-module": noJsModule,
   },
