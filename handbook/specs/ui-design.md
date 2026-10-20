@@ -170,11 +170,15 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   survey line and coordinates.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
   main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit while it does
-  (Alex, 2026-10-13, Issue #778). Where it is seated and why, and what the manicule does, are
+  (Alex, 2026-10-13, Issue #778). On the Explorer a press of the room's own stands between the
+  manicule and the camera's presses, seated through the component's `presses` slot: the hold, lit
+  while the sheet is held, while the caption line ends `held` (Alex, 2026-10-04 and 2026-10-20,
+  Issue #751). Where it is seated and why, and what the manicule does, are
   `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit. **A toggle
   press is lit when on, never in the dress of its own hover**, since a touch browser leaves a
   tapped press hovered and focused. **Provisional until the post-use review:** the manicule's
-  glyph, its seat, its lit dress and its name.
+  glyph, its seat, its lit dress and its name, and the hold's glyph, seat, name, caption mark and
+  ceiling.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside

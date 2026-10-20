@@ -103,7 +103,9 @@ about a rule, the rulebook wins.
   presence.
 - **The redraft stands down while the survey track is armed or the sheet is flipped**, because the
   track narrates the WORLD survey at world coordinates and the verso holds the world sheet
-  (`regionEligible` in `src/site/explorer/app.ts`).
+  (`regionEligible` in `src/site/explorer/app.ts`). **It stands down too while the reader holds the
+  sheet**, the Glass's own gate (`createGlass` in `src/site/explorer/glass.ts`); what the hold does is
+  `handbook/specs/explorer-doctrine.md`'s.
 - **A region-only change leaves the world sheets byte-identical.** That is the constraint on the
   author; whether a regen is owed is the rulebook's.
 

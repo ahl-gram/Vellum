@@ -129,6 +129,16 @@ make an unqualified rule false. Read the surface, not just the rule.
   because the tween rewrites the stored transform every frame and would discard the refit. A refit
   that wrote the address before the boot read it lands a bare visit on the wrong seed, since
   `seedFromHash` in `src/site/explorer/address.ts` takes digits only.
+- **The hold freezes the redraft and widens the camera, and every home lets it go** (Alex,
+  2026-10-04 and 2026-10-20, Issue #751). While the Glass's hold press is lit, a settle still writes
+  the address and never reaches the redraft, so the sheet on the table, a region inset or the bare
+  world sheet, stays whatever the camera does, and the camera's ceiling rises from `GLASS_MAX` to
+  `HELD_MAX` (`createGlass` in `src/site/explorer/glass.ts`, through `setScaleMax` in
+  `src/site/shared/zoom-controller.ts`); pressing it drops a draft still in flight (`cancelPending`
+  in `src/site/explorer/lod-controller.ts`). Letting go lowers the ceiling and runs the settle at
+  once, or glides the camera back under the ceiling and settles at the landing. Every path that homes
+  the camera lets go first and runs no settle of its own: the draw's rebase, the turned sheet's and
+  the survey's homes, and the voiced home. The state is pure in `src/site/explorer/glass-hold.ts`.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the
@@ -197,7 +207,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   rebases every draw and a live camera would re-frame every one. Record the world sheet BEFORE
   applying it, so the settle it triggers redrafts over the same base world. The grammar itself is
   pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
-  passed verbatim and never re-serialized.
+  passed verbatim and never re-serialized. The hold is the reader's and the address never carries it:
+  a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
+  (`cameraForAddress` in `src/site/explorer/glass.ts`), so the camera's bound in `readHash` stands.
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
   address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
