@@ -214,12 +214,13 @@ const buttons = {
   zoomOut: $("zoom-out"),
   reset: $("zoom-reset"),
 };
+const worldInMotion = (): boolean => drawing || sheetEl.classList.contains("turning");
 const glass = pageGlass({
   lc,
   chartTable,
   regionEligible,
   syncHash,
-  busy: () => drawing,
+  busy: worldInMotion,
   earLabel,
   prefersReduce,
   token,
@@ -390,7 +391,7 @@ wirePageControls(touched, draw, lc);
 wireFootnotes();
 
 versoBtn.addEventListener("click", () => {
-  if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
+  if (!lastSvg || worldInMotion()) return;
   // Issue #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
   glass.homeToWorld(); // Issue #169: drop a committed region inset before the flip
   glass.reset();

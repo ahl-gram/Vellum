@@ -96,7 +96,6 @@ export async function sampleRow(
 
 type Picks = (p: Readonly<Rgb>) => boolean;
 
-// A full-coverage pixel of a pure test colour: its antialiased rim is left out on every side alike, so a centroid stays unbiased.
 export const pure =
   (channel: 0 | 1 | 2): Picks =>
   (p) =>
