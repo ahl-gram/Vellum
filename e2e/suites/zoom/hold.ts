@@ -141,6 +141,7 @@ export async function zh3HeldWorld(k: ZoomKit, target: Target21): Promise<void> 
 
 async function viaHome(k: ZoomKit): Promise<void> {
   await k.evaluate(`document.getElementById("zoom-reset").click()`);
+  await makeSettle(k)<Read>(READ, (d) => !d.glide && d.k === 1, "zh4-home-lands");
 }
 
 async function viaDraw(k: ZoomKit): Promise<void> {
@@ -178,6 +179,7 @@ function homeCheck(k: ZoomKit, name: string, r: Homed): void {
       r.lit.pressed === "true" &&
       r.after.pressed === "false" &&
       !marked(r.after) &&
+      r.after.k === 1 &&
       r.ceiling === 8,
     JSON.stringify(r),
   );
@@ -324,6 +326,7 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
     "ZH6 held, the camera reaches 24 and the hamlet's label is 24 / 6.5 times its first size, the address says 8, letting go glides back to 8, and unheld 24 lands on 8 (Issue #751)",
     deep.k === 24 &&
       !!big &&
+      // 2026-10-20 at the Z21 target: 24.3076 / 6.5835 = 3.6923 against 24 / 6.5 = 3.6923; a growth that tracked a ceiling of 8 would read 1.23, so 2% is headroom for a pixel of label rounding and nothing else.
       Math.abs(big.h / rest.h / want - 1) < 0.02 &&
       hashed.hashK === "8.0000" &&
       letGo.glide &&

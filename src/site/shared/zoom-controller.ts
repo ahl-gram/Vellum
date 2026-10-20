@@ -70,7 +70,6 @@ export interface ZoomController {
   /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft (a refit before the boot wrote an empty seed into the hash, CI R0b). */
   refit(next: ZoomState): void;
   glideBy(factor: number): void;
-  /** The absolute k a glide in flight will land on, or null. */
   glideTarget(): number | null;
   setScaleMax(max: number): void;
   settlePending(): boolean;

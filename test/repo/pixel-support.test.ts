@@ -170,7 +170,24 @@ test("centroidOf and extentOf read a test colour in page coordinates, and pure a
   assert.deepEqual(centroidOf(rows, 10, 20, pure(0)), { n: 2, x: 12, y: 21.5 });
   assert.deepEqual(extentOf(rows, 10, 20, pure(0)), { left: 11, top: 21, right: 13, bottom: 22 });
   assert.equal(centroidOf(rows, 10, 20, pure(2)), null, "no blue anywhere");
+  const scattered = [
+    [parchment, parchment, red, parchment],
+    [parchment, red, parchment, parchment],
+    [parchment, parchment, parchment, red],
+  ];
+  assert.deepEqual(
+    extentOf(scattered, 10, 20, pure(0)),
+    { left: 11, top: 20, right: 14, bottom: 23 },
+    "the box of matches in three rows is the minimum top and left and the maximum right and bottom, each one past the last pixel",
+  );
+  assert.deepEqual(
+    extentOf([[parchment, red]], 10, 20, pure(0)),
+    { left: 11, top: 20, right: 12, bottom: 21 },
+    "one pixel is a box one wide and one tall",
+  );
   assert.ok(pure(0)([230, 40, 40]), "the floor of full coverage");
+  assert.ok(!pure(0)([230, 41, 40]), "one over the ceiling on another channel");
+  assert.ok(!pure(0)([255, 50, 50]), "a midway off-channel value");
   assert.ok(!pure(0)([229, 0, 0]), "one under the floor");
   assert.ok(!pure(0)([178, 34, 34]), "heraldic gules is not a test colour");
   assert.ok(dominant(1)([0, 128, 0]), "half coverage");

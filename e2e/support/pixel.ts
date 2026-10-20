@@ -12,7 +12,6 @@ const paeth = (a: number, b: number, c: number): number => {
 
 export type Rgb = [number, number, number];
 
-// Every row of a PNG as pixels, each row unfiltered against the one above it (a zero row above the first).
 export function decodeRows(png: Buffer): Rgb[][] {
   let at = 8;
   let width = 0,
@@ -97,13 +96,12 @@ export async function sampleRow(
 
 type Picks = (p: Readonly<Rgb>) => boolean;
 
-// A full-coverage pixel of a pure test colour: its antialiased rim is left out on every side alike, so a centroid stays unbiased, and nothing the chart draws, heraldic gules and azure included, passes it.
+// A full-coverage pixel of a pure test colour: its antialiased rim is left out on every side alike, so a centroid stays unbiased.
 export const pure =
   (channel: 0 | 1 | 2): Picks =>
   (p) =>
     p.every((v, i) => (i === channel ? v >= 230 : v <= 40));
 
-// Half coverage or more of a test colour, for an edge.
 export const dominant =
   (channel: 0 | 1 | 2): Picks =>
   (p) =>

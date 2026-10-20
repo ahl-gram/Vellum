@@ -26,18 +26,18 @@ test("a region inset's hits stand at the sheet's own fractions, the box folded i
 test("a region inset's card anchors at the same folded fraction and flips by the place's own (Issue #751)", async () => {
   const { manifest } = await realWorld();
   const { lc, mount } = await barlessHost();
-  lc.buildPlaceOverlay(manifest, { box: { x: 0, y: 0, w: 0.5, h: 0.5 } });
+  lc.buildPlaceOverlay(manifest, { box: { x: 0.1, y: 0.1, w: 0.5, h: 0.5 } });
   const armed = await armShow(mount);
-  const i = manifest.places.findIndex((p) => p.nx > 0.5);
+  const i = manifest.places.findIndex((p) => p.nx > 0.5 && p.nx <= 0.8);
   assert.notEqual(
     i,
     -1,
-    "a place whose own fraction flips the card left, where the folded one (at most 0.5) would not",
+    "a place whose own fraction flips the card left, where the folded one (0.5 or less) would not",
   );
   const p = manifest.places[i]!;
   armed.hits[i]!.fire("mouseenter", { clientX: -100, clientY: -100 });
   const card = walk(lastOverlay(mount)).find((n) => n.getAttribute("id") === "place-card")!;
-  assert.equal(card.style.getPropertyValue("--pc-nx"), String(p.nx * 0.5));
-  assert.equal(card.style.getPropertyValue("--pc-ny"), String(p.ny * 0.5));
+  assert.equal(card.style.getPropertyValue("--pc-nx"), String(0.1 + p.nx * 0.5));
+  assert.equal(card.style.getPropertyValue("--pc-ny"), String(0.1 + p.ny * 0.5));
   assert.ok(card.classList.contains("flip-h"), "the flip is chosen from the place's own fraction");
 });
