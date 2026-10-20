@@ -5,11 +5,15 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  container-type: size;
 }
 .place-hit {
   position: absolute;
+  left: 0;
+  top: 0;
   /* The whole hit divides by --zoom-k (published on .place-overlay, never the mount) so the target holds its 26px at every depth; the (,1) fallback keeps non-zooming hosts untouched. */
-  transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
+  transform: translate(calc(var(--nx, 0) * 100cqw), calc(var(--ny, 0) * 100cqh)) translate(-50%, -50%)
+    scale(calc(1 / var(--zoom-k, 1)));
   width: 26px;
   height: 26px;
   box-sizing: border-box;

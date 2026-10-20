@@ -18,6 +18,16 @@ import { latticeFromSettle } from "../shared/table-address.ts";
 
 const pct = (f: number) => `${(f * 100).toFixed(4)}%`;
 
+function placeInset(el: HTMLElement, rect: SheetRect): void {
+  el.style.setProperty("left", pct(rect.x));
+  el.style.setProperty("top", pct(rect.y));
+  el.style.setProperty("width", pct(rect.w));
+  el.style.setProperty("height", pct(rect.h));
+  el.style.setProperty("--ix", String(rect.x));
+  el.style.setProperty("--iy", String(rect.y));
+  el.style.setProperty("--iw", String(rect.w));
+}
+
 type RegionJobMessage = {
   kind: "region";
   seed: number;
@@ -164,10 +174,7 @@ export function createLodController(deps: Deps) {
     const prevLabeled = reduce ? null : prevLabeledNames();
     const el = document.createElement("div");
     el.className = "region-inset";
-    el.style.left = pct(rect.x);
-    el.style.top = pct(rect.y);
-    el.style.width = pct(rect.w);
-    el.style.height = pct(rect.h);
+    placeInset(el, rect);
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);

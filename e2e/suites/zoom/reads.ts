@@ -62,10 +62,10 @@ export const PICK = (
   const inner = c.querySelector(".pc-inner"), a = inner ? inner.getAnimations() : [], r = c.getBoundingClientRect(), m = document.getElementById("map").getBoundingClientRect();
   return { idx: Number(h.dataset.idx), name: (c.querySelector(".pc-name") || {}).textContent, flipH: c.classList.contains("flip-h"), flipV: c.classList.contains("flip-v"),
     dx: c.style.getPropertyValue("--pc-dx"), dy: c.style.getPropertyValue("--pc-dy"), rested: a.length > 0 && a.every((v) => v.playState === "finished") && c.getAnimations().length === 0,
-    card: [r.left, r.top, r.right, r.bottom], map: [m.left, m.top, m.width, m.height], nx: parseFloat(h.style.left) / 100, ny: parseFloat(h.style.top) / 100 }; })()`;
+    card: [r.left, r.top, r.right, r.bottom], map: [m.left, m.top, m.width, m.height], nx: parseFloat(h.style.getPropertyValue("--nx")), ny: parseFloat(h.style.getPropertyValue("--ny")) }; })()`;
 
 export const PICKS: Payload<number[]> =
-  `(() => { const hits = [...document.querySelectorAll("#map .place-hit")].map((h) => ({ idx: Number(h.dataset.idx), x: parseFloat(h.style.left) / 100, y: parseFloat(h.style.top) / 100 }));
+  `(() => { const hits = [...document.querySelectorAll("#map .place-hit")].map((h) => ({ idx: Number(h.dataset.idx), x: parseFloat(h.style.getPropertyValue("--nx")), y: parseFloat(h.style.getPropertyValue("--ny")) }));
   return [[0.30, 0.35], [0.70, 0.35], [0.30, 0.65], [0.70, 0.65]].map(([wx, wy]) => { let best = -1, bd = Infinity;
     for (const h of hits) { const d = Math.hypot(h.x - wx, h.y - wy); if (d < bd) { bd = d; best = h.idx; } } return best; }); })()`;
 

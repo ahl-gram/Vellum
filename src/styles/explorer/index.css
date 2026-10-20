@@ -45,6 +45,7 @@ body.chart-room .stage {
   position: absolute;
   inset: 0;
   transform-origin: 0 0;
+  container-type: size;
 }
 /* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */
 #map svg[data-vellum-style] {
@@ -54,6 +55,9 @@ body.chart-room .stage {
 }
 
 .region-inset {
+  --ix: 0;
+  --iy: 0;
+  --iw: 1;
   position: absolute;
   pointer-events: none;
   opacity: 0;
@@ -64,6 +68,10 @@ body.chart-room .stage {
 }
 /* width and height 100%, not auto, pin the inset svg to its computed box so no rounding gap opens at the window edge. */
 #map .region-inset svg {
+  position: absolute;
+  left: calc(var(--ix) * -100cqw);
+  top: calc(var(--iy) * -100cqh);
+  transform: translate(calc(var(--ix) * 100cqw), calc(var(--iy) * 100cqh));
   width: 100%;
   height: 100%;
   border: 0;
@@ -276,6 +284,7 @@ body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) {
   #map {
     position: static;
     transform: none !important;
+    container-type: normal;
   }
   #map svg[data-vellum-style] {
     height: auto;
