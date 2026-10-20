@@ -220,10 +220,11 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
     "zh6-label",
   );
   await press(k);
+  const was = await read(k);
   await k.enterAt(24, target.cx, target.cy);
   const deep = await read(k);
   const big = await k.evaluate<Label | null>(FIRST_HAMLET(rest.name));
-  const hashed = await waitHashK(k, "8.0000", "zh6-held-hash");
+  const hashed = await settle<Read>(READ, (d) => d.hashK !== was.hashK, "zh6-held-hash");
   await press(k);
   const back = await settle<Read>(READ, (d) => Math.abs(d.k - 8) < 1e-6, "zh6-glide-back");
   await k.enterAt(24, target.cx, target.cy);
