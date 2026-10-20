@@ -1,0 +1,5 @@
+import fs from "node:fs";
+const src = JSON.parse(fs.readFileSync("/Users/ahl/CodeProjects/Vellum/out/844/explorer/explorer-shots.json","utf8"));
+const probe = `(() => { const slip=document.getElementById("broadside"); const out=[]; const walk=(e,d)=>{ if(d>3)return; const cs=getComputedStyle(e); const b=e.getBoundingClientRect(); out.push([ "  ".repeat(d)+e.tagName+"#"+e.id+"."+String(e.className).slice(0,40), Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height), cs.overflowY, e.scrollHeight, e.clientHeight].join(" ")); for(const c of e.children) walk(c,d+1);}; walk(slip,0); const t=document.getElementById("chart-drawer-tab"); const tb=t.getBoundingClientRect(); out.push("TAB "+[tb.left,tb.top,tb.right,tb.bottom].join(",")+" z="+getComputedStyle(t).zIndex+" slipz="+getComputedStyle(slip).zIndex); return out.join("\\n"); })()`;
+const s = src.find(x=>x.out.endsWith("control-today-1024x900.png"));
+fs.writeFileSync("explore.json", JSON.stringify([{...s, out:"/Users/ahl/CodeProjects/Vellum/out/844-plate-read/work/explore.png", probe}]));

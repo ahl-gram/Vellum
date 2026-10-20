@@ -1,0 +1,42 @@
+[
+ {
+  "key": "a-plain",
+  "hash": "seed=30&type=island",
+  "title": "A plain world: the new rows at rest, every slider live",
+  "shape": "",
+  "isles": null,
+  "size": "alike",
+  "stood": false,
+  "typeNote": null
+ },
+ {
+  "key": "b-shaped",
+  "hash": "seed=30&type=island",
+  "title": "A shaped world: Texas picked, the sliders still live (the coast wobbles the outline)",
+  "shape": "texas",
+  "isles": null,
+  "size": "alike",
+  "stood": false,
+  "typeNote": null
+ },
+ {
+  "key": "c-counted",
+  "hash": "seed=1&type=archipelago",
+  "title": "A counted archipelago: about 20 islands, the sea level and the coast stood down",
+  "shape": "",
+  "isles": 20,
+  "size": "alike",
+  "stood": true,
+  "typeNote": null
+ },
+ {
+  "key": "d-counted-continent",
+  "hash": "seed=5&type=continent",
+  "title": "A count on a continent (D14): the islands row shows on every type, with the type's measured meaning",
+  "shape": "",
+  "isles": 100,
+  "size": "every",
+  "stood": true,
+  "typeNote": "on a continent: one great land, and islets for the rest"
+ }
+]

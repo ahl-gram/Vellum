@@ -1,0 +1,22 @@
+[
+ {
+  "url": "/out/844/pages/dresses.html",
+  "width": 1686,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-every-dress.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/844/pages/small.html",
+  "width": 3336,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/sheet-small-sizes.png",
+  "waitMs": 2500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ }
+]

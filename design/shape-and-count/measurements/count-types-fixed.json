@@ -1,0 +1,3499 @@
+{
+ "sha": "581a6de3",
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10
+ ],
+ "archipelago|equal|measured|2": [
+  {
+   "islands": 7,
+   "largest": 0.5472005208333334,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.4772677951388889,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.4469943576388889,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.4597981770833333,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.5692816840277778,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.4729817708333333,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.5267469618055556,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4560546875,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5224609375,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.5095486111111112,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|measured|5": [
+  {
+   "islands": 9,
+   "largest": 0.1980251736111111,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.22086588541666666,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.2038302951388889,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.3599717881944444,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.2703450520833333,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.212890625,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.22401258680555555,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.2035590277777778,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.19959852430555555,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.22911241319444445,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|measured|20": [
+  {
+   "islands": 25,
+   "largest": 0.06895616319444445,
+   "border": 0
+  },
+  {
+   "islands": 25,
+   "largest": 0.07313368055555555,
+   "border": 0
+  },
+  {
+   "islands": 22,
+   "largest": 0.1015625,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.1727973090277778,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.1266818576388889,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.11393229166666667,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.09716796875,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.09027777777777778,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.16075303819444445,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.21956380208333334,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|measured|100": [
+  {
+   "islands": 91,
+   "largest": 0.038248697916666664,
+   "border": 0
+  },
+  {
+   "islands": 86,
+   "largest": 0.0710720486111111,
+   "border": 0
+  },
+  {
+   "islands": 83,
+   "largest": 0.047688802083333336,
+   "border": 0
+  },
+  {
+   "islands": 89,
+   "largest": 0.07134331597222222,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.0920681423611111,
+   "border": 0
+  },
+  {
+   "islands": 81,
+   "largest": 0.0646701388888889,
+   "border": 0
+  },
+  {
+   "islands": 79,
+   "largest": 0.06483289930555555,
+   "border": 0
+  },
+  {
+   "islands": 85,
+   "largest": 0.06315104166666667,
+   "border": 0
+  },
+  {
+   "islands": 86,
+   "largest": 0.09163411458333333,
+   "border": 0
+  },
+  {
+   "islands": 83,
+   "largest": 0.10237630208333333,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|sunk|2": [
+  {
+   "islands": 4,
+   "largest": 0.5599500868055556,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5111219618055556,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.4998372395833333,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5208333333333334,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5345052083333334,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5188259548611112,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5457899305555556,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.50146484375,
+   "border": 33
+  },
+  {
+   "islands": 2,
+   "largest": 0.5330946180555556,
+   "border": 11
+  },
+  {
+   "islands": 2,
+   "largest": 0.5330403645833334,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|sunk|5": [
+  {
+   "islands": 5,
+   "largest": 0.21034071180555555,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2092013888888889,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.20768229166666666,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.20833333333333334,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.22509765625,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2179904513888889,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2151150173611111,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2113715277777778,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2082248263888889,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.20789930555555555,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|sunk|20": [
+  {
+   "islands": 20,
+   "largest": 0.05457899305555555,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.09510633680555555,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.0966796875,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.15169270833333334,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.05740017361111111,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.0934787326388889,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.10633680555555555,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.0973849826388889,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.10405815972222222,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.158203125,
+   "border": 0
+  }
+ ],
+ "archipelago|equal|sunk|100": [
+  {
+   "islands": 85,
+   "largest": 0.061957465277777776,
+   "border": 0
+  },
+  {
+   "islands": 79,
+   "largest": 0.06922743055555555,
+   "border": 0
+  },
+  {
+   "islands": 71,
+   "largest": 0.05018446180555555,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.06260850694444445,
+   "border": 0
+  },
+  {
+   "islands": 76,
+   "largest": 0.052571614583333336,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.0685763888888889,
+   "border": 0
+  },
+  {
+   "islands": 79,
+   "largest": 0.04969618055555555,
+   "border": 0
+  },
+  {
+   "islands": 81,
+   "largest": 0.0400390625,
+   "border": 0
+  },
+  {
+   "islands": 83,
+   "largest": 0.04269748263888889,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.042317708333333336,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|measured|2": [
+  {
+   "islands": 2,
+   "largest": 0.5607096354166666,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5351019965277778,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.6131184895833334,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.5256076388888888,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5984157986111112,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.7189127604166666,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.8538953993055556,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.7852105034722222,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.80908203125,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.7645941840277778,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|measured|5": [
+  {
+   "islands": 5,
+   "largest": 0.23111979166666666,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.4753146701388889,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.3191731770833333,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2891710069444444,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2715928819444444,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.2699110243055556,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.3203667534722222,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.3860677083333333,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.3323567708333333,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.3542751736111111,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|measured|20": [
+  {
+   "islands": 18,
+   "largest": 0.16981336805555555,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.09581163194444445,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.2446831597222222,
+   "border": 0
+  },
+  {
+   "islands": 22,
+   "largest": 0.19862196180555555,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.12456597222222222,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.22932942708333334,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.1904296875,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.2109375,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.3435329861111111,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.17122395833333334,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|measured|100": [
+  {
+   "islands": 83,
+   "largest": 0.06532118055555555,
+   "border": 0
+  },
+  {
+   "islands": 80,
+   "largest": 0.12852647569444445,
+   "border": 0
+  },
+  {
+   "islands": 77,
+   "largest": 0.12434895833333333,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.11588541666666667,
+   "border": 0
+  },
+  {
+   "islands": 71,
+   "largest": 0.09315321180555555,
+   "border": 0
+  },
+  {
+   "islands": 68,
+   "largest": 0.09309895833333333,
+   "border": 0
+  },
+  {
+   "islands": 75,
+   "largest": 0.12532552083333334,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.08262803819444445,
+   "border": 0
+  },
+  {
+   "islands": 74,
+   "largest": 0.15592447916666666,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.09754774305555555,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|sunk|2": [
+  {
+   "islands": 2,
+   "largest": 0.5380316840277778,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.54638671875,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.6925455729166666,
+   "border": 15
+  },
+  {
+   "islands": 2,
+   "largest": 0.5194227430555556,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5728624131944444,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7345377604166666,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.8885633680555556,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.8028428819444444,
+   "border": 16
+  },
+  {
+   "islands": 2,
+   "largest": 0.8181966145833334,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.7682834201388888,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|sunk|5": [
+  {
+   "islands": 5,
+   "largest": 0.23475477430555555,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.23893229166666666,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.32958984375,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2830946180555556,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2792426215277778,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2909071180555556,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.3290473090277778,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.4381510416666667,
+   "border": 23
+  },
+  {
+   "islands": 5,
+   "largest": 0.3201497395833333,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.3494466145833333,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|sunk|20": [
+  {
+   "islands": 18,
+   "largest": 0.1641167534722222,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.0927734375,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2532009548611111,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.20589192708333334,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.11121961805555555,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.2184787326388889,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.1908637152777778,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2323676215277778,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.3502061631944444,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.1720920138888889,
+   "border": 0
+  }
+ ],
+ "archipelago|varied|sunk|100": [
+  {
+   "islands": 77,
+   "largest": 0.057671440972222224,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.0954318576388889,
+   "border": 0
+  },
+  {
+   "islands": 75,
+   "largest": 0.1264105902777778,
+   "border": 0
+  },
+  {
+   "islands": 76,
+   "largest": 0.10150824652777778,
+   "border": 0
+  },
+  {
+   "islands": 77,
+   "largest": 0.05978732638888889,
+   "border": 0
+  },
+  {
+   "islands": 68,
+   "largest": 0.0852322048611111,
+   "border": 0
+  },
+  {
+   "islands": 75,
+   "largest": 0.12852647569444445,
+   "border": 0
+  },
+  {
+   "islands": 70,
+   "largest": 0.09217664930555555,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.17073567708333334,
+   "border": 0
+  },
+  {
+   "islands": 76,
+   "largest": 0.06678602430555555,
+   "border": 0
+  }
+ ],
+ "island|equal|measured|2": [
+  {
+   "islands": 8,
+   "largest": 0.5662147671568627,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.5384880514705882,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4309129901960784,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.4311044730392157,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4482230392156863,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.5345052083333334,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.4013863357843137,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.41207107843137253,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.39276960784313725,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.42731311274509803,
+   "border": 0
+  }
+ ],
+ "island|equal|measured|5": [
+  {
+   "islands": 7,
+   "largest": 0.3307674632352941,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2907092524509804,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.37105545343137253,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.35301776960784315,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.3542432598039216,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2603017769607843,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.25379136029411764,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.2282092524509804,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.20875459558823528,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2283624387254902,
+   "border": 0
+  }
+ ],
+ "island|equal|measured|20": [
+  {
+   "islands": 13,
+   "largest": 0.29691329656862747,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.20308670343137256,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.17800245098039216,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.32042738970588236,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.4036458333333333,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.25919117647058826,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.16111366421568626,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.27780330882352944,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.2169500612745098,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.27167585784313725,
+   "border": 0
+  }
+ ],
+ "island|equal|measured|100": [
+  {
+   "islands": 60,
+   "largest": 0.2327282475490196,
+   "border": 0
+  },
+  {
+   "islands": 55,
+   "largest": 0.18401501225490197,
+   "border": 0
+  },
+  {
+   "islands": 46,
+   "largest": 0.1595435049019608,
+   "border": 0
+  },
+  {
+   "islands": 56,
+   "largest": 0.18003216911764705,
+   "border": 0
+  },
+  {
+   "islands": 47,
+   "largest": 0.4470358455882353,
+   "border": 0
+  },
+  {
+   "islands": 56,
+   "largest": 0.1090686274509804,
+   "border": 0
+  },
+  {
+   "islands": 49,
+   "largest": 0.3075980392156863,
+   "border": 0
+  },
+  {
+   "islands": 57,
+   "largest": 0.13832720588235295,
+   "border": 0
+  },
+  {
+   "islands": 66,
+   "largest": 0.16907935049019607,
+   "border": 0
+  },
+  {
+   "islands": 51,
+   "largest": 0.21300551470588236,
+   "border": 0
+  }
+ ],
+ "island|equal|sunk|2": [
+  {
+   "islands": 7,
+   "largest": 0.5723422181372549,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.5391007965686274,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.4371936274509804,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.4339767156862745,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.46112898284313725,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.45557598039215685,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.4289981617647059,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.4216452205882353,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.40625,
+   "border": 16
+  },
+  {
+   "islands": 6,
+   "largest": 0.44144454656862747,
+   "border": 0
+  }
+ ],
+ "island|equal|sunk|5": [
+  {
+   "islands": 8,
+   "largest": 0.3208486519607843,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.27389705882352944,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.24291513480392157,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.19083180147058823,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.3600260416666667,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.2444469975490196,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.24816176470588236,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.22621783088235295,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.2046185661764706,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.22863051470588236,
+   "border": 0
+  }
+ ],
+ "island|equal|sunk|20": [
+  {
+   "islands": 14,
+   "largest": 0.2885263480392157,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2013250612745098,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.111328125,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.25570618872549017,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.39571844362745096,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.26221660539215685,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.16203278186274508,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.2746629901960784,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.21346507352941177,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.27301623774509803,
+   "border": 0
+  }
+ ],
+ "island|equal|sunk|100": [
+  {
+   "islands": 54,
+   "largest": 0.23563878676470587,
+   "border": 0
+  },
+  {
+   "islands": 54,
+   "largest": 0.12151501225490197,
+   "border": 0
+  },
+  {
+   "islands": 44,
+   "largest": 0.15326286764705882,
+   "border": 0
+  },
+  {
+   "islands": 50,
+   "largest": 0.18087469362745098,
+   "border": 0
+  },
+  {
+   "islands": 44,
+   "largest": 0.4645373774509804,
+   "border": 0
+  },
+  {
+   "islands": 52,
+   "largest": 0.13411458333333334,
+   "border": 0
+  },
+  {
+   "islands": 45,
+   "largest": 0.2949984681372549,
+   "border": 0
+  },
+  {
+   "islands": 59,
+   "largest": 0.13399969362745098,
+   "border": 0
+  },
+  {
+   "islands": 62,
+   "largest": 0.16410079656862744,
+   "border": 0
+  },
+  {
+   "islands": 53,
+   "largest": 0.16804534313725492,
+   "border": 0
+  }
+ ],
+ "island|varied|measured|2": [
+  {
+   "islands": 2,
+   "largest": 0.573031556372549,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.565219056372549,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5019914215686274,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.4830346200980392,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.5651807598039216,
+   "border": 11
+  },
+  {
+   "islands": 11,
+   "largest": 0.46480545343137253,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.671109068627451,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7292432598039216,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.6685431985294118,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.7650122549019608,
+   "border": 0
+  }
+ ],
+ "island|varied|measured|5": [
+  {
+   "islands": 5,
+   "largest": 0.23521752450980393,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.6271829044117647,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.4831495098039216,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.2465533088235294,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.40088848039215685,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2837392769607843,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.34823069852941174,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.30886182598039214,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.5629212622549019,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.3594515931372549,
+   "border": 0
+  }
+ ],
+ "island|varied|measured|20": [
+  {
+   "islands": 14,
+   "largest": 0.3996629901960784,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.16808363970588236,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.38851868872549017,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.27401194852941174,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.3288143382352941,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.1951593137254902,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.31207873774509803,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.44864430147058826,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.28691789215686275,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.29898131127450983,
+   "border": 0
+  }
+ ],
+ "island|varied|measured|100": [
+  {
+   "islands": 52,
+   "largest": 0.24456188725490197,
+   "border": 0
+  },
+  {
+   "islands": 45,
+   "largest": 0.19642310049019607,
+   "border": 0
+  },
+  {
+   "islands": 52,
+   "largest": 0.19466145833333334,
+   "border": 0
+  },
+  {
+   "islands": 55,
+   "largest": 0.19956341911764705,
+   "border": 0
+  },
+  {
+   "islands": 46,
+   "largest": 0.37905943627450983,
+   "border": 0
+  },
+  {
+   "islands": 52,
+   "largest": 0.3404564950980392,
+   "border": 0
+  },
+  {
+   "islands": 47,
+   "largest": 0.17015165441176472,
+   "border": 0
+  },
+  {
+   "islands": 51,
+   "largest": 0.2146905637254902,
+   "border": 0
+  },
+  {
+   "islands": 62,
+   "largest": 0.21832873774509803,
+   "border": 0
+  },
+  {
+   "islands": 53,
+   "largest": 0.23337928921568626,
+   "border": 0
+  }
+ ],
+ "island|varied|sunk|2": [
+  {
+   "islands": 2,
+   "largest": 0.5641467524509803,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.5543045343137255,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5225949754901961,
+   "border": 26
+  },
+  {
+   "islands": 4,
+   "largest": 0.5063189338235294,
+   "border": 16
+  },
+  {
+   "islands": 2,
+   "largest": 0.5703890931372549,
+   "border": 29
+  },
+  {
+   "islands": 12,
+   "largest": 0.4898897058823529,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.7161458333333334,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7421109068627451,
+   "border": 43
+  },
+  {
+   "islands": 15,
+   "largest": 0.7159160539215687,
+   "border": 2
+  },
+  {
+   "islands": 2,
+   "largest": 0.7823988970588235,
+   "border": 0
+  }
+ ],
+ "island|varied|sunk|5": [
+  {
+   "islands": 5,
+   "largest": 0.23537071078431374,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.6521522671568627,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.33176317401960786,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2685738357843137,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.3990502450980392,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.28262867647058826,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.33942248774509803,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.3265165441176471,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2978324142156863,
+   "border": 21
+  },
+  {
+   "islands": 5,
+   "largest": 0.34719669117647056,
+   "border": 0
+  }
+ ],
+ "island|varied|sunk|20": [
+  {
+   "islands": 15,
+   "largest": 0.3037683823529412,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.1388250612745098,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.3806295955882353,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.27849264705882354,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.32418045343137253,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.20323988970588236,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.32142310049019607,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.23824295343137256,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.29901960784313725,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.2888327205882353,
+   "border": 0
+  }
+ ],
+ "island|varied|sunk|100": [
+  {
+   "islands": 43,
+   "largest": 0.18654258578431374,
+   "border": 0
+  },
+  {
+   "islands": 44,
+   "largest": 0.1721813725490196,
+   "border": 0
+  },
+  {
+   "islands": 51,
+   "largest": 0.19029564950980393,
+   "border": 0
+  },
+  {
+   "islands": 49,
+   "largest": 0.1520373774509804,
+   "border": 0
+  },
+  {
+   "islands": 46,
+   "largest": 0.29450061274509803,
+   "border": 0
+  },
+  {
+   "islands": 48,
+   "largest": 0.36159620098039214,
+   "border": 0
+  },
+  {
+   "islands": 49,
+   "largest": 0.16563265931372548,
+   "border": 0
+  },
+  {
+   "islands": 49,
+   "largest": 0.19358915441176472,
+   "border": 0
+  },
+  {
+   "islands": 55,
+   "largest": 0.21645220588235295,
+   "border": 0
+  },
+  {
+   "islands": 47,
+   "largest": 0.21752450980392157,
+   "border": 0
+  }
+ ],
+ "citystate|equal|measured|2": [
+  {
+   "islands": 6,
+   "largest": 0.5661024305555555,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.375,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.4328559027777778,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.4624565972222222,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5556857638888889,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.5000434027777778,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.45086805555555554,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.3304253472222222,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.5279513888888889,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.5003472222222223,
+   "border": 0
+  }
+ ],
+ "citystate|equal|measured|5": [
+  {
+   "islands": 9,
+   "largest": 0.2111545138888889,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.24895833333333334,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.24921875,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2545138888888889,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.7046440972222222,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.31940104166666666,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.22061631944444443,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2584635416666667,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.47586805555555556,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.3287760416666667,
+   "border": 0
+  }
+ ],
+ "citystate|equal|measured|20": [
+  {
+   "islands": 20,
+   "largest": 0.3023003472222222,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.22877604166666668,
+   "border": 0
+  },
+  {
+   "islands": 25,
+   "largest": 0.1890625,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2562934027777778,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.4837673611111111,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.18394097222222222,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.21080729166666667,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.3016493055555556,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.20577256944444444,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.239453125,
+   "border": 0
+  }
+ ],
+ "citystate|equal|measured|100": [
+  {
+   "islands": 80,
+   "largest": 0.25924479166666664,
+   "border": 0
+  },
+  {
+   "islands": 78,
+   "largest": 0.17690972222222223,
+   "border": 0
+  },
+  {
+   "islands": 60,
+   "largest": 0.17478298611111112,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.1937934027777778,
+   "border": 0
+  },
+  {
+   "islands": 58,
+   "largest": 0.4832899305555556,
+   "border": 0
+  },
+  {
+   "islands": 67,
+   "largest": 0.16770833333333332,
+   "border": 0
+  },
+  {
+   "islands": 77,
+   "largest": 0.14583333333333334,
+   "border": 0
+  },
+  {
+   "islands": 74,
+   "largest": 0.18515625,
+   "border": 0
+  },
+  {
+   "islands": 76,
+   "largest": 0.23736979166666666,
+   "border": 0
+  },
+  {
+   "islands": 70,
+   "largest": 0.3051215277777778,
+   "border": 0
+  }
+ ],
+ "citystate|equal|sunk|2": [
+  {
+   "islands": 7,
+   "largest": 0.5668836805555556,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.38263888888888886,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.4343315972222222,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.45108506944444443,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.5567708333333333,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.5059895833333333,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.4187065972222222,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.34661458333333334,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.5108072916666667,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.5045572916666666,
+   "border": 0
+  }
+ ],
+ "citystate|equal|sunk|5": [
+  {
+   "islands": 8,
+   "largest": 0.19392361111111112,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.24539930555555556,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.24735243055555556,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.19739583333333333,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.6950520833333333,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.30885416666666665,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.219921875,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.2529079861111111,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.46453993055555554,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.3148003472222222,
+   "border": 0
+  }
+ ],
+ "citystate|equal|sunk|20": [
+  {
+   "islands": 20,
+   "largest": 0.26749131944444443,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.224609375,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.14088541666666668,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.25078125,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.4113715277777778,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.17482638888888888,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.2103298611111111,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.29791666666666666,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.19431423611111112,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.23402777777777778,
+   "border": 0
+  }
+ ],
+ "citystate|equal|sunk|100": [
+  {
+   "islands": 79,
+   "largest": 0.2408420138888889,
+   "border": 0
+  },
+  {
+   "islands": 77,
+   "largest": 0.13211805555555556,
+   "border": 0
+  },
+  {
+   "islands": 59,
+   "largest": 0.1733940972222222,
+   "border": 0
+  },
+  {
+   "islands": 72,
+   "largest": 0.18611111111111112,
+   "border": 0
+  },
+  {
+   "islands": 58,
+   "largest": 0.473046875,
+   "border": 0
+  },
+  {
+   "islands": 68,
+   "largest": 0.16137152777777777,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.14249131944444443,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.1681423611111111,
+   "border": 0
+  },
+  {
+   "islands": 76,
+   "largest": 0.23585069444444445,
+   "border": 0
+  },
+  {
+   "islands": 70,
+   "largest": 0.16805555555555557,
+   "border": 0
+  }
+ ],
+ "citystate|varied|measured|2": [
+  {
+   "islands": 3,
+   "largest": 0.5416666666666666,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.46236979166666664,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.5063368055555556,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.46953125,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.9850260416666666,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.4565972222222222,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.6508246527777778,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.7246527777777778,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.6131944444444445,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.7556857638888889,
+   "border": 0
+  }
+ ],
+ "citystate|varied|measured|5": [
+  {
+   "islands": 5,
+   "largest": 0.244140625,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.445703125,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.3021267361111111,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.24709201388888888,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.26796875,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.285546875,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.33793402777777776,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.27296006944444445,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.2764756944444444,
+   "border": 6
+  },
+  {
+   "islands": 7,
+   "largest": 0.3383246527777778,
+   "border": 0
+  }
+ ],
+ "citystate|varied|measured|20": [
+  {
+   "islands": 19,
+   "largest": 0.18237847222222223,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.19852430555555556,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.37287326388888886,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.18415798611111112,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.40672743055555555,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.19730902777777778,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.33389756944444443,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.26640625,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.28324652777777776,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.2193576388888889,
+   "border": 0
+  }
+ ],
+ "citystate|varied|measured|100": [
+  {
+   "islands": 74,
+   "largest": 0.2658420138888889,
+   "border": 0
+  },
+  {
+   "islands": 73,
+   "largest": 0.13177083333333334,
+   "border": 0
+  },
+  {
+   "islands": 66,
+   "largest": 0.181640625,
+   "border": 0
+  },
+  {
+   "islands": 65,
+   "largest": 0.19210069444444444,
+   "border": 0
+  },
+  {
+   "islands": 54,
+   "largest": 0.5109809027777777,
+   "border": 0
+  },
+  {
+   "islands": 60,
+   "largest": 0.12721354166666668,
+   "border": 0
+  },
+  {
+   "islands": 72,
+   "largest": 0.12369791666666667,
+   "border": 0
+  },
+  {
+   "islands": 57,
+   "largest": 0.22213541666666667,
+   "border": 0
+  },
+  {
+   "islands": 71,
+   "largest": 0.2787326388888889,
+   "border": 0
+  },
+  {
+   "islands": 68,
+   "largest": 0.33125,
+   "border": 0
+  }
+ ],
+ "citystate|varied|sunk|2": [
+  {
+   "islands": 2,
+   "largest": 0.5393229166666667,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.49114583333333334,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4796006944444444,
+   "border": 36
+  },
+  {
+   "islands": 4,
+   "largest": 0.48420138888888886,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.5575520833333333,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.47508680555555555,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.6830729166666667,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7310329861111111,
+   "border": 15
+  },
+  {
+   "islands": 12,
+   "largest": 0.6483506944444445,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.7776909722222223,
+   "border": 0
+  }
+ ],
+ "citystate|varied|sunk|5": [
+  {
+   "islands": 5,
+   "largest": 0.242578125,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.6517361111111111,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.3092013888888889,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.26419270833333336,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.27725694444444443,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.2855902777777778,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.3376736111111111,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.28758680555555555,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.29097222222222224,
+   "border": 19
+  },
+  {
+   "islands": 8,
+   "largest": 0.341015625,
+   "border": 0
+  }
+ ],
+ "citystate|varied|sunk|20": [
+  {
+   "islands": 19,
+   "largest": 0.18411458333333333,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.15633680555555557,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.3401909722222222,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.18897569444444445,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.34609375,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.20516493055555557,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.31692708333333336,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2649739583333333,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.2956597222222222,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.16506076388888888,
+   "border": 0
+  }
+ ],
+ "citystate|varied|sunk|100": [
+  {
+   "islands": 68,
+   "largest": 0.12955729166666666,
+   "border": 0
+  },
+  {
+   "islands": 70,
+   "largest": 0.12291666666666666,
+   "border": 0
+  },
+  {
+   "islands": 63,
+   "largest": 0.17282986111111112,
+   "border": 0
+  },
+  {
+   "islands": 61,
+   "largest": 0.18893229166666667,
+   "border": 0
+  },
+  {
+   "islands": 55,
+   "largest": 0.49114583333333334,
+   "border": 0
+  },
+  {
+   "islands": 58,
+   "largest": 0.15434027777777778,
+   "border": 0
+  },
+  {
+   "islands": 72,
+   "largest": 0.12078993055555555,
+   "border": 0
+  },
+  {
+   "islands": 55,
+   "largest": 0.2174045138888889,
+   "border": 0
+  },
+  {
+   "islands": 67,
+   "largest": 0.271484375,
+   "border": 0
+  },
+  {
+   "islands": 65,
+   "largest": 0.3171875,
+   "border": 0
+  }
+ ],
+ "continent|equal|measured|2": [
+  {
+   "islands": 6,
+   "largest": 0.5224750905797102,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.5747565670289855,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.9363960597826086,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.5608016304347826,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.9396229619565217,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.9468976449275363,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.4232620018115942,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.8843127264492754,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.9456804800724637,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.588088768115942,
+   "border": 21
+  }
+ ],
+ "continent|equal|measured|5": [
+  {
+   "islands": 6,
+   "largest": 0.3706125452898551,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.40438179347826086,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.9582484148550725,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.5023211050724637,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.6654495018115942,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.27912703804347827,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.6174139492753623,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.41312839673913043,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.825775588768116,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.5669440670289855,
+   "border": 0
+  }
+ ],
+ "continent|equal|measured|20": [
+  {
+   "islands": 14,
+   "largest": 0.595703125,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.354194972826087,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.6511831974637681,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7437726449275363,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.7949501811594203,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.3523550724637681,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.8212466032608695,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.306838768115942,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.6152909873188406,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.5932404891304348,
+   "border": 0
+  }
+ ],
+ "continent|equal|measured|100": [
+  {
+   "islands": 42,
+   "largest": 0.3116508152173913,
+   "border": 0
+  },
+  {
+   "islands": 37,
+   "largest": 0.6904721467391305,
+   "border": 0
+  },
+  {
+   "islands": 27,
+   "largest": 0.7061537590579711,
+   "border": 0
+  },
+  {
+   "islands": 25,
+   "largest": 0.35538383152173914,
+   "border": 0
+  },
+  {
+   "islands": 23,
+   "largest": 0.6945765398550725,
+   "border": 0
+  },
+  {
+   "islands": 40,
+   "largest": 0.6355015851449275,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.521484375,
+   "border": 0
+  },
+  {
+   "islands": 27,
+   "largest": 0.3146795742753623,
+   "border": 0
+  },
+  {
+   "islands": 27,
+   "largest": 0.6826879528985508,
+   "border": 0
+  },
+  {
+   "islands": 34,
+   "largest": 0.5341372282608695,
+   "border": 0
+  }
+ ],
+ "continent|equal|sunk|2": [
+  {
+   "islands": 6,
+   "largest": 0.5341655344202898,
+   "border": 29
+  },
+  {
+   "islands": 3,
+   "largest": 0.5803045742753623,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.9477468297101449,
+   "border": 48
+  },
+  {
+   "islands": 5,
+   "largest": 0.5602921195652174,
+   "border": 12
+  },
+  {
+   "islands": 2,
+   "largest": 0.9534080615942029,
+   "border": 1
+  },
+  {
+   "islands": 7,
+   "largest": 0.9501245471014492,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.4338201992753623,
+   "border": 13
+  },
+  {
+   "islands": 7,
+   "largest": 0.8960597826086957,
+   "border": 50
+  },
+  {
+   "islands": 6,
+   "largest": 0.9565500452898551,
+   "border": 5
+  },
+  {
+   "islands": 6,
+   "largest": 0.5804461050724637,
+   "border": 50
+  }
+ ],
+ "continent|equal|sunk|5": [
+  {
+   "islands": 9,
+   "largest": 0.36506453804347827,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.389945652173913,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.7797780797101449,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.666015625,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.6636379076086957,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.2658514492753623,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.6163100090579711,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4107223731884058,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.66796875,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.5529042119565217,
+   "border": 0
+  }
+ ],
+ "continent|equal|sunk|20": [
+  {
+   "islands": 15,
+   "largest": 0.3727921195652174,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.37771739130434784,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.5148607336956522,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.7268738677536232,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.7321105072463768,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.33842844202898553,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5422044836956522,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.29843183876811596,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.599014945652174,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.6235846920289855,
+   "border": 0
+  }
+ ],
+ "continent|equal|sunk|100": [
+  {
+   "islands": 39,
+   "largest": 0.304885643115942,
+   "border": 0
+  },
+  {
+   "islands": 27,
+   "largest": 0.7358186141304348,
+   "border": 0
+  },
+  {
+   "islands": 25,
+   "largest": 0.6971240942028986,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.3467504528985507,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.6915760869565217,
+   "border": 0
+  },
+  {
+   "islands": 32,
+   "largest": 0.6538722826086957,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.8237658514492754,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.29831861413043476,
+   "border": 0
+  },
+  {
+   "islands": 26,
+   "largest": 0.6418421648550725,
+   "border": 0
+  },
+  {
+   "islands": 30,
+   "largest": 0.6106770833333334,
+   "border": 0
+  }
+ ],
+ "continent|varied|measured|2": [
+  {
+   "islands": 4,
+   "largest": 0.6018172554347826,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.9534646739130435,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.9349807518115942,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.4717504528985507,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.981063179347826,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.9069293478260869,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.9967164855072463,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.6363507699275363,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.9799592391304348,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.7719372735507246,
+   "border": 8
+  }
+ ],
+ "continent|varied|measured|5": [
+  {
+   "islands": 4,
+   "largest": 0.4208276721014493,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.5668308423913043,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.9019191576086957,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.455276268115942,
+   "border": 0
+  },
+  {
+   "islands": 1,
+   "largest": 1,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.4453691123188406,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.371971240942029,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.4056272644927536,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.5488564311594203,
+   "border": 0
+  },
+  {
+   "islands": 3,
+   "largest": 0.7695029438405797,
+   "border": 0
+  }
+ ],
+ "continent|varied|measured|20": [
+  {
+   "islands": 12,
+   "largest": 0.5066519474637681,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.7017096920289855,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.7139096467391305,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.6831125452898551,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.8013473731884058,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.3593466938405797,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.8945878623188406,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.5962126358695652,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.8807461503623188,
+   "border": 0
+  },
+  {
+   "islands": 10,
+   "largest": 0.46277740036231885,
+   "border": 0
+  }
+ ],
+ "continent|varied|measured|100": [
+  {
+   "islands": 39,
+   "largest": 0.41092051630434784,
+   "border": 0
+  },
+  {
+   "islands": 30,
+   "largest": 0.46235280797101447,
+   "border": 0
+  },
+  {
+   "islands": 30,
+   "largest": 0.6116677989130435,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.7363564311594203,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.8620074728260869,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.7282891757246377,
+   "border": 0
+  },
+  {
+   "islands": 28,
+   "largest": 0.47814764492753625,
+   "border": 0
+  },
+  {
+   "islands": 33,
+   "largest": 0.5219089673913043,
+   "border": 0
+  },
+  {
+   "islands": 28,
+   "largest": 0.7280061141304348,
+   "border": 0
+  },
+  {
+   "islands": 34,
+   "largest": 0.5369678442028986,
+   "border": 0
+  }
+ ],
+ "continent|varied|sunk|2": [
+  {
+   "islands": 2,
+   "largest": 0.5812952898550725,
+   "border": 16
+  },
+  {
+   "islands": 4,
+   "largest": 0.9790251358695652,
+   "border": 52
+  },
+  {
+   "islands": 4,
+   "largest": 0.9446614583333334,
+   "border": 101
+  },
+  {
+   "islands": 5,
+   "largest": 0.45304008152173914,
+   "border": 30
+  },
+  {
+   "islands": 3,
+   "largest": 0.9968863224637681,
+   "border": 61
+  },
+  {
+   "islands": 10,
+   "largest": 0.9240545742753623,
+   "border": 54
+  },
+  {
+   "islands": 3,
+   "largest": 0.8809159873188406,
+   "border": 0
+  },
+  {
+   "islands": 5,
+   "largest": 0.658203125,
+   "border": 51
+  },
+  {
+   "islands": 3,
+   "largest": 0.9842051630434783,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.7732959692028986,
+   "border": 56
+  }
+ ],
+ "continent|varied|sunk|5": [
+  {
+   "islands": 4,
+   "largest": 0.3830672554347826,
+   "border": 9
+  },
+  {
+   "islands": 4,
+   "largest": 0.6017323369565217,
+   "border": 38
+  },
+  {
+   "islands": 7,
+   "largest": 0.9001641757246377,
+   "border": 41
+  },
+  {
+   "islands": 5,
+   "largest": 0.47274116847826086,
+   "border": 0
+  },
+  {
+   "islands": 2,
+   "largest": 0.8232563405797102,
+   "border": 18
+  },
+  {
+   "islands": 4,
+   "largest": 0.4733072916666667,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.36534759963768115,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.39608808876811596,
+   "border": 5
+  },
+  {
+   "islands": 7,
+   "largest": 0.41032608695652173,
+   "border": 33
+  },
+  {
+   "islands": 3,
+   "largest": 0.7642096920289855,
+   "border": 0
+  }
+ ],
+ "continent|varied|sunk|20": [
+  {
+   "islands": 9,
+   "largest": 0.5183423913043478,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.4118263134057971,
+   "border": 0
+  },
+  {
+   "islands": 11,
+   "largest": 0.7127490942028986,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.645125679347826,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.7825237771739131,
+   "border": 0
+  },
+  {
+   "islands": 8,
+   "largest": 0.29616734601449274,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.7060122282608695,
+   "border": 0
+  },
+  {
+   "islands": 7,
+   "largest": 0.5344769021739131,
+   "border": 0
+  },
+  {
+   "islands": 6,
+   "largest": 0.8534873188405797,
+   "border": 0
+  },
+  {
+   "islands": 4,
+   "largest": 0.8918704710144928,
+   "border": 0
+  }
+ ],
+ "continent|varied|sunk|100": [
+  {
+   "islands": 35,
+   "largest": 0.3270210597826087,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.5589617300724637,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.6536741394927537,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.5712466032608695,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.8492413949275363,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.8265398550724637,
+   "border": 0
+  },
+  {
+   "islands": 26,
+   "largest": 0.4679574275362319,
+   "border": 0
+  },
+  {
+   "islands": 27,
+   "largest": 0.6323029891304348,
+   "border": 0
+  },
+  {
+   "islands": 25,
+   "largest": 0.7849014945652174,
+   "border": 0
+  },
+  {
+   "islands": 32,
+   "largest": 0.5087466032608695,
+   "border": 0
+  }
+ ],
+ "texas|5": [
+  {
+   "islands": 12,
+   "largest": 0.2087673611111111,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.6233181423611112,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.4552951388888889,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.3099500868055556,
+   "border": 0
+  },
+  {
+   "islands": 9,
+   "largest": 0.7689887152777778,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.3045789930555556,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.20594618055555555,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.67431640625,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.3116861979166667,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.28369140625,
+   "border": 0
+  }
+ ],
+ "texas|20": [
+  {
+   "islands": 11,
+   "largest": 0.6166449652777778,
+   "border": 0
+  },
+  {
+   "islands": 22,
+   "largest": 0.3587239583333333,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.6676432291666666,
+   "border": 0
+  },
+  {
+   "islands": 12,
+   "largest": 0.6474609375,
+   "border": 0
+  },
+  {
+   "islands": 15,
+   "largest": 0.9093967013888888,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.5516493055555556,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.4349500868055556,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.3566080729166667,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.3422309027777778,
+   "border": 0
+  },
+  {
+   "islands": 17,
+   "largest": 0.3891059027777778,
+   "border": 0
+  }
+ ],
+ "texas|100": [
+  {
+   "islands": 14,
+   "largest": 0.70849609375,
+   "border": 0
+  },
+  {
+   "islands": 20,
+   "largest": 0.5324435763888888,
+   "border": 0
+  },
+  {
+   "islands": 18,
+   "largest": 0.7097981770833334,
+   "border": 0
+  },
+  {
+   "islands": 13,
+   "largest": 0.7292751736111112,
+   "border": 0
+  },
+  {
+   "islands": 24,
+   "largest": 0.8589952256944444,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.62890625,
+   "border": 0
+  },
+  {
+   "islands": 19,
+   "largest": 0.6872287326388888,
+   "border": 0
+  },
+  {
+   "islands": 21,
+   "largest": 0.7618272569444444,
+   "border": 0
+  },
+  {
+   "islands": 14,
+   "largest": 0.7194552951388888,
+   "border": 0
+  },
+  {
+   "islands": 16,
+   "largest": 0.8018120659722222,
+   "border": 0
+  }
+ ]
+}

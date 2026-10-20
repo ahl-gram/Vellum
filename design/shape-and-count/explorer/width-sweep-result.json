@@ -1,0 +1,74 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1024.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 900,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"slip\":[608,147,384,564],\"land\":[635,259,331,198],\"sheet\":[0,226,537,414],\"stage\":[0,0,1024,900],\"folio\":[736,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1280.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 900,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"slip\":[864,147,384,564],\"land\":[891,259,331,198],\"sheet\":[20,145,753,581],\"stage\":[0,0,1280,900],\"folio\":[992,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1440.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"slip\":[1024,147,384,564],\"land\":[1051,259,331,198],\"sheet\":[60,145,833,643],\"stage\":[0,0,1440,900],\"folio\":[1152,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1680.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1680,
+   "innerHeight": 900,
+   "clientWidth": 1680
+  },
+  "probe": "{\"scrollWidth\":1680,\"slip\":[1264,147,384,564],\"land\":[1291,259,331,198],\"sheet\":[180,145,833,643],\"stage\":[0,0,1680,900],\"folio\":[1392,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1920.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 1920,
+   "innerHeight": 900,
+   "clientWidth": 1920
+  },
+  "probe": "{\"scrollWidth\":1920,\"slip\":[1504,147,384,564],\"land\":[1531,259,331,198],\"sheet\":[300,145,833,643],\"stage\":[0,0,1920,900],\"folio\":[1632,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-2560.png",
+  "url": "http://127.0.0.1:56963/explorer/#seed=30&type=island",
+  "viewport": {
+   "innerWidth": 2560,
+   "innerHeight": 900,
+   "clientWidth": 2560
+  },
+  "probe": "{\"scrollWidth\":2560,\"slip\":[2144,147,384,564],\"land\":[2171,259,331,198],\"sheet\":[620,145,833,643],\"stage\":[0,0,2560,900],\"folio\":[2272,22,263,108],\"slipW\":\"24rem\",\"rem\":\"16px\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

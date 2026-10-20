@@ -1,0 +1,631 @@
+{
+ "sha": "581a6de3",
+ "BITING": {
+  "scale": 1,
+  "amp": 1.2
+ },
+ "2|0.55|measured": [
+  {
+   "islands": 4,
+   "border": 0,
+   "shore": 0.046440972222222224
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.035101996527777776
+  },
+  {
+   "islands": 3,
+   "border": 0,
+   "shore": 0.04172092013888889
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.03488498263888889
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.034993489583333336
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.03537326388888889
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.035698784722222224
+  },
+  {
+   "islands": 4,
+   "border": 33,
+   "shore": 0.03700086805555555
+  },
+  {
+   "islands": 2,
+   "border": 11,
+   "shore": 0.034993489583333336
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.03488498263888889
+  }
+ ],
+ "2|0.55|biting": [
+  {
+   "islands": 9,
+   "border": 3,
+   "shore": 0.060004340277777776
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.03933376736111111
+  },
+  {
+   "islands": 7,
+   "border": 0,
+   "shore": 0.047797309027777776
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.039984809027777776
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.039496527777777776
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.041069878472222224
+  },
+  {
+   "islands": 2,
+   "border": 0,
+   "shore": 0.03933376736111111
+  },
+  {
+   "islands": 3,
+   "border": 45,
+   "shore": 0.04025607638888889
+  },
+  {
+   "islands": 5,
+   "border": 14,
+   "shore": 0.04307725694444445
+  },
+  {
+   "islands": 3,
+   "border": 8,
+   "shore": 0.043402777777777776
+  }
+ ],
+ "5|0.55|measured": [
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.05409071180555555
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.05322265625
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.05300564236111111
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.053765190972222224
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.052897135416666664
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.0537109375
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.053385416666666664
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.05333116319444445
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.053168402777777776
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.05235460069444445
+  }
+ ],
+ "5|0.55|biting": [
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06282552083333333
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.0642361111111111
+  },
+  {
+   "islands": 6,
+   "border": 0,
+   "shore": 0.0632595486111111
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.0636935763888889
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06130642361111111
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06212022569444445
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06065538194444445
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06532118055555555
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.061089409722222224
+  },
+  {
+   "islands": 5,
+   "border": 0,
+   "shore": 0.06358506944444445
+  }
+ ],
+ "20|0.1|measured": [
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10319010416666667
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10313585069444445
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10205078125
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.09857855902777778
+  },
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10313585069444445
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10264756944444445
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.1018337673611111
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10112847222222222
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.1013454861111111
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.1013454861111111
+  }
+ ],
+ "20|0.1|biting": [
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.103515625
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10335286458333333
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.1023220486111111
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.0993381076388889
+  },
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10362413194444445
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10286458333333333
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10346137152777778
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10118272569444445
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.1017795138888889
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.1015625
+  }
+ ],
+ "20|0.55|measured": [
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10367838541666667
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10308159722222222
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10248480902777778
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.09966362847222222
+  },
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10346137152777778
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10308159722222222
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.1022677951388889
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10145399305555555
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10167100694444445
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.10112847222222222
+  }
+ ],
+ "20|0.55|biting": [
+  {
+   "islands": 21,
+   "border": 0,
+   "shore": 0.1220703125
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.12125651041666667
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.12158203125
+  },
+  {
+   "islands": 15,
+   "border": 0,
+   "shore": 0.11577690972222222
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.1237521701388889
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.12272135416666667
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.11924913194444445
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.12076822916666667
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.12114800347222222
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.1194118923611111
+  }
+ ],
+ "20|0.95|measured": [
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.1044921875
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10394965277777778
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.10308159722222222
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.10020616319444445
+  },
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.10416666666666667
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.1037868923611111
+  },
+  {
+   "islands": 17,
+   "border": 0,
+   "shore": 0.10210503472222222
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.10215928819444445
+  },
+  {
+   "islands": 18,
+   "border": 0,
+   "shore": 0.1027560763888889
+  },
+  {
+   "islands": 16,
+   "border": 0,
+   "shore": 0.1012912326388889
+  }
+ ],
+ "20|0.95|biting": [
+  {
+   "islands": 22,
+   "border": 0,
+   "shore": 0.1545138888888889
+  },
+  {
+   "islands": 22,
+   "border": 0,
+   "shore": 0.1571723090277778
+  },
+  {
+   "islands": 21,
+   "border": 0,
+   "shore": 0.16493055555555555
+  },
+  {
+   "islands": 15,
+   "border": 0,
+   "shore": 0.15538194444444445
+  },
+  {
+   "islands": 20,
+   "border": 0,
+   "shore": 0.16650390625
+  },
+  {
+   "islands": 24,
+   "border": 0,
+   "shore": 0.16682942708333334
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.1503363715277778
+  },
+  {
+   "islands": 21,
+   "border": 0,
+   "shore": 0.1587456597222222
+  },
+  {
+   "islands": 19,
+   "border": 0,
+   "shore": 0.15538194444444445
+  },
+  {
+   "islands": 21,
+   "border": 0,
+   "shore": 0.15266927083333334
+  }
+ ],
+ "100|0.55|measured": [
+  {
+   "islands": 85,
+   "border": 0,
+   "shore": 0.2194552951388889
+  },
+  {
+   "islands": 79,
+   "border": 0,
+   "shore": 0.21614583333333334
+  },
+  {
+   "islands": 71,
+   "border": 0,
+   "shore": 0.2131076388888889
+  },
+  {
+   "islands": 78,
+   "border": 0,
+   "shore": 0.21766493055555555
+  },
+  {
+   "islands": 76,
+   "border": 0,
+   "shore": 0.21571180555555555
+  },
+  {
+   "islands": 78,
+   "border": 0,
+   "shore": 0.21451822916666666
+  },
+  {
+   "islands": 79,
+   "border": 0,
+   "shore": 0.21744791666666666
+  },
+  {
+   "islands": 81,
+   "border": 0,
+   "shore": 0.21641710069444445
+  },
+  {
+   "islands": 83,
+   "border": 0,
+   "shore": 0.21690538194444445
+  },
+  {
+   "islands": 78,
+   "border": 0,
+   "shore": 0.2151150173611111
+  }
+ ],
+ "100|0.55|biting": [
+  {
+   "islands": 83,
+   "border": 0,
+   "shore": 0.24609375
+  },
+  {
+   "islands": 76,
+   "border": 0,
+   "shore": 0.24283854166666666
+  },
+  {
+   "islands": 65,
+   "border": 0,
+   "shore": 0.23719618055555555
+  },
+  {
+   "islands": 75,
+   "border": 0,
+   "shore": 0.2439236111111111
+  },
+  {
+   "islands": 74,
+   "border": 0,
+   "shore": 0.2414279513888889
+  },
+  {
+   "islands": 75,
+   "border": 0,
+   "shore": 0.2394748263888889
+  },
+  {
+   "islands": 73,
+   "border": 0,
+   "shore": 0.2440863715277778
+  },
+  {
+   "islands": 80,
+   "border": 0,
+   "shore": 0.24479166666666666
+  },
+  {
+   "islands": 82,
+   "border": 0,
+   "shore": 0.2440863715277778
+  },
+  {
+   "islands": 75,
+   "border": 0,
+   "shore": 0.24153645833333334
+  }
+ ]
+}

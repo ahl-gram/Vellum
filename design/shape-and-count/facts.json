@@ -1,0 +1,7557 @@
+{
+ "sha": "581a6de3",
+ "cases": [
+  {
+   "slug": "crescent-17",
+   "group": "shape",
+   "title": "the crescent (a hand-drawn house form), seed 17, the island type",
+   "why": "seed 17 is the lower median of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 17,
+   "mapType": "island",
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "primary": true,
+   "outline": {
+    "id": "crescent",
+    "name": "the crescent (a hand-drawn house form)",
+    "source": "drawn for this round",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70",
+    "soft-big"
+   ]
+  },
+  {
+   "slug": "crescent-11",
+   "group": "shape",
+   "title": "the crescent (a hand-drawn house form), seed 11, the island type",
+   "why": "seed 11 is the 10th percentile of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 11,
+   "mapType": "island",
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "primary": false,
+   "outline": {
+    "id": "crescent",
+    "name": "the crescent (a hand-drawn house form)",
+    "source": "drawn for this round",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "texas-30",
+   "group": "shape",
+   "title": "Texas, seed 30, the island type",
+   "why": "seed 30 is the lower median of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 30,
+   "mapType": "island",
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": true,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70",
+    "soft-big"
+   ]
+  },
+  {
+   "slug": "texas-8",
+   "group": "shape",
+   "title": "Texas, seed 8, the island type",
+   "why": "seed 8 is the 10th percentile of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 8,
+   "mapType": "island",
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": false,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "japan-13",
+   "group": "shape",
+   "title": "Japan, north up, seed 13, the archipelago type",
+   "why": "seed 13 is the lower median of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 13,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": true,
+   "outline": {
+    "id": "japan",
+    "name": "Japan, north up",
+    "source": "Natural Earth 1:110m admin 0 (ne_110m_admin_0_countries.geojson), feature \"Japan\" (JPN), 3 rings of 37+16+12 vertices; longitude x cos(38.29 deg) = x 0.7849",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70",
+    "soft-big"
+   ]
+  },
+  {
+   "slug": "japan-10",
+   "group": "shape",
+   "title": "Japan, north up, seed 10, the archipelago type",
+   "why": "seed 10 is the 10th percentile of the soft likeness over seeds 1 to 40 (measurements/shape-sweep.md)",
+   "seed": 10,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "outline": {
+    "id": "japan",
+    "name": "Japan, north up",
+    "source": "Natural Earth 1:110m admin 0 (ne_110m_admin_0_countries.geojson), feature \"Japan\" (JPN), 3 rings of 37+16+12 vertices; longitude x cos(38.29 deg) = x 0.7849",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "japan-turned-13",
+   "group": "shape",
+   "title": "Japan, turned to the sheet's long axis, seed 13, the archipelago type",
+   "why": "the same seed as Japan north up, so the turn is the only difference; Sub 2 (Issue #851) leaves the turn to this sitting",
+   "seed": 13,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "outline": {
+    "id": "japan-turned",
+    "name": "Japan, turned to the sheet's long axis",
+    "source": "as \"Japan, north up\", then turned -49.4 deg so its principal axis lies east-west",
+    "fit": "turned, then fitted in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "texas-30-coast0.1",
+   "group": "shape",
+   "title": "Texas, seed 30, the island type, coast 0.1",
+   "why": "the Texas median seed with the coast slider at calm, so the warp's interplay with the shape is seen, and today's close-up beside the pass-through one",
+   "seed": 30,
+   "mapType": "island",
+   "coastWarp": 0.1,
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": false,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "control-pass",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "texas-30-coast0.95",
+   "group": "shape",
+   "title": "Texas, seed 30, the island type, coast 0.95",
+   "why": "the Texas median seed with the coast slider at lobed, so the warp's interplay with the shape is seen, and today's close-up beside the pass-through one",
+   "seed": 30,
+   "mapType": "island",
+   "coastWarp": 0.95,
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": false,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "control-pass",
+    "soft",
+    "hard",
+    "bias35",
+    "bias70"
+   ]
+  },
+  {
+   "slug": "count-1",
+   "group": "count",
+   "title": "The count on the archipelago, seed 1",
+   "why": "seed 1: today's archipelago has 8 islands of 20 cells or more, the lower median of seeds 1 to 60 (measurements/landmass-sweep.md)",
+   "seed": 1,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": true,
+   "dirs": [
+    "control",
+    "n2-equal-measured",
+    "n2-equal-sunk",
+    "n2-varied-measured",
+    "n2-varied-sunk",
+    "n5-equal-measured",
+    "n5-equal-sunk",
+    "n5-varied-measured",
+    "n5-varied-sunk",
+    "n20-equal-measured",
+    "n20-equal-sunk",
+    "n20-varied-measured",
+    "n20-varied-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk",
+    "n100-varied-measured",
+    "n100-varied-sunk"
+   ]
+  },
+  {
+   "slug": "count-12",
+   "group": "count",
+   "title": "The count on the archipelago, seed 12 (today's sparseest)",
+   "why": "seed 12: today's archipelago has 3 islands of 20 cells or more, the fewest in seeds 1 to 60 (measurements/landmass-sweep.md)",
+   "seed": 12,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n5-equal-measured",
+    "n5-equal-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk"
+   ]
+  },
+  {
+   "slug": "count-35",
+   "group": "count",
+   "title": "The count on the archipelago, seed 35 (today's denseest)",
+   "why": "seed 35: today's archipelago has 16 islands of 20 cells or more, the most in seeds 1 to 60 (measurements/landmass-sweep.md)",
+   "seed": 35,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n5-equal-measured",
+    "n5-equal-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk"
+   ]
+  },
+  {
+   "slug": "type-island-3",
+   "group": "type",
+   "title": "The count on the island type, seed 3",
+   "why": "seed 3: today's island has 3 islands of 20 cells or more, the lower median of seeds 1 to 60 (measurements/landmass-sweep.md); a count on every type is D14",
+   "seed": 3,
+   "mapType": "island",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": true,
+   "dirs": [
+    "control",
+    "n20-equal-measured",
+    "n20-equal-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk"
+   ]
+  },
+  {
+   "slug": "type-citystate-13",
+   "group": "type",
+   "title": "The count on the city-state type, seed 13",
+   "why": "seed 13: today's citystate has 2 islands of 20 cells or more, the lower median of seeds 1 to 60 (measurements/landmass-sweep.md); a count on every type is D14",
+   "seed": 13,
+   "mapType": "citystate",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": true,
+   "dirs": [
+    "control",
+    "n20-equal-measured",
+    "n20-equal-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk"
+   ]
+  },
+  {
+   "slug": "type-continent-5",
+   "group": "type",
+   "title": "The count on the continent type, seed 5",
+   "why": "seed 5: today's continent has 4 islands of 20 cells or more, the lower median of seeds 1 to 60 (measurements/landmass-sweep.md); a count on every type is D14",
+   "seed": 5,
+   "mapType": "continent",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": true,
+   "dirs": [
+    "control",
+    "n20-equal-measured",
+    "n20-equal-sunk",
+    "n100-equal-measured",
+    "n100-equal-sunk"
+   ]
+  },
+  {
+   "slug": "share-1",
+   "group": "extra",
+   "title": "The land share axis, seed 1",
+   "why": "why a counted world keeps its type's default share (D8): the same asked count at the archipelago's 0.24 and at a founded \"vast\" 0.336",
+   "seed": 1,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n20-equal-sunk",
+    "n20-equal-sunk-share0.336",
+    "n100-equal-sunk",
+    "n100-equal-sunk-share0.336"
+   ]
+  },
+  {
+   "slug": "count-in-texas-30",
+   "group": "extra",
+   "title": "A counted world with an outline, seed 30, the archipelago type",
+   "why": "lobes scattered inside the shape; the lobes' coverage is cut to the outline's own share of the sheet (a stand-in)",
+   "seed": 30,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": false,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "control",
+    "n20-equal-sunk-in-texas",
+    "n100-equal-sunk-in-texas"
+   ]
+  },
+  {
+   "slug": "count-1-coast0.1",
+   "group": "extra",
+   "title": "The coast slider on a counted world, seed 1, coast 0.1",
+   "why": "the coast slider is measured inert on lobes (measurements/count-through-outline-3.md); these show it, for D9's slider standing down",
+   "seed": 1,
+   "mapType": "archipelago",
+   "coastWarp": 0.1,
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n20-equal-sunk"
+   ]
+  },
+  {
+   "slug": "count-1-coast0.95",
+   "group": "extra",
+   "title": "The coast slider on a counted world, seed 1, coast 0.95",
+   "why": "the coast slider is measured inert on lobes (measurements/count-through-outline-3.md); these show it, for D9's slider standing down",
+   "seed": 1,
+   "mapType": "archipelago",
+   "coastWarp": 0.95,
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n20-equal-sunk"
+   ]
+  },
+  {
+   "slug": "border-archipelago-8",
+   "group": "extra",
+   "title": "Where a small count reaches the border, seed 8, the archipelago type",
+   "why": "asked 2 makes lobes a quarter of the sheet across; with the ground between sunk they reach the edge on this seed (measurements/count-types-fixed.md lists every seed that does)",
+   "seed": 8,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n2-equal-measured",
+    "n2-equal-sunk"
+   ]
+  },
+  {
+   "slug": "border-continent-3",
+   "group": "extra",
+   "title": "Where a small count reaches the border, seed 3, the continent type",
+   "why": "asked 2 makes lobes a quarter of the sheet across; with the ground between sunk they reach the edge on this seed (measurements/count-types-fixed.md lists every seed that does)",
+   "seed": 3,
+   "mapType": "continent",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n2-equal-measured",
+    "n2-equal-sunk"
+   ]
+  },
+  {
+   "slug": "example-texas",
+   "group": "extra",
+   "title": "\"tropical island in the shape of Texas\", founded",
+   "why": "today the sentence founds chart 2010822250 from its residual \"in shape texas\"; under D5 \"in the shape of texas\" is a shape phrase, the residual empties, and it founds chart 2166136261 with the Texas outline",
+   "seed": 2166136261,
+   "mapType": "island",
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "primary": false,
+   "outline": {
+    "id": "texas",
+    "name": "Texas",
+    "source": "Natural Earth 1:110m admin 1 (ne_110m_admin_1_states_provinces.geojson), feature \"Texas\" (US-TX), 1 ring of 79 vertices; longitude x cos(31.17 deg) = x 0.8556",
+    "fit": "north-up in the inner box inset 0.14"
+   },
+   "dirs": [
+    "today",
+    "control",
+    "soft",
+    "hard"
+   ],
+   "overrides": {
+    "band": "tropical",
+    "culture": "oromi"
+   }
+  },
+  {
+   "slug": "example-100",
+   "group": "extra",
+   "title": "\"exactly 100 equal sized round islands\", founded",
+   "why": "today the sentence founds chart 116723379 from its residual \"exactly 100 equal sized round\"; under D6 the number rule takes \"100 equal sized round islands\", the residual is \"exactly\", and it founds chart 1524000883 with about 100 islands alike",
+   "seed": 1524000883,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "today",
+    "control",
+    "n100-equal-sunk",
+    "n100-equal-measured"
+   ]
+  },
+  {
+   "slug": "count-wobble-1",
+   "group": "extra",
+   "title": "A wobble that bites, seed 1, the archipelago",
+   "why": "the measured wobble leaves every counted island a disc (the count sheets); this one warps each island at its own scale (noise 1 unit across the mean lobe radius, 1.2 lobe radii at full slider), so the slider works again",
+   "seed": 1,
+   "mapType": "archipelago",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "primary": false,
+   "dirs": [
+    "control",
+    "n20-equal-sunk",
+    "n20-equal-sunk-wobble-coast0.1",
+    "n20-equal-sunk-wobble",
+    "n20-equal-sunk-wobble-coast0.95",
+    "n5-equal-sunk-wobble",
+    "n100-equal-sunk-wobble",
+    "n20-varied-sunk-wobble"
+   ]
+  }
+ ],
+ "plates": [
+  {
+   "id": "crescent-17--control",
+   "caseSlug": "crescent-17",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.34,
+    "largestShare": 0.9991191789215687,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.2475693955192335,
+    "landInside": 0.2691482843137255,
+    "landBeyond": 0.7308517156862745
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.7423567708333333,
+    "largestShare": 1,
+    "borderLand": 573,
+    "towns": 10,
+    "realms": 3,
+    "disagreement": 0.006236979166666667,
+    "title": "The Environs of Zyargkru",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--control--world-antique.svg",
+    "close-antique": "crescent-17--control--close-antique.svg",
+    "world-ink": "crescent-17--control--world-ink.svg",
+    "close-ink": "crescent-17--control--close-ink.svg"
+   },
+   "ms": 1522
+  },
+  {
+   "id": "crescent-17--soft",
+   "caseSlug": "crescent-17",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 4,
+    "landShare": 0.34,
+    "largestShare": 0.9901194852941176,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.35237513364899953,
+    "landInside": 0.35340073529411764,
+    "landBeyond": 0.6465992647058824
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 8,
+    "landShare": 0.5143489583333334,
+    "largestShare": 0.9995443268695255,
+    "borderLand": 747,
+    "towns": 6,
+    "realms": 3,
+    "disagreement": 0.004557291666666667,
+    "title": "The Environs of Grad",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--soft--world-antique.svg",
+    "close-antique": "crescent-17--soft--close-antique.svg",
+    "world-ink": "crescent-17--soft--world-ink.svg",
+    "close-ink": "crescent-17--soft--close-ink.svg"
+   },
+   "ms": 1484
+  },
+  {
+   "id": "crescent-17--hard",
+   "caseSlug": "crescent-17",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.12114583333333333,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.24049479166666668,
+    "largestShare": 1,
+    "borderLand": 456,
+    "towns": 5,
+    "realms": 1,
+    "disagreement": 0.0012239583333333334,
+    "title": "The Environs of Malekeep",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--hard--world-antique.svg",
+    "close-antique": "crescent-17--hard--close-antique.svg",
+    "world-ink": "crescent-17--hard--world-ink.svg",
+    "close-ink": "crescent-17--hard--close-ink.svg"
+   },
+   "ms": 1031
+  },
+  {
+   "id": "crescent-17--bias35",
+   "caseSlug": "crescent-17",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 9,
+    "landShare": 0.34,
+    "largestShare": 0.9993872549019608,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.2980977165267749,
+    "landInside": 0.3114659926470588,
+    "landBeyond": 0.6885340073529411
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 9,
+    "landShare": 0.7263802083333334,
+    "largestShare": 0.9988169074678235,
+    "borderLand": 631,
+    "towns": 15,
+    "realms": 3,
+    "disagreement": 0.006666666666666667,
+    "title": "The Environs of Thyargdrekeep",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--bias35--world-antique.svg",
+    "close-antique": "crescent-17--bias35--close-antique.svg",
+    "world-ink": "crescent-17--bias35--world-ink.svg",
+    "close-ink": "crescent-17--bias35--close-ink.svg"
+   },
+   "ms": 1718
+  },
+  {
+   "id": "crescent-17--bias70",
+   "caseSlug": "crescent-17",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 4,
+    "landShare": 0.34,
+    "largestShare": 0.9977787990196079,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.3412103309853821,
+    "landInside": 0.3450520833333333,
+    "landBeyond": 0.6549479166666666
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 5,
+    "landShare": 0.627578125,
+    "largestShare": 0.99531100875555,
+    "borderLand": 721,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.005729166666666666,
+    "title": "The Environs of Vorok",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--bias70--world-antique.svg",
+    "close-antique": "crescent-17--bias70--close-antique.svg",
+    "world-ink": "crescent-17--bias70--world-ink.svg",
+    "close-ink": "crescent-17--bias70--close-ink.svg"
+   },
+   "ms": 1672
+  },
+  {
+   "id": "crescent-17--soft-big",
+   "caseSlug": "crescent-17",
+   "dir": "soft-big",
+   "label": "The soft likeness, the outline drawn larger (to 0.06 from the edge, short of today's dome core)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: the fit is an unruled stand-in, and this shows what a larger one does",
+   "recipe": {
+    "seed": 17,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.34,
+    "largestShare": 0.9899280024509803,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.181015625,
+    "likeness": 0.5155096011816839,
+    "landInside": 0.5212545955882353,
+    "landBeyond": 0.4787454044117647
+   },
+   "outlineFit": "bigger: capped at inset 0.06 (covers 18% of the sheet, short of the dome core's 30%)",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.39303385416666664,
+    "largestShare": 0.9817459002815968,
+    "borderLand": 646,
+    "towns": 7,
+    "realms": 3,
+    "disagreement": 0.004309895833333333,
+    "title": "The Environs of Baryargspire",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Zagat",
+   "files": {
+    "world-antique": "crescent-17--soft-big--world-antique.svg",
+    "close-antique": "crescent-17--soft-big--close-antique.svg",
+    "world-ink": "crescent-17--soft-big--world-ink.svg",
+    "close-ink": "crescent-17--soft-big--close-ink.svg"
+   },
+   "ms": 1386
+  },
+  {
+   "id": "crescent-11--control",
+   "caseSlug": "crescent-11",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 11,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 9,
+    "landShare": 0.34,
+    "largestShare": 0.9962852328431373,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.2633681732244141,
+    "landInside": 0.28274356617647056,
+    "landBeyond": 0.7172564338235294
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 7,
+    "landShare": 0.6093489583333334,
+    "largestShare": 0.9965169451685969,
+    "borderLand": 679,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.007369791666666667,
+    "title": "The Environs of Wauki",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Tuko",
+   "files": {
+    "world-antique": "crescent-11--control--world-antique.svg",
+    "close-antique": "crescent-11--control--close-antique.svg",
+    "world-ink": "crescent-11--control--world-ink.svg",
+    "close-ink": "crescent-11--control--close-ink.svg"
+   },
+   "ms": 1317
+  },
+  {
+   "id": "crescent-11--soft",
+   "caseSlug": "crescent-11",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 11,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 11,
+    "landShare": 0.34,
+    "largestShare": 0.9941789215686274,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.3437037599119778,
+    "landInside": 0.3469286151960784,
+    "landBeyond": 0.6530713848039216
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 10,
+    "landmasses": 13,
+    "landShare": 0.3986588541666667,
+    "largestShare": 0.8999902015220302,
+    "borderLand": 716,
+    "towns": 10,
+    "realms": 3,
+    "disagreement": 0.007955729166666667,
+    "title": "The Environs of Kun",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Tuko",
+   "files": {
+    "world-antique": "crescent-11--soft--world-antique.svg",
+    "close-antique": "crescent-11--soft--close-antique.svg",
+    "world-ink": "crescent-11--soft--world-ink.svg",
+    "close-ink": "crescent-11--soft--close-ink.svg"
+   },
+   "ms": 1384
+  },
+  {
+   "id": "crescent-11--hard",
+   "caseSlug": "crescent-11",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 11,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.12114583333333333,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.24049479166666668,
+    "largestShare": 1,
+    "borderLand": 456,
+    "towns": 15,
+    "realms": 1,
+    "disagreement": 0.0012239583333333334,
+    "title": "The Environs of Moakikoa",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Tuko",
+   "files": {
+    "world-antique": "crescent-11--hard--world-antique.svg",
+    "close-antique": "crescent-11--hard--close-antique.svg",
+    "world-ink": "crescent-11--hard--world-ink.svg",
+    "close-ink": "crescent-11--hard--close-ink.svg"
+   },
+   "ms": 989
+  },
+  {
+   "id": "crescent-11--bias35",
+   "caseSlug": "crescent-11",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 11,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 8,
+    "landShare": 0.34,
+    "largestShare": 0.9710094975490197,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.3186387668478666,
+    "landInside": 0.3277420343137255,
+    "landBeyond": 0.6722579656862745
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 14,
+    "landShare": 0.594765625,
+    "largestShare": 0.9873024212969044,
+    "borderLand": 722,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.007317708333333333,
+    "title": "The Environs of Pemekonui",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Tuko",
+   "files": {
+    "world-antique": "crescent-11--bias35--world-antique.svg",
+    "close-antique": "crescent-11--bias35--close-antique.svg",
+    "world-ink": "crescent-11--bias35--world-ink.svg",
+    "close-ink": "crescent-11--bias35--close-ink.svg"
+   },
+   "ms": 1667
+  },
+  {
+   "id": "crescent-11--bias70",
+   "caseSlug": "crescent-11",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 11,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 6,
+    "landShare": 0.34,
+    "largestShare": 0.9874770220588235,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.12114583333333333,
+    "likeness": 0.3525817293003361,
+    "landInside": 0.35355392156862747,
+    "landBeyond": 0.6464460784313726
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 7,
+    "landmasses": 12,
+    "landShare": 0.5327213541666667,
+    "largestShare": 0.9579351306430719,
+    "borderLand": 675,
+    "towns": 13,
+    "realms": 3,
+    "disagreement": 0.0080859375,
+    "title": "The Environs of Kun",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.375,
+    "v0": 0.25,
+    "u1": 0.875,
+    "v1": 0.75
+   },
+   "title": "The Isle of Tuko",
+   "files": {
+    "world-antique": "crescent-11--bias70--world-antique.svg",
+    "close-antique": "crescent-11--bias70--close-antique.svg",
+    "world-ink": "crescent-11--bias70--world-ink.svg",
+    "close-ink": "crescent-11--bias70--close-ink.svg"
+   },
+   "ms": 1667
+  },
+  {
+   "id": "texas-30--control",
+   "caseSlug": "texas-30",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 10,
+    "landShare": 0.34,
+    "largestShare": 0.9918811274509803,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4329900530737057,
+    "landInside": 0.47177542892156865,
+    "landBeyond": 0.5282245710784313
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.797421875,
+    "largestShare": 0.9985957349531367,
+    "borderLand": 589,
+    "towns": 12,
+    "realms": 3,
+    "disagreement": 0.005703125,
+    "title": "The Environs of Kruthspire",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--control--world-antique.svg",
+    "close-antique": "texas-30--control--close-antique.svg",
+    "world-ink": "texas-30--control--world-ink.svg",
+    "close-ink": "texas-30--control--close-ink.svg"
+   },
+   "ms": 1389
+  },
+  {
+   "id": "texas-30--soft",
+   "caseSlug": "texas-30",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 5,
+    "landShare": 0.34,
+    "largestShare": 0.9986213235294118,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.5323611215515297,
+    "landInside": 0.5424325980392157,
+    "landBeyond": 0.4575674019607843
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 11,
+    "landShare": 0.7619010416666666,
+    "largestShare": 0.9991967734217452,
+    "borderLand": 558,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.004765625,
+    "title": "The Environs of Zokgru",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--soft--world-antique.svg",
+    "close-antique": "texas-30--soft--close-antique.svg",
+    "world-ink": "texas-30--soft--world-ink.svg",
+    "close-ink": "texas-30--soft--close-ink.svg"
+   },
+   "ms": 1438
+  },
+  {
+   "id": "texas-30--hard",
+   "caseSlug": "texas-30",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.190859375,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.5510807291666666,
+    "largestShare": 1,
+    "borderLand": 329,
+    "towns": 20,
+    "realms": 2,
+    "disagreement": 0.0025390625,
+    "title": "The Environs of Zurg",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--hard--world-antique.svg",
+    "close-antique": "texas-30--hard--close-antique.svg",
+    "world-ink": "texas-30--hard--world-ink.svg",
+    "close-ink": "texas-30--hard--close-ink.svg"
+   },
+   "ms": 1026
+  },
+  {
+   "id": "texas-30--bias35",
+   "caseSlug": "texas-30",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 9,
+    "landShare": 0.34,
+    "largestShare": 0.9971660539215687,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4676554231613809,
+    "landInside": 0.4975107230392157,
+    "landBeyond": 0.5024892769607843
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 8,
+    "landShare": 0.8008723958333334,
+    "largestShare": 0.9987643682832849,
+    "borderLand": 581,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.0060026041666666665,
+    "title": "The Environs of Zumarguspire",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--bias35--world-antique.svg",
+    "close-antique": "texas-30--bias35--close-antique.svg",
+    "world-ink": "texas-30--bias35--world-ink.svg",
+    "close-ink": "texas-30--bias35--close-ink.svg"
+   },
+   "ms": 1625
+  },
+  {
+   "id": "texas-30--bias70",
+   "caseSlug": "texas-30",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 10,
+    "landShare": 0.34,
+    "largestShare": 0.9897365196078431,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.51,
+    "landInside": 0.52734375,
+    "landBeyond": 0.47265625
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 7,
+    "landShare": 0.7799479166666666,
+    "largestShare": 0.9903839732888147,
+    "borderLand": 576,
+    "towns": 10,
+    "realms": 3,
+    "disagreement": 0.005833333333333334,
+    "title": "The Environs of Zumarguspire",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--bias70--world-antique.svg",
+    "close-antique": "texas-30--bias70--close-antique.svg",
+    "world-ink": "texas-30--bias70--world-ink.svg",
+    "close-ink": "texas-30--bias70--close-ink.svg"
+   },
+   "ms": 1583
+  },
+  {
+   "id": "texas-30--soft-big",
+   "caseSlug": "texas-30",
+   "dir": "soft-big",
+   "label": "The soft likeness, the outline drawn larger (to 0.06 from the edge, short of today's dome core)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: the fit is an unruled stand-in, and this shows what a larger one does",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 6,
+    "landmasses": 12,
+    "landShare": 0.34,
+    "largestShare": 0.8367417279411765,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.2845963541666667,
+    "likeness": 0.611428379467885,
+    "landInside": 0.6970358455882353,
+    "landBeyond": 0.3029641544117647
+   },
+   "outlineFit": "bigger: capped at inset 0.06 (covers 28% of the sheet, short of the dome core's 30%)",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 5,
+    "landShare": 0.7469661458333333,
+    "largestShare": 0.94503808809943,
+    "borderLand": 611,
+    "towns": 13,
+    "realms": 3,
+    "disagreement": 0.0058984375,
+    "title": "The Environs of Kra",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30--soft-big--world-antique.svg",
+    "close-antique": "texas-30--soft-big--close-antique.svg",
+    "world-ink": "texas-30--soft-big--world-ink.svg",
+    "close-ink": "texas-30--soft-big--close-ink.svg"
+   },
+   "ms": 1369
+  },
+  {
+   "id": "texas-8--control",
+   "caseSlug": "texas-8",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 8,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 7,
+    "landShare": 0.34,
+    "largestShare": 0.9988511029411765,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.3734209196563921,
+    "landInside": 0.4245174632352941,
+    "landBeyond": 0.5754825367647058
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 13,
+    "landShare": 0.7486067708333334,
+    "largestShare": 0.9988520341606805,
+    "borderLand": 661,
+    "towns": 13,
+    "realms": 3,
+    "disagreement": 0.008216145833333334,
+    "title": "The Environs of Leasmiaport",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Thio",
+   "files": {
+    "world-antique": "texas-8--control--world-antique.svg",
+    "close-antique": "texas-8--control--close-antique.svg",
+    "world-ink": "texas-8--control--world-ink.svg",
+    "close-ink": "texas-8--control--close-ink.svg"
+   },
+   "ms": 1290
+  },
+  {
+   "id": "texas-8--soft",
+   "caseSlug": "texas-8",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 8,
+    "landShare": 0.34,
+    "largestShare": 0.9973958333333334,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4965312190287413,
+    "landInside": 0.5180376838235294,
+    "landBeyond": 0.48196231617647056
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 4,
+    "landShare": 0.8006770833333333,
+    "largestShare": 0.9998861640538607,
+    "borderLand": 560,
+    "towns": 10,
+    "realms": 3,
+    "disagreement": 0.006380208333333333,
+    "title": "The Environs of Mimario",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Thio",
+   "files": {
+    "world-antique": "texas-8--soft--world-antique.svg",
+    "close-antique": "texas-8--soft--close-antique.svg",
+    "world-ink": "texas-8--soft--world-ink.svg",
+    "close-ink": "texas-8--soft--close-ink.svg"
+   },
+   "ms": 1358
+  },
+  {
+   "id": "texas-8--hard",
+   "caseSlug": "texas-8",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.190859375,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.5510807291666666,
+    "largestShare": 1,
+    "borderLand": 329,
+    "towns": 20,
+    "realms": 2,
+    "disagreement": 0.0025390625,
+    "title": "The Environs of Thesmar",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Thio",
+   "files": {
+    "world-antique": "texas-8--hard--world-antique.svg",
+    "close-antique": "texas-8--hard--close-antique.svg",
+    "world-ink": "texas-8--hard--world-ink.svg",
+    "close-ink": "texas-8--hard--close-ink.svg"
+   },
+   "ms": 1035
+  },
+  {
+   "id": "texas-8--bias35",
+   "caseSlug": "texas-8",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 7,
+    "landShare": 0.34,
+    "largestShare": 0.9996553308823529,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.403200826019618,
+    "landInside": 0.44864430147058826,
+    "landBeyond": 0.5513556985294118
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 4,
+    "landShare": 0.7561197916666667,
+    "largestShare": 0.9998105734458412,
+    "borderLand": 688,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.007578125,
+    "title": "The Environs of Seliar",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Thio",
+   "files": {
+    "world-antique": "texas-8--bias35--world-antique.svg",
+    "close-antique": "texas-8--bias35--close-antique.svg",
+    "world-ink": "texas-8--bias35--world-ink.svg",
+    "close-ink": "texas-8--bias35--close-ink.svg"
+   },
+   "ms": 1580
+  },
+  {
+   "id": "texas-8--bias70",
+   "caseSlug": "texas-8",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 9,
+    "landShare": 0.34,
+    "largestShare": 0.9986596200980392,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.45083804846802605,
+    "landInside": 0.48517922794117646,
+    "landBeyond": 0.5148207720588235
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 5,
+    "landShare": 0.7861979166666667,
+    "largestShare": 0.9996025173898642,
+    "borderLand": 607,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.007552083333333333,
+    "title": "The Environs of Thon",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Thio",
+   "files": {
+    "world-antique": "texas-8--bias70--world-antique.svg",
+    "close-antique": "texas-8--bias70--close-antique.svg",
+    "world-ink": "texas-8--bias70--world-ink.svg",
+    "close-ink": "texas-8--bias70--close-ink.svg"
+   },
+   "ms": 1609
+  },
+  {
+   "id": "japan-13--control",
+   "caseSlug": "japan-13",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 11,
+    "landmasses": 31,
+    "landShare": 0.24,
+    "largestShare": 0.7568901909722222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.16246966019417475,
+    "landInside": 0.17431640625,
+    "landBeyond": 0.82568359375
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 24,
+    "landShare": 0.6605989583333334,
+    "largestShare": 0.900638624985217,
+    "borderLand": 542,
+    "towns": 19,
+    "realms": 5,
+    "disagreement": 0.011510416666666667,
+    "title": "The Environs of Feniemir",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--control--world-antique.svg",
+    "close-antique": "japan-13--control--close-antique.svg",
+    "world-ink": "japan-13--control--world-ink.svg",
+    "close-ink": "japan-13--control--close-ink.svg"
+   },
+   "ms": 1350
+  },
+  {
+   "id": "japan-13--soft",
+   "caseSlug": "japan-13",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 15,
+    "landShare": 0.24,
+    "largestShare": 0.9459635416666666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.22509992006394883,
+    "landInside": 0.22916666666666666,
+    "landBeyond": 0.7708333333333334
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 17,
+    "landShare": 0.5668619791666667,
+    "largestShare": 0.9783852073044677,
+    "borderLand": 393,
+    "towns": 7,
+    "realms": 2,
+    "disagreement": 0.007278645833333333,
+    "title": "The Environs of Bramere",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--soft--world-antique.svg",
+    "close-antique": "japan-13--soft--close-antique.svg",
+    "world-ink": "japan-13--soft--world-ink.svg",
+    "close-ink": "japan-13--soft--close-ink.svg"
+   },
+   "ms": 1309
+  },
+  {
+   "id": "japan-13--hard",
+   "caseSlug": "japan-13",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.0593359375,
+    "largestShare": 0.7105551898178626,
+    "borderLand": 0,
+    "towns": 11,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.1936328125,
+    "largestShare": 0.78925425324457,
+    "borderLand": 164,
+    "towns": 6,
+    "realms": 2,
+    "disagreement": 0.0031119791666666665,
+    "title": "The Environs of Fie",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--hard--world-antique.svg",
+    "close-antique": "japan-13--hard--close-antique.svg",
+    "world-ink": "japan-13--hard--world-ink.svg",
+    "close-ink": "japan-13--hard--close-ink.svg"
+   },
+   "ms": 947
+  },
+  {
+   "id": "japan-13--bias35",
+   "caseSlug": "japan-13",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 28,
+    "landShare": 0.24,
+    "largestShare": 0.9295789930555556,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.1932419806913734,
+    "landInside": 0.20198567708333334,
+    "landBeyond": 0.7980143229166666
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 13,
+    "landShare": 0.710859375,
+    "largestShare": 0.9910612887863135,
+    "borderLand": 527,
+    "towns": 19,
+    "realms": 2,
+    "disagreement": 0.007890625,
+    "title": "The Environs of Thei",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--bias35--world-antique.svg",
+    "close-antique": "japan-13--bias35--close-antique.svg",
+    "world-ink": "japan-13--bias35--world-ink.svg",
+    "close-ink": "japan-13--bias35--close-ink.svg"
+   },
+   "ms": 1583
+  },
+  {
+   "id": "japan-13--bias70",
+   "caseSlug": "japan-13",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 21,
+    "landShare": 0.24,
+    "largestShare": 0.96435546875,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.2160918324164198,
+    "landInside": 0.2216254340277778,
+    "landBeyond": 0.7783745659722222
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 18,
+    "landShare": 0.645859375,
+    "largestShare": 0.9875811459215355,
+    "borderLand": 471,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.007578125,
+    "title": "The Environs of Fenielaeglade",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--bias70--world-antique.svg",
+    "close-antique": "japan-13--bias70--close-antique.svg",
+    "world-ink": "japan-13--bias70--world-ink.svg",
+    "close-ink": "japan-13--bias70--close-ink.svg"
+   },
+   "ms": 1593
+  },
+  {
+   "id": "japan-13--soft-big",
+   "caseSlug": "japan-13",
+   "dir": "soft-big",
+   "label": "The soft likeness, the outline drawn larger (to 0.06 from the edge, short of today's dome core)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: the fit is an unruled stand-in, and this shows what a larger one does",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.9686414930555556,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.08877604166666667,
+    "likeness": 0.3010769310042768,
+    "landInside": 0.3170030381944444,
+    "landBeyond": 0.6829969618055556
+   },
+   "outlineFit": "bigger: capped at inset 0.06 (covers 9% of the sheet, short of the dome core's 24%)",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 21,
+    "landShare": 0.5090755208333333,
+    "largestShare": 0.9721462004757399,
+    "borderLand": 357,
+    "towns": 10,
+    "realms": 2,
+    "disagreement": 0.0074609375,
+    "title": "The Environs of Brei",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--soft-big--world-antique.svg",
+    "close-antique": "japan-13--soft-big--close-antique.svg",
+    "world-ink": "japan-13--soft-big--world-ink.svg",
+    "close-ink": "japan-13--soft-big--close-ink.svg"
+   },
+   "ms": 1308
+  },
+  {
+   "id": "japan-10--control",
+   "caseSlug": "japan-10",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 10,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 10,
+    "landmasses": 43,
+    "landShare": 0.24,
+    "largestShare": 0.5380859375,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.08428450146212621,
+    "landInside": 0.0969509548611111,
+    "landBeyond": 0.9030490451388888
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 24,
+    "landShare": 0.6428255208333333,
+    "largestShare": 0.6073852012396443,
+    "borderLand": 588,
+    "towns": 19,
+    "realms": 2,
+    "disagreement": 0.011731770833333334,
+    "title": "The Environs of Keddi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Ger",
+   "files": {
+    "world-antique": "japan-10--control--world-antique.svg",
+    "close-antique": "japan-10--control--close-antique.svg",
+    "world-ink": "japan-10--control--world-ink.svg",
+    "close-ink": "japan-10--control--close-ink.svg"
+   },
+   "ms": 1328
+  },
+  {
+   "id": "japan-10--soft",
+   "caseSlug": "japan-10",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 10,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 7,
+    "landmasses": 25,
+    "landShare": 0.24,
+    "largestShare": 0.9722222222222222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.20500052416395848,
+    "landInside": 0.2121853298611111,
+    "landBeyond": 0.7878146701388888
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 13,
+    "landShare": 0.6259244791666667,
+    "largestShare": 0.9992095026107216,
+    "borderLand": 478,
+    "towns": 18,
+    "realms": 2,
+    "disagreement": 0.009596354166666666,
+    "title": "The Environs of Trikkrodgrad",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Ger",
+   "files": {
+    "world-antique": "japan-10--soft--world-antique.svg",
+    "close-antique": "japan-10--soft--close-antique.svg",
+    "world-ink": "japan-10--soft--world-ink.svg",
+    "close-ink": "japan-10--soft--close-ink.svg"
+   },
+   "ms": 1352
+  },
+  {
+   "id": "japan-10--hard",
+   "caseSlug": "japan-10",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 10,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.0593359375,
+    "largestShare": 0.7105551898178626,
+    "borderLand": 0,
+    "towns": 11,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.1936328125,
+    "largestShare": 0.78925425324457,
+    "borderLand": 164,
+    "towns": 6,
+    "realms": 2,
+    "disagreement": 0.0031119791666666665,
+    "title": "The Environs of Vur",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Ger",
+   "files": {
+    "world-antique": "japan-10--hard--world-antique.svg",
+    "close-antique": "japan-10--hard--close-antique.svg",
+    "world-ink": "japan-10--hard--world-ink.svg",
+    "close-ink": "japan-10--hard--close-ink.svg"
+   },
+   "ms": 930
+  },
+  {
+   "id": "japan-10--bias35",
+   "caseSlug": "japan-10",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 10,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 10,
+    "landShare": 0.24,
+    "largestShare": 0.6107855902777778,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.13162687669209944,
+    "landInside": 0.1450737847222222,
+    "landBeyond": 0.8549262152777778
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 9,
+    "landShare": 0.69953125,
+    "largestShare": 0.6421897103715285,
+    "borderLand": 569,
+    "towns": 20,
+    "realms": 2,
+    "disagreement": 0.011119791666666667,
+    "title": "The Environs of Draklisk",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Ger",
+   "files": {
+    "world-antique": "japan-10--bias35--world-antique.svg",
+    "close-antique": "japan-10--bias35--close-antique.svg",
+    "world-ink": "japan-10--bias35--world-ink.svg",
+    "close-ink": "japan-10--bias35--close-ink.svg"
+   },
+   "ms": 1628
+  },
+  {
+   "id": "japan-10--bias70",
+   "caseSlug": "japan-10",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 10,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 13,
+    "landShare": 0.24,
+    "largestShare": 0.9520941840277778,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "shape": {
+    "outlineShare": 0.0593359375,
+    "likeness": 0.1708174178762414,
+    "landInside": 0.18196614583333334,
+    "landBeyond": 0.8180338541666666
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 9,
+    "landShare": 0.6961979166666666,
+    "largestShare": 0.999513727837211,
+    "borderLand": 453,
+    "towns": 19,
+    "realms": 4,
+    "disagreement": 0.008255208333333333,
+    "title": "The Environs of Tragyin",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Ger",
+   "files": {
+    "world-antique": "japan-10--bias70--world-antique.svg",
+    "close-antique": "japan-10--bias70--close-antique.svg",
+    "world-ink": "japan-10--bias70--world-ink.svg",
+    "close-ink": "japan-10--bias70--close-ink.svg"
+   },
+   "ms": 1627
+  },
+  {
+   "id": "japan-turned-13--control",
+   "caseSlug": "japan-turned-13",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 11,
+    "landmasses": 31,
+    "landShare": 0.24,
+    "largestShare": 0.7568901909722222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "shape": {
+    "outlineShare": 0.07173177083333333,
+    "likeness": 0.16865176217904912,
+    "landInside": 0.1874457465277778,
+    "landBeyond": 0.8125542534722222
+   },
+   "outlineFit": "turned, then fitted in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 24,
+    "landShare": 0.6605989583333334,
+    "largestShare": 0.900638624985217,
+    "borderLand": 542,
+    "towns": 19,
+    "realms": 5,
+    "disagreement": 0.011510416666666667,
+    "title": "The Environs of Feniemir",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-13--control--world-antique.svg",
+    "close-antique": "japan-13--control--close-antique.svg",
+    "world-ink": "japan-13--control--world-ink.svg",
+    "close-ink": "japan-13--control--close-ink.svg"
+   },
+   "ms": 688
+  },
+  {
+   "id": "japan-turned-13--soft",
+   "caseSlug": "japan-turned-13",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 30,
+    "landShare": 0.24,
+    "largestShare": 0.8336588541666666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.07173177083333333,
+    "likeness": 0.2531274535461921,
+    "landInside": 0.2623697916666667,
+    "landBeyond": 0.7376302083333334
+   },
+   "outlineFit": "turned, then fitted in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 9,
+    "landmasses": 37,
+    "landShare": 0.6058463541666667,
+    "largestShare": 0.9659996991123815,
+    "borderLand": 385,
+    "towns": 12,
+    "realms": 3,
+    "disagreement": 0.0109765625,
+    "title": "The Environs of Thei",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-turned-13--soft--world-antique.svg",
+    "close-antique": "japan-turned-13--soft--close-antique.svg",
+    "world-ink": "japan-turned-13--soft--world-ink.svg",
+    "close-ink": "japan-turned-13--soft--close-ink.svg"
+   },
+   "ms": 1450
+  },
+  {
+   "id": "japan-turned-13--hard",
+   "caseSlug": "japan-turned-13",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.07173177083333333,
+    "largestShare": 0.7101107278998003,
+    "borderLand": 0,
+    "towns": 13,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.07173177083333333,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "turned, then fitted in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.21361979166666667,
+    "largestShare": 0.827441180056077,
+    "borderLand": 93,
+    "towns": 8,
+    "realms": 2,
+    "disagreement": 0.0032552083333333335,
+    "title": "The Environs of Brei",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-turned-13--hard--world-antique.svg",
+    "close-antique": "japan-turned-13--hard--close-antique.svg",
+    "world-ink": "japan-turned-13--hard--world-ink.svg",
+    "close-ink": "japan-turned-13--hard--close-ink.svg"
+   },
+   "ms": 1001
+  },
+  {
+   "id": "japan-turned-13--bias35",
+   "caseSlug": "japan-turned-13",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 22,
+    "landShare": 0.24,
+    "largestShare": 0.8882921006944444,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.07173177083333333,
+    "likeness": 0.18731402499504066,
+    "landInside": 0.20491536458333334,
+    "landBeyond": 0.7950846354166666
+   },
+   "outlineFit": "turned, then fitted in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 22,
+    "landShare": 0.7021484375,
+    "largestShare": 0.9845526193787668,
+    "borderLand": 497,
+    "towns": 17,
+    "realms": 3,
+    "disagreement": 0.012669270833333333,
+    "title": "The Environs of Brei",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-turned-13--bias35--world-antique.svg",
+    "close-antique": "japan-turned-13--bias35--close-antique.svg",
+    "world-ink": "japan-turned-13--bias35--world-ink.svg",
+    "close-ink": "japan-turned-13--bias35--close-ink.svg"
+   },
+   "ms": 1654
+  },
+  {
+   "id": "japan-turned-13--bias70",
+   "caseSlug": "japan-turned-13",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 6,
+    "landmasses": 29,
+    "landShare": 0.24,
+    "largestShare": 0.8655056423611112,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.07173177083333333,
+    "likeness": 0.22054550089217437,
+    "landInside": 0.23470052083333334,
+    "landBeyond": 0.7652994791666666
+   },
+   "outlineFit": "turned, then fitted in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 22,
+    "landShare": 0.6701432291666667,
+    "largestShare": 0.9760817611284901,
+    "borderLand": 390,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.011705729166666666,
+    "title": "The Environs of Gwithe",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Feelie",
+   "files": {
+    "world-antique": "japan-turned-13--bias70--world-antique.svg",
+    "close-antique": "japan-turned-13--bias70--close-antique.svg",
+    "world-ink": "japan-turned-13--bias70--world-ink.svg",
+    "close-ink": "japan-turned-13--bias70--close-ink.svg"
+   },
+   "ms": 1660
+  },
+  {
+   "id": "texas-30-coast0.1--control",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 6,
+    "landShare": 0.34,
+    "largestShare": 0.8819316789215687,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.44083969465648853,
+    "landInside": 0.47771139705882354,
+    "landBeyond": 0.5222886029411765
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 8,
+    "landShare": 0.7783984375,
+    "largestShare": 0.9537311185828273,
+    "borderLand": 555,
+    "towns": 16,
+    "realms": 3,
+    "disagreement": 0.06884114583333334,
+    "title": "The Environs of Gekburg",
+    "dropped": 3
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--control--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--control--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--control--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--control--close-ink.svg"
+   },
+   "ms": 1347
+  },
+  {
+   "id": "texas-30-coast0.1--control-pass",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "control-pass",
+   "label": "Today's dome, its close-up drawn as Sub 1 will draw it (the spike passes the coast warp)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 6,
+    "landShare": 0.34,
+    "largestShare": 0.8819316789215687,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.44083969465648853,
+    "landInside": 0.47771139705882354,
+    "landBeyond": 0.5222886029411765
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 7,
+    "landShare": 0.81921875,
+    "largestShare": 0.9540339500286096,
+    "borderLand": 556,
+    "towns": 19,
+    "realms": 3,
+    "disagreement": 0.004895833333333334,
+    "title": "The Environs of Gekburg",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--control-pass--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--control-pass--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--control-pass--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--control-pass--close-ink.svg"
+   },
+   "ms": 1379
+  },
+  {
+   "id": "texas-30-coast0.1--soft",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.34,
+    "largestShare": 0.9990808823529411,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.5436165379373012,
+    "landInside": 0.5498621323529411,
+    "landBeyond": 0.4501378676470588
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.7958984375,
+    "largestShare": 1,
+    "borderLand": 678,
+    "towns": 12,
+    "realms": 3,
+    "disagreement": 0.0032161458333333334,
+    "title": "The Environs of Maladbaru",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--soft--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--soft--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--soft--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--soft--close-ink.svg"
+   },
+   "ms": 1384
+  },
+  {
+   "id": "texas-30-coast0.1--hard",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.190859375,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.5510807291666666,
+    "largestShare": 1,
+    "borderLand": 329,
+    "towns": 20,
+    "realms": 2,
+    "disagreement": 0.0025390625,
+    "title": "The Environs of Zurg",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--hard--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--hard--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--hard--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--hard--close-ink.svg"
+   },
+   "ms": 1038
+  },
+  {
+   "id": "texas-30-coast0.1--bias35",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 6,
+    "landShare": 0.34,
+    "largestShare": 0.9978553921568627,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4723726977248104,
+    "landInside": 0.5009191176470589,
+    "landBeyond": 0.4990808823529412
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 4,
+    "landShare": 0.8195182291666666,
+    "largestShare": 0.9999523348003623,
+    "borderLand": 611,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.004752604166666666,
+    "title": "The Environs of Kra",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--bias35--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--bias35--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--bias35--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--bias35--close-ink.svg"
+   },
+   "ms": 1594
+  },
+  {
+   "id": "texas-30-coast0.1--bias70",
+   "caseSlug": "texas-30-coast0.1",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.34,
+    "largestShare": 0.9983532475490197,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.5109513397324241,
+    "landInside": 0.5279947916666666,
+    "landBeyond": 0.4720052083333333
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.7998046875,
+    "largestShare": 1,
+    "borderLand": 639,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.003841145833333333,
+    "title": "The Environs of Voruzak",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.1--bias70--world-antique.svg",
+    "close-antique": "texas-30-coast0.1--bias70--close-antique.svg",
+    "world-ink": "texas-30-coast0.1--bias70--world-ink.svg",
+    "close-ink": "texas-30-coast0.1--bias70--close-ink.svg"
+   },
+   "ms": 1588
+  },
+  {
+   "id": "texas-30-coast0.95--control",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 20,
+    "landShare": 0.34,
+    "largestShare": 0.9357766544117647,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4141519250780437,
+    "landInside": 0.4572610294117647,
+    "landBeyond": 0.5427389705882353
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 4,
+    "landShare": 0.8033854166666666,
+    "largestShare": 0.9982820097244732,
+    "borderLand": 602,
+    "towns": 10,
+    "realms": 4,
+    "disagreement": 0.058359375,
+    "title": "The Environs of Gya",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--control--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--control--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--control--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--control--close-ink.svg"
+   },
+   "ms": 1339
+  },
+  {
+   "id": "texas-30-coast0.95--control-pass",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "control-pass",
+   "label": "Today's dome, its close-up drawn as Sub 1 will draw it (the spike passes the coast warp)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 20,
+    "landShare": 0.34,
+    "largestShare": 0.9357766544117647,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4141519250780437,
+    "landInside": 0.4572610294117647,
+    "landBeyond": 0.5427389705882353
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 11,
+    "landShare": 0.7689713541666666,
+    "largestShare": 0.9892984743552838,
+    "borderLand": 643,
+    "towns": 10,
+    "realms": 4,
+    "disagreement": 0.007513020833333333,
+    "title": "The Environs of Gya",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--control-pass--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--control-pass--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--control-pass--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--control-pass--close-ink.svg"
+   },
+   "ms": 1373
+  },
+  {
+   "id": "texas-30-coast0.95--soft",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "soft",
+   "label": "The soft likeness (ruled D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 12,
+    "landmasses": 19,
+    "landShare": 0.34,
+    "largestShare": 0.9534313725490197,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4993380406001765,
+    "landInside": 0.5199908088235294,
+    "landBeyond": 0.48000919117647056
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 10,
+    "landShare": 0.7547265625,
+    "largestShare": 0.9767610372133948,
+    "borderLand": 609,
+    "towns": 10,
+    "realms": 3,
+    "disagreement": 0.0080078125,
+    "title": "The Environs of Zebaramar",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--soft--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--soft--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--soft--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--soft--close-ink.svg"
+   },
+   "ms": 1455
+  },
+  {
+   "id": "texas-30-coast0.95--hard",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "hard",
+   "label": "The hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.190859375,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.5510807291666666,
+    "largestShare": 1,
+    "borderLand": 329,
+    "towns": 20,
+    "realms": 2,
+    "disagreement": 0.0025390625,
+    "title": "The Environs of Zurg",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--hard--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--hard--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--hard--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--hard--close-ink.svg"
+   },
+   "ms": 1043
+  },
+  {
+   "id": "texas-30-coast0.95--bias35",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "bias35",
+   "label": "A bias on today's dome, weak (0.35)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 11,
+    "landmasses": 25,
+    "landShare": 0.34,
+    "largestShare": 0.9486443014705882,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.45648756787653616,
+    "landInside": 0.48935355392156865,
+    "landBeyond": 0.5106464460784313
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 11,
+    "landShare": 0.7770572916666667,
+    "largestShare": 0.9918060256711015,
+    "borderLand": 665,
+    "towns": 8,
+    "realms": 3,
+    "disagreement": 0.008098958333333333,
+    "title": "The Environs of Zumarguspire",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--bias35--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--bias35--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--bias35--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--bias35--close-ink.svg"
+   },
+   "ms": 1623
+  },
+  {
+   "id": "texas-30-coast0.95--bias70",
+   "caseSlug": "texas-30-coast0.95",
+   "dir": "bias70",
+   "label": "A bias on today's dome, strong (0.7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 11,
+    "landmasses": 22,
+    "landShare": 0.34,
+    "largestShare": 0.9379212622549019,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.48752189141856395,
+    "landInside": 0.51171875,
+    "landBeyond": 0.48828125
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 9,
+    "landShare": 0.7762630208333333,
+    "largestShare": 0.9513897042789808,
+    "borderLand": 601,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.008033854166666667,
+    "title": "The Environs of Thyarg",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isle of Kre",
+   "files": {
+    "world-antique": "texas-30-coast0.95--bias70--world-antique.svg",
+    "close-antique": "texas-30-coast0.95--bias70--close-antique.svg",
+    "world-ink": "texas-30-coast0.95--bias70--world-ink.svg",
+    "close-ink": "texas-30-coast0.95--bias70--close-ink.svg"
+   },
+   "ms": 1659
+  },
+  {
+   "id": "count-1--control",
+   "caseSlug": "count-1",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.8332248263888888,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 19,
+    "landShare": 0.6138411458333334,
+    "largestShare": 0.9519122669325244,
+    "borderLand": 638,
+    "towns": 17,
+    "realms": 3,
+    "disagreement": 0.011549479166666666,
+    "title": "The Environs of Ual",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--control--world-antique.svg",
+    "close-antique": "count-1--control--close-antique.svg",
+    "world-ink": "count-1--control--world-ink.svg",
+    "close-ink": "count-1--control--close-ink.svg"
+   },
+   "ms": 1295
+  },
+  {
+   "id": "count-1--n2-equal-measured",
+   "caseSlug": "count-1",
+   "dir": "n2-equal-measured",
+   "label": "Asked 2, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 7,
+    "landmasses": 37,
+    "landShare": 0.24,
+    "largestShare": 0.5472005208333334,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 23,
+    "landShare": 0.2730208333333333,
+    "largestShare": 0.9293685616177032,
+    "borderLand": 312,
+    "towns": 6,
+    "realms": 4,
+    "disagreement": 0.004166666666666667,
+    "title": "The Environs of Tluachican",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n2-equal-measured--world-antique.svg",
+    "close-antique": "count-1--n2-equal-measured--close-antique.svg",
+    "world-ink": "count-1--n2-equal-measured--world-ink.svg",
+    "close-ink": "count-1--n2-equal-measured--close-ink.svg"
+   },
+   "ms": 1217
+  },
+  {
+   "id": "count-1--n2-equal-sunk",
+   "caseSlug": "count-1",
+   "dir": "n2-equal-sunk",
+   "label": "Asked 2, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 15,
+    "landShare": 0.24,
+    "largestShare": 0.5599500868055556,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.30509114583333335,
+    "largestShare": 0.9469506209722163,
+    "borderLand": 311,
+    "towns": 5,
+    "realms": 2,
+    "disagreement": 0.0028515625,
+    "title": "The Environs of Mectlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n2-equal-sunk--world-antique.svg",
+    "close-antique": "count-1--n2-equal-sunk--close-antique.svg",
+    "world-ink": "count-1--n2-equal-sunk--world-ink.svg",
+    "close-ink": "count-1--n2-equal-sunk--close-ink.svg"
+   },
+   "ms": 1178
+  },
+  {
+   "id": "count-1--n2-varied-measured",
+   "caseSlug": "count-1",
+   "dir": "n2-varied-measured",
+   "label": "Asked 2, varied sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "varied",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 2,
+    "landShare": 0.24,
+    "largestShare": 0.5607096354166666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 10,
+    "landShare": 0.31592447916666666,
+    "largestShare": 0.9334789597329267,
+    "borderLand": 264,
+    "towns": 9,
+    "realms": 2,
+    "disagreement": 0.0039453125,
+    "title": "The Environs of Tzua",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n2-varied-measured--world-antique.svg",
+    "close-antique": "count-1--n2-varied-measured--close-antique.svg",
+    "world-ink": "count-1--n2-varied-measured--world-ink.svg",
+    "close-ink": "count-1--n2-varied-measured--close-ink.svg"
+   },
+   "ms": 1219
+  },
+  {
+   "id": "count-1--n2-varied-sunk",
+   "caseSlug": "count-1",
+   "dir": "n2-varied-sunk",
+   "label": "Asked 2, varied sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "varied",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 3,
+    "landShare": 0.24,
+    "largestShare": 0.5380316840277778,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 2,
+    "landShare": 0.31170572916666667,
+    "largestShare": 0.910731442416141,
+    "borderLand": 303,
+    "towns": 6,
+    "realms": 2,
+    "disagreement": 0.0026692708333333334,
+    "title": "The Environs of Tluachican",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n2-varied-sunk--world-antique.svg",
+    "close-antique": "count-1--n2-varied-sunk--close-antique.svg",
+    "world-ink": "count-1--n2-varied-sunk--world-ink.svg",
+    "close-ink": "count-1--n2-varied-sunk--close-ink.svg"
+   },
+   "ms": 1208
+  },
+  {
+   "id": "count-1--n5-equal-measured",
+   "caseSlug": "count-1",
+   "dir": "n5-equal-measured",
+   "label": "Asked 5, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 18,
+    "landShare": 0.24,
+    "largestShare": 0.1980251736111111,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 9,
+    "landShare": 0.154765625,
+    "largestShare": 0.5846373885243143,
+    "borderLand": 380,
+    "towns": 5,
+    "realms": 6,
+    "disagreement": 0.002994791666666667,
+    "title": "The Environs of Liapo",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n5-equal-measured--world-antique.svg",
+    "close-antique": "count-1--n5-equal-measured--close-antique.svg",
+    "world-ink": "count-1--n5-equal-measured--world-ink.svg",
+    "close-ink": "count-1--n5-equal-measured--close-ink.svg"
+   },
+   "ms": 1249
+  },
+  {
+   "id": "count-1--n5-equal-sunk",
+   "caseSlug": "count-1",
+   "dir": "n5-equal-sunk",
+   "label": "Asked 5, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 5,
+    "landShare": 0.24,
+    "largestShare": 0.21034071180555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 3,
+    "landShare": 0.18044270833333334,
+    "largestShare": 0.5808919035935921,
+    "borderLand": 362,
+    "towns": 8,
+    "realms": 5,
+    "disagreement": 0.002734375,
+    "title": "The Environs of Xamual",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n5-equal-sunk--world-antique.svg",
+    "close-antique": "count-1--n5-equal-sunk--close-antique.svg",
+    "world-ink": "count-1--n5-equal-sunk--world-ink.svg",
+    "close-ink": "count-1--n5-equal-sunk--close-ink.svg"
+   },
+   "ms": 1228
+  },
+  {
+   "id": "count-1--n5-varied-measured",
+   "caseSlug": "count-1",
+   "dir": "n5-varied-measured",
+   "label": "Asked 5, varied sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "varied",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 8,
+    "landShare": 0.24,
+    "largestShare": 0.23111979166666666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 6,
+    "landShare": 0.152421875,
+    "largestShare": 0.7125405774816334,
+    "borderLand": 361,
+    "towns": 7,
+    "realms": 5,
+    "disagreement": 0.00390625,
+    "title": "The Environs of Liaci",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n5-varied-measured--world-antique.svg",
+    "close-antique": "count-1--n5-varied-measured--close-antique.svg",
+    "world-ink": "count-1--n5-varied-measured--world-ink.svg",
+    "close-ink": "count-1--n5-varied-measured--close-ink.svg"
+   },
+   "ms": 1244
+  },
+  {
+   "id": "count-1--n5-varied-sunk",
+   "caseSlug": "count-1",
+   "dir": "n5-varied-sunk",
+   "label": "Asked 5, varied sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "varied",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 5,
+    "landShare": 0.24,
+    "largestShare": 0.23475477430555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 4,
+    "landShare": 0.15486979166666667,
+    "largestShare": 0.6906843786783252,
+    "borderLand": 367,
+    "towns": 6,
+    "realms": 5,
+    "disagreement": 0.003125,
+    "title": "The Environs of Uatil",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n5-varied-sunk--world-antique.svg",
+    "close-antique": "count-1--n5-varied-sunk--close-antique.svg",
+    "world-ink": "count-1--n5-varied-sunk--world-ink.svg",
+    "close-ink": "count-1--n5-varied-sunk--close-ink.svg"
+   },
+   "ms": 1237
+  },
+  {
+   "id": "count-1--n20-equal-measured",
+   "caseSlug": "count-1",
+   "dir": "n20-equal-measured",
+   "label": "Asked 20, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 25,
+    "landmasses": 40,
+    "landShare": 0.24,
+    "largestShare": 0.06895616319444445,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 13,
+    "landmasses": 13,
+    "landShare": 0.39934895833333334,
+    "largestShare": 0.12517117704597328,
+    "borderLand": 385,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.01015625,
+    "title": "The Environs of Uaya",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n20-equal-measured--world-antique.svg",
+    "close-antique": "count-1--n20-equal-measured--close-antique.svg",
+    "world-ink": "count-1--n20-equal-measured--world-ink.svg",
+    "close-ink": "count-1--n20-equal-measured--close-ink.svg"
+   },
+   "ms": 1345
+  },
+  {
+   "id": "count-1--n20-equal-sunk",
+   "caseSlug": "count-1",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.05457899305555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.43221354166666665,
+    "largestShare": 0.12176899439657769,
+    "borderLand": 390,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.010755208333333334,
+    "title": "The Environs of Pelo",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n20-equal-sunk--world-antique.svg",
+    "close-antique": "count-1--n20-equal-sunk--close-antique.svg",
+    "world-ink": "count-1--n20-equal-sunk--world-ink.svg",
+    "close-ink": "count-1--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1355
+  },
+  {
+   "id": "count-1--n20-varied-measured",
+   "caseSlug": "count-1",
+   "dir": "n20-varied-measured",
+   "label": "Asked 20, varied sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "varied",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 18,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.16981336805555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 10,
+    "landmasses": 14,
+    "landShare": 0.3334244791666667,
+    "largestShare": 0.24981450384660445,
+    "borderLand": 447,
+    "towns": 10,
+    "realms": 8,
+    "disagreement": 0.008138020833333334,
+    "title": "The Environs of Tzi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n20-varied-measured--world-antique.svg",
+    "close-antique": "count-1--n20-varied-measured--close-antique.svg",
+    "world-ink": "count-1--n20-varied-measured--world-ink.svg",
+    "close-ink": "count-1--n20-varied-measured--close-ink.svg"
+   },
+   "ms": 1336
+  },
+  {
+   "id": "count-1--n20-varied-sunk",
+   "caseSlug": "count-1",
+   "dir": "n20-varied-sunk",
+   "label": "Asked 20, varied sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "varied",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 18,
+    "landmasses": 18,
+    "landShare": 0.24,
+    "largestShare": 0.1641167534722222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 10,
+    "landmasses": 11,
+    "landShare": 0.3377604166666667,
+    "largestShare": 0.23989976869699306,
+    "borderLand": 427,
+    "towns": 9,
+    "realms": 8,
+    "disagreement": 0.008333333333333333,
+    "title": "The Environs of Tzuayictlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n20-varied-sunk--world-antique.svg",
+    "close-antique": "count-1--n20-varied-sunk--close-antique.svg",
+    "world-ink": "count-1--n20-varied-sunk--world-ink.svg",
+    "close-ink": "count-1--n20-varied-sunk--close-ink.svg"
+   },
+   "ms": 1356
+  },
+  {
+   "id": "count-1--n100-equal-measured",
+   "caseSlug": "count-1",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 91,
+    "landmasses": 107,
+    "landShare": 0.24,
+    "largestShare": 0.038248697916666664,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 47,
+    "landmasses": 49,
+    "landShare": 0.41263020833333336,
+    "largestShare": 0.06913852950457558,
+    "borderLand": 512,
+    "towns": 6,
+    "realms": 5,
+    "disagreement": 0.02296875,
+    "title": "The Environs of Litluantlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n100-equal-measured--world-antique.svg",
+    "close-antique": "count-1--n100-equal-measured--close-antique.svg",
+    "world-ink": "count-1--n100-equal-measured--world-ink.svg",
+    "close-ink": "count-1--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1541
+  },
+  {
+   "id": "count-1--n100-equal-sunk",
+   "caseSlug": "count-1",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 85,
+    "landmasses": 85,
+    "landShare": 0.24,
+    "largestShare": 0.061957465277777776,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 42,
+    "landmasses": 42,
+    "landShare": 0.452734375,
+    "largestShare": 0.13270060396893874,
+    "borderLand": 515,
+    "towns": 12,
+    "realms": 7,
+    "disagreement": 0.023385416666666665,
+    "title": "The Environs of Tzuayictlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n100-equal-sunk--world-antique.svg",
+    "close-antique": "count-1--n100-equal-sunk--close-antique.svg",
+    "world-ink": "count-1--n100-equal-sunk--world-ink.svg",
+    "close-ink": "count-1--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1574
+  },
+  {
+   "id": "count-1--n100-varied-measured",
+   "caseSlug": "count-1",
+   "dir": "n100-varied-measured",
+   "label": "Asked 100, varied sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "varied",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 83,
+    "landmasses": 93,
+    "landShare": 0.24,
+    "largestShare": 0.06532118055555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 45,
+    "landmasses": 47,
+    "landShare": 0.4113411458333333,
+    "largestShare": 0.12791617865847868,
+    "borderLand": 439,
+    "towns": 9,
+    "realms": 8,
+    "disagreement": 0.021393229166666666,
+    "title": "The Environs of Choican",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n100-varied-measured--world-antique.svg",
+    "close-antique": "count-1--n100-varied-measured--close-antique.svg",
+    "world-ink": "count-1--n100-varied-measured--world-ink.svg",
+    "close-ink": "count-1--n100-varied-measured--close-ink.svg"
+   },
+   "ms": 1555
+  },
+  {
+   "id": "count-1--n100-varied-sunk",
+   "caseSlug": "count-1",
+   "dir": "n100-varied-sunk",
+   "label": "Asked 100, varied sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "varied",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 77,
+    "landmasses": 77,
+    "landShare": 0.24,
+    "largestShare": 0.057671440972222224,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 43,
+    "landmasses": 44,
+    "landShare": 0.4319661458333333,
+    "largestShare": 0.11885455915599095,
+    "borderLand": 446,
+    "towns": 8,
+    "realms": 8,
+    "disagreement": 0.021549479166666666,
+    "title": "The Environs of Yitla",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--n100-varied-sunk--world-antique.svg",
+    "close-antique": "count-1--n100-varied-sunk--close-antique.svg",
+    "world-ink": "count-1--n100-varied-sunk--world-ink.svg",
+    "close-ink": "count-1--n100-varied-sunk--close-ink.svg"
+   },
+   "ms": 1572
+  },
+  {
+   "id": "count-12--control",
+   "caseSlug": "count-12",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 12,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 18,
+    "landShare": 0.24,
+    "largestShare": 0.9862738715277778,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 11,
+    "landShare": 0.6122265625,
+    "largestShare": 0.9984049001467492,
+    "borderLand": 583,
+    "towns": 14,
+    "realms": 2,
+    "disagreement": 0.011002604166666667,
+    "title": "The Environs of Wewau",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Poamokau",
+   "files": {
+    "world-antique": "count-12--control--world-antique.svg",
+    "close-antique": "count-12--control--close-antique.svg",
+    "world-ink": "count-12--control--world-ink.svg",
+    "close-ink": "count-12--control--close-ink.svg"
+   },
+   "ms": 1331
+  },
+  {
+   "id": "count-12--n5-equal-measured",
+   "caseSlug": "count-12",
+   "dir": "n5-equal-measured",
+   "label": "Asked 5, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 12,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 11,
+    "landmasses": 22,
+    "landShare": 0.24,
+    "largestShare": 0.19813368055555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "closeUp": {
+    "islands": 7,
+    "landmasses": 10,
+    "landShare": 0.2812109375,
+    "largestShare": 0.6551372875862388,
+    "borderLand": 321,
+    "towns": 4,
+    "realms": 6,
+    "disagreement": 0.006627604166666667,
+    "title": "The Environs of Lupuhau",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Poamokau",
+   "files": {
+    "world-antique": "count-12--n5-equal-measured--world-antique.svg",
+    "close-antique": "count-12--n5-equal-measured--close-antique.svg",
+    "world-ink": "count-12--n5-equal-measured--world-ink.svg",
+    "close-ink": "count-12--n5-equal-measured--close-ink.svg"
+   },
+   "ms": 1259
+  },
+  {
+   "id": "count-12--n5-equal-sunk",
+   "caseSlug": "count-12",
+   "dir": "n5-equal-sunk",
+   "label": "Asked 5, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 12,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 5,
+    "landShare": 0.24,
+    "largestShare": 0.21006944444444445,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 5,
+    "landShare": 0.2750651041666667,
+    "largestShare": 0.6892781065088758,
+    "borderLand": 328,
+    "towns": 6,
+    "realms": 5,
+    "disagreement": 0.003997395833333334,
+    "title": "The Environs of Koapau",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Poamokau",
+   "files": {
+    "world-antique": "count-12--n5-equal-sunk--world-antique.svg",
+    "close-antique": "count-12--n5-equal-sunk--close-antique.svg",
+    "world-ink": "count-12--n5-equal-sunk--world-ink.svg",
+    "close-ink": "count-12--n5-equal-sunk--close-ink.svg"
+   },
+   "ms": 1255
+  },
+  {
+   "id": "count-12--n100-equal-measured",
+   "caseSlug": "count-12",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 12,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 77,
+    "landmasses": 89,
+    "landShare": 0.24,
+    "largestShare": 0.0657009548611111,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 38,
+    "landmasses": 46,
+    "landShare": 0.4453255208333333,
+    "largestShare": 0.13599017572585598,
+    "borderLand": 507,
+    "towns": 10,
+    "realms": 7,
+    "disagreement": 0.021888020833333334,
+    "title": "The Environs of Tomalopua",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Poamokau",
+   "files": {
+    "world-antique": "count-12--n100-equal-measured--world-antique.svg",
+    "close-antique": "count-12--n100-equal-measured--close-antique.svg",
+    "world-ink": "count-12--n100-equal-measured--world-ink.svg",
+    "close-ink": "count-12--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1569
+  },
+  {
+   "id": "count-12--n100-equal-sunk",
+   "caseSlug": "count-12",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 12,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 77,
+    "landmasses": 77,
+    "landShare": 0.24,
+    "largestShare": 0.03260633680555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 42,
+    "landmasses": 43,
+    "landShare": 0.45266927083333336,
+    "largestShare": 0.06877606788436647,
+    "borderLand": 516,
+    "towns": 12,
+    "realms": 8,
+    "disagreement": 0.0229296875,
+    "title": "The Environs of Rang",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Poamokau",
+   "files": {
+    "world-antique": "count-12--n100-equal-sunk--world-antique.svg",
+    "close-antique": "count-12--n100-equal-sunk--close-antique.svg",
+    "world-ink": "count-12--n100-equal-sunk--world-ink.svg",
+    "close-ink": "count-12--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1581
+  },
+  {
+   "id": "count-35--control",
+   "caseSlug": "count-35",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 35,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 16,
+    "landmasses": 47,
+    "landShare": 0.24,
+    "largestShare": 0.5641276041666666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 11,
+    "landmasses": 30,
+    "landShare": 0.6093489583333334,
+    "largestShare": 0.7118252916791316,
+    "borderLand": 572,
+    "towns": 16,
+    "realms": 4,
+    "disagreement": 0.012005208333333333,
+    "title": "The Environs of Midai",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Shining Isles of Hain",
+   "files": {
+    "world-antique": "count-35--control--world-antique.svg",
+    "close-antique": "count-35--control--close-antique.svg",
+    "world-ink": "count-35--control--world-ink.svg",
+    "close-ink": "count-35--control--close-ink.svg"
+   },
+   "ms": 1323
+  },
+  {
+   "id": "count-35--n5-equal-measured",
+   "caseSlug": "count-35",
+   "dir": "n5-equal-measured",
+   "label": "Asked 5, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 35,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 31,
+    "landShare": 0.24,
+    "largestShare": 0.2365993923611111,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 9,
+    "landmasses": 14,
+    "landShare": 0.193125,
+    "largestShare": 0.7189185544768069,
+    "borderLand": 399,
+    "towns": 7,
+    "realms": 5,
+    "disagreement": 0.004505208333333333,
+    "title": "The Environs of Tsishikawa",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Shining Isles of Hain",
+   "files": {
+    "world-antique": "count-35--n5-equal-measured--world-antique.svg",
+    "close-antique": "count-35--n5-equal-measured--close-antique.svg",
+    "world-ink": "count-35--n5-equal-measured--world-ink.svg",
+    "close-ink": "count-35--n5-equal-measured--close-ink.svg"
+   },
+   "ms": 1250
+  },
+  {
+   "id": "count-35--n5-equal-sunk",
+   "caseSlug": "count-35",
+   "dir": "n5-equal-sunk",
+   "label": "Asked 5, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 35,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 5,
+    "landShare": 0.24,
+    "largestShare": 0.20768229166666666,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 5,
+    "landShare": 0.17537760416666667,
+    "largestShare": 0.8273071497512807,
+    "borderLand": 334,
+    "towns": 6,
+    "realms": 5,
+    "disagreement": 0.0024609375,
+    "title": "The Environs of Suyoshimoto",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Shining Isles of Hain",
+   "files": {
+    "world-antique": "count-35--n5-equal-sunk--world-antique.svg",
+    "close-antique": "count-35--n5-equal-sunk--close-antique.svg",
+    "world-ink": "count-35--n5-equal-sunk--world-ink.svg",
+    "close-ink": "count-35--n5-equal-sunk--close-ink.svg"
+   },
+   "ms": 1235
+  },
+  {
+   "id": "count-35--n100-equal-measured",
+   "caseSlug": "count-35",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 35,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 82,
+    "landmasses": 92,
+    "landShare": 0.24,
+    "largestShare": 0.1449652777777778,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 45,
+    "landmasses": 49,
+    "landShare": 0.4130729166666667,
+    "largestShare": 0.245082587315597,
+    "borderLand": 508,
+    "towns": 11,
+    "realms": 4,
+    "disagreement": 0.022109375,
+    "title": "The Environs of Noubouze",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Shining Isles of Hain",
+   "files": {
+    "world-antique": "count-35--n100-equal-measured--world-antique.svg",
+    "close-antique": "count-35--n100-equal-measured--close-antique.svg",
+    "world-ink": "count-35--n100-equal-measured--world-ink.svg",
+    "close-ink": "count-35--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1524
+  },
+  {
+   "id": "count-35--n100-equal-sunk",
+   "caseSlug": "count-35",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 35,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 82,
+    "landmasses": 82,
+    "landShare": 0.24,
+    "largestShare": 0.049153645833333336,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 46,
+    "landmasses": 48,
+    "landShare": 0.41377604166666665,
+    "largestShare": 0.08140852161872994,
+    "borderLand": 488,
+    "towns": 11,
+    "realms": 5,
+    "disagreement": 0.021770833333333333,
+    "title": "The Environs of Zakatseyama",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Shining Isles of Hain",
+   "files": {
+    "world-antique": "count-35--n100-equal-sunk--world-antique.svg",
+    "close-antique": "count-35--n100-equal-sunk--close-antique.svg",
+    "world-ink": "count-35--n100-equal-sunk--world-ink.svg",
+    "close-ink": "count-35--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1547
+  },
+  {
+   "id": "type-island-3--control",
+   "caseSlug": "type-island-3",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 3,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 3,
+    "landmasses": 10,
+    "landShare": 0.34,
+    "largestShare": 0.9938342524509803,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 7,
+    "landShare": 0.8619270833333333,
+    "largestShare": 0.9993202006163514,
+    "borderLand": 930,
+    "towns": 16,
+    "realms": 3,
+    "disagreement": 0.006953125,
+    "title": "The Environs of Sahuqash",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Isle of Khi",
+   "files": {
+    "world-antique": "type-island-3--control--world-antique.svg",
+    "close-antique": "type-island-3--control--close-antique.svg",
+    "world-ink": "type-island-3--control--world-ink.svg",
+    "close-ink": "type-island-3--control--close-ink.svg"
+   },
+   "ms": 1359
+  },
+  {
+   "id": "type-island-3--n20-equal-measured",
+   "caseSlug": "type-island-3",
+   "dir": "n20-equal-measured",
+   "label": "Asked 20, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 19,
+    "landmasses": 37,
+    "landShare": 0.34,
+    "largestShare": 0.17800245098039216,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 11,
+    "landmasses": 27,
+    "landShare": 0.42721354166666664,
+    "largestShare": 0.42898506552880217,
+    "borderLand": 399,
+    "towns": 6,
+    "realms": 8,
+    "disagreement": 0.011119791666666667,
+    "title": "The Environs of Qifarai",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Isle of Khi",
+   "files": {
+    "world-antique": "type-island-3--n20-equal-measured--world-antique.svg",
+    "close-antique": "type-island-3--n20-equal-measured--close-antique.svg",
+    "world-ink": "type-island-3--n20-equal-measured--world-ink.svg",
+    "close-ink": "type-island-3--n20-equal-measured--close-ink.svg"
+   },
+   "ms": 1359
+  },
+  {
+   "id": "type-island-3--n20-equal-sunk",
+   "caseSlug": "type-island-3",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 21,
+    "landmasses": 25,
+    "landShare": 0.34,
+    "largestShare": 0.111328125,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 15,
+    "landmasses": 22,
+    "landShare": 0.43078125,
+    "largestShare": 0.2685890460645629,
+    "borderLand": 376,
+    "towns": 6,
+    "realms": 8,
+    "disagreement": 0.009505208333333333,
+    "title": "The Environs of Shi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Isle of Khi",
+   "files": {
+    "world-antique": "type-island-3--n20-equal-sunk--world-antique.svg",
+    "close-antique": "type-island-3--n20-equal-sunk--close-antique.svg",
+    "world-ink": "type-island-3--n20-equal-sunk--world-ink.svg",
+    "close-ink": "type-island-3--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1369
+  },
+  {
+   "id": "type-island-3--n100-equal-measured",
+   "caseSlug": "type-island-3",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 46,
+    "landmasses": 52,
+    "landShare": 0.34,
+    "largestShare": 0.1595435049019608,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 26,
+    "landmasses": 32,
+    "landShare": 0.5056640625,
+    "largestShare": 0.2484356894553882,
+    "borderLand": 634,
+    "towns": 3,
+    "realms": 5,
+    "disagreement": 0.0170703125,
+    "title": "The Environs of Faraqash",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Isle of Khi",
+   "files": {
+    "world-antique": "type-island-3--n100-equal-measured--world-antique.svg",
+    "close-antique": "type-island-3--n100-equal-measured--close-antique.svg",
+    "world-ink": "type-island-3--n100-equal-measured--world-ink.svg",
+    "close-ink": "type-island-3--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1559
+  },
+  {
+   "id": "type-island-3--n100-equal-sunk",
+   "caseSlug": "type-island-3",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 44,
+    "landmasses": 48,
+    "landShare": 0.34,
+    "largestShare": 0.15326286764705882,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 28,
+    "landmasses": 32,
+    "landShare": 0.5199088541666667,
+    "largestShare": 0.23829797891256982,
+    "borderLand": 656,
+    "towns": 2,
+    "realms": 5,
+    "disagreement": 0.0151171875,
+    "title": "The Environs of Azumzi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Isle of Khi",
+   "files": {
+    "world-antique": "type-island-3--n100-equal-sunk--world-antique.svg",
+    "close-antique": "type-island-3--n100-equal-sunk--close-antique.svg",
+    "world-ink": "type-island-3--n100-equal-sunk--world-ink.svg",
+    "close-ink": "type-island-3--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1582
+  },
+  {
+   "id": "type-citystate-13--control",
+   "caseSlug": "type-citystate-13",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 13,
+    "mapType": "citystate",
+    "landFraction": 0.3,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 10,
+    "landShare": 0.3,
+    "largestShare": 0.9950954861111111,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 7,
+    "landShare": 0.8832942708333333,
+    "largestShare": 0.9985111369901382,
+    "borderLand": 565,
+    "towns": 16,
+    "realms": 1,
+    "disagreement": 0.006705729166666666,
+    "title": "The Environs of Brefaglade",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The City-State of Bramere",
+   "files": {
+    "world-antique": "type-citystate-13--control--world-antique.svg",
+    "close-antique": "type-citystate-13--control--close-antique.svg",
+    "world-ink": "type-citystate-13--control--world-ink.svg",
+    "close-ink": "type-citystate-13--control--close-ink.svg"
+   },
+   "ms": 1307
+  },
+  {
+   "id": "type-citystate-13--n20-equal-measured",
+   "caseSlug": "type-citystate-13",
+   "dir": "n20-equal-measured",
+   "label": "Asked 20, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "citystate",
+    "landFraction": 0.3,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 18,
+    "landmasses": 22,
+    "landShare": 0.3,
+    "largestShare": 0.16788194444444443,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 13,
+    "landShare": 0.3037890625,
+    "largestShare": 0.1453002443101453,
+    "borderLand": 424,
+    "towns": 2,
+    "realms": 1,
+    "disagreement": 0.007955729166666667,
+    "title": "The Environs of Lirillae",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The City-State of Bramere",
+   "files": {
+    "world-antique": "type-citystate-13--n20-equal-measured--world-antique.svg",
+    "close-antique": "type-citystate-13--n20-equal-measured--close-antique.svg",
+    "world-ink": "type-citystate-13--n20-equal-measured--world-ink.svg",
+    "close-ink": "type-citystate-13--n20-equal-measured--close-ink.svg"
+   },
+   "ms": 1195
+  },
+  {
+   "id": "type-citystate-13--n20-equal-sunk",
+   "caseSlug": "type-citystate-13",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "citystate",
+    "landFraction": 0.3,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 24,
+    "landShare": 0.3,
+    "largestShare": 0.16145833333333334,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.3243229166666667,
+    "largestShare": 0.14208286494299022,
+    "borderLand": 435,
+    "towns": 4,
+    "realms": 1,
+    "disagreement": 0.00796875,
+    "title": "The Environs of Lirillae",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The City-State of Bramere",
+   "files": {
+    "world-antique": "type-citystate-13--n20-equal-sunk--world-antique.svg",
+    "close-antique": "type-citystate-13--n20-equal-sunk--close-antique.svg",
+    "world-ink": "type-citystate-13--n20-equal-sunk--world-ink.svg",
+    "close-ink": "type-citystate-13--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1217
+  },
+  {
+   "id": "type-citystate-13--n100-equal-measured",
+   "caseSlug": "type-citystate-13",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "citystate",
+    "landFraction": 0.3,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 72,
+    "landmasses": 76,
+    "landShare": 0.3,
+    "largestShare": 0.20225694444444445,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "closeUp": {
+    "islands": 43,
+    "landmasses": 45,
+    "landShare": 0.37537760416666666,
+    "largestShare": 0.06809115820874813,
+    "borderLand": 466,
+    "towns": 0,
+    "realms": 1,
+    "disagreement": 0.017643229166666666,
+    "title": "The Environs of Lorelasdell",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The City-State of Bramere",
+   "files": {
+    "world-antique": "type-citystate-13--n100-equal-measured--world-antique.svg",
+    "close-antique": "type-citystate-13--n100-equal-measured--close-antique.svg",
+    "world-ink": "type-citystate-13--n100-equal-measured--world-ink.svg",
+    "close-ink": "type-citystate-13--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1518
+  },
+  {
+   "id": "type-citystate-13--n100-equal-sunk",
+   "caseSlug": "type-citystate-13",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 13,
+    "mapType": "citystate",
+    "landFraction": 0.3,
+    "band": "tropical"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 69,
+    "landmasses": 75,
+    "landShare": 0.3,
+    "largestShare": 0.20086805555555556,
+    "borderLand": 0,
+    "towns": 21,
+    "realms": 1
+   },
+   "closeUp": {
+    "islands": 42,
+    "landmasses": 43,
+    "landShare": 0.3996484375,
+    "largestShare": 0.06815886358453067,
+    "borderLand": 490,
+    "towns": 0,
+    "realms": 1,
+    "disagreement": 0.016627604166666667,
+    "title": "The Environs of Fie",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The City-State of Bramere",
+   "files": {
+    "world-antique": "type-citystate-13--n100-equal-sunk--world-antique.svg",
+    "close-antique": "type-citystate-13--n100-equal-sunk--close-antique.svg",
+    "world-ink": "type-citystate-13--n100-equal-sunk--world-ink.svg",
+    "close-ink": "type-citystate-13--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1523
+  },
+  {
+   "id": "type-continent-5--control",
+   "caseSlug": "type-continent-5",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 5,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 12,
+    "landShare": 0.46,
+    "largestShare": 0.9944519927536232,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 3,
+    "landShare": 0.9224609375,
+    "largestShare": 0.9999435387112711,
+    "borderLand": 877,
+    "towns": 1,
+    "realms": 4,
+    "disagreement": 0.0016276041666666667,
+    "title": "The Environs of Zvadgungrad",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Sundered Reaches of Brelde",
+   "files": {
+    "world-antique": "type-continent-5--control--world-antique.svg",
+    "close-antique": "type-continent-5--control--close-antique.svg",
+    "world-ink": "type-continent-5--control--world-ink.svg",
+    "close-ink": "type-continent-5--control--close-ink.svg"
+   },
+   "ms": 1275
+  },
+  {
+   "id": "type-continent-5--n20-equal-measured",
+   "caseSlug": "type-continent-5",
+   "dir": "n20-equal-measured",
+   "label": "Asked 20, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 5,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "polar"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 7,
+    "landmasses": 9,
+    "landShare": 0.46,
+    "largestShare": 0.7949501811594203,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 6,
+    "landShare": 0.76390625,
+    "largestShare": 0.8880479989091157,
+    "borderLand": 778,
+    "towns": 4,
+    "realms": 7,
+    "disagreement": 0.007578125,
+    "title": "The Environs of Zvadgungrad",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Sundered Reaches of Brelde",
+   "files": {
+    "world-antique": "type-continent-5--n20-equal-measured--world-antique.svg",
+    "close-antique": "type-continent-5--n20-equal-measured--close-antique.svg",
+    "world-ink": "type-continent-5--n20-equal-measured--world-ink.svg",
+    "close-ink": "type-continent-5--n20-equal-measured--close-ink.svg"
+   },
+   "ms": 1394
+  },
+  {
+   "id": "type-continent-5--n20-equal-sunk",
+   "caseSlug": "type-continent-5",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 5,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "polar"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 9,
+    "landShare": 0.46,
+    "largestShare": 0.7321105072463768,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 7,
+    "landShare": 0.761015625,
+    "largestShare": 0.7723026383328201,
+    "borderLand": 806,
+    "towns": 5,
+    "realms": 7,
+    "disagreement": 0.006614583333333333,
+    "title": "The Environs of Purzvaksk",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Sundered Reaches of Brelde",
+   "files": {
+    "world-antique": "type-continent-5--n20-equal-sunk--world-antique.svg",
+    "close-antique": "type-continent-5--n20-equal-sunk--close-antique.svg",
+    "world-ink": "type-continent-5--n20-equal-sunk--world-ink.svg",
+    "close-ink": "type-continent-5--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1387
+  },
+  {
+   "id": "type-continent-5--n100-equal-measured",
+   "caseSlug": "type-continent-5",
+   "dir": "n100-equal-measured",
+   "label": "Asked 100, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 5,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "polar"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 23,
+    "landmasses": 31,
+    "landShare": 0.46,
+    "largestShare": 0.6945765398550725,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 10,
+    "landmasses": 11,
+    "landShare": 0.8034895833333333,
+    "largestShare": 0.8256303882802878,
+    "borderLand": 713,
+    "towns": 9,
+    "realms": 4,
+    "disagreement": 0.010546875,
+    "title": "The Environs of Vykzir",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Sundered Reaches of Brelde",
+   "files": {
+    "world-antique": "type-continent-5--n100-equal-measured--world-antique.svg",
+    "close-antique": "type-continent-5--n100-equal-measured--close-antique.svg",
+    "world-ink": "type-continent-5--n100-equal-measured--world-ink.svg",
+    "close-ink": "type-continent-5--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1623
+  },
+  {
+   "id": "type-continent-5--n100-equal-sunk",
+   "caseSlug": "type-continent-5",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 5,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "polar"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 24,
+    "landShare": 0.46,
+    "largestShare": 0.6915760869565217,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "closeUp": {
+    "islands": 11,
+    "landmasses": 15,
+    "landShare": 0.8082291666666667,
+    "largestShare": 0.8130396958370925,
+    "borderLand": 735,
+    "towns": 9,
+    "realms": 6,
+    "disagreement": 0.009791666666666667,
+    "title": "The Environs of Sko",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Sundered Reaches of Brelde",
+   "files": {
+    "world-antique": "type-continent-5--n100-equal-sunk--world-antique.svg",
+    "close-antique": "type-continent-5--n100-equal-sunk--close-antique.svg",
+    "world-ink": "type-continent-5--n100-equal-sunk--world-ink.svg",
+    "close-ink": "type-continent-5--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1740
+  },
+  {
+   "id": "share-1--control",
+   "caseSlug": "share-1",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.8332248263888888,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 19,
+    "landShare": 0.6138411458333334,
+    "largestShare": 0.9519122669325244,
+    "borderLand": 638,
+    "towns": 17,
+    "realms": 3,
+    "disagreement": 0.011549479166666666,
+    "title": "The Environs of Ual",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1--control--world-antique.svg",
+    "close-antique": "count-1--control--close-antique.svg",
+    "world-ink": "count-1--control--world-ink.svg",
+    "close-ink": "count-1--control--close-ink.svg"
+   },
+   "ms": 691
+  },
+  {
+   "id": "share-1--n20-equal-sunk",
+   "caseSlug": "share-1",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.05457899305555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.43221354166666665,
+    "largestShare": 0.12176899439657769,
+    "borderLand": 390,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.010755208333333334,
+    "title": "The Environs of Pelo",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "share-1--n20-equal-sunk--world-antique.svg",
+    "close-antique": "share-1--n20-equal-sunk--close-antique.svg",
+    "world-ink": "share-1--n20-equal-sunk--world-ink.svg",
+    "close-ink": "share-1--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1355
+  },
+  {
+   "id": "share-1--n20-equal-sunk-share0.336",
+   "caseSlug": "share-1",
+   "dir": "n20-equal-sunk-share0.336",
+   "label": "Asked 20, equal sizes, the ground between sunk, land share 0.336",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.336,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 22,
+    "landmasses": 42,
+    "landShare": 0.33600260416666666,
+    "largestShare": 0.14574694826583995,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 16,
+    "landShare": 0.5314583333333334,
+    "largestShare": 0.1196344570756566,
+    "borderLand": 572,
+    "towns": 10,
+    "realms": 8,
+    "disagreement": 0.010859375,
+    "title": "The Environs of Locuel",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "share-1--n20-equal-sunk-share0.336--world-antique.svg",
+    "close-antique": "share-1--n20-equal-sunk-share0.336--close-antique.svg",
+    "world-ink": "share-1--n20-equal-sunk-share0.336--world-ink.svg",
+    "close-ink": "share-1--n20-equal-sunk-share0.336--close-ink.svg"
+   },
+   "ms": 1399
+  },
+  {
+   "id": "share-1--n100-equal-sunk",
+   "caseSlug": "share-1",
+   "dir": "n100-equal-sunk",
+   "label": "Asked 100, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 85,
+    "landmasses": 85,
+    "landShare": 0.24,
+    "largestShare": 0.061957465277777776,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 42,
+    "landmasses": 42,
+    "landShare": 0.452734375,
+    "largestShare": 0.13270060396893874,
+    "borderLand": 515,
+    "towns": 12,
+    "realms": 7,
+    "disagreement": 0.023385416666666665,
+    "title": "The Environs of Tzuayictlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "share-1--n100-equal-sunk--world-antique.svg",
+    "close-antique": "share-1--n100-equal-sunk--close-antique.svg",
+    "world-ink": "share-1--n100-equal-sunk--world-ink.svg",
+    "close-ink": "share-1--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1582
+  },
+  {
+   "id": "share-1--n100-equal-sunk-share0.336",
+   "caseSlug": "share-1",
+   "dir": "n100-equal-sunk-share0.336",
+   "label": "Asked 100, equal sizes, the ground between sunk, land share 0.336",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.336,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 56,
+    "landmasses": 74,
+    "landShare": 0.33600260416666666,
+    "largestShare": 0.07397791125750823,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 32,
+    "landmasses": 36,
+    "landShare": 0.556171875,
+    "largestShare": 0.17041251112047573,
+    "borderLand": 665,
+    "towns": 1,
+    "realms": 8,
+    "disagreement": 0.019895833333333335,
+    "title": "The Environs of Tzi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "share-1--n100-equal-sunk-share0.336--world-antique.svg",
+    "close-antique": "share-1--n100-equal-sunk-share0.336--close-antique.svg",
+    "world-ink": "share-1--n100-equal-sunk-share0.336--world-ink.svg",
+    "close-ink": "share-1--n100-equal-sunk-share0.336--close-ink.svg"
+   },
+   "ms": 1646
+  },
+  {
+   "id": "count-in-texas-30--control",
+   "caseSlug": "count-in-texas-30",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 30,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 10,
+    "landmasses": 41,
+    "landShare": 0.24,
+    "largestShare": 0.7018771701388888,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.3090434369807738,
+    "landInside": 0.423828125,
+    "landBeyond": 0.576171875
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 20,
+    "landShare": 0.484921875,
+    "largestShare": 0.8679984963213576,
+    "borderLand": 405,
+    "towns": 12,
+    "realms": 3,
+    "disagreement": 0.01171875,
+    "title": "The Environs of Voruzak",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isles of Kre",
+   "files": {
+    "world-antique": "count-in-texas-30--control--world-antique.svg",
+    "close-antique": "count-in-texas-30--control--close-antique.svg",
+    "world-ink": "count-in-texas-30--control--world-ink.svg",
+    "close-ink": "count-in-texas-30--control--close-ink.svg"
+   },
+   "ms": 1438
+  },
+  {
+   "id": "count-in-texas-30--n20-equal-sunk-in-texas",
+   "caseSlug": "count-in-texas-30",
+   "dir": "n20-equal-sunk-in-texas",
+   "label": "Asked 20, equal sizes, the ground between sunk, inside Texas",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.190859375
+   },
+   "world": {
+    "islands": 17,
+    "landmasses": 31,
+    "landShare": 0.24,
+    "largestShare": 0.2969292534722222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.4432764862389323,
+    "landInside": 0.5513780381944444,
+    "landBeyond": 0.4486219618055556
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 8,
+    "landmasses": 9,
+    "landShare": 0.4947005208333333,
+    "largestShare": 0.42607848814255256,
+    "borderLand": 327,
+    "towns": 16,
+    "realms": 6,
+    "disagreement": 0.011158854166666666,
+    "title": "The Environs of Krogatgate",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isles of Kre",
+   "files": {
+    "world-antique": "count-in-texas-30--n20-equal-sunk-in-texas--world-antique.svg",
+    "close-antique": "count-in-texas-30--n20-equal-sunk-in-texas--close-antique.svg",
+    "world-ink": "count-in-texas-30--n20-equal-sunk-in-texas--world-ink.svg",
+    "close-ink": "count-in-texas-30--n20-equal-sunk-in-texas--close-ink.svg"
+   },
+   "ms": 1391
+  },
+  {
+   "id": "count-in-texas-30--n100-equal-sunk-in-texas",
+   "caseSlug": "count-in-texas-30",
+   "dir": "n100-equal-sunk-in-texas",
+   "label": "Asked 100, equal sizes, the ground between sunk, inside Texas",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 30,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.190859375
+   },
+   "world": {
+    "islands": 17,
+    "landmasses": 30,
+    "landShare": 0.24,
+    "largestShare": 0.6777886284722222,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.5257285134636666,
+    "landInside": 0.6185980902777778,
+    "landBeyond": 0.3814019097222222
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 10,
+    "landShare": 0.5141666666666667,
+    "largestShare": 0.9562398703403565,
+    "borderLand": 227,
+    "towns": 7,
+    "realms": 6,
+    "disagreement": 0.015755208333333333,
+    "title": "The Environs of Gemargate",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Verdant Isles of Kre",
+   "files": {
+    "world-antique": "count-in-texas-30--n100-equal-sunk-in-texas--world-antique.svg",
+    "close-antique": "count-in-texas-30--n100-equal-sunk-in-texas--close-antique.svg",
+    "world-ink": "count-in-texas-30--n100-equal-sunk-in-texas--world-ink.svg",
+    "close-ink": "count-in-texas-30--n100-equal-sunk-in-texas--close-ink.svg"
+   },
+   "ms": 1910
+  },
+  {
+   "id": "count-1-coast0.1--control",
+   "caseSlug": "count-1-coast0.1",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 40,
+    "landShare": 0.24,
+    "largestShare": 0.8487413194444444,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 7,
+    "landmasses": 27,
+    "landShare": 0.578125,
+    "largestShare": 0.960563063063063,
+    "borderLand": 588,
+    "towns": 16,
+    "realms": 3,
+    "disagreement": 0.029765625,
+    "title": "The Environs of Locuel",
+    "dropped": 2
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1-coast0.1--control--world-antique.svg",
+    "close-antique": "count-1-coast0.1--control--close-antique.svg",
+    "world-ink": "count-1-coast0.1--control--world-ink.svg",
+    "close-ink": "count-1-coast0.1--control--close-ink.svg"
+   },
+   "ms": 1310
+  },
+  {
+   "id": "count-1-coast0.1--n20-equal-sunk",
+   "caseSlug": "count-1-coast0.1",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.05164930555555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.4333203125,
+    "largestShare": 0.11442651521980829,
+    "borderLand": 393,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.010403645833333334,
+    "title": "The Environs of Tzi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1-coast0.1--n20-equal-sunk--world-antique.svg",
+    "close-antique": "count-1-coast0.1--n20-equal-sunk--close-antique.svg",
+    "world-ink": "count-1-coast0.1--n20-equal-sunk--world-ink.svg",
+    "close-ink": "count-1-coast0.1--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1337
+  },
+  {
+   "id": "count-1-coast0.95--control",
+   "caseSlug": "count-1-coast0.95",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 22,
+    "landShare": 0.24,
+    "largestShare": 0.8082139756944444,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 16,
+    "landShare": 0.6283072916666667,
+    "largestShare": 0.9489783230405769,
+    "borderLand": 649,
+    "towns": 17,
+    "realms": 3,
+    "disagreement": 0.033567708333333335,
+    "title": "The Environs of Liaci",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1-coast0.95--control--world-antique.svg",
+    "close-antique": "count-1-coast0.95--control--close-antique.svg",
+    "world-ink": "count-1-coast0.95--control--world-ink.svg",
+    "close-ink": "count-1-coast0.95--control--close-ink.svg"
+   },
+   "ms": 1333
+  },
+  {
+   "id": "count-1-coast0.95--n20-equal-sunk",
+   "caseSlug": "count-1-coast0.95",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.0576171875,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.4305729166666667,
+    "largestShare": 0.1285230434256683,
+    "borderLand": 382,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.010729166666666666,
+    "title": "The Environs of Uatil",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-1-coast0.95--n20-equal-sunk--world-antique.svg",
+    "close-antique": "count-1-coast0.95--n20-equal-sunk--close-antique.svg",
+    "world-ink": "count-1-coast0.95--n20-equal-sunk--world-ink.svg",
+    "close-ink": "count-1-coast0.95--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 1374
+  },
+  {
+   "id": "border-archipelago-8--control",
+   "caseSlug": "border-archipelago-8",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 8,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 40,
+    "landShare": 0.24,
+    "largestShare": 0.5530056423611112,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 51,
+    "landShare": 0.5850911458333333,
+    "largestShare": 0.6393457215978636,
+    "borderLand": 642,
+    "towns": 14,
+    "realms": 4,
+    "disagreement": 0.014830729166666667,
+    "title": "The Environs of Thon",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Thio Archipelago",
+   "files": {
+    "world-antique": "border-archipelago-8--control--world-antique.svg",
+    "close-antique": "border-archipelago-8--control--close-antique.svg",
+    "world-ink": "border-archipelago-8--control--world-ink.svg",
+    "close-ink": "border-archipelago-8--control--close-ink.svg"
+   },
+   "ms": 1529
+  },
+  {
+   "id": "border-archipelago-8--n2-equal-measured",
+   "caseSlug": "border-archipelago-8",
+   "dir": "n2-equal-measured",
+   "label": "Asked 2, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 9,
+    "landmasses": 32,
+    "landShare": 0.24,
+    "largestShare": 0.4560546875,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 16,
+    "landShare": 0.24420572916666666,
+    "largestShare": 0.573980271927486,
+    "borderLand": 430,
+    "towns": 10,
+    "realms": 4,
+    "disagreement": 0.0047786458333333335,
+    "title": "The Environs of Thaneport",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Thio Archipelago",
+   "files": {
+    "world-antique": "border-archipelago-8--n2-equal-measured--world-antique.svg",
+    "close-antique": "border-archipelago-8--n2-equal-measured--close-antique.svg",
+    "world-ink": "border-archipelago-8--n2-equal-measured--world-ink.svg",
+    "close-ink": "border-archipelago-8--n2-equal-measured--close-ink.svg"
+   },
+   "ms": 1322
+  },
+  {
+   "id": "border-archipelago-8--n2-equal-sunk",
+   "caseSlug": "border-archipelago-8",
+   "dir": "n2-equal-sunk",
+   "label": "Asked 2, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 8,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 6,
+    "landShare": 0.24,
+    "largestShare": 0.50146484375,
+    "borderLand": 33,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 2,
+    "landmasses": 2,
+    "landShare": 0.25614583333333335,
+    "largestShare": 0.6033448556323708,
+    "borderLand": 416,
+    "towns": 12,
+    "realms": 2,
+    "disagreement": 0.002734375,
+    "title": "The Environs of Mal",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Thio Archipelago",
+   "files": {
+    "world-antique": "border-archipelago-8--n2-equal-sunk--world-antique.svg",
+    "close-antique": "border-archipelago-8--n2-equal-sunk--close-antique.svg",
+    "world-ink": "border-archipelago-8--n2-equal-sunk--world-ink.svg",
+    "close-ink": "border-archipelago-8--n2-equal-sunk--close-ink.svg"
+   },
+   "ms": 1244
+  },
+  {
+   "id": "border-continent-3--control",
+   "caseSlug": "border-continent-3",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 3,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 15,
+    "landShare": 0.46,
+    "largestShare": 0.9782325634057971,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 3,
+    "landmasses": 4,
+    "landShare": 0.8820963541666667,
+    "largestShare": 0.9967082441508598,
+    "borderLand": 790,
+    "towns": 8,
+    "realms": 5,
+    "disagreement": 0.005221354166666667,
+    "title": "The Environs of Azarar",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Reaches of Khi",
+   "files": {
+    "world-antique": "border-continent-3--control--world-antique.svg",
+    "close-antique": "border-continent-3--control--close-antique.svg",
+    "world-ink": "border-continent-3--control--world-ink.svg",
+    "close-ink": "border-continent-3--control--close-ink.svg"
+   },
+   "ms": 1349
+  },
+  {
+   "id": "border-continent-3--n2-equal-measured",
+   "caseSlug": "border-continent-3",
+   "dir": "n2-equal-measured",
+   "label": "Asked 2, equal sizes, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 10,
+    "landShare": 0.46,
+    "largestShare": 0.9363960597826086,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 6,
+    "landShare": 0.5770052083333334,
+    "largestShare": 0.9994584104346256,
+    "borderLand": 582,
+    "towns": 8,
+    "realms": 5,
+    "disagreement": 0.008880208333333334,
+    "title": "The Environs of Saram",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Reaches of Khi",
+   "files": {
+    "world-antique": "border-continent-3--n2-equal-measured--world-antique.svg",
+    "close-antique": "border-continent-3--n2-equal-measured--close-antique.svg",
+    "world-ink": "border-continent-3--n2-equal-measured--world-ink.svg",
+    "close-ink": "border-continent-3--n2-equal-measured--close-ink.svg"
+   },
+   "ms": 1338
+  },
+  {
+   "id": "border-continent-3--n2-equal-sunk",
+   "caseSlug": "border-continent-3",
+   "dir": "n2-equal-sunk",
+   "label": "Asked 2, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 3,
+    "mapType": "continent",
+    "landFraction": 0.46,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 2,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 9,
+    "landShare": 0.46,
+    "largestShare": 0.9477468297101449,
+    "borderLand": 48,
+    "towns": 26,
+    "realms": 4
+   },
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 8,
+    "landShare": 0.5605989583333333,
+    "largestShare": 0.997375389046314,
+    "borderLand": 589,
+    "towns": 12,
+    "realms": 4,
+    "disagreement": 0.007786458333333334,
+    "title": "The Environs of Zaa",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Quiet Reaches of Khi",
+   "files": {
+    "world-antique": "border-continent-3--n2-equal-sunk--world-antique.svg",
+    "close-antique": "border-continent-3--n2-equal-sunk--close-antique.svg",
+    "world-ink": "border-continent-3--n2-equal-sunk--world-ink.svg",
+    "close-ink": "border-continent-3--n2-equal-sunk--close-ink.svg"
+   },
+   "ms": 1288
+  },
+  {
+   "id": "example-texas--today",
+   "caseSlug": "example-texas",
+   "dir": "today",
+   "label": "What the sentence founds today (chart 2010822250, the engine)",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 2010822250,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 9,
+    "landShare": 0.34,
+    "largestShare": 0.9970511642156863,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.3944182228606608,
+    "landInside": 0.4416360294117647,
+    "landBeyond": 0.5583639705882353
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 9,
+    "landShare": 0.5838802083333333,
+    "largestShare": 0.9947593773694304,
+    "borderLand": 434,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.007916666666666667,
+    "title": "The Environs of Toa",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "Hoaho, the Storm-Held Isle",
+   "files": {
+    "world-antique": "example-texas--today--world-antique.svg",
+    "close-antique": "example-texas--today--close-antique.svg",
+    "world-ink": "example-texas--today--world-ink.svg",
+    "close-ink": "example-texas--today--close-ink.svg"
+   },
+   "ms": 1318
+  },
+  {
+   "id": "example-texas--control",
+   "caseSlug": "example-texas",
+   "dir": "control",
+   "label": "Chart 2166136261 without the outline (what \"a tropical island\" founds today, the engine)",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 2166136261,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 17,
+    "landShare": 0.34,
+    "largestShare": 0.9961320465686274,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.37272727272727274,
+    "landInside": 0.42394301470588236,
+    "landBeyond": 0.5760569852941176
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 6,
+    "landmasses": 24,
+    "landShare": 0.5856119791666666,
+    "largestShare": 0.9572206781545303,
+    "borderLand": 580,
+    "towns": 11,
+    "realms": 3,
+    "disagreement": 0.0101171875,
+    "title": "The Environs of Koakekau",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Tolo",
+   "files": {
+    "world-antique": "example-texas--control--world-antique.svg",
+    "close-antique": "example-texas--control--close-antique.svg",
+    "world-ink": "example-texas--control--world-ink.svg",
+    "close-ink": "example-texas--control--close-ink.svg"
+   },
+   "ms": 1315
+  },
+  {
+   "id": "example-texas--soft",
+   "caseSlug": "example-texas",
+   "dir": "soft",
+   "label": "Chart 2166136261 with the Texas outline, the soft likeness (D5 and D7)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 2166136261,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 2,
+    "landmasses": 12,
+    "landShare": 0.34,
+    "largestShare": 0.9963235294117647,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 0.48920626803521206,
+    "landInside": 0.512905943627451,
+    "landBeyond": 0.48709405637254904
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 11,
+    "landShare": 0.6533854166666667,
+    "largestShare": 0.9918094858509366,
+    "borderLand": 681,
+    "towns": 9,
+    "realms": 3,
+    "disagreement": 0.0057552083333333335,
+    "title": "The Environs of Pulupua",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Tolo",
+   "files": {
+    "world-antique": "example-texas--soft--world-antique.svg",
+    "close-antique": "example-texas--soft--close-antique.svg",
+    "world-ink": "example-texas--soft--world-ink.svg",
+    "close-ink": "example-texas--soft--close-ink.svg"
+   },
+   "ms": 1380
+  },
+  {
+   "id": "example-texas--hard",
+   "caseSlug": "example-texas",
+   "dir": "hard",
+   "label": "Chart 2166136261 with the Texas outline, the hard cut-out",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 2166136261,
+    "mapType": "island",
+    "landFraction": 0.34,
+    "band": "tropical"
+   },
+   "world": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.190859375,
+    "largestShare": 1,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "shape": {
+    "outlineShare": 0.190859375,
+    "likeness": 1,
+    "landInside": 1,
+    "landBeyond": 0
+   },
+   "outlineFit": "north-up in the inner box inset 0.14",
+   "closeUp": {
+    "islands": 1,
+    "landmasses": 1,
+    "landShare": 0.5510807291666666,
+    "largestShare": 1,
+    "borderLand": 329,
+    "towns": 19,
+    "realms": 2,
+    "disagreement": 0.0025390625,
+    "title": "The Environs of Pauki",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.3125,
+    "v0": 0.375,
+    "u1": 0.8125,
+    "v1": 0.875
+   },
+   "title": "The Isle of Tolo",
+   "files": {
+    "world-antique": "example-texas--hard--world-antique.svg",
+    "close-antique": "example-texas--hard--close-antique.svg",
+    "world-ink": "example-texas--hard--world-ink.svg",
+    "close-ink": "example-texas--hard--close-ink.svg"
+   },
+   "ms": 1061
+  },
+  {
+   "id": "example-100--today",
+   "caseSlug": "example-100",
+   "dir": "today",
+   "label": "What the sentence founds today (chart 116723379, the engine)",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 116723379,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "polar"
+   },
+   "world": {
+    "islands": 4,
+    "landmasses": 17,
+    "landShare": 0.24,
+    "largestShare": 0.9608289930555556,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 2
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 23,
+    "landShare": 0.5315494791666666,
+    "largestShare": 0.9736178134874948,
+    "borderLand": 476,
+    "towns": 15,
+    "realms": 2,
+    "disagreement": 0.013190104166666666,
+    "title": "The Environs of Ongbegan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Verdant Isles of Ghoot",
+   "files": {
+    "world-antique": "example-100--today--world-antique.svg",
+    "close-antique": "example-100--today--close-antique.svg",
+    "world-ink": "example-100--today--world-ink.svg",
+    "close-ink": "example-100--today--close-ink.svg"
+   },
+   "ms": 1295
+  },
+  {
+   "id": "example-100--control",
+   "caseSlug": "example-100",
+   "dir": "control",
+   "label": "Chart 1524000883 without a count (the engine)",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1524000883,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 10,
+    "landmasses": 33,
+    "landShare": 0.24,
+    "largestShare": 0.5651584201388888,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 7,
+    "landmasses": 34,
+    "landShare": 0.546171875,
+    "largestShare": 0.47406188909550373,
+    "borderLand": 513,
+    "towns": 14,
+    "realms": 3,
+    "disagreement": 0.015052083333333334,
+    "title": "The Environs of Kalau",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Verdant Isles of Brest",
+   "files": {
+    "world-antique": "example-100--control--world-antique.svg",
+    "close-antique": "example-100--control--close-antique.svg",
+    "world-ink": "example-100--control--world-ink.svg",
+    "close-ink": "example-100--control--close-ink.svg"
+   },
+   "ms": 1378
+  },
+  {
+   "id": "example-100--n100-equal-sunk",
+   "caseSlug": "example-100",
+   "dir": "n100-equal-sunk",
+   "label": "Chart 1524000883, asked 100, alike, the ground between sunk (D6 and D8)",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1524000883,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 88,
+    "landmasses": 88,
+    "landShare": 0.24,
+    "largestShare": 0.04031032986111111,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 7
+   },
+   "closeUp": {
+    "islands": 45,
+    "landmasses": 45,
+    "landShare": 0.46143229166666666,
+    "largestShare": 0.07616118291099949,
+    "borderLand": 440,
+    "towns": 13,
+    "realms": 7,
+    "disagreement": 0.022890625,
+    "title": "The Environs of Threi",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Verdant Isles of Brest",
+   "files": {
+    "world-antique": "example-100--n100-equal-sunk--world-antique.svg",
+    "close-antique": "example-100--n100-equal-sunk--close-antique.svg",
+    "world-ink": "example-100--n100-equal-sunk--world-ink.svg",
+    "close-ink": "example-100--n100-equal-sunk--close-ink.svg"
+   },
+   "ms": 1617
+  },
+  {
+   "id": "example-100--n100-equal-measured",
+   "caseSlug": "example-100",
+   "dir": "n100-equal-measured",
+   "label": "Chart 1524000883, asked 100, alike, as measured",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1524000883,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": false,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 89,
+    "landmasses": 98,
+    "landShare": 0.24,
+    "largestShare": 0.0661892361111111,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 6
+   },
+   "closeUp": {
+    "islands": 48,
+    "landmasses": 48,
+    "landShare": 0.4245703125,
+    "largestShare": 0.15009047137117798,
+    "borderLand": 431,
+    "towns": 12,
+    "realms": 6,
+    "disagreement": 0.0235546875,
+    "title": "The Environs of Hju",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Verdant Isles of Brest",
+   "files": {
+    "world-antique": "example-100--n100-equal-measured--world-antique.svg",
+    "close-antique": "example-100--n100-equal-measured--close-antique.svg",
+    "world-ink": "example-100--n100-equal-measured--world-ink.svg",
+    "close-ink": "example-100--n100-equal-measured--close-ink.svg"
+   },
+   "ms": 1570
+  },
+  {
+   "id": "count-wobble-1--control",
+   "caseSlug": "count-wobble-1",
+   "dir": "control",
+   "label": "Today's dome (the control), drawn by the engine",
+   "pipeline": "engine",
+   "closeUpPipeline": "engine",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "world": {
+    "islands": 8,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.8332248263888888,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 3
+   },
+   "closeUp": {
+    "islands": 5,
+    "landmasses": 19,
+    "landShare": 0.6138411458333334,
+    "largestShare": 0.9519122669325244,
+    "borderLand": 638,
+    "towns": 17,
+    "realms": 3,
+    "disagreement": 0.011549479166666666,
+    "title": "The Environs of Ual",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--control--world-antique.svg",
+    "close-antique": "count-wobble-1--control--close-antique.svg",
+    "world-ink": "count-wobble-1--control--world-ink.svg",
+    "close-ink": "count-wobble-1--control--close-ink.svg"
+   },
+   "ms": 3033
+  },
+  {
+   "id": "count-wobble-1--n20-equal-sunk",
+   "caseSlug": "count-wobble-1",
+   "dir": "n20-equal-sunk",
+   "label": "Asked 20, equal sizes, the ground between sunk",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.05457899305555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.43221354166666665,
+    "largestShare": 0.12176899439657769,
+    "borderLand": 390,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.010755208333333334,
+    "title": "The Environs of Pelo",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n20-equal-sunk--world-antique.svg",
+    "close-antique": "count-wobble-1--n20-equal-sunk--close-antique.svg",
+    "world-ink": "count-wobble-1--n20-equal-sunk--world-ink.svg",
+    "close-ink": "count-wobble-1--n20-equal-sunk--close-ink.svg"
+   },
+   "ms": 2700
+  },
+  {
+   "id": "count-wobble-1--n20-equal-sunk-wobble-coast0.1",
+   "caseSlug": "count-wobble-1",
+   "dir": "n20-equal-sunk-wobble-coast0.1",
+   "label": "Asked 20, equal sizes, the ground between sunk, each coast wobbled at its own scale, coast 0.1",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.1
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 20,
+    "landmasses": 20,
+    "landShare": 0.24,
+    "largestShare": 0.052300347222222224,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 12,
+    "landShare": 0.43365885416666666,
+    "largestShare": 0.11445728869539108,
+    "borderLand": 392,
+    "towns": 13,
+    "realms": 8,
+    "disagreement": 0.0103515625,
+    "title": "The Environs of Tzuayictlan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n20-equal-sunk-wobble-coast0.1--world-antique.svg",
+    "close-antique": "count-wobble-1--n20-equal-sunk-wobble-coast0.1--close-antique.svg",
+    "world-ink": "count-wobble-1--n20-equal-sunk-wobble-coast0.1--world-ink.svg",
+    "close-ink": "count-wobble-1--n20-equal-sunk-wobble-coast0.1--close-ink.svg"
+   },
+   "ms": 2384
+  },
+  {
+   "id": "count-wobble-1--n20-equal-sunk-wobble",
+   "caseSlug": "count-wobble-1",
+   "dir": "n20-equal-sunk-wobble",
+   "label": "Asked 20, equal sizes, the ground between sunk, each coast wobbled at its own scale",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 21,
+    "landmasses": 24,
+    "landShare": 0.24,
+    "largestShare": 0.05848524305555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 12,
+    "landmasses": 15,
+    "landShare": 0.4347265625,
+    "largestShare": 0.11887860544523317,
+    "borderLand": 374,
+    "towns": 10,
+    "realms": 8,
+    "disagreement": 0.012591145833333333,
+    "title": "The Environs of Ual",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n20-equal-sunk-wobble--world-antique.svg",
+    "close-antique": "count-wobble-1--n20-equal-sunk-wobble--close-antique.svg",
+    "world-ink": "count-wobble-1--n20-equal-sunk-wobble--world-ink.svg",
+    "close-ink": "count-wobble-1--n20-equal-sunk-wobble--close-ink.svg"
+   },
+   "ms": 2300
+  },
+  {
+   "id": "count-wobble-1--n20-equal-sunk-wobble-coast0.95",
+   "caseSlug": "count-wobble-1",
+   "dir": "n20-equal-sunk-wobble-coast0.95",
+   "label": "Asked 20, equal sizes, the ground between sunk, each coast wobbled at its own scale, coast 0.95",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate",
+    "coastWarp": 0.95
+   },
+   "asked": {
+    "n": 20,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 22,
+    "landmasses": 57,
+    "landShare": 0.24,
+    "largestShare": 0.1003146701388889,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 15,
+    "landmasses": 45,
+    "landShare": 0.4348046875,
+    "largestShare": 0.12266043781630881,
+    "borderLand": 410,
+    "towns": 12,
+    "realms": 8,
+    "disagreement": 0.015299479166666666,
+    "title": "The Environs of Conco",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n20-equal-sunk-wobble-coast0.95--world-antique.svg",
+    "close-antique": "count-wobble-1--n20-equal-sunk-wobble-coast0.95--close-antique.svg",
+    "world-ink": "count-wobble-1--n20-equal-sunk-wobble-coast0.95--world-ink.svg",
+    "close-ink": "count-wobble-1--n20-equal-sunk-wobble-coast0.95--close-ink.svg"
+   },
+   "ms": 2355
+  },
+  {
+   "id": "count-wobble-1--n5-equal-sunk-wobble",
+   "caseSlug": "count-wobble-1",
+   "dir": "n5-equal-sunk-wobble",
+   "label": "Asked 5, equal sizes, the ground between sunk, each coast wobbled at its own scale",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 5,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 5,
+    "landmasses": 6,
+    "landShare": 0.24,
+    "largestShare": 0.21327039930555555,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 5
+   },
+   "closeUp": {
+    "islands": 4,
+    "landmasses": 6,
+    "landShare": 0.2017578125,
+    "largestShare": 0.6354953210713133,
+    "borderLand": 331,
+    "towns": 8,
+    "realms": 5,
+    "disagreement": 0.003424479166666667,
+    "title": "The Environs of Yixcan",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n5-equal-sunk-wobble--world-antique.svg",
+    "close-antique": "count-wobble-1--n5-equal-sunk-wobble--close-antique.svg",
+    "world-ink": "count-wobble-1--n5-equal-sunk-wobble--world-ink.svg",
+    "close-ink": "count-wobble-1--n5-equal-sunk-wobble--close-ink.svg"
+   },
+   "ms": 1846
+  },
+  {
+   "id": "count-wobble-1--n100-equal-sunk-wobble",
+   "caseSlug": "count-wobble-1",
+   "dir": "n100-equal-sunk-wobble",
+   "label": "Asked 100, equal sizes, the ground between sunk, each coast wobbled at its own scale",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 100,
+    "spread": "equal",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 83,
+    "landmasses": 92,
+    "landShare": 0.24,
+    "largestShare": 0.05712890625,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 43,
+    "landmasses": 52,
+    "landShare": 0.456953125,
+    "largestShare": 0.12110332250527156,
+    "borderLand": 526,
+    "towns": 10,
+    "realms": 8,
+    "disagreement": 0.023203125,
+    "title": "The Environs of Uatil",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n100-equal-sunk-wobble--world-antique.svg",
+    "close-antique": "count-wobble-1--n100-equal-sunk-wobble--close-antique.svg",
+    "world-ink": "count-wobble-1--n100-equal-sunk-wobble--world-ink.svg",
+    "close-ink": "count-wobble-1--n100-equal-sunk-wobble--close-ink.svg"
+   },
+   "ms": 2307
+  },
+  {
+   "id": "count-wobble-1--n20-varied-sunk-wobble",
+   "caseSlug": "count-wobble-1",
+   "dir": "n20-varied-sunk-wobble",
+   "label": "Asked 20, varied sizes, the ground between sunk, each coast wobbled at its own scale",
+   "pipeline": "spike",
+   "closeUpPipeline": "spike",
+   "mine": "the designer's own: a wobble that bites",
+   "recipe": {
+    "seed": 1,
+    "mapType": "archipelago",
+    "landFraction": 0.24,
+    "band": "temperate"
+   },
+   "asked": {
+    "n": 20,
+    "spread": "varied",
+    "sunk": true,
+    "coverage": 0.3
+   },
+   "world": {
+    "islands": 18,
+    "landmasses": 25,
+    "landShare": 0.24,
+    "largestShare": 0.14453125,
+    "borderLand": 0,
+    "towns": 26,
+    "realms": 8
+   },
+   "closeUp": {
+    "islands": 11,
+    "landmasses": 15,
+    "landShare": 0.33303385416666664,
+    "largestShare": 0.20053172772412714,
+    "borderLand": 432,
+    "towns": 9,
+    "realms": 8,
+    "disagreement": 0.0091015625,
+    "title": "The Environs of Yitla",
+    "dropped": 0
+   },
+   "window": {
+    "u0": 0.25,
+    "v0": 0.25,
+    "u1": 0.75,
+    "v1": 0.75
+   },
+   "title": "The Scattered Isles of Tzatlua",
+   "files": {
+    "world-antique": "count-wobble-1--n20-varied-sunk-wobble--world-antique.svg",
+    "close-antique": "count-wobble-1--n20-varied-sunk-wobble--close-antique.svg",
+    "world-ink": "count-wobble-1--n20-varied-sunk-wobble--world-ink.svg",
+    "close-ink": "count-wobble-1--n20-varied-sunk-wobble--close-ink.svg"
+   },
+   "ms": 1702
+  }
+ ]
+}

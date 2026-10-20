@@ -1,0 +1,14 @@
+ok   seed 2 (archipelago) heightfield
+ok   seed 2 world sheet SVG
+ok   seed 2 band-1 close-up SVG (detail arm)
+ok   seed 42 (island) heightfield
+ok   seed 42 world sheet SVG
+ok   seed 42 band-1 close-up SVG (detail arm)
+ok   seed 12 (archipelago) heightfield
+ok   seed 12 world sheet SVG
+ok   seed 12 band-1 close-up SVG (detail arm)
+ok   seed 2 coast 0.1 world sheet SVG
+ok   seed 2 coast 0.1: today's close-up disagrees, the pass-through one sits near the floor: today 5.89%, pass-through 1.45%
+ok   seed 2 coast 0.95 world sheet SVG
+ok   seed 2 coast 0.95: today's close-up disagrees, the pass-through one sits near the floor: today 6.02%, pass-through 1.39%
+exit 0

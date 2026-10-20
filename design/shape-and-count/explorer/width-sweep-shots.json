@@ -1,0 +1,56 @@
+[
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 1024,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1024.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ },
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 1280,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1280.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ },
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 1440,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1440.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ },
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 1680,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1680.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ },
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 1920,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-1920.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ },
+ {
+  "url": "/explorer/#seed=30&type=island",
+  "width": 2560,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/844/explorer/width-sweep-2560.png",
+  "waitMs": 5000,
+  "probe": "(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)]; }; return JSON.stringify({ scrollWidth: document.documentElement.scrollWidth, slip: r(\"#broadside\"), land: r(\"#grp-land\") && r(\"[aria-labelledby=grp-land]\"), sheet: r(\"#sheet\"), stage: r(\".stage\"), folio: r(\".room-folio\") || r(\"[class*=folio]\"), slipW: getComputedStyle(document.documentElement).getPropertyValue(\"--slip-w\"), rem: getComputedStyle(document.documentElement).fontSize }); })()"
+ }
+]
