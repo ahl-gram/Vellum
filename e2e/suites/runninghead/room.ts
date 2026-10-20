@@ -238,6 +238,7 @@ const GLASS_PRESSES = [
   ["BUTTON", "zoom-out", "zoom-btn", "button", "out", "Stand off", "−", null, 0],
   ["BUTTON", "zoom-reset", "zoom-btn", "button", "fit", "The whole sheet", "⌂", null, 0],
 ];
+const HOLD_PRESS = ["BUTTON", "zoom-hold", "zoom-btn hold-btn", "button", null, "Hold the sheet", "⚓︎", null, 0];
 
 function fogFaults(route: string, s: KitSample | undefined): string[] {
   if (!s) return [`${route}: unreachable`];
@@ -273,7 +274,10 @@ function glassFaults(route: string, s: KitSample | undefined): string[] {
     g.id === wantId || `${route}: id ${g.id}, want ${wantId || "(none)"}`,
     g.role === "group" || `${route}: role ${g.role}`,
     g.label === "Camera" || `${route}: label ${g.label}`,
-    same(g.presses, GLASS_PRESSES) || `${route}: presses ${JSON.stringify(g.presses)}`,
+    same(
+      g.presses,
+      route === "/explorer/" ? [GLASS_PRESSES[0], HOLD_PRESS, ...GLASS_PRESSES.slice(1)] : GLASS_PRESSES,
+    ) || `${route}: presses ${JSON.stringify(g.presses)}`,
   ]);
 }
 

@@ -86,6 +86,7 @@ export function createLodController(deps: Deps) {
     band: number;
     window: UvWindow;
     title: string;
+    caption: string;
     seat: { lx: number; ly: number } | null;
   } | null = null;
 
@@ -170,7 +171,8 @@ export function createLodController(deps: Deps) {
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
-    inset = { el, svg: res.svg, band, window, title: res.title, seat };
+    const text = `${res.title} · regional survey · band ${band} · drawn in ${ms}ms`;
+    inset = { el, svg: res.svg, band, window, title: res.title, caption: text, seat };
     // AFTER the assignment: the hook asks the controller what is committed, and before it this still named the outgoing sheet.
     deps.decorateInset?.(el);
     currentBand = band;
@@ -178,7 +180,7 @@ export function createLodController(deps: Deps) {
     hidePencil();
     buildPlaceOverlay(res.manifest, { preservePinByName: true, box: rect });
     redrafts++;
-    setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
+    setCaption(text);
     if (reduce) {
       el.classList.add("in");
       if (old) old.remove();
@@ -272,6 +274,13 @@ export function createLodController(deps: Deps) {
       regionGen++;
       hidePencil();
       removeInsetsExcept(null);
+    },
+
+    cancelPending() {
+      if (!pencil || !pencil.parentNode) return;
+      regionGen++;
+      hidePencil();
+      setCaption(inset ? inset.caption : "");
     },
 
     cancel() {

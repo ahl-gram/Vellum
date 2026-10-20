@@ -37,6 +37,10 @@ body.chart-room .stage {
 #map-viewport.zoomable {
   touch-action: none;
 }
+.zoomery .zoom-btn.hold-btn {
+  font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 1.15rem;
+}
 #map {
   position: absolute;
   inset: 0;

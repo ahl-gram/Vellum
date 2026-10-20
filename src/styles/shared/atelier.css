@@ -327,7 +327,7 @@ body:has(.slip.folded) .corner.br.zoomery {
   font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
   font-size: 1.35rem;
 }
-.zoomery.corner .zoom-btn.touch-btn[aria-pressed="true"] {
+.zoomery.corner .zoom-btn[aria-pressed="true"] {
   background: var(--parchment-bright);
   color: var(--ink-dark);
   border-color: var(--parchment);

@@ -102,6 +102,7 @@ export function pageGlass({
     setCaption: (t) => {
       caption.textContent = t;
     },
+    readCaption: () => caption.textContent,
     // A failed survey reports on the status pill, the page's one error channel.
     setError: (t) => {
       status.textContent = t;

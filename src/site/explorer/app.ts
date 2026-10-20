@@ -198,7 +198,7 @@ function syncHash(): void {
     hashControls,
     touched.land,
     touched.coast,
-    glass.cameraNow(),
+    glass.cameraForAddress(),
     agesChk.checked ? { kind: "survey" } : null,
     chartTable.state(),
   );
@@ -209,6 +209,7 @@ function syncHash(): void {
 
 const buttons = {
   touch: $("zoom-touch"),
+  hold: $("zoom-hold"),
   zoomIn: $("zoom-in"),
   zoomOut: $("zoom-out"),
   reset: $("zoom-reset"),
