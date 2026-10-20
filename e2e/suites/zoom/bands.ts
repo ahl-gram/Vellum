@@ -1,6 +1,6 @@
 import type { ZoomKit } from "./kit.ts";
 
-type Target21 = Awaited<ReturnType<typeof z21Target>>;
+export type Target21 = Awaited<ReturnType<typeof z21Target>>;
 type Deep21 = Awaited<ReturnType<typeof z21Hamlets>>;
 
 export async function z20dInkDrops({
