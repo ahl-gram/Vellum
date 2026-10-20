@@ -1,6 +1,6 @@
 import { centroidOf, dominant, extentOf, pure, sampleRect } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { home, press } from "./hold.ts";
+import { CEILING, home, press } from "./hold.ts";
 import type { ZoomKit } from "./kit.ts";
 
 export type HamletWindow = { e: number; u0: number; v0: number; cx: number; cy: number };
@@ -322,5 +322,26 @@ export async function zh13PrintKeepsSheet(k: ZoomKit, pick: HamletWindow): Promi
       Math.abs(read.mh - read.sh) <= 1 &&
       read.ear === "none",
     JSON.stringify(read),
+  );
+}
+
+const PRESS_WHILE_DRAFTING = `(()=>{document.getElementById("draw").click();document.getElementById("zoom-hold").click();return{drafting:document.getElementById("verso-turn").disabled,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
+const HOLD_READ = `(()=>({pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),caption:document.getElementById("caption").textContent||""}))()`;
+
+export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
+  await home(k);
+  // One task: Draw puts the world in flight and the press follows it, the way a reader's press can land in the same instant.
+  const now = await k.evaluate<{ drafting: boolean; pressed: string | null }>(PRESS_WHILE_DRAFTING);
+  await k.waitSettled("zh14-draw");
+  const after = await k.evaluate<{ pressed: string | null; caption: string }>(HOLD_READ);
+  const ceiling = await k.evaluate<number>(CEILING);
+  k.check(
+    "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, and the ceiling stays at 8 (Issue #751)",
+    now.drafting &&
+      now.pressed === "false" &&
+      after.pressed === "false" &&
+      !after.caption.endsWith("held") &&
+      ceiling === 8,
+    JSON.stringify({ now, after, ceiling }),
   );
 }

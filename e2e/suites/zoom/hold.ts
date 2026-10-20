@@ -27,7 +27,7 @@ const READ =
   `v0:svg?svg.getAttribute("data-vellum-region-v0"):null,k:z.k,hashK:new URLSearchParams(location.hash.slice(1)).get("k"),glide:!!document.getElementById("map-viewport").__transition};})()`;
 
 // Asks for 24 and goes straight home in the same task, so no settle runs at the deep camera and nothing is drafted.
-const CEILING = `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:24,x:W/2-12*W,y:H/2-12*H});const k=window.__vellumZoomState().k;window.__vellumZoomTo({k:1,x:0,y:0});return k;})()`;
+export const CEILING = `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:24,x:W/2-12*W,y:H/2-12*H});const k=window.__vellumZoomState().k;window.__vellumZoomTo({k:1,x:0,y:0});return k;})()`;
 const LET_GO = `(()=>{document.getElementById("zoom-hold").click();return{glide:!!document.getElementById("map-viewport").__transition};})()`;
 const OUT_THEN_LET_GO = `(()=>{document.getElementById("zoom-out").click();document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,glide:!!document.getElementById("map-viewport").__transition,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
 const ZOOM_THEN_LET_GO = (target: Target21): string =>
