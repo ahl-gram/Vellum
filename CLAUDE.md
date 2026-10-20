@@ -204,8 +204,9 @@ Every project agent under `.claude/agents/` sets an `effort` in its frontmatter,
   in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
   to default your way and mention afterwards. A dispatched `vellum-planner` cannot reach him, so
   it hands the menu to its dispatcher at the same STOP.
-- **No em-dashes** in issue bodies, PR bodies, issue and PR comments, commit messages, published copy
-  or new code comments. In an issue or PR body or comment, a commit message or the repo's markdown,
+- **No em-dashes** in issue bodies, PR bodies, issue and PR comments, commit messages or published
+  copy; a comment in code or a stylesheet may carry one (Issue #727). In an issue or PR body or
+  comment, a commit message or the repo's markdown,
   one inside inline backticks or a fenced code block is code, not prose, and stands: that is how a
   pasted red line keeps its own (Issue #644). The footgun hook refuses one in a body's prose and reads what code
   is the way `.claude/skills/vellum-footguns/hooks/README.md` says.
