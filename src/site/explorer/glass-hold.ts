@@ -1,8 +1,15 @@
 // The hold (Issue #751): one press with two moments; while it is lit the Glass drafts no finer survey and takes nothing away.
 export const HELD_MARK = "held";
+const SEPARATOR = " · ";
 
-export function markCaption(text: string, _held: boolean): string {
-  return text;
+export function markCaption(text: string, held: boolean): string {
+  const marked = text === HELD_MARK || text.endsWith(SEPARATOR + HELD_MARK);
+  if (held) {
+    if (marked) return text;
+    return text === "" ? HELD_MARK : text + SEPARATOR + HELD_MARK;
+  }
+  if (text === HELD_MARK) return "";
+  return marked ? text.slice(0, text.length - (SEPARATOR + HELD_MARK).length) : text;
 }
 
 export interface HoldPress {
@@ -24,6 +31,32 @@ export interface Hold {
   readonly release: () => void;
 }
 
-export function createHold(_deps: HoldDeps): Hold {
-  return { held: () => false, release: () => {} };
+export function createHold(deps: HoldDeps): Hold {
+  let held = false;
+  const settle = (next: boolean): void => {
+    held = next;
+    deps.press.setAttribute("aria-pressed", String(next));
+  };
+  const unmark = (): void => deps.setCaption(markCaption(deps.readCaption(), false));
+  deps.press.setAttribute("aria-pressed", "false");
+  deps.press.addEventListener("click", () => {
+    if (!held) {
+      settle(true);
+      deps.onHold();
+      deps.setCaption(markCaption(deps.readCaption(), true));
+      return;
+    }
+    settle(false);
+    unmark();
+    deps.onLetGo();
+  });
+  return {
+    held: () => held,
+    release() {
+      if (!held) return;
+      settle(false);
+      unmark();
+      deps.onRelease();
+    },
+  };
 }
