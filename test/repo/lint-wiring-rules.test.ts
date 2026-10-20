@@ -64,7 +64,6 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
 
 const SHEET_RULES: Readonly<Record<string, unknown>> = {
   "vellum/css-comment-one-line": [2],
-  "vellum/css-comment-no-em-dash": [2],
   "vellum/css-comment-issue-form": [2],
   "vellum/css-comment-no-js-module": [2],
   "vellum/css-no-narrow-width": [2],

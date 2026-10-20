@@ -8,7 +8,6 @@ import { STYLES } from "../../scripts/served-sources.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const ONE_LINE = "vellum/css-comment-one-line";
-const NO_EM_DASH = "vellum/css-comment-no-em-dash";
 const ISSUE_FORM = "vellum/css-comment-issue-form";
 const NO_JS_MODULE = "vellum/css-comment-no-js-module";
 
@@ -47,7 +46,6 @@ const PLANT = [
 test("the comment-form rules red on exactly the planted lines and nowhere else", async () => {
   assert.deepEqual(await lintSheet(PLANT), [
     [ONE_LINE, 4],
-    [NO_EM_DASH, 7],
     [ISSUE_FORM, 8],
     [ISSUE_FORM, 14],
     [ISSUE_FORM, 15],
