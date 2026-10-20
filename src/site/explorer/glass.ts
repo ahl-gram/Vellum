@@ -27,6 +27,7 @@ interface GlassDeps {
   prefersReduce: () => boolean;
   regionEligible: () => boolean;
   syncHash: () => void;
+  busy: () => boolean;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
   buttons: { touch: HTMLElement; hold: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
@@ -209,6 +210,7 @@ export function createGlass(deps: GlassDeps) {
   const lodController = glassLod(mapDiv, deps, setCardZoom, zoomController);
   const hold = createHold({
     press: buttons.hold,
+    busy: deps.busy,
     readCaption: deps.readCaption,
     setCaption: deps.setCaption,
     onHold: () => {

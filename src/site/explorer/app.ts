@@ -214,7 +214,18 @@ const buttons = {
   zoomOut: $("zoom-out"),
   reset: $("zoom-reset"),
 };
-const glass = pageGlass({ lc, chartTable, regionEligible, syncHash, earLabel, prefersReduce, token, tokenMs, buttons });
+const glass = pageGlass({
+  lc,
+  chartTable,
+  regionEligible,
+  syncHash,
+  busy: () => drawing,
+  earLabel,
+  prefersReduce,
+  token,
+  tokenMs,
+  buttons,
+});
 
 const room = bindRoom({
   frame: stageEl,

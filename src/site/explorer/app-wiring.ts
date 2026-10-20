@@ -75,6 +75,7 @@ interface PageGlassDeps {
   readonly chartTable: ReturnType<typeof bindChartDrawer>;
   readonly regionEligible: () => boolean;
   readonly syncHash: () => void;
+  readonly busy: () => boolean;
   readonly earLabel: (item: TableItem) => string;
   readonly prefersReduce: () => boolean;
   readonly token: (name: string) => string;
@@ -87,6 +88,7 @@ export function pageGlass({
   chartTable,
   regionEligible,
   syncHash,
+  busy,
   earLabel,
   prefersReduce,
   token,
@@ -110,6 +112,7 @@ export function pageGlass({
     prefersReduce,
     regionEligible,
     syncHash,
+    busy,
     decorateInset: (el: HTMLElement) => {
       insetDogEar(el, glass, chartTable, earLabel, prefersReduce, token, tokenMs);
     },

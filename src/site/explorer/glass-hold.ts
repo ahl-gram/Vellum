@@ -19,6 +19,7 @@ export interface HoldPress {
 
 export interface HoldDeps {
   readonly press: HoldPress;
+  readonly busy: () => boolean;
   readonly readCaption: () => string;
   readonly setCaption: (text: string) => void;
   readonly onHold: () => void;
@@ -40,6 +41,7 @@ export function createHold(deps: HoldDeps): Hold {
   const unmark = (): void => deps.setCaption(markCaption(deps.readCaption(), false));
   deps.press.setAttribute("aria-pressed", "false");
   deps.press.addEventListener("click", () => {
+    if (deps.busy()) return;
     if (!held) {
       settle(true);
       deps.onHold();
