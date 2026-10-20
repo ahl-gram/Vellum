@@ -45,10 +45,7 @@ test("no tracked file sits under a root .gitignore pattern, so the ignore list t
 
 const SIZE_CAPS = ["max-lines", "max-lines-per-function"];
 
-const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
-  "e2e/split-proof.ts": [1, 0],
-  "test/site/astro-scaffold.test.ts": [0, 2],
-};
+const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {};
 
 const readList = (): Record<string, Record<string, { count: number }>> => {
   const file = join(ROOT, "eslint-suppressions.json");
@@ -96,5 +93,17 @@ test("eslint-suppressions.json only shrinks: no file joins it, and no file's cou
     grown,
     [],
     "a file joined the list or a count grew, so an overrun nobody ruled was recorded, most likely by a re-run of eslint --suppress-rule: split the code instead. A split lowers its file's entry here in the same change. BLIND SPOTS, declared, erring toward passing: the list counts overruns, not sizes, so a listed file or function that grows while already over its cap passes; and an entry here left above its file's count lets a new overrun in that file return up to it",
+  );
+});
+
+test("eslint-suppressions.json does not exist, so no rule's findings are lifted file by file outside the rulebook's inline skips (Alex, 2026-10-18, Issue #814)", () => {
+  assert.ok(
+    existsSync(join(ROOT, "eslint.config.ts")),
+    "eslint.config.ts is not at ROOT, so this guard looks for the list in the wrong directory",
+  );
+  assert.equal(
+    existsSync(join(ROOT, "eslint-suppressions.json")),
+    false,
+    "eslint-suppressions.json exists, and ESLint applies it on every lint run, so every finding it counts passes the lint unread; fix the code and delete the file, which ESLint's --suppress-all, --suppress-rule and --prune-suppressions each write (handbook/specs/rulebook.md, The accepted lint and type-check skips)",
   );
 });

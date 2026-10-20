@@ -1,12 +1,1 @@
-{
-  "e2e/split-proof.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "test/site/astro-scaffold.test.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  }
-}
+{}
