@@ -106,7 +106,7 @@ When the drafts run long, deliver them as one file per sub in the main checkout'
 - Never commit, branch, push, file an issue, post to GitHub, or touch the roadmap board. `gh` is yours for reading.
 - Never run `npm test` or the full local e2e lanes. You test nothing, a suite deletes the generated assets a build of your tree may need, and the full lanes starve every lane beside you. Build and serve only what your stills need.
 - **Never move or restore the main checkout or your tree.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against either, and never remove a worktree you did not create.
-- No em-dashes in anything you write, except inside inline backticks or a fenced code block.
+- No em-dashes in anything you write, except inside inline backticks or a fenced code block, or in a comment in code or a stylesheet.
 
 ## Reporting
 

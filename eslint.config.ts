@@ -105,7 +105,6 @@ export default defineConfig(
     languageOptions: { tolerant: true },
     rules: {
       "vellum/css-comment-issue-form": "error",
-      "vellum/css-comment-no-em-dash": "error",
       "vellum/css-comment-one-line": "error",
       "vellum/css-comment-no-js-module": "error",
       "vellum/css-no-narrow-width": "error",
