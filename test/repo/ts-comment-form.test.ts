@@ -7,6 +7,7 @@ import { includeIgnoreFile } from "eslint/config";
 import css, { type CSSRuleDefinition } from "@eslint/css";
 import tseslint from "typescript-eslint";
 import * as prettier from "prettier";
+import { blockWitnesses } from "../../test-support/lint-block-witnesses.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -166,6 +167,17 @@ test("a line, block or doc comment on any TypeScript root may carry an em-dash (
   for (const file of Object.values(ROOT_WITNESSES)) {
     const [result] = await eslint.lintText(text, { filePath: join(ROOT, file) });
     assert.deepEqual(result!.messages, [], `${file}: an em-dash in a comment is reported`);
+  }
+  const plain = text.replaceAll(dash, "-");
+  for (const { block, file } of blockWitnesses()) {
+    const [withDash, withHyphen] = await Promise.all(
+      [text, plain].map((t) => eslint.lintText(t, { filePath: join(ROOT, file) })),
+    );
+    assert.deepEqual(
+      withDash![0]!.messages,
+      withHyphen![0]!.messages,
+      `${file}, a witness of the block "${block}": an em-dash in a comment is reported`,
+    );
   }
 });
 
