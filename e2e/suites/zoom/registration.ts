@@ -330,7 +330,6 @@ const HOLD_READ = `(()=>({pressed:document.getElementById("zoom-hold").getAttrib
 
 export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
   await home(k);
-  // One task: Draw puts the world in flight and the press follows it, the way a reader's press can land in the same instant.
   const now = await k.evaluate<{ drafting: boolean; pressed: string | null }>(PRESS_WHILE_DRAFTING);
   await k.waitSettled("zh14-draw");
   const after = await k.evaluate<{ pressed: string | null; caption: string }>(HOLD_READ);
@@ -338,6 +337,25 @@ export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
   k.check(
     "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, and the ceiling stays at 8 (Issue #751)",
     now.drafting &&
+      now.pressed === "false" &&
+      after.pressed === "false" &&
+      !after.caption.endsWith("held") &&
+      ceiling === 8,
+    JSON.stringify({ now, after, ceiling }),
+  );
+}
+
+const PRESS_WHILE_TURNING = `(async()=>{const style=document.getElementById("style");style.value="topographic";style.dispatchEvent(new Event("change",{bubbles:true}));const sheet=document.getElementById("sheet");for(let i=0;i<400&&!sheet.classList.contains("turning");i++)await new Promise(r=>setTimeout(r,10));const turning=sheet.classList.contains("turning");document.getElementById("zoom-hold").click();return{turning,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
+
+export async function zh14bPressIgnoredWhileTurning(k: ZoomKit): Promise<void> {
+  await home(k);
+  const now = await k.evaluate<{ turning: boolean; pressed: string | null }>(PRESS_WHILE_TURNING, true);
+  await k.waitSettled("zh14b-turn");
+  const after = await k.evaluate<{ pressed: string | null; caption: string }>(HOLD_READ);
+  const ceiling = await k.evaluate<number>(CEILING);
+  k.check(
+    "ZH14b a hold pressed while a style change's sheet is turning is ignored too: the press stays unlit, the caption carries no mark, and the ceiling stays at 8 (Issue #751)",
+    now.turning &&
       now.pressed === "false" &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&

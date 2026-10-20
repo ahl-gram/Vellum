@@ -72,6 +72,7 @@ import {
   zh12CardFlat,
   zh13PrintKeepsSheet,
   zh14PressIgnoredWhileDrafting,
+  zh14bPressIgnoredWhileTurning,
 } from "./zoom/registration.ts";
 import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
@@ -143,6 +144,7 @@ async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Ta
   await step("ZH12", () => zh12CardFlat(k, pick));
   await step("ZH13", () => zh13PrintKeepsSheet(k, pick));
   await step("ZH14", () => zh14PressIgnoredWhileDrafting(k));
+  await step("ZH14b", () => zh14bPressIgnoredWhileTurning(k));
 }
 
 async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
