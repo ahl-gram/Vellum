@@ -450,6 +450,15 @@ because the house lift writes `transform` and would replace the seat.
 animation-cascade priority permanently**, silently killing any hover transform on that element
 afterwards. A shadow escapes if the keyframes do not own it. Only a rendered probe found this.
 
+**That final keyframe is flat.** A 3D transform left filled on an element, even
+`perspective(900px) rotateX(0)`, keeps it on a layer of its own that the compositor resamples, so the
+place card's text read soft inside the magnified chart (Issue #751). So a 3D entrance rests flat.
+Where the motion's last tilt must be kept, it is held at 99.99% and the final keyframe is
+`transform: none`, which keeps every frame and fills flat (`paperUnfurl` in
+`src/styles/shared/motion.css`; `zh12CardFlat` in `e2e/suites/zoom/registration.ts` reads a card
+mid-roll and at rest); an entrance that need not fill takes `backwards` and rests on its element's own
+style (`prospectUnfurl` in `src/styles/reading-room/index.css`).
+
 **A one-shot ceremony needs its own guard rather than an end event.** Hiding an element mid-animation
 fires no animation event at all in Chrome, so a ceremony that must not replay cannot record that it
 ran by listening for its own end. The recipe is a pair of rules:

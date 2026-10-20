@@ -274,9 +274,30 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   BUILT between applies sets the counter-scale at creation (`makeDogEar` in
   `src/site/explorer/chart-drawer.ts`), because a commit never touches the camera and nothing else
   will publish to it.
-- **One division, on the hit element itself.** The translate pins the scale's fixed point to the
-  mark so anchors never move, and a second division on a ring pseudo-element would shrink the ring
-  with the depth. The target and its ring hold their designed size at every depth.
+- **One division, on the hit element itself, and the hit placed by that same transform.** The hit's
+  transform carries the place's sheet fraction against the place overlay's own box (`--nx` and
+  `--ny`, read in container units, since `.place-overlay` is a size container), then the half-box
+  translate that pins the scale's fixed point to the mark, then the division, so anchors never move;
+  a second division on a ring pseudo-element would shrink the ring with the depth. The target and its
+  ring hold their designed size at every depth.
+- **A box in the mount is placed by a transform from a whole-pixel origin, never by a fractional
+  offset** (Alex, 2026-10-20, Issue #751). The browser rounds to a whole pixel the fractional `left`
+  or `top` of a box that carries a transform of its own, and the box of an inline svg, and the
+  mount's `scale(k)` multiplies the rounding: at 24 times a town's ring and click area stood up to
+  12 px off its dot, and a region sheet's drawing up to 11 px off its window.
+  `getBoundingClientRect` reports the box unrounded, so a rect read sees none of it, and the guard
+  reads the paint and the hit test (`zh10aTownsOnDots` and `zh10bHamletsOnDots` in
+  `e2e/suites/zoom/registration.ts`). So the place overlay always fills the mount and folds a region
+  inset's box into each place's own fraction (`buildPlaceOverlay` in
+  `src/site/shared/living-chart/place-overlay.ts`), and a region inset keeps its percentage box while
+  its svg and its dog-ear are laid out at the mount's origin and carried onto it by transforms of
+  their own, in the mount's container units (`src/styles/explorer/index.css`,
+  `src/styles/explorer/chart-drawer.css`); the dog-ear, a button, takes the individual `translate`
+  and `scale` properties, since the house hover owns `transform`, so no hover replaces its seat
+  (`zh11EarOnCorner`); whether it should lift under the hand at all is Issue #859's. The inset itself
+  takes no transform, so it makes no stacking context and the dog-ear stays above the towns' click
+  areas. Container units on the mount collapse it on paper, so in print the mount stands down as a
+  container (`zh13PrintKeepsSheet`).
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
 - **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box
@@ -290,8 +311,9 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   collision pass keeps every centre at the cost of boxes shrunk to 11.7px.
 - **A published nudge rides INSIDE the counter-scaled translate.** Placed ahead of the division it
   composes with the live scale, which is exactly right at rest and wrong by the depth factor under
-  magnification. The guard matches the leading counter-scale AND COUNTS the translates and scales per
-  variant, because the match alone passes on a second leading translate that restores the bug.
+  magnification. Z24 (`z24CardSeats` in `e2e/suites/zoom/dress.ts`) reads every variant's seat at
+  rest and at depth, and Z25 (`z25ClampFlush` in `e2e/suites/zoom/camera.ts`) the nudge flush into
+  the box, so a nudge moved ahead of the division reds on the seat it moves.
 - **A card is measured AFTER the counter-scale is published, never before**, or a fresh card is
   measured by the depth factor too large.
 

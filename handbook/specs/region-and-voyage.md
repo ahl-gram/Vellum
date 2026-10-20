@@ -97,14 +97,17 @@ about a rule, the rulebook wins.
   no byte comparison can guard it.
 - **The redraft is an INSET mounted inside the chart mount**, aligned so its plot area lands on the
   window it re-surveys. It is not a sheet replacement. What the inset owes the live transform, and
-  what may be mounted beside it, are `handbook/specs/explorer-doctrine.md`'s.
+  what may be mounted beside it, are `handbook/specs/explorer-doctrine.md`'s. The inset keeps its
+  rect as percentages and publishes it as `--ix`, `--iy` and `--iw` (`placeInset` in
+  `src/site/explorer/lod-controller.ts`), from which its drawing and its dog-ear are placed exactly;
+  why no fractional offset may place them is that file's Counter-scale.
 - **What a finer survey reveals is LABELS.** A region sheet's settlement set is a crop of the world's
   until the smallest tier appears, so a reveal ceremony keys on placed labels and never on place
   presence.
 - **The redraft stands down while the survey track is armed or the sheet is flipped**, because the
   track narrates the WORLD survey at world coordinates and the verso holds the world sheet
   (`regionEligible` in `src/site/explorer/app.ts`). **It stands down too while the reader holds the
-  sheet**, the Glass's own gate (`createGlass` in `src/site/explorer/glass.ts`); what the hold does is
+  sheet**, the Glass's own gate (`onCameraSettle` in `src/site/explorer/glass.ts`); what the hold does is
   `handbook/specs/explorer-doctrine.md`'s.
 - **A region-only change leaves the world sheets byte-identical.** That is the constraint on the
   author; whether a regen is owed is the rulebook's.
