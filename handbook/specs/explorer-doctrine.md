@@ -135,8 +135,15 @@ make an unqualified rule false. Read the surface, not just the rule.
   world sheet, stays whatever the camera does, and the camera's ceiling rises from `GLASS_MAX` to
   `HELD_MAX` (`createGlass` in `src/site/explorer/glass.ts`, through `setScaleMax` in
   `src/site/shared/zoom-controller.ts`); pressing it drops a draft still in flight (`cancelPending`
-  in `src/site/explorer/lod-controller.ts`). Letting go lowers the ceiling and runs the settle at
-  once, or glides the camera back under the ceiling and settles at the landing. Every path that homes
+  in `src/site/explorer/lod-controller.ts`). Letting go lowers the ceiling, which stops where it
+  stands any glide not started through `glideBy` (a double-click's, whose end d3 fixed against the
+  held ceiling, or a home's), wherever it was headed (`setScaleMax` in
+  `src/site/shared/zoom-controller.ts`); a camera, or a press's glide, headed above the ceiling then
+  glides back under it, or under reduced motion steps there, and settles at the landing; otherwise
+  the settle runs at once, unless a settle is still to come (`settlePending`: a press's glide in
+  flight, or the settle debounce armed), which then runs alone with the hold off. A settle beside the
+  one still to come sends its survey twice, or judges a camera about to leave whose draft can outlive
+  a landing that sends nothing. Every path that homes
   the camera lets go first and runs no settle of its own: the draw's rebase, the turned sheet's and
   the survey's homes, and the voiced home. The state is pure in `src/site/explorer/glass-hold.ts`.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
@@ -307,9 +314,15 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 - **No hide, reflow and restore dance is owed on the chronicle's marks**, because every paint drives
   display straight off the year, so the DOM visibility always equals the predicate.
 - **A superseding transition interrupts its predecessor ONE FRAME LATER**, because transitions start
-  on the next timer tick, so an unguarded end or interrupt handler clears state the newer transition
-  just set. Guard with a monotonic generation counter, the `drawGen` idiom in
-  `src/site/prospect/app.ts`.
+  on the next timer tick, so an unguarded end, interrupt or cancel handler clears state the newer
+  transition just set. Guard with a monotonic generation counter, the `drawGen` idiom in
+  `src/site/prospect/app.ts`. A transition stopped before it starts fires `cancel`, not `interrupt`,
+  so state set when a glide is queued is cleared on all three (`glideTo` in
+  `src/site/shared/zoom-controller.ts`). d3-zoom fixes a glide's end once and never clamps its frames
+  afterwards: a glide through `scaleTo`, as `glideTo` makes, at its first frame, against the scale
+  extent then in force; its own double-click glide at the double-click. So a ceiling lowered under a
+  glide holds only if the glide is re-aimed or stopped (`setScaleMax`, and the hold's let-go in
+  `src/site/explorer/glass.ts`) (Issue #751).
 - **A place card takes a DEFINITE width, never the room left beside its mark**, so the engine
   publishes the anchor fractions and the SHEET owns both the anchor side and the width. Shrink-to-fit
   is the shape to refuse: a flipped card got `nx * boxWidth`, so a card near an edge was narrow and

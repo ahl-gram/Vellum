@@ -219,7 +219,7 @@ export function createGlass(deps: GlassDeps) {
       zoomController.setScaleMax(GLASS_MAX);
       const target = zoomController.glideTarget() ?? zoomController.getState().k;
       if (target > GLASS_MAX) zoomController.glideBy(GLASS_MAX / target);
-      else onCameraSettle();
+      else if (!zoomController.settlePending()) onCameraSettle();
     },
     onRelease: () => zoomController.setScaleMax(GLASS_MAX),
   });

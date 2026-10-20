@@ -207,7 +207,7 @@ function zoomGlide(
   getState: () => ZoomState,
   extentNow: () => readonly [number, number],
 ) {
-  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
+  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end, interrupt or cancel clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
   let glideTargetK: number | null = null;
   let glideSeq = 0;
 
@@ -218,7 +218,7 @@ function zoomGlide(
       .transition()
       .duration(glideMsNow())
       .call((s, k2: number) => behavior.scaleTo(s, k2), k)
-      .on("end interrupt", () => {
+      .on("end interrupt cancel", () => {
         if (myGlide === glideSeq) glideTargetK = null;
       });
   }
@@ -394,9 +394,11 @@ function zoomCeiling(
 ): Pick<ZoomController, "setScaleMax" | "settlePending"> {
   return {
     setScaleMax(max: number) {
+      const lowered = max < extentNow()[1];
       behavior.scaleExtent([...setMax(max)]);
+      if (lowered && glideTargetK() === null) sel().interrupt();
     },
-    settlePending: () => false,
+    settlePending: () => glideTargetK() !== null || settleArmed(),
   };
 }
 
