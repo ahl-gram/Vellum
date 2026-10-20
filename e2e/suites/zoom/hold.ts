@@ -32,8 +32,13 @@ const marked = (r: Read): boolean => r.caption.endsWith("held");
 // Home, with the inset's fade run out, and the hold free whatever the last check left.
 async function home(k: ZoomKit): Promise<void> {
   const settle = makeSettle(k);
-  await k.goHome();
-  const r = await settle<Read>(READ, (d) => d.k === 1 && d.insets === 0 && !d.committed && !d.pencil, "zh-home");
+  // A stalled frame mid-glide (more than the 250ms settle debounce, measured on CI) settles at a deep k and drafts a survey that lands after the camera is home, so a home that finds a sheet committed goes again.
+  for (let i = 0; i < 4; i++) {
+    await k.goHome();
+    const landed = await settle<Read>(READ, (d) => d.k === 1 && !d.pencil, "zh-home");
+    if (!landed.committed) break;
+  }
+  const r = await settle<Read>(READ, (d) => d.insets === 0 && !d.committed && !d.pencil, "zh-home-fade");
   if (r.pressed === "true") await press(k);
 }
 

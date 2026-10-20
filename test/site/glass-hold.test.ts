@@ -8,7 +8,15 @@ const TITLE = "The Environs of Paukilua · regional survey · band 1 · drawn in
 function rig(initial: string) {
   const press = new El("button");
   let caption = initial;
-  const seen = { caption: [] as string[], writes: 0, hold: 0, letGo: 0, release: 0 };
+  const seen = {
+    caption: [] as string[],
+    letGoCaption: [] as string[],
+    releaseCaption: [] as string[],
+    writes: 0,
+    hold: 0,
+    letGo: 0,
+    release: 0,
+  };
   const hold = createHold({
     press,
     readCaption: () => caption,
@@ -20,14 +28,21 @@ function rig(initial: string) {
       seen.hold++;
       seen.caption.push(caption);
     },
-    onLetGo: () => void seen.letGo++,
-    onRelease: () => void seen.release++,
+    onLetGo: () => {
+      seen.letGo++;
+      seen.letGoCaption.push(caption);
+    },
+    onRelease: () => {
+      seen.release++;
+      seen.releaseCaption.push(caption);
+    },
   });
   return { press, hold, seen, caption: () => caption };
 }
 
 test("a press holds the sheet: it lights, drops a draft in flight, then marks the caption (Issue #751)", () => {
   const r = rig(TITLE);
+  assert.equal(r.press.getAttribute("aria-pressed"), "false", "a press is built unlit");
   r.press.fire("click");
   assert.equal(r.hold.held(), true);
   assert.equal(r.press.getAttribute("aria-pressed"), "true");
@@ -46,6 +61,7 @@ test("a second press lets go: unlit, the mark stripped, and the let-go runs once
   assert.equal(r.press.getAttribute("aria-pressed"), "false");
   assert.equal(r.caption(), TITLE);
   assert.equal(r.seen.letGo, 1, "onLetGo runs once");
+  assert.deepEqual(r.seen.letGoCaption, [TITLE], "the mark is stripped before onLetGo runs");
   assert.equal(r.seen.release, 0);
 });
 
@@ -57,6 +73,7 @@ test("a home lets go through the release, never the let-go, and a release with n
   assert.equal(r.press.getAttribute("aria-pressed"), "false");
   assert.equal(r.caption(), TITLE);
   assert.equal(r.seen.release, 1, "onRelease runs once");
+  assert.deepEqual(r.seen.releaseCaption, [TITLE], "the mark is stripped before onRelease runs");
   assert.equal(r.seen.letGo, 0, "a release is not a let-go");
 
   const free = rig("island · temperate · drawn in 547ms");
@@ -73,4 +90,6 @@ test("the mark is added once and stripped only from the end (Issue #751)", () =>
   assert.equal(markCaption("held", false), "");
   assert.equal(markCaption("A · held", false), "A");
   assert.equal(markCaption("held up · A", false), "held up · A");
+  assert.equal(markCaption("A · held · B", false), "A · held · B", "a mark mid-caption is not the mark");
+  assert.equal(markCaption("A · held · B", true), "A · held · B · held");
 });
