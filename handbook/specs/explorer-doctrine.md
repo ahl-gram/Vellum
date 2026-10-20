@@ -143,9 +143,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   the settle runs at once, unless a settle is still to come (`settlePending`: a press's glide in
   flight, or the settle debounce armed), which then runs alone with the hold off. A settle beside the
   one still to come sends its survey twice, or judges a camera about to leave whose draft can outlive
-  a landing that sends nothing. Every path that homes
-  the camera lets go first and runs no settle of its own: the draw's rebase, the turned sheet's and
-  the survey's homes, and the voiced home. The state is pure in `src/site/explorer/glass-hold.ts`.
+  a landing that sends nothing. Every path that homes the camera lets go first and runs no settle of
+  its own: the draw's rebase, the turned sheet's and the survey's homes, and the voiced home. The
+  state is pure in `src/site/explorer/glass-hold.ts`.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the

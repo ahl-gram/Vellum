@@ -58,6 +58,7 @@ import {
   zh4cTurn,
   zh4dInk,
   zh5DraftDropped,
+  zh5bKeepsCaption,
   zh6HeldCeiling,
   zh7LetGoMidGlide,
   zh8LetGoGlidingOut,
@@ -121,6 +122,7 @@ async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Ta
   await step("ZH4c", () => zh4cTurn(k, target21));
   await step("ZH4d", () => zh4dInk(k, target21));
   await step("ZH5", () => zh5DraftDropped(k, target21));
+  await step("ZH5b", () => zh5bKeepsCaption(k, target21));
   await step("ZH6", () => zh6HeldCeiling(k, target21));
   await step("ZH7", () => zh7LetGoMidGlide(k, target21));
   await step("ZH8", () => zh8LetGoGlidingOut(k, target21));

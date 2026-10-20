@@ -72,9 +72,7 @@ export interface ZoomController {
   glideBy(factor: number): void;
   /** The absolute k a glide in flight will land on, or null. */
   glideTarget(): number | null;
-  /** Move the camera's ceiling; the floor stays. */
   setScaleMax(max: number): void;
-  /** True while a glideBy glide is in flight or the settle debounce is armed. */
   settlePending(): boolean;
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;

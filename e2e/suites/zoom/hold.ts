@@ -39,10 +39,9 @@ const read = (k: ZoomKit) => k.evaluate<Read>(READ);
 const press = (k: ZoomKit) => k.evaluate<undefined>(`document.getElementById("zoom-hold").click()`);
 const marked = (r: Read): boolean => r.caption.endsWith("held");
 
-// Home, with the inset's fade run out, and the hold free whatever the last check left.
 async function home(k: ZoomKit): Promise<void> {
   const settle = makeSettle(k);
-  // A stalled frame mid-glide (more than the 250ms settle debounce, measured on CI) settles at a deep k and drafts a survey that lands after the camera is home, so a home that finds a sheet committed goes again.
+  // A stalled frame mid-glide (more than the 250ms settle debounce, measured on CI) settles at a deep k and drafts a survey that lands after the camera is home, so a home that finds a sheet committed goes again; Issue #938 files the product defect, and the loop goes with its fix.
   for (let i = 0; i < 4; i++) {
     await k.goHome();
     const landed = await settle<Read>(READ, (d) => d.k === 1 && !d.pencil, "zh-home");
@@ -247,6 +246,48 @@ export async function zh5DraftDropped(k: ZoomKit, target: Target21): Promise<voi
       !after.committed &&
       after.insets === 0,
     JSON.stringify({ base, lit, after }),
+  );
+}
+
+export async function zh5bKeepsCaption(k: ZoomKit, target: Target21): Promise<void> {
+  await home(k);
+  await viaDraw(k);
+  const drawn = await read(k);
+  await press(k);
+  const worldHeld = await read(k);
+  await press(k);
+  const first = await bandOneInset(k, target);
+  const cx = Math.min(0.9, Math.max(0.1, target.cx + 0.2));
+  // As ZH5: the press lands in the microtask after the dispatching task, with a finer draft in flight over a committed inset.
+  await k.evaluate(
+    `(()=>{const obs=new MutationObserver((recs)=>{for(const r of recs){for(const n of r.addedNodes){` +
+      `if(n.classList&&n.classList.contains("survey-pencil")){obs.disconnect();document.getElementById("zoom-hold").click();return;}}}});` +
+      `obs.observe(document.getElementById("map"),{childList:true});const vp=document.getElementById("map-viewport");` +
+      `const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:4,x:W/2-(${cx})*4*W,y:H/2-(${target.cy})*4*H});})()`,
+  );
+  const lit = await makeSettle(k)<Read>(READ, (d) => d.pressed === "true", "zh5b-press-lit");
+  await k.evaluate(
+    `window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:300,legend:false,arms:false,beasts:false}})`,
+    true,
+  );
+  const after = await read(k);
+  k.check(
+    "ZH5b the hold keeps the caption it finds: a world's draw caption when no draft is in flight, and a committed inset's own title when one is, each with the mark added (Issue #751)",
+    drawn.caption !== "" &&
+      worldHeld.caption === `${drawn.caption} · held` &&
+      first.band === 1 &&
+      first.committed &&
+      !lit.pencil &&
+      lit.caption === `${first.caption} · held` &&
+      after.redrafts === first.redrafts &&
+      after.band === 1,
+    JSON.stringify({
+      drawn: drawn.caption,
+      worldHeld: worldHeld.caption,
+      first: first.caption,
+      lit: lit.caption,
+      after,
+    }),
   );
 }
 
