@@ -101,7 +101,7 @@ const PASSED: readonly string[] = [
   "export const square = (x: number) => x * x;",
 ];
 
-// Restated on purpose, an oracle beside FOUNDING_GLOBALS in scripts/lint/import-bounds.ts rather than read from it, so a name wrongly added to it or dropped from it reds here; every other global this Node holds, and BROWSER_SAMPLE, is planted as refused.
+// Restated on purpose, an oracle beside FOUNDING_GLOBALS in scripts/lint/import-bounds.ts rather than read from it.
 const APPROVED = ["Array", "Map", "Math", "Set", "undefined"];
 const BROWSER_SAMPLE = [
   "caches",
