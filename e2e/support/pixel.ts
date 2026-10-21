@@ -153,6 +153,38 @@ export function extentOf(
 
 export const luminance = ([r, g, b]: readonly [number, number, number]): number => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
+export type Registration = { readonly dx: number; readonly dy: number; readonly ncc: number; readonly std: number };
+
+export function registration(a: Rgb[][], b: Rgb[][], search: number): Registration {
+  const la = a.map((row) => row.map((p) => luminance(p)));
+  const lb = b.map((row) => row.map((p) => luminance(p)));
+  const n = la.length - 2 * search;
+  const N = n * n;
+  let sa = 0;
+  let sb = 0;
+  let saa = 0;
+  let sbb = 0;
+  let sab = 0;
+  for (let y = search; y < search + n; y++)
+    for (let x = search; x < search + n; x++) {
+      const p = la[y]![x]!;
+      const q = lb[y]![x]!;
+      sa += p;
+      sb += q;
+      saa += p * p;
+      sbb += q * q;
+      sab += p * q;
+    }
+  const va = saa - (sa * sa) / N;
+  const vb = sbb - (sb * sb) / N;
+  return {
+    dx: 0,
+    dy: 0,
+    ncc: va > 0 && vb > 0 ? (sab - (sa * sb) / N) / Math.sqrt(va * vb) : 0,
+    std: Math.sqrt(Math.max(0, vb) / N),
+  };
+}
+
 export type Rgba = readonly [number, number, number, number];
 
 // Spliced into a payload: Chromium serialises one token colour as rgb(), color(srgb ...) or oklab(...) by property, so a check compares the channels one canvas pixel reads back; a canvas keeps its last fillStyle for a string it cannot parse, hence the sentinel.

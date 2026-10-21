@@ -210,17 +210,19 @@ function syncHash(): void {
 const buttons = {
   touch: $("zoom-touch"),
   hold: $("zoom-hold"),
+  loupe: $("zoom-loupe"),
   zoomIn: $("zoom-in"),
   zoomOut: $("zoom-out"),
   reset: $("zoom-reset"),
 };
-const motion = createMotion(buttons.hold);
+const motion = createMotion(buttons.hold, buttons.loupe);
 const glass = pageGlass({
   lc,
   chartTable,
   regionEligible,
   syncHash,
-  busy: motion.busy,
+  motion,
+  worldSvg: () => lastSvg,
   earLabel,
   prefersReduce,
   token,

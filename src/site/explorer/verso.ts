@@ -165,6 +165,10 @@ export function isFlipped(sheetEl: HTMLElement): boolean {
   return sheetEl.classList.contains("versoed");
 }
 
+export function offRecto(sheetEl: HTMLElement): boolean {
+  return sheetEl.classList.contains("flip3d");
+}
+
 export function toggleFlip(sheetEl: HTMLElement): boolean {
   if (isFlipped(sheetEl)) {
     flipToRecto(sheetEl);

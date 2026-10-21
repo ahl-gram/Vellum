@@ -871,6 +871,8 @@ const KIT_VIGNETTES =
   '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const EXPLORER_HOLD =
   '<button id="zoom-hold" class="zoom-btn hold-btn" type="button" aria-pressed="false" aria-label="Hold the sheet">&#9875;&#65038;</button>';
+const EXPLORER_LOUPE =
+  '<button id="zoom-loupe" class="zoom-btn loupe-btn" type="button" aria-pressed="false" aria-label="The loupe"><span class="loupe-glyph" aria-hidden="true"></span></button>';
 const KIT_GLASS = (
   id: string,
   presses: string,
@@ -966,7 +968,7 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
   for (const p of chartRooms) {
     const html = page(p.route);
     const explorer = p.dir === "/explorer/";
-    const glass = KIT_GLASS(explorer ? ' id="zoom-controls"' : "", explorer ? EXPLORER_HOLD : "");
+    const glass = KIT_GLASS(explorer ? ' id="zoom-controls"' : "", explorer ? EXPLORER_HOLD + EXPLORER_LOUPE : "");
     assert.ok(html.includes(glass), `${p.route} carries the Glass as the kit renders it`);
     const folio = html.match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/);
     assert.ok(folio, `${p.route} carries the chart folio`);

@@ -5,6 +5,8 @@ import { makeDogEar, surveyItemFrom } from "./chart-drawer.ts";
 import type { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { createGlass, type Glass } from "./glass.ts";
+import { pageLoupe } from "./loupe-page.ts";
+import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
 import { pageBox } from "../shared/page-box.ts";
@@ -75,12 +77,13 @@ interface PageGlassDeps {
   readonly chartTable: ReturnType<typeof bindChartDrawer>;
   readonly regionEligible: () => boolean;
   readonly syncHash: () => void;
-  readonly busy: () => boolean;
+  readonly motion: Motion;
+  readonly worldSvg: () => string;
   readonly earLabel: (item: TableItem) => string;
   readonly prefersReduce: () => boolean;
   readonly token: (name: string) => string;
   readonly tokenMs: (name: string, fallback: number) => number;
-  readonly buttons: Parameters<typeof createGlass>[0]["buttons"];
+  readonly buttons: Parameters<typeof createGlass>[0]["buttons"] & { readonly loupe: HTMLElement };
 }
 
 export function pageGlass({
@@ -88,13 +91,15 @@ export function pageGlass({
   chartTable,
   regionEligible,
   syncHash,
-  busy,
+  motion,
+  worldSvg,
   earLabel,
   prefersReduce,
   token,
   tokenMs,
   buttons,
 }: PageGlassDeps): Glass {
+  const loupe = pageLoupe({ press: buttons.loupe, motion, worldSvg, glass: () => glass });
   const glass = createGlass({
     mapViewport,
     mapDiv,
@@ -112,7 +117,8 @@ export function pageGlass({
     prefersReduce,
     regionEligible,
     syncHash,
-    busy,
+    busy: motion.busy,
+    onView: () => loupe.follow(),
     decorateInset: (el: HTMLElement) => {
       insetDogEar(el, glass, chartTable, earLabel, prefersReduce, token, tokenMs);
     },
