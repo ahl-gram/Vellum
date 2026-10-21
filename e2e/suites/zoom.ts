@@ -82,8 +82,8 @@ import {
   zl3LensRegisters,
   zl4HeldKey,
   zl5StandsAsideOverCard,
-  zl6TrackRides,
 } from "./zoom/loupe.ts";
+import { zl6TrackRides, zl7DarkPastSheet } from "./zoom/loupe-chart.ts";
 import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
 
@@ -167,6 +167,7 @@ async function zLoupe(step: ReturnType<typeof makeStep>, k: ZoomKit, pick: Hamle
   await step("ZL4", () => zl4HeldKey(k));
   await step("ZL5", () => zl5StandsAsideOverCard(k));
   await step("ZL6", () => zl6TrackRides(k));
+  await step("ZL7", () => zl7DarkPastSheet(k));
 }
 
 async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {

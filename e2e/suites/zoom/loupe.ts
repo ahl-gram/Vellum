@@ -9,10 +9,10 @@ import { ensureHeldDeepInset, pollLast } from "./registration.ts";
 import type { HamletWindow } from "./registration.ts";
 import type { ZoomKit } from "./kit.ts";
 
-type Point = { x: number; y: number };
-type Centre = Point & { L: number; T: number; W: number; H: number; iw: number; ih: number };
+export type Point = { x: number; y: number };
+export type Centre = Point & { L: number; T: number; W: number; H: number; iw: number; ih: number };
 type Press = Point & { on: boolean; pressed: string | null };
-type Lens = {
+export type Lens = {
   exists: boolean;
   parent: string | null;
   inMap: boolean;
@@ -37,9 +37,9 @@ const TEXTURE_AT_LEAST = 10;
 const INSIDE_PX = 150;
 
 const PRESS = `(()=>{const b=document.getElementById("zoom-loupe");if(!b)return null;const r=b.getBoundingClientRect();const x=r.x+r.width/2,y=r.y+r.height/2;return{x,y,on:b.contains(document.elementFromPoint(x,y)),pressed:b.getAttribute("aria-pressed")};})()`;
-const CENTRE = `(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,L:r.left,T:r.top,W:r.width,H:r.height,iw:innerWidth,ih:innerHeight};})()`;
-const LENS = `(()=>{const rgba=${PAGE_RGBA};const l=document.querySelector(".loupe");const g=l?l.querySelector(".loupe-glass"):null;const r=g?g.getBoundingClientRect():null;const b=document.getElementById("zoom-loupe");const w=l?l.querySelector(".loupe-world"):null;return{exists:!!l,parent:l&&l.parentElement?l.parentElement.id:null,inMap:!!document.querySelector("#map .loupe"),mapSvgs:document.querySelectorAll("#map > svg").length,hidden:l?l.hidden:null,rect:r?[r.left,r.top,r.width,r.height]:null,pe:l?getComputedStyle(l).pointerEvents:null,ariaHidden:l?l.getAttribute("aria-hidden"):null,src:w?w.src:null,pressed:b.getAttribute("aria-pressed"),away:b.getAttribute("aria-disabled"),ground:rgba(getComputedStyle(b).backgroundColor)};})()`;
-const LOADED = `(()=>{const l=document.querySelector(".loupe");if(!l||l.hidden)return false;return[...l.querySelectorAll("img")].filter((i)=>!i.hidden).every((i)=>i.complete&&i.naturalWidth>0);})()`;
+export const CENTRE = `(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,L:r.left,T:r.top,W:r.width,H:r.height,iw:innerWidth,ih:innerHeight};})()`;
+export const LENS = `(()=>{const rgba=${PAGE_RGBA};const l=document.querySelector(".loupe");const g=l?l.querySelector(".loupe-glass"):null;const r=g?g.getBoundingClientRect():null;const b=document.getElementById("zoom-loupe");const w=l?l.querySelector(".loupe-world"):null;return{exists:!!l,parent:l&&l.parentElement?l.parentElement.id:null,inMap:!!document.querySelector("#map .loupe"),mapSvgs:document.querySelectorAll("#map > svg").length,hidden:l?l.hidden:null,rect:r?[r.left,r.top,r.width,r.height]:null,pe:l?getComputedStyle(l).pointerEvents:null,ariaHidden:l?l.getAttribute("aria-hidden"):null,src:w?w.src:null,pressed:b.getAttribute("aria-pressed"),away:b.getAttribute("aria-disabled"),ground:rgba(getComputedStyle(b).backgroundColor)};})()`;
+export const LOADED = `(()=>{const l=document.querySelector(".loupe");if(!l||l.hidden)return false;return[...l.querySelectorAll("img")].filter((i)=>!i.hidden).every((i)=>i.complete&&i.naturalWidth>0);})()`;
 const STATE = `window.__vellumZoomState()`;
 const DEEP = `(()=>({k:window.__vellumZoomState().k,hashK:new URLSearchParams(location.hash.slice(1)).get("k")}))()`;
 const CAPITAL_IDX = `(()=>{const g=document.querySelector("#map > svg .settlement-capital");const s=g?g.closest("g.settlement"):null;return s?s.dataset.idx:null;})()`;
@@ -54,7 +54,8 @@ const HAMLET_DOT = (box: Centre): string =>
   `.filter((p)=>p.x>=L+m&&p.x<=R-m&&p.y>=T+m&&p.y<=B-m&&p.x>=m&&p.x<=innerWidth-m&&p.y>=m&&p.y<=innerHeight-m);` +
   `hs.sort((a,b)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(b.x-cx,b.y-cy));return hs[0]||null;})()`;
 
-const mouse = (k: ZoomKit, x: number, y: number) => k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+export const mouse = (k: ZoomKit, x: number, y: number) =>
+  k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
 const key = (k: ZoomKit, type: "keyDown" | "keyUp") =>
   k.send(
     "Input.dispatchKeyEvent",
@@ -62,8 +63,9 @@ const key = (k: ZoomKit, type: "keyDown" | "keyUp") =>
       ? { type, key: "l", code: "KeyL", windowsVirtualKeyCode: 76, text: "l" }
       : { type, key: "l", code: "KeyL", windowsVirtualKeyCode: 76 },
   );
+const OPTION_UP = { type: "keyUp", key: "\u00ac", code: "KeyL", windowsVirtualKeyCode: 76, modifiers: 1 };
 const lens = (k: ZoomKit) => k.evaluate<Lens>(LENS);
-const shown = (d: Lens): boolean => d.hidden === false;
+export const shown = (d: Lens): boolean => d.hidden === false;
 const hiddenNow = (d: Lens): boolean => d.hidden === true;
 const centred = (d: Lens, p: Point): boolean =>
   !!d.rect && Math.hypot(d.rect[0] + d.rect[2] / 2 - p.x, d.rect[1] + d.rect[3] / 2 - p.y) <= 1;
@@ -75,7 +77,7 @@ async function clickLoupe(k: ZoomKit): Promise<boolean> {
   return p.on;
 }
 
-async function setLoupe(k: ZoomKit, on: boolean): Promise<void> {
+export async function setLoupe(k: ZoomKit, on: boolean): Promise<void> {
   const p = await k.evaluate<Press | null>(PRESS);
   if (p && p.pressed !== String(on) && !(await clickLoupe(k))) throw new Error("the loupe's press is not reachable");
 }
@@ -308,6 +310,20 @@ export async function zl3LensRegisters(k: ZoomKit, pick: HamletWindow): Promise<
   );
 }
 
+async function heldAtPointer(k: ZoomKit, p1: Point): Promise<[Lens, Lens, Lens, Lens, Lens]> {
+  await mouse(k, p1.x, p1.y);
+  const r0 = await lens(k);
+  await key(k, "keyDown");
+  const r1 = await pollLast<Lens>(k, LENS, shown, 40);
+  await key(k, "keyUp");
+  const r2 = await pollLast<Lens>(k, LENS, hiddenNow, 40);
+  await key(k, "keyDown");
+  const r2b = await pollLast<Lens>(k, LENS, shown, 40);
+  await k.send("Input.dispatchKeyEvent", OPTION_UP);
+  const r2c = await pollLast<Lens>(k, LENS, hiddenNow, 40);
+  return [r0, r1, r2, r2b, r2c];
+}
+
 export async function zl4HeldKey(k: ZoomKit): Promise<void> {
   await home(k);
   await setLoupe(k, false);
@@ -315,12 +331,7 @@ export async function zl4HeldKey(k: ZoomKit): Promise<void> {
   await k.evaluate(`document.getElementById("map-viewport").focus()`);
   const c = await k.evaluate<Centre>(CENTRE);
   const p1 = { x: c.x - 100, y: c.y - 60 };
-  await mouse(k, p1.x, p1.y);
-  const r0 = await lens(k);
-  await key(k, "keyDown");
-  const r1 = await pollLast<Lens>(k, LENS, shown, 40);
-  await key(k, "keyUp");
-  const r2 = await pollLast<Lens>(k, LENS, hiddenNow, 40);
+  const [r0, r1, r2, r2b, r2c] = await heldAtPointer(k, p1);
   await mouse(k, 3, 3);
   await key(k, "keyDown");
   const r3 = await pollLast<Lens>(k, LENS, shown, 40);
@@ -340,13 +351,15 @@ export async function zl4HeldKey(k: ZoomKit): Promise<void> {
   await k.evaluate(`document.getElementById("map-viewport").focus()`);
   await key(k, "keyUp");
   const label = await k.evaluate<string | null>(`document.getElementById("map-viewport").getAttribute("aria-label")`);
-  const reads = [r0, r1, r2, r3, r4, r5, r6];
+  const reads = [r0, r1, r2, r2b, r2c, r3, r4, r5, r6];
   k.check(
-    "ZL4 holding L while the chart has the keyboard shows the lens under the pointer, or at the chart's centre with no pointer over the chart, and letting go or the keyboard leaving the map, from the map or from a town on it, hides it, the press untouched (Issue #751)",
+    "ZL4 holding L while the chart has the keyboard shows the lens under the pointer, or at the chart's centre with no pointer over the chart, and letting go, with Option over the release or not, or the keyboard leaving the map, from the map or from a town on it, hides it, the press untouched (Issue #751)",
     hiddenNow(r0) &&
       shown(r1) &&
       centred(r1, p1) &&
       hiddenNow(r2) &&
+      shown(r2b) &&
+      hiddenNow(r2c) &&
       shown(r3) &&
       centred(r3, c) &&
       hiddenNow(r4) &&
@@ -381,39 +394,5 @@ export async function zl5StandsAsideOverCard(k: ZoomKit): Promise<void> {
     "ZL5 the lens stands aside while the pointer is on a shown place card and comes back off it (Issue #751)",
     shown(onTown) && hiddenNow(onCard) && cardStill && shown(offCard),
     JSON.stringify({ onTown: onTown.hidden, onCard: onCard.hidden, cardStill, offCard: offCard.hidden }),
-  );
-}
-
-const AGES = (on: boolean): string =>
-  `(()=>{const c=document.getElementById("ages");c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));})()`;
-const TRACK_START = `(()=>{const o=document.querySelector("#map > .voyage-overlay");const t=o?o.querySelector(".voyage-track"):null;if(!o||!t)return null;const vb=o.viewBox.baseVal;const p=(t.getAttribute("points")||"").trim().split(/\\s+/)[0].split(",").map(Number);const r=o.getBoundingClientRect();return{x:r.left+p[0]*r.width/vb.width,y:r.top+p[1]*r.height/vb.height};})()`;
-const TRACK_COPY = `(()=>{const src=document.querySelector("#map > .voyage-overlay .voyage-track");const c=document.querySelector(".loupe-sheet .voyage-overlay .voyage-track");return{copies:document.querySelectorAll(".loupe .voyage-overlay").length,same:!!c&&!!src&&c.getAttribute("points")===src.getAttribute("points"),stroke:c?getComputedStyle(c).stroke:"",srcStroke:src?getComputedStyle(src).stroke:null};})()`;
-
-type TrackCopy = { copies: number; same: boolean; stroke: string; srcStroke: string | null };
-
-async function trackRead(k: ZoomKit): Promise<{ copy: TrackCopy; overlays: number }> {
-  try {
-    await k.evaluate(AGES(true));
-    await k.waitInked("zl6");
-    await setLoupe(k, true);
-    const at = await k.evaluate<Point | null>(TRACK_START);
-    if (at) await mouse(k, at.x, at.y);
-    const copy = await pollLast<TrackCopy>(k, TRACK_COPY, (d) => d.copies === 1, 40);
-    await setLoupe(k, false);
-    return { copy, overlays: await k.evaluate<number>(`document.querySelectorAll(".voyage-overlay").length`) };
-  } finally {
-    await setLoupe(k, false);
-    await k.evaluate(AGES(false));
-    await home(k);
-  }
-}
-
-export async function zl6TrackRides(k: ZoomKit): Promise<void> {
-  await home(k);
-  const { copy, overlays } = await trackRead(k);
-  k.check(
-    "ZL6 the inked survey track rides along in the lens, dressed as the chart's, and the copy goes with the lens (Issue #751)",
-    copy.copies === 1 && copy.same && copy.stroke !== "" && copy.stroke === copy.srcStroke && overlays === 1,
-    JSON.stringify({ copy, overlays }),
   );
 }
