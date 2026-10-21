@@ -315,6 +315,33 @@ the row says so, and an incident the record does not show has no row.
   word, and Issue #193 says they still resolve there. Stands behind `handbook/specs/rulebook.md`'s
   line on old `#193` citations.
 
+## Behind the lines Issue #789 moved
+
+The incidents behind lines Issue #789 brought out of a private note and into the specs and the agent
+definitions, one row each with the line it stands behind. Each was checked against the public record
+on 2026-10-21; where that record is a commit or a comment on the pull request rather than its body,
+the row says so, and a line whose incident the record does not show has no row.
+
+- PR #179 (Issue #174): W9 read `#status.textContent`, which keeps only the last write, so a burst
+  ending on the final line would have passed it; W9b counted the writes with a `MutationObserver`
+  instead, exactly one. Stands behind `handbook/specs/settle-doctrine.md`'s bullet that an element's
+  `textContent` holds only its last write.
+- Issue #472, in its comment of 2026-08-28 at 14:02 UTC
+  (https://github.com/ahl-gram/Vellum/issues/472#issuecomment-5453462247), PR #481: no e2e check had
+  seen a map action taken from down the page, because `buttonPoint` in `e2e/support/home.ts` scrolls
+  the stage into view before it reads a point, un-scrolling the page as it does; L1k clicks the
+  instruments at their raw scrolled positions instead. Stands behind
+  `handbook/specs/settle-doctrine.md`'s helper that scrolls before it reads.
+- PR #631 (Issue #522), its plan skeptic's comment of 2026-09-17, finding 2: the plan built no
+  `layOnTable` call on the Prospect page, and since the table's parser and its writer both end in
+  `.slice(0, TABLE_CAP)`, a seventh sheet would have been dropped silently on return, the outcome
+  Issue #522 forbids. Stands behind `handbook/specs/explorer-doctrine.md`'s every door laying a
+  sheet through `layOnTable`.
+- PR #867, in its commit `0848f3683`: an implementer lane stopped on a failing test with its edits
+  uncommitted, and the orchestrating session committed them as a WIP commit so a fresh implementer
+  could resume the pull request. Stands behind `handbook/specs/orchestration.md`'s WIP commit before
+  a fresh implementer takes over a dead lane's pull request.
+
 ## Where the rules are written down
 
 Where a lesson's rule is written down in this repo, it is in one of these: the gate lines in
