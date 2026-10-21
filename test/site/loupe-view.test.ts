@@ -49,3 +49,15 @@ test("the copy is the gesture box at its own fractional size, magnified by depth
       assert.equal(v.lens.y, AT.y - 120);
     }
 });
+
+test("the paper's rect in the lens is the sheet as it lies on screen, the camera's translate less the lens's corner, at the camera's depth and never the power (Issue #751)", () => {
+  for (const k of DEPTHS) {
+    const v = loupeView(input(k, 3));
+    assert.deepEqual(v.paper, {
+      x: ZOOM.x - (AT.x - 120),
+      y: ZOOM.y - (AT.y - 120),
+      w: BOX.width * k,
+      h: BOX.height * k,
+    });
+  }
+});

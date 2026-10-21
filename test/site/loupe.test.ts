@@ -63,6 +63,7 @@ test("the lens is seated in the gesture box, never in the chart mount, hidden an
   assert.equal(lens.getAttribute("aria-hidden"), "true");
   assert.equal(lens.className, "loupe");
   assert.equal(lens.children[0]!.style.width, `${LOUPE_DIAMETER}px`);
+  assert.equal(lens.children[0]!.children[1]?.className, "loupe-room", "the room lies over the copy, in the glass");
   assert.equal(lens.children[1], asEl(loupe.grip));
   assert.equal(lens.children[1].className, "loupe-grip");
   assert.equal(asEl(build(() => null, true).loupe.lens).className, "loupe touchable");
@@ -81,6 +82,12 @@ test("a show sizes the copy from the box's own fractional size, puts the pointer
   assert.equal(layer.style.width, "3170.375px");
   assert.equal(layer.style.height, "2447.375px");
   assert.equal(layer.style["translate"], "-680px -380px");
+  const room = lens.children[0]!.children[1];
+  assert.deepEqual(
+    [room?.style.width, room?.style.height, room?.style["translate"]],
+    ["1585.1875px", "1223.6875px", "-280px -130px"],
+    "the room is the sheet as it lies on screen, in the lens's own coordinates",
+  );
   assert.equal((world as unknown as { src: string }).src, "u1");
   assert.equal((inset as unknown as { src: string }).src, "u2");
   assert.equal(inset.hidden, false);

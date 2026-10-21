@@ -35,6 +35,7 @@ export interface Loupe {
 type Parts = {
   lens: HTMLElement;
   sheet: HTMLElement;
+  room: HTMLElement;
   world: HTMLImageElement;
   inset: HTMLImageElement;
   grip: HTMLElement;
@@ -71,11 +72,12 @@ function buildLens(touchable: boolean): Parts {
   world.alt = "";
   inset.alt = "";
   inset.hidden = true;
+  const room = part("div", "loupe-room");
   const grip = part("div", "loupe-grip");
   sheet.append(world, inset);
-  glass.append(sheet);
+  glass.append(sheet, room);
   lens.append(glass, grip);
-  return { lens, sheet, world, inset, grip };
+  return { lens, sheet, room, world, inset, grip };
 }
 
 function insetAt(img: HTMLElement, rect: SheetRect): void {

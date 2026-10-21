@@ -229,3 +229,21 @@ test("the press is ignored while a world is in motion, as the hold's is, and tak
   assert.equal(r.press.getAttribute("aria-pressed"), "true", "ignored again while lit");
   assert.equal(r.calls.length, lit, "no new call");
 });
+
+test("the release of the key that held lets go, whatever character it reads as at release, and another key's release does not (Issue #751)", () => {
+  const r = rig();
+  r.mouse("pointermove", 310, 220);
+  r.viewport.fire("keydown", { ...key(), code: "KeyL" });
+  assert.deepEqual(r.calls.at(-1), ["show", { x: 300, y: 200 }]);
+  const held = r.calls.length;
+  r.viewport.fire("keyup", { key: "k", code: "KeyK" });
+  assert.equal(r.calls.length, held, "another key's release keeps the lens");
+  r.viewport.fire("keyup", { key: "\u00ac", code: "KeyL", altKey: true });
+  assert.deepEqual(r.calls.at(-1), ["hide"], "Option held over the L key's release still lets go");
+  r.viewport.fire("keydown", { ...key(), code: "" });
+  const bare = r.calls.length;
+  r.viewport.fire("keyup", { key: "x", code: "" });
+  assert.equal(r.calls.length, bare, "a key with no code of its own matches nothing");
+  r.viewport.fire("keyup", { key: "l", code: "" });
+  assert.deepEqual(r.calls.at(-1), ["hide"]);
+});

@@ -7,21 +7,26 @@ export interface LoupeInput {
   readonly power: number;
 }
 
+type Rect = { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
+
 export interface LoupeView {
   readonly lens: { readonly x: number; readonly y: number };
-  readonly sheet: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
+  readonly sheet: Rect;
+  readonly paper: Rect;
 }
 
 export function loupeView(i: LoupeInput): LoupeView {
   const r = i.diameter / 2;
   const s = i.zoom.k * i.power;
+  const lens = { x: i.at.x - r, y: i.at.y - r };
   return {
-    lens: { x: i.at.x - r, y: i.at.y - r },
+    lens,
     sheet: {
       x: r - (i.at.x - i.zoom.x) * i.power,
       y: r - (i.at.y - i.zoom.y) * i.power,
       w: i.box.width * s,
       h: i.box.height * s,
     },
+    paper: { x: 0, y: 0, w: 0, h: 0 },
   };
 }
