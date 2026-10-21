@@ -4,6 +4,7 @@ import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import {
   zg10Carried,
+  zg11LoupeDrag,
   zg1cDeskHidesTouch,
   zg4BrowserPinch,
   zg8TouchTaken,
@@ -28,8 +29,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("ZG6", () => zg6Pinches(k));
   await step("ZG9", () => zg9Rooms(k));
   await step("ZG10", () => zg10Carried(k));
-  await step("ZG8, ZG8b, ZG2, ZG3, ZG4, ZG8c", async () => {
+  await step("ZG8, ZG8b, ZG11, ZG2, ZG3, ZG4, ZG8c", async () => {
     await zg8TouchTaken(k);
+    await zg11LoupeDrag(k);
     await zg2TouchGestures(k);
     await zg4BrowserPinch(k);
     await zg8cTakenBack(k);

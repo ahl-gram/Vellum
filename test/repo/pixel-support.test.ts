@@ -8,6 +8,8 @@ import {
   extentOf,
   nearRgba,
   pure,
+  registration,
+  type Rgb,
   sampleRect,
   sampleRow,
   tokenRgba,
@@ -192,4 +194,38 @@ test("centroidOf and extentOf read a test colour in page coordinates, and pure a
   assert.ok(dominant(1)([0, 128, 0]), "half coverage");
   assert.ok(!dominant(1)([0, 127, 0]), "just under half");
   assert.ok(!dominant(1)([120, 242, 104]), "a pale green is not an edge");
+});
+
+test("registration finds the shift that aligns a patch with its copy, scores the same paint near 1 and unrelated paint near 0, and reports the control's texture (Issue #751)", () => {
+  const size = 40;
+  const grid = (at: (x: number, y: number) => number): Rgb[][] =>
+    Array.from({ length: size }, (_, y) =>
+      Array.from({ length: size }, (_, x): Rgb => {
+        const v = at(x, y);
+        return [v, v, v];
+      }),
+    );
+  const stripes = (x: number, y: number): number => ((x * 7 + y * 13) % 17 < 8 ? 40 : 220);
+  const inSquare = (x: number, y: number): boolean => x >= 12 && x < 18 && y >= 9 && y < 15;
+  const paint = (x: number, y: number): number => (inSquare(x, y) ? 0 : stripes(x, y));
+  const a = grid(paint);
+  const moved = grid((x, y) => (x - 2 >= 0 && y + 1 < size ? paint(x - 2, y + 1) : 220));
+  const found = registration(a, moved, 4);
+  assert.deepEqual({ dx: found.dx, dy: found.dy }, { dx: 2, dy: -1 }, "the copy sits 2 right and 1 up of its source");
+  assert.ok(found.ncc > 0.99, `the same paint scores near 1, read ${found.ncc}`);
+  assert.ok(found.std > 50, `the control has texture, read ${found.std}`);
+  let s = 7;
+  const noise = grid(() => {
+    s = (s * 1103515245 + 12345) % 2 ** 31;
+    return s % 256;
+  });
+  const unrelated = registration(a, noise, 4);
+  assert.ok(unrelated.ncc < 0.5, `unrelated paint scores near 0, read ${unrelated.ncc}`);
+  const flat = registration(
+    a,
+    grid(() => 128),
+    4,
+  );
+  assert.equal(flat.ncc, 0, "a flat patch scores 0, never NaN");
+  assert.equal(flat.std, 0, "a flat patch has no texture");
 });

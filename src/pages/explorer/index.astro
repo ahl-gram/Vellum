@@ -18,14 +18,14 @@ const tagline = "every seed is a world, draw one";
   room={room}
   description="Generate procedural fantasy maps in your browser. Every seed is a world."
   path="/explorer/"
-  extraCss={["/shared/living-chart.css", "/explorer/broadside.css", "/explorer/chart-drawer.css"]}
+  extraCss={["/shared/living-chart.css", "/explorer/broadside.css", "/explorer/chart-drawer.css", "/explorer/loupe.css"]}
   chartRoom
 >
 <Fog />
 <div class="stage">
   <!-- The sheet is the Glass's gesture box, so a bookmark's cx/cy are SHEET fractions. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay. -->
   <div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
-  <div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets."><div id="map" class="living-chart"></div></div>
+  <div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets, hold L for the loupe."><div id="map" class="living-chart"></div></div>
   <div id="verso" aria-hidden="true"></div>
   </div></div>
   <StageNotices pillId="status">
@@ -158,6 +158,7 @@ const tagline = "every seed is a world, draw one";
 
 <Glass id="zoom-controls">
   <button slot="presses" id="zoom-hold" class="zoom-btn hold-btn" type="button" aria-pressed="false" aria-label="Hold the sheet">&#9875;&#65038;</button>
+  <button slot="presses" id="zoom-loupe" class="zoom-btn loupe-btn" type="button" aria-pressed="false" aria-label="The loupe"><span class="loupe-glyph" aria-hidden="true"></span></button>
 </Glass>
 
 <script type="module" src="./app.bundle.js" is:inline></script>

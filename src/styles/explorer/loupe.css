@@ -1,0 +1,102 @@
+/* The loupe (Issue #751): a lens in the gesture box over the chart, ringed in ink, its copy of the sheet laid out at its final size so nothing in it is scaled. */
+.loupe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.loupe-glass {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--chart-paper);
+  box-shadow:
+    0 0 0 2px var(--ink-dark),
+    0 0 0 4px var(--parchment),
+    0 0 0 5px var(--ink-dark),
+    0 6px 18px rgb(from var(--chart-ink) r g b / 0.45);
+}
+.loupe-sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  container-type: size;
+}
+.loupe-sheet img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+}
+.loupe-world {
+  width: 100%;
+  height: 100%;
+}
+.loupe-inset {
+  width: calc(var(--iw, 1) * 100%);
+  height: calc(var(--ih, 1) * 100%);
+  transform: translate(calc(var(--ix, 0) * 100cqw), calc(var(--iy, 0) * 100cqh));
+}
+.loupe-room {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  box-shadow: 0 0 0 100vmax var(--chart-ink);
+}
+.loupe-grip {
+  display: none;
+}
+.loupe.touchable .loupe-grip {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 2px);
+  translate: -50% 0;
+  width: 2.4rem;
+  height: 0.9rem;
+  box-sizing: border-box;
+  border: 2px solid var(--ink-dark);
+  border-radius: 0.45rem;
+  background: var(--parchment);
+}
+.loupe.touchable .loupe-grip::before {
+  content: "";
+  position: absolute;
+  inset: -7px -8px;
+}
+#map-viewport.zoomable .loupe.touchable .loupe-grip {
+  pointer-events: auto;
+  touch-action: none;
+}
+.zoomery .zoom-btn.loupe-btn {
+  position: relative;
+}
+.loupe-glyph {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.78rem;
+  height: 0.78rem;
+  margin: -0.5rem 0 0 -0.5rem;
+  box-sizing: border-box;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+.loupe-glyph::after {
+  content: "";
+  position: absolute;
+  left: 0.62rem;
+  top: 0.62rem;
+  width: 0.38rem;
+  height: 2px;
+  background: currentColor;
+  rotate: 45deg;
+  transform-origin: 0 50%;
+}
+@media print {
+  .loupe {
+    display: none;
+  }
+}

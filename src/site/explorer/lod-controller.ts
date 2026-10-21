@@ -343,6 +343,11 @@ export function createLodController(deps: Deps) {
       };
     },
 
+    committedInset(): { svg: string; rect: SheetRect } | null {
+      if (!inset || !world) return null;
+      return { svg: inset.svg, rect: insetSheetRect(inset.window, margins()) };
+    },
+
     state() {
       return {
         band: currentBand,

@@ -28,6 +28,7 @@ interface GlassDeps {
   regionEligible: () => boolean;
   syncHash: () => void;
   busy: () => boolean;
+  onView: () => void;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
   buttons: { touch: HTMLElement; hold: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
@@ -55,6 +56,7 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
     }
     // Issue #387/Issue #388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
+    deps.onView();
   }
   return { setCardZoom };
 }
@@ -189,6 +191,7 @@ function glassApi(zoomController: ZoomController, lodController: LodController, 
       lodController.homeToWorld();
     },
     committedSurvey: () => lodController.committedSurvey(),
+    committedInset: () => lodController.committedInset(),
     lodState: () => lodController.state(),
   };
 }

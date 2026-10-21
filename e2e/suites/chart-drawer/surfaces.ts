@@ -111,7 +111,7 @@ export async function cd13TabClear(bag: DrawerKit & { edge: Record<string, Edge>
           edge[k]!.folded &&
           edge[k]!.tabShown &&
           edge[k]!.overlap === 0 &&
-          edge[k]!.buttons.length === 4 &&
+          edge[k]!.buttons.length === 5 &&
           edge[k]!.buttons.every((r) => r === 100),
       ),
     JSON.stringify(edge),

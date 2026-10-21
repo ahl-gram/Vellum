@@ -96,6 +96,14 @@ make an unqualified rule false. Read the surface, not just the rule.
     describes the outgoing sheet. The type check is clean either way and no unit test sees it.
   - **The voyage track is a SIBLING `<svg>` inside the mount, never inside the chart's own svg**,
     which is what keeps the drawn sheet string byte-clean for the verso ghost and every saved sheet.
+  - **The loupe is seated in the gesture box, never in the chart mount** (Issue #751). `div.loupe`
+    is a child of `#map-viewport` (`createLoupe` in `src/site/explorer/loupe.ts`), so a draw's wipe
+    of `#map` never takes it and no region inset gains an svg. It shows the drawn sheets as images
+    of their own svg strings, so no id of theirs enters the document twice, and it copies the inked
+    survey track while it shows and drops the copy when it hides. A lit or held lens is placed again
+    whenever the mount's own children change (`pageLoupe` in `src/site/explorer/loupe-page.ts`), so
+    a track inked or taken off with nothing moving reaches it at once (`zl6TrackRides` in
+    `e2e/suites/zoom/loupe-chart.ts`).
 - **The Chart Table and the Broadside never stand open together.** Opening the drawer folds the
   Broadside and takes its tab off the edge; shutting gives it back to the reader who had it open and
   leaves it folded for the reader who folded it. Nothing is lifted onto the chart: the drawer covers
@@ -147,13 +155,28 @@ make an unqualified rule false. Read the surface, not just the rule.
   its own: the draw's rebase, the turned sheet's and the survey's homes, and the voiced home. **The
   press is ignored while a world is being drawn or its sheet is turning** (Alex, 2026-10-20, Issue
   #751: the anchor does nothing until the world has landed, the way the turn button behaves): the
-  hold's click path and the turn button's read one predicate, `createMotion`'s `busy` in
+  hold's click path, the loupe's and the turn button's read one predicate, `createMotion`'s `busy` in
   `src/site/explorer/world-motion.ts` (a draft in flight, or the sheet mid-turn), so a press can
   never light over a world that is about to replace the one it was made on. The ignored press keeps
   its look, and a screen reader hears it unavailable for exactly that window (Alex, 2026-10-20: the
   hold carries `aria-disabled`, driven by the same predicate at every draw's start and end by
   `setDrawing` and at every turn's by the sheet's class; never a `disabled` attribute, which would
   dress a zoom press no sheet dresses). The state is pure in `src/site/explorer/glass-hold.ts`.
+- **The loupe follows the pointer over the chart and shows the sheets under it at twice the camera's
+  depth** (Alex, 2026-10-04 and 2026-10-20, Issue #751). Its press stands in the Glass after the
+  hold; holding L while the chart has the keyboard shows it while the key is down, under the
+  pointer, or at the chart's centre with no pointer over the chart, and the release of the key that
+  held it lets it go whatever character that key reads as when it comes up (`keyHands` in
+  `src/site/explorer/loupe-bind.ts`); where touch is the main pointer it appears at the chart's
+  centre when lit and is dragged by its grip, the one part of it that takes a finger. It reads the
+  hold's predicate twice (Alex, 2026-10-21, Issue #751): its press, like the hold's, is ignored and
+  carries `aria-disabled` for exactly the window `createMotion`'s `busy` reports, written beside the
+  hold's by the same `sync`, and its lens stands aside for that window and while the sheet is off
+  its recto (`offRecto` in `src/site/explorer/verso.ts`), re-placed at every change of either
+  through `createMotion`'s `watch` in `src/site/explorer/world-motion.ts`. On a computer it stands
+  aside while the pointer is on a shown place card. The behaviour is `bindLoupe` in
+  `src/site/explorer/loupe-bind.ts`; where it is seated and how its copy of the sheet is laid out
+  are under the host contract and counter-scale.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the
@@ -191,24 +214,28 @@ make an unqualified rule false. Read the surface, not just the rule.
   passes it.
 - **`touch-action: none` is required for touch drag and pinch**, because the zoom behaviour does not
   set it, and it is gated to the class the controller adds only while attached and taking touch.
-- **Where touch is the main pointer a finger moves the page until the reader gives it to the
-  chart** (Alex, 2026-10-13, Issue #778). The press at the top of the Glass (`bindChartTouch` in
+- **Where touch is the main pointer a finger moves the page until the reader gives it to the chart**
+  (Alex, 2026-10-13, Issue #778). The press at the top of the Glass (`bindChartTouch` in
   `src/site/shared/chart-touch.ts`) shows only where the house's touch gate matches as the page
   boots (`TOUCH_PRIMARY` there), starts off on every visit and holds the reader's choice for the
-  visit. A device with touch but another main pointer, a touchscreen laptop, shows no press and
-  its chart takes a finger as it always has. Off, the camera listens to no touch: `takeTouch` in
-  `src/site/shared/zoom-controller.ts` unbinds the camera's touch listeners and drops the class,
-  the box takes `touch-action: manipulation` so a tap on the chart never waits for a second one,
-  and the camera's filter refuses the mouse events a tap fires (`gestureAllowed` there), since a
-  double tap otherwise reaches the double-click zoom. Home's stage takes the same press through
+  visit. A device with touch but another main pointer, a touchscreen laptop, shows no press and its
+  chart takes a finger as it always has. Off, the camera listens to no touch: `takeTouch` in
+  `src/site/shared/zoom-controller.ts` unbinds the camera's touch listeners and drops the class, the
+  box takes `touch-action: manipulation` so a tap on the chart never waits for a second one, and the
+  camera's filter refuses the mouse events a tap fires (`gestureAllowed` there), since a double tap
+  otherwise reaches the double-click zoom. Home's stage takes the same press through
   `bindStageInput` in `src/site/home/input.ts`. The wheel, the keys and the Glass's presses drive
-  the camera whatever the press says. **A new surface that takes a finger joins this press**
-  rather than taking touch on its own. Whether a real phone gives the pinch to the page every
-  time is a phone pass, never a harness read.
-- **Any interactive control placed inside the zoom-bound gesture box stops propagation of the gesture
-  events on its container**, or a rapid double-click on the control bubbles into the built-in
-  double-click-to-zoom and the map lurches on its own. The live instance is `makeDogEar` in
-  `src/site/explorer/chart-drawer.ts`.
+  the camera whatever the press says. **A new surface that takes a finger joins this press** rather
+  than taking touch on its own. The loupe is one: where touch is the main pointer its grip alone
+  takes a finger, and only while the chart is in hand
+  (`#map-viewport.zoomable .loupe.touchable .loupe-grip` in `src/styles/explorer/loupe.css`); the
+  rest of the lens lets a finger through to the chart. Whether a real phone gives the pinch to the
+  page every time is a phone pass, never a harness read.
+- **Any interactive control placed inside the zoom-bound gesture box stops propagation of the
+  gesture events on its container**, or a rapid double-click on the control bubbles into the
+  built-in double-click-to-zoom and the map lurches on its own. The live instances are `makeDogEar`
+  in `src/site/explorer/chart-drawer.ts` and the loupe's grip, which also stops and prevents the
+  touches it is dragged by (`dragHands` in `src/site/explorer/loupe-bind.ts`).
 - **The camera is world-relative at every band and NEVER rebases.** A camera rebased to identity at
   each committed band leaves pan dead at that band, because the reader's transform no longer
   addresses the world.
@@ -306,6 +333,18 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   takes no transform, so it makes no stacking context and the dog-ear stays above the towns' click
   areas. Container units on the mount collapse it on paper, so in print the mount stands down as a
   container (`zh13PrintKeepsSheet`).
+- **The loupe's copy of the sheet is laid out at its final size, never scaled** (Issue #751). Its
+  layer is the gesture box's own fractional size times the camera's depth times the power, so a
+  fractional offset in it rounds by at most half a pixel and nothing multiplies it, and its region
+  sheet is still placed by a transform in the layer's own container units. The size is read from
+  `getBoundingClientRect`, never `offsetWidth`, whose whole pixels left the region sheet 5 px off at
+  24 times (measured 2026-10-20). `zl3LensRegisters` in `e2e/suites/zoom/loupe.ts` reads the lens's
+  paint against the camera's at the same depth, over the world sheet and over a region sheet held at
+  24 times. Where the lens lies past the sheet as the sheet lies on screen it shows opaque chart
+  ink, the darkness that keeps the chrome's faintest ink at 4.5:1 under the fog, which in a chart
+  room paints above the lens (Alex, 2026-10-21, Issue #751): a room the size of that sheet, placed
+  in the lens by a transform from `loupeView`'s `paper` (`src/site/explorer/loupe-view.ts`), spreads
+  the dark outside itself, and `zl7DarkPastSheet` in `e2e/suites/zoom/loupe-chart.ts` reads it.
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
 - **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box
@@ -431,6 +470,10 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
     the ghost, so it must not repaint the overlay either.
   - **The verso overlay is static, never live**: painted only where the animation comes to rest, and
     a flip snaps the animation to rest first.
+- **The loupe's urls have exactly one owner**, `svgUrl` in `src/site/explorer/loupe.ts`, one for the
+  world sheet and one for the region sheet, each revoking its previous url as it mints the next;
+  nothing else mints or revokes them (`zl2StandsAsideInMotion` in `e2e/suites/zoom/loupe.ts` reads
+  the old url refused after a turned draw).
 
 ---
 

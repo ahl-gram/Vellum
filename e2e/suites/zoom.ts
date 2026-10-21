@@ -65,6 +65,7 @@ import {
   zh9LetGoJustMoved,
 } from "./zoom/hold.ts";
 import {
+  type HamletWindow,
   pickHamletWindow,
   zh10aTownsOnDots,
   zh10bHamletsOnDots,
@@ -75,6 +76,14 @@ import {
   zh14bPressIgnoredWhileTurning,
 } from "./zoom/registration.ts";
 import { zh15HoldLights } from "./zoom/hold-dress.ts";
+import {
+  zl1PressShowsLens,
+  zl2StandsAsideInMotion,
+  zl3LensRegisters,
+  zl4HeldKey,
+  zl5StandsAsideOverCard,
+} from "./zoom/loupe.ts";
+import { zl6TrackRides, zl7DarkPastSheet } from "./zoom/loupe-chart.ts";
 import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
 
@@ -120,11 +129,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const target21 = await z21Target(k);
   const deep21 = await z21Hamlets(k, target21);
   await z21bOneBandUp(k, target21, deep21);
-  await zHold(step, k, target21);
+  const pick = await zHold(step, k, target21);
+  await zLoupe(step, k, pick);
   await step("Z restore", () => zRestore(k));
 }
 
-async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Target21): Promise<void> {
+async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Target21): Promise<HamletWindow> {
   await step("ZH1", () => zh1HeldInsetStays(k, target21));
   await step("ZH2", () => zh2LetGoSettles(k));
   await step("ZH3", () => zh3HeldWorld(k, target21));
@@ -147,6 +157,17 @@ async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Ta
   await step("ZH14", () => zh14PressIgnoredWhileDrafting(k));
   await step("ZH14b", () => zh14bPressIgnoredWhileTurning(k));
   await step("ZH15", () => zh15HoldLights(k));
+  return pick;
+}
+
+async function zLoupe(step: ReturnType<typeof makeStep>, k: ZoomKit, pick: HamletWindow): Promise<void> {
+  await step("ZL1", () => zl1PressShowsLens(k));
+  await step("ZL2", () => zl2StandsAsideInMotion(k));
+  await step("ZL3", () => zl3LensRegisters(k, pick));
+  await step("ZL4", () => zl4HeldKey(k));
+  await step("ZL5", () => zl5StandsAsideOverCard(k));
+  await step("ZL6", () => zl6TrackRides(k));
+  await step("ZL7", () => zl7DarkPastSheet(k));
 }
 
 async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
