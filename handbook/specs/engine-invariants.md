@@ -70,8 +70,13 @@ world sheet (`terrainStage` in `src/world/generate.ts`), to both arms of a close
 (`regionElevation` in `src/world/region.ts`) and to the detail chain and its cache key
 (`buildChainedField` and `chainCacheKey` in `src/world/detail-chain.ts`). Never pass one to
 `buildHeightfield` by hand: a field spread at one call and forgotten at another draws a close-up that
-contradicts its own chart. `test/world/terrain-inputs.test.ts` walks every key of the list and holds
-each arm of the close-up to its chart; it cannot see a field that never joined the list.
+contradicts its own chart. A key's value is a number or a string, since `chainCacheKey` joins it into
+a string. `test/world/terrain-inputs.test.ts` holds each arm of the close-up to its chart at the
+values its fixture row gives each key (the type checker refuses a key with no row and a row with no
+value). It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
+or `buildChainedField` that skips `terrainInputsOf`; `scripts/region-detail/probes.ts`,
+`partition.ts` and `cost.ts` build terrain by hand today, harmlessly, because each builds from
+`defaultRecipe(seed)`.
 
 ## World identity is entry-point independent
 
