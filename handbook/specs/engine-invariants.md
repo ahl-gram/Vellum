@@ -62,6 +62,17 @@ style input. `politicalTints` in `src/render/style.ts` decides only whether `rea
 `src/render/layers/realms.ts` draws anything. Changing a tint is a view change; changing what makes
 a realm is an identity change, and `handbook/specs/rulebook.md` says what that costs.
 
+## A terrain input reaches every sheet through one mapper
+
+**A recipe field that shapes the heightfield is a terrain input, and it is read in one place.** Add
+it to `TERRAIN_INPUT_KEYS` in `src/world/terrain-inputs.ts`; `terrainInputsOf` there hands it to the
+world sheet (`terrainStage` in `src/world/generate.ts`), to both arms of a close-up
+(`regionElevation` in `src/world/region.ts`) and to the detail chain and its cache key
+(`buildChainedField` and `chainCacheKey` in `src/world/detail-chain.ts`). Never pass one to
+`buildHeightfield` by hand: a field spread at one call and forgotten at another draws a close-up that
+contradicts its own chart. `test/world/terrain-inputs.test.ts` walks every key of the list and holds
+each arm of the close-up to its chart; it cannot see a field that never joined the list.
+
 ## World identity is entry-point independent
 
 **The same seed yields the same world through every entry point, and every new surface inherits this

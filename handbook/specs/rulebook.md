@@ -262,6 +262,11 @@ byte-identical, and the drift guard is green.**
   the rest. It ruled the full table as a drawer in the Explorer, by the exception recorded on the
   destinations rule above; the count-and-button minimum was drawn and passed on. The destination
   complies: the gathered sheets land on The Portfolio, its own page, under the Explorer.
+- **Issue #844 (Shape and count) HAS ITS SLOT, ratified 2026-10-10**, with its own board phase and
+  label. Its founding words are part of version 1 of the founding: they land before Issue #393 makes
+  the written-world link public and locks that version, and Issue #393 stays held until they have.
+  What the epic carries past the lock is version 2 of the word list. Sub 0 (Issue #849) was the
+  design sitting and gated the rest.
 - Each epic carries its own contract, sub shape (a Sub 0 spike or mockup round first), open decisions,
   and golden or regen posture in its own issue, per the house pattern.
 - **Delight and anytime work interleaves but never leads.** It is not the lead lane, and a delight
