@@ -40,7 +40,6 @@ async function deep(k: ZoomKit, cu: number, cv: number): Promise<void> {
   );
 }
 
-// Never throws, so a mutation reds on the assertion and not on a stopped step.
 async function pollLast<T>(k: ZoomKit, payload: string, ok: (v: T) => boolean, tries: number): Promise<T> {
   let last = await k.evaluate<T>(payload);
   for (let i = 1; i < tries && !ok(last); i++) {
@@ -87,7 +86,6 @@ const PICK_WINDOW =
   `if(!best||e>best.e)best={e,u0:win.u0,v0:win.v0,cx:mx+q.cx*(1-2*mx),cy:my+q.cy*(1-2*my)};}` +
   `return best;})()`;
 
-// Reads the world sheet's own box at whatever camera it stands, so it needs no home and nothing here can throw outside a step; a sheet with no such window reads as one that rounds by nothing, which ZH10b reds on.
 export async function pickHamletWindow(k: ZoomKit): Promise<HamletWindow> {
   const pick = await k.evaluate<HamletWindow | null>(PICK_WINDOW, true);
   return pick ?? { e: 0, u0: Number.NaN, v0: Number.NaN, cx: 0.5, cy: 0.5 };
@@ -342,7 +340,7 @@ export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
     now.drafting &&
       now.pressed === "false" &&
       now.away === "true" &&
-      (after.away === null || after.away === "false") &&
+      after.away === "false" &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
       ceiling === 8,
@@ -367,7 +365,7 @@ export async function zh14bPressIgnoredWhileTurning(k: ZoomKit): Promise<void> {
     now.turning &&
       now.pressed === "false" &&
       now.away === "true" &&
-      (after.away === null || after.away === "false") &&
+      after.away === "false" &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
       ceiling === 8,

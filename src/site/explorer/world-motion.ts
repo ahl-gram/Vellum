@@ -5,7 +5,6 @@ export function createMotion(hold: HTMLElement): { busy: () => boolean; setDrawi
   const busy = (): boolean => drawing || sheetEl.classList.contains("turning");
   const sync = (): void => hold.setAttribute("aria-disabled", String(busy()));
   new MutationObserver(sync).observe(sheetEl, { attributes: true, attributeFilter: ["class"] });
-  sync();
   return {
     busy,
     setDrawing: (on) => {

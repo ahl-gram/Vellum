@@ -35,7 +35,6 @@ const ZOOM_THEN_LET_GO = (target: Target21): string =>
 const OUT_TWICE_THEN_LET_GO = `(()=>{const o=document.getElementById("zoom-out");o.click();o.click();document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,glide:!!document.getElementById("map-viewport").__transition,pencil:!!document.querySelector("#map .survey-pencil"),pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
 
 const read = (k: ZoomKit) => k.evaluate<Read>(READ);
-// Wiring only: ZH1 drove the real press with the mouse.
 export const press = (k: ZoomKit) => k.evaluate<undefined>(`document.getElementById("zoom-hold").click()`);
 const marked = (r: Read): boolean => r.caption.endsWith("held");
 

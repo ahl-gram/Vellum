@@ -85,7 +85,6 @@ test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and n
   assert.ok(!nearRgba([61, 47, 31, 214], stop, 1), "a stop moved by 0.01 does not");
 });
 
-// An 8-bit RGB PNG from its scanlines, each already led by its filter byte; the decoder reads no CRC, so none is computed.
 const pngOf = (width: number, scanlines: number[][]): Buffer => {
   const chunk = (type: string, data: Buffer): Buffer => {
     const head = Buffer.alloc(8);
