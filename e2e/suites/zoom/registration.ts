@@ -1,6 +1,7 @@
 import { centroidOf, dominant, extentOf, pure, sampleRect } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { CEILING, home, press } from "./hold.ts";
+import { sheetAtRest } from "./hold-dress.ts";
 import type { ZoomKit } from "./kit.ts";
 
 export type HamletWindow = { e: number; u0: number; v0: number; cx: number; cy: number };
@@ -39,7 +40,7 @@ async function deep(k: ZoomKit, cu: number, cv: number): Promise<void> {
   );
 }
 
-// A measurement poll: the first read that satisfies `ok`, else the last, and never a throw, so a mutation reds on the assertion and not on a stopped step.
+// Never throws, so a mutation reds on the assertion and not on a stopped step.
 async function pollLast<T>(k: ZoomKit, payload: string, ok: (v: T) => boolean, tries: number): Promise<T> {
   let last = await k.evaluate<T>(payload);
   for (let i = 1; i < tries && !ok(last); i++) {
@@ -358,6 +359,7 @@ export async function zh14bPressIgnoredWhileTurning(k: ZoomKit): Promise<void> {
     true,
   );
   await k.waitSettled("zh14b-turn");
+  await sheetAtRest(k, "zh14b-sheet-rest");
   const after = await k.evaluate<{ pressed: string | null; away: string | null; caption: string }>(HOLD_READ);
   const ceiling = await k.evaluate<number>(CEILING);
   k.check(

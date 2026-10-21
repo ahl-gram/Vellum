@@ -147,11 +147,13 @@ make an unqualified rule false. Read the surface, not just the rule.
   its own: the draw's rebase, the turned sheet's and the survey's homes, and the voiced home. **The
   press is ignored while a world is being drawn or its sheet is turning** (Alex, 2026-10-20, Issue
   #751: the anchor does nothing until the world has landed, the way the turn button behaves): the
-  hold's click path and the turn button's read one predicate, `worldInMotion` in
-  `src/site/explorer/app.ts` (a draft in flight, or the sheet mid-turn), so a press can never light
-  over a world that is about to replace the one it was made on. The ignored press keeps its look and
-  carries no `disabled` mark, since no sheet dresses a disabled zoom press. The state is
-  pure in `src/site/explorer/glass-hold.ts`.
+  hold's click path and the turn button's read one predicate, `createMotion`'s `busy` in
+  `src/site/explorer/world-motion.ts` (a draft in flight, or the sheet mid-turn), so a press can
+  never light over a world that is about to replace the one it was made on. The ignored press keeps
+  its look, and a screen reader hears it unavailable for exactly that window (Alex, 2026-10-20: the
+  hold carries `aria-disabled`, driven by the same predicate at every draw's start and end by
+  `setDrawing` and at every turn's by the sheet's class; never a `disabled` attribute, which would
+  dress a zoom press no sheet dresses). The state is pure in `src/site/explorer/glass-hold.ts`.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the

@@ -260,7 +260,6 @@ export async function zh5bKeepsCaption(k: ZoomKit, target: Target21): Promise<vo
   await press(k);
   const first = await bandOneInset(k, target);
   const cx = Math.min(0.9, Math.max(0.1, target.cx + 0.2));
-  // As ZH5: the press lands in the microtask after the dispatching task, with a finer draft in flight over a committed inset.
   await k.evaluate(
     `(()=>{const obs=new MutationObserver((recs)=>{for(const r of recs){for(const n of r.addedNodes){` +
       `if(n.classList&&n.classList.contains("survey-pencil")){obs.disconnect();document.getElementById("zoom-hold").click();return;}}}});` +

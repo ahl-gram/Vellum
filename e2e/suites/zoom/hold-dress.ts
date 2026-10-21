@@ -6,13 +6,16 @@ import type { ZoomKit } from "./kit.ts";
 const GROUND = `(()=>{const rgba=${PAGE_RGBA};const b=document.getElementById("zoom-hold");return{pressed:b.getAttribute("aria-pressed"),ground:rgba(getComputedStyle(b).backgroundColor)};})()`;
 const AT_REST = `!document.getElementById("sheet").classList.contains("turning")`;
 
+export const sheetAtRest = (k: ZoomKit, label: string): Promise<boolean> =>
+  makeSettle(k)<boolean>(AT_REST, (d) => d, label);
+
 type Ground = { pressed: string | null; ground: number[] };
 
 const grounded = (k: ZoomKit, label: string): Promise<Ground> =>
   makeSettle(k)<Ground>(GROUND, (d, last) => !!last && JSON.stringify(d) === JSON.stringify(last), label);
 
 export async function zh15HoldLights(k: ZoomKit): Promise<void> {
-  await makeSettle(k)<boolean>(AT_REST, (d) => d, "zh15-sheet-rest");
+  await sheetAtRest(k, "zh15-sheet-rest");
   await home(k);
   const rest = await grounded(k, "zh15-rest");
   await press(k);
