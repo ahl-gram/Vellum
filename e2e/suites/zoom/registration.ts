@@ -325,19 +325,23 @@ export async function zh13PrintKeepsSheet(k: ZoomKit, pick: HamletWindow): Promi
   );
 }
 
-const PRESS_WHILE_DRAFTING = `(()=>{document.getElementById("draw").click();document.getElementById("zoom-hold").click();return{drafting:document.getElementById("verso-turn").disabled,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
-const HOLD_READ = `(()=>({pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),caption:document.getElementById("caption").textContent||""}))()`;
+const PRESS_WHILE_DRAFTING = `(()=>{document.getElementById("draw").click();document.getElementById("zoom-hold").click();return{drafting:document.getElementById("verso-turn").disabled,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),away:document.getElementById("zoom-hold").getAttribute("aria-disabled")};})()`;
+const HOLD_READ = `(()=>({pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),away:document.getElementById("zoom-hold").getAttribute("aria-disabled"),caption:document.getElementById("caption").textContent||""}))()`;
 
 export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
   await home(k);
-  const now = await k.evaluate<{ drafting: boolean; pressed: string | null }>(PRESS_WHILE_DRAFTING);
+  const now = await k.evaluate<{ drafting: boolean; pressed: string | null; away: string | null }>(
+    PRESS_WHILE_DRAFTING,
+  );
   await k.waitSettled("zh14-draw");
-  const after = await k.evaluate<{ pressed: string | null; caption: string }>(HOLD_READ);
+  const after = await k.evaluate<{ pressed: string | null; away: string | null; caption: string }>(HOLD_READ);
   const ceiling = await k.evaluate<number>(CEILING);
   k.check(
-    "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, and the ceiling stays at 8 (Issue #751)",
+    "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, the ceiling stays at 8, and a screen reader hears it unavailable only while the world is in motion (Issue #751)",
     now.drafting &&
       now.pressed === "false" &&
+      now.away === "true" &&
+      (after.away === null || after.away === "false") &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
       ceiling === 8,
@@ -345,18 +349,23 @@ export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
   );
 }
 
-const PRESS_WHILE_TURNING = `(async()=>{const style=document.getElementById("style");style.value="topographic";style.dispatchEvent(new Event("change",{bubbles:true}));const sheet=document.getElementById("sheet");for(let i=0;i<400&&!sheet.classList.contains("turning");i++)await new Promise(r=>setTimeout(r,10));const turning=sheet.classList.contains("turning");document.getElementById("zoom-hold").click();return{turning,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
+const PRESS_WHILE_TURNING = `(async()=>{const style=document.getElementById("style");style.value="topographic";style.dispatchEvent(new Event("change",{bubbles:true}));const sheet=document.getElementById("sheet");for(let i=0;i<400&&!sheet.classList.contains("turning");i++)await new Promise(r=>setTimeout(r,10));const turning=sheet.classList.contains("turning");document.getElementById("zoom-hold").click();return{turning,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed"),away:document.getElementById("zoom-hold").getAttribute("aria-disabled")};})()`;
 
 export async function zh14bPressIgnoredWhileTurning(k: ZoomKit): Promise<void> {
   await home(k);
-  const now = await k.evaluate<{ turning: boolean; pressed: string | null }>(PRESS_WHILE_TURNING, true);
+  const now = await k.evaluate<{ turning: boolean; pressed: string | null; away: string | null }>(
+    PRESS_WHILE_TURNING,
+    true,
+  );
   await k.waitSettled("zh14b-turn");
-  const after = await k.evaluate<{ pressed: string | null; caption: string }>(HOLD_READ);
+  const after = await k.evaluate<{ pressed: string | null; away: string | null; caption: string }>(HOLD_READ);
   const ceiling = await k.evaluate<number>(CEILING);
   k.check(
-    "ZH14b a hold pressed while a style change's sheet is turning is ignored too: the press stays unlit, the caption carries no mark, and the ceiling stays at 8 (Issue #751)",
+    "ZH14b a hold pressed while a style change's sheet is turning is ignored too: the press stays unlit, the caption carries no mark, the ceiling stays at 8, and a screen reader hears it unavailable only while the sheet is in motion (Issue #751)",
     now.turning &&
       now.pressed === "false" &&
+      now.away === "true" &&
+      (after.away === null || after.away === "false") &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
       ceiling === 8,
