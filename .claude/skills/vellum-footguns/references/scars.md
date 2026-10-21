@@ -477,7 +477,8 @@ Where a lesson's rule is written down in this repo, it is in one of these: the g
 (what a pull request owes, and in what order); `handbook/specs/orchestration.md` (running several
 lanes at once); `handbook/specs/conventions.md` (the comment sweep,
 citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
-section (measuring a ground); `handbook/specs/explorer-doctrine.md`, `handbook/specs/region-and-voyage.md`,
+section (measuring a ground) and its room and furniture section (the legend row's footing);
+`handbook/specs/explorer-doctrine.md`, `handbook/specs/region-and-voyage.md`,
 `handbook/specs/chart-dress.md`, `handbook/specs/engine-invariants.md`,
 `handbook/specs/site-architecture.md`, `handbook/specs/cascade-traps.md`,
 `handbook/specs/check-placement.md` and `handbook/specs/rulebook.md` (the rules the spec-line
