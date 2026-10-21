@@ -377,7 +377,9 @@ precisely, because a token that falls outside it looks identical at the point of
   deliberate, and the pull request that changes the job list names the exact check names in its body.
 - **Deploy is a workflow, not a branch.** Pages builds from `.github/workflows/deploy.yml`, which
   installs, runs the build and publishes the built tree on a push to `main` or on demand. What is
-  committed rather than rebuilt is the rulebook's rule and is not restated here.
+  committed rather than rebuilt is the rulebook's rule and is not restated here. A deploy whose
+  publish step fails is redeployed by starting a fresh run of the workflow on demand, never by
+  re-running the failed run.
 
 ---
 
