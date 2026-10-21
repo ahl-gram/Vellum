@@ -70,6 +70,9 @@ export interface ZoomController {
   /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft (a refit before the boot wrote an empty seed into the hash, CI R0b). */
   refit(next: ZoomState): void;
   glideBy(factor: number): void;
+  glideTarget(): number | null;
+  setScaleMax(max: number): void;
+  settlePending(): boolean;
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;
   getState(): ZoomState;
@@ -119,17 +122,17 @@ function zoomMotion(
 }
 
 function zoomBehavior(
-  scaleExtent: [number, number],
+  extentNow: () => readonly [number, number],
   viewportExtent: () => Extent,
   prefersReduced: () => boolean,
   DBLCLICK_MS: number,
 ): Behavior {
   return zoom<HTMLElement, unknown>()
-    .scaleExtent(scaleExtent)
+    .scaleExtent([...extentNow()])
     .extent(viewportExtent)
     .duration(prefersReduced() ? 0 : DBLCLICK_MS)
     .constrain((transform, ext) => {
-      const c = constrainZoom({ x: transform.x, y: transform.y, k: transform.k }, ext, scaleExtent);
+      const c = constrainZoom({ x: transform.x, y: transform.y, k: transform.k }, ext, extentNow());
       return zoomIdentity.translate(c.x, c.y).scale(c.k);
     });
 }
@@ -166,7 +169,8 @@ function zoomPaint(
   const setSettleTimer = (next: ReturnType<typeof setTimeout> | 0): void => {
     settleTimer = next;
   };
-  return { syncDblDuration, clearSettle, apply, setSettleTimer };
+  const settleArmed = (): boolean => settleTimer !== 0;
+  return { syncDblDuration, clearSettle, apply, setSettleTimer, settleArmed };
 }
 
 function listenZoom(
@@ -198,9 +202,9 @@ function zoomGlide(
   glideMsNow: () => number,
   prefersReduced: () => boolean,
   getState: () => ZoomState,
-  scaleExtent: [number, number],
+  extentNow: () => readonly [number, number],
 ) {
-  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
+  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end, interrupt or cancel clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
   let glideTargetK: number | null = null;
   let glideSeq = 0;
 
@@ -211,7 +215,7 @@ function zoomGlide(
       .transition()
       .duration(glideMsNow())
       .call((s, k2: number) => behavior.scaleTo(s, k2), k)
-      .on("end interrupt", () => {
+      .on("end interrupt cancel", () => {
         if (myGlide === glideSeq) glideTargetK = null;
       });
   }
@@ -223,7 +227,7 @@ function zoomGlide(
       return;
     }
     const base = glideTargetK != null ? glideTargetK : getState().k;
-    glideTo(nextGlideTarget(base, factor, scaleExtent));
+    glideTo(nextGlideTarget(base, factor, extentNow()));
   }
   const setGlideTargetK = (next: number | null): void => {
     glideTargetK = next;
@@ -307,7 +311,7 @@ function zoomSeat(
 
 function zoomFit(
   viewportExtent: () => Extent,
-  scaleExtent: [number, number],
+  extentNow: () => readonly [number, number],
   sel: Sel,
   behavior: Behavior,
   glideTargetK: () => number | null,
@@ -318,11 +322,11 @@ function zoomFit(
   return {
     /** Programmatically zoom to a proposed transform, clamped like a live gesture. */
     zoomTo(next: ZoomState) {
-      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
+      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), extentNow());
       sel().call((s, t) => behavior.transform(s, t), zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
     refit(next: ZoomState) {
-      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
+      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), extentNow());
       const t = zoomIdentity.translate(c.x, c.y).scale(c.k);
       // A glide in flight tweens from the transform it captured at its start and rewrites __zoom every frame (d3-zoom's schedule), so a framing written under it is gone on the next frame: stop the glide, seat the framing, restart the glide toward its pending target against the refitted box (skeptic on PR #491, round 3).
       const pending = glideTargetK();
@@ -371,6 +375,30 @@ function zoomHome(
   };
 }
 
+function zoomExtent(scaleExtent: readonly [number, number]) {
+  let extent = scaleExtent;
+  const setMax = (max: number): readonly [number, number] => (extent = [extent[0], max]);
+  return { extentNow: (): readonly [number, number] => extent, setMax };
+}
+
+function zoomCeiling(
+  behavior: Behavior,
+  sel: Sel,
+  glideTargetK: () => number | null,
+  settleArmed: () => boolean,
+  extentNow: () => readonly [number, number],
+  setMax: (max: number) => readonly [number, number],
+): Pick<ZoomController, "setScaleMax" | "settlePending"> {
+  return {
+    setScaleMax(max: number) {
+      const lowered = max < extentNow()[1];
+      behavior.scaleExtent([...setMax(max)]);
+      if (lowered && glideTargetK() === null) sel().interrupt();
+    },
+    settlePending: () => glideTargetK() !== null || settleArmed(),
+  };
+}
+
 export function createZoomController({
   viewportEl,
   targetEl,
@@ -389,9 +417,11 @@ export function createZoomController({
   const { prefersReduced, glideMsNow } = zoomMotion(reducedMotion, mq, glideMs);
   const DBLCLICK_MS = 250;
 
-  const behavior = zoomBehavior(scaleExtent, viewportExtent, prefersReduced, DBLCLICK_MS);
+  const { extentNow, setMax } = zoomExtent(scaleExtent);
+
+  const behavior = zoomBehavior(extentNow, viewportExtent, prefersReduced, DBLCLICK_MS);
   const touch = zoomTouch(viewportEl, sel, behavior);
-  const { syncDblDuration, clearSettle, apply, setSettleTimer } = zoomPaint(
+  const { syncDblDuration, clearSettle, apply, setSettleTimer, settleArmed } = zoomPaint(
     behavior,
     prefersReduced,
     DBLCLICK_MS,
@@ -406,14 +436,16 @@ export function createZoomController({
     glideMsNow,
     prefersReduced,
     getState,
-    scaleExtent,
+    extentNow,
   );
 
   return {
     ...zoomSeat(viewportEl, syncDblDuration, sel, behavior, clearSettle, apply, touch),
     takeTouch: touch.take,
-    ...zoomFit(viewportExtent, scaleExtent, sel, behavior, glideTargetK, viewportEl, apply, glideTo),
+    ...zoomFit(viewportExtent, extentNow, sel, behavior, glideTargetK, viewportEl, apply, glideTo),
     glideBy,
+    glideTarget: glideTargetK,
+    ...zoomCeiling(behavior, sel, glideTargetK, settleArmed, extentNow, setMax),
     ...zoomHome(clearSettle, setGlideTargetK, prefersReduced, sel, behavior, apply, glideMsNow, getState),
     getState,
   };

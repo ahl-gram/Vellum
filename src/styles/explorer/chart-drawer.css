@@ -74,7 +74,8 @@ body:has(.chart-drawer.open) .slip-tab {
 
 @media print {
   .chart-drawer,
-  .chart-drawer-tab {
+  .chart-drawer-tab,
+  .dog-ear {
     display: none;
   }
 }
@@ -318,15 +319,18 @@ body.sheet-drag :is(#map-viewport, *) {
 /* No element inside the dog-ear: `LAST_INSET` in `e2e/suites/region-detail.ts` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
 .dog-ear {
   position: absolute;
-  top: 0;
-  right: 0;
+  left: calc(var(--ix) * -100cqw);
+  top: calc(var(--iy) * -100cqh);
   padding: 0;
   border: 0;
   cursor: pointer;
   /* Restored: .region-inset is pointer-events: none (explorer/index.css), and without this a real click lands on the chart underneath. */
   pointer-events: auto;
-  width: calc(3.4rem / var(--zoom-k, 1));
-  height: calc(3.4rem / var(--zoom-k, 1));
+  width: 3.4rem;
+  height: 3.4rem;
+  transform-origin: 0 0;
+  translate: calc((var(--ix) + var(--iw)) * 100cqw - 3.4rem / var(--zoom-k, 1)) calc(var(--iy) * 100cqh);
+  scale: calc(1 / var(--zoom-k, 1));
   appearance: none;
   border-radius: 0;
   z-index: 3;
@@ -339,13 +343,11 @@ body.sheet-drag :is(#map-viewport, *) {
     var(--ink-dark) 100%
   );
   box-shadow: none;
-  transition:
-    width 0.18s var(--ease-paper),
-    height 0.18s var(--ease-paper);
 }
 .dog-ear:is(:hover, :focus-visible) {
-  width: calc(4.1rem / var(--zoom-k, 1));
-  height: calc(4.1rem / var(--zoom-k, 1));
+  width: 4.1rem;
+  height: 4.1rem;
+  translate: calc((var(--ix) + var(--iw)) * 100cqw - 4.1rem / var(--zoom-k, 1)) calc(var(--iy) * 100cqh);
 }
 .dog-ear:focus-visible {
   outline: 2px solid var(--parchment-bright);

@@ -25,6 +25,7 @@ import {
 } from "./chart-drawer.ts";
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { draftDress, draftOverrides, pageGlass, wirePageControls, type DrawOverrides } from "./app-wiring.ts";
+import { createMotion } from "./world-motion.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
@@ -82,7 +83,6 @@ const touched = { land: false, coast: false };
 let pendingCamera: Camera | null = null;
 
 let drawGen = 0;
-let drawing = false;
 
 function prefersReduce(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -198,7 +198,7 @@ function syncHash(): void {
     hashControls,
     touched.land,
     touched.coast,
-    glass.cameraNow(),
+    glass.cameraForAddress(),
     agesChk.checked ? { kind: "survey" } : null,
     chartTable.state(),
   );
@@ -209,11 +209,24 @@ function syncHash(): void {
 
 const buttons = {
   touch: $("zoom-touch"),
+  hold: $("zoom-hold"),
   zoomIn: $("zoom-in"),
   zoomOut: $("zoom-out"),
   reset: $("zoom-reset"),
 };
-const glass = pageGlass({ lc, chartTable, regionEligible, syncHash, earLabel, prefersReduce, token, tokenMs, buttons });
+const motion = createMotion(buttons.hold);
+const glass = pageGlass({
+  lc,
+  chartTable,
+  regionEligible,
+  syncHash,
+  busy: motion.busy,
+  earLabel,
+  prefersReduce,
+  token,
+  tokenMs,
+  buttons,
+});
 
 const room = bindRoom({
   frame: stageEl,
@@ -229,8 +242,7 @@ function writeFolio(res: { title: string; subtitle: string }, seed: number): voi
 }
 
 function keepDraw(res: DrawResult, seed: number, t0: number): void {
-  drawing = false;
-  versoBtn.disabled = false;
+  motion.setDrawing(false);
   lastSvg = res.svg;
   lastSubtitle = res.subtitle;
   lastSeed = seed;
@@ -344,8 +356,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   // Issue #165: rebase(), not reset(): the chart under the camera is being replaced, so drop to home with no spurious settle.
   glass.rebase();
   glass.cancelRedraft();
-  drawing = true;
-  versoBtn.disabled = true;
+  motion.setDrawing(true);
   status.textContent = "Drafting…";
   caption.textContent = "";
   syncHash();
@@ -367,8 +378,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
-      drawing = false;
-      versoBtn.disabled = false;
+      motion.setDrawing(false);
       cancelTurn();
       status.textContent = "The cartographer spilled the ink: " + errorText(err);
     });
@@ -378,7 +388,7 @@ wirePageControls(touched, draw, lc);
 wireFootnotes();
 
 versoBtn.addEventListener("click", () => {
-  if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
+  if (!lastSvg || motion.busy()) return;
   // Issue #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
   glass.homeToWorld(); // Issue #169: drop a committed region inset before the flip
   glass.reset();

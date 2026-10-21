@@ -18,6 +18,16 @@ import { latticeFromSettle } from "../shared/table-address.ts";
 
 const pct = (f: number) => `${(f * 100).toFixed(4)}%`;
 
+function placeInset(el: HTMLElement, rect: SheetRect): void {
+  el.style.setProperty("left", pct(rect.x));
+  el.style.setProperty("top", pct(rect.y));
+  el.style.setProperty("width", pct(rect.w));
+  el.style.setProperty("height", pct(rect.h));
+  el.style.setProperty("--ix", String(rect.x));
+  el.style.setProperty("--iy", String(rect.y));
+  el.style.setProperty("--iw", String(rect.w));
+}
+
 type RegionJobMessage = {
   kind: "region";
   seed: number;
@@ -86,6 +96,7 @@ export function createLodController(deps: Deps) {
     band: number;
     window: UvWindow;
     title: string;
+    caption: string;
     seat: { lx: number; ly: number } | null;
   } | null = null;
 
@@ -163,14 +174,12 @@ export function createLodController(deps: Deps) {
     const prevLabeled = reduce ? null : prevLabeledNames();
     const el = document.createElement("div");
     el.className = "region-inset";
-    el.style.left = pct(rect.x);
-    el.style.top = pct(rect.y);
-    el.style.width = pct(rect.w);
-    el.style.height = pct(rect.h);
+    placeInset(el, rect);
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
-    inset = { el, svg: res.svg, band, window, title: res.title, seat };
+    const text = `${res.title} · regional survey · band ${band} · drawn in ${ms}ms`;
+    inset = { el, svg: res.svg, band, window, title: res.title, caption: text, seat };
     // AFTER the assignment: the hook asks the controller what is committed, and before it this still named the outgoing sheet.
     deps.decorateInset?.(el);
     currentBand = band;
@@ -178,7 +187,7 @@ export function createLodController(deps: Deps) {
     hidePencil();
     buildPlaceOverlay(res.manifest, { preservePinByName: true, box: rect });
     redrafts++;
-    setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
+    setCaption(text);
     if (reduce) {
       el.classList.add("in");
       if (old) old.remove();
@@ -272,6 +281,13 @@ export function createLodController(deps: Deps) {
       regionGen++;
       hidePencil();
       removeInsetsExcept(null);
+    },
+
+    cancelPending() {
+      if (!pencil || !pencil.parentNode) return;
+      regionGen++;
+      hidePencil();
+      setCaption(inset ? inset.caption : "");
     },
 
     cancel() {

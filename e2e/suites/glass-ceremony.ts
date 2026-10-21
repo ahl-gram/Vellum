@@ -90,9 +90,9 @@ async function g1Cluster({ evaluate, check }: GlassKit): Promise<void> {
     `(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`,
   );
   check(
-    "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice, the chart's touch press above them (Issue #778); no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
+    "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice, the chart's touch press above them (Issue #778), the hold among them on the Explorer (Issue #751); no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
     g1.grpAria === "Camera" &&
-      g1.order === "zoom-touch,zoom-in,zoom-out,zoom-reset" &&
+      g1.order === "zoom-touch,zoom-hold,zoom-in,zoom-out,zoom-reset" &&
       g1.zin.aria === "Draw nearer" &&
       g1.zin.text === "+" &&
       !g1.zin.svg &&

@@ -129,6 +129,31 @@ make an unqualified rule false. Read the surface, not just the rule.
   because the tween rewrites the stored transform every frame and would discard the refit. A refit
   that wrote the address before the boot read it lands a bare visit on the wrong seed, since
   `seedFromHash` in `src/site/explorer/address.ts` takes digits only.
+- **The hold freezes the redraft and widens the camera, and every home lets it go** (Alex,
+  2026-10-04 and 2026-10-20, Issue #751). While the Glass's hold press is lit, a settle still writes
+  the address and never reaches the redraft, so the sheet on the table, a region inset or the bare
+  world sheet, stays whatever the camera does, and the camera's ceiling rises from `GLASS_MAX` to
+  `HELD_MAX` (`createGlass` in `src/site/explorer/glass.ts`, through `setScaleMax` in
+  `src/site/shared/zoom-controller.ts`); pressing it drops a draft still in flight (`cancelPending`
+  in `src/site/explorer/lod-controller.ts`). Letting go lowers the ceiling, which stops where it
+  stands any glide not started through `glideBy` (a double-click's, whose end d3 fixed against the
+  held ceiling, or a home's), wherever it was headed (`setScaleMax` in
+  `src/site/shared/zoom-controller.ts`); a camera, or a press's glide, headed above the ceiling then
+  glides back under it, or under reduced motion steps there, and settles at the landing; otherwise
+  the settle runs at once, unless a settle is still to come (`settlePending`: a press's glide in
+  flight, or the settle debounce armed), which then runs alone with the hold off. A settle beside the
+  one still to come sends its survey twice, or judges a camera about to leave whose draft can outlive
+  a landing that sends nothing. Every path that homes the camera lets go first and runs no settle of
+  its own: the draw's rebase, the turned sheet's and the survey's homes, and the voiced home. **The
+  press is ignored while a world is being drawn or its sheet is turning** (Alex, 2026-10-20, Issue
+  #751: the anchor does nothing until the world has landed, the way the turn button behaves): the
+  hold's click path and the turn button's read one predicate, `createMotion`'s `busy` in
+  `src/site/explorer/world-motion.ts` (a draft in flight, or the sheet mid-turn), so a press can
+  never light over a world that is about to replace the one it was made on. The ignored press keeps
+  its look, and a screen reader hears it unavailable for exactly that window (Alex, 2026-10-20: the
+  hold carries `aria-disabled`, driven by the same predicate at every draw's start and end by
+  `setDrawing` and at every turn's by the sheet's class; never a `disabled` attribute, which would
+  dress a zoom press no sheet dresses). The state is pure in `src/site/explorer/glass-hold.ts`.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the
@@ -197,7 +222,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   rebases every draw and a live camera would re-frame every one. Record the world sheet BEFORE
   applying it, so the settle it triggers redrafts over the same base world. The grammar itself is
   pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
-  passed verbatim and never re-serialized.
+  passed verbatim and never re-serialized. The hold is the reader's and the address never carries it:
+  a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
+  (`cameraForAddress` in `src/site/explorer/glass.ts`), so the camera's bound in `readHash` stands.
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
   address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
@@ -255,9 +282,30 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   BUILT between applies sets the counter-scale at creation (`makeDogEar` in
   `src/site/explorer/chart-drawer.ts`), because a commit never touches the camera and nothing else
   will publish to it.
-- **One division, on the hit element itself.** The translate pins the scale's fixed point to the
-  mark so anchors never move, and a second division on a ring pseudo-element would shrink the ring
-  with the depth. The target and its ring hold their designed size at every depth.
+- **One division, on the hit element itself, and the hit placed by that same transform.** The hit's
+  transform carries the place's sheet fraction against the place overlay's own box (`--nx` and
+  `--ny`, read in container units, since `.place-overlay` is a size container), then the half-box
+  translate that pins the scale's fixed point to the mark, then the division, so anchors never move;
+  a second division on a ring pseudo-element would shrink the ring with the depth. The target and its
+  ring hold their designed size at every depth.
+- **A box in the mount is placed by a transform from a whole-pixel origin, never by a fractional
+  offset** (Alex, 2026-10-20, Issue #751). The browser rounds to a whole pixel the fractional `left`
+  or `top` of a box that carries a transform of its own, and the box of an inline svg, and the
+  mount's `scale(k)` multiplies the rounding: at 24 times a town's ring and click area stood up to
+  12 px off its dot, and a region sheet's drawing up to 11 px off its window.
+  `getBoundingClientRect` reports the box unrounded, so a rect read sees none of it, and the guard
+  reads the paint and the hit test (`zh10aTownsOnDots` and `zh10bHamletsOnDots` in
+  `e2e/suites/zoom/registration.ts`). So the place overlay always fills the mount and folds a region
+  inset's box into each place's own fraction (`buildPlaceOverlay` in
+  `src/site/shared/living-chart/place-overlay.ts`), and a region inset keeps its percentage box while
+  its svg and its dog-ear are laid out at the mount's origin and carried onto it by transforms of
+  their own, in the mount's container units (`src/styles/explorer/index.css`,
+  `src/styles/explorer/chart-drawer.css`); the dog-ear, a button, takes the individual `translate`
+  and `scale` properties, since the house hover owns `transform`, so no hover replaces its seat
+  (`zh11EarOnCorner`); whether it should lift under the hand at all is Issue #859's. The inset itself
+  takes no transform, so it makes no stacking context and the dog-ear stays above the towns' click
+  areas. Container units on the mount collapse it on paper, so in print the mount stands down as a
+  container (`zh13PrintKeepsSheet`).
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
 - **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box
@@ -271,8 +319,9 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   collision pass keeps every centre at the cost of boxes shrunk to 11.7px.
 - **A published nudge rides INSIDE the counter-scaled translate.** Placed ahead of the division it
   composes with the live scale, which is exactly right at rest and wrong by the depth factor under
-  magnification. The guard matches the leading counter-scale AND COUNTS the translates and scales per
-  variant, because the match alone passes on a second leading translate that restores the bug.
+  magnification. Z24 (`z24CardSeats` in `e2e/suites/zoom/dress.ts`) reads every variant's seat at
+  rest and at depth, and Z25 (`z25ClampFlush` in `e2e/suites/zoom/camera.ts`) the nudge flush into
+  the box, so a nudge moved ahead of the division reds on the seat it moves.
 - **A card is measured AFTER the counter-scale is published, never before**, or a fresh card is
   measured by the depth factor too large.
 
@@ -295,9 +344,15 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 - **No hide, reflow and restore dance is owed on the chronicle's marks**, because every paint drives
   display straight off the year, so the DOM visibility always equals the predicate.
 - **A superseding transition interrupts its predecessor ONE FRAME LATER**, because transitions start
-  on the next timer tick, so an unguarded end or interrupt handler clears state the newer transition
-  just set. Guard with a monotonic generation counter, the `drawGen` idiom in
-  `src/site/prospect/app.ts`.
+  on the next timer tick, so an unguarded end, interrupt or cancel handler clears state the newer
+  transition just set. Guard with a monotonic generation counter, the `drawGen` idiom in
+  `src/site/prospect/app.ts`. A transition stopped before it starts fires `cancel`, not `interrupt`,
+  so state set when a glide is queued is cleared on all three (`glideTo` in
+  `src/site/shared/zoom-controller.ts`). d3-zoom fixes a glide's end once and never clamps its frames
+  afterwards: a glide through `scaleTo`, as `glideTo` makes, at its first frame, against the scale
+  extent then in force; its own double-click glide at the double-click. So a ceiling lowered under a
+  glide holds only if the glide is re-aimed or stopped (`setScaleMax`, and the hold's let-go in
+  `src/site/explorer/glass.ts`) (Issue #751).
 - **A place card takes a DEFINITE width, never the room left beside its mark**, so the engine
   publishes the anchor fractions and the SHEET owns both the anchor side and the width. Shrink-to-fit
   is the shape to refuse: a flipped card got `nx * boxWidth`, so a card near an edge was narrow and

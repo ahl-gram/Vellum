@@ -156,7 +156,9 @@ const tagline = "every seed is a world, draw one";
   </div>
 </div>
 
-<Glass id="zoom-controls" />
+<Glass id="zoom-controls">
+  <button slot="presses" id="zoom-hold" class="zoom-btn hold-btn" type="button" aria-pressed="false" aria-label="Hold the sheet">&#9875;&#65038;</button>
+</Glass>
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>

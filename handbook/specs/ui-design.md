@@ -170,11 +170,15 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   survey line and coordinates.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
   main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit while it does
-  (Alex, 2026-10-13, Issue #778). Where it is seated and why, and what the manicule does, are
+  (Alex, 2026-10-13, Issue #778). On the Explorer a press of the room's own stands between the
+  manicule and the camera's presses, seated through the component's `presses` slot: the hold, lit
+  while the sheet is held, while the caption line ends `held` (Alex, 2026-10-04 and 2026-10-20,
+  Issue #751). Where it is seated and why, and what the manicule does, are
   `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit. **A toggle
   press is lit when on, never in the dress of its own hover**, since a touch browser leaves a
   tapped press hovered and focused. **Provisional until the post-use review:** the manicule's
-  glyph, its seat, its lit dress and its name.
+  glyph, its seat, its lit dress and its name, and the hold's glyph, seat, name, caption mark and
+  ceiling.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
@@ -445,6 +449,15 @@ because the house lift writes `transform` and would replace the seat.
 **An entrance animation with a `both` or `forwards` fill pins its final keyframe's transform at
 animation-cascade priority permanently**, silently killing any hover transform on that element
 afterwards. A shadow escapes if the keyframes do not own it. Only a rendered probe found this.
+
+**That final keyframe is flat.** A 3D transform left filled on an element, even
+`perspective(900px) rotateX(0)`, keeps it on a layer of its own that the compositor resamples, so the
+place card's text read soft inside the magnified chart (Issue #751). So a 3D entrance rests flat.
+Where the motion's last tilt must be kept, it is held at 99.99% and the final keyframe is
+`transform: none`, which keeps every frame and fills flat (`paperUnfurl` in
+`src/styles/shared/motion.css`; `zh12CardFlat` in `e2e/suites/zoom/registration.ts` reads a card
+mid-roll and at rest); an entrance that need not fill takes `backwards` and rests on its element's own
+style (`prospectUnfurl` in `src/styles/reading-room/index.css`).
 
 **A one-shot ceremony needs its own guard rather than an end event.** Hiding an element mid-animation
 fires no animation event at all in Chrome, so a ceremony that must not replay cannot record that it

@@ -22,6 +22,7 @@ export interface PlaceOverlayState {
   inner: HTMLDivElement;
   hits: HTMLButtonElement[];
   places: ReadonlyArray<PlaceMark>;
+  anchors: ReadonlyArray<PlaceAnchor>;
   events: ReadonlyArray<HistoricalEvent>;
   cultureId: string;
   presentYear: number;
@@ -49,6 +50,11 @@ export interface BuildPlaceOverlayOpts {
   box?: OverlayBox;
 }
 
+export interface PlaceAnchor {
+  readonly nx: number;
+  readonly ny: number;
+}
+
 /** The card's second action, injected the way `prospectHref` is. */
 export interface LayProspectHost {
   state: (idx: number) => { label: string; refuses: boolean };
@@ -63,20 +69,14 @@ export interface PlaceOverlayDeps {
   clampBox?: () => CardBox | null;
 }
 
-function overlayBox(opts: Readonly<BuildPlaceOverlayOpts> | undefined): HTMLDivElement {
+function overlayEl(): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.className = "place-overlay";
-  if (opts && opts.box) {
-    const b = opts.box;
-    overlay.style.left = `${b.x * 100}%`;
-    overlay.style.top = `${b.y * 100}%`;
-    overlay.style.width = `${b.w * 100}%`;
-    overlay.style.height = `${b.h * 100}%`;
-    overlay.style.right = "auto"; // the stylesheet's inset:0 would otherwise fight width/height
-    overlay.style.bottom = "auto";
-  }
   return overlay;
 }
+
+const anchorOf = (place: Readonly<PlaceMark>, box: Readonly<OverlayBox> | undefined): PlaceAnchor =>
+  box ? { nx: box.x + place.nx * box.w, ny: box.y + place.ny * box.h } : { nx: place.nx, ny: place.ny };
 
 const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTMLElement | null => {
   if (prev && prev !== el) prev.classList.remove(cls);
@@ -84,15 +84,15 @@ const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTM
   return el;
 };
 
-function placeHit(place: PlaceMark, idx: number): HTMLButtonElement {
+function placeHit(place: PlaceMark, idx: number, at: PlaceAnchor): HTMLButtonElement {
   const hit = document.createElement("button");
   hit.type = "button";
   hit.className = "place-hit";
   hit.dataset.idx = String(idx);
   hit.setAttribute("aria-label", placeAriaLabel(place));
   hit.setAttribute("aria-describedby", "place-card");
-  hit.style.left = `${place.nx * 100}%`;
-  hit.style.top = `${place.ny * 100}%`;
+  hit.style.setProperty("--nx", String(at.nx));
+  hit.style.setProperty("--ny", String(at.ny));
   return hit;
 }
 
@@ -118,8 +118,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     fillCardInner(inner, card, placeOverlay.acts);
     if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
     paintLay(place.idx);
-    el.style.setProperty("--pc-nx", String(place.nx));
-    el.style.setProperty("--pc-ny", String(place.ny));
+    const at = placeOverlay.anchors[idx]!;
+    el.style.setProperty("--pc-nx", String(at.nx));
+    el.style.setProperty("--pc-ny", String(at.ny));
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");
@@ -273,7 +274,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     syncWatch();
   }
 
-  // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     const preserveName =
       opts && opts.preservePinByName && placeOverlay && hold.pinned && hold.shown >= 0
@@ -282,7 +282,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     reset();
     // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
-    const overlay = overlayBox(opts);
+    const overlay = overlayEl();
     overlay.addEventListener("click", (e) => {
       const pressed = e.target === overlay && e.detail > 0 ? track.press(e, -1) : null;
       if (pressed && pressed.idx >= 0) feed({ kind: "press", ...pressed });
@@ -293,8 +293,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     });
     const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
     const wiring = { feed, inCard, markPress, takePress, track };
+    const anchors = manifest.places.map((place) => anchorOf(place, opts?.box));
     const hits = manifest.places.map((place, idx) => {
-      const hit = placeHit(place, idx);
+      const hit = placeHit(place, idx, anchors[idx]!);
       wireHit(hit, idx, wiring);
       overlay.appendChild(hit);
       return hit;
@@ -304,6 +305,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       inner,
       hits,
       places: manifest.places,
+      anchors,
       events: manifest.events,
       cultureId: manifest.cultureId,
       presentYear: manifest.presentYear,

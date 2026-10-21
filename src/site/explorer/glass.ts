@@ -2,12 +2,15 @@
 import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";
 import { createZoomController, type ZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
+import { createHold, type Hold } from "./glass-hold.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
 // Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
 const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
+const GLASS_MAX = 8;
+const HELD_MAX = 24;
 
 interface GlassDeps {
   mapViewport: HTMLElement;
@@ -19,13 +22,15 @@ interface GlassDeps {
   ) => void;
   reclampCard: () => void;
   setCaption: (text: string) => void;
+  readCaption: () => string;
   setError: (text: string) => void;
   prefersReduce: () => boolean;
   regionEligible: () => boolean;
   syncHash: () => void;
+  busy: () => boolean;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
-  buttons: { touch: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
+  buttons: { touch: HTMLElement; hold: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
 }
 
 type LodController = ReturnType<typeof createLodController>;
@@ -82,6 +87,7 @@ function glassCamera(
   zoomController: ZoomController,
   lodController: LodController,
   setCardZoom: (k: number) => void,
+  hold: Hold,
 ) {
   // Issue #165/Issue #169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
   function cameraNow(): Camera {
@@ -92,7 +98,12 @@ function glassCamera(
 
   function onCameraSettle(): void {
     deps.syncHash();
-    if (deps.regionEligible()) lodController.onSettle(cameraNow());
+    if (deps.regionEligible() && !hold.held()) lodController.onSettle(cameraNow());
+  }
+
+  function cameraForAddress(): Camera {
+    const c = cameraNow();
+    return c.k > GLASS_MAX ? { cx: c.cx, cy: c.cy, k: GLASS_MAX } : c;
   }
 
   // Issue #165: geometric pan/zoom belongs to ALL FOUR styles (the epic's ratified decision); the controller attaches unconditionally, and the reset-home-on-world-change policy lives in the conductor, so no style branch can strand a magnified sheet.
@@ -110,10 +121,11 @@ function glassCamera(
 
   // Issue #170: the voiced home (full-sheet button, the 0 key); the hash writes at the landing (glideHome's onDone), never mid-flight. The programmatic homes (verso, chronicle, voyage, draw) keep their INSTANT homeToWorld() + reset() + explicit syncHash in the conductor.
   function goHomeVoiced(): void {
+    hold.release();
     lodController.easeHome();
     zoomController.glideHome(deps.syncHash);
   }
-  return { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced };
+  return { cameraNow, cameraForAddress, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced };
 }
 
 function glassKeys(mapViewport: HTMLElement, zoomController: ZoomController, goHomeVoiced: () => void): void {
@@ -161,15 +173,21 @@ function glassPresses(buttons: GlassDeps["buttons"], zoomController: ZoomControl
   bindChartTouch(buttons.touch, (on) => zoomController.takeTouch(on), pageTouchEnv());
 }
 
-function glassApi(zoomController: ZoomController, lodController: LodController) {
+function glassApi(zoomController: ZoomController, lodController: LodController, hold: Hold) {
   return {
-    rebase: () => zoomController.rebase(),
+    rebase: () => {
+      hold.release();
+      zoomController.rebase();
+    },
     reset: () => zoomController.reset(),
     zoomTo: (t: ZoomState) => zoomController.zoomTo(t),
     zoomState: () => zoomController.getState(),
     cancelRedraft: () => lodController.cancel(),
     setWorld: (ctx: Parameters<typeof lodController.setWorld>[0]) => lodController.setWorld(ctx),
-    homeToWorld: () => lodController.homeToWorld(),
+    homeToWorld: () => {
+      hold.release();
+      lodController.homeToWorld();
+    },
     committedSurvey: () => lodController.committedSurvey(),
     lodState: () => lodController.state(),
   };
@@ -183,29 +201,48 @@ export function createGlass(deps: GlassDeps) {
   const zoomController = createZoomController({
     viewportEl: mapViewport,
     targetEl: mapDiv,
-    scaleExtent: [1, 8],
+    scaleExtent: [1, GLASS_MAX],
     onApply: (state) => setCardZoom(state.k),
     onSettle: () => onCameraSettle(),
     glideMs,
   });
 
   const lodController = glassLod(mapDiv, deps, setCardZoom, zoomController);
-  const { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced } = glassCamera(
+  const hold = createHold({
+    press: buttons.hold,
+    busy: deps.busy,
+    readCaption: deps.readCaption,
+    setCaption: deps.setCaption,
+    onHold: () => {
+      lodController.cancelPending();
+      zoomController.setScaleMax(HELD_MAX);
+    },
+    onLetGo: () => {
+      zoomController.setScaleMax(GLASS_MAX);
+      const target = zoomController.glideTarget() ?? zoomController.getState().k;
+      if (target > GLASS_MAX) zoomController.glideBy(GLASS_MAX / target);
+      else if (!zoomController.settlePending()) onCameraSettle();
+    },
+    onRelease: () => zoomController.setScaleMax(GLASS_MAX),
+  });
+  const { cameraNow, cameraForAddress, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced } = glassCamera(
     mapViewport,
     deps,
     zoomController,
     lodController,
     setCardZoom,
+    hold,
   );
   glassKeys(mapViewport, zoomController, goHomeVoiced);
   glassPresses(buttons, zoomController, goHomeVoiced);
 
   return {
     cameraNow,
+    cameraForAddress,
     syncZoom,
     applyCamera,
     refitCamera,
-    ...glassApi(zoomController, lodController),
+    ...glassApi(zoomController, lodController, hold),
   };
 }
 

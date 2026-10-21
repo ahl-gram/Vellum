@@ -197,7 +197,7 @@ type Hit = {
 const HIT = (idx: number): Payload<Hit | null> => `(() => { const rgba = ${PAGE_RGBA};
   const t = document.querySelector('#map .place-hit[data-idx="${idx}"]'); if (!t) return null;
   const m = document.getElementById("map"), b = t.getBoundingClientRect(), mb = m.getBoundingClientRect(), s = getComputedStyle(t, "::after");
-  return { rect: [b.left, b.top, b.width, b.height], nx: parseFloat(t.style.left) / 100, ny: parseFloat(t.style.top) / 100,
+  return { rect: [b.left, b.top, b.width, b.height], nx: parseFloat(t.style.getPropertyValue("--nx")), ny: parseFloat(t.style.getPropertyValue("--ny")),
     map: [mb.left, mb.top, mb.width, mb.height], near: t.classList.contains("pc-near"), focused: document.activeElement === t, hovered: t.matches(":hover"), moving: document.getAnimations().some((a) => a.effect && a.effect.target === t && a.playState !== "finished"),
     ring: { content: s.content, width: s.width, height: s.height, bw: s.borderTopWidth, bs: s.borderTopStyle, bc: rgba(s.borderTopColor), radius: s.borderTopLeftRadius, opacity: s.opacity, transform: s.transform } }; })()`;
 

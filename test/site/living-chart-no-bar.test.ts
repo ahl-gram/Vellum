@@ -144,8 +144,17 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
   assert.equal(first.dataset.idx, "0", "the hit carries its manifest index");
   assert.match(first.getAttribute("aria-label") ?? "", /\w/, "the hit is labelled for assistive tech");
   assert.equal(first.getAttribute("aria-describedby"), "place-card", "and described by the one card");
-  assert.match(first.style.left ?? "", /%$/, "positioned by fraction, so it aligns at any width");
-  assert.match(first.style.top ?? "", /%$/);
+  assert.equal(
+    first.style.getPropertyValue("--nx"),
+    String(manifest.places[0]!.nx),
+    "positioned by the place's own sheet fraction, so it aligns at any width",
+  );
+  assert.equal(first.style.getPropertyValue("--ny"), String(manifest.places[0]!.ny));
+  assert.equal(
+    first.style.left ?? "",
+    "",
+    "and by no fractional offset, which the browser rounds to a whole pixel (Issue #751)",
+  );
   assert.deepEqual(
     [...new Set(first.listeners)].sort(),
     ["blur", "click", "focus", "mousedown", "mouseenter", "mouseleave"],

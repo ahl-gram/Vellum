@@ -5,7 +5,11 @@ import {
   constrainZoom,
   nextGlideTarget,
   gestureAllowed,
+  createZoomController,
 } from "../../src/site/shared/zoom-controller.ts";
+import { El } from "../../test-support/element-shim.ts";
+
+const el = () => Object.assign(new El("div"), { clientWidth: 1000, clientHeight: 800 }) as unknown as HTMLElement;
 
 // The Glass (Issue #164): d3-zoom handles the gestures; the translate clamp mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent. Live gestures are proven by e2e suite-zoom Z1-Z4.
 
@@ -70,4 +74,90 @@ test("otherwise the camera keeps d3-zoom's own filter: a ctrl-held wheel is a tr
   assert.equal(gestureAllowed({ type: "wheel", ctrlKey: true }, "touch", false), true);
   assert.equal(gestureAllowed({ type: "mousedown", ctrlKey: true }, "mouse", true), false);
   assert.equal(gestureAllowed({ type: "mousedown", button: 2 }, "mouse", true), false);
+});
+
+test("a glide stopped before its first frame leaves no pending target (Issue #751)", () => {
+  const zc = createZoomController({ viewportEl: el(), targetEl: el(), reducedMotion: false, glideMs: 300 });
+  zc.glideBy(1.4);
+  assert.equal(zc.glideTarget(), 1.4, "a press queues a glide toward 1.4");
+  zc.zoomTo({ k: 2, x: 0, y: 0 });
+  assert.equal(zc.glideTarget(), null);
+});
+
+test("a settle is still to come while a glide is queued or the settle debounce is armed, and not once it has run (Issue #751)", async () => {
+  const glider = createZoomController({ viewportEl: el(), targetEl: el(), reducedMotion: false, glideMs: 300 });
+  glider.glideBy(1.4);
+  assert.equal(glider.settlePending(), true, "a queued glide counts as a settle to come");
+  glider.rebase();
+
+  const settled: number[] = [];
+  const zc = createZoomController({
+    viewportEl: el(),
+    targetEl: el(),
+    settleMs: 20,
+    onSettle: (s) => settled.push(s.k),
+  });
+  assert.equal(zc.settlePending(), false, "a camera that never moved has no settle to come");
+  zc.zoomTo({ k: 2, x: 0, y: 0 });
+  assert.equal(zc.settlePending(), true, "a move arms the settle");
+  await new Promise((r) => setTimeout(r, 60));
+  assert.deepEqual(settled, [2], "the armed settle ran");
+  assert.equal(zc.settlePending(), false, "once it has run, none is to come");
+});
+
+const dblclick = {
+  type: "dblclick",
+  pageX: 500,
+  pageY: 400,
+  clientX: 500,
+  clientY: 400,
+  shiftKey: false,
+  button: 0,
+  preventDefault: () => {},
+  stopImmediatePropagation: () => {},
+};
+const doubleClick = (vp: El) => {
+  for (const h of vp.handlers.get("dblclick") ?? []) h.call(vp, dblclick);
+};
+const centred = (k: number) => ({ k, x: 500 - 0.5 * k * 1000, y: 400 - 0.5 * k * 800 });
+const viewport = () =>
+  Object.assign(new El("div"), { clientWidth: 1000, clientHeight: 800, clientLeft: 0, clientTop: 0 });
+
+test("lowering the ceiling stops a double-click's glide where it stands, and raising it leaves the glide to land (Issue #751)", async () => {
+  const held = viewport();
+  const zc = createZoomController({
+    viewportEl: held as unknown as HTMLElement,
+    targetEl: el(),
+    scaleExtent: [1, 8],
+    reducedMotion: false,
+  });
+  zc.attach();
+  zc.setScaleMax(24);
+  zc.zoomTo(centred(6));
+  doubleClick(held);
+  zc.setScaleMax(8);
+  await new Promise((r) => setTimeout(r, 400));
+  assert.deepEqual(
+    zc.getState(),
+    { x: -2500, y: -2000, k: 6 },
+    "the double-click's glide toward 12 stopped where it stood",
+  );
+
+  const free = viewport();
+  const zf = createZoomController({
+    viewportEl: free as unknown as HTMLElement,
+    targetEl: el(),
+    scaleExtent: [1, 8],
+    reducedMotion: false,
+  });
+  zf.attach();
+  zf.zoomTo(centred(3));
+  doubleClick(free);
+  zf.setScaleMax(24);
+  await new Promise((r) => setTimeout(r, 400));
+  assert.deepEqual(
+    zf.getState(),
+    { x: -2500, y: -2000, k: 6 },
+    "raising the ceiling left the double-click's glide to land on 6",
+  );
 });

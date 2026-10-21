@@ -1,6 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { nearRgba, sampleRow, tokenRgba } from "../../e2e/support/pixel.ts";
+import { deflateSync } from "node:zlib";
+import {
+  centroidOf,
+  decodeRows,
+  dominant,
+  extentOf,
+  nearRgba,
+  pure,
+  sampleRect,
+  sampleRow,
+  tokenRgba,
+} from "../../e2e/support/pixel.ts";
 
 // A 1x1 8-bit RGBA PNG, enough for the decoder.
 const PNG_1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
@@ -72,4 +83,113 @@ test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and n
   const stop = tokenRgba("--chart-ink", 0.85);
   assert.ok(nearRgba([61, 47, 31, 216], stop, 1), "a panel stop's own rounding passes the tighter alpha");
   assert.ok(!nearRgba([61, 47, 31, 214], stop, 1), "a stop moved by 0.01 does not");
+});
+
+const pngOf = (width: number, scanlines: number[][]): Buffer => {
+  const chunk = (type: string, data: Buffer): Buffer => {
+    const head = Buffer.alloc(8);
+    head.writeUInt32BE(data.length, 0);
+    head.write(type, 4, "ascii");
+    return Buffer.concat([head, data, Buffer.alloc(4)]);
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(scanlines.length, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", deflateSync(Buffer.from(scanlines.flat()))),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
+};
+
+test("decodeRows unfilters every row by its own filter against the row above, so a rectangle reads as it was drawn (Issue #751)", () => {
+  const png = pngOf(2, [
+    [0, 10, 20, 30, 40, 50, 60],
+    [1, 70, 80, 90, 30, 30, 30],
+    [2, 60, 60, 60, 60, 60, 60],
+    [3, 125, 130, 135, 45, 45, 45],
+    [4, 71, 50, 61, 30, 51, 185],
+  ]);
+  assert.deepEqual(decodeRows(png), [
+    [
+      [10, 20, 30],
+      [40, 50, 60],
+    ],
+    [
+      [70, 80, 90],
+      [100, 110, 120],
+    ],
+    [
+      [130, 140, 150],
+      [160, 170, 180],
+    ],
+    [
+      [190, 200, 210],
+      [220, 230, 240],
+    ],
+    [
+      [5, 250, 15],
+      [35, 45, 200],
+    ],
+  ]);
+});
+
+test("sampleRect asks for the page rectangle: the viewport point plus the scroll, the whole width and height (Issue #751)", async () => {
+  const png = pngOf(2, [
+    [0, 1, 2, 3, 4, 5, 6],
+    [0, 7, 8, 9, 10, 11, 12],
+  ]).toString("base64");
+  let clip: unknown = null;
+  const send = (method: string, params?: Record<string, unknown>) => {
+    if (method === "Runtime.evaluate") return Promise.resolve({ result: { value: [3, 1200] } });
+    clip = (params as { clip: unknown }).clip;
+    return Promise.resolve({ data: png });
+  };
+  const rows = await sampleRect(send, 40, 60, 2, 2);
+  assert.deepEqual(clip, { x: 43, y: 1260, width: 2, height: 2, scale: 1 });
+  assert.equal(rows.length, 2, "two rows");
+  assert.deepEqual(
+    rows.map((r) => r.length),
+    [2, 2],
+    "two pixels a row",
+  );
+});
+
+test("centroidOf and extentOf read a test colour in page coordinates, and pure and dominant split full from half coverage (Issue #751)", () => {
+  const parchment: [number, number, number] = [239, 230, 207];
+  const red: [number, number, number] = [255, 0, 0];
+  const rows = [
+    [parchment, parchment, parchment, parchment],
+    [parchment, red, red, parchment],
+    [parchment, parchment, parchment, parchment],
+  ];
+  assert.deepEqual(centroidOf(rows, 10, 20, pure(0)), { n: 2, x: 12, y: 21.5 });
+  assert.deepEqual(extentOf(rows, 10, 20, pure(0)), { left: 11, top: 21, right: 13, bottom: 22 });
+  assert.equal(centroidOf(rows, 10, 20, pure(2)), null, "no blue anywhere");
+  const scattered = [
+    [parchment, parchment, red, parchment],
+    [parchment, red, parchment, parchment],
+    [parchment, parchment, parchment, red],
+  ];
+  assert.deepEqual(
+    extentOf(scattered, 10, 20, pure(0)),
+    { left: 11, top: 20, right: 14, bottom: 23 },
+    "the box of matches in three rows is the minimum top and left and the maximum right and bottom, each one past the last pixel",
+  );
+  assert.deepEqual(
+    extentOf([[parchment, red]], 10, 20, pure(0)),
+    { left: 11, top: 20, right: 12, bottom: 21 },
+    "one pixel is a box one wide and one tall",
+  );
+  assert.ok(pure(0)([230, 40, 40]), "the floor of full coverage");
+  assert.ok(!pure(0)([230, 41, 40]), "one over the ceiling on another channel");
+  assert.ok(!pure(0)([255, 50, 50]), "a midway off-channel value");
+  assert.ok(!pure(0)([229, 0, 0]), "one under the floor");
+  assert.ok(!pure(0)([178, 34, 34]), "heraldic gules is not a test colour");
+  assert.ok(dominant(1)([0, 128, 0]), "half coverage");
+  assert.ok(!dominant(1)([0, 127, 0]), "just under half");
+  assert.ok(!dominant(1)([120, 242, 104]), "a pale green is not an edge");
 });

@@ -92,9 +92,13 @@
     opacity: 1;
     transform: perspective(900px) rotateX(7deg);
   }
-  to {
+  99.99% {
     opacity: 1;
     transform: perspective(900px) rotateX(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

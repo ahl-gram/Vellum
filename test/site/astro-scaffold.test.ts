@@ -869,8 +869,13 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
 const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
 const KIT_VIGNETTES =
   '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
-const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
-  <button id="zoom-touch" class="zoom-btn touch-btn" type="button" aria-pressed="false" aria-label="The chart in hand" hidden>&#9758;</button>
+const EXPLORER_HOLD =
+  '<button id="zoom-hold" class="zoom-btn hold-btn" type="button" aria-pressed="false" aria-label="Hold the sheet">&#9875;&#65038;</button>';
+const KIT_GLASS = (
+  id: string,
+  presses: string,
+) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
+  <button id="zoom-touch" class="zoom-btn touch-btn" type="button" aria-pressed="false" aria-label="The chart in hand" hidden>&#9758;</button>${presses}
   <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Draw nearer">+</button>
   <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand off">&minus;</button>
   <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The whole sheet">&#8962;</button>
@@ -918,7 +923,7 @@ const roadOpening = (r: Road): string =>
 function checkHomeStagesAndRoads(): void {
   assert.ok(!page("index.html").includes(KIT_FOG), "home keeps its own stage dress (#461)");
   assert.ok(
-    page("index.html").includes(KIT_GLASS(' id="lf-controls"')),
+    page("index.html").includes(KIT_GLASS(' id="lf-controls"', "")),
     "home carries the kit's camera (#505), seated by its own id",
   );
   for (const [route, label] of STAGES) {
@@ -960,7 +965,8 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
   );
   for (const p of chartRooms) {
     const html = page(p.route);
-    const glass = KIT_GLASS(p.dir === "/explorer/" ? ' id="zoom-controls"' : "");
+    const explorer = p.dir === "/explorer/";
+    const glass = KIT_GLASS(explorer ? ' id="zoom-controls"' : "", explorer ? EXPLORER_HOLD : "");
     assert.ok(html.includes(glass), `${p.route} carries the Glass as the kit renders it`);
     const folio = html.match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/);
     assert.ok(folio, `${p.route} carries the chart folio`);
