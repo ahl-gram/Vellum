@@ -136,6 +136,37 @@ test("on a computer it stands aside while the world is in motion or off its rect
   r.now.card = null;
   r.binding.follow();
   assert.deepEqual(r.calls.at(-1), ["show", { x: 300, y: 200 }]);
+  r.now.card = { left: 300, top: 200, right: 500, bottom: 400 };
+  for (const [x, y] of [
+    [300, 200],
+    [500, 200],
+    [300, 400],
+    [500, 400],
+  ] as const) {
+    r.mouse("pointermove", x, y);
+    assert.deepEqual(r.calls.at(-1), ["hide"], `the card's own edge at (${x}, ${y}) is on the card`);
+  }
+  for (const [x, y] of [
+    [299, 300],
+    [501, 300],
+    [400, 199],
+    [400, 401],
+  ] as const) {
+    r.mouse("pointermove", x, y);
+    assert.deepEqual(r.calls.at(-1), ["show", { x: x - 10, y: y - 20 }], `one pixel off the card at (${x}, ${y})`);
+  }
+});
+
+test("on a computer a pen follows as a mouse does and a touch pointer moves nothing (Issue #751)", () => {
+  const r = rig();
+  r.mouse("pointermove", 310, 220);
+  r.press.fire("click");
+  const lit = r.calls.length;
+  r.viewport.fire("pointermove", { pointerType: "touch", clientX: 600, clientY: 400 });
+  r.viewport.fire("pointerenter", { pointerType: "touch", clientX: 600, clientY: 400 });
+  assert.equal(r.calls.length, lit, "a touch pointer reaches no placement");
+  r.viewport.fire("pointermove", { pointerType: "pen", clientX: 410, clientY: 320 });
+  assert.deepEqual(r.calls.at(-1), ["show", { x: 400, y: 300 }], "a pen is followed");
 });
 
 test("where touch is the main pointer, lighting places it mid-chart, its grip drags it inside the gesture box without reaching the camera, and a card does not set it aside (Issue #751)", () => {
@@ -156,6 +187,8 @@ test("where touch is the main pointer, lighting places it mid-chart, its grip dr
   assert.deepEqual([move.stopPropagation.count, move.preventDefault.count], [1, 1], "the drag stops and prevents");
   r.grip.fire("touchmove", touch(2000, -500));
   assert.deepEqual(r.calls.at(-1), ["show", { x: 800, y: 0 }], "the centre stays inside the 800 by 600 box");
+  r.grip.fire("touchmove", touch(-2000, 335));
+  assert.deepEqual(r.calls.at(-1), ["show", { x: 0, y: 315 }], "and inside it on the left");
   for (const type of ["mousedown", "dblclick", "wheel", "touchend", "touchcancel"]) {
     const e = { stopPropagation: spy() };
     r.grip.fire(type, e);
@@ -163,10 +196,10 @@ test("where touch is the main pointer, lighting places it mid-chart, its grip dr
   }
   assert.deepEqual(r.lens.listeners, [], "the lens's body takes no finger");
   r.mouse("pointermove", 100, 100);
-  assert.deepEqual(r.calls.at(-1), ["show", { x: 800, y: 0 }], "a mouse moves nothing where touch is the main pointer");
+  assert.deepEqual(r.calls.at(-1), ["show", { x: 0, y: 315 }], "a mouse moves nothing where touch is the main pointer");
   r.now.card = { left: 0, top: 0, right: 2000, bottom: 2000 };
   r.binding.follow();
-  assert.deepEqual(r.calls.at(-1), ["show", { x: 800, y: 0 }], "a card sets nothing aside on a tablet");
+  assert.deepEqual(r.calls.at(-1), ["show", { x: 0, y: 315 }], "a card sets nothing aside on a tablet");
 });
 
 test("while the loupe is neither lit nor held, a follow does nothing and reads no layout (Issue #751)", () => {

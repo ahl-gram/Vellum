@@ -97,3 +97,33 @@ test("a show sizes the copy from the box's own fractional size, puts the pointer
   loupe.show({ x: 300, y: 200 });
   assert.equal(lens.hidden, true, "no sheet drawn, no lens");
 });
+
+test("the inked survey track is copied into the lens while it shows, replaced when its points change, kept when they do not, and dropped with the lens (Issue #751)", () => {
+  const { host, mapDiv, loupe } = build(() => ({ world: "W", inset: null }));
+  assert.equal(host.children.length, 1);
+  let points = "0,0 1,1";
+  const track = new El("polyline");
+  track.getAttribute = (name: string) => (name === "points" ? points : null);
+  const overlay = new El("svg");
+  overlay.querySelector = () => track;
+  const clones: El[] = [];
+  (overlay as unknown as { cloneNode: () => El }).cloneNode = () => {
+    const copy = new El("svg");
+    clones.push(copy);
+    return copy;
+  };
+  mapDiv.querySelector = () => overlay;
+  const layer = asEl(loupe.lens).children[0]!.children[0]!;
+  loupe.show({ x: 300, y: 200 });
+  assert.equal(clones.length, 1, "the track is copied");
+  assert.equal(layer.children.at(-1), clones[0], "into the layer");
+  loupe.show({ x: 310, y: 200 });
+  assert.equal(clones.length, 1, "the same points copy nothing again");
+  points = "5,5 6,6";
+  loupe.show({ x: 310, y: 200 });
+  assert.equal(clones.length, 2, "new points copy again");
+  assert.equal(clones[0]!.parentNode, null, "and the old copy goes");
+  assert.equal(layer.children.at(-1), clones[1]);
+  loupe.hide();
+  assert.equal(clones[1]!.parentNode, null, "the copy goes with the lens");
+});
