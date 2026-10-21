@@ -20,6 +20,7 @@ import { conjureBestiary, type SeaBeast } from "../society/bestiary.ts";
 import { nameSetOf } from "../society/hamlets.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import type { FeatureNames, NamedSettlement, Winds, World, WorldRecipe } from "./types.ts";
+import { terrainInputsOf } from "./terrain-inputs.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
   ["island", 0.4],
@@ -76,13 +77,7 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
 
 function terrainStage(recipe: WorldRecipe, rng: Rng): { elev: Field; seaLevel: number; winds: Winds } {
   const { seed, gridW, gridH, mapType } = recipe;
-  const elev = buildHeightfield({
-    seed,
-    gridW,
-    gridH,
-    mapType,
-    ...(recipe.coastWarp !== undefined ? { coastWarp: recipe.coastWarp } : {}),
-  });
+  const elev = buildHeightfield({ seed, gridW, gridH, mapType, ...terrainInputsOf(recipe) });
   const seaLevel = pickSeaLevel(elev, recipe.landFraction);
 
   const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
