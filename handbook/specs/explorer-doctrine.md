@@ -100,7 +100,10 @@ make an unqualified rule false. Read the surface, not just the rule.
     is a child of `#map-viewport` (`createLoupe` in `src/site/explorer/loupe.ts`), so a draw's wipe
     of `#map` never takes it and no region inset gains an svg. It shows the drawn sheets as images
     of their own svg strings, so no id of theirs enters the document twice, and it copies the inked
-    survey track while it shows and drops the copy when it hides.
+    survey track while it shows and drops the copy when it hides. A lit or held lens is placed again
+    whenever the mount's own children change (`pageLoupe` in `src/site/explorer/loupe-page.ts`), so
+    a track inked or taken off with nothing moving reaches it at once (`zl6TrackRides` in
+    `e2e/suites/zoom/loupe-chart.ts`).
 - **The Chart Table and the Broadside never stand open together.** Opening the drawer folds the
   Broadside and takes its tab off the edge; shutting gives it back to the reader who had it open and
   leaves it folded for the reader who folded it. Nothing is lifted onto the chart: the drawer covers
@@ -162,16 +165,18 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The loupe follows the pointer over the chart and shows the sheets under it at twice the camera's
   depth** (Alex, 2026-10-04 and 2026-10-20, Issue #751). Its press stands in the Glass after the
   hold; holding L while the chart has the keyboard shows it while the key is down, under the
-  pointer, or at the chart's centre with no pointer over the chart; where touch is the main pointer
-  it appears at the chart's centre when lit and is dragged by its grip, the one part of it that
-  takes a finger. It reads the hold's predicate twice (Alex, 2026-10-21, Issue #751): its press,
-  like the hold's, is ignored and carries `aria-disabled` for exactly the window `createMotion`'s
-  `busy` reports, written beside the hold's by the same `sync`, and its lens stands aside for that
-  window and while the sheet is off its recto (`offRecto` in `src/site/explorer/verso.ts`),
-  re-placed at every change of either through `createMotion`'s `watch` in
-  `src/site/explorer/world-motion.ts`. On a computer it stands aside while the pointer is on a shown
-  place card. The behaviour is `bindLoupe` in `src/site/explorer/loupe-bind.ts`; where it is seated
-  and how its copy of the sheet is laid out are under the host contract and counter-scale.
+  pointer, or at the chart's centre with no pointer over the chart, and the release of the key that
+  held it lets it go whatever character that key reads as when it comes up (`keyHands` in
+  `src/site/explorer/loupe-bind.ts`); where touch is the main pointer it appears at the chart's
+  centre when lit and is dragged by its grip, the one part of it that takes a finger. It reads the
+  hold's predicate twice (Alex, 2026-10-21, Issue #751): its press, like the hold's, is ignored and
+  carries `aria-disabled` for exactly the window `createMotion`'s `busy` reports, written beside the
+  hold's by the same `sync`, and its lens stands aside for that window and while the sheet is off
+  its recto (`offRecto` in `src/site/explorer/verso.ts`), re-placed at every change of either
+  through `createMotion`'s `watch` in `src/site/explorer/world-motion.ts`. On a computer it stands
+  aside while the pointer is on a shown place card. The behaviour is `bindLoupe` in
+  `src/site/explorer/loupe-bind.ts`; where it is seated and how its copy of the sheet is laid out
+  are under the host contract and counter-scale.
 - **The Explorer keeps the SHEET as the gesture box**, and the Reading Room does the same. The
   bookmark centre and the level-of-detail window are sheet fractions, so a full-stage gesture box
   would silently redraft the wrong region. **This is not the shape every chart room takes**: the
@@ -335,7 +340,11 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   `getBoundingClientRect`, never `offsetWidth`, whose whole pixels left the region sheet 5 px off at
   24 times (measured 2026-10-20). `zl3LensRegisters` in `e2e/suites/zoom/loupe.ts` reads the lens's
   paint against the camera's at the same depth, over the world sheet and over a region sheet held at
-  24 times.
+  24 times. Where the lens lies past the sheet as the sheet lies on screen it shows opaque chart
+  ink, the darkness that keeps the chrome's faintest ink at 4.5:1 under the fog, which in a chart
+  room paints above the lens (Alex, 2026-10-21, Issue #751): a room the size of that sheet, placed
+  in the lens by a transform from `loupeView`'s `paper` (`src/site/explorer/loupe-view.ts`), spreads
+  the dark outside itself, and `zl7DarkPastSheet` in `e2e/suites/zoom/loupe-chart.ts` reads it.
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
 - **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box

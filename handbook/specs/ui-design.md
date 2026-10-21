@@ -178,7 +178,8 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   the fit. **A toggle press is lit when on, never in the dress of its own hover**, since a touch
   browser leaves a tapped press hovered and focused. **Provisional until the post-use review:** the
   manicule's glyph, its seat, its lit dress and its name, the hold's glyph, seat, name, caption mark
-  and ceiling, and the loupe's glyph, seat, name, key, size, power, rings and touch form.
+  and ceiling, and the loupe's glyph, seat, name, key, size, power, rings, touch form and darkness
+  past the sheet.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
@@ -352,6 +353,14 @@ radial ground overstates the margin, and one taken from a dark neighbour underst
 background *is*, re-measure everything standing on it, not just the element the issue named. A dark
 pool had been covering a phone sheet, and four separate things were leaning on it without anyone
 knowing, including a keyboard focus ring that fell to about 1.0:1.
+
+**A lens over the chart never puts paper under the chrome.** Where the loupe lies past the sheet it
+shows opaque chart ink, so every piece of chrome painted over it keeps a dark ground (Alex,
+2026-10-21, Issue #751: the cream folio, masthead, room folio and Glass read as low as 1.07:1 over
+the light lens before). It answers what the pools answer for a pale chart reaching the chrome while
+zoomed, but opaque, because the lens lies under the fog and the pools above it: in a chart room the
+fog paints above the stage, and a darkness of 0.92 or 0.95 under the fog's peak leaves the faintest
+chrome ink under 4.5:1.
 
 **The focus ring is one face**, ratified on #324 and pinned: a control that draws its own is
 conforming, not inventing. It is drawn *outside* the control, so it stands on the surrounding ground
