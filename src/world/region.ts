@@ -10,6 +10,7 @@ import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
 import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
+import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
@@ -42,6 +43,7 @@ type RegionGrid = {
 function regionElevation(g: RegionGrid, spec: RegionSpec, seaLevel: number): Field {
   const { world, window, gridW, gridH, worldAspect } = g;
   const { recipe } = world;
+  const terrain = terrainInputsOf(recipe);
   return spec.detail === true
     ? buildChainedField(
         {
@@ -52,6 +54,7 @@ function regionElevation(g: RegionGrid, spec: RegionSpec, seaLevel: number): Fie
           gridH,
           worldAspect,
           seaLevel,
+          ...terrain,
         },
         spec.chainCache,
       )
@@ -62,6 +65,7 @@ function regionElevation(g: RegionGrid, spec: RegionSpec, seaLevel: number): Fie
         mapType: recipe.mapType,
         window,
         worldAspect,
+        ...terrain,
       });
 }
 

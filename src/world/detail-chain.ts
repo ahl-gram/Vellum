@@ -8,9 +8,10 @@ import {
   rejectBridges,
 } from "../terrain/detail-guarantees.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, quantizeCenter } from "./lod.ts";
+import { TERRAIN_INPUT_KEYS, terrainInputsOf, type TerrainInputs } from "./terrain-inputs.ts";
 
 /** No band index: the window alone fixes the ancestry, its depth and every detail level, so a caller cannot pass a band that disagrees with its window. */
-export type ChainSpec = {
+export type ChainSpec = TerrainInputs & {
   readonly seed: number;
   readonly mapType: MapType;
   readonly window: UvWindow;
@@ -18,7 +19,6 @@ export type ChainSpec = {
   readonly gridH: number;
   readonly worldAspect: number;
   readonly seaLevel: number;
-  readonly coastWarp?: number;
 };
 
 export type ChainCache = {
@@ -69,7 +69,7 @@ export function chainCacheKey(spec: ChainSpec): string {
     spec.gridH,
     spec.worldAspect,
     spec.seaLevel,
-    spec.coastWarp ?? "-",
+    ...TERRAIN_INPUT_KEYS.map((key) => spec[key] ?? "-"),
   ].join("|");
 }
 
@@ -140,7 +140,7 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
     window: spec.window,
     worldAspect: spec.worldAspect,
     detail: detailForWindow(spec.window),
-    ...(spec.coastWarp !== undefined ? { coastWarp: spec.coastWarp } : {}),
+    ...terrainInputsOf(spec),
   });
 
   const ancestors = ancestorWindows(spec.window);
