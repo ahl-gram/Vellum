@@ -336,6 +336,9 @@ export async function zl4HeldKey(k: ZoomKit): Promise<void> {
   await k.evaluate(`document.getElementById("seed").focus()`);
   const r6 = await pollLast<Lens>(k, LENS, hiddenNow, 40);
   await key(k, "keyUp");
+  // Wiring: a held key a broken listener never let go is let go here, so the steps after this one read their own state.
+  await k.evaluate(`document.getElementById("map-viewport").focus()`);
+  await key(k, "keyUp");
   const label = await k.evaluate<string | null>(`document.getElementById("map-viewport").getAttribute("aria-label")`);
   const reads = [r0, r1, r2, r3, r4, r5, r6];
   k.check(
