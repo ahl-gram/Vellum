@@ -103,6 +103,16 @@ home's line wins for the lane and this file's for the orchestrator.
   request again.** A message to a lane that has stopped can sit unread.
 - **End the poll loops a lane leaves behind.** A wait loop on a marker that never comes runs for
   hours after its lane has finished; find them with `ps` and end them.
+- **Every update to Alex names each lane in flight by what it is for and what hangs on it.** For
+  each lane give, in this order: the issue or pull request number with a plain-words description of
+  what it is for, what the lane is doing now, and what depends on it or comes next (the issues and
+  pull requests that wait on it or overlap its files, and the decision it will hand back, if any).
+  Close with what waits on Alex, or say nothing does. A lane that finished since the last update is
+  named once with its outcome. Alex keeps several lanes in his head at once, and a bare number
+  makes him look each one up.
+- **Where the issue-dial pane is present, set its columns whenever a lane starts or ends or what
+  follows one is agreed**: one column per issue in hand, up to three, each with the issues that
+  could follow it without colliding with the other columns.
 
 ## A lane that stalls, dies or loses its tree
 
