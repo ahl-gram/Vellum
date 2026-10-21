@@ -89,7 +89,7 @@ Your dispatch names the epic and hands you its `vellum-spec-recon` ledger, which
   - the files it touches and what it waits on;
   - its risks: determinism, the golden, a regen, a re-roll, the rosters it joins;
   - its acceptance, and the test whose red would prove it.
-- Write each sub as a draft the dispatcher can file as it stands, linked to the epic the way the epic rules at the end of `handbook/specs/development-workflow.md` say for an epic of its filing date: nested as a native sub-issue under an epic filed from 2026-10-04 on, linked in prose under an older one. Each carries the epic's label and names the epic in its prose. You file nothing.
+- Write each sub as a draft the dispatcher can file as it stands, linked to the epic the way the epic rules at the end of `handbook/specs/development-workflow.md` say for an epic of its filing date: nested as a native sub-issue, except under an epic filed before 2026-10-04 that already has a prose-linked sub, which keeps linking in prose. Each carries the epic's label and names the epic in its prose. You file nothing.
 - Every decision the epic leaves open goes in the menu, with its consequence measured. Where a sub's shape depends on a ruling, say which.
 
 When the drafts run long, deliver them as one file per sub in the main checkout's `out/<epic>/` (or `out/<epic>-<what>/`), with notes and a page as above, and keep the order and the menu in your report.
