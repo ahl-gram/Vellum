@@ -202,14 +202,17 @@ section points there rather than restating it.
   logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
   it began; the probe that reproduces it against a real browser is in
   `handbook/plans/621/621-plan.md`.
-- **A visual claim in a suite is carried by a control taken in the same run.** A
-  claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
-  can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an
-  EMULATED condition carries a read of the other condition taken in the same run, which is what the
-  print checks in `e2e/suites/specimen/print.ts` call the same-run control. A byte comparison of
-  renders from two environments is never the check. No suite compares one screenshot against
-  another; the one tool that does is the sweep in the next bullet, which carries a control of its own.
-  The imperative is Gate 2's "run the probe's control in the same run".
+- **A visual claim in a suite is carried by a control taken in the same run.** A claim about PAINT
+  goes through the one-row pixel strip, because no hit test and no computed style can see paint
+  (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an EMULATED condition
+  carries a read of the other condition taken in the same run, which is what the print checks in
+  `e2e/suites/specimen/print.ts` call the same-run control. A byte comparison of renders from two
+  environments is never the check. No suite compares one screenshot against another, save
+  `zl3LensRegisters` in `e2e/suites/zoom/loupe.ts`, which correlates the lens's paint with the
+  camera's at the same depth, both taken in the same run (`registration` in `e2e/support/pixel.ts`),
+  and never compares bytes; the one tool that compares builds is the sweep in the next bullet, which
+  carries a control of its own. The imperative is Gate 2's "run the probe's control in the same
+  run".
 - **Two builds are compared by the sweep, row by row, against two runs of the unchanged build.**
   `node scripts/design/oracle.ts <dist> <out> [label]` shoots every page of a built site at 1280x800
   and at 1024x768, the narrowest the site is laid out for: a page that runs a live chart app as its head box, the Specimen Book
