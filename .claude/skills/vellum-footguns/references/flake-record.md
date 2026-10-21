@@ -18,6 +18,9 @@ where the proof goes.
 - **A row's disposition is one of three**: *settled* (the wait or the bound was fixed, and the check
   asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue number,
   per `handbook/specs/settle-doctrine.md` item 11), or *open* (seen, recorded, nobody has acted).
+- **Only a row from GitHub's machines counts toward the issue** (`handbook/specs/settle-doctrine.md`
+  item 12): the CI workflow's or the proof runner's, one per run. A local run's red gets its row and
+  its disposition as usual, and local rows never file the issue.
 - **A cell that cannot be read back is written "not retained"**, never inferred. GitHub ages out run
   logs, and a guess here is worse than a gap.
 - **This is a record, not a rule.** It is not required reading before a kind of work; it is what you
