@@ -15,7 +15,7 @@ const WINDOWS = [BAND_1, BAND_3];
 // 2026-10-21, Issue #850: swept seeds 1 to 12 and 42, band 1 to 3 windows and the atlas's 0.38 window, coast absent, 0, 0.1, 0.3, 0.8, 0.9 and 1, both arms passed every input: worst 3.08% (seed 5, band 3, coast 0.1, bare), so 4% keeps 0.92 points of headroom.
 const BOUND = 0.04;
 
-const OFF_DEFAULT: Readonly<Record<TerrainInputKey, ReadonlyArray<TerrainInputs>>> = {
+const OFF_DEFAULT: Readonly<Record<TerrainInputKey, readonly [TerrainInputs, ...TerrainInputs[]]>> = {
   coastWarp: [{ coastWarp: 0.1 }, { coastWarp: 0.9 }],
 };
 
