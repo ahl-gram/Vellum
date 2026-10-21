@@ -447,9 +447,15 @@ without asking, so read `gh api repos/ahl-gram/Vellum/issues/<sub> --jq .parent_
 linking. When a later decision changes what an epic subsumes, that same `--parent` moves the link,
 and a dated comment goes on both ends.
 
-**Epics filed before that date stay linked in prose and are not back-filled.** A new sub of one is
-linked in prose like its siblings, not nested, so no old epic is left half nested. For those epics,
-trust the prose over the flat board.
+**An epic filed before that date nests its subs when it has none yet.** Its first subs are filed
+with `--parent` exactly as above, so the roadmap board shows every one of them under it, and a dated
+comment on the epic names the nesting.
+
+**An epic filed before that date that already has a sub, nested or linked in prose, stays linked in
+prose and is not back-filled.** A new sub of one is linked in prose like its siblings, not nested,
+so no old epic is left half nested. For those epics, trust the prose over the flat board. Count the
+subs with `gh api repos/ahl-gram/Vellum/issues/<epic> --jq .sub_issues_summary.total` and read the
+epic's checklist, since the count sees native sub-issues only.
 
 ## The gates are not a step
 
