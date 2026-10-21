@@ -13,5 +13,15 @@ export interface LoupeView {
 }
 
 export function loupeView(i: LoupeInput): LoupeView {
-  return { lens: { x: i.at.x, y: i.at.y }, sheet: { x: 0, y: 0, w: 0, h: 0 } };
+  const r = i.diameter / 2;
+  const s = i.zoom.k * i.power;
+  return {
+    lens: { x: i.at.x - r, y: i.at.y - r },
+    sheet: {
+      x: r - (i.at.x - i.zoom.x) * i.power,
+      y: r - (i.at.y - i.zoom.y) * i.power,
+      w: i.box.width * s,
+      h: i.box.height * s,
+    },
+  };
 }
