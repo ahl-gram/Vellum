@@ -97,13 +97,15 @@ headless browser actually do, so a green run can be believed.
     unprotected until the check returns; no earlier deletion is undone. The list is the one roster of
     skipped checks.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
-    never silently re-run away (#546's CD7b). When a step's rows in
+    never silently re-run away (#546's CD7b). When a step's CI rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` (counted by the step that runs the
     check, the unit of the skip list) reach three with no issue open for it, whoever adds the third row
     files the issue and skips the step as item 11 says, with no offer first, so recurring flakes become
-    issues rather than piling up as rows. A launch hiccup is a lane, not a step: its rows count toward
-    one launch issue, and at three with none open that issue is filed about the harness, with nothing
-    to skip.
+    issues rather than piling up as rows. Only a row from a run on GitHub's machines counts, the CI
+    workflow's or the proof runner's, and a run counts once however many rows it produced, so three
+    CI rows are three runs. A local run's red still gets its row and its trail, and local rows never
+    file the issue. A launch hiccup is a lane, not a step: its CI rows count toward one launch issue, and at three with
+    none open that issue is filed about the harness, with nothing to skip.
 13. **A stillness assertion in a fixture that crosses the ambient idle delay needs a tolerance sized
     to the drift, not an epsilon.** The home stage starts drifting on its own once it has been idle
     (`IDLE_DELAY_MS` and the drift constants in `src/site/home/drift.ts`), so a long fixture reads
@@ -137,8 +139,8 @@ holds only the order.
    `.claude/skills/vellum-footguns/references/flake-record.md` before the one re-run, which is alone;
    a second red is a defect (`vellum-footguns` Gate 2 item 10).
 2. **It leaves a trail.** A PR comment with the payload; it is never silently re-run away (item 12).
-3. **Recurrence becomes an issue and a skip.** At three rows for one step with no issue open, the issue
-   is filed and the step skipped, with no offer first (item 12).
+3. **Recurrence becomes an issue and a skip.** At three CI rows for one step with no issue open, the
+   issue is filed and the step skipped, with no offer first (item 12).
 4. **A filed issue pulls the check out of the run**, by whoever files it, with no ruling asked (item 11).
 5. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
    until the check returns (item 11).
