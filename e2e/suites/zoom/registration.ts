@@ -40,7 +40,7 @@ async function deep(k: ZoomKit, cu: number, cv: number): Promise<void> {
   );
 }
 
-async function pollLast<T>(k: ZoomKit, payload: string, ok: (v: T) => boolean, tries: number): Promise<T> {
+export async function pollLast<T>(k: ZoomKit, payload: string, ok: (v: T) => boolean, tries: number): Promise<T> {
   let last = await k.evaluate<T>(payload);
   for (let i = 1; i < tries && !ok(last); i++) {
     await k.sleep(50);
@@ -111,7 +111,7 @@ async function heldDeepInset(k: ZoomKit, pick: HamletWindow): Promise<InsetRead>
   return k.evaluate<InsetRead>(INSET);
 }
 
-async function ensureHeldDeepInset(k: ZoomKit, pick: HamletWindow): Promise<InsetRead> {
+export async function ensureHeldDeepInset(k: ZoomKit, pick: HamletWindow): Promise<InsetRead> {
   const now = await k.evaluate<InsetRead>(INSET);
   const same =
     now.u0 !== null && now.v0 !== null && Math.abs(now.u0 - pick.u0) < 1e-6 && Math.abs(now.v0 - pick.v0) < 1e-6;

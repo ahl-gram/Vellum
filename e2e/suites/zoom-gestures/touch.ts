@@ -236,3 +236,87 @@ export async function zg10Carried(k: GesturesKit): Promise<void> {
     JSON.stringify({ carried, back }),
   );
 }
+
+type PressAt = Point & { on: boolean };
+type LoupeRead = {
+  hidden: boolean;
+  touchable: boolean;
+  cx: number;
+  cy: number;
+  vx: number;
+  vy: number;
+  pe: string;
+  gx: number;
+  gy: number;
+  gpe: string;
+  gdisplay: string;
+  pressed: string | null;
+};
+type Cam = { k: number; x: number; y: number };
+
+const PRESS_AT = `(() => { const b = document.getElementById("zoom-loupe"); b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); return { x, y, on: b.contains(document.elementFromPoint(x, y)) }; })()`;
+const LOUPE_READ = `(() => { const l = document.querySelector(".loupe"); const b = document.getElementById("zoom-loupe"); const pressed = b ? b.getAttribute("aria-pressed") : null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const vx = v.left + v.width / 2, vy = v.top + v.height / 2; const g = l ? l.querySelector(".loupe-glass") : null; const grip = l ? l.querySelector(".loupe-grip") : null; if (!l || !g || !grip) return { hidden: true, touchable: false, cx: 0, cy: 0, vx, vy, pe: "", gx: 0, gy: 0, gpe: "", gdisplay: "", pressed }; const gr = g.getBoundingClientRect(), pr = grip.getBoundingClientRect(); return { hidden: l.hidden, touchable: l.classList.contains("touchable"), cx: gr.left + gr.width / 2, cy: gr.top + gr.height / 2, vx, vy, pe: getComputedStyle(l).pointerEvents, gx: pr.left + pr.width / 2, gy: pr.top + pr.height / 2, gpe: getComputedStyle(grip).pointerEvents, gdisplay: getComputedStyle(grip).display, pressed }; })()`;
+const CAMERA = `window.__vellumZoomState()`;
+
+async function pollRead<T>(k: GesturesKit, payload: string, ok: (d: T) => boolean): Promise<T> {
+  let last = await k.evaluate<T>(payload);
+  for (let i = 1; i < 40 && !ok(last); i++) {
+    await k.sleep(50);
+    last = await k.evaluate<T>(payload);
+  }
+  return last;
+}
+
+const sameCam = (a: Cam, b: Cam, dx = 0): boolean =>
+  Math.abs(a.x - b.x - dx) <= 2 && Math.abs(a.y - b.y) <= 1e-6 && Math.abs(a.k - b.k) <= 1e-6;
+const rounded = (x: number, y: number): Point => ({ x: Math.round(x), y: Math.round(y) });
+
+export async function zg11LoupeDrag(k: GesturesKit): Promise<void> {
+  const press = await k.evaluate<PressAt>(PRESS_AT);
+  await tapAt(k, press);
+  const l1 = await pollRead<LoupeRead>(k, LOUPE_READ, (d) => !d.hidden);
+  const lit =
+    !l1.hidden &&
+    l1.touchable &&
+    Math.hypot(l1.cx - l1.vx, l1.cy - l1.vy) <= 1 &&
+    l1.pe === "none" &&
+    l1.gpe === "auto" &&
+    l1.gdisplay === "block" &&
+    l1.pressed === "true";
+  let moved = false;
+  let camStill = false;
+  let doubleTapped = false;
+  let bodyPans = false;
+  let outOfHand = "";
+  if (!l1.hidden) {
+    const vp = await k.vpRect();
+    await k.evaluate(`window.__vellumZoomTo({k:2,x:${vp.W / 2}-${vp.W},y:${vp.H / 2}-${vp.H}})`);
+    const l2 = await pollRead<LoupeRead>(k, LOUPE_READ, (d) => !d.hidden);
+    const s0 = await k.evaluate<Cam>(CAMERA);
+    const from = rounded(l2.gx, l2.gy);
+    await k.touchPan(from.x, from.y, from.x + 60, from.y);
+    const l3 = await pollRead<LoupeRead>(k, LOUPE_READ, (d) => Math.abs(d.cx - l2.cx - 60) <= 2);
+    const s1 = await k.evaluate<Cam>(CAMERA);
+    moved = Math.abs(l3.cx - l2.cx - 60) <= 2 && Math.abs(l3.cy - l2.cy) <= 2;
+    camStill = sameCam(s1, s0);
+    await doubleTap(k, rounded(l3.gx, l3.gy));
+    const kNow = await kStill(k, "ZG11 the camera rests after the double tap on the grip");
+    doubleTapped = Math.abs(kNow - 2) < 0.01 && sameCam(await k.evaluate<Cam>(CAMERA), s0);
+    const body = rounded(l3.cx, l3.cy - 40);
+    await k.touchPan(body.x, body.y, body.x - 50, body.y);
+    const sBody = await pollRead<Cam>(k, CAMERA, (d) => Math.abs(d.x - s0.x + 50) <= 2);
+    const lBody = await pollRead<LoupeRead>(k, LOUPE_READ, () => true);
+    bodyPans = sameCam(sBody, s0, -50) && Math.hypot(lBody.cx - l3.cx, lBody.cy - l3.cy) <= 1;
+    await takeChartTouch(k, false);
+    outOfHand = (await k.evaluate<LoupeRead>(LOUPE_READ)).gpe;
+    await takeChartTouch(k, true);
+  }
+  await tapAt(k, await k.evaluate<PressAt>(PRESS_AT));
+  const off = await pollRead<LoupeRead>(k, LOUPE_READ, (d) => d.hidden);
+  await k.evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  k.check(
+    "ZG11 where touch is the main pointer a tap on the loupe's press shows the lens mid-chart with its grip; only the grip takes a finger, only while the chart is in hand; a drag or a double tap on the grip leaves the camera still, and a pan begun on the lens's body moves the camera under a lens that stays put (Issue #751)",
+    press.on && lit && moved && camStill && doubleTapped && bodyPans && outOfHand === "none" && off.hidden,
+    JSON.stringify({ press, l1, moved, camStill, doubleTapped, bodyPans, outOfHand, off: off.hidden }),
+  );
+}
