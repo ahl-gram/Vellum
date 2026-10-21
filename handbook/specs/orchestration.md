@@ -125,6 +125,12 @@ home's line wins for the lane and this file's for the orchestrator.
   with `git -C` for commits and uncommitted edits; resume it after the limit resets with a message
   telling it to re-verify its own state by command. The review agents share the limit, so a review
   round waits too. Arm a timer for the reset rather than polling for it.
+- **A fresh implementer takes over a dead lane's pull request on the pull request's own branch, once
+  the dead lane's tree is retired**, since git refuses to check out a branch another tree holds.
+  Commit the dead lane's uncommitted edits as a WIP commit in its tree, taking the tree over out
+  loud (One writer per tree, above), and push it; retire the tree as "Handing over and retiring a
+  lane" says, though its pull request is still open; then brief the fresh lane with the pull request
+  and its branch, which its definition takes in place of a rename.
 - **When Alex says he is near his usage limit**, tell every running lane to commit and push small and
   often, and start the handoff early.
 - **A lost tree is rebuilt by the orchestrator, never by the lane.** Workflow step 6 says when the

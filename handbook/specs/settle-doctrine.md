@@ -297,7 +297,17 @@ section points there rather than restating it.
   filed there and on the local harness browser), so a check that a key press
   files nothing passes whatever the page would have done. Send Enter with `text: "\r"`, as
   `p31Keyboard` in `e2e/suites/cards/hold.ts` and `midTurn` in `e2e/suites/chart-drawer/gestures.ts`
-  do, and read that the press holds the focus before trusting the key's lack of effect.
+  do, and read that the press holds the focus before trusting the key's lack of effect. Space is the
+  same: it scrolls the page only when its `keyDown` carries `text: " "`, while the navigation keys
+  scroll from their codes alone (`navKeys` in `e2e/suites/landfall/kit.ts`).
+- **An element's `textContent` holds only its last write.** A check that something was written
+  exactly once counts the writes with a `MutationObserver`, since a burst that ends on the right text
+  reads the same as a single write.
+- **A helper that scrolls before it reads cannot see a scrolled page.** `buttonPoint` in
+  `e2e/support/home.ts` scrolls the stage into view before it reads a point, un-scrolling the page as
+  it does, so a check about anything at its scrolled position reads raw viewport rects instead, as
+  `centerOf` in `e2e/suites/landfall/kit.ts` does. The scroll `vellum-footguns` Gate 2 item 2 asks
+  for belongs to a reachability read, never to a check of the scrolled state.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, and the harness wraps it two ways in

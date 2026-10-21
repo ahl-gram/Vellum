@@ -108,6 +108,12 @@ make an unqualified rule false. Read the surface, not just the rule.
   Broadside and takes its tab off the edge; shutting gives it back to the reader who had it open and
   leaves it folded for the reader who folded it. Nothing is lifted onto the chart: the drawer covers
   the caption and the roads where they stand.
+- **Every door lays a sheet through `layOnTable` in `src/site/explorer/chart-drawer.ts`, never a raw
+  append, and builds a prospect sheet only with `prospectItemFrom` in
+  `src/site/shared/table-address.ts`.** `emitTable` and `parseTableValue` there both cut the list at
+  `TABLE_CAP`, so a sheet appended past the cap is dropped silently on the next write rather than
+  refused; and `sameSheet` beside `layOnTable` compares emitted items byte for byte, so one prospect
+  spelled two ways would seat twice.
 
 ## The camera, the gesture and the fit
 
