@@ -354,13 +354,13 @@ background *is*, re-measure everything standing on it, not just the element the 
 pool had been covering a phone sheet, and four separate things were leaning on it without anyone
 knowing, including a keyboard focus ring that fell to about 1.0:1.
 
-**A lens over the chart never puts paper under the chrome.** Where the loupe lies past the sheet it
-shows opaque chart ink, so every piece of chrome painted over it keeps a dark ground (Alex,
-2026-10-21, Issue #751: the cream folio, masthead, room folio and Glass read as low as 1.07:1 over
-the light lens before). It answers what the pools answer for a pale chart reaching the chrome while
-zoomed, but opaque, because the lens lies under the fog and the pools above it: in a chart room the
-fog paints above the stage, and a darkness of 0.92 or 0.95 under the fog's peak leaves the faintest
-chrome ink under 4.5:1.
+**A lens over the chart never puts paper under the chrome where it lies past the sheet as the sheet
+lies on screen.** There the loupe shows opaque chart ink, so every piece of chrome painted over that
+part of it keeps a dark ground (Alex, 2026-10-21, Issue #751: the cream folio, masthead, room folio
+and Glass read as low as 1.07:1 over the light lens before). It answers what the pools answer for a
+pale chart reaching the chrome while zoomed, but opaque, because the lens lies under the fog and the
+pools above it: in a chart room the fog paints above the stage, and a darkness of 0.92 or 0.95 under
+the fog's peak leaves the faintest chrome ink under 4.5:1.
 
 **The focus ring is one face**, ratified on #324 and pinned: a control that draws its own is
 conforming, not inventing. It is drawn *outside* the control, so it stands on the surrounding ground
