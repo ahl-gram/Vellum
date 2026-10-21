@@ -79,13 +79,15 @@ function pointerHands(viewport: HTMLElement, moved: (client: Point | null, insid
 }
 
 function keyHands(viewport: HTMLElement, hold: (held: boolean) => void): void {
+  let heldCode: string | null = null;
   viewport.addEventListener("keydown", (e: KeyboardEvent) => {
     if (!loupeKey(e)) return;
     e.preventDefault();
+    heldCode = e.code || null;
     if (!e.repeat) hold(true);
   });
   viewport.addEventListener("keyup", (e: KeyboardEvent) => {
-    if (e.key.toLowerCase() === LOUPE_KEY) hold(false);
+    if (e.key.toLowerCase() === LOUPE_KEY || (heldCode !== null && e.code === heldCode)) hold(false);
   });
   viewport.addEventListener("focusout", (e: FocusEvent) => {
     if (!viewport.contains(e.relatedTarget as Node | null)) hold(false);

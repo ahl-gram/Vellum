@@ -27,6 +27,11 @@ export function loupeView(i: LoupeInput): LoupeView {
       w: i.box.width * s,
       h: i.box.height * s,
     },
-    paper: { x: 0, y: 0, w: 0, h: 0 },
+    paper: {
+      x: i.zoom.x - lens.x,
+      y: i.zoom.y - lens.y,
+      w: i.box.width * i.zoom.k,
+      h: i.box.height * i.zoom.k,
+    },
   };
 }

@@ -141,6 +141,9 @@ export function createLoupe(deps: LoupeDeps): Loupe {
     p.sheet.style.setProperty("width", `${v.sheet.w}px`);
     p.sheet.style.setProperty("height", `${v.sheet.h}px`);
     p.sheet.style.setProperty("translate", `${v.sheet.x}px ${v.sheet.y}px`);
+    p.room.style.setProperty("width", `${v.paper.w}px`);
+    p.room.style.setProperty("height", `${v.paper.h}px`);
+    p.room.style.setProperty("translate", `${v.paper.x}px ${v.paper.y}px`);
     track.sync();
     p.lens.hidden = false;
   };

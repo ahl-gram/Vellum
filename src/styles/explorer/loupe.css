@@ -43,6 +43,7 @@
   left: 0;
   top: 0;
   pointer-events: none;
+  box-shadow: 0 0 0 100vmax var(--chart-ink);
 }
 .loupe-grip {
   display: none;

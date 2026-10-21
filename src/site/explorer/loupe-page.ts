@@ -47,5 +47,6 @@ export function pageLoupe(deps: PageLoupeDeps): LoupeBinding {
     touchable,
   });
   deps.motion.watch(binding.follow);
+  new MutationObserver(binding.follow).observe(mapDiv, { childList: true });
   return binding;
 }
