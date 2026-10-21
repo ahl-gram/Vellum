@@ -342,6 +342,133 @@ the row says so, and a line whose incident the record does not show has no row.
   could resume the pull request. Stands behind `handbook/specs/orchestration.md`'s WIP commit before
   a fresh implementer takes over a dead lane's pull request.
 
+## Behind the product specs, from Issue #789
+
+The measurements behind spec and gate lines that a private note had kept, brought into the repo by
+Issue #789, one row each with the line it stands behind. Each was read from the public record on
+2026-10-21; a figure no issue or pull request records stayed out.
+
+- PR #114 (Issue #79) and PR #139 (Issue #80): each moved seed 42's realm partition and re-pinned
+  the golden checksum only, while the title, capital, year, sea and three realms held identical,
+  since seed 42 is one mainland holding the capital and every town, and what moved was two offshore
+  islets, then a few border cells. Stands behind `handbook/specs/engine-invariants.md`'s seat roster
+  being a different thing from the per-cell partition.
+- Issue #49, in its comment of 2026-08-16: a draw inserted mid-fork inside `simulateHistory`
+  re-rolls every seed's founding years and its ruin set, and seed 42's committed hero chart draws
+  three ruins, so it moves committed bytes and fires `test/site/hero-charts.test.ts`; former names
+  took a fork of their own instead. Stands behind `handbook/specs/engine-invariants.md`'s hazard of
+  inserting a draw mid-fork.
+- PR #194 (Issue #178, Issue #195): a river's name yields only where its true rotated ink overlaps a
+  label by 15% of the smaller box, the issue's own bar for a substantial collision rather than a
+  tuned value; seed 36's river still yields, burying the capital at 18%. Stands behind
+  `handbook/specs/chart-dress.md`'s river keeping its name over a graze.
+- PR #383 (Issue #381): Z8b read a ring's opacity at 0.906 against a strict equality, sampled once
+  after a fixed 400ms sleep, while its scale clause, carrying a 0.02 tolerance, passed off the same
+  wait; both values were still climbing. Stands behind `handbook/specs/settle-doctrine.md` clause 3
+  and `vellum-footguns` Gate 2 item 6.
+- Issue #296, in its comment widening it to citation drift: none of the line-number citations in
+  comments was out of range, so an existence check reported nothing, yet reading each against its
+  target found two drifted sites; and a resolver read a bare realms.ts citation as the renderer's
+  layer when it meant `src/society/realms.ts`, nearly filing a correct comment as stale. Stands
+  behind `handbook/specs/conventions.md`'s How code is cited.
+- PR #627 (Issue #623): splitting the e2e into one CI job per lane, each on a runner of its own,
+  took the median pull request's wall clock from 12m51s to 10m00s and the worst from 13m18s to
+  10m09s, the same gain at every point of the distribution. Stands behind
+  `handbook/specs/site-architecture.md`'s CI as parallel jobs, where a pull request waits for the
+  longest job and not the sum.
+- PR #481 (Issue #472): the riding wash's 46rem box was real document overflow, and phone Chrome
+  widened the layout viewport itself to 736px to fit it, which e2e H3 and H12a caught; the wash's
+  box was capped. Stands behind `handbook/specs/cascade-traps.md`'s box wider than the page.
+- Issue #329: on a cold home load about 6.3MB of hero and style SVGs were still streaming when a
+  click came, and the next page's html request queued behind them; reserved frames and a low fetch
+  priority on below-the-fold plates followed. Stands behind `handbook/specs/site-architecture.md`'s
+  diagnosis that a pause before navigating is usually bandwidth.
+- Issue #367, PR #369: the armed survey wore the sheet's hairline and shadow twice in register,
+  measured 22.5 luminance darker 1px below the sheet's edge, and a single shadow fitted to that
+  profile came to alpha 0.385, which the house depth rounds to 0.4. Stands behind
+  `handbook/specs/chart-dress.md`'s sheet on the desk in one dressing.
+- PR #510 (Issue #454's sitting rulings 11 and 23): home's legend head still read under the floor at
+  the old fade's clear top, 1.0:1 in ink-faded and 1.76:1 in parchment, while the seed box's crisp
+  panel measured 6.04:1, so the row's footing became that panel on home and in the kit. Stands
+  behind `handbook/specs/ui-design.md`'s legend row and room folio on home's crisp panel.
+- PR #491 (Issue #463), in its comment of 2026-08-29
+  (https://github.com/ahl-gram/Vellum/pull/491#issuecomment-5465484438): the kit's
+  `line-height: normal` on `.legend-btn` shortened Today's roads by 5px; it now pins the mockup's
+  1.45. Stands behind `handbook/specs/cascade-traps.md`'s head cluster pinning its own line-height.
+- Issue #331: Alex, playing live, found the place-hit ring riding the zoom while its card
+  counter-scaled, a ring of about 160px with a 16px stroke at deep zoom; the card held its size, and
+  only the ring showed that the hit buttons scale. Stands behind
+  `handbook/specs/explorer-doctrine.md`'s Counter-scale, which a test that never zooms cannot see.
+- PR #245 (Issue #169): the first push committed each survey by replacing the world sheet and
+  rebasing the camera onto it, which broke panning at committed bands, flashed the frame at each
+  commit and made zoom-out shrink into void before snapping; the revision after its first review
+  keeps the camera world-relative at every band and commits each survey as an inset. Stands behind
+  `handbook/specs/explorer-doctrine.md`'s camera that never rebases.
+- Issue #234, PR #250: the issue's proposed fix, gating the sea caption on water connected to the
+  window edge, was measured and does not fix it: cropping reconnects an inland lake to the edge, so
+  seed 42's caption landed at region cell (65,85), parent cell (127,82), inside the lake The Mairoa
+  Pool, which the region's own mask reads as sea and the parent's as lake. Stands behind
+  `handbook/specs/region-and-voyage.md`'s parent world as the authority on a crop.
+- Issue #423, PR #435: each realm's carried ring traverses every shared seam, and the plate reader
+  measured the coincident dash phases filling each other's gaps into a solid line on seed 42, 98.3%
+  ink duty against a 78.1% single-stroke control. Stands behind
+  `handbook/specs/region-and-voyage.md`'s borders that are not stroked from the carried rings.
+- Issue #633, PR #642: a place card shrank into the room left beside its mark, so a card near an
+  edge was narrow and therefore tall; measured over every place of four seeds, cards taller than the
+  box went from 6 of 97 to 0 of 97 at 390 and from 67 of 96 to 0 of 94 at 320, with every number at
+  1280 unchanged. The first cap multiplied the box's height by `--zoom-k` under a comment saying the
+  card is scaled by 1/k; its net scale is 1, so one real wheel at 320 took the cap from 247.016 to
+  344.523 CSS px and the card stood 45.38px past the box, on a branch whose guards and CI were
+  green. The control that settled it: the fixed 16rem card renders 256px wide at k=1 and at k=1.3947
+  alike. Stands behind `handbook/specs/explorer-doctrine.md`'s Overlay lifecycle bullet that takes
+  the box's height raw.
+- Issue #387, Issue #388, PR #415: the clamp's nudge was measured rather than reasoned into the
+  counter-scaled frame: measured move over published nudge read 1.000000 across all 24 zoom probes,
+  worst deviation 0.000009, where a nudge landing ahead of the counter-scale would read 2, 4 and 8.
+  Stands behind `handbook/specs/explorer-doctrine.md`'s Overlay lifecycle bullet that makes the
+  clamp the host's seam.
+- Issue #155, PR #290, its body and its commit `a947681`: the first commit anchored the press on
+  each mark's own bounding-box centre, under a comment asserting each mark is drawn centred on its
+  own point. A profile castle stands on its point while a plan glyph centres on it and a seat halo
+  sits on a third point, which for seed 42's capital are y=474.21, 469.21 and 469.83, so the
+  box-centre origin started the castle's foot 1.75 chart units below its town: 1.03 CSS px at rest,
+  10.3 px at k=8. Stands behind `handbook/specs/rulebook.md`'s mixed projections.
+- Issue #174, PR #179: re-blobbing the verso's ghost to refresh an overlay leaks about 1 MB per
+  redraw (Issue #116's warning, carried in Issue #174's body), so the surveyor's track reached the
+  back face as a mirrored polyline sharing the ghost's box, and the quiet mid-drag redraws rebuild
+  no ghost at all. Stands behind `handbook/specs/explorer-doctrine.md`'s Overlay lifecycle bullet
+  that never rebuilds the ghost blob to refresh an overlay.
+- Issue #366, PR #374: a settle's arm is droppable, so a style change inside the settle's own beat
+  dropped the pending arm and left the engine holding the world before last; the turn's draw rebuilt
+  the verso ghost for the new world and struck the older world's survey over it for the turn's
+  ~900ms. Reproduced in a browser before the fix by driving the style change from inside a
+  `MutationObserver` callback, it put seed 7's track, byte-identical, on seed 42's back face; SV2m
+  now reds on the old shape. Stands behind `handbook/specs/explorer-doctrine.md`'s single-slot arm.
+- Issue #366, PR #374: the frame a diff predicate called the first to carry the new chart, at
+  650.7ms, held 0.83% of the settled ink, because the outgoing chart moves 86 to 88% of the region
+  by itself: it measured the mount emptying. Read as ink against a control Draw with the box never
+  ticked, the chart was legible (half its settled ink) at 822ms armed against 782ms unarmed. Proves
+  `vellum-footguns` Gate 2 item 12.
+- Issue #185, PR #283: the eleven voyage constants picked by eye were re-measured against the closed
+  tour and all held, no value or test changed. `RDP_EPSILON` at 1.0 ties 0.75 on the worst case for
+  a fifth fewer vertices, a tie by luck that would loosen a test bound; `SAIL_WHEN_ROAD_EXCEEDS` at
+  1.5 or more takes the leanest genuine inland handoff from 8.94 to 4.24 cells. `MAX_TILT`, the one
+  constant with no metric, was ratified by eye at 24 on Issue #185, where the median leg peaks at
+  23.6 degrees, so the ceiling is what the mark looks like on any climbing leg rather than a tail
+  clamp. Stands behind `handbook/specs/region-and-voyage.md`'s measured voyage constants.
+- PR #283 (Issue #185), its body: its three corrections to its own first pass were all caught by
+  re-deriving, none by a test. A facing harness re-seeded the mark's facing at the top of every leg
+  where the overlay seeds it once from leg 0, which hid every flip at a leg boundary; a 120px leg
+  worked by hand read 488ms where `34 * 120^0.55` is 473ms; and a cap claim, back-solved, came
+  nearer than first written. Stands behind `handbook/specs/development-workflow.md` step 10's claim
+  that is a prediction until a command's output says otherwise.
+- Issue #522, PR #631: the gate on the `turning` class stopped a place card filing a world under
+  another world's year during a sheet turn, but an aborted turn drops the class without moving the
+  world, so the skew outlived it indefinitely: the card filed seed 42's town at year 809, seed 7's
+  present, while the chart read 1059, and CT7 asserted the mismatched filing as correct. Both closed
+  by a shape, `filingAt` taking one sheet that carries its own present year, so no caller can
+  express the skew. Stands behind `handbook/specs/check-placement.md`'s unrepresentable wrong state.
+
 ## Where the rules are written down
 
 Where a lesson's rule is written down in this repo, it is in one of these: the gate lines in
@@ -350,8 +477,10 @@ Where a lesson's rule is written down in this repo, it is in one of these: the g
 (what a pull request owes, and in what order); `handbook/specs/orchestration.md` (running several
 lanes at once); `handbook/specs/conventions.md` (the comment sweep,
 citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
-section (measuring a ground); `handbook/specs/explorer-doctrine.md`,
-`handbook/specs/region-and-voyage.md` and `handbook/specs/chart-dress.md` (the rules the spec-line
+section (measuring a ground); `handbook/specs/explorer-doctrine.md`, `handbook/specs/region-and-voyage.md`,
+`handbook/specs/chart-dress.md`, `handbook/specs/engine-invariants.md`,
+`handbook/specs/site-architecture.md`, `handbook/specs/cascade-traps.md`,
+`handbook/specs/check-placement.md` and `handbook/specs/rulebook.md` (the rules the spec-line
 rows above stand behind); `CLAUDE.md`'s "Measure before you assert" and "Write visual samples to
 out/"; the agent definitions under `.claude/agents/`; and, for the tooling traps (CDP escapes, perl
 wide chars, the rebase subject strip, closing keywords), the Never list,
