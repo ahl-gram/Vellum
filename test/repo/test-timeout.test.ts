@@ -26,7 +26,7 @@ test("a wedged test fails by name within the cap instead of hanging the lane", (
     { cwd: REPO, encoding: "utf8", timeout: CHILD_LIMIT_MS, env: childEnv() },
   );
   const output = `${run.stdout}${run.stderr}`;
-  assert.notEqual(run.error?.code, "ETIMEDOUT", `the child hung until the ${CHILD_LIMIT_MS} ms limit killed it`);
+  assert.doesNotMatch(String(run.error), /ETIMEDOUT/, `the child hung until the ${CHILD_LIMIT_MS} ms limit killed it`);
   assert.notEqual(run.status, 0, output);
   assert.match(output, /wedged/);
   assert.match(output, /timed out/i);
