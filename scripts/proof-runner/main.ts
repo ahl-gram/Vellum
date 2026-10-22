@@ -39,11 +39,13 @@ const api = (endpoint: string, body: object): string =>
     JSON.stringify(body),
   );
 
-const rulesAt = async (sha: string): Promise<SuiteRules> => {
+export const rulesAt = async (sha: string): Promise<SuiteRules> => {
   const dir = mkdtempSync(join(tmpdir(), "proof-runner-rules-"));
   try {
     const file = join(dir, "suites.mts");
-    writeFileSync(file, readAt(process.cwd(), sha)("e2e/support/suites.ts"));
+    const read = readAt(process.cwd(), sha);
+    writeFileSync(file, read("e2e/support/suites.ts"));
+    writeFileSync(join(dir, "skips.ts"), read("e2e/support/skips.ts"));
     const m = (await import(pathToFileURL(file).href)) as {
       E2E_SUITE_ORDER: string[];
       NEEDS_PREDECESSOR: Record<string, string>;
