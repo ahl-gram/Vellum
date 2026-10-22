@@ -128,11 +128,14 @@ function gridForWindow(win: UvWindow): { readonly gridW: number; readonly gridH:
 
 /** Floored and de-bridged against EVERY ancestor, not only the nearest: two bilinear resamples in a row smooth differently from one, so parent-only flooring lets waterline cells sink relative to a grandparent. The cache defaults to a fresh one per top-level call because the recursion would otherwise rebuild each ancestor's own ancestry, costing 2^depth field builds instead of depth. */
 export function buildChainedField(spec: ChainSpec, cache: ChainCache = createChainCache()): Field {
-  const key = chainCacheKey(spec);
-  const hit = cache.get(key);
+  const hit = cache.get(chainCacheKey(spec));
   if (hit !== undefined) return hit;
+  return chainFromBare(spec, cache, bareDetailField(spec));
+}
 
-  const bare = buildHeightfield({
+/** The window's own detail before the chain floors it to its ancestors: the ground a river is routed over. */
+export function bareDetailField(spec: ChainSpec): Field {
+  return buildHeightfield({
     seed: spec.seed,
     gridW: spec.gridW,
     gridH: spec.gridH,
@@ -142,7 +145,20 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
     detail: detailForWindow(spec.window),
     ...terrainInputsOf(spec),
   });
+}
 
+/** The chained field and the unfloored ground it was floored from, in one call: on a miss the chain builds the ground, floors it and caches the floored field; on a hit it builds the ground alone. Only the chain writes what it caches. */
+export function chainedFieldAndGround(
+  spec: ChainSpec,
+  cache: ChainCache = createChainCache(),
+): { readonly field: Field; readonly ground: Field } {
+  const hit = cache.get(chainCacheKey(spec));
+  const ground = bareDetailField(spec);
+  return { field: hit ?? chainFromBare(spec, cache, ground), ground };
+}
+
+function chainFromBare(spec: ChainSpec, cache: ChainCache, bare: Field): Field {
+  const key = chainCacheKey(spec);
   const ancestors = ancestorWindows(spec.window);
   let out = bare;
   if (ancestors.length > 0) {

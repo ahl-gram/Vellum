@@ -54,3 +54,60 @@ export function createMinHeap(): MinHeap {
     },
   };
 }
+
+/** Pops the least value and, of equal values, the lower index: the tie-break by cell index a search needs to stay deterministic. */
+export function createCellMinHeap(): MinHeap {
+  const idx: number[] = [];
+  const val: number[] = [];
+
+  const before = (a: number, b: number): boolean => {
+    const va = val[a] as number;
+    const vb = val[b] as number;
+    return va < vb || (va === vb && (idx[a] as number) < (idx[b] as number));
+  };
+  const swap = (a: number, b: number): void => {
+    const ti = idx[a] as number;
+    idx[a] = idx[b] as number;
+    idx[b] = ti;
+    const tv = val[a] as number;
+    val[a] = val[b] as number;
+    val[b] = tv;
+  };
+
+  return {
+    size: () => idx.length,
+    push(i: number, v: number): void {
+      idx.push(i);
+      val.push(v);
+      let c = idx.length - 1;
+      while (c > 0) {
+        const p = (c - 1) >> 1;
+        if (!before(c, p)) break;
+        swap(p, c);
+        c = p;
+      }
+    },
+    pop(): number {
+      if (idx.length === 0) throw new RangeError("pop on empty heap");
+      const top = idx[0] as number;
+      const lastI = idx.pop() as number;
+      const lastV = val.pop() as number;
+      if (idx.length > 0) {
+        idx[0] = lastI;
+        val[0] = lastV;
+        let p = 0;
+        for (;;) {
+          const l = p * 2 + 1;
+          const r = l + 1;
+          let m = p;
+          if (l < idx.length && before(l, m)) m = l;
+          if (r < idx.length && before(r, m)) m = r;
+          if (m === p) break;
+          swap(p, m);
+          p = m;
+        }
+      }
+      return top;
+    },
+  };
+}
