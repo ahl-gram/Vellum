@@ -12,6 +12,8 @@ Other places carry what this one deliberately does not:
 - **`handbook/specs/orchestration.md`** holds how a session runs several lanes at once, each of which
   runs this sequence: the briefs, the relay of menus and rulings, merging, and a lane that stalls or
   loses its tree.
+- **`handbook/specs/cloud-routine.md`** holds the scheduled cloud session that takes one small, fully
+  planned issue to a merged pull request without a lane or a menu.
 - **`handbook/specs/conventions.md`** holds how a design decision is made, and how a rule is written down
   once made: where it lives, the voice, the citation form, the comment sweep.
 - **`.claude/skills/vellum-footguns/SKILL.md`** holds the gates, which are keyed to the moment of

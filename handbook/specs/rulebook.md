@@ -32,7 +32,8 @@ host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
 `development-workflow.md` the sequence a change moves through, `orchestration.md` how a session
-runs several lanes of it at once, `settle-doctrine.md` how an e2e
+runs several lanes of it at once, `cloud-routine.md` the scheduled cloud session for a small, fully
+planned issue, `settle-doctrine.md` how an e2e
 wait is written and what the harness environment does, and `check-placement.md` which check holds
 which kind of rule.
 
@@ -429,7 +430,7 @@ overlays), to
 `handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `handbook/specs/site-architecture.md` (how the site is authored and shipped), to
 `handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/orchestration.md` (running
-several lanes at once), to `handbook/specs/settle-doctrine.md` (how an e2e
+several lanes at once), to `handbook/specs/cloud-routine.md` (the cloud quick-win routine), to `handbook/specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), to `handbook/specs/check-placement.md` (which
 check holds which kind of rule), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
