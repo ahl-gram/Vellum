@@ -81,6 +81,7 @@ const LELIX_BAND_2: UvWindow = { u0: 0.59375, v0: 0.46875, u1: 0.84375, v1: 0.71
 test("a leg the corridor cannot carry goes round by land: seed 23's Lelix band-2 survey, a trunk round a lake (Issue #952)", () => {
   const world = generateWorld(defaultRecipe(23));
   const region = closeUp(world, LELIX_BAND_2);
+  assertRoadsSound("Lelix band 2", region);
   const courses = world.roads
     .map((r) => inWindowCourse(r.points, world, LELIX_BAND_2, GRID_W, GRID_H))
     .filter((c) => c.length > 0);
@@ -94,7 +95,6 @@ test("a leg the corridor cannot carry goes round by land: seed 23's Lelix band-2
     straying.length > 20,
     `precondition: a road goes round the lake outside its corridor (${straying.length} cells)`,
   );
-  assertRoadsSound("Lelix band 2", region);
 });
 
 test("a close-up draws the world's roads and none of its own weaving (Issue #952)", () => {
