@@ -59,12 +59,8 @@ export function createMinHeap(): MinHeap {
 export function createCellMinHeap(): MinHeap {
   const idx: number[] = [];
   const val: number[] = [];
-
-  const before = (a: number, b: number): boolean => {
-    const va = val[a] as number;
-    const vb = val[b] as number;
-    return va < vb || (va === vb && (idx[a] as number) < (idx[b] as number));
-  };
+  const before = (a: number, b: number): boolean =>
+    (val[a] as number) < (val[b] as number) || (val[a] === val[b] && (idx[a] as number) < (idx[b] as number));
   const swap = (a: number, b: number): void => {
     const ti = idx[a] as number;
     idx[a] = idx[b] as number;
@@ -73,7 +69,6 @@ export function createCellMinHeap(): MinHeap {
     val[a] = val[b] as number;
     val[b] = tv;
   };
-
   return {
     size: () => idx.length,
     push(i: number, v: number): void {
