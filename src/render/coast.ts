@@ -14,7 +14,7 @@ export function coastRingsGrid(world: World, coastIters: number): Point[][] {
   return rings.map((c) => chaikinSmoothPinned(c.points, coastIters, onFrame));
 }
 
-function frameVertexPredicate(w: number, h: number): (p: Point) => boolean {
+export function frameVertexPredicate(w: number, h: number): (p: Point) => boolean {
   const gw = w - 1;
   const gh = h - 1;
   return (p: Point): boolean =>

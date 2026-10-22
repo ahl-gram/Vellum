@@ -12,10 +12,10 @@ import { anchorRegionRivers } from "./region-rivers.ts";
 import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
-import { refineRegionRealms, type RealmTown } from "./realm-refine.ts";
+import { realmOwners, refineRegionRealms, type RealmTown } from "./realm-refine.ts";
 import { regionSeaGate } from "./region-sea-gate.ts";
 import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
-import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
+import { regionRealmBorders, regionRealmRings } from "./realm-carry.ts";
 import { LOD_BANDS } from "./lod.ts";
 import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
@@ -225,7 +225,11 @@ function regionNames(world: World, lakes: NamedLake[]): FeatureNames {
   };
 }
 
-function regionCarry(g: RegionGrid, land: Pick<RegionLand, "elev" | "seaLevel">): NonNullable<World["region"]> {
+function regionCarry(
+  g: RegionGrid,
+  land: Pick<RegionLand, "elev" | "seaLevel">,
+  labels: Int16Array,
+): NonNullable<World["region"]> {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
   return {
@@ -233,8 +237,8 @@ function regionCarry(g: RegionGrid, land: Pick<RegionLand, "elev" | "seaLevel">)
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
     seaGate: regionSeaGate(world, window, { gridW, gridH }, land),
-    realmRings: mapRingsToWindow(realmCarryRings(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
-    realmBorders: mapChainsToWindow(realmBorderChains(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
+    realmRings: regionRealmRings(realmOwners(world, window, land, labels), gridW, gridH),
+    realmBorders: regionRealmBorders(labels, gridW, gridH),
     parentRealmLabels: world.realms.labels,
   };
 }
@@ -294,7 +298,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: regionCarry(g, { elev, seaLevel }),
+    region: regionCarry(g, { elev, seaLevel }, roadLabels),
   };
 }
 

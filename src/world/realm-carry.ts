@@ -1,8 +1,8 @@
 import { boxBlur } from "../core/box-blur.ts";
 import { createField } from "../core/grid.ts";
 import { chainBorderSegments, labelBorderSegments } from "../core/segment-chains.ts";
-import { chaikinSmooth, marchingSquares } from "../terrain/contours.ts";
-import type { UvWindow } from "../terrain/heightfield.ts";
+import { frameVertexPredicate } from "../render/coast.ts";
+import { chaikinSmooth, chaikinSmoothPinned, closedIsoRings } from "../terrain/contours.ts";
 import type { World } from "./types.ts";
 
 // Ratified 2026-08-20: measured max reach today is 4 parent cells and Issue #376's coast excursion adds up to ~2.4 more (the sweep is recorded on Issue #423), so 8 is generous without letting a realm wander the open ocean.
@@ -63,94 +63,24 @@ export function grownRealmLabels(world: World): Int16Array {
   return grown;
 }
 
-const ringCache = new WeakMap<World, RealmRings>();
-const borderCache = new WeakMap<World, ReadonlyArray<RealmRing>>();
-
-/** The same chains the world sheet strokes (label-boundary segments, chained, smoothed), in parent grid coordinates: one per land boundary, so a seam is never inked twice and no segment can sit on a coastline. */
-export function realmBorderChains(world: World): ReadonlyArray<RealmRing> {
-  const cached = borderCache.get(world);
-  if (cached) return cached;
-  const { w, h } = world.elev;
-  const segs = labelBorderSegments(world.realms.labels, w, h);
-  const chains = chainBorderSegments(segs).map((chain) => chaikinSmooth(chain, false, 2) as RealmRing);
-  borderCache.set(world, chains);
-  return chains;
-}
-
-export function mapChainsToWindow(
-  chains: ReadonlyArray<RealmRing>,
-  window: UvWindow,
-  parentW: number,
-  parentH: number,
-  gridW: number,
-  gridH: number,
-): ReadonlyArray<RealmRing> {
-  const mapped = mapRingsToWindow([{ realm: 0, rings: chains }], window, parentW, parentH, gridW, gridH);
-  return mapped[0]?.rings ?? [];
-}
-
-export function realmCarryRings(world: World): RealmRings {
-  const cached = ringCache.get(world);
-  if (cached) return cached;
-  const { w, h } = world.elev;
-  const { data } = world.elev;
-  const sl = world.seaLevel;
-  const grown = growRealmLabels(world.realms.labels, (i) => (data[i] as number) <= sl, w, h);
+/** One tint ring set per realm present in `owner`, blurred from the owner field at region scale and closed against the window frame. */
+export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number): RealmRings {
+  const present = new Set<number>();
+  for (const o of owner) if (o >= 0) present.add(o);
+  const onFrame = frameVertexPredicate(gridW, gridH);
   const out: Array<{ realm: number; rings: RealmRing[] }> = [];
-  for (let realm = 0; realm < world.realms.seats.length; realm++) {
-    const indicator = createField(w, h, (x, y) => (grown[x + y * w] === realm ? 1 : 0));
+  for (const realm of [...present].sort((a, b) => a - b)) {
+    const indicator = createField(gridW, gridH, (x, y) => (owner[x + y * gridW] === realm ? 1 : 0));
     const soft = boxBlur(indicator, 3);
-    // Owned SEA cells are floored above the iso: offshore the ring is invisible (the region land clip is the drawn coast), so precision there buys nothing, while the blur's bite on a thin grown finger would bare the finer shoreline inside it. Land cells keep the world sheet's exact blur behavior.
-    const floored = createField(w, h, (x, y) => {
-      const i = x + y * w;
-      const v = soft.data[i] as number;
-      return grown[i] === realm && (data[i] as number) <= sl ? Math.max(v, 0.75) : v;
-    });
-    const rings = marchingSquares(floored, 0.5)
-      .filter((c) => c.closed)
-      .map((c) => chaikinSmooth(c.points, true, 2) as RealmRing);
+    const rings = closedIsoRings(soft, 0.5).map((c) => chaikinSmoothPinned(c.points, 2, onFrame) as RealmRing);
     if (rings.length > 0) out.push({ realm, rings });
   }
-  ringCache.set(world, out);
   return out;
 }
 
-/** Rings kept only if their bbox meets the window: a fully disjoint ring adds no even-odd parity inside it, while a containing ring's bbox always meets it, so culling cannot flip a hole. */
-export function mapRingsToWindow(
-  rings: RealmRings,
-  window: UvWindow,
-  parentW: number,
-  parentH: number,
-  gridW: number,
-  gridH: number,
-): RealmRings {
-  const du = window.u1 - window.u0;
-  const dv = window.v1 - window.v0;
-  const x0 = window.u0 * (parentW - 1);
-  const x1 = window.u1 * (parentW - 1);
-  const y0 = window.v0 * (parentH - 1);
-  const y1 = window.v1 * (parentH - 1);
-  const gx = (x: number): number => ((x / (parentW - 1) - window.u0) / du) * (gridW - 1);
-  const gy = (y: number): number => ((y / (parentH - 1) - window.v0) / dv) * (gridH - 1);
-
-  const out: Array<{ realm: number; rings: RealmRing[] }> = [];
-  for (const { realm, rings: parentRings } of rings) {
-    const kept: RealmRing[] = [];
-    for (const ring of parentRings) {
-      let minX = Infinity;
-      let maxX = -Infinity;
-      let minY = Infinity;
-      let maxY = -Infinity;
-      for (const [x, y] of ring) {
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-      }
-      if (maxX < x0 || minX > x1 || maxY < y0 || minY > y1) continue;
-      kept.push(ring.map(([x, y]) => [gx(x), gy(y)] as const));
-    }
-    if (kept.length > 0) out.push({ realm, rings: kept });
-  }
-  return out;
+/** The land-to-land boundary of the region's own labels, chained and smoothed: one chain per boundary, so a seam is never inked twice and no segment can sit on a coastline. */
+export function regionRealmBorders(labels: Int16Array, gridW: number, gridH: number): ReadonlyArray<RealmRing> {
+  return chainBorderSegments(labelBorderSegments(labels, gridW, gridH)).map(
+    (chain) => chaikinSmooth(chain, false, 3) as RealmRing,
+  );
 }
