@@ -259,7 +259,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
   (`cameraForAddress` in `src/site/explorer/glass.ts`), so the camera's bound in `readHash` stands.
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
-  address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
+  address decides an ARRIVAL and the device decides a RETURN (Issue #634, 2026-09-19, superseding Issue #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
   take the table the address names, so a folio someone shares reproduces exactly; a Back or Forward
   takes the table this device holds **when it holds one**, because the address in a history entry is
