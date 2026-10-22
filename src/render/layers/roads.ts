@@ -7,7 +7,9 @@ export function roadDress(
   rank: Road["rank"],
   region: boolean,
 ): { readonly width: number; readonly dash: readonly [number, number]; readonly opacity: number } {
-  void region;
+  if (region) {
+    return rank === "trunk" ? { width: 2.4, dash: [6, 3.5], opacity: 1 } : { width: 1.8, dash: [3.2, 3], opacity: 0.9 };
+  }
   return rank === "trunk"
     ? { width: 1.5, dash: [5, 3.5], opacity: 0.85 }
     : { width: 1.0, dash: [2.5, 3.5], opacity: 0.7 };
