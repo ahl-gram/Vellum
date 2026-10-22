@@ -4,7 +4,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
 import { createChainCache, type ChainCache } from "../../src/world/detail-chain.ts";
-import { growRealmLabels, regionRealmBorders, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
+import { growRealmLabels, regionRealmBorders, regionRealmRings, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
 import type { RealmRings } from "../../src/world/realm-carry.ts";
 import { nearestParentCells } from "../../src/world/region-parent.ts";
 import type { World } from "../../src/world/types.ts";
@@ -333,6 +333,11 @@ function sweepWindows(): { windows: SweepWindow[]; borderWindows: number } {
   const cache = createChainCache(16);
   windows.push([42, "b4border", borderWindowOfSize(worldFor(42), 1 / 16)!, cache]);
   windows.push([42, "b5border", borderWindowOfSize(worldFor(42), 1 / 32)!, cache]);
+  const world42 = worldFor(42);
+  const capital42 = world42.settlements.find((s) => s.kind === "capital")!;
+  const q = quantizeCenter(capital42.x / (world42.recipe.gridW - 1), capital42.y / (world42.recipe.gridH - 1), 1 / 32);
+  windows.push([42, "b5capital", lodWindowFor(q.cx, q.cy, 1 / 32), cache]);
+  windows.push([2, "enclave", { u0: 0.375, v0: 0.5, u1: 0.625, v1: 0.75 }, cache]);
   return { windows, borderWindows };
 }
 
@@ -373,6 +378,42 @@ test("the collar guard: the tint holds every refined label and every border stan
       `${label}: ${strays} border vertices stand further than 1.5 cells from any change of label`,
     );
   }
+});
+
+test("a realm holding the whole frame is tinted to the frame, its enclaves cut out (Issue #953)", () => {
+  const w = 20;
+  const h = 16;
+  const whole = regionRealmRings(new Int16Array(w * h), w, h);
+  assert.equal(whole.length, 1, "one realm");
+  assert.deepEqual(whole[0]!.rings, [
+    [
+      [0, 0],
+      [19, 0],
+      [19, 15],
+      [0, 15],
+    ],
+  ]);
+
+  const owner = new Int16Array(w * h);
+  for (let y = 4; y <= 11; y++) for (let x = 6; x <= 13; x++) owner[x + y * w] = 1;
+  const rings = regionRealmRings(owner, w, h);
+  const outer = rings.find((r) => r.realm === 0)!;
+  const inner = rings.find((r) => r.realm === 1)!;
+  assert.equal(outer.rings.length, 2, "the frame and the enclave's contour");
+  assert.deepEqual(outer.rings[0], [
+    [0, 0],
+    [19, 0],
+    [19, 15],
+    [0, 15],
+  ]);
+  const covers = (
+    r: { rings: ReadonlyArray<ReadonlyArray<readonly [number, number]>> },
+    x: number,
+    y: number,
+  ): boolean => rasterize(r.rings, w, h)[x + y * w] === 1;
+  assert.ok(covers(outer, 2, 2), "realm 0 covers the ground round the enclave");
+  assert.ok(!covers(outer, 9, 7), "realm 0 does not cover the enclave");
+  assert.ok(covers(inner, 9, 7), "realm 1 covers its enclave");
 });
 
 test("a staircase border is drawn as the line it steps along (Issue #953)", () => {
