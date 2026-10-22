@@ -12,9 +12,9 @@ import { anchorRegionRivers } from "./region-rivers.ts";
 import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
+import { regionSeaGate } from "./region-sea-gate.ts";
 import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
-import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
 import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
@@ -202,25 +202,6 @@ function regionRoadLabels(
   return roadLabels;
 }
 
-function regionSeaGate(g: RegionGrid): Uint8Array {
-  const { world, window, gridW, gridH } = g;
-  const { recipe } = world;
-  const du = window.u1 - window.u0;
-  const dv = window.v1 - window.v0;
-  const worldSea = seaMask(world.elev, world.seaLevel);
-  const seaGate = new Uint8Array(gridW * gridH);
-  for (let gy = 0; gy < gridH; gy++) {
-    for (let gx = 0; gx < gridW; gx++) {
-      const u = window.u0 + (gx / (gridW - 1)) * du;
-      const v = window.v0 + (gy / (gridH - 1)) * dv;
-      const wx = Math.round(u * (recipe.gridW - 1));
-      const wy = Math.round(v * (recipe.gridH - 1));
-      seaGate[gx + gy * gridW] = worldSea[wx + wy * recipe.gridW] as number;
-    }
-  }
-  return seaGate;
-}
-
 function regionLakes(g: RegionGrid, elev: Field, seaLevel: number): NamedLake[] {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
@@ -256,14 +237,14 @@ function regionNames(world: World, lakes: NamedLake[]): FeatureNames {
   };
 }
 
-function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["region"]> {
+function regionCarry(g: RegionGrid, land: Pick<RegionLand, "elev" | "seaLevel">): NonNullable<World["region"]> {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
   return {
     window,
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
-    seaGate,
+    seaGate: regionSeaGate(world, window, { gridW, gridH }, land),
     realmRings: mapRingsToWindow(realmCarryRings(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
     realmBorders: mapChainsToWindow(realmBorderChains(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
     parentRealmLabels: world.realms.labels,
@@ -325,7 +306,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: regionCarry(g, regionSeaGate(g)),
+    region: regionCarry(g, { elev, seaLevel }),
   };
 }
 
