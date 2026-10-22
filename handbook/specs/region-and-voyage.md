@@ -69,12 +69,12 @@ about a rule, the rulebook wins.
   and of the order the reader interacted. Screen it on the PARENT grid, append it after the projected
   settlements so seats and roads stay valid, and never put it on a world sheet, on a seat, or on a
   road.
-- **A harbour town stands on the region's own shore.** A world harbour stands beside water at
+- **A projected harbour town stands on the region's own shore.** A world harbour stands beside water at
   world resolution, and at depth the close-up's shore lies up to a world cell and a half from its
   cell's centre, so a projected harbour is seated on the nearest region land cell beside water,
   within the farthest its water can lie (`seatProjected` and `HARBOUR_REACH_WORLD_CELLS` in
   `src/world/seat-settlements.ts`). Never seat a town by editing `snapToLand`, which the hamlets
-  share.
+  share. A region hamlet's `harbor` flag is not seated and stays at world resolution (Issue #976).
 - **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as

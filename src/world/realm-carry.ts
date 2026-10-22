@@ -113,7 +113,10 @@ function simplifyChain(points: ReadonlyArray<readonly [number, number]>, epsilon
     let bestScore = -1;
     for (let i = a + 1; i < b; i++) {
       const [px, py] = points[i] as readonly [number, number];
-      const score = len2 === 0 ? (px - ax) ** 2 + (py - ay) ** 2 : ((px - ax) * dy - (py - ay) * dx) ** 2 / len2;
+      const ex = px - ax;
+      const ey = py - ay;
+      const cross = ex * dy - ey * dx;
+      const score = len2 === 0 ? ex * ex + ey * ey : (cross * cross) / len2;
       if (score > bestScore) {
         bestScore = score;
         best = i;

@@ -193,6 +193,7 @@ const borderWindowOfSize = (world: World, size: number) => {
   return null;
 };
 
+// Blind spot: a cell within the reach of the window frame counts as beside a change of owner, so a defect confined to the outer 4 cells of the frame is not seen; the rings are pinned to the frame by chaikinSmoothPinned, which errs toward a gap there going unnoticed, and the skeptic's probe found none in production.
 const nearOwnerChange = (
   owner: Int16Array,
   gridW: number,
@@ -223,7 +224,7 @@ const FOUR = [
   [0, -1],
 ] as const;
 
-/** Border vertices at least 2 cells inside the grid that stand further than 1.5 cells from every land cell with a four-neighbour of a different label: half a cell from a boundary edge to a cell centre, plus the one-cell simplification. */
+// The 1.5 is half a cell from a boundary edge to a cell centre, plus the one-cell simplification.
 const strayBorderVertices = (
   borders: ReadonlyArray<ReadonlyArray<readonly [number, number]>>,
   labels: Int16Array,
