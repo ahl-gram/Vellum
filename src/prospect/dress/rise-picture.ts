@@ -35,7 +35,7 @@ function placeFigures(scene: Scene, rng: Rng): Figure[] {
   });
 }
 
-const figureBox =(f: Figure): Box => {
+const figureBox = (f: Figure): Box => {
   const half = (FIGURE_WIDTH[f.kind] * (f.h / 30)) / 2;
   return { x0: f.x - half, x1: f.x + half, y0: f.y - f.h * (f.kind === "rider" ? 1.25 : 1) - 2, y1: f.y + 2 };
 };
