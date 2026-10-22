@@ -72,8 +72,9 @@ world sheet (`terrainStage` in `src/world/generate.ts`), to both arms of a close
 `buildHeightfield` by hand: a field spread at one call and forgotten at another draws a close-up that
 contradicts its own chart. A key's value is a number or a string, since `chainCacheKey` joins it into
 a string. `test/world/terrain-inputs.test.ts` holds each arm of the close-up to its chart at the
-values its fixture row gives each key (the type checker refuses a key with no row and a row with no
-value). It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
+values its fixture row gives each key, against a close-up of the same world without that key (the
+type checker refuses a key with no row and a row with no value). A row may carry another key it
+needs, as a looseness needs an outline. It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
 or `buildChainedField` that skips `terrainInputsOf`; `scripts/region-detail/probes.ts`,
 `partition.ts` and `cost.ts` build terrain by hand today, harmlessly, because each builds from
 `defaultRecipe(seed)`.
@@ -151,6 +152,12 @@ world it always built, and a named culture renames a world without moving its la
 or realms (`test/world/culture-pin.test.ts`). A culture ID is world identity: a founded chart stamps it
 and a written link names it, so an ID in `CULTURE_IDS` (`src/society/culture-ids.ts`) is never renamed.
 
+**An outline is world identity in the same way.** An ID in `OUTLINE_IDS` (`src/world/outline-ids.ts`)
+is never renamed and its rings in `src/terrain/outlines.ts` never change, so a corrected outline is a
+new ID; `test/terrain/outlines.test.ts` pins each one. A looseness is world identity beside it, and
+means nothing without an outline: the terrain refuses one alone. An absent outline is the dome the
+seed always drew.
+
 ## What a terrain change moves, and what it does not
 
 **Stability under a terrain change follows from where a value draws its randomness, not from where
@@ -226,6 +233,13 @@ edge sink and the falloff in `src/terrain/heightfield.ts` are what hold a sea ma
 borders, and they are upstream of any waterline choice. The CLI rejects a land fraction outside its
 allowed range rather than clamping it, so do not go looking for clamp logic.
 
+**On a world with an outline the land fraction does not move the waterline.** The waterline takes the
+outline's own share of the sheet while the edge softens, then the map type's usual share as the
+looseness reaches today's island (`landShareOf` in `src/world/generate.ts`), so at looseness 0 every
+cell inside the outline is land and every cell outside is sea on the world sheet. The land fraction
+is still checked, and draws nothing. A close-up is held to its chart, not to the outline. The
+outline's inset from the sheet's edge, the falloff and the edge sink hold the sea margin there.
+
 **This deferral is ruled. Do not implement an off-edge continent as a land-fraction tweak.**
 
 **The domain-warped falloff lobes the coast and can grow offshore islets. It does not touch the
@@ -241,7 +255,9 @@ at once, which is why true off-edge land is a rework of the edge treatment rathe
 `test/terrain/heightfield.test.ts` hold one recipe and sweep the coast warp, and none of them varies
 the land fraction. Other tests in that same file do vary it, for other claims, so cite the border
 tests and not the file. The strongest of them asserts the land mask is zero along all four borders,
-at a single land fraction. The guarantee itself rests on the edge sink and the falloff, corroborated
+at a single land fraction. The border test for outlines beside them samples the looseness and the
+coast warp, and sweeps the land fraction, which draws nothing on a world with an outline, so it holds
+the land slider out of that world's waterline. The guarantee itself rests on the edge sink and the falloff, corroborated
 by measurement. State it that way.
 
 **The candidate path if the deferral is ever revisited** is the regional survey, which generates an
