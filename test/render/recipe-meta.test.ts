@@ -249,3 +249,63 @@ test("a chart stamped with a culture the engine does not know is unreadable, nev
     assert.equal(recipeFromSvg(edited), null, `a culture of "${junk}" must not rebuild some other world`);
   }
 });
+
+test("an outlined chart stamps its outline and looseness, and the stamp redraws it byte for byte (Issue #851)", () => {
+  const world = generateWorld(defaultRecipe(7, { outline: "crescent", looseness: 0.5 }));
+  const svg = renderMap(world, { style: "antique" });
+  assert.match(svg, /data-vellum-outline="crescent"/, "the outline is stamped on the root");
+  assert.match(svg, /data-vellum-looseness="0\.5"/, "the looseness is stamped on the root");
+  assert.match(svg, /outline=crescent/, "the metadata summary carries the outline");
+  assert.match(svg, /looseness=0\.5/, "the metadata summary carries the looseness");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.deepEqual(parsed.recipe, world.recipe, "the recipe round-trips with its outline and looseness");
+  const redrawn = renderMap(generateWorld(parsed.recipe), { style: parsed.style });
+  assert.equal(redrawn, svg, "the recovered recipe redraws byte for byte, inside the same outline");
+});
+
+test("a chart with no outline carries no outline stamp, and its recipe no outline or looseness key (Issue #851)", () => {
+  const world = generateWorld(defaultRecipe(7));
+  const svg = renderMap(world, { style: "antique" });
+  assert.doesNotMatch(svg, /data-vellum-outline/);
+  assert.doesNotMatch(svg, /data-vellum-looseness/);
+  assert.doesNotMatch(svg, / outline=/);
+  assert.doesNotMatch(svg, / looseness=/);
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.equal("outline" in parsed.recipe, false, "an absent outline must not come back as a key");
+  assert.equal("looseness" in parsed.recipe, false, "an absent looseness must not come back as a key");
+  assert.deepEqual(parsed.recipe, world.recipe);
+});
+
+test("a chart stamped with an outline the engine does not know, or a looseness it cannot draw, is unreadable (Issue #851)", () => {
+  const svg = renderMap(generateWorld(defaultRecipe(7, { outline: "crescent", looseness: 0.5 })), { style: "antique" });
+  const edits: ReadonlyArray<readonly [string, string]> = [
+    ...["atlantis", "", "Crescent", "6"].map(
+      (junk) => ['data-vellum-outline="crescent"', `data-vellum-outline="${junk}"`] as const,
+    ),
+    ...["abc", "-0.1", "1.5", "NaN"].map(
+      (junk) => ['data-vellum-looseness="0.5"', `data-vellum-looseness="${junk}"`] as const,
+    ),
+    [' data-vellum-outline="crescent"', ""],
+  ];
+  for (const [from, to] of edits) {
+    const edited = svg.replace(from, to);
+    assert.notEqual(edited, svg, "the stamp must be there to edit");
+    assert.equal(recipeFromSvg(edited), null, `${from} replaced by ${to} must not rebuild some other world`);
+  }
+});
+
+test("a close-up of an outlined world carries the outline its parent needs (Issue #851)", () => {
+  const world = generateWorld(defaultRecipe(7, { outline: "crescent" }));
+  const capital = world.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const window = windowAround(world, capital, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Detail" });
+  const svg = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 0 },
+  });
+  assert.match(svg, /data-vellum-outline="crescent"/);
+  assert.equal(recipeFromSvg(svg)?.recipe.outline, "crescent");
+});
