@@ -73,6 +73,12 @@ export function glyphDensity(
 ): { readonly zoom: number; readonly capScale: number } {
   if (!region) return { zoom: 1, capScale: 1 };
   const du = region.window.u1 - region.window.u0;
+  if (du < GLYPH_DENSITY_WINDOW) {
+    return {
+      zoom: Math.sqrt((gridW - 1) / (GLYPH_DENSITY_WINDOW * (region.worldGridW - 1))),
+      capScale: GLYPH_DENSITY_WINDOW / du,
+    };
+  }
   return { zoom: Math.sqrt((gridW - 1) / (du * (region.worldGridW - 1))), capScale: 1 };
 }
 
