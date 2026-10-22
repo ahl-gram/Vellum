@@ -350,7 +350,7 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs. The cloud
-routine runs none (`handbook/specs/cloud-routine.md`).
+routine runs it only for a diff that touches `src/` or changes more than 50 lines (`handbook/specs/cloud-routine.md`).
 
 **Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
 the single exception of a step 6 spike under `vellum-plate-reader`, which reads the working tree by
