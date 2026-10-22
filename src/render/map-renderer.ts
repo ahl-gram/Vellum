@@ -151,9 +151,10 @@ type LabelledLayers = {
 };
 
 function labelledLayers(ctx: RenderCtx, plans: ChartPlans, opts: RenderOptions): LabelledLayers {
-  // Evaluation order IS label priority: settlements claim before feature labels, before decorative art.
-  const settlements = settlementsLayer(ctx);
+  // Evaluation order IS label priority: settlements claim before feature labels, the finer tier's names after them, then decorative art.
+  const settlementsDraft = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
+  const settlements = settlementsDraft.finish();
   const bestiary = opts.beasts ? beastsLayer(ctx, plans.cartouche, plans.compass) : null;
   const seaDecor = seaDecorLayer(ctx, plans.cartouche, plans.compass, { serpent: bestiary === null });
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;

@@ -228,6 +228,11 @@ test("a world sheet never carries a hamlet, in kind or in ink (#171)", () => {
   );
   const svg = renderMap(bigWorld, { style: "antique", legend: true });
   assert.equal(count(svg, "hamlet"), 0, "no hamlet mark, tier, or legend row on a world sheet");
+  assert.ok(
+    bigWorld.settlements.every((s) => s.kind !== "farmstead" && s.kind !== "mill"),
+    "nor a farmstead or a mill (Issue #952)",
+  );
+  assert.ok(!svg.includes(">Farmstead<") && !svg.includes(">Mill<"), "nor a legend row for either");
 });
 
 test("windowAround clamps to the world", () => {

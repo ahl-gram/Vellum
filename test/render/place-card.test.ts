@@ -56,6 +56,11 @@ test("placeRank calls a hamlet a Hamlet (#171)", () => {
   assert.equal(placeAriaLabel(mark({ name: "Weki", kind: "hamlet" })), "Weki, Hamlet");
 });
 
+test("placeRank calls a farmstead a Farmstead and a mill a Mill (Issue #952)", () => {
+  assert.equal(placeRank(mark({ kind: "farmstead" })), "Farmstead");
+  assert.equal(placeAriaLabel(mark({ name: "Lokai", kind: "mill" })), "Lokai, Mill");
+});
+
 test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", () => {
   // `selectSeats` in `src/society/realms.ts` pushes the capital as realm 0's seat, so the capital carries seat===true; it must still read "Capital", matching `tierOf` in `src/render/layers/settlements.ts`.
   assert.equal(placeRank(mark({ kind: "capital", seat: true })), "Capital");

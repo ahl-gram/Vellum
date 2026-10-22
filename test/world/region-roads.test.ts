@@ -46,7 +46,11 @@ function sheets(): Array<{ readonly name: string; readonly region: World }> {
 function assertRoadsSound(name: string, region: World): void {
   const { w, h, data } = region.elev;
   assert.ok(region.roads.length > 0, `precondition: ${name} lays roads`);
-  const towns = new Set(region.settlements.filter((s) => s.kind !== "hamlet").map((s) => s.x + s.y * w));
+  const towns = new Set(
+    region.settlements
+      .filter((s) => s.kind === "capital" || s.kind === "town" || s.kind === "village")
+      .map((s) => s.x + s.y * w),
+  );
   const roadCells = region.roads.map((r) => new Set(r.points.map((p) => p.x + p.y * w)));
   region.roads.forEach((road, i) => {
     for (const p of road.points) {

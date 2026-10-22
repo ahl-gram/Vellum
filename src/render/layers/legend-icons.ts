@@ -70,7 +70,12 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
   const k = ctx.proj.widthPx / 1500;
   switch (icon.kind) {
     case "settlement":
-      return settlementGlyph(icon.tier, cx, cy + (icon.tier === "capital" || icon.tier === "seat" ? 3 * k : 0), ctx);
+      return settlementGlyph(
+        icon.tier,
+        cx,
+        cy + (icon.tier === "capital" || icon.tier === "seat" || icon.tier === "farmstead" ? 3 * k : 0),
+        ctx,
+      );
     case "ruin":
       return ruinGlyph(cx, cy + 3 * k, ctx);
     case "glyph":
