@@ -8,6 +8,7 @@ import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
 import sourceShape from "./scripts/lint/source-shape.ts";
 import sourceShapeConsole from "./scripts/lint/source-shape-console.ts";
 import errorCast from "./scripts/lint/error-cast.ts";
+import emDashString from "./scripts/lint/em-dash-string.ts";
 import narrowWidth from "./scripts/lint/narrow-width.ts";
 import e2eScriptsOff from "./scripts/lint/e2e-scripts-off.ts";
 import e2eSteps from "./scripts/lint/e2e-steps.ts";
@@ -28,7 +29,7 @@ import sheetMotion, {
   TIPS_AWAITING_A_RULING,
 } from "./scripts/lint/sheet-motion.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...emDashString.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
@@ -141,6 +142,12 @@ export default defineConfig(
       "vellum/param-excuse-holds-element": ["error", { names: PAGE_ELEMENT_PARAMETERS }],
       "vellum/package-import-declared": "error",
     },
+  },
+  {
+    name: "Issue #981: no em-dash is written in a string in shipped code",
+    files: ["src/**/*.ts", "scripts/**/*.ts", "e2e/**/*.ts"],
+    plugins: { vellum },
+    rules: { "vellum/no-em-dash-in-string": ["error", { allow: { "e2e/harness.ts": 1, "src/atlas/compose.ts": 2 } }] },
   },
   {
     name: "Issue #675: the living-chart engine takes its elements from the host",
