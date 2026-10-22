@@ -130,3 +130,22 @@ test("a stored circle draws round on the 4:3 sheet, and an outline sets its own 
   assert.ok(Math.abs(far - 0.34) < 1e-12, `the far end's share is the island's usual 0.34, got ${far}`);
   assert.equal(landShareOf(defaultRecipe(7, { landFraction: 0.5 })), 0.5);
 });
+
+test("the ring's enclosed water is a named lake at looseness 0, on every map type (Issue #851)", () => {
+  for (const mapType of MAP_TYPES) {
+    for (const seed of [1, 2]) {
+      const { names } = generateWorld(defaultRecipe(seed, { mapType, outline: "ring" }));
+      const inHole = names.lakes.filter((lake) => Math.hypot(lake.x - W / 2, lake.y - H / 2) < 55);
+      assert.equal(inHole.length, 1, `ring on ${mapType}, seed ${seed}: ${inHole.length} named lakes in the hole`);
+    }
+  }
+});
+
+test("the coast slider does nothing at looseness 0 and reshapes the coast once the shape is loosened (Issue #851)", () => {
+  const elevations = (looseness: number, coastWarp: number): Float64Array =>
+    buildHeightfield({ seed: 3, gridW: W, gridH: H, mapType: "island", outline: "crescent", looseness, coastWarp })
+      .data;
+  const differing = (a: Float64Array, b: Float64Array): number => a.reduce((n, v, i) => n + (v !== b[i] ? 1 : 0), 0);
+  assert.equal(differing(elevations(0, 0), elevations(0, 1)), 0, "the coast slider moved the exact end");
+  assert.ok(differing(elevations(0.5, 0), elevations(0.5, 1)) > 1000, "the coast slider did nothing at looseness 0.5");
+});
