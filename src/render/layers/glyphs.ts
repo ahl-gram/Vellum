@@ -4,6 +4,7 @@ import { prunePoints } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 import type { Rng } from "../../core/rng.ts";
+import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { World } from "../../world/types.ts";
 
 type Glyph = {
@@ -64,11 +65,15 @@ type GlyphCands = {
   readonly dune: Cand[];
 };
 
-function glyphZoom(world: World): number {
-  const { w } = world.elev;
-  return world.region
-    ? Math.sqrt((w - 1) / ((world.region.window.u1 - world.region.window.u0) * (world.region.worldGridW - 1)))
-    : 1;
+export const GLYPH_DENSITY_WINDOW = 0.125;
+
+export function glyphDensity(
+  gridW: number,
+  region: { readonly window: UvWindow; readonly worldGridW: number } | undefined,
+): { readonly zoom: number; readonly capScale: number } {
+  if (!region) return { zoom: 1, capScale: 1 };
+  const du = region.window.u1 - region.window.u0;
+  return { zoom: Math.sqrt((gridW - 1) / (du * (region.worldGridW - 1))), capScale: 1 };
 }
 
 function glyphCandidates(ctx: RenderCtx): GlyphCands {
@@ -104,7 +109,7 @@ function glyphCandidates(ctx: RenderCtx): GlyphCands {
   return { mtn, hill, tree, marsh, dune };
 }
 
-function pickGlyphSpots(proj: Projection, jrng: Rng, cands: GlyphCands, spread: number): GlyphCands {
+function pickGlyphSpots(proj: Projection, jrng: Rng, cands: GlyphCands, spread: number, capScale: number): GlyphCands {
   const treeShuffled = jrng.fork("trees").shuffled(cands.tree);
   const marshShuffled = jrng.fork("marsh").shuffled(cands.marsh);
   const duneShuffled = jrng.fork("dunes").shuffled(cands.dune);
@@ -116,11 +121,11 @@ function pickGlyphSpots(proj: Projection, jrng: Rng, cands: GlyphCands, spread: 
   });
 
   return {
-    mtn: prunePoints(cands.mtn.map(toPx), 15 * spread, 260),
-    hill: prunePoints(cands.hill.map(toPx), 13 * spread, 170),
-    tree: prunePoints(treeShuffled.map(toPx), 12.5 * spread, 340),
-    marsh: prunePoints(marshShuffled.map(toPx), 12 * spread, 90),
-    dune: prunePoints(duneShuffled.map(toPx), 17 * spread, 70),
+    mtn: prunePoints(cands.mtn.map(toPx), 15 * spread, Math.round(260 * capScale)),
+    hill: prunePoints(cands.hill.map(toPx), 13 * spread, Math.round(170 * capScale)),
+    tree: prunePoints(treeShuffled.map(toPx), 12.5 * spread, Math.round(340 * capScale)),
+    marsh: prunePoints(marshShuffled.map(toPx), 12 * spread, Math.round(90 * capScale)),
+    dune: prunePoints(duneShuffled.map(toPx), 17 * spread, Math.round(70 * capScale)),
   };
 }
 
@@ -183,12 +188,12 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
   if (!style.glyphs) return null;
 
   const k = proj.widthPx / 1500;
-  const zoom = glyphZoom(world);
+  const { zoom, capScale } = glyphDensity(world.elev.w, world.region);
   const spread = k * zoom;
   const size = k * Math.min(1.35, 0.85 + zoom * 0.25);
   const jrng = rng.fork("glyphs");
 
-  const picked = pickGlyphSpots(proj, jrng, glyphCandidates(ctx), spread);
+  const picked = pickGlyphSpots(proj, jrng, glyphCandidates(ctx), spread, capScale);
   const grng = jrng.fork("variants");
   return glyphUses(glyphVariants(world, grng, picked, size));
 }
