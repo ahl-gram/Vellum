@@ -6,9 +6,10 @@ import { classifyBiomes } from "../climate/biomes.ts";
 import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
 import type { River } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
-import { buildRoads } from "../society/roads.ts";
-import { placeHamlets } from "../society/hamlets.ts";
+import type { Road } from "../society/roads.ts";
+import { HAMLET_MAX_WINDOW_UV, placeHamlets } from "../society/hamlets.ts";
 import { layRegionRivers } from "./region-rivers.ts";
+import { layWorldRoads } from "./region-roads.ts";
 import { chainedFieldAndGround, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
@@ -16,7 +17,6 @@ import { realmOwners, refineRegionRealms, type RealmTown } from "./realm-refine.
 import { regionSeaGate } from "./region-sea-gate.ts";
 import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
 import { regionRealmBorders, regionRealmRings } from "./realm-carry.ts";
-import { LOD_BANDS } from "./lod.ts";
 import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
 export type RegionSpec = {
@@ -253,17 +253,17 @@ function regionPeople(
   g: RegionGrid,
   spec: RegionSpec,
   land: RegionLand,
-): { peopled: NamedSettlement[]; roads: ReturnType<typeof buildRoads>; roadLabels: Int16Array; seats: number[] } {
+): { peopled: NamedSettlement[]; roads: Road[]; roadLabels: Int16Array; seats: number[] } {
   const { world, window } = g;
-  const { elev, seaLevel, riverCells } = land;
+  const { elev, seaLevel } = land;
   const placed = projectSettlements(g, spec, land);
   const { settlements } = placed;
   const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
   const roadLabels = regionRoadLabels(g, land, placed);
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
+  const roads = layWorldRoads(world, window, land, placed);
 
-  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
-  const hamlets = window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const hamlets =
+    window.u1 - window.u0 <= HAMLET_MAX_WINDOW_UV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
   const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
   return { peopled, roads, roadLabels, seats };
 }
