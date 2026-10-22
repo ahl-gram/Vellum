@@ -2,6 +2,7 @@ import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 import { settlementGlyph, ruinGlyph, type SettlementTier } from "./settlements.ts";
 import { isoStroke } from "./iso.ts";
+import { roadDress } from "./roads.ts";
 import type { MapStyle } from "../style.ts";
 
 export type Icon =
@@ -30,6 +31,7 @@ function roadIcon(
   cy: number,
   style: MapStyle,
   k: number,
+  region: boolean,
 ): SvgNode {
   const trunk = icon.rank === "trunk";
   const x1 = cx - 10 * k;
@@ -52,15 +54,14 @@ function roadIcon(
       }),
     ]);
   }
+  const dress = roadDress(icon.rank, region);
   return el("path", {
     d,
     fill: "none",
     stroke: style.road,
-    "stroke-width": ((trunk ? 1.5 : 1.0) * k).toFixed(1),
-    "stroke-dasharray": trunk
-      ? `${(5 * k).toFixed(1)} ${(3.5 * k).toFixed(1)}`
-      : `${(2.5 * k).toFixed(1)} ${(3.5 * k).toFixed(1)}`,
-    "stroke-opacity": trunk ? 0.85 : 0.7,
+    "stroke-width": (dress.width * k).toFixed(1),
+    "stroke-dasharray": `${(dress.dash[0] * k).toFixed(1)} ${(dress.dash[1] * k).toFixed(1)}`,
+    "stroke-opacity": dress.opacity,
   });
 }
 
@@ -86,7 +87,7 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
         "stroke-linecap": "round",
       });
     case "road":
-      return roadIcon(icon, cx, cy, style, k);
+      return roadIcon(icon, cx, cy, style, k, ctx.world.region !== undefined);
   }
 }
 
