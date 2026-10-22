@@ -10,6 +10,7 @@ import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 import type { FlowResult } from "../../src/hydrology/flow.ts";
 import { worldRiversDrawn } from "../../scripts/region-detail/feature-match.ts";
+import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
 import { closeUp, relay, townWindows } from "../../test-support/region-rivers-fixtures.ts";
 
 const SEA = 0;
@@ -264,4 +265,64 @@ test("no drawn river's points stand more than one diagonal step apart, at any ba
     });
   });
   assert.deepEqual(gaps, []);
+});
+
+const landUnder = (run: ReturnType<typeof worldRiverRuns>[number], region: World): boolean => {
+  const { w, data } = region.elev;
+  return densifyCourse(run.course).some(
+    (p) => (data[Math.round(p.x) + Math.round(p.y) * w] as number) > region.seaLevel,
+  );
+};
+
+test("a world river with no land under its course in the window lays nothing: Toatauhe's band 4 on chart 42 (Issue #951)", () => {
+  const window = TOATAUHE[3] as UvWindow;
+  const { region, laid } = relay(HERO, window);
+  const runs = worldRiverRuns(HERO, window, region.elev.w, region.elev.h);
+  const onLand = runs.filter((run) => landUnder(run, region));
+  assert.ok(onLand.length < runs.length, "the window holds a run that crosses only the close-up's sea");
+  assert.equal(laid.length, onLand.length, "one river is laid for each run with land under it, none on the water");
+});
+
+test("the runs are laid majors first, then the highest peak accumulation first (Issue #951)", () => {
+  const runs = worldRiverRuns(HERO, TOATAUHE[0] as UvWindow, 320, 240);
+  const peaks = runs.map((run) => Math.max(...run.acc));
+  assert.ok(runs.some((run) => run.major) && runs.some((run) => !run.major), "the window holds both kinds");
+  const misordered = runs.flatMap((run, i) => {
+    const before = runs[i - 1];
+    if (before === undefined) return [];
+    const inOrder = before.major === run.major ? (peaks[i - 1] as number) >= (peaks[i] as number) : before.major;
+    return inOrder ? [] : [i];
+  });
+  assert.deepEqual(misordered, []);
+});
+
+test("a run ending inside the window walks down the region's own flow to the border, and a kept stream that ends beside a river stands (Issue #951)", () => {
+  const stanbyl = townWindows(FIFTEEN, "Stanbyl")[1] as UvWindow;
+  const { region, laid } = relay(FIFTEEN, stanbyl);
+  const { w, h } = region.elev;
+  const ending = worldRiverRuns(FIFTEEN, stanbyl, w, h).filter((run) => landUnder(run, region) && !run.leavesAtEdge);
+  const atBorder = ending.filter((_, i) => {
+    const last = (laid[i] as River).points.at(-1) as River["points"][number];
+    return last.x === 0 || last.y === 0 || last.x === w - 1 || last.y === h - 1;
+  });
+  assert.ok(atBorder.length >= 1, "an inside-ending run reaches the window's border by the walk");
+
+  const rulba = townWindows(FIFTEEN, "Rulba")[0] as UvWindow;
+  const sheet = relay(FIFTEEN, rulba);
+  const cells = sheet.region.rivers.map((r) => cellsOf(r, sheet.region.elev.w));
+  const beside = sheet.extracted.filter((river, j) => {
+    const last = river.points.at(-1) as River["points"][number];
+    const x = Math.round(last.x);
+    const y = Math.round(last.y);
+    const self = sheet.laid.length + j;
+    const on = cells.some((c, i) => i !== self && c.has(x + y * sheet.region.elev.w));
+    const next = cells.some((c, i) => {
+      if (i === self) return false;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) if (c.has(x + dx + (y + dy) * sheet.region.elev.w)) return true;
+      return false;
+    });
+    return next && !on;
+  });
+  assert.ok(beside.length >= 1, "a kept stream ending next to, not on, another river stands");
 });
