@@ -47,6 +47,16 @@ about a rule, the rulebook wins.
   `src/world/river-route.ts`). A laid river ends at the window's edge, in water, or on another drawn
   river. Keep an extracted river only where it neither doubles a laid one nor is left ending on dry
   land. Climate and biomes take the parent's elevation span so the bands match at the boundary.
+- **Roads are laid in from the parent.** A window holds only the towns inside it, so a web woven among
+  them alone loses every road that leads out of the window, and every road of a window holding one
+  town. Lay each world road crossing the window along the cheapest way over the close-up's own land
+  (`layWorldRoads` in `src/world/region-roads.ts`), inside the rivers' corridor (`corridorRadius` in
+  `src/world/river-route.ts`) around the world's line, run through the dot each of its towns is drawn
+  at, and pinned where it crosses the window's edge, at its towns and at every point where a later road
+  joins it, so the network stays joined. A road may end at a town in the window's margin that the
+  close-up does not draw. A leg the corridor cannot carry on land goes round by any land; one with no
+  land route is not drawn. The close-up weaves no roads of its own, and draws them heavier than a world
+  sheet does (`roadDress` in `src/render/layers/roads.ts`).
 - **Realms are CARRIED onto a region sheet and refined only beside a border, never re-derived.**
   Re-partitioning a crop disagrees with the parent's assignment. A region land cell takes its
   nearest parent cell's label, grown over parent water; only in the corridor of parent cells that
@@ -66,9 +76,11 @@ about a rule, the rulebook wins.
   sit on a coastline, so no border on a coast holds by construction.
 - **A region's smallest settlement tier is grown on a FIXED world-space lattice**, each point forked
   off the seed by its cell indices alone, so existence, spot and name are independent of the window
-  and of the order the reader interacted. Screen it on the PARENT grid, append it after the projected
-  settlements so seats and roads stay valid, and never put it on a world sheet, on a seat, or on a
-  road.
+  and of the order the reader interacted. Screen it on the PARENT grid, grow it on every window no
+  larger than `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and never the deepest
+  band read from `LOD_BANDS`, and append it after the projected settlements so seats and roads stay
+  valid. Never put it on a world sheet or on a seat, and never wire a road to it: a through road may
+  pass a hamlet, but no road departs from or arrives at one.
 - **A projected harbour town stands on the region's own shore.** A world harbour stands beside water at
   world resolution, and at depth the close-up's shore lies up to a world cell and a half from its
   cell's centre, so a projected harbour is seated on the nearest region land cell beside water,
