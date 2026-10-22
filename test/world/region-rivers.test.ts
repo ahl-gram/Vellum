@@ -4,23 +4,20 @@ import { createField } from "../../src/core/grid.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
-import { extendMouthToWater } from "../../src/world/region-rivers.ts";
-import { createChainCache } from "../../src/world/detail-chain.ts";
+import { extendMouthToWater, regionRiverThreshold } from "../../src/world/region-rivers.ts";
+import { extractRivers, type River } from "../../src/hydrology/rivers.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 import type { FlowResult } from "../../src/hydrology/flow.ts";
 import { worldRiversDrawn } from "../../scripts/region-detail/feature-match.ts";
+import { closeUp, relay, townWindows } from "../../test-support/region-rivers-fixtures.ts";
 
 const SEA = 0;
 
 const HERO = generateWorld(defaultRecipe(42));
-const CHAINS = new Map<World, ReturnType<typeof createChainCache>>();
-
-function closeUp(world: World, window: UvWindow): World {
-  const chainCache = CHAINS.get(world) ?? createChainCache(64);
-  CHAINS.set(world, chainCache);
-  return generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Rivers", detail: true, chainCache });
-}
+const FIFTEEN = generateWorld(defaultRecipe(15));
+const TOATAUHE = townWindows(HERO, "Toatauhe");
+const WON_BAND_5 = lodWindowFor(0.73828125, 0.671875, 1 / 32);
 
 /** A 1D chute running east: every land cell drains to its neighbour, the tail is water. */
 function chute(
@@ -148,9 +145,123 @@ test("on the detailed field no region river stops on interior dry land (seed 2, 
 });
 
 test("a deep close-up draws the world river crossing it: Won at band 5 on chart 42 (Issue #951)", () => {
-  const window = lodWindowFor(0.73828125, 0.671875, 1 / 32);
+  const window = WON_BAND_5;
   const drawn = worldRiversDrawn(HERO, closeUp(HERO, window), window);
   const crossing = drawn.flatMap((d, i) => (d === undefined ? [] : [i]));
   assert.equal(crossing.length, 1, "exactly one world river crosses the witness window");
   assert.equal(drawn[crossing[0] as number], true, "the close-up draws it");
+});
+
+function verticesInside(world: World, river: number, window: UvWindow): number {
+  const ww = world.recipe.gridW - 1;
+  const wh = world.recipe.gridH - 1;
+  return (world.rivers[river] as River).points.filter((p) => {
+    const u = p.x / ww;
+    const v = p.y / wh;
+    return u >= window.u0 && u <= window.u1 && v >= window.v0 && v <= window.v1;
+  }).length;
+}
+
+test("a river drawn on a close-up is drawn one band deeper wherever its course crosses: Stanbyl on chart 15, bands 1 to 5 (Issue #951)", () => {
+  const windows = townWindows(FIFTEEN, "Stanbyl");
+  const drawn = windows.map((w) => worldRiversDrawn(FIFTEEN, closeUp(FIFTEEN, w), w));
+  const lost: string[] = [];
+  let withOneVertexInside = 0;
+  for (let n = 0; n + 1 < windows.length; n++) {
+    (drawn[n] as Array<boolean | undefined>).forEach((here, river) => {
+      const deeper = (drawn[n + 1] as Array<boolean | undefined>)[river];
+      if (here !== true || deeper === undefined) return;
+      if (deeper !== true) lost.push(`world river ${river} is drawn at band ${n + 1} and lost at band ${n + 2}`);
+      if (verticesInside(FIFTEEN, river, windows[n + 1] as UvWindow) <= 1) withOneVertexInside++;
+    });
+  }
+  assert.deepEqual(lost, []);
+  assert.ok(
+    withOneVertexInside >= 1,
+    "no river here crosses a deeper window on a single vertex, the class a vertex-pair clip loses",
+  );
+});
+
+function cellsOf(river: River, w: number): Set<number> {
+  return new Set(river.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
+}
+
+const BAND_2_WINDOW = lodWindowFor(0.625, 0.375, 0.25);
+
+test("every laid river ends at the window's edge, in water, or on another drawn river (Issue #951)", () => {
+  const stranded: string[] = [];
+  const endings = { edge: 0, water: 0, river: 0 };
+  [BAND_2_WINDOW, ...TOATAUHE].forEach((window, k) => {
+    const { region, laid } = relay(HERO, window);
+    const { w, h } = region.elev;
+    const cells = region.rivers.map((r) => cellsOf(r, w));
+    laid.forEach((river, i) => {
+      const last = river.points[river.points.length - 1] as River["points"][number];
+      const x = Math.round(last.x);
+      const y = Math.round(last.y);
+      const cell = x + y * w;
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) endings.edge++;
+      else if ((region.elev.data[cell] as number) <= region.seaLevel) endings.water++;
+      else if (cells.some((c, j) => j !== i && c.has(cell))) endings.river++;
+      else stranded.push(`window ${k}, laid river ${i} ends at ${x},${y}`);
+    });
+  });
+  assert.deepEqual(stranded, []);
+  assert.ok(
+    endings.edge > 0 && endings.water > 0 && endings.river > 0,
+    `each ending occurs: ${JSON.stringify(endings)}`,
+  );
+});
+
+test("no river a close-up keeps from its own ground is left ending on dry land (Issue #951)", () => {
+  const orphans: string[] = [];
+  TOATAUHE.forEach((window, k) => {
+    const { region, laid, extracted } = relay(HERO, window);
+    const { w, h } = region.elev;
+    const cells = region.rivers.map((r) => cellsOf(r, w));
+    extracted.forEach((river, j) => {
+      const self = laid.length + j;
+      const last = river.points[river.points.length - 1] as River["points"][number];
+      const x = Math.round(last.x);
+      const y = Math.round(last.y);
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) return;
+      if ((region.elev.data[x + y * w] as number) <= region.seaLevel) return;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (cells.some((c, i) => i !== self && c.has(x + dx + (y + dy) * w))) return;
+        }
+      }
+      orphans.push(`band ${k + 1}, kept river ${j} ends at ${x},${y}`);
+    });
+  });
+  assert.deepEqual(orphans, []);
+
+  const band2 = TOATAUHE[1] as UvWindow;
+  const { region, extracted } = relay(HERO, band2);
+  const own = extractRivers(region.elev, region.flow, region.seaLevel, {
+    absoluteThreshold: regionRiverThreshold(HERO, band2, 320, 240),
+  });
+  assert.ok(
+    own.length > extracted.length,
+    "Toatauhe's band-2 close-up drops one of its own rivers, so this fixture can tell a drop from none",
+  );
+});
+
+test("no drawn river's points stand more than one diagonal step apart, at any band (Issue #951)", () => {
+  const gaps: string[] = [];
+  [...TOATAUHE, WON_BAND_5].forEach((window, k) => {
+    const { rivers } = closeUp(HERO, window);
+    assert.ok(
+      rivers.some((r) => r.points.length >= 2),
+      `fixture window ${k} holds a river of at least two points`,
+    );
+    rivers.forEach((river, i) => {
+      for (let p = 1; p < river.points.length; p++) {
+        const a = river.points[p - 1] as River["points"][number];
+        const b = river.points[p] as River["points"][number];
+        if ((b.x - a.x) ** 2 + (b.y - a.y) ** 2 > 2) gaps.push(`window ${k}, river ${i}, point ${p}`);
+      }
+    });
+  });
+  assert.deepEqual(gaps, []);
 });

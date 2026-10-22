@@ -2,14 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
-import { chainedFieldAndGround, createChainCache } from "../../src/world/detail-chain.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
-import { layRegionRivers, regionRiverThreshold } from "../../src/world/region-rivers.ts";
-import { terrainInputsOf } from "../../src/world/terrain-inputs.ts";
-import { extractRivers, isMajorRiver, type River } from "../../src/hydrology/rivers.ts";
-import type { Field } from "../../src/core/grid.ts";
+import { regionRiverThreshold } from "../../src/world/region-rivers.ts";
+import { extractRivers, isMajorRiver } from "../../src/hydrology/rivers.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
+import { relay } from "../../test-support/region-rivers-fixtures.ts";
 import { MATCH_FRACTION, matchedFraction, matchTolerance } from "../../scripts/region-detail/feature-match.ts";
 
 function nearRegionRiver(region: World, gridW: number, gridH: number): (gx: number, gy: number) => boolean {
@@ -122,51 +120,9 @@ function fixtures(): Fixture[] {
   ];
 }
 
-/** The rivers the close-up laid and the ones it kept from its own ground, re-laid over the same ground the sheet used. */
-function laidAndKept(f: Fixture): { laid: River[]; kept: River[]; region: World; ground: Field } {
-  const { world, window } = f;
-  const chainCache = createChainCache(64);
-  const region = generateRegionWorld(world, {
-    window,
-    gridW: 320,
-    gridH: 240,
-    title: "Rivers",
-    detail: f.detail,
-    chainCache,
-  });
-  const { recipe } = world;
-  const ground = f.detail
-    ? chainedFieldAndGround(
-        {
-          seed: recipe.seed,
-          mapType: recipe.mapType,
-          window,
-          gridW: 320,
-          gridH: 240,
-          worldAspect: (recipe.gridW - 1) / (recipe.gridH - 1),
-          seaLevel: world.seaLevel,
-          ...terrainInputsOf(recipe),
-        },
-        chainCache,
-      ).ground
-    : region.elev;
-  const { laid, extracted } = layRegionRivers(world, window, {
-    elev: region.elev,
-    flow: region.flow,
-    seaLevel: region.seaLevel,
-    ground,
-  });
-  assert.deepEqual(
-    [...laid, ...extracted],
-    region.rivers,
-    `${f.name}: the sheet draws the laid rivers then the kept ones`,
-  );
-  return { laid: [...laid], kept: [...extracted], region, ground };
-}
-
 test("a close-up never draws one river twice: no river it keeps from its own ground runs beside a laid one (Issue #162, Issue #951)", () => {
   for (const f of fixtures()) {
-    const { laid, kept, region } = laidAndKept(f);
+    const { region, laid, extracted: kept } = relay(f.world, f.window, f.detail);
     assert.ok(laid.length > 0, `${f.name}: the window carries laid world rivers to double`);
     if (f.name.startsWith("seed 27"))
       assert.ok(kept.length >= 1, "the window also carries genuinely new extracted detail");

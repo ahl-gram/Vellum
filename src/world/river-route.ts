@@ -117,8 +117,7 @@ function stepCostOf(dist: Float64Array, frame: RouteFrame): (cell: number) => nu
   const { elev, seaLevel, relief, radius } = frame;
   const inside: number[] = [];
   for (let c = 0; c < dist.length; c++) {
-    if (Number.isFinite(dist[c]) && (elev.data[c] as number) > seaLevel)
-      inside.push(relief.data[c] as number);
+    if (Number.isFinite(dist[c]) && (elev.data[c] as number) > seaLevel) inside.push(relief.data[c] as number);
   }
   const lo = inside.length > 0 ? quantile(inside, 0.05) : 0;
   const hi = inside.length > 0 ? quantile(inside, 0.95) : 0;
