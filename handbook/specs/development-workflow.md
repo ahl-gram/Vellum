@@ -12,7 +12,7 @@ Other places carry what this one deliberately does not:
 - **`handbook/specs/orchestration.md`** holds how a session runs several lanes at once, each of which
   runs this sequence: the briefs, the relay of menus and rulings, merging, and a lane that stalls or
   loses its tree.
-- **`handbook/specs/cloud-routine.md`** holds the scheduled cloud session that takes one small, fully
+- **`handbook/specs/cloud-routine.md`** holds the cloud session that takes one small, fully
   planned issue to a merged pull request without a lane or a menu.
 - **`handbook/specs/conventions.md`** holds how a design decision is made, and how a rule is written down
   once made: where it lives, the voice, the citation form, the comment sweep.
@@ -64,8 +64,8 @@ or a thread is empty. An empty result from the `api` form is a claim like any ot
 **2. Run `vellum-spec-recon` at the start of any sub or epic**, as `CLAUDE.md` requires. It returns a
 CURRENT / STALE / UNVERIFIABLE ledger and the open decisions awaiting Alex, and it exists because
 #132 (six of seven subs stale) and #190 (seventy three stale claims) each cost a twelve to thirteen
-agent audit built from scratch. This file does not carve out an exception, and neither does
-`CLAUDE.md`: a session that departs from it is departing from a rule, and says so in its reply.
+agent audit built from scratch. This file carves out one exception, the cloud routine's
+(`handbook/specs/cloud-routine.md`), which verifies the issue itself, and `CLAUDE.md` none: a session that departs from it is departing from a rule, and says so in its reply.
 
 **3. Write the plan. No code.** The plan names the design, the files, the tests with the mutation
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
@@ -86,8 +86,9 @@ comment,
 `handbook/specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
 reads a screenshot, a focus state or a narrow viewport in the harness,
 `handbook/specs/check-placement.md` before writing a test, a lint rule or a browser check, or moving a rule
-from one to another, and `handbook/specs/orchestration.md` before dispatching a lane, or handing
-an issue from one lane to another.
+from one to another, `handbook/specs/orchestration.md` before dispatching a lane, or handing
+an issue from one lane to another, and `handbook/specs/cloud-routine.md` before labelling an issue for
+the cloud routine.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its
@@ -348,7 +349,8 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
-NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
+NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs. The cloud
+routine runs none (`handbook/specs/cloud-routine.md`).
 
 **Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
 the single exception of a step 6 spike under `vellum-plate-reader`, which reads the working tree by
@@ -407,7 +409,8 @@ cold skeptic as usual, then treat its report as documentation rather than a fix 
 finding in a comment with its disposition, which is one of already recorded on a sub, parked on a
 ratified future sub, or new and worth its own issue.
 
-**16. Leave the PR open. Alex reviews and merges.** Never merge for him unless he asks you to.
+**16. Leave the PR open. Alex reviews and merges.** Never merge for him unless he asks you to. The
+cloud routine merges its own pull request under his standing clearance (`handbook/specs/cloud-routine.md`).
 
 **17. Hand off.** The roadmap Project first, since the global `session-handoff` skill does not know
 it exists: newly filed issues added and phased, shipped issues closed. Then the session ritual.

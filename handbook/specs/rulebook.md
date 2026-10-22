@@ -32,7 +32,7 @@ host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
 `development-workflow.md` the sequence a change moves through, `orchestration.md` how a session
-runs several lanes of it at once, `cloud-routine.md` the scheduled cloud session for a small, fully
+runs several lanes of it at once, `cloud-routine.md` the cloud session for a small, fully
 planned issue, `settle-doctrine.md` how an e2e
 wait is written and what the harness environment does, and `check-placement.md` which check holds
 which kind of rule.
