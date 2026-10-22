@@ -256,11 +256,15 @@ body.chart-room .stage {
   align-self: flex-start;
   margin-left: -0.45rem;
 }
-.legend-row a.fn:hover,
-.legend-row a.fn:focus-visible {
+.legend-row a.fn:hover {
   color: var(--parchment-bright);
 }
-body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) {
+.legend-row a.fn:focus-visible {
+  color: var(--parchment-bright);
+  outline-color: var(--parchment-bright);
+}
+body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible),
+body:has(#map-viewport.zoomed) .legend .legend-row a.fn:not(:hover, :focus-visible) {
   color: var(--parchment);
 }
 

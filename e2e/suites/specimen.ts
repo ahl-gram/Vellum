@@ -8,7 +8,6 @@ import {
   sb1Boots,
   sb4Folded,
   sb5Leaned,
-  sb5bEdgesDark,
   sb5fCornerPanels,
   sb5dGlassBare,
   sb5eFolioPanel,
@@ -42,7 +41,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const leaned = await read();
     sb5Leaned(k, leaned);
     const interior = await brightest(200, 24);
-    await sb5bEdgesDark(k, interior);
     sb5fCornerPanels(k, leaned);
     await sb5dGlassBare(k, leaned, interior);
     await sb5eFolioPanel(k, rest, leaned);

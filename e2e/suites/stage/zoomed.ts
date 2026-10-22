@@ -6,6 +6,7 @@ import { pressAt } from "../print-room/kit.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { RR_LENS } from "../reading-room/kit.ts";
 import { GLYPH_LINES } from "./glyphs.ts";
+import type { Glyph } from "./glyphs.ts";
 import { CHART_ROOM_FLOOR, FLOOR_PLAIN, grounds, open, rest, size, withStyle, worstOf } from "./stage.ts";
 import type { Stage } from "./stage.ts";
 
@@ -104,16 +105,25 @@ async function readRoom(ctx: SuiteContext, page: string, w: number, h: number, a
   const zoomed = at !== null && (await zoomIn(ctx, page));
   const s = await rest(ctx, w, h, `EZ ${page} zoomed`);
   const panels = await ctx.evaluate(PANELS);
-  const glyphs = () => ctx.evaluate(GLYPH_LINES);
-  const folio = async () => (await glyphs()).filter((g) => g.piece === "chart folio");
-  const lines = (await glyphs()).filter(
+  const lines = (await ctx.evaluate(GLYPH_LINES)).filter(
     (g) => ask.pieces.includes(g.piece as Piece) || (ask.mark && g.t.startsWith("the section mark")),
   );
-  const read = await grounds(ctx, lines);
-  const bare = ask.bare ? await withStyle(ctx, "ez-bare", BARE, () => grounds(ctx, lines)) : [];
-  const lineTan: Record<Sub, Reads | null> = { sub: null, coords: null };
+  // Every ink is read before the first ground read: under the suite's reduced motion a hide style's removal leaves the next ink read at transparent for a frame (measured 2026-10-22, every chart folio line read 1.8 to 2.3 behind the panel), so an ink read inside a style polls until two reads agree.
+  const tanInk: Record<Sub, Glyph[]> = { sub: [], coords: [] };
   for (const k of ask.lineTan)
-    lineTan[k] = await withStyle(ctx, `ez-line-tan-${k}`, LINE_TAN[k], async () => grounds(ctx, await folio()));
+    tanInk[k] = await withStyle(ctx, `ez-line-tan-${k}`, LINE_TAN[k], async () =>
+      (
+        await makeSettle(ctx)(
+          GLYPH_LINES,
+          (d, last) => !!last && JSON.stringify(d) === JSON.stringify(last),
+          `EZ ${page} ${k} in line-tan`,
+        )
+      ).filter((g) => g.piece === "chart folio"),
+    );
+  const read = await grounds(ctx, lines);
+  const lineTan: Record<Sub, Reads | null> = { sub: null, coords: null };
+  for (const k of ask.lineTan) lineTan[k] = await grounds(ctx, tanInk[k]);
+  const bare = ask.bare ? await withStyle(ctx, "ez-bare", BARE, () => grounds(ctx, lines)) : [];
   const ring = ask.mark ? await markRing(ctx) : null;
   return { page, at, s, zoomed, panels, read, bare, lineTan, ring };
 }
