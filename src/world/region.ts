@@ -12,6 +12,7 @@ import { anchorRegionRivers } from "./region-rivers.ts";
 import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
+import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
@@ -124,18 +125,21 @@ function regionClimate(
   return { climate, biomes };
 }
 
+type RegionLand = { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array };
+
 function projectSettlements(
   g: RegionGrid,
   spec: RegionSpec,
-  elev: Field,
-  seaLevel: number,
+  land: RegionLand,
 ): { settlements: NamedSettlement[]; regionIdxOf: Map<number, number> } {
   const { world, window, gridW, gridH } = g;
+  const { elev, seaLevel } = land;
   const { recipe } = world;
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const inset = 0.02;
   const snapRadius = landSnapRadius(gridW, window, recipe.gridW);
+  const harbourReach = harbourReachCells(gridW, window, recipe.gridW);
   const settlements: NamedSettlement[] = [];
   const regionIdxOf = new Map<number, number>();
   const drowned: string[] = [];
@@ -158,7 +162,8 @@ function projectSettlements(
       return;
     }
     regionIdxOf.set(worldIdx, settlements.length);
-    settlements.push({ ...s, x: cell.x, y: cell.y });
+    const seat = seatProjected(s, cell, land, harbourReach);
+    settlements.push({ ...s, x: seat.x, y: seat.y });
   });
   if (drowned.length > 0) {
     console.warn(
@@ -268,11 +273,11 @@ function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["reg
 function regionPeople(
   g: RegionGrid,
   spec: RegionSpec,
-  land: { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array },
+  land: RegionLand,
 ): { peopled: NamedSettlement[]; roads: ReturnType<typeof buildRoads>; roadLabels: Int16Array; seats: number[] } {
   const { world, window } = g;
   const { elev, seaLevel, riverCells } = land;
-  const placed = projectSettlements(g, spec, elev, seaLevel);
+  const placed = projectSettlements(g, spec, land);
   const { settlements } = placed;
   const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
   const roadLabels = regionRoadLabels(g, elev, seaLevel, placed);
