@@ -51,6 +51,18 @@ export function growRealmLabels(
   return grown;
 }
 
+const grownCache = new WeakMap<World, Int16Array>();
+
+/** The parent's labels grown over parent water, memoized per world. */
+export function grownRealmLabels(world: World): Int16Array {
+  const cached = grownCache.get(world);
+  if (cached) return cached;
+  const { w, h, data } = world.elev;
+  const grown = growRealmLabels(world.realms.labels, (i) => (data[i] as number) <= world.seaLevel, w, h);
+  grownCache.set(world, grown);
+  return grown;
+}
+
 const ringCache = new WeakMap<World, RealmRings>();
 const borderCache = new WeakMap<World, ReadonlyArray<RealmRing>>();
 
