@@ -39,11 +39,10 @@ Everything here is the round as it ran. Nothing is edited to match the site or t
   | a river and road village, Won | 42 | `design/farther-interior/sheet-river-and-road-village-42-won.png` |
 
   The lake shore's file name says "sea edge" because the first sweep picked it as one. `notes.md` says why it is a lake.
-- **dress-*.png**: every dress (antique plain, then the four themes) at bands 3 to 6, one sheet per place.
-- **`design/farther-interior/sheet-lines.png`**: a diagnostic, not a direction. Every arm at bands 5 and 6, with the world's own rivers laid over in red dashes.
-- **surfaces-*.png**: a deep close-up on every surface that shows one, at the size the live site shows it, for the capital and the river town.
+- **Cut after the sitting, not here** (see the top of this file): every `dress-*.png` sheet (every dress at bands 3 to 6, one sheet per place; the vegetation column was the evidence of the biomes ruling), `sheet-lines.png` (a diagnostic, not a direction: every arm at bands 5 and 6 with the world's rivers laid over in red dashes) and the two `surfaces-*.png` sheets (a deep close-up on every surface that shows one, read against `live/`).
+- **`plate-read/`**: the plate reader's measurements of the round's 20 mock pages, text and JSON only (its full-page renders and 1:1 crops are not kept). It found no layout, font, image or label defect: every page's scrollWidth equals its declared width, the house faces loaded, 556 figures with 0 broken, 0 distorted and 0 mislabelled arms, 0 console errors and 0 4xx. Its one limit: the plates' own legend text is 2.7 to 5.8 px at the pages' sizes, so a key is not legible on the dress, lines, surfaces and overview pages (only the place sheets show it small but readable at 1:1). The archive keeps that limit as a stated one.
 - **`live/`**: the controls, photographed on the live Explorer and Portfolio built at `cbf57b8f`: the band-3 close-up, the held sheet at 16 and 24 times, the loupe, the Chart Table cutting and the Portfolio. Also the shot list and its result, which carries the measured sizes.
-- **`stills/crop/`**: the three 1:1 crops the notes and the ruling cite:
+- **`stills/crop/`**: the three 1:1 crops the notes cite:
   - the lake shore's square coast at band 5;
   - the capital's band-6 sheet today;
   - the capital's band-6 sheet under arm B, where the hill marks move.
@@ -62,7 +61,7 @@ Everything here is the round as it ran. Nothing is edited to match the site or t
 
 ## What the archive leaves out, on purpose
 
-- **svg/** (400 plate SVGs, 165 MB) and **`stills/`** apart from the three crops above. The rest of `stills/` is 448 full-scale and 1:1 still PNGs plus the open-sea place's 64, about 156 MB. Size is the reason. The kept contact sheets are the stills the sitting ruled from. The engine at `cbf57b8f` and the code under `mock/` regenerate the rest. `facts.json`, `notes.md` and `pages/` still name them by id.
+- **svg/** (400 plate SVGs, 165 MB) and **`stills/`** apart from the three crops above. The rest of `stills/` is 448 full-scale and 1:1 still PNGs plus the open-sea place's 64, about 156 MB. Size is the reason. The kept contact sheets are most of the stills the sitting ruled from; the dress and surfaces sheets were cut later, so the biomes and surfaces rulings are held to the kept place sheets, `live/`, `measure/` and `notes.md`, not to their own stills. The engine at `cbf57b8f` and the code under `mock/` regenerate the rest. `facts.json`, `notes.md` and `pages/` still name them by id.
 - **The sitting's page**: the delivery's generated index.html linked svg/ and `stills/`, so it would not resolve here. This README replaces it.
 - **The designer's tree-only working output**: out/950/dev/ and out/950/instrument/ in that tree. The instrument run's JSON is kept as `measure/committed-sweep/`.
 - **No references were used**, so there are no images or links to keep. **No third-party bundle and no `node_modules`** were part of the round. **No file here carries a personal contact detail or a credential**, scanned before staging. The absolute paths into the checkout that the code carries as it ran are kept.
@@ -79,7 +78,7 @@ From Issue #950 comment 6330451217, where Alex's own words are quoted.
    - No carve is built, so the question of whether a carve crosses the epic's "no erosion model" non-goal does not arise.
 4. **Roads reach every close-up at every band** (ruled into Sub 2 before the sitting, confirmed here).
 5. **Hamlets stand from band 3 down, and a finer tier joins from band 5** (decision 9):
-   - named farmsteads;
+   - farmsteads;
    - mills, where a farmstead stands on a drawn river.
 
    Fords wait on the roads.
@@ -122,5 +121,5 @@ Every item is a stand-in the designer picked to make the picture. A later build 
 
   The sheet's key does not list the new marks.
 - **Arm B and its variants**: the carve's shape (`MEANDER`, `FLOOR_MARGIN`, `CARVE_FLOOR` in `mock/carve.ts`), the inflow and the outlet. These were ruled out with the arm, and stay here as the record of what was weighed.
-- **The red dashes** on `sheet-lines.png`, which ship nowhere.
+- **The red dashes** of the cut `sheet-lines.png`, which ship nowhere.
 - **Today's look in the controls** is the engine's and the live site's own, not a ruling. Where the stills show today's defects (the doubled river, the scale bar past its paper), they show what was found, not what was chosen.
