@@ -29,7 +29,6 @@ export type RefineInput = {
   readonly towns: ReadonlyArray<RealmTown>;
 };
 
-/** Parent cells whose grown label differs from an in-grid 8-neighbour's: the world's border, one world cell wide either side. */
 function contestedParentCells(grownParent: Int16Array, parentW: number, parentH: number): Uint8Array {
   const contested = new Uint8Array(parentW * parentH);
   for (let y = 0; y < parentH; y++) {
@@ -72,13 +71,11 @@ function touchesCorridor(corridor: Uint8Array, w: number, h: number, i: number):
   return false;
 }
 
-/** The world partition's own penalty per world cell of travel: slope and river, scaled by region cells per world cell. */
 function travelPenalty(input: RefineInput, slope: Field, j: number): number {
   const cpw = input.cellsPerWorldCell;
   return (slope.data[j] as number) * cpw * SLOPE_WEIGHT + (input.riverCells[j] === 1 ? RIVER_WEIGHT * cpw : 0);
 }
 
-/** The world partition's own Dijkstra, run on the region's ground: towns and the cells beside the corridor are sources, the corridor takes the label that reaches it cheapest. */
 function refloodCorridor(input: RefineInput, seeded: { labels: Int16Array; corridor: Uint8Array }): Int16Array {
   const { elev, seaLevel, towns } = input;
   const { w, h, data } = elev;
@@ -146,7 +143,6 @@ function mostFrequentLabel(labels: Int16Array, cells: ReadonlyArray<number>): nu
   return best;
 }
 
-/** The islet ruling (Issue #376): a four-connected region landmass standing on no parent land is one realm's whole. */
 function wholeIslets(
   labels: Int16Array,
   isLand: (i: number) => boolean,
@@ -221,7 +217,6 @@ export function refineRegionRealms(
   });
 }
 
-/** The owner of every region cell: the refined label on land, the parent's grown label at the nearest parent cell on water. */
 export function realmOwners(
   world: World,
   window: UvWindow,

@@ -30,7 +30,6 @@ export function harbourReachCells(gridW: number, window: UvWindow, worldGridW: n
   return Math.ceil(HARBOUR_REACH_WORLD_CELLS * cellsPerWorldCell(gridW, window, worldGridW));
 }
 
-/** The nearest land cell with a water 8-neighbour within `radius` (squared distance, then dy, then dx: integers, so the same on every device), or null. */
 export function seatOnShore(elev: Field, seaLevel: number, at: Cell, radius: number): Cell | null {
   const { w, h, data } = elev;
   const isLand = (x: number, y: number): boolean => (data[x + y * w] as number) > seaLevel;

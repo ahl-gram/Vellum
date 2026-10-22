@@ -193,7 +193,6 @@ const borderWindowOfSize = (world: World, size: number) => {
   return null;
 };
 
-/** Within `reach` cells (Chebyshev) of the frame or of a cell whose owner differs: where the blur and the smoothing may legitimately move a ring off the labels. */
 const nearOwnerChange = (
   owner: Int16Array,
   gridW: number,

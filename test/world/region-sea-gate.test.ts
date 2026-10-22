@@ -21,7 +21,6 @@ import type { World } from "../../src/world/types.ts";
 const SEA = 0;
 const GRID_H = 8;
 
-/** A one-row parent of `parentW` cells over a region `parentW * 8` cells wide, each parent cell 8 region cells across. */
 function gateOf(
   worldSea: number[],
   parentLand: number[],

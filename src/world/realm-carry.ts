@@ -53,7 +53,6 @@ export function growRealmLabels(
 
 const grownCache = new WeakMap<World, Int16Array>();
 
-/** The parent's labels grown over parent water, memoized per world. */
 export function grownRealmLabels(world: World): Int16Array {
   const cached = grownCache.get(world);
   if (cached) return cached;
@@ -63,7 +62,6 @@ export function grownRealmLabels(world: World): Int16Array {
   return grown;
 }
 
-/** One tint ring set per realm present in `owner`, blurred from the owner field at region scale and closed against the window frame. */
 export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number): RealmRings {
   const present = new Set<number>();
   for (const o of owner) if (o >= 0) present.add(o);
@@ -78,7 +76,7 @@ export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number
   return out;
 }
 
-/** Douglas-Peucker on squared distances, both ends kept; it calls no Math member, so a chain simplifies the same on every device. */
+// Squared distances throughout and no Math member, so a chain simplifies the same on every device.
 function simplifyChain(points: ReadonlyArray<readonly [number, number]>, epsilon: number): Array<[number, number]> {
   const n = points.length;
   const keep = new Uint8Array(n);
@@ -111,7 +109,6 @@ function simplifyChain(points: ReadonlyArray<readonly [number, number]>, epsilon
   return points.filter((_, i) => keep[i] === 1).map(([x, y]) => [x, y]);
 }
 
-/** The land-to-land boundary of the region's own labels, chained, its cell steps simplified within one cell and then smoothed: one chain per boundary, so a seam is never inked twice and no segment can sit on a coastline. */
 export function regionRealmBorders(labels: Int16Array, gridW: number, gridH: number): ReadonlyArray<RealmRing> {
   return chainBorderSegments(labelBorderSegments(labels, gridW, gridH)).map(
     (chain) => chaikinSmooth(simplifyChain(chain, 1), false, 3) as RealmRing,

@@ -1,6 +1,5 @@
 import type { UvWindow } from "../terrain/heightfield.ts";
 
-/** For every region cell `gx + gy * gridW`, the index `wx + wy * parentW` of its nearest parent cell. */
 export function nearestParentCells(
   parentW: number,
   parentH: number,
@@ -23,7 +22,6 @@ export function nearestParentCells(
   return out;
 }
 
-/** Region cells per parent cell along a row; 1 for a degenerate window or grid, the guard `landSnapRadius` uses. */
 export function cellsPerWorldCell(gridW: number, window: UvWindow, worldGridW: number): number {
   const du = window.u1 - window.u0;
   if (!(du > 0) || worldGridW < 2 || gridW < 2) return 1;

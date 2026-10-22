@@ -21,7 +21,6 @@ const FLOOD_ORDER = [
   [0, -1],
 ] as const;
 
-/** Parent land touching genuine sea (8-neighbour): the only land whose region water the gate may enter. */
 export function coastalParentCells(
   worldSea: Uint8Array,
   parentLand: Uint8Array,
