@@ -143,8 +143,8 @@ test("region biomes are continuous with the world via the parent elevSpan (AC #1
   );
 });
 
-function deepestHamletWindow(): { win: ReturnType<typeof windowAround>; n: number } | null {
-  // anchor on the settlement whose deepest window carries the most hamlets
+function band3HamletWindow(): { win: ReturnType<typeof windowAround>; n: number } | null {
+  // anchor on the settlement whose band-3 window carries the most hamlets
   let best: { win: ReturnType<typeof windowAround>; n: number } | null = null;
   for (const s of bigWorld.settlements) {
     const win = windowAround(bigWorld, s, 0.125);
@@ -160,9 +160,21 @@ function deepestHamletWindow(): { win: ReturnType<typeof windowAround>; n: numbe
   return best;
 }
 
+function bandFiveSheetAt(c: { readonly u: number; readonly v: number }): ReturnType<typeof generateRegionWorld> {
+  const at = { x: c.u * (bigWorld.recipe.gridW - 1), y: c.v * (bigWorld.recipe.gridH - 1) };
+  return generateRegionWorld(bigWorld, {
+    window: windowAround(bigWorld, at, 1 / 32),
+    gridW: 320,
+    gridH: 240,
+    title: "Deeper Environs",
+    detail: true,
+    chainCache: createChainCache(16),
+  });
+}
+
 test("windows no larger than band 3's grow hamlets and band 2's grow none; a hamlet never seats a realm and no road departs or arrives at one (#171, Issue #952)", () => {
-  const best = deepestHamletWindow();
-  assert.ok(best && best.n >= 3, `a deepest window grows hamlets (best had ${best?.n})`);
+  const best = band3HamletWindow();
+  assert.ok(best && best.n >= 3, `a band-3 window grows hamlets (best had ${best?.n})`);
 
   const deep = generateRegionWorld(bigWorld, {
     window: best.win,
@@ -191,14 +203,7 @@ test("windows no larger than band 3's grow hamlets and band 2's grow none; a ham
 
   const candidate = hamletCandidates(bigWorld, best.win).find((c) => hamlets.some((h) => h.name === c.name));
   assert.ok(candidate !== undefined, "precondition: a hamlet of the band-3 sheet is a candidate");
-  const band5 = generateRegionWorld(bigWorld, {
-    window: windowAround(bigWorld, { x: candidate.u * 319, y: candidate.v * 239 }, 1 / 32),
-    gridW: 320,
-    gridH: 240,
-    title: "Deeper Environs",
-    detail: true,
-    chainCache: createChainCache(16),
-  });
+  const band5 = bandFiveSheetAt(candidate);
   assert.ok(
     band5.settlements.some((s) => s.kind === "hamlet" && s.name === candidate.name),
     "a window of band 5's size grows hamlets too: the gate is a named size, not the deepest band",

@@ -43,35 +43,58 @@ function sheets(): Array<{ readonly name: string; readonly region: World }> {
   ];
 }
 
+function assertRoadsSound(name: string, region: World): void {
+  const { w, h, data } = region.elev;
+  assert.ok(region.roads.length > 0, `precondition: ${name} lays roads`);
+  const towns = new Set(region.settlements.filter((s) => s.kind !== "hamlet").map((s) => s.x + s.y * w));
+  const roadCells = region.roads.map((r) => new Set(r.points.map((p) => p.x + p.y * w)));
+  region.roads.forEach((road, i) => {
+    for (const p of road.points) {
+      assert.ok((data[p.x + p.y * w] as number) > region.seaLevel, `${name}, road ${i}: cell ${p.x},${p.y} is land`);
+    }
+    for (let k = 1; k < road.points.length; k++) {
+      const a = road.points[k - 1] as { x: number; y: number };
+      const b = road.points[k] as { x: number; y: number };
+      assert.equal(
+        Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)),
+        1,
+        `${name}, road ${i}: step ${k} is to a neighbour`,
+      );
+    }
+    for (const end of [road.points[0], road.points[road.points.length - 1]] as Array<{ x: number; y: number }>) {
+      const onEdge = end.x === 0 || end.y === 0 || end.x === w - 1 || end.y === h - 1;
+      const onRoad = roadCells.some((cells, j) => j !== i && cells.has(end.x + end.y * w));
+      assert.ok(
+        onEdge || towns.has(end.x + end.y * w) || onRoad,
+        `${name}, road ${i}: the end ${end.x},${end.y} is at the edge, a town or another road`,
+      );
+    }
+  });
+}
+
 test("every laid road stands on land, steps cell to cell, and ends at the sheet's edge, at a town or on another road (Issue #952)", () => {
-  for (const { name, region } of sheets()) {
-    const { w, h, data } = region.elev;
-    assert.ok(region.roads.length > 0, `precondition: ${name} lays roads`);
-    const towns = new Set(region.settlements.filter((s) => s.kind !== "hamlet").map((s) => s.x + s.y * w));
-    const roadCells = region.roads.map((r) => new Set(r.points.map((p) => p.x + p.y * w)));
-    region.roads.forEach((road, i) => {
-      for (const p of road.points) {
-        assert.ok((data[p.x + p.y * w] as number) > region.seaLevel, `${name}, road ${i}: cell ${p.x},${p.y} is land`);
-      }
-      for (let k = 1; k < road.points.length; k++) {
-        const a = road.points[k - 1] as { x: number; y: number };
-        const b = road.points[k] as { x: number; y: number };
-        assert.equal(
-          Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)),
-          1,
-          `${name}, road ${i}: step ${k} is to a neighbour`,
-        );
-      }
-      for (const end of [road.points[0], road.points[road.points.length - 1]] as Array<{ x: number; y: number }>) {
-        const onEdge = end.x === 0 || end.y === 0 || end.x === w - 1 || end.y === h - 1;
-        const onRoad = roadCells.some((cells, j) => j !== i && cells.has(end.x + end.y * w));
-        assert.ok(
-          onEdge || towns.has(end.x + end.y * w) || onRoad,
-          `${name}, road ${i}: the end ${end.x},${end.y} is at the edge, a town or another road`,
-        );
-      }
-    });
-  }
+  for (const { name, region } of sheets()) assertRoadsSound(name, region);
+});
+
+const LELIX_BAND_2: UvWindow = { u0: 0.59375, v0: 0.46875, u1: 0.84375, v1: 0.71875 };
+
+test("a leg the corridor cannot carry goes round by land: seed 23's Lelix band-2 survey, a trunk round a lake (Issue #952)", () => {
+  const world = generateWorld(defaultRecipe(23));
+  const region = closeUp(world, LELIX_BAND_2);
+  const courses = world.roads
+    .map((r) => inWindowCourse(r.points, world, LELIX_BAND_2, GRID_W, GRID_H))
+    .filter((c) => c.length > 0);
+  const bound =
+    corridorRadius(LELIX_BAND_2, GRID_W, world.recipe.gridW) +
+    harbourReachCells(GRID_W, LELIX_BAND_2, world.recipe.gridW);
+  const straying = region.roads.flatMap((road) =>
+    road.points.filter((p) => Math.min(...courses.map((course) => distanceToPolyline(p, course))) > bound),
+  );
+  assert.ok(
+    straying.length > 20,
+    `precondition: a road goes round the lake outside its corridor (${straying.length} cells)`,
+  );
+  assertRoadsSound("Lelix band 2", region);
 });
 
 test("a close-up draws the world's roads and none of its own weaving (Issue #952)", () => {

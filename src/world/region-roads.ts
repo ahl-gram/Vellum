@@ -8,7 +8,6 @@ import { cheapestPath, corridorRadius, courseDistance } from "./river-route.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
-// A road's own pull to the chart's line, in flat steps; the rivers' CENTRE_PULL in river-route.ts is scaled by their VALLEY_K.
 export const ROAD_CENTRE_PULL = 1;
 
 export type RoadGround = {
