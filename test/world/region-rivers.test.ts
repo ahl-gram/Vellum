@@ -5,9 +5,22 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 import { extendMouthToWater } from "../../src/world/region-rivers.ts";
+import { createChainCache } from "../../src/world/detail-chain.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
+import type { World } from "../../src/world/types.ts";
 import type { FlowResult } from "../../src/hydrology/flow.ts";
+import { worldRiversDrawn } from "../../scripts/region-detail/feature-match.ts";
 
 const SEA = 0;
+
+const HERO = generateWorld(defaultRecipe(42));
+const CHAINS = new Map<World, ReturnType<typeof createChainCache>>();
+
+function closeUp(world: World, window: UvWindow): World {
+  const chainCache = CHAINS.get(world) ?? createChainCache(64);
+  CHAINS.set(world, chainCache);
+  return generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Rivers", detail: true, chainCache });
+}
 
 /** A 1D chute running east: every land cell drains to its neighbour, the tail is water. */
 function chute(
@@ -114,4 +127,12 @@ test("on the detailed field no region river stops on interior dry land (seed 2, 
     [],
     "every river reaches the sea, a confluence, or the window edge",
   );
+});
+
+test("a deep close-up draws the world river crossing it: Won at band 5 on chart 42 (Issue #951)", () => {
+  const window = lodWindowFor(0.73828125, 0.671875, 1 / 32);
+  const drawn = worldRiversDrawn(HERO, closeUp(HERO, window), window);
+  const crossing = drawn.flatMap((d, i) => (d === undefined ? [] : [i]));
+  assert.equal(crossing.length, 1, "exactly one world river crosses the witness window");
+  assert.equal(drawn[crossing[0] as number], true, "the close-up draws it");
 });

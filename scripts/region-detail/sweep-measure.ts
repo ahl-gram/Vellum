@@ -81,7 +81,7 @@ function expectedProjections(world: World, window: UvWindow): number {
 const CONFLUENCE_TOL = 2; // anchorRegionRivers' own SHADOW_RADIUS: how near a drawn river counts as meeting it
 
 /** A river may legitimately stop at the window edge (cropped) or on another river (a confluence, which anchorRegionRivers itself judges within SHADOW_RADIUS). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
-function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
+export function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
   const { w, h } = region.elev;
   const cellsOf = (r: River): Set<number> => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
   const all = rivers.map(cellsOf);
