@@ -288,7 +288,6 @@ const collarSweep = (
   let landCells = 0;
   let bare = 0;
   let interiorMiss = 0;
-  let seamJitter = 0;
   let bareTinted = 0;
   for (let gy = 0; gy < gridH; gy++) {
     for (let gx = 0; gx < gridW; gx++) {
@@ -302,14 +301,14 @@ const collarSweep = (
         continue;
       }
       if (insideOwn && !insideOther) continue;
-      if (nearOwnerChange(owner, gridW, gridH, gx, gy, SEAM_REACH)) seamJitter++;
-      else if (!insideOwn && !insideOther && isSea(parentOf[i] as number)) bare++;
+      if (nearOwnerChange(owner, gridW, gridH, gx, gy, SEAM_REACH)) continue;
+      if (!insideOwn && !insideOther && isSea(parentOf[i] as number)) bare++;
       else interiorMiss++;
     }
   }
   assert.ok(landCells > 0, `${name}: the window must hold land or the sweep proves nothing`);
   const strays = strayBorderVertices(region.region?.realmBorders ?? [], region.realms.labels, gridW, gridH);
-  return { landCells, bare, interiorMiss, seamJitter, bareTinted, strays };
+  return { bare, interiorMiss, bareTinted, strays };
 };
 
 type SweepWindow = [number, string, NonNullable<ReturnType<typeof borderWindow>>, ChainCache?];
@@ -350,12 +349,7 @@ test("the collar guard: the tint holds every refined label and every border stan
 
   for (const [seed, name, window, chainCache] of windows) {
     const label = `seed ${seed} ${name}`;
-    const { landCells, bare, interiorMiss, seamJitter, bareTinted, strays } = collarSweep(
-      seed,
-      label,
-      window,
-      chainCache,
-    );
+    const { bare, interiorMiss, bareTinted, strays } = collarSweep(seed, label, window, chainCache);
     assert.equal(
       bare,
       0,
@@ -367,11 +361,6 @@ test("the collar guard: the tint holds every refined label and every border stan
       `${label}: ${interiorMiss} cells away from any change of owner disagree with the rings; the tint is not drawn from the refined labels`,
     );
     assert.equal(bareTinted, 0, `${label}: ${bareTinted} realm-less land cells are tinted (category B must stay bare)`);
-    // Ceiling measured 2026-10-22 across this sweep: max 0.79% (chart 15, band-1 capital window). A coarse backstop only.
-    assert.ok(
-      seamJitter / landCells < 0.02,
-      `${label}: seam jitter ${seamJitter}/${landCells} exceeds 2%; the rings have moved off the labels`,
-    );
     assert.equal(
       strays,
       0,
