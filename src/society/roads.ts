@@ -12,9 +12,9 @@ export type Road = {
   readonly rank: "trunk" | "lane";
 };
 
-const SLOPE_PENALTY = 12;
-const RIVER_CROSSING = 4.5;
-const REUSE_DISCOUNT = 0.3;
+export const SLOPE_PENALTY = 12;
+export const RIVER_CROSSING = 4.5;
+export const REUSE_DISCOUNT = 0.3;
 const VILLAGE_BUDGET = 260;
 
 type Wiring = {
