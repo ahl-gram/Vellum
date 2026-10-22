@@ -1092,13 +1092,17 @@ test("every stage's notices stand in the kit's one shape, last in the stage: the
   }
 });
 
-test("no page names a status line that is not live, so a line its script writes is one a screen reader hears (Issue #913)", () => {
-  for (const p of PAGES)
+test("no page names a status line that is not live, so a line its script writes is one a screen reader hears (Issue #913, Issue #921)", () => {
+  for (const p of PAGES) {
+    const html = page(p.route);
     assert.doesNotMatch(
-      page(p.route),
+      html,
       /<p class="status" id="[^"]*"(?! role="status" aria-live="polite")/,
       `${p.route} carries a status line by id that is not live`,
     );
+    for (const tag of html.match(/<p\b[^>]*\sid="[^"]*status"[^>]*>/g) ?? [])
+      assert.match(tag, /\saria-live="polite"/, `${p.route} carries a status line by id that is not live: ${tag}`);
+  }
 });
 
 test("the chart folio names the world once on every chart room (Issue #827)", () => {
