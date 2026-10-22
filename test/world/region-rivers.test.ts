@@ -85,6 +85,24 @@ test("a cell exactly at the waterline counts as water, and the walk stops there"
   );
 });
 
+test("the mouth walk also stops on a cell the caller names, short of the water", () => {
+  const { elev, flow } = chute(20, 4, 10);
+  const points = [
+    { x: 5, y: 1, acc: 5 },
+    { x: 6, y: 1, acc: 5 },
+  ];
+  const out = extendMouthToWater(points, elev, flow, SEA, 12, (c) => c === 8 + 1 * 20);
+  assert.deepEqual(
+    out.map((p) => p.x),
+    [5, 6, 7, 8],
+    "the walk halts on the named cell",
+  );
+  assert.deepEqual(
+    extendMouthToWater(points, elev, flow, SEA, 12, (c) => c === 6 + 1 * 20),
+    points,
+  );
+});
+
 test("a mouth with no water within reach is left alone rather than dragged across the sheet", () => {
   const { elev, flow } = chute(20, 4, 19);
   const points = [

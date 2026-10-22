@@ -80,12 +80,13 @@ export function extendMouthToWater(
   flow: FlowResult,
   seaLevel: number,
   maxSteps: number,
+  meets: (cell: number) => boolean = () => false,
 ): ReadonlyArray<RiverPoint> {
   const last = points[points.length - 1];
   if (last === undefined) return points;
   const w = elev.w;
   let cell = Math.round(last.x) + Math.round(last.y) * w;
-  if ((elev.data[cell] as number) <= seaLevel) return points;
+  if ((elev.data[cell] as number) <= seaLevel || meets(cell)) return points;
 
   const walked: RiverPoint[] = [];
   for (let step = 0; step < maxSteps; step++) {
@@ -93,7 +94,7 @@ export function extendMouthToWater(
     if (next < 0) break;
     cell = next;
     walked.push({ x: cell % w, y: (cell / w) | 0, acc: last.acc });
-    if ((elev.data[cell] as number) <= seaLevel) return [...points, ...walked];
+    if ((elev.data[cell] as number) <= seaLevel || meets(cell)) return [...points, ...walked];
   }
   return points;
 }
