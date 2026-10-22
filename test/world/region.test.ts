@@ -7,6 +7,8 @@ import { createLoreWriter } from "../../src/society/lore.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { classifyBiomes, BIOMES } from "../../src/climate/biomes.ts";
+import { createChainCache } from "../../src/world/detail-chain.ts";
+import { hamletCandidates } from "../../src/society/hamlets.ts";
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 
@@ -158,7 +160,7 @@ function deepestHamletWindow(): { win: ReturnType<typeof windowAround>; n: numbe
   return best;
 }
 
-test("only the deepest band grows hamlets; they never seat a realm or take a road (#171)", () => {
+test("windows no larger than band 3's grow hamlets and band 2's grow none; a hamlet never seats a realm and no road departs or arrives at one (#171, Issue #952)", () => {
   const best = deepestHamletWindow();
   assert.ok(best && best.n >= 3, `a deepest window grows hamlets (best had ${best?.n})`);
 
@@ -185,6 +187,21 @@ test("only the deepest band grows hamlets; they never seat a realm or take a roa
   assert.ok(
     deep.settlements.slice(firstHamlet).every((s) => s.kind === "hamlet"),
     "hamlets are appended after every projected settlement",
+  );
+
+  const candidate = hamletCandidates(bigWorld, best.win).find((c) => hamlets.some((h) => h.name === c.name));
+  assert.ok(candidate !== undefined, "precondition: a hamlet of the band-3 sheet is a candidate");
+  const band5 = generateRegionWorld(bigWorld, {
+    window: windowAround(bigWorld, { x: candidate.u * 319, y: candidate.v * 239 }, 1 / 32),
+    gridW: 320,
+    gridH: 240,
+    title: "Deeper Environs",
+    detail: true,
+    chainCache: createChainCache(16),
+  });
+  assert.ok(
+    band5.settlements.some((s) => s.kind === "hamlet" && s.name === candidate.name),
+    "a window of band 5's size grows hamlets too: the gate is a named size, not the deepest band",
   );
 
   // one band shallower, same centre: no hamlets at all
