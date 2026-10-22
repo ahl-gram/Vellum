@@ -38,6 +38,12 @@ test("a harbour with no water within its reach keeps its cell", () => {
   });
 });
 
+test("the reach is a disc: water in the corner of the square is out of reach", () => {
+  const field = createField(21, 21, (x, y) => (x === 16 && y === 16 ? -1 : 1));
+  assert.equal(seatOnShore(field, SEA, { x: 10, y: 10 }, 5), null, "(15, 15) is 7.1 cells away");
+  assert.deepEqual(seatOnShore(field, SEA, { x: 10, y: 10 }, 8), { x: 15, y: 15 });
+});
+
 test("only a harbour is seated", () => {
   const land = { elev: shoreAtX15(), seaLevel: SEA };
   assert.deepEqual(seatProjected({ harbor: false }, { x: 5, y: 10 }, land, 20), { x: 5, y: 10 });
