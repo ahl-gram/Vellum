@@ -17,7 +17,7 @@ import {
   worldRiversDrawn,
   worldRoadsDrawn,
 } from "./feature-match.ts";
-import { riversEndingOnLand } from "./sweep-measure.ts";
+import { laidRiverCount, riversEndingOnLand } from "./sweep-measure.ts";
 
 /** The depth census of Issue #951: per settlement-centred close-up at bands 1 to 5, whether every world river crossing it is drawn and how the drawn ones read, plus the road rows Issue #952 reads as its own before and after. Not in `npm test`: a detailed close-up costs about a second and the run takes minutes. A failed row exits non-zero and writes nothing. */
 
@@ -62,9 +62,8 @@ type LossRow = {
   readonly lost: number;
 };
 
-/** At the commit before the method exists, a laid river is a projected major: the one with a fractional coordinate. */
-function laidRivers(region: World): River[] {
-  return region.rivers.filter((r) => r.points.some((p) => !Number.isInteger(p.x) || !Number.isInteger(p.y)));
+function laidRivers(world: World, region: World, window: UvWindow): River[] {
+  return region.rivers.slice(0, laidRiverCount(world, region, window));
 }
 
 function stepLength(a: { x: number; y: number }, b: { x: number; y: number }): number {
@@ -101,7 +100,7 @@ function longestStraight(rivers: ReadonlyArray<River>): number {
 }
 
 function drawnTwice(region: World, world: World, window: UvWindow): number {
-  const laid = laidRivers(region);
+  const laid = laidRivers(world, region, window);
   const tolerance = matchTolerance(window, GRID_W, world.recipe.gridW);
   const polylines = laid.map((r) => r.points);
   return region.rivers.filter(

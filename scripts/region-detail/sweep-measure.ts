@@ -1,4 +1,5 @@
 import { generateRegionWorld } from "../../src/world/region.ts";
+import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
 import { landSnapRadius } from "../../src/world/snap-to-land.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 import { hamletCandidates } from "../../src/society/hamlets.ts";
@@ -53,8 +54,8 @@ export type RiverFailure = {
   readonly terminalElev: number;
   readonly parentElevAtTerminal: number;
   readonly endsInOcean: boolean;
-  /** projectWorldMajors emits fractional cell coordinates, extractRivers integral ones: the one discriminator available without exporting it. */
-  readonly projected: boolean;
+  /** One of the rivers the close-up laid from a world river: they come first, one per run of `worldRiverRuns` in `src/world/river-runs.ts` with land under it. */
+  readonly laid: boolean;
   readonly cellsToSea: number;
 };
 
@@ -78,9 +79,9 @@ function expectedProjections(world: World, window: UvWindow): number {
   return n;
 }
 
-const CONFLUENCE_TOL = 2; // anchorRegionRivers' own SHADOW_RADIUS: how near a drawn river counts as meeting it
+const CONFLUENCE_TOL = 2; // how near another drawn river a river's end counts as meeting it
 
-/** A river may legitimately stop at the window edge (cropped) or on another river (a confluence, which anchorRegionRivers itself judges within SHADOW_RADIUS). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
+/** A river may legitimately stop at the window edge (cropped) or on another river (a confluence). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
 export function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
   const { w, h } = region.elev;
   const cellsOf = (r: River): Set<number> => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
@@ -108,6 +109,14 @@ export function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, 
     bad.push(i);
   });
   return bad;
+}
+
+/** The close-up lays a river for every run of a world river with land under its course, and draws them first. */
+export function laidRiverCount(world: World, region: World, window: UvWindow): number {
+  const { w, h, data } = region.elev;
+  return worldRiverRuns(world, window, w, h).filter((run) =>
+    densifyCourse(run.course).some((p) => (data[Math.round(p.x) + Math.round(p.y) * w] as number) > region.seaLevel),
+  ).length;
 }
 
 function chebyshevToSea(region: World, x: number, y: number, limit: number): number {
@@ -302,6 +311,7 @@ function riverFailures(
 ): RiverFailure[] {
   const { gridW, gridH } = band;
   const { data } = region.elev;
+  const laidCount = laidRiverCount(world, region, window);
   return badRivers.map((i) => {
     const river = region.rivers[i] as River;
     const last = river.points[river.points.length - 1] as River["points"][number];
@@ -318,7 +328,7 @@ function riverFailures(
       terminalElev: data[x + y * gridW] as number,
       parentElevAtTerminal: (world.elev.data[wi] as number) - world.seaLevel,
       endsInOcean: river.endsInOcean,
-      projected: river.points.some((p) => !Number.isInteger(p.x) || !Number.isInteger(p.y)),
+      laid: i < laidCount,
       cellsToSea: chebyshevToSea(region, x, y, 32),
     };
   });
