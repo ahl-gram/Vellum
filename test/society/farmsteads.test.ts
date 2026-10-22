@@ -298,28 +298,41 @@ function wordBoxes(layer: string): Box[] {
   return boxes;
 }
 
-test("no word is printed over a farmstead's or a mill's mark (Issue #952, M11)", () => {
-  const { gridW, gridH } = LAULUME.recipe;
+function wordsOverMarks(region: World, svg: string): string[] {
+  const { gridW, gridH } = region.recipe;
   const proj = createProjection(gridW, gridH, 1500, marginFor(1500));
+  const groups = settlementGroups(svg);
+  const featureWords = wordBoxes(layerOf(svg, "layer-feature-labels"));
+  const covered: string[] = [];
+  region.settlements.forEach((s, i) => {
+    if (!isTier(s)) return;
+    const mark = MARK_BOX[s.kind]!(proj.px(s.x), proj.py(s.y));
+    const others = groups.filter((g) => attr(g.open, "data-idx") !== String(i)).flatMap((g) => wordBoxes(g.body));
+    if ([...others, ...featureWords].some((word) => overlap(mark, word))) covered.push(s.name);
+  });
+  return covered;
+}
+
+test("no word is printed over a farmstead's or a mill's mark (Issue #952, M11)", () => {
+  const { gridW } = LAULUME.recipe;
   const cpw = (gridW - 1) / ((LAULUME_WINDOW.u1 - LAULUME_WINDOW.u0) * (world7.recipe.gridW - 1));
-  const marks = LAULUME.settlements.map((s, i) => ({ s, i })).filter(({ s }) => isTier(s));
-  const crowded = marks.filter(({ s }) =>
-    LAULUME.settlements.some(
-      (o) => !isTier(o) && Math.hypot(o.x - s.x, o.y - s.y) / cpw < FARMSTEAD_SPACING_WORLD_CELLS,
-    ),
+  const crowded = LAULUME.settlements.filter(
+    (s) =>
+      isTier(s) &&
+      LAULUME.settlements.some(
+        (o) => !isTier(o) && Math.hypot(o.x - s.x, o.y - s.y) / cpw < FARMSTEAD_SPACING_WORLD_CELLS,
+      ),
   );
   assert.ok(
     crowded.length >= 1,
     "a mark stands within the spacing of another settlement's drawn cell (Toanui by Laulume)",
   );
+  assert.deepEqual(wordsOverMarks(LAULUME, LAULUME_SVG), [], "Laulume's sheet prints no word over a mark");
+});
 
-  const groups = settlementGroups(LAULUME_SVG);
-  const featureWords = wordBoxes(layerOf(LAULUME_SVG, "layer-feature-labels"));
-  for (const { s, i } of marks) {
-    const mark = MARK_BOX[s.kind]!(proj.px(s.x), proj.py(s.y));
-    const others = groups.filter((g) => attr(g.open, "data-idx") !== String(i)).flatMap((g) => wordBoxes(g.body));
-    for (const word of [...others, ...featureWords]) {
-      assert.ok(!overlap(mark, word), `${s.name}'s mark has a word printed over it`);
-    }
-  }
+test("a crowded farmstead or mill loses its name and is never forced into place (Issue #952, M7)", () => {
+  const marks = [...groupsOfTier(PAUKILUA_SVG, "farmstead"), ...groupsOfTier(PAUKILUA_SVG, "mill")];
+  const nameless = marks.filter((g) => !g.body.includes("<text"));
+  assert.ok(nameless.length >= 1, "at least one mark on the crowded sheet went label-less (the drop path is live)");
+  assert.ok(nameless.length < marks.length, "and the rest keep their names");
 });
