@@ -78,9 +78,42 @@ export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number
   return out;
 }
 
-/** The land-to-land boundary of the region's own labels, chained and smoothed: one chain per boundary, so a seam is never inked twice and no segment can sit on a coastline. */
+/** Douglas-Peucker on squared distances, both ends kept; it calls no Math member, so a chain simplifies the same on every device. */
+function simplifyChain(points: ReadonlyArray<readonly [number, number]>, epsilon: number): Array<[number, number]> {
+  const n = points.length;
+  const keep = new Uint8Array(n);
+  keep[0] = 1;
+  keep[n - 1] = 1;
+  const spans: Array<readonly [number, number]> = [[0, n - 1]];
+  while (spans.length > 0) {
+    const [a, b] = spans.pop() as readonly [number, number];
+    if (b - a < 2) continue;
+    const [ax, ay] = points[a] as readonly [number, number];
+    const [bx, by] = points[b] as readonly [number, number];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    let best = -1;
+    let bestScore = -1;
+    for (let i = a + 1; i < b; i++) {
+      const [px, py] = points[i] as readonly [number, number];
+      const score = len2 === 0 ? (px - ax) ** 2 + (py - ay) ** 2 : ((px - ax) * dy - (py - ay) * dx) ** 2 / len2;
+      if (score > bestScore) {
+        bestScore = score;
+        best = i;
+      }
+    }
+    if (bestScore > epsilon * epsilon) {
+      keep[best] = 1;
+      spans.push([a, best], [best, b]);
+    }
+  }
+  return points.filter((_, i) => keep[i] === 1).map(([x, y]) => [x, y]);
+}
+
+/** The land-to-land boundary of the region's own labels, chained, its cell steps simplified within one cell and then smoothed: one chain per boundary, so a seam is never inked twice and no segment can sit on a coastline. */
 export function regionRealmBorders(labels: Int16Array, gridW: number, gridH: number): ReadonlyArray<RealmRing> {
   return chainBorderSegments(labelBorderSegments(labels, gridW, gridH)).map(
-    (chain) => chaikinSmooth(chain, false, 3) as RealmRing,
+    (chain) => chaikinSmooth(simplifyChain(chain, 1), false, 3) as RealmRing,
   );
 }
