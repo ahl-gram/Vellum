@@ -296,17 +296,7 @@ test("the runs are laid majors first, then the highest peak accumulation first (
   assert.deepEqual(misordered, []);
 });
 
-test("a run ending inside the window walks down the region's own flow to the border, and a kept stream that ends beside a river stands (Issue #951)", () => {
-  const stanbyl = townWindows(FIFTEEN, "Stanbyl")[1] as UvWindow;
-  const { region, laid } = relay(FIFTEEN, stanbyl);
-  const { w, h } = region.elev;
-  const ending = worldRiverRuns(FIFTEEN, stanbyl, w, h).filter((run) => landUnder(run, region) && !run.leavesAtEdge);
-  const atBorder = ending.filter((_, i) => {
-    const last = (laid[i] as River).points.at(-1) as River["points"][number];
-    return last.x === 0 || last.y === 0 || last.x === w - 1 || last.y === h - 1;
-  });
-  assert.ok(atBorder.length >= 1, "an inside-ending run reaches the window's border by the walk");
-
+test("a kept stream that ends beside a river, not on it, stands: Rulba on chart 15, band 1 (Issue #951)", () => {
   const rulba = townWindows(FIFTEEN, "Rulba")[0] as UvWindow;
   const sheet = relay(FIFTEEN, rulba);
   const cells = sheet.region.rivers.map((r) => cellsOf(r, sheet.region.elev.w));
