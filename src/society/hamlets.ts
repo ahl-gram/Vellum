@@ -12,6 +12,8 @@ export const HAMLET_LATTICE_WORLD_CELLS = 5;
 
 export const HAMLET_SPACING_WORLD_CELLS = 2.5;
 
+export const HAMLET_MAX_WINDOW_UV = 0.125;
+
 const JITTER = 0.7;
 
 const DENSITY = 0.22;

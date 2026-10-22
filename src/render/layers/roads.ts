@@ -1,12 +1,26 @@
+import type { Road } from "../../society/roads.ts";
 import { chaikinSmooth } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
+
+export function roadDress(
+  rank: Road["rank"],
+  region: boolean,
+): { readonly width: number; readonly dash: readonly [number, number]; readonly opacity: number } {
+  if (region) {
+    return rank === "trunk" ? { width: 2.4, dash: [6, 3.5], opacity: 1 } : { width: 1.8, dash: [3.2, 3], opacity: 0.9 };
+  }
+  return rank === "trunk"
+    ? { width: 1.5, dash: [5, 3.5], opacity: 0.85 }
+    : { width: 1.0, dash: [2.5, 3.5], opacity: 0.7 };
+}
 
 export function roadsLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   if (world.roads.length === 0) return null;
   const k = proj.widthPx / 1500;
   const topo = style.name === "topographic";
+  const region = world.region !== undefined;
   const nodes: SvgNode[] = [];
 
   for (const road of world.roads) {
@@ -33,14 +47,15 @@ export function roadsLayer(ctx: RenderCtx): SvgNode | null {
         }),
       );
     } else {
+      const dress = roadDress(road.rank, region);
       nodes.push(
         el("path", {
           d,
           fill: "none",
           stroke: style.road,
-          "stroke-width": (trunk ? 1.5 : 1.0) * k,
-          "stroke-dasharray": trunk ? `${5 * k} ${3.5 * k}` : `${2.5 * k} ${3.5 * k}`,
-          "stroke-opacity": trunk ? 0.85 : 0.7,
+          "stroke-width": dress.width * k,
+          "stroke-dasharray": `${dress.dash[0] * k} ${dress.dash[1] * k}`,
+          "stroke-opacity": dress.opacity,
           "stroke-linejoin": "round",
         }),
       );
