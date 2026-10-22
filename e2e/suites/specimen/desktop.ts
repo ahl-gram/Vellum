@@ -131,6 +131,28 @@ export async function sb5bEdgesDark({ check, brightest }: SpecimenKit, interior:
   );
 }
 
+export function sb5fCornerPanels({ check }: Pick<SpecimenKit, "check">, leaned: Specimen): void {
+  check(
+    "SB5f leaned, the head cluster and the chart folio stand on the legend row's own footing: each one's ::before resolves the very ground the row's does, a top-to-bottom gradient, and none of the three is blurred (Alex, 2026-10-22, Issue #988: \"the same as the foot underneath in the middle\")",
+    leaned.poolChrome === '""' &&
+      leaned.chartFolioOn === '""' &&
+      /^linear-gradient\((?!to top)/.test(leaned.legendGround ?? "") &&
+      leaned.chromeGround === leaned.legendGround &&
+      leaned.chartFolioGround === leaned.legendGround &&
+      leaned.chromeFilter === "none" &&
+      leaned.chartFolioFilter === "none" &&
+      leaned.legendFilter === "none",
+    JSON.stringify({
+      cluster: leaned.chromeGround?.slice(0, 44),
+      chartFolio: leaned.chartFolioGround?.slice(0, 44),
+      legend: leaned.legendGround?.slice(0, 44),
+      clusterFilter: leaned.chromeFilter,
+      chartFolioFilter: leaned.chartFolioFilter,
+      legendFilter: leaned.legendFilter,
+    }),
+  );
+}
+
 export async function sb5dGlassBare(
   { check, brightest }: SpecimenKit,
   leaned: Specimen,
