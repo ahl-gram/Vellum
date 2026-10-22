@@ -11,8 +11,8 @@ export type RealmsResult = {
   readonly seats: ReadonlyArray<number>;
 };
 
-const SLOPE_WEIGHT = 6;
-const RIVER_WEIGHT = 1.5;
+export const SLOPE_WEIGHT = 6;
+export const RIVER_WEIGHT = 1.5;
 const MIN_SEAT_SPACING = 24;
 
 // Realm budget scales with the grid FRACTION, so counts stay resolution-independent across production and test grids.

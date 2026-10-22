@@ -12,8 +12,10 @@ import { layRegionRivers } from "./region-rivers.ts";
 import { chainedFieldAndGround, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
-import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
-import { seaMask } from "../hydrology/sea-mask.ts";
+import { realmOwners, refineRegionRealms, type RealmTown } from "./realm-refine.ts";
+import { regionSeaGate } from "./region-sea-gate.ts";
+import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
+import { regionRealmBorders, regionRealmRings } from "./realm-carry.ts";
 import { LOD_BANDS } from "./lod.ts";
 import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
@@ -130,18 +132,21 @@ function regionClimate(
   return { climate, biomes };
 }
 
+type RegionLand = { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array };
+
 function projectSettlements(
   g: RegionGrid,
   spec: RegionSpec,
-  elev: Field,
-  seaLevel: number,
+  land: RegionLand,
 ): { settlements: NamedSettlement[]; regionIdxOf: Map<number, number> } {
   const { world, window, gridW, gridH } = g;
+  const { elev, seaLevel } = land;
   const { recipe } = world;
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const inset = 0.02;
   const snapRadius = landSnapRadius(gridW, window, recipe.gridW);
+  const harbourReach = harbourReachCells(gridW, window, recipe.gridW);
   const settlements: NamedSettlement[] = [];
   const regionIdxOf = new Map<number, number>();
   const drowned: string[] = [];
@@ -164,7 +169,8 @@ function projectSettlements(
       return;
     }
     regionIdxOf.set(worldIdx, settlements.length);
-    settlements.push({ ...s, x: cell.x, y: cell.y });
+    const seat = seatProjected(s, cell, land, harbourReach);
+    settlements.push({ ...s, x: seat.x, y: seat.y });
   });
   if (drowned.length > 0) {
     console.warn(
@@ -176,50 +182,18 @@ function projectSettlements(
 
 function regionRoadLabels(
   g: RegionGrid,
-  elev: Field,
-  seaLevel: number,
+  land: RegionLand,
   placed: { readonly settlements: ReadonlyArray<NamedSettlement>; readonly regionIdxOf: ReadonlyMap<number, number> },
 ): Int16Array {
-  const { world, window, gridW, gridH } = g;
+  const { world, window } = g;
   const { recipe } = world;
-  const du = window.u1 - window.u0;
-  const dv = window.v1 - window.v0;
-  const roadLabels = new Int16Array(gridW * gridH).fill(-1);
-  for (let gy = 0; gy < gridH; gy++) {
-    for (let gx = 0; gx < gridW; gx++) {
-      if ((elev.data[gx + gy * gridW] as number) <= seaLevel) continue;
-      const u = window.u0 + (gx / (gridW - 1)) * du;
-      const v = window.v0 + (gy / (gridH - 1)) * dv;
-      const wx = Math.round(u * (recipe.gridW - 1));
-      const wy = Math.round(v * (recipe.gridH - 1));
-      roadLabels[gx + gy * gridW] = world.realms.labels[wx + wy * recipe.gridW] as number;
-    }
-  }
+  const towns: RealmTown[] = [];
   for (const [worldIdx, regionIdx] of placed.regionIdxOf) {
     const ws = world.settlements[worldIdx] as NamedSettlement;
     const rs = placed.settlements[regionIdx] as NamedSettlement;
-    roadLabels[rs.x + rs.y * gridW] = world.realms.labels[ws.x + ws.y * recipe.gridW] as number;
+    towns.push({ x: rs.x, y: rs.y, realm: world.realms.labels[ws.x + ws.y * recipe.gridW] as number });
   }
-  return roadLabels;
-}
-
-function regionSeaGate(g: RegionGrid): Uint8Array {
-  const { world, window, gridW, gridH } = g;
-  const { recipe } = world;
-  const du = window.u1 - window.u0;
-  const dv = window.v1 - window.v0;
-  const worldSea = seaMask(world.elev, world.seaLevel);
-  const seaGate = new Uint8Array(gridW * gridH);
-  for (let gy = 0; gy < gridH; gy++) {
-    for (let gx = 0; gx < gridW; gx++) {
-      const u = window.u0 + (gx / (gridW - 1)) * du;
-      const v = window.v0 + (gy / (gridH - 1)) * dv;
-      const wx = Math.round(u * (recipe.gridW - 1));
-      const wy = Math.round(v * (recipe.gridH - 1));
-      seaGate[gx + gy * gridW] = worldSea[wx + wy * recipe.gridW] as number;
-    }
-  }
-  return seaGate;
+  return refineRegionRealms(world, window, land, towns);
 }
 
 function regionLakes(g: RegionGrid, elev: Field, seaLevel: number): NamedLake[] {
@@ -257,16 +231,20 @@ function regionNames(world: World, lakes: NamedLake[]): FeatureNames {
   };
 }
 
-function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["region"]> {
+function regionCarry(
+  g: RegionGrid,
+  land: Pick<RegionLand, "elev" | "seaLevel">,
+  labels: Int16Array,
+): NonNullable<World["region"]> {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
   return {
     window,
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
-    seaGate,
-    realmRings: mapRingsToWindow(realmCarryRings(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
-    realmBorders: mapChainsToWindow(realmBorderChains(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
+    seaGate: regionSeaGate(world, window, { gridW, gridH }, land),
+    realmRings: regionRealmRings(realmOwners(world, window, land, labels), gridW, gridH),
+    realmBorders: regionRealmBorders(labels, gridW, gridH),
     parentRealmLabels: world.realms.labels,
   };
 }
@@ -274,14 +252,14 @@ function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["reg
 function regionPeople(
   g: RegionGrid,
   spec: RegionSpec,
-  land: { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array },
+  land: RegionLand,
 ): { peopled: NamedSettlement[]; roads: ReturnType<typeof buildRoads>; roadLabels: Int16Array; seats: number[] } {
   const { world, window } = g;
   const { elev, seaLevel, riverCells } = land;
-  const placed = projectSettlements(g, spec, elev, seaLevel);
+  const placed = projectSettlements(g, spec, land);
   const { settlements } = placed;
   const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
-  const roadLabels = regionRoadLabels(g, elev, seaLevel, placed);
+  const roadLabels = regionRoadLabels(g, land, placed);
   const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
 
   const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
@@ -326,7 +304,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: regionCarry(g, regionSeaGate(g)),
+    region: regionCarry(g, { elev, seaLevel }, roadLabels),
   };
 }
 

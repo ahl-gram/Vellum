@@ -21,9 +21,12 @@ about a rule, the rulebook wins.
 
 ## Region worlds and level of detail
 
-- **The PARENT world is the authority on a crop.** A region-local sea mask is untrustworthy: the
-  window edge cuts out a lake's separating land, so the lake reconnects to the border and floods as
-  sea. The parent's mask is projected onto the region grid and carried as `region.seaGate`, a
+- **The PARENT world is the authority on a crop, and a close-up refines it only along the shore.**
+  A region-local sea mask is untrustworthy: the window edge cuts out a lake's separating land, so
+  the lake reconnects to the border and floods as sea. So `region.seaGate` (`regionSeaGate` in
+  `src/world/region-sea-gate.ts`) opens only the region's water reachable, through the region's
+  own water, from water on a parent SEA cell, entering parent sea cells and parent land cells
+  that touch parent sea, and never water on a parent lake cell or further inland. It is a
   transient computed field rather than a stamped one, and the parent's in-window named lakes are
   projected with it.
 - **`region.seaGate` gates ALL region sea-furniture**, not the caption alone: the compass sea search,
@@ -44,19 +47,38 @@ about a rule, the rulebook wins.
   `src/world/river-route.ts`). A laid river ends at the window's edge, in water, or on another drawn
   river. Keep an extracted river only where it neither doubles a laid one nor is left ending on dry
   land. Climate and biomes take the parent's elevation span so the bands match at the boundary.
-- **Realms are CARRIED onto a region sheet, never re-derived.** Re-deriving on a crop disagrees with
-  the parent's assignment. Carry the parent LABEL FIELD and not a tint index array, because the tint
-  indices take the style and an index array would need one copy per style.
-- **Borders are not stroked from the carried rings.** Per-realm rings traverse a shared seam twice and
-  the coincident dash phases fill each other's gaps, so a dashed border paints solid. Borders come
-  from the world sheet's own label-boundary chains (`labelBorderSegments` and `chainBorderSegments`
-  in `src/core/segment-chains.ts`) mapped into the window. A land-to-land segment cannot sit on a
-  coastline, so no border on a coast holds by construction.
+- **Realms are CARRIED onto a region sheet and refined only beside a border, never re-derived.**
+  Re-partitioning a crop disagrees with the parent's assignment. A region land cell takes its
+  nearest parent cell's label, grown over parent water; only in the corridor of parent cells that
+  touch another realm is it re-flooded on the region's own ground, by the parent partition's own
+  costs per world cell of travel, with every projected town a fixed source of its world realm
+  (`refineRealmLabels` in `src/world/realm-refine.ts`). A region landmass standing on no parent
+  land is one realm's whole. The tint indices still come from the parent LABEL FIELD and not a
+  tint index array, because the tint indices take the style and an index array would need one
+  copy per style.
+- **Borders are not stroked from the tint rings.** Per-realm rings traverse a shared seam twice
+  and the coincident dash phases fill each other's gaps, so a dashed border paints solid. A
+  region's borders are the chained land-to-land boundary of its own refined labels, its cell
+  steps simplified within one cell before the smoothing (`regionRealmBorders` in
+  `src/world/realm-carry.ts`, over `labelBorderSegments` and `chainBorderSegments` in
+  `src/core/segment-chains.ts`), and its tint rings are blurred from the same labels
+  (`regionRealmRings`), so the tint ends where the border is drawn. A land-to-land segment cannot
+  sit on a coastline, so no border on a coast holds by construction.
 - **A region's smallest settlement tier is grown on a FIXED world-space lattice**, each point forked
   off the seed by its cell indices alone, so existence, spot and name are independent of the window
   and of the order the reader interacted. Screen it on the PARENT grid, append it after the projected
   settlements so seats and roads stay valid, and never put it on a world sheet, on a seat, or on a
   road.
+- **A projected harbour town stands on the region's own shore.** A world harbour stands beside water at
+  world resolution, and at depth the close-up's shore lies up to a world cell and a half from its
+  cell's centre, so a projected harbour is seated on the nearest region land cell beside water,
+  within the farthest its water can lie (`seatProjected` and `HARBOUR_REACH_WORLD_CELLS` in
+  `src/world/seat-settlements.ts`). Never seat a town by editing `snapToLand`, which the hamlets
+  share. A region hamlet's `harbor` flag is not seated and stays at world resolution (Issue #976).
+- **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
+  `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
+  grows their caps with its area; a world sheet and every window at least that size draw as
+  before.
 - **A region's coast closes against the window rect, and only the TRUE shore may round.** A plain
   smoothing pass rounds the frame's right-angle corners inward and carves real land over the ocean
   painted behind it; `chaikinSmoothPinned` in `src/terrain/polyline.ts` pins the window-frame

@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
-import { growRealmLabels, mapRingsToWindow, realmCarryRings, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
+import { createChainCache, type ChainCache } from "../../src/world/detail-chain.ts";
+import { growRealmLabels, regionRealmBorders, regionRealmRings, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
 import type { RealmRings } from "../../src/world/realm-carry.ts";
+import { nearestParentCells } from "../../src/world/region-parent.ts";
 import type { World } from "../../src/world/types.ts";
 
 const worlds = new Map<number, World>();
@@ -22,31 +24,6 @@ const isSeaOf = (world: World): ((i: number) => boolean) => {
   const sl = world.seaLevel;
   return (i) => (data[i] as number) <= sl;
 };
-
-function touchesOwnLandAt(
-  grown: ArrayLike<number>,
-  isSea: (i: number) => boolean,
-  w: number,
-  h: number,
-  x: number,
-  y: number,
-): boolean {
-  const i = x + y * w;
-  let touchesOwnLand = false;
-  for (const [dx, dy] of [
-    [1, 0],
-    [-1, 0],
-    [0, 1],
-    [0, -1],
-  ] as const) {
-    const nx = x + dx;
-    const ny = y + dy;
-    if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-    const j = nx + ny * w;
-    if (!isSea(j) && grown[j] === grown[i]) touchesOwnLand = true;
-  }
-  return touchesOwnLand;
-}
 
 const capitalWindow = (world: World, band: number) => {
   const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0]!;
@@ -118,69 +95,6 @@ test("a realm-less island's land stays bare even inside another realm's reach (#
   }
 });
 
-test("the parent rings and their window mapping are deterministic and non-empty (#423)", () => {
-  const world = worldFor(42);
-  const a = realmCarryRings(world);
-  // A fresh world, not the cached one: realmCarryRings memoizes per world object, so same-object comparison is a tautology.
-  const b = realmCarryRings(generateWorld(defaultRecipe(42)));
-  assert.deepEqual(a, b, "two computations of the parent rings must be identical");
-  assert.ok(a.length > 0, "seed 42 has 3 realms; the carry must produce rings");
-  for (const { rings } of a) assert.ok(rings.length > 0, "every carried realm must have at least one ring");
-
-  const window = capitalWindow(world, 1);
-  const m1 = mapRingsToWindow(a, window, world.recipe.gridW, world.recipe.gridH, 320, 240);
-  const m2 = mapRingsToWindow(b, window, world.recipe.gridW, world.recipe.gridH, 320, 240);
-  assert.deepEqual(m1, m2, "the same window must map to identical rings, whatever path reached it");
-
-  // The affine pinned exactly at the corners: a sub-cell offset otherwise hides inside the collar guard's seam-jitter tolerance.
-  const pw = world.recipe.gridW;
-  const ph = world.recipe.gridH;
-  const cornerRing = [
-    [window.u0 * (pw - 1), window.v0 * (ph - 1)],
-    [window.u1 * (pw - 1), window.v0 * (ph - 1)],
-    [window.u1 * (pw - 1), window.v1 * (ph - 1)],
-    [window.u0 * (pw - 1), window.v1 * (ph - 1)],
-  ] as const;
-  const mapped = mapRingsToWindow([{ realm: 0, rings: [cornerRing] }], window, pw, ph, 320, 240)[0]!.rings[0]!;
-  assert.ok(
-    Math.abs(mapped[0]![0] - 0) < 1e-9 && Math.abs(mapped[0]![1] - 0) < 1e-9,
-    `the window's origin corner must land on the region grid origin, got (${mapped[0]![0]}, ${mapped[0]![1]})`,
-  );
-  assert.ok(
-    Math.abs(mapped[2]![0] - 319) < 1e-9 && Math.abs(mapped[2]![1] - 239) < 1e-9,
-    `the window's far corner must land on (319, 239), got (${mapped[2]![0]}, ${mapped[2]![1]})`,
-  );
-});
-
-test("the sea floor holds everywhere: a grown shore cell sits inside its realm's parent ring (#423)", () => {
-  // Window-independent contract: without the floor a thin grown finger's blur dips below the iso and its shoreline goes bare, which the window sweep can miss.
-  for (const seed of [42, 2, 15]) {
-    const world = worldFor(seed);
-    const { w, h } = world.elev;
-    const isSea = isSeaOf(world);
-    const grown = growRealmLabels(world.realms.labels, isSea, w, h, 8);
-    const masks = new Map(realmCarryRings(world).map((r) => [r.realm, rasterize(r.rings, w, h)]));
-    let shoreCells = 0;
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const i = x + y * w;
-        if (grown[i]! < 0 || !isSea(i)) continue;
-        if (!touchesOwnLandAt(grown, isSea, w, h, x, y)) continue;
-        shoreCells++;
-        assert.equal(
-          masks.get(grown[i] as number)?.[i],
-          1,
-          `seed ${seed}: grown shore cell (${x},${y}) of realm ${grown[i]} is outside its parent ring`,
-        );
-      }
-    }
-    assert.ok(
-      shoreCells > 100,
-      `seed ${seed}: the shore sweep covered only ${shoreCells} cells; the contract went unexercised`,
-    );
-  }
-});
-
 test("generateRegionWorld carries labels, names, rings and the parent label field (#423)", () => {
   const world = worldFor(42);
   const region = generateRegionWorld(world, {
@@ -197,7 +111,7 @@ test("generateRegionWorld carries labels, names, rings and the parent label fiel
     region.region?.realmRings && region.region.realmRings.length > 0,
     "the region should carry mapped realm rings",
   );
-  assert.ok(region.region.realmBorders, "the region should carry the parent's border chains");
+  assert.ok(region.region.realmBorders, "the region should carry its border chains");
   assert.ok(region.region.parentRealmLabels, "the region should carry the parent's label field for tint assignment");
   assert.equal(region.region.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW");
 });
@@ -248,20 +162,6 @@ const borderWindow = (world: World, band: number) => {
   return null; // island realms: no land border exists, so there is no border window to sweep
 };
 
-const boundaryAdjacentOf =
-  (grown: ArrayLike<number>, pw: number, ph: number) =>
-  (wx: number, wy: number, owner: number): boolean => {
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const nx = wx + dx;
-        const ny = wy + dy;
-        if (nx < 0 || nx >= pw || ny < 0 || ny >= ph) return true;
-        if (grown[nx + ny * pw] !== owner) return true;
-      }
-    }
-    return false;
-  };
-
 const tintAt = (
   masks: ReadonlyMap<number, ArrayLike<number>>,
   i: number,
@@ -277,11 +177,101 @@ const tintAt = (
   return { insideOwn, insideOther };
 };
 
-const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<typeof borderWindow>>) => {
+const borderWindowOfSize = (world: World, size: number) => {
+  const { w, h } = world.elev;
+  const labels = world.realms.labels;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x + 1 < w; x++) {
+      const a = labels[x + y * w] as number;
+      const b = labels[x + 1 + y * w] as number;
+      if (a >= 0 && b >= 0 && a !== b) {
+        const q = quantizeCenter(x / (w - 1), y / (h - 1), size);
+        return lodWindowFor(q.cx, q.cy, size);
+      }
+    }
+  }
+  return null;
+};
+
+// Blind spot: a cell within the reach of the window frame counts as beside a change of owner, so a defect confined to the outer 4 cells of the frame is not seen; the rings are pinned to the frame by chaikinSmoothPinned, which errs toward a gap there going unnoticed, and the skeptic's probe found none in production.
+const nearOwnerChange = (
+  owner: Int16Array,
+  gridW: number,
+  gridH: number,
+  gx: number,
+  gy: number,
+  reach: number,
+): boolean => {
+  const own = owner[gx + gy * gridW];
+  for (let dy = -reach; dy <= reach; dy++) {
+    for (let dx = -reach; dx <= reach; dx++) {
+      const nx = gx + dx;
+      const ny = gy + dy;
+      if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) return true;
+      if (owner[nx + ny * gridW] !== own) return true;
+    }
+  }
+  return false;
+};
+
+// Three passes of a three-by-three box blur move an iso at most 3 cells and two Chaikin passes less than 1.
+const SEAM_REACH = 4;
+
+const FOUR = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+] as const;
+
+// The 1.5 is half a cell from a boundary edge to a cell centre, plus the one-cell simplification.
+const strayBorderVertices = (
+  borders: ReadonlyArray<ReadonlyArray<readonly [number, number]>>,
+  labels: Int16Array,
+  gridW: number,
+  gridH: number,
+): number => {
+  const onBoundary = (x: number, y: number): boolean => {
+    if (x < 0 || x >= gridW || y < 0 || y >= gridH) return false;
+    const a = labels[x + y * gridW] as number;
+    if (a < 0) return false;
+    return FOUR.some(([dx, dy]) => {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) return false;
+      const b = labels[nx + ny * gridW] as number;
+      return b >= 0 && b !== a;
+    });
+  };
+  const nearBoundary = (vx: number, vy: number): boolean => {
+    for (let cy = Math.floor(vy - 1.5); cy <= Math.ceil(vy + 1.5); cy++) {
+      for (let cx = Math.floor(vx - 1.5); cx <= Math.ceil(vx + 1.5); cx++) {
+        if ((cx - vx) ** 2 + (cy - vy) ** 2 <= 1.5 * 1.5 && onBoundary(cx, cy)) return true;
+      }
+    }
+    return false;
+  };
+  let strays = 0;
+  for (const chain of borders) {
+    for (const [vx, vy] of chain) {
+      if (vx < 2 || vy < 2 || vx > gridW - 3 || vy > gridH - 3) continue;
+      if (!nearBoundary(vx, vy)) strays++;
+    }
+  }
+  return strays;
+};
+
+const collarSweep = (
+  seed: number,
+  name: string,
+  window: NonNullable<ReturnType<typeof borderWindow>>,
+  chainCache?: ChainCache,
+) => {
   const world = worldFor(seed);
   const gridW = 320;
   const gridH = 240;
-  const region = generateRegionWorld(world, { window, gridW, gridH, title: "t" });
+  const spec = { window, gridW, gridH, title: "t" };
+  const region = generateRegionWorld(world, chainCache ? { ...spec, detail: true, chainCache } : spec);
   const rings: RealmRings = region.region?.realmRings ?? [];
   const masks = new Map(rings.map((r) => [r.realm, rasterize(r.rings, gridW, gridH)]));
   assert.ok(masks.size > 0, `${name}: the window must carry rings or the sweep proves nothing`);
@@ -290,46 +280,42 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
   const isSea = isSeaOf(world);
   // The oracle's cap is the literal ratified 8, never the exported constant, or the guard moves with a nerfed production cap.
   const grown = growRealmLabels(world.realms.labels, isSea, pw, ph, 8);
-  const du = window.u1 - window.u0;
-  const dv = window.v1 - window.v0;
-
-  const boundaryAdjacent = boundaryAdjacentOf(grown, pw, ph);
+  const parentOf = nearestParentCells(pw, ph, window, gridW, gridH);
+  const isLand = (i: number): boolean => (region.elev.data[i] as number) > region.seaLevel;
+  const owner = Int16Array.from(region.realms.labels, (l, i) =>
+    isLand(i) ? l : (grown[parentOf[i] as number] as number),
+  );
 
   let landCells = 0;
   let bare = 0;
   let interiorMiss = 0;
-  let seamJitter = 0;
   let bareTinted = 0;
   for (let gy = 0; gy < gridH; gy++) {
     for (let gx = 0; gx < gridW; gx++) {
-      if ((region.elev.data[gx + gy * gridW] as number) <= region.seaLevel) continue;
+      const i = gx + gy * gridW;
+      if (!isLand(i)) continue;
       landCells++;
-      const wx = Math.round((window.u0 + (gx / (gridW - 1)) * du) * (pw - 1));
-      const wy = Math.round((window.v0 + (gy / (gridH - 1)) * dv) * (ph - 1));
-      const owner = grown[wx + wy * pw] as number;
-      const { insideOwn, insideOther } = tintAt(masks, gx + gy * gridW, owner);
-      if (owner < 0) {
-        if ((insideOwn || insideOther) && !isSea(wx + wy * pw)) bareTinted++;
+      const o = owner[i] as number;
+      const { insideOwn, insideOther } = tintAt(masks, i, o);
+      if (o < 0) {
+        if (insideOwn || insideOther) bareTinted++;
         continue;
       }
-      if (!insideOwn && !insideOther) {
-        // Untinted owned land. Over parent sea this is THE collar; on labelled land the blur bites thin features exactly as the world sheet does, which is seam behavior when boundary-adjacent.
-        if (isSea(wx + wy * pw)) bare++;
-        else if (boundaryAdjacent(wx, wy, owner)) seamJitter++;
-        else interiorMiss++;
-      } else if (!insideOwn || insideOther) {
-        // Tinted, but not by the owner: within a cell of a boundary that is dash-covered seam jitter; in an interior it is a mapping or growth defect.
-        if (boundaryAdjacent(wx, wy, owner)) seamJitter++;
-        else interiorMiss++;
-      }
+      if (insideOwn && !insideOther) continue;
+      if (nearOwnerChange(owner, gridW, gridH, gx, gy, SEAM_REACH)) continue;
+      if (!insideOwn && !insideOther && isSea(parentOf[i] as number)) bare++;
+      else interiorMiss++;
     }
   }
   assert.ok(landCells > 0, `${name}: the window must hold land or the sweep proves nothing`);
-  return { landCells, bare, interiorMiss, seamJitter, bareTinted };
+  const strays = strayBorderVertices(region.region?.realmBorders ?? [], region.realms.labels, gridW, gridH);
+  return { bare, interiorMiss, bareTinted, strays };
 };
 
-test("the collar guard: no bare shoreline, no interior miss, jitter only on seams (#423)", () => {
-  const windows: Array<[number, string, NonNullable<ReturnType<typeof borderWindow>>]> = [];
+type SweepWindow = [number, string, NonNullable<ReturnType<typeof borderWindow>>, ChainCache?];
+
+function sweepWindows(): { windows: SweepWindow[]; borderWindows: number } {
+  const windows: SweepWindow[] = [];
   let borderWindows = 0;
   for (const seed of [42, 7, 2, 15, 23]) {
     const world = worldFor(seed);
@@ -344,29 +330,99 @@ test("the collar guard: no bare shoreline, no interior miss, jitter only on seam
   }
   windows.push([42, "b2border", borderWindow(worldFor(42), 2)!]);
   windows.push([15, "b2", capitalWindow(worldFor(15), 2)]);
+  const cache = createChainCache(16);
+  windows.push([42, "b4border", borderWindowOfSize(worldFor(42), 1 / 16)!, cache]);
+  windows.push([42, "b5border", borderWindowOfSize(worldFor(42), 1 / 32)!, cache]);
+  const world42 = worldFor(42);
+  const capital42 = world42.settlements.find((s) => s.kind === "capital")!;
+  const q = quantizeCenter(capital42.x / (world42.recipe.gridW - 1), capital42.y / (world42.recipe.gridH - 1), 1 / 32);
+  windows.push([42, "b5capital", lodWindowFor(q.cx, q.cy, 1 / 32), cache]);
+  windows.push([2, "enclave", { u0: 0.375, v0: 0.5, u1: 0.625, v1: 0.75 }, cache]);
+  return { windows, borderWindows };
+}
+
+test("the collar guard: the tint holds every refined label and every border stands on a change of label (Issue #953)", () => {
+  const { windows, borderWindows } = sweepWindows();
   assert.ok(
     borderWindows >= 3,
     "the sweep must cover several genuine land-border windows or the seam claims are unexercised",
   );
 
-  for (const [seed, name, window] of windows) {
+  for (const [seed, name, window, chainCache] of windows) {
     const label = `seed ${seed} ${name}`;
-    const { landCells, bare, interiorMiss, seamJitter, bareTinted } = collarSweep(seed, label, window);
+    const { bare, interiorMiss, bareTinted, strays } = collarSweep(seed, label, window, chainCache);
     assert.equal(
       bare,
       0,
-      `${label}: ${bare} land cells on parent-sea ground carry NO tint at all; this is the shoreline collar the growth exists to prevent`,
+      `${label}: ${bare} land cells on parent-sea ground carry NO tint at all; this is the shoreline collar the owned water exists to prevent`,
     );
     assert.equal(
       interiorMiss,
       0,
-      `${label}: ${interiorMiss} cells in a realm's interior disagree with the rings; that is a mapping or growth defect, not seam jitter`,
+      `${label}: ${interiorMiss} cells away from any change of owner disagree with the rings; the tint is not drawn from the refined labels`,
     );
     assert.equal(bareTinted, 0, `${label}: ${bareTinted} realm-less land cells are tinted (category B must stay bare)`);
-    // Ceiling measured 2026-08-20 across this sweep: max 0.87% (seed 2, band-3 border window). A coarse backstop only: sub-cell affine drift hides under it, which is why the determinism test corner-pins the mapping exactly.
-    assert.ok(
-      seamJitter / landCells < 0.02,
-      `${label}: seam jitter ${seamJitter}/${landCells} exceeds 2%; the rings have moved off the labels`,
+    assert.equal(
+      strays,
+      0,
+      `${label}: ${strays} border vertices stand further than 1.5 cells from any change of label`,
     );
   }
+});
+
+test("a realm holding the whole frame is tinted to the frame, its enclaves cut out (Issue #953)", () => {
+  const w = 20;
+  const h = 16;
+  const whole = regionRealmRings(new Int16Array(w * h), w, h);
+  assert.equal(whole.length, 1, "one realm");
+  assert.deepEqual(whole[0]!.rings, [
+    [
+      [0, 0],
+      [19, 0],
+      [19, 15],
+      [0, 15],
+    ],
+  ]);
+
+  const owner = new Int16Array(w * h);
+  for (let y = 4; y <= 11; y++) for (let x = 6; x <= 13; x++) owner[x + y * w] = 1;
+  const rings = regionRealmRings(owner, w, h);
+  const outer = rings.find((r) => r.realm === 0)!;
+  const inner = rings.find((r) => r.realm === 1)!;
+  assert.equal(outer.rings.length, 2, "the frame and the enclave's contour");
+  assert.deepEqual(outer.rings[0], [
+    [0, 0],
+    [19, 0],
+    [19, 15],
+    [0, 15],
+  ]);
+  const covers = (
+    r: { rings: ReadonlyArray<ReadonlyArray<readonly [number, number]>> },
+    x: number,
+    y: number,
+  ): boolean => rasterize(r.rings, w, h)[x + y * w] === 1;
+  assert.ok(covers(outer, 2, 2), "realm 0 covers the ground round the enclave");
+  assert.ok(!covers(outer, 9, 7), "realm 0 does not cover the enclave");
+  assert.ok(covers(inner, 9, 7), "realm 1 covers its enclave");
+});
+
+test("a staircase border is drawn as the line it steps along (Issue #953)", () => {
+  const n = 40;
+  const labels = new Int16Array(n * n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) labels[x + y * n] = x + y < n ? 0 : 1;
+  const chains = regionRealmBorders(labels, n, n);
+  assert.equal(chains.length, 1, "one boundary, one chain");
+  const chain = chains[0]!;
+  let turning = 0;
+  for (let i = 1; i + 1 < chain.length; i++) {
+    const [ax, ay] = chain[i - 1]!;
+    const [bx, by] = chain[i]!;
+    const [cx, cy] = chain[i + 1]!;
+    let turn = Math.atan2(cy - by, cx - bx) - Math.atan2(by - ay, bx - ax);
+    while (turn > Math.PI) turn -= 2 * Math.PI;
+    while (turn < -Math.PI) turn += 2 * Math.PI;
+    turning += Math.abs(turn);
+  }
+  const degrees = (turning * 180) / Math.PI;
+  assert.ok(degrees < 5, `the staircase turns ${degrees.toFixed(0)} degrees in total`);
 });

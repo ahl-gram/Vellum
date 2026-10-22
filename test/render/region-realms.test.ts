@@ -74,7 +74,7 @@ test("the interior border strokes each seam ONCE, inside the land clip (#423)", 
   assert.equal(
     paths,
     region.region?.realmBorders?.length,
-    "the border layer must stroke exactly the carried chains, one path each",
+    "the border layer must stroke exactly the region's border chains, one path each",
   );
 });
 
