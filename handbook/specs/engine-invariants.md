@@ -68,7 +68,7 @@ a realm is an identity change, and `handbook/specs/rulebook.md` says what that c
 it to `TERRAIN_INPUT_KEYS` in `src/world/terrain-inputs.ts`; `terrainInputsOf` there hands it to the
 world sheet (`terrainStage` in `src/world/generate.ts`), to both arms of a close-up
 (`regionElevation` in `src/world/region.ts`) and to the detail chain and its cache key
-(`buildChainedField` and `chainCacheKey` in `src/world/detail-chain.ts`). Never pass one to
+(`bareDetailField`, `buildChainedField` and `chainCacheKey` in `src/world/detail-chain.ts`). Never pass one to
 `buildHeightfield` by hand: a field spread at one call and forgotten at another draws a close-up that
 contradicts its own chart. A key's value is a number or a string, since `chainCacheKey` joins it into
 a string. `test/world/terrain-inputs.test.ts` holds each arm of the close-up to its chart at the
