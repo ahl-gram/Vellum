@@ -40,7 +40,7 @@ Before the first commit, run `git diff --stat <planned-at sha> origin/main -- <e
 You do not take design decisions, and the cheap-looking ones are where a lane goes wrong. Stop, commit what you have as a WIP commit, and report to the dispatcher, who routes it to the planner and to Alex where a decision is involved, when:
 
 - a factual claim in the plan is false: a symbol, path, call site, count or behaviour is not what it says;
-- building it as written would need a source file, export, test, dependency or roster the plan does not name, or would leave one it names unused (an issue filed or a `handbook/errata/` row added at step 15 is not one);
+- building it as written would need a source file, export, test, dependency or roster the plan does not name, or would leave one it names unused (an issue filed or a `handbook/errata/` row added at step 15 is not one, and an issue you file carries the whole fix as far as you can write it, as `handbook/specs/development-workflow.md` step 15 says);
 - a test the plan specifies cannot go red on the assertion it names, or a bound it names is exceeded by a measurement;
 - one of the plan's own stop conditions fires;
 - a `vellum-pr-skeptic`, `vellum-guard-prover` or `vellum-plate-reader` finding is about the design rather than about your execution of it, or fixing it needs a decision of Alex's.
