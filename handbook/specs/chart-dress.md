@@ -81,9 +81,14 @@ everything already claimed in the arena**, which is more than the labels: the ca
 scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
 they are drawn. The label layers claim in the order they run, and that order IS their priority
 (`labelledLayers` in `src/render/map-renderer.ts`): the settlements claim before the feature labels,
-so a river's name yields to every settlement label as well, and a reorder moves labels wherever two
-claims collide. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
-costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
+so a river's name yields to every settlement label as well, except the names of a close-up's
+farmsteads and mills, which claim after the feature labels and before the sea beasts, so they give
+way to every other word on the sheet; a reorder moves labels wherever two claims collide. The marks
+of those farmsteads and mills claim their own boxes before any label is placed, so every label
+placed by search steps around them, though a settlement's or realm's name forced into place when no
+spot is free can still cover one, and a river's name may graze one as it may any claim; no other
+settlement mark reserves room. Terrain glyphs are the exception that reserve nothing, so grazing a
+stand of trees costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
 
 **A sea beast is drawn last and yields to everything.** `beastsLayer`
 (`src/render/layers/beasts.ts`) claims the arena after the settlements and the feature labels, keeps

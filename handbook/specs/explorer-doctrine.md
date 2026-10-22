@@ -432,9 +432,9 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   `touch-action` down the ancestor chain, so an ancestor at `none` may defeat the card's own line,
   and the harness cannot see a `touch-action` line at all. A green run there says only that the
   camera no longer swallows the gesture, and a real device is the evidence.
-- **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
-  no world index, so an inset card is deliberately linkless. Why an inset renumbers is
-  `handbook/specs/region-and-voyage.md`'s.
+- **A place link is world-sheet only.** A region inset renumbers its places and its hamlets,
+  farmsteads and mills have no world index, so an inset card is deliberately linkless. Why an inset
+  renumbers is `handbook/specs/region-and-voyage.md`'s.
 - **A shown card holds while the pointer is anywhere over its outline, and stays see-through
   while it does** (Issue #750, the rules pure in `src/site/shared/living-chart/place-card-hold.ts`). The
   outline is the card's rectangle read against the pointer, never a card that takes the pointer, so
