@@ -73,7 +73,11 @@ The environment is defined in the claude.ai/code web UI. No repo file, API or CL
 
 ## Starting a run
 
-The routine runs on demand. Alex starts it from a terminal with `claude --cloud` (which needs a TTY), or the dispatching session fires it through the cloud routine's API endpoint; a session's own shell has no TTY. No unattended schedule runs until Alex rules one after watching real runs.
+The routine runs on demand, from claude.ai/code: choose `ahl-gram/Vellum` and the cloud environment above, and type one line, **"Run the cloud quick-win routine: read `handbook/specs/cloud-routine.md` in full and follow it, one issue, 60 minutes."** That line is the whole prompt; this file is the rest. A session started from a checkout with `claude --cloud` cannot upload this repository (over the upload limit), and a session's own shell has no TTY. The cloud routine's API endpoint can fire a saved routine instead. No unattended schedule runs until Alex rules one after watching real runs.
+
+**The run begins** with `node -v` (v24.x), `git remote -v` (an origin), and `gh api repos/ahl-gram/Vellum --jq .permissions` (push), each as its own command, and stops as the stop conditions say if one fails. The repository is attached by the environment, so no `add_repo` call is needed; where a session finds no checkout it stops and reports, since attaching a repository is Alex's act.
+
+**The final comment on the issue carries "Run notes"** while the routine is new: whether the repo's hook refused a command and its message, the time and a rough token count, and anything in this file that was wrong, missing or unclear.
 
 ## Not yet known
 
