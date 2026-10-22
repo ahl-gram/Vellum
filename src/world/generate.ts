@@ -7,8 +7,9 @@ import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
 import { extractRivers, isMajorRiver, type River } from "../hydrology/rivers.ts";
 import { mountainCrests } from "../hydrology/crests.ts";
 import { findLakes } from "../hydrology/lakes.ts";
-import { buildHeightfield, type MapType } from "../terrain/heightfield.ts";
-import { pickSeaLevel } from "../terrain/sealevel.ts";
+import { buildHeightfield, looseningOf, type MapType } from "../terrain/heightfield.ts";
+import { checkLandFraction, pickSeaLevel } from "../terrain/sealevel.ts";
+import { outlineCoverage } from "../terrain/outline-distance.ts";
 import { CULTURES, createNamer, makeMapTitle, type Culture, type MapTitle, type Namer } from "../society/names.ts";
 import { placeSettlements, type Settlement } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
@@ -75,10 +76,17 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   return out as Partial<T>;
 }
 
+export function landShareOf(recipe: WorldRecipe): number {
+  if (recipe.outline === undefined) return recipe.landFraction;
+  checkLandFraction(recipe.landFraction);
+  const own = outlineCoverage(recipe.outline, recipe.gridW, recipe.gridH);
+  return own + (LAND_FRACTION[recipe.mapType] - own) * looseningOf(recipe.looseness ?? 0);
+}
+
 function terrainStage(recipe: WorldRecipe, rng: Rng): { elev: Field; seaLevel: number; winds: Winds } {
   const { seed, gridW, gridH, mapType } = recipe;
   const elev = buildHeightfield({ seed, gridW, gridH, mapType, ...terrainInputsOf(recipe) });
-  const seaLevel = pickSeaLevel(elev, recipe.landFraction);
+  const seaLevel = pickSeaLevel(elev, landShareOf(recipe));
 
   const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
   return { elev, seaLevel, winds };

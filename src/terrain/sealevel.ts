@@ -1,9 +1,13 @@
 import { quantile, type Field } from "../core/grid.ts";
 
-export function pickSeaLevel(elev: Field, landFraction: number): number {
+export function checkLandFraction(landFraction: number): void {
   if (!Number.isFinite(landFraction) || landFraction <= 0 || landFraction >= 1) {
     throw new RangeError(`landFraction must be in (0, 1), got ${landFraction}`);
   }
+}
+
+export function pickSeaLevel(elev: Field, landFraction: number): number {
+  checkLandFraction(landFraction);
   return quantile(elev.data, 1 - landFraction);
 }
 

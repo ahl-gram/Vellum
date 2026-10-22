@@ -4,7 +4,8 @@ import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel, landMask, landFractionOf } from "../../src/terrain/sealevel.ts";
 import { slopeField } from "../../src/terrain/slope.ts";
 import { createField } from "../../src/core/grid.ts";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/generate.ts";
+import { OUTLINE_IDS, type OutlineId } from "../../src/world/outline-ids.ts";
 import type { MapType } from "../../src/terrain/heightfield.ts";
 
 const RECIPE = {
@@ -198,4 +199,68 @@ test("a landFraction override is additive: it shifts no other recipe roll", () =
     assert.equal(forced.mapType, base.mapType, "mapType unchanged by forcing land");
     assert.equal(forced.band, base.band, "band unchanged by forcing land");
   }
+});
+
+function borderLandCells(land: Uint8Array, w: number, h: number): number {
+  let border = 0;
+  for (let x = 0; x < w; x++) border += (land[x] as number) + (land[x + (h - 1) * w] as number);
+  for (let y = 1; y < h - 1; y++) border += (land[y * w] as number) + (land[w - 1 + y * w] as number);
+  return border;
+}
+
+test("a shaped world keeps the sea on all four borders at looseness 0, 0.5 and 1 on every map type, both coast extremes and both land fraction extremes (Issue #851)", () => {
+  const W = 320;
+  const H = 240;
+  const settings: ReadonlyArray<readonly [number, number]> = [
+    [0, 1],
+    [0.5, 0],
+    [0.5, 1],
+    [1, 0],
+    [1, 1],
+  ];
+  // 2026-10-21, Issue #851: seeds 1 to 6, every outline and type, coast 0, 0.55 and 1 and looseness by quarters left every border sea; moving the share across the whole slider puts land on it for seed 2's crescent on a continent at looseness 0.5 and coast 1, this test's witness.
+  for (const id of OUTLINE_IDS) {
+    for (const mapType of MAP_TYPES) {
+      for (const [looseness, coastWarp] of settings) {
+        const loose = looseness > 0 ? { looseness } : {};
+        const elev = buildHeightfield({ seed: 2, gridW: W, gridH: H, mapType, outline: id, coastWarp, ...loose });
+        for (const landFraction of [0.1, 0.7]) {
+          const recipe = defaultRecipe(2, { mapType, outline: id, coastWarp, landFraction, ...loose });
+          const land = landMask(elev, pickSeaLevel(elev, landShareOf(recipe)));
+          const border = borderLandCells(land, W, H);
+          assert.equal(
+            border,
+            0,
+            `${id} on ${mapType}, looseness ${looseness}, coast ${coastWarp}, land fraction ${landFraction}: ${border} border cells are land`,
+          );
+        }
+      }
+    }
+  }
+});
+
+test("the terrain refuses a looseness outside [0, 1], a looseness with no outline, and an outline it does not know (Issue #851)", () => {
+  for (const bad of [Number.NaN, -0.1, 1.5, Infinity]) {
+    assert.throws(
+      () => buildHeightfield({ ...RECIPE, outline: "round", looseness: bad }),
+      { name: "RangeError", message: `looseness must be a number in [0, 1], got ${bad}` },
+      `looseness ${bad}`,
+    );
+  }
+  assert.throws(() => buildHeightfield({ ...RECIPE, looseness: 0.5 }), {
+    name: "RangeError",
+    message: "looseness needs an outline",
+  });
+  assert.throws(() => buildHeightfield({ ...RECIPE, outline: "atlantis" as OutlineId }), {
+    name: "RangeError",
+    message: "unknown outline atlantis",
+  });
+  assert.throws(() => generateWorld(defaultRecipe(11, { gridW: 80, gridH: 60, looseness: 0.5 })), {
+    name: "RangeError",
+    message: "looseness needs an outline",
+  });
+  assert.throws(() => generateWorld(defaultRecipe(11, { gridW: 80, gridH: 60, outline: "round", landFraction: 7 })), {
+    name: "RangeError",
+    message: "landFraction must be in (0, 1), got 7",
+  });
 });
