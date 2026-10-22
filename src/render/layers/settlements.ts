@@ -11,6 +11,8 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   town: 13,
   village: 10.5,
   hamlet: 8.5,
+  farmstead: 8.5,
+  mill: 8.5,
 };
 
 export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
@@ -19,6 +21,8 @@ export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
   town: 17.5,
   village: 15,
   hamlet: 13,
+  farmstead: 13,
+  mill: 13,
 };
 
 const CAPITAL_GLYPH_SCALE = 1.25;
@@ -224,7 +228,15 @@ function settlementOrder(world: World): { ordered: OrderedSettlement[]; seatReal
   const seatRealm = new Map<number, number>();
   seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
 
-  const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3, hamlet: 4 };
+  const RANK: Record<SettlementTier, number> = {
+    capital: 0,
+    seat: 1,
+    town: 2,
+    village: 3,
+    hamlet: 4,
+    farmstead: 5,
+    mill: 5,
+  };
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
     s.kind === "capital" ? "capital" : seatRealm.has(i) ? "seat" : s.kind;
 

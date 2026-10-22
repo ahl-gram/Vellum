@@ -39,8 +39,8 @@ const KIND_LABEL: Record<string, string> = {
 
 const gazetteerWriter = (world: World) => createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
 
-// hamlet is unreachable (the gazetteer reads the BASE world); listed to keep the kind index total.
-const KIND_ORDER = { capital: 0, town: 1, village: 2, hamlet: 3 };
+// hamlet, farmstead and mill are unreachable (the gazetteer reads the BASE world); listed to keep the kind index total.
+const KIND_ORDER = { capital: 0, town: 1, village: 2, hamlet: 3, farmstead: 4, mill: 5 };
 
 function gazetteerOrder(world: World): number[] {
   return world.settlements
