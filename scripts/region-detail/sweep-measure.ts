@@ -1,5 +1,4 @@
 import { generateRegionWorld } from "../../src/world/region.ts";
-import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
 import { landSnapRadius } from "../../src/world/snap-to-land.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 import { hamletCandidates } from "../../src/society/hamlets.ts";
@@ -8,6 +7,7 @@ import { BIOMES } from "../../src/climate/biomes.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { River } from "../../src/hydrology/rivers.ts";
 import type { World } from "../../src/world/types.ts";
+import { laidRiverCount } from "./feature-match.ts";
 
 const INSET = 0.02; // region.ts's own open-window inset
 
@@ -109,14 +109,6 @@ export function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, 
     bad.push(i);
   });
   return bad;
-}
-
-/** The close-up lays a river for every run of a world river with land under its course, and draws them first. */
-export function laidRiverCount(world: World, region: World, window: UvWindow): number {
-  const { w, h, data } = region.elev;
-  return worldRiverRuns(world, window, w, h).filter((run) =>
-    densifyCourse(run.course).some((p) => (data[Math.round(p.x) + Math.round(p.y) * w] as number) > region.seaLevel),
-  ).length;
 }
 
 function chebyshevToSea(region: World, x: number, y: number, limit: number): number {

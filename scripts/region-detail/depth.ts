@@ -10,6 +10,7 @@ import { landSnapRadius } from "../../src/world/snap-to-land.ts";
 import type { World } from "../../src/world/types.ts";
 import {
   inWindowCourse,
+  laidRiverCount,
   leadsOut,
   matchedFraction,
   matchTolerance,
@@ -17,7 +18,7 @@ import {
   worldRiversDrawn,
   worldRoadsDrawn,
 } from "./feature-match.ts";
-import { laidRiverCount, riversEndingOnLand } from "./sweep-measure.ts";
+import { riversEndingOnLand } from "./sweep-measure.ts";
 
 /** The depth census of Issue #951: per settlement-centred close-up at bands 1 to 5, whether every world river crossing it is drawn and how the drawn ones read, plus the road rows Issue #952 reads as its own before and after. Not in `npm test`: a detailed close-up costs about a second and the run takes minutes. A failed row exits non-zero and writes nothing. */
 
@@ -78,7 +79,6 @@ function largestStep(rivers: ReadonlyArray<River>): number {
   return best;
 }
 
-/** The longest stretch of one river keeping one step direction, region cells. */
 function longestStraight(rivers: ReadonlyArray<River>): number {
   let best = 0;
   for (const r of rivers) {

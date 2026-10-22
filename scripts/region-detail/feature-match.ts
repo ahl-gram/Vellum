@@ -1,7 +1,8 @@
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
+import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
 import type { World } from "../../src/world/types.ts";
 
-/** The census's and the guards' one instrument for rivers and roads, the Issue #395 breakdown's per-feature rule: a world feature crossing a close-up counts as drawn when at least half of its in-window course lies within max(3 cells, one world cell) of a drawn one. It clips on its own, independent of `worldRiverRuns`, so a guard built on it does not share the defect's oracle. */
+/** The census's and the guards' one instrument for rivers and roads, the Issue #395 breakdown's per-feature rule: a world feature crossing a close-up counts as drawn when at least half of its in-window course lies within max(3 cells, one world cell) of a drawn one. It clips with its own copy of the clip, not an import of `worldRiverRuns`, so a guard built on it does not share that function's code. */
 
 export type Pt = { readonly x: number; readonly y: number };
 
@@ -60,7 +61,6 @@ function clip(a: Pt, b: Pt, f: Frame): { readonly t0: number; readonly t1: numbe
 
 const at = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
 
-/** The clipped course sampled about once per region cell, in region grid coordinates; empty when the clipped course is under one region cell. */
 export function inWindowCourse(
   points: ReadonlyArray<Pt>,
   world: World,
@@ -124,7 +124,6 @@ const hasLandUnder = (course: ReadonlyArray<Pt>, region: World): boolean => {
   });
 };
 
-/** Per feature: undefined when it does not cross the close-up (no in-window course of a region cell, or no land under any sample), else whether MATCH_FRACTION of its samples lie within `matchTolerance` of a drawn one. */
 export function worldFeaturesDrawn(
   features: ReadonlyArray<ReadonlyArray<Pt>>,
   drawn: ReadonlyArray<ReadonlyArray<Pt>>,
@@ -161,7 +160,6 @@ export function worldRoadsDrawn(world: World, region: World, window: UvWindow): 
   );
 }
 
-/** A clipped segment of the course reaches the window's border: the course enters or leaves rather than lying wholly inside. */
 export function leadsOut(points: ReadonlyArray<Pt>, world: World, window: UvWindow): boolean {
   const f = frameOf(world, window, 2, 2);
   for (let i = 1; i < points.length; i++) {
@@ -169,4 +167,10 @@ export function leadsOut(points: ReadonlyArray<Pt>, world: World, window: UvWind
     if (c !== null && (c.t0 > 0 || c.t1 < 1)) return true;
   }
   return false;
+}
+
+/** How many rivers the close-up laid from a world river: one per run of `worldRiverRuns` with land under it, and they come first in `region.rivers`. */
+export function laidRiverCount(world: World, region: World, window: UvWindow): number {
+  const { w, h } = region.elev;
+  return worldRiverRuns(world, window, w, h).filter((run) => hasLandUnder(densifyCourse(run.course), region)).length;
 }

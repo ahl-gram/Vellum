@@ -11,7 +11,7 @@ import { relay } from "../../test-support/region-rivers-fixtures.ts";
 import { MATCH_FRACTION, matchedFraction, matchTolerance } from "../../scripts/region-detail/feature-match.ts";
 
 function nearRegionRiver(region: World, gridW: number, gridH: number): (gx: number, gy: number) => boolean {
-  // region river cells (rounded; projected world rivers carry fractional coords)
+  // region river cells (rounded)
   const regionCells = new Set<number>();
   for (const r of region.rivers) {
     for (const p of r.points) regionCells.add(Math.round(p.x) + Math.round(p.y) * gridW);

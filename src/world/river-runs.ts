@@ -20,7 +20,6 @@ type Frame = {
   readonly toRegion: (p: GridPoint) => GridPoint;
 };
 
-/** Liang-Barsky: the parameters t0 <= t1 of segment a-b inside the box, or null. */
 function clipSegment(a: GridPoint, b: GridPoint, box: Box): readonly [number, number] | null {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
@@ -55,7 +54,6 @@ function courseLength(course: ReadonlyArray<GridPoint>): number {
   return length;
 }
 
-/** The sample count is one per region cell of each segment, at least one. */
 export function densifyCourse(course: ReadonlyArray<GridPoint>): GridPoint[] {
   const out: GridPoint[] = [];
   for (let i = 1; i < course.length; i++) {
@@ -113,7 +111,6 @@ function runsOfRiver(river: River, index: number, frame: Frame): RiverRun[] {
 
 const peak = (run: RiverRun): number => Math.max(...run.acc);
 
-/** Every maximal in-window stretch of every world river, clipped segment by segment so a river with one world vertex inside, or none, still crosses. Laid order: majors first, then the highest peak accumulation first; ties keep world river order, then run order. */
 export function worldRiverRuns(world: World, window: UvWindow, gridW: number, gridH: number): RiverRun[] {
   const ww = world.recipe.gridW - 1;
   const wh = world.recipe.gridH - 1;

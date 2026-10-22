@@ -10,12 +10,10 @@ export const CORRIDOR_WORLD_CELLS = 1;
 export const VALLEY_K = 6;
 export const CENTRE_PULL = 1;
 
-/** One world cell in region cells, never under 2: keyed to the WINDOW, so the corridor is the same width at any depth. */
 export function corridorRadius(window: UvWindow, gridW: number, worldGridW: number): number {
   return Math.max(2, (CORRIDOR_WORLD_CELLS * (gridW - 1)) / ((window.u1 - window.u0) * (worldGridW - 1)));
 }
 
-/** The ground less its own blur: where the fine ground lies below its surroundings (a valley) it reads negative. */
 export function fineRelief(ground: Field, radius: number): Field {
   const smooth = boxBlur(ground, Math.max(1, Math.round(radius / 2)));
   const data = new Float64Array(ground.data.length);
@@ -23,7 +21,6 @@ export function fineRelief(ground: Field, radius: number): Field {
   return fieldFrom(ground.w, ground.h, data);
 }
 
-/** Each cell's Euclidean distance to the course, Infinity beyond `radius`. */
 export function courseDistance(
   course: ReadonlyArray<GridPoint>,
   gridW: number,
@@ -159,7 +156,6 @@ function tiersOf(run: RiverRun, frame: RouteFrame, dist: Float64Array): Readonly
   return [{ isTarget: meeting, passable: corridorLand }, { isTarget: meeting, passable: isLand }, ...toExit];
 }
 
-/** The cells of the cheapest path from the run's first land cell to its target, before the mouth walk. The caller has checked the course has land under it; when the start is the exit, the path is the start alone. */
 export function routeRun(run: RiverRun, frame: RouteFrame): number[] {
   const { w, h } = frame.elev;
   const dist = courseDistance(run.course, w, h, frame.radius);

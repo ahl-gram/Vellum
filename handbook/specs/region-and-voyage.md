@@ -37,7 +37,7 @@ about a rule, the rulebook wins.
   area is missing, not miscalibrated, and a deep window holds too little ground for its own extraction
   to find any river. Lay EVERY world river whose course crosses the window over land, major and minor,
   along the cheapest path over the window's own unfloored detail, inside a corridor one world cell
-  either side of the world's line (`layRegionRivers` in `src/world/region-rivers.ts`), and never draw it
+  either side of the world's line, or up to twice that where it meets another river (`layRegionRivers` in `src/world/region-rivers.ts`), and never draw it
   as its world vertices, which stand a world cell apart and read as chords. Take that ground from the
   chain, never from a second terrain build (`chainedFieldAndGround` in `src/world/detail-chain.ts`). Key
   the corridor and the relief to the WINDOW, never to a band index (`corridorRadius` in

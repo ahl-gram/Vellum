@@ -21,7 +21,6 @@ function heldOf(world: World): Held {
   return held;
 }
 
-/** A close-up on the Glass's grid, memoised by world and window, all of a world's sharing one chain cache. */
 export function closeUp(world: World, window: UvWindow, detail = true): World {
   const held = heldOf(world);
   const key = `${window.u0}|${window.v0}|${window.u1}|${window.v1}|${detail}`;
@@ -39,7 +38,6 @@ export function closeUp(world: World, window: UvWindow, detail = true): World {
   return region;
 }
 
-/** The windows of the settlement called `name` at bands 1 to 5, as the Glass commits them. */
 export function townWindows(world: World, name: string): UvWindow[] {
   const town = world.settlements.find((s) => s.name === name);
   assert.ok(town !== undefined, `the world has a settlement called ${name}`);
@@ -50,7 +48,6 @@ export function townWindows(world: World, name: string): UvWindow[] {
   });
 }
 
-/** The ground a close-up was routed over: the chain's unfloored detail, or the drawn field itself on a sheet drawn without detail. */
 export function groundOf(world: World, window: UvWindow, detail: boolean): Field {
   const region = closeUp(world, window, detail);
   if (!detail) return region.elev;
@@ -70,7 +67,6 @@ export function groundOf(world: World, window: UvWindow, detail: boolean): Field
   ).ground;
 }
 
-/** The rivers a sheet laid from the world and the ones it kept from its own ground, laid again over the same ground; the sheet draws exactly these. */
 export function relay(
   world: World,
   window: UvWindow,

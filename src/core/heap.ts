@@ -55,7 +55,6 @@ export function createMinHeap(): MinHeap {
   };
 }
 
-/** Pops the least value and, of equal values, the lower index: the tie-break by cell index a search needs to stay deterministic. */
 export function createCellMinHeap(): MinHeap {
   const idx: number[] = [];
   const val: number[] = [];

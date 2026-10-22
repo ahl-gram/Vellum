@@ -133,7 +133,6 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
   return chainFromBare(spec, cache, bareDetailField(spec));
 }
 
-/** The window's own detail before the chain floors it to its ancestors: the ground a river is routed over. */
 export function bareDetailField(spec: ChainSpec): Field {
   return buildHeightfield({
     seed: spec.seed,
@@ -147,7 +146,6 @@ export function bareDetailField(spec: ChainSpec): Field {
   });
 }
 
-/** The chained field and the unfloored ground it was floored from, in one call: on a miss the chain builds the ground, floors it and caches the floored field; on a hit it builds the ground alone. Only the chain writes what it caches. */
 export function chainedFieldAndGround(
   spec: ChainSpec,
   cache: ChainCache = createChainCache(),

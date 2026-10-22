@@ -77,7 +77,6 @@ export type RiverGround = {
   readonly elev: Field;
   readonly flow: FlowResult;
   readonly seaLevel: number;
-  /** The window's own unfloored detail: the field a river is routed over, which is `elev` itself on a sheet drawn without detail. */
   readonly ground: Field;
 };
 
@@ -95,12 +94,10 @@ const onBorder = (cell: number, w: number, h: number): boolean => {
 const cellOfPoint = (p: { readonly x: number; readonly y: number }, w: number, h: number): number =>
   clamp(Math.round(p.x), 0, w - 1) + clamp(Math.round(p.y), 0, h - 1) * w;
 
-/** A run with no land under its densified course is a mouth over the close-up's own sea, where a river would draw a stub on the water. */
 function hasLandUnder(run: RiverRun, elev: Field, seaLevel: number): boolean {
   return densifyCourse(run.course).some((p) => (elev.data[cellOfPoint(p, elev.w, elev.h)] as number) > seaLevel);
 }
 
-/** Integer cell points whose accumulation runs linearly from the run's first to its last, in the window's own density. */
 function pointsAlong(path: ReadonlyArray<number>, run: RiverRun, density: number, w: number): RiverPoint[] {
   const first = (run.acc[0] as number) * density;
   const last = (run.acc[run.acc.length - 1] as number) * density;
@@ -111,7 +108,6 @@ function pointsAlong(path: ReadonlyArray<number>, run: RiverRun, density: number
   }));
 }
 
-/** An extracted river is dropped when at least `SHADOW_FRACTION` of its points lie within `reach` cells of a laid one. */
 function unshadowed(extracted: ReadonlyArray<River>, laid: Uint8Array, reach: number, w: number, h: number): River[] {
   const near = bfsDistance(w, h, (x, y) => laid[x + y * w] === 1);
   return extracted.filter((river) => {
@@ -120,7 +116,7 @@ function unshadowed(extracted: ReadonlyArray<River>, laid: Uint8Array, reach: nu
   });
 }
 
-/** An orphaned tributary, one whose trunk was dropped as a double, is left ending on dry land: drop it, repeatedly, until none is. A river's end on or next to a cell of a laid river, or a point of another kept river other than that river's last, stands. */
+/** Another kept river's LAST point never counts as a meeting point for a river: that river may itself be dropped next. */
 function dropOrphans(kept: ReadonlyArray<River>, laid: Uint8Array, elev: Field, seaLevel: number): River[] {
   const { w, h } = elev;
   let rivers = [...kept];
@@ -156,7 +152,6 @@ function dropOrphans(kept: ReadonlyArray<River>, laid: Uint8Array, elev: Field, 
   }
 }
 
-/** Lay one run: its cheapest path over the ground, then, for a run that ends inside the window, a walk down the region's own flow to water, a cell an earlier run laid, or the border. */
 function layRun(run: RiverRun, ctx: LayContext): River {
   const { elev, flow, seaLevel, relief, radius, laid, density, reach } = ctx;
   const path = routeRun(run, { elev, seaLevel, relief, radius, laid });
