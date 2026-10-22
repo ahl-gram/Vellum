@@ -29,6 +29,13 @@ home's line wins for the lane and this file's for the orchestrator.
   commit small and often; any ruling of Alex's, quoted from its posted comment; and, where it asks
   for a read of the roadmap board, a read that counts its rows against the board's total, since a
   listing cut short is not an absence (the Never list).
+- **A sub Alex calls small gets a brief that carries his cap and names the reviews he skips.** The
+  brief quotes his words on time and tokens (a cap, or "keep time and tokens down") and lists the
+  rounds he skips (the plan, the plan skeptic, the guard prover, the cold skeptic); the lane runs no
+  more than that and stops at the open pull request. Where he skips the plan, the issue body is
+  the plan and the implementer is dispatched on it, handing back if the issue is not true on main.
+  The pull request body's Records line says which reviews were skipped by his order, with the date.
+  A sub is small when he calls it so, never on the orchestrator's own judgement.
 - **Several planners may run at once.** Recon, the plan and the plan skeptic write no code,
   so running them together is cheap and batches Alex's menus into one sitting; the builds are the
   expensive part.
