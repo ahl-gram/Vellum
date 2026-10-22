@@ -7,6 +7,7 @@ import { BIOMES } from "../../src/climate/biomes.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { River } from "../../src/hydrology/rivers.ts";
 import type { World } from "../../src/world/types.ts";
+import { laidRiverCount } from "./feature-match.ts";
 
 const INSET = 0.02; // region.ts's own open-window inset
 
@@ -53,8 +54,8 @@ export type RiverFailure = {
   readonly terminalElev: number;
   readonly parentElevAtTerminal: number;
   readonly endsInOcean: boolean;
-  /** projectWorldMajors emits fractional cell coordinates, extractRivers integral ones: the one discriminator available without exporting it. */
-  readonly projected: boolean;
+  /** One of the rivers the close-up laid from a world river: they come first, one per run of `worldRiverRuns` in `src/world/river-runs.ts` with land under it. */
+  readonly laid: boolean;
   readonly cellsToSea: number;
 };
 
@@ -78,10 +79,10 @@ function expectedProjections(world: World, window: UvWindow): number {
   return n;
 }
 
-const CONFLUENCE_TOL = 2; // anchorRegionRivers' own SHADOW_RADIUS: how near a drawn river counts as meeting it
+const CONFLUENCE_TOL = 2; // how near another drawn river a river's end counts as meeting it
 
-/** A river may legitimately stop at the window edge (cropped) or on another river (a confluence, which anchorRegionRivers itself judges within SHADOW_RADIUS). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
-function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
+/** A river may legitimately stop at the window edge (cropped) or on another river (a confluence). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
+export function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
   const { w, h } = region.elev;
   const cellsOf = (r: River): Set<number> => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
   const all = rivers.map(cellsOf);
@@ -302,6 +303,7 @@ function riverFailures(
 ): RiverFailure[] {
   const { gridW, gridH } = band;
   const { data } = region.elev;
+  const laidCount = laidRiverCount(world, region, window);
   return badRivers.map((i) => {
     const river = region.rivers[i] as River;
     const last = river.points[river.points.length - 1] as River["points"][number];
@@ -318,7 +320,7 @@ function riverFailures(
       terminalElev: data[x + y * gridW] as number,
       parentElevAtTerminal: (world.elev.data[wi] as number) - world.seaLevel,
       endsInOcean: river.endsInOcean,
-      projected: river.points.some((p) => !Number.isInteger(p.x) || !Number.isInteger(p.y)),
+      laid: i < laidCount,
       cellsToSea: chebyshevToSea(region, x, y, 32),
     };
   });

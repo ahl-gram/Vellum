@@ -2,11 +2,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
-import { isMajorRiver } from "../../src/hydrology/rivers.ts";
+import { lodWindowFor } from "../../src/world/lod.ts";
+import { regionRiverThreshold } from "../../src/world/region-rivers.ts";
+import { extractRivers, isMajorRiver } from "../../src/hydrology/rivers.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
+import { relay } from "../../test-support/region-rivers-fixtures.ts";
+import { MATCH_FRACTION, matchedFraction, matchTolerance } from "../../scripts/region-detail/feature-match.ts";
 
 function nearRegionRiver(region: World, gridW: number, gridH: number): (gx: number, gy: number) => boolean {
-  // region river cells (rounded; projected world rivers carry fractional coords)
+  // region river cells (rounded)
   const regionCells = new Set<number>();
   for (const r of region.rivers) {
     for (const p of r.points) regionCells.add(Math.round(p.x) + Math.round(p.y) * gridW);
@@ -92,51 +97,46 @@ test("region rivers match the world's major-river set at the window boundary (AC
   assert.ok(interior >= 0.85, `world major rivers persist in the interior (got ${(interior * 100) | 0}%)`);
 });
 
-function cellsAround(cx: number, cy: number, gridW: number, gridH: number): number[] {
-  const cells: number[] = [];
-  for (let dy = -2; dy <= 2; dy++) {
-    for (let dx = -2; dx <= 2; dx++) {
-      const nx = cx + dx,
-        ny = cy + dy;
-      if (nx >= 0 && nx < gridW && ny >= 0 && ny < gridH) cells.push(nx + ny * gridW);
-    }
-  }
-  return cells;
-}
+type Fixture = { readonly name: string; readonly world: World; readonly window: UvWindow; readonly detail: boolean };
 
-test("region rivers are not inked twice: no extracted river shadows a projected major (#162)", () => {
-  // Projected majors carry fractional coords, extracted rivers integer ones; the shadow filter drops any extracted river covering >=50% of its cells within the majors' 2-cell shadow (guards the no-double-ink return in region-rivers.ts).
+function fixtures(): Fixture[] {
   const riverWorld = generateWorld(defaultRecipe(27, { gridW: 320, gridH: 240 }));
   const majors = riverWorld.rivers.filter(isMajorRiver).sort((a, b) => b.points.length - a.points.length);
   const mid = majors[0]!.points[Math.floor(majors[0]!.points.length / 2)]!;
-  const win = windowAround(riverWorld, { x: mid.x, y: mid.y }, 0.38);
-  const gridW = 320,
-    gridH = 240;
-  const region = generateRegionWorld(riverWorld, { window: win, gridW, gridH, title: "River Environs" });
+  return [
+    { name: "seed 27, the 0.38 window", world: riverWorld, window: windowAround(riverWorld, mid, 0.38), detail: false },
+    {
+      name: "chart 2, Vunsvyov, band 2",
+      world: generateWorld(defaultRecipe(2)),
+      window: lodWindowFor(0.5, 0.625, 0.25),
+      detail: true,
+    },
+    {
+      name: "chart 42, the capital, band 3",
+      world: generateWorld(defaultRecipe(42)),
+      window: lodWindowFor(0.515625, 0.390625, 0.125),
+      detail: true,
+    },
+  ];
+}
 
-  const isProjected = (r: (typeof region.rivers)[number]): boolean =>
-    r.points.some((p) => !Number.isInteger(p.x) || !Number.isInteger(p.y));
-  const shadow = new Set<number>();
-  for (const r of region.rivers) {
-    if (!isProjected(r)) continue;
-    for (const p of r.points) {
-      for (const cell of cellsAround(Math.round(p.x), Math.round(p.y), gridW, gridH)) shadow.add(cell);
+test("a close-up never draws one river twice: no river it keeps from its own ground runs beside a laid one (Issue #162, Issue #951)", () => {
+  for (const f of fixtures()) {
+    const { region, laid, extracted: kept } = relay(f.world, f.window, f.detail);
+    assert.ok(laid.length > 0, `${f.name}: the window carries laid world rivers to double`);
+    if (f.name.startsWith("seed 27"))
+      assert.ok(kept.length >= 1, "the window also carries genuinely new extracted detail");
+    if (f.name.includes("Vunsvyov")) {
+      const own = extractRivers(region.elev, region.flow, region.seaLevel, {
+        absoluteThreshold: regionRiverThreshold(f.world, f.window, 320, 240),
+      });
+      assert.ok(own.length > kept.length, "the fixture's own extraction holds a river that the double reach drops");
     }
+    const tolerance = matchTolerance(f.window, 320, f.world.recipe.gridW);
+    const laidLines = laid.map((r) => r.points);
+    const doubled = kept
+      .filter((r) => matchedFraction(r.points, laidLines, tolerance) >= MATCH_FRACTION)
+      .map((r) => r.points[0]);
+    assert.deepEqual(doubled, [], `${f.name}: a river the close-up kept runs beside a laid one`);
   }
-  assert.ok(shadow.size > 0, "the window carries projected world majors to shadow-check against");
-
-  let extractedRivers = 0;
-  for (const r of region.rivers) {
-    if (isProjected(r)) continue;
-    extractedRivers++;
-    let covered = 0;
-    for (const p of r.points) {
-      if (shadow.has(Math.round(p.x) + Math.round(p.y) * gridW)) covered++;
-    }
-    assert.ok(
-      covered / r.points.length < 0.5,
-      `an extracted river shadows a projected major (${((100 * covered) / r.points.length) | 0}% covered): double-ink`,
-    );
-  }
-  assert.ok(extractedRivers > 0, "the window also carries genuinely new extracted detail");
 });

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createMinHeap } from "../../src/core/heap.ts";
+import { createCellMinHeap, createMinHeap } from "../../src/core/heap.ts";
 
 test("pops indices in ascending value order", () => {
   const h = createMinHeap();
@@ -45,4 +45,13 @@ test("handles interleaved push/pop and many items", () => {
     assert.ok(v >= prev - 1e-12, "heap order violated");
     prev = v;
   }
+});
+
+test("the cell heap pops equal costs by cell index, the lower first", () => {
+  const h = createCellMinHeap();
+  h.push(30, 1);
+  h.push(10, 1);
+  h.push(20, 1);
+  h.push(5, 2);
+  assert.deepEqual([h.pop(), h.pop(), h.pop(), h.pop()], [10, 20, 30, 5]);
 });

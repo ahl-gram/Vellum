@@ -32,10 +32,18 @@ about a rule, the rulebook wins.
 - **A region compass may sit on LAND.** Where no genuine sea qualifies, the rose falls back,
   region-only, to a shrunk rose on the most open land clearing rather than vanishing. A world compass
   is unchanged: full size, sea only.
-- **Rivers are anchored to the parent.** A cropped window loses the inflow's upstream area, so no
-  threshold exponent restores it: the missing area is missing, not miscalibrated. Lay the parent's
-  major rivers in as the continuity backbone and drop an extracted river shadowing a projected major.
-  Climate and biomes take the parent's elevation span so the bands match at the boundary.
+- **Rivers are anchored to the parent, and every one is laid along the window's own ground.** A
+  cropped window loses the inflow's upstream area, so no threshold exponent restores it: the missing
+  area is missing, not miscalibrated, and a deep window holds too little ground for its own extraction
+  to find any river. Lay EVERY world river whose course crosses the window over land, major and minor,
+  along the cheapest path over the window's own unfloored detail, inside a corridor one world cell
+  either side of the world's line, or up to twice that where it meets another river (`layRegionRivers` in `src/world/region-rivers.ts`), and never draw it
+  as its world vertices, which stand a world cell apart and read as chords. Take that ground from the
+  chain, never from a second terrain build (`chainedFieldAndGround` in `src/world/detail-chain.ts`). Key
+  the corridor and the relief to the WINDOW, never to a band index (`corridorRadius` in
+  `src/world/river-route.ts`). A laid river ends at the window's edge, in water, or on another drawn
+  river. Keep an extracted river only where it neither doubles a laid one nor is left ending on dry
+  land. Climate and biomes take the parent's elevation span so the bands match at the boundary.
 - **Realms are CARRIED onto a region sheet, never re-derived.** Re-deriving on a crop disagrees with
   the parent's assignment. Carry the parent LABEL FIELD and not a tint index array, because the tint
   indices take the style and an index array would need one copy per style.
