@@ -61,6 +61,14 @@ On any of these the session stops, comments what it found on the issue (the comm
 
 Force-push; delete a branch it did not create; edit `.claude/settings.json`, any local settings file, `CLAUDE.md` or an agent definition; merge another session's pull request; file, move or phase a board item; post a review on another's pull request; run a command the Never list in `.claude/skills/vellum-footguns/SKILL.md` names.
 
+## The cloud environment
+
+The environment is defined in the claude.ai/code web UI. No repo file, API or CLI sets it, so this section is the record of what it holds, and `scripts/cloud-setup.sh` is the repo's copy of its script.
+
+- **Setup script:** the contents of `scripts/cloud-setup.sh`, pasted into the environment's "Setup script" field. It installs Node 24 over the VM's own. A setup script runs as root before Claude starts and is cached, which a SessionStart hook is not (it runs on every start), so the install is not a hook. Change the file and the field together.
+- **Network access:** Limited (the dialog's levels are None, Limited and Full), with `nodejs.org` added as an allowed domain.
+- **Repository:** `ahl-gram/Vellum`, attached with push access, with the Claude GitHub App installed on it.
+
 ## Starting a run
 
 The routine runs on demand. Alex starts it from a terminal with `claude --cloud` (which needs a TTY), or the dispatching session fires it through the cloud routine's API endpoint; a session's own shell has no TTY. No unattended schedule runs until Alex rules one after watching real runs.
