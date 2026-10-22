@@ -68,6 +68,7 @@ The environment is defined in the claude.ai/code web UI. No repo file, API or CL
 - **Setup script:** the contents of `scripts/cloud-setup.sh`, pasted into the environment's "Setup script" field. It installs Node 24 over the VM's own. A setup script runs as root before Claude starts and is cached, which a SessionStart hook is not (it runs on every start), so the install is not a hook. Change the file and the field together.
 - **Network access:** Limited (the dialog's levels are None, Limited and Full), with `nodejs.org` added as an allowed domain.
 - **Repository:** `ahl-gram/Vellum`, attached with push access, with the Claude GitHub App installed on it.
+- **Environment variables:** none.
 
 ## Starting a run
 
