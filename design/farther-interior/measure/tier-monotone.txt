@@ -1,0 +1,10 @@
+finer tier, band 5 to band 6, at cbf57b8f: each band-5 farmstead or mill whose spot lies inside the band-6 window, and whether band 6 draws it
+capital-42-laukuwelua: band 5 draws 6, 2 inside the band-6 window, 0 of them missing at band 6; band 6 draws 9
+river-town-7-wutoanu: band 5 draws 14, 2 inside the band-6 window, 0 of them missing at band 6; band 6 draws 6
+road-town-2-skorsty: band 5 draws 7, 3 inside the band-6 window, 0 of them missing at band 6; band 6 draws 6
+river-mouth-23-mouth-of-world-river-1: band 5 draws 13, 7 inside the band-6 window, 1 of them missing at band 6 (Luatzox); band 6 draws 14
+realm-border-15-border-chain-0-vertex-102: band 5 draws 7, 3 inside the band-6 window, 1 of them missing at band 6 (Zakbru); band 6 draws 9
+sea-edge-42-shore-at-world-cell-143-76: band 5 draws 1, 1 inside the band-6 window, 0 of them missing at band 6; band 6 draws 3
+river-and-road-village-42-won: band 5 draws 5, 0 inside the band-6 window, 0 of them missing at band 6; band 6 draws 7
+sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47: band 5 draws 2, 0 inside the band-6 window, 0 of them missing at band 6; band 6 draws 3
+in all: 16 carried, 2 lost

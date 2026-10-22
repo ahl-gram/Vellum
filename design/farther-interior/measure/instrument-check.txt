@@ -1,0 +1,146 @@
+instrument check at cbf57b8f
+ok   seed 42 band 1 window 0.010,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 1 window 0.010,0.010 world land drawn as water: copy 284, committed 284
+ok   seed 42 band 1 window 0.010,0.010 world landmasses fused/lost/in window: copy 9, committed 9
+ok   seed 42 band 1 window 0.490,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 1 window 0.490,0.010 world land drawn as water: copy 193, committed 193
+ok   seed 42 band 1 window 0.490,0.010 world landmasses fused/lost/in window: copy 6, committed 6
+ok   seed 42 band 1 window 0.010,0.490 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 1 window 0.010,0.490 world land drawn as water: copy 187, committed 187
+ok   seed 42 band 1 window 0.010,0.490 world landmasses fused/lost/in window: copy 9, committed 9
+ok   seed 42 band 1 window 0.490,0.490 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 1 window 0.490,0.490 world land drawn as water: copy 154, committed 154
+ok   seed 42 band 1 window 0.490,0.490 world landmasses fused/lost/in window: copy 2, committed 2
+ok   seed 42 band 2 window 0.010,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.010,0.010 world land drawn as water: copy 46, committed 46
+ok   seed 42 band 2 window 0.010,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.250,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.250,0.010 world land drawn as water: copy 259, committed 259
+ok   seed 42 band 2 window 0.250,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.500,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.500,0.010 world land drawn as water: copy 180, committed 180
+ok   seed 42 band 2 window 0.500,0.010 world landmasses fused/lost/in window: copy 2, committed 2
+ok   seed 42 band 2 window 0.740,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.740,0.010 world land drawn as water: copy 87, committed 87
+ok   seed 42 band 2 window 0.740,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.010,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.010,0.250 world land drawn as water: copy 363, committed 363
+ok   seed 42 band 2 window 0.010,0.250 world landmasses fused/lost/in window: copy 4, committed 4
+ok   seed 42 band 2 window 0.250,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.250,0.250 world land drawn as water: copy 563, committed 563
+ok   seed 42 band 2 window 0.250,0.250 world landmasses fused/lost/in window: copy 6, committed 6
+ok   seed 42 band 2 window 0.500,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.500,0.250 world land drawn as water: copy 183, committed 183
+ok   seed 42 band 2 window 0.500,0.250 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.740,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.740,0.250 world land drawn as water: copy 327, committed 327
+ok   seed 42 band 2 window 0.740,0.250 world landmasses fused/lost/in window: copy 5, committed 5
+ok   seed 42 band 2 window 0.010,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.010,0.500 world land drawn as water: copy 152, committed 152
+ok   seed 42 band 2 window 0.010,0.500 world landmasses fused/lost/in window: copy 3, committed 3
+ok   seed 42 band 2 window 0.250,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.250,0.500 world land drawn as water: copy 260, committed 260
+ok   seed 42 band 2 window 0.250,0.500 world landmasses fused/lost/in window: copy 3, committed 3
+ok   seed 42 band 2 window 0.500,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.500,0.500 world land drawn as water: copy 118, committed 118
+ok   seed 42 band 2 window 0.500,0.500 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.740,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.740,0.500 world land drawn as water: copy 225, committed 225
+ok   seed 42 band 2 window 0.740,0.500 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.010,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.010,0.740 world land drawn as water: copy 21, committed 21
+ok   seed 42 band 2 window 0.010,0.740 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 2 window 0.250,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.250,0.740 world land drawn as water: copy 377, committed 377
+ok   seed 42 band 2 window 0.250,0.740 world landmasses fused/lost/in window: copy 6, committed 6
+ok   seed 42 band 2 window 0.500,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.500,0.740 world land drawn as water: copy 339, committed 339
+ok   seed 42 band 2 window 0.500,0.740 world landmasses fused/lost/in window: copy 2, committed 2
+ok   seed 42 band 2 window 0.740,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 42 band 2 window 0.740,0.740 world land drawn as water: copy 27, committed 27
+ok   seed 42 band 2 window 0.740,0.740 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 1 window 0.010,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 1 window 0.010,0.010 world land drawn as water: copy 111, committed 111
+ok   seed 7 band 1 window 0.010,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 1 window 0.490,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 1 window 0.490,0.010 world land drawn as water: copy 216, committed 216
+ok   seed 7 band 1 window 0.490,0.010 world landmasses fused/lost/in window: copy 6, committed 6
+ok   seed 7 band 1 window 0.010,0.490 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 1 window 0.010,0.490 world land drawn as water: copy 88, committed 88
+ok   seed 7 band 1 window 0.010,0.490 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 1 window 0.490,0.490 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 1 window 0.490,0.490 world land drawn as water: copy 215, committed 215
+ok   seed 7 band 1 window 0.490,0.490 world landmasses fused/lost/in window: copy 3, committed 3
+ok   seed 7 band 2 window 0.010,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.010,0.010 world land drawn as water: copy 6, committed 6
+ok   seed 7 band 2 window 0.010,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.250,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.250,0.010 world land drawn as water: copy 195, committed 195
+ok   seed 7 band 2 window 0.250,0.010 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.500,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.500,0.010 world land drawn as water: copy 340, committed 340
+ok   seed 7 band 2 window 0.500,0.010 world landmasses fused/lost/in window: copy 2, committed 2
+ok   seed 7 band 2 window 0.740,0.010 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.740,0.010 world land drawn as water: copy 66, committed 66
+ok   seed 7 band 2 window 0.740,0.010 world landmasses fused/lost/in window: copy 3, committed 3
+ok   seed 7 band 2 window 0.010,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.010,0.250 world land drawn as water: copy 243, committed 243
+ok   seed 7 band 2 window 0.010,0.250 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.250,0.250 rivers ending on land: copy 1, committed 1
+ok   seed 7 band 2 window 0.250,0.250 world land drawn as water: copy 75, committed 75
+ok   seed 7 band 2 window 0.250,0.250 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.500,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.500,0.250 world land drawn as water: copy 229, committed 229
+ok   seed 7 band 2 window 0.500,0.250 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.740,0.250 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.740,0.250 world land drawn as water: copy 191, committed 191
+ok   seed 7 band 2 window 0.740,0.250 world landmasses fused/lost/in window: copy 4, committed 4
+ok   seed 7 band 2 window 0.010,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.010,0.500 world land drawn as water: copy 87, committed 87
+ok   seed 7 band 2 window 0.010,0.500 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.250,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.250,0.500 world land drawn as water: copy 138, committed 138
+ok   seed 7 band 2 window 0.250,0.500 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.500,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.500,0.500 world land drawn as water: copy 450, committed 450
+ok   seed 7 band 2 window 0.500,0.500 world landmasses fused/lost/in window: copy 2, committed 2
+ok   seed 7 band 2 window 0.740,0.500 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.740,0.500 world land drawn as water: copy 219, committed 219
+ok   seed 7 band 2 window 0.740,0.500 world landmasses fused/lost/in window: copy 3, committed 3
+ok   seed 7 band 2 window 0.010,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.010,0.740 world land drawn as water: copy 0, committed 0
+ok   seed 7 band 2 window 0.010,0.740 world landmasses fused/lost/in window: copy 0, committed 0
+ok   seed 7 band 2 window 0.250,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.250,0.740 world land drawn as water: copy 235, committed 235
+ok   seed 7 band 2 window 0.250,0.740 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.500,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.500,0.740 world land drawn as water: copy 158, committed 158
+ok   seed 7 band 2 window 0.500,0.740 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 7 band 2 window 0.740,0.740 rivers ending on land: copy 0, committed 0
+ok   seed 7 band 2 window 0.740,0.740 world land drawn as water: copy 84, committed 84
+ok   seed 7 band 2 window 0.740,0.740 world landmasses fused/lost/in window: copy 1, committed 1
+ok   seed 42 band 3 window 0.4531,0.3281 majors crossing/drawn: copy 202, committed 202
+ok   seed 42 band 3 window 0.4531,0.3281 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 3 window 0.4531,0.3281 roads crossing/drawn: copy 601, committed 601
+ok   seed 42 band 3 window 0.5156,0.7031 majors crossing/drawn: copy 202, committed 202
+ok   seed 42 band 3 window 0.5156,0.7031 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 3 window 0.5156,0.7031 roads crossing/drawn: copy 300, committed 300
+ok   seed 42 band 3 window 0.6719,0.6094 majors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 3 window 0.6719,0.6094 minors crossing/drawn: copy 100, committed 100
+ok   seed 42 band 3 window 0.6719,0.6094 roads crossing/drawn: copy 200, committed 200
+ok   seed 42 band 3 window 0.3750,0.3281 majors crossing/drawn: copy 101, committed 101
+ok   seed 42 band 3 window 0.3750,0.3281 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 3 window 0.3750,0.3281 roads crossing/drawn: copy 300, committed 300
+ok   seed 42 band 5 window 0.4961,0.3828 majors crossing/drawn: copy 101, committed 101
+ok   seed 42 band 5 window 0.4961,0.3828 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 5 window 0.4961,0.3828 roads crossing/drawn: copy 400, committed 400
+ok   seed 42 band 5 window 0.5625,0.7461 majors crossing/drawn: copy 101, committed 101
+ok   seed 42 band 5 window 0.5625,0.7461 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 5 window 0.5625,0.7461 roads crossing/drawn: copy 200, committed 200
+ok   seed 42 band 5 window 0.7227,0.6563 majors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 5 window 0.7227,0.6563 minors crossing/drawn: copy 100, committed 100
+ok   seed 42 band 5 window 0.7227,0.6563 roads crossing/drawn: copy 200, committed 200
+ok   seed 42 band 5 window 0.4180,0.3828 majors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 5 window 0.4180,0.3828 minors crossing/drawn: copy 0, committed 0
+ok   seed 42 band 5 window 0.4180,0.3828 roads crossing/drawn: copy 200, committed 200
+every copy reads what the committed instrument reads

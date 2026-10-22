@@ -1,0 +1,86 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-b3-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":{\"x\":-2981.9868045977014,\"y\":-1785.1196545562834,\"k\":8},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"inset\":{\"x\":86,\"y\":113,\"w\":832.5,\"h\":642.6},\"cutting\":null,\"pfSheet\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"thumb\":null,\"loupe\":{\"x\":0,\"y\":0,\"w\":0,\"h\":0},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1112ms\",\"hold\":\"false\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-b3-1024x768.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"zoom\":{\"x\":-1922.3612413793103,\"y\":-1149.3616438356164,\"k\":8},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":0,\"y\":160,\"w\":536.6,\"h\":414.2},\"inset\":{\"x\":17,\"y\":141,\"w\":536.5,\"h\":414.1},\"cutting\":null,\"pfSheet\":{\"x\":0,\"y\":160,\"w\":536.6,\"h\":414.2},\"thumb\":null,\"loupe\":{\"x\":0,\"y\":0,\"w\":0,\"h\":0},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1127ms\",\"hold\":\"false\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-held16-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":{\"x\":-6380.473609195403,\"y\":-3891.739309112567,\"k\":16},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"inset\":{\"x\":-304,\"y\":-241,\"w\":1665,\"h\":1285.3},\"cutting\":null,\"pfSheet\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"thumb\":null,\"loupe\":{\"x\":0,\"y\":0,\"w\":0,\"h\":0},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1107ms · held\",\"hold\":\"true\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-held24-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":{\"x\":-9778.960413793106,\"y\":-5998.358963668849,\"k\":24},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"inset\":{\"x\":-694,\"y\":-595,\"w\":2497.5,\"h\":1927.9},\"cutting\":null,\"pfSheet\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"thumb\":null,\"loupe\":{\"x\":0,\"y\":0,\"w\":0,\"h\":0},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1120ms · held\",\"hold\":\"true\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-loupe-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":{\"x\":-2981.9868045977014,\"y\":-1785.1196545562834,\"k\":8},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"inset\":{\"x\":86,\"y\":113,\"w\":832.5,\"h\":642.6},\"cutting\":null,\"pfSheet\":{\"x\":60,\"y\":145,\"w\":832.5,\"h\":642.7},\"thumb\":null,\"loupe\":{\"x\":356,\"y\":346,\"w\":240,\"h\":240},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1102ms\",\"hold\":\"false\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-drawer-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/#seed=42&style=antique",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":{\"x\":-2981.9868045977014,\"y\":-1785.1196545562834,\"k\":8},\"region\":{\"band\":3,\"window\":{\"u0\":0.453125,\"v0\":0.328125,\"u1\":0.578125,\"v1\":0.453125},\"committed\":true,\"title\":\"The Environs of Laukuwelua\",\"redrafts\":1},\"viewport\":{\"x\":304,\"y\":145,\"w\":832.5,\"h\":642.7},\"inset\":{\"x\":330,\"y\":113,\"w\":832.5,\"h\":642.6},\"cutting\":{\"x\":249,\"y\":676,\"w\":175.2,\"h\":137.7},\"pfSheet\":{\"x\":304,\"y\":145,\"w\":832.5,\"h\":642.7},\"thumb\":null,\"loupe\":{\"x\":0,\"y\":0,\"w\":0,\"h\":0},\"caption\":\"The Environs of Laukuwelua · regional survey · band 3 · drawn in 1125ms\",\"hold\":\"false\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/live/live-portfolio-1440x900.png",
+  "url": "http://127.0.0.1:64984/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1440,
+   "innerHeight": 900,
+   "clientWidth": 1440
+  },
+  "probe": "{\"scrollWidth\":1440,\"zoom\":null,\"region\":null,\"viewport\":{\"x\":74,\"y\":141,\"w\":836.8,\"h\":646},\"inset\":null,\"cutting\":null,\"pfSheet\":{\"x\":74,\"y\":141,\"w\":836.8,\"h\":646},\"thumb\":{\"x\":1119,\"y\":380,\"w\":73.6,\"h\":57.3},\"loupe\":null,\"caption\":null,\"hold\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

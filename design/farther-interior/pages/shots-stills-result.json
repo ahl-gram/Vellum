@@ -1,0 +1,5378 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=road-town-2-skorsty--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b4--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b4--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b4--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--vegetation.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--vegetation.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--vegetation.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--climate.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--climate.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--climate.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--moisture.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--moisture.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--moisture.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--population.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--population.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--population.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b5--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--tier--b5--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b5--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b6--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--tier--b6--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b6--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--A-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B-held16--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B-held16--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--B-held16--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held24--b3--plain.svg&w=833",
+  "viewport": {
+   "innerWidth": 833,
+   "innerHeight": 643,
+   "clientWidth": 833
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today-held24--b3--plain.png",
+  "url": "http://127.0.0.1:49311/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held24--b3--plain.svg&w=1500",
+  "viewport": {
+   "innerWidth": 1500,
+   "innerHeight": 1158,
+   "clientWidth": 1500
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

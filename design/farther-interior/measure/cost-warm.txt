@@ -1,0 +1,7 @@
+cost with the chain held, at cbf57b8f: per band, the median over the five capitals' close-ups of the fastest of three runs, ms. "today" is today's whole close-up after its chain; each arm's figure is its own whole close-up after the chain, except arm A, which runs on today's close-up and is the time it adds.
+band 1: today 191; arm A adds 231; arm B (cut after the chain) 418, adding 227; arm B cut inside the chain 186; arm B without the cut 189, adding 3
+band 2: today 184; arm A adds 241; arm B (cut after the chain) 422, adding 238; arm B cut inside the chain 184; arm B without the cut 183, adding -2
+band 3: today 171; arm A adds 257; arm B (cut after the chain) 432, adding 257; arm B cut inside the chain 179; arm B without the cut 177, adding -1
+band 4: today 158; arm A adds 278; arm B (cut after the chain) 445, adding 286; arm B cut inside the chain 170; arm B without the cut 171, adding 10
+band 5: today 158; arm A adds 314; arm B (cut after the chain) 474, adding 313; arm B cut inside the chain 168; arm B without the cut 170, adding 11
+band 6: today 160; arm A adds 362; arm B (cut after the chain) 517, adding 350; arm B cut inside the chain 171; arm B without the cut 170, adding 7
