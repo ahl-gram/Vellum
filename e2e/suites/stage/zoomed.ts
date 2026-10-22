@@ -45,7 +45,7 @@ const RING = (selector: string): Payload<Ring> =>
 
 // The colour is read on a later task than the focus: in the focus's own task the ring still reads the colour it started from (measured 2026-10-22, 1024x768 zoomed Explorer, [1,0,1,0] for the mark), so the read polls until two reads agree.
 async function ringOf(ctx: SuiteContext, selector: string): Promise<Ring> {
-  const focus = `(() => { const a = document.querySelector(${JSON.stringify(selector)}); if (!a) return false; a.focus(); return true; })()`;
+  const focus: Payload<boolean> = `(() => { const a = document.querySelector(${JSON.stringify(selector)}); if (!a) return false; a.focus(); return true; })()`;
   if (!(await ctx.evaluate(focus))) return null;
   try {
     return await makeSettle(ctx)(
