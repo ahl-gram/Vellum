@@ -239,12 +239,11 @@ other way, which is what earns them a section of their own.
 - **A bare relative worker URL resolves against the DOCUMENT base**, not the module URL, so it does
   not throw. It 404s, and the client falls back to running the job inline, which looks like a slow
   page rather than a broken one. That is the failure the literal form above exists to prevent.
-- **`is:inline` on a working page's bundle-twin script tag is contractual.** Without it the build
-  routes that script through its own pass, which the ratified #204 analysis rejects for these
-  surfaces. **No guard reads the word itself**: the built-output assertion that each app page keeps
-  its bundle-twin script tag rendered verbatim runs over `PAGES` in `test/site/astro-scaffold.test.ts`,
-  which a new working page joins, and the word's own guard is Issue #600's. Copy a sibling page's
-  script tag whole, and join the roster.
+- **`is:inline` on a working page's bundle-twin script tag changes no built byte** (measured on the
+  four app pages, Issue #600), so the word is not a contract and has no guard of its own. What is
+  checked is that each app page keeps its bundle-twin script tag rendered verbatim in the built
+  output, over `PAGES` in `test/site/astro-scaffold.test.ts`, which a new working page joins. Copy a
+  sibling page's script tag whole, and join the roster.
 
 ## Discovery and indexes
 

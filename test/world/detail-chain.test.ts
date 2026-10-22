@@ -2,9 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   ancestorWindows,
+  bareDetailField,
   buildChainedField,
   canonicalParent,
   chainCacheKey,
+  chainedFieldAndGround,
   createChainCache,
   detailForWindow,
   maxOfSurfaces,
@@ -301,6 +303,40 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
   assert.notEqual(chainCacheKey(specFor(win, { coastWarp: 1 })), a, "a different coast warp shares one cache key");
   assert.notEqual(chainCacheKey(specFor(sibling)), a, "two windows of one size share a cache key");
   assert.notEqual(chainCacheKey(specFor(win, { gridW: 160, gridH: 120 })), a, "two grids share one cache key");
+});
+
+test("a close-up's chain hands back the unfloored field it floors, on a miss and on a hit (Issue #951)", () => {
+  const win = lodWindowFor(0.5, 0.4375, 0.125);
+  const spec = specFor(win, { coastWarp: 0.9 });
+  const cache = createChainCache();
+  const first = chainedFieldAndGround(spec, cache);
+  assertSameField(
+    first.field.data,
+    buildChainedField(spec, createChainCache()).data,
+    "the miss path changed the floored field",
+  );
+  assertSameField(
+    first.ground.data,
+    bareDetailField(spec).data,
+    "the miss path handed back something else as the ground",
+  );
+
+  const hitsBefore = cache.hits;
+  const second = chainedFieldAndGround(spec, cache);
+  assert.equal(cache.hits - hitsBefore, 1, "the second call must hit the cache exactly once");
+  assert.equal(second.field, first.field, "a hit must hand back the cached field itself");
+  assertSameField(
+    second.ground.data,
+    bareDetailField(spec).data,
+    "the hit path handed back something else as the ground",
+  );
+
+  const warped = bareDetailField(spec).data;
+  const plain = bareDetailField(specFor(win)).data;
+  assert.ok(
+    warped.some((v, i) => v !== plain[i]),
+    "the coast warp never reached the ground, so the fixture cannot tell a threaded input from a dropped one",
+  );
 });
 
 test("maxOfSurfaces takes the highest ancestor and abstains where none covers (#398)", () => {

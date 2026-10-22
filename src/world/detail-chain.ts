@@ -128,11 +128,13 @@ function gridForWindow(win: UvWindow): { readonly gridW: number; readonly gridH:
 
 /** Floored and de-bridged against EVERY ancestor, not only the nearest: two bilinear resamples in a row smooth differently from one, so parent-only flooring lets waterline cells sink relative to a grandparent. The cache defaults to a fresh one per top-level call because the recursion would otherwise rebuild each ancestor's own ancestry, costing 2^depth field builds instead of depth. */
 export function buildChainedField(spec: ChainSpec, cache: ChainCache = createChainCache()): Field {
-  const key = chainCacheKey(spec);
-  const hit = cache.get(key);
+  const hit = cache.get(chainCacheKey(spec));
   if (hit !== undefined) return hit;
+  return chainFromBare(spec, cache, bareDetailField(spec));
+}
 
-  const bare = buildHeightfield({
+export function bareDetailField(spec: ChainSpec): Field {
+  return buildHeightfield({
     seed: spec.seed,
     gridW: spec.gridW,
     gridH: spec.gridH,
@@ -142,7 +144,19 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
     detail: detailForWindow(spec.window),
     ...terrainInputsOf(spec),
   });
+}
 
+export function chainedFieldAndGround(
+  spec: ChainSpec,
+  cache: ChainCache = createChainCache(),
+): { readonly field: Field; readonly ground: Field } {
+  const hit = cache.get(chainCacheKey(spec));
+  const ground = bareDetailField(spec);
+  return { field: hit ?? chainFromBare(spec, cache, ground), ground };
+}
+
+function chainFromBare(spec: ChainSpec, cache: ChainCache, bare: Field): Field {
+  const key = chainCacheKey(spec);
   const ancestors = ancestorWindows(spec.window);
   let out = bare;
   if (ancestors.length > 0) {

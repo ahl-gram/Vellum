@@ -8,8 +8,8 @@ import type { River } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
-import { anchorRegionRivers } from "./region-rivers.ts";
-import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
+import { layRegionRivers } from "./region-rivers.ts";
+import { chainedFieldAndGround, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { realmOwners, refineRegionRealms, type RealmTown } from "./realm-refine.ts";
@@ -42,33 +42,38 @@ type RegionGrid = {
   readonly worldAspect: number;
 };
 
-function regionElevation(g: RegionGrid, spec: RegionSpec, seaLevel: number): Field {
+function regionElevation(
+  g: RegionGrid,
+  spec: RegionSpec,
+  seaLevel: number,
+): { readonly elev: Field; readonly ground: Field } {
   const { world, window, gridW, gridH, worldAspect } = g;
   const { recipe } = world;
   const terrain = terrainInputsOf(recipe);
-  return spec.detail === true
-    ? buildChainedField(
-        {
-          seed: recipe.seed,
-          mapType: recipe.mapType,
-          window,
-          gridW,
-          gridH,
-          worldAspect,
-          seaLevel,
-          ...terrain,
-        },
-        spec.chainCache,
-      )
-    : buildHeightfield({
-        seed: recipe.seed,
-        gridW,
-        gridH,
-        mapType: recipe.mapType,
-        window,
-        worldAspect,
-        ...terrain,
-      });
+  if (spec.detail === true) {
+    const chainSpec = {
+      seed: recipe.seed,
+      mapType: recipe.mapType,
+      window,
+      gridW,
+      gridH,
+      worldAspect,
+      seaLevel,
+      ...terrain,
+    };
+    const { field, ground } = chainedFieldAndGround(chainSpec, spec.chainCache);
+    return { elev: field, ground };
+  }
+  const elev = buildHeightfield({
+    seed: recipe.seed,
+    gridW,
+    gridH,
+    mapType: recipe.mapType,
+    window,
+    worldAspect,
+    ...terrain,
+  });
+  return { elev, ground: elev };
 }
 
 function worldElevSpan(world: World, seaLevel: number): number {
@@ -79,11 +84,11 @@ function worldElevSpan(world: World, seaLevel: number): number {
 
 function regionWaters(
   g: RegionGrid,
-  elev: Field,
-  seaLevel: number,
+  land: { readonly elev: Field; readonly ground: Field; readonly seaLevel: number },
   elevSpan: number,
 ): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
   const { world, window, gridW, gridH, worldAspect } = g;
+  const { elev, ground, seaLevel } = land;
   const { recipe } = world;
   const preClimate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
@@ -97,7 +102,8 @@ function regionWaters(
     rain[i] = 0.3 + 1.4 * (preClimate.moisture.data[i] as number);
   }
   const flow = computeFlow(elev, seaLevel, rain);
-  const rivers = anchorRegionRivers(world, window, gridW, gridH, elev, flow, seaLevel);
+  const { laid, extracted } = layRegionRivers(world, window, { elev, flow, seaLevel, ground });
+  const rivers = [...laid, ...extracted];
   const riverCells = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
     for (const p of r.points) riverCells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
@@ -269,9 +275,9 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const g: RegionGrid = { world, window, gridW, gridH, worldAspect };
 
   const seaLevel = world.seaLevel;
-  const elev = regionElevation(g, spec, seaLevel);
+  const { elev, ground } = regionElevation(g, spec, seaLevel);
   const elevSpan = worldElevSpan(world, seaLevel);
-  const { flow, rivers, riverCells } = regionWaters(g, elev, seaLevel, elevSpan);
+  const { flow, rivers, riverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
   const { climate, biomes } = regionClimate(g, elev, seaLevel, riverCells, elevSpan);
 
   const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells });
