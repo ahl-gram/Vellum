@@ -1,7 +1,8 @@
 import type { World, WorldRecipe } from "../world/types.ts";
-import { MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
+import { isLooseness, MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import { isCultureId } from "../society/culture-ids.ts";
+import { isOutlineId, type OutlineId } from "../world/outline-ids.ts";
 import type { StyleName } from "./style.ts";
 import { el, type SvgNode } from "./svg.ts";
 
@@ -28,6 +29,8 @@ export function recipeAttrs(world: World, styleName: StyleName): Record<string, 
     "data-vellum-style": styleName,
     ...(r.coastWarp !== undefined ? { "data-vellum-coast-warp": r.coastWarp } : {}),
     ...(r.culture !== undefined ? { "data-vellum-culture": r.culture } : {}),
+    ...(r.outline !== undefined ? { "data-vellum-outline": r.outline } : {}),
+    ...(r.looseness !== undefined ? { "data-vellum-looseness": r.looseness } : {}),
   };
 }
 
@@ -35,10 +38,12 @@ export function recipeMetadataNode(world: World, styleName: StyleName, regionRec
   const r = world.recipe;
   const coast = r.coastWarp !== undefined ? ` coast=${r.coastWarp}` : "";
   const culture = r.culture !== undefined ? ` culture=${r.culture}` : "";
+  const outline = r.outline !== undefined ? ` outline=${r.outline}` : "";
+  const looseness = r.looseness !== undefined ? ` looseness=${r.looseness}` : "";
   const summary =
     `Vellum chart. Recipe: seed=${r.seed} type=${r.mapType} band=${r.band} ` +
     `land=${r.landFraction} grid=${r.gridW}x${r.gridH} style=${styleName} ` +
-    `engine=${ENGINE_VERSION}${coast}${culture}${regionMetadataSuffix(regionRecipe)}`;
+    `engine=${ENGINE_VERSION}${coast}${culture}${outline}${looseness}${regionMetadataSuffix(regionRecipe)}`;
   return el("metadata", {}, [summary]);
 }
 
@@ -71,6 +76,16 @@ function readAttr(svg: string, name: string): string | null {
   return m ? (m[1] as string) : null;
 }
 
+function parseShape(svg: string): { outline?: OutlineId; looseness?: number } | null {
+  const outline = readAttr(svg, "data-vellum-outline");
+  const looseness = readAttr(svg, "data-vellum-looseness");
+  if (outline === null) return looseness === null ? {} : null;
+  if (!isOutlineId(outline)) return null;
+  if (looseness === null) return { outline };
+  const value = Number(looseness);
+  return isLooseness(value) ? { outline, looseness: value } : null;
+}
+
 export function recipeFromSvg(svg: string): ParsedRecipe | null {
   const seed = readAttr(svg, "data-vellum-seed");
   const gridW = readAttr(svg, "data-vellum-grid-w");
@@ -95,6 +110,8 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   const coastWarp = readAttr(svg, "data-vellum-coast-warp");
   const culture = readAttr(svg, "data-vellum-culture");
   if (culture !== null && !isCultureId(culture)) return null;
+  const shape = parseShape(svg);
+  if (shape === null) return null;
   return {
     recipe: {
       seed: Number(seed),
@@ -105,6 +122,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
       band: band as ClimateBand,
       ...(coastWarp !== null ? { coastWarp: Number(coastWarp) } : {}),
       ...(culture !== null ? { culture } : {}),
+      ...shape,
     },
     style: style as StyleName,
     version,
