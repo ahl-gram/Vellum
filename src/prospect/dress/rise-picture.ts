@@ -19,7 +19,7 @@ import {
 const FIGURE_H = 50;
 const FIGURE_SPAN: readonly [number, number] = [VIEW_X0 + 50, VIEW_X0 + 270];
 
-export function placeFigures(scene: Scene, rng: Rng): Figure[] {
+function placeFigures(scene: Scene, rng: Rng): Figure[] {
   const cast = castFor(scene.kind, scene.g.water?.kind === "sea", scene.roadCount, scene.era);
   const [x0, x1] = FIGURE_SPAN;
   const unit = FIGURE_H / 30;
@@ -35,7 +35,7 @@ export function placeFigures(scene: Scene, rng: Rng): Figure[] {
   });
 }
 
-export const figureBox = (f: Figure): Box => {
+const figureBox = (f: Figure): Box => {
   const half = (FIGURE_WIDTH[f.kind] * (f.h / 30)) / 2;
   return { x0: f.x - half, x1: f.x + half, y0: f.y - f.h * (f.kind === "rider" ? 1.25 : 1) - 2, y1: f.y + 2 };
 };
