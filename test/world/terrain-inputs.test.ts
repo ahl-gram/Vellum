@@ -6,6 +6,7 @@ import { lodWindowFor } from "../../src/world/lod.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import { TERRAIN_INPUT_KEYS, type TerrainInputKey, type TerrainInputs } from "../../src/world/terrain-inputs.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
+import { OUTLINE_IDS } from "../../src/world/outline-ids.ts";
 import type { World } from "../../src/world/types.ts";
 
 const SEED = 2;
@@ -17,7 +18,13 @@ const BOUND = 0.04;
 
 const OFF_DEFAULT: Readonly<Record<TerrainInputKey, readonly [TerrainInputs, ...TerrainInputs[]]>> = {
   coastWarp: [{ coastWarp: 0.1 }, { coastWarp: 0.9 }],
+  outline: [{ outline: "crescent" }],
+  looseness: [{ outline: "round", looseness: 0.5 }],
 };
+
+function without(inputs: TerrainInputs, key: TerrainInputKey): TerrainInputs {
+  return Object.fromEntries(Object.entries(inputs).filter(([k]) => k !== key));
+}
 
 const ARMS = [
   { name: "bare", detail: false },
@@ -45,18 +52,21 @@ function disagreement(chart: World, close: World, window: UvWindow): number {
   return cells / (gridW * gridH);
 }
 
-test("a close-up agrees with its own chart for every terrain input off its default, on the bare arm and the detailed arm (Issue #453, Issue #850)", () => {
-  const plain = generateWorld(defaultRecipe(SEED));
+test("a close-up agrees with its own chart for every terrain input off its default, on the bare arm and the detailed arm (Issue #453, Issue #850, Issue #851)", () => {
   const charts = TERRAIN_INPUT_KEYS.flatMap((key) =>
-    OFF_DEFAULT[key].map((inputs) => ({ key, inputs, world: generateWorld(defaultRecipe(SEED, inputs)) })),
+    OFF_DEFAULT[key].map((inputs) => ({
+      key,
+      inputs,
+      world: generateWorld(defaultRecipe(SEED, inputs)),
+      blind: generateWorld(defaultRecipe(SEED, without(inputs, key))),
+    })),
   );
   const problems: string[] = [];
   for (const window of WINDOWS) {
     for (const arm of ARMS) {
-      const ignoring = closeUp(plain, window, arm.detail);
       for (const chart of charts) {
         const label = `${chart.key} ${JSON.stringify(chart.inputs)} on the ${arm.name} arm, window size ${window.u1 - window.u0}`;
-        const blind = disagreement(chart.world, ignoring, window);
+        const blind = disagreement(chart.world, closeUp(chart.blind, window, arm.detail), window);
         assert.ok(
           blind > BOUND,
           `${label}: a close-up that ignored the input disagrees by only ${pct(blind)}, so this fixture cannot see an input dropped`,
@@ -70,22 +80,33 @@ test("a close-up agrees with its own chart for every terrain input off its defau
   assert.deepEqual(problems, [], "a close-up drew land or sea its own chart does not");
 });
 
+const CHAIN_BASE: ChainSpec = {
+  seed: SEED,
+  mapType: "archipelago",
+  window: BAND_1,
+  gridW: 320,
+  gridH: 240,
+  worldAspect: 319 / 239,
+  seaLevel: 0.46,
+};
+
 test("two chain specs that differ only in one terrain input never share a cache key (Issue #850)", () => {
-  const base: ChainSpec = {
-    seed: SEED,
-    mapType: "archipelago",
-    window: BAND_1,
-    gridW: 320,
-    gridH: 240,
-    worldAspect: 319 / 239,
-    seaLevel: 0.46,
-  };
   for (const key of TERRAIN_INPUT_KEYS) {
-    const keys = [base, ...OFF_DEFAULT[key].map((inputs) => ({ ...base, ...inputs }))].map(chainCacheKey);
+    const keys = [CHAIN_BASE, ...OFF_DEFAULT[key].map((inputs) => ({ ...CHAIN_BASE, ...inputs }))].map(chainCacheKey);
     assert.equal(
       new Set(keys).size,
       keys.length,
       `${key}: ${keys.length} specs share ${new Set(keys).size} cache keys`,
     );
   }
+});
+
+test("a chain spec's cache key tells every outline apart, and one looseness from another or from none (Issue #851)", () => {
+  const specs: ChainSpec[] = [
+    ...OUTLINE_IDS.map((outline) => ({ ...CHAIN_BASE, outline })),
+    { ...CHAIN_BASE, outline: "round", looseness: 0.5 },
+    { ...CHAIN_BASE, outline: "round", looseness: 1 },
+  ];
+  const keys = specs.map(chainCacheKey);
+  assert.equal(new Set(keys).size, keys.length, `${keys.length} specs share ${new Set(keys).size} cache keys`);
 });

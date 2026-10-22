@@ -1,6 +1,7 @@
 import { createField, type Field } from "../core/grid.ts";
 import { lerp, smoothstep } from "../core/math.ts";
 import { fbm2, ridged2, warped2, OCTAVE_OFFSETS } from "../noise/fbm.ts";
+import type { OutlineId } from "../world/outline-ids.ts";
 
 export type MapType = "island" | "archipelago" | "continent" | "citystate";
 
@@ -21,6 +22,8 @@ export type TerrainParams = {
   readonly ridgedWeight?: number;
   /** Wobbles the radial falloff by direction so the coast forms lobes and peninsulas instead of an oval. Range [0, 1]; 0 is the pure radial dome; omitted takes the map type's SHAPES value. */
   readonly coastWarp?: number;
+  readonly outline?: OutlineId;
+  readonly looseness?: number;
   /** Extra fBm octaves for a finer survey window, keyed off the window size by the caller; default 0, the world chart's density (Issue #396). */
   readonly detail?: number;
   readonly window?: UvWindow;
