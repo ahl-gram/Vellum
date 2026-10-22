@@ -412,7 +412,7 @@ Issue #789, one row each with the line it stands behind. Each was read from the 
 - Issue #423, PR #435: each realm's carried ring traverses every shared seam, and the plate reader
   measured the coincident dash phases filling each other's gaps into a solid line on seed 42, 98.3%
   ink duty against a 78.1% single-stroke control. Stands behind
-  `handbook/specs/region-and-voyage.md`'s borders that are not stroked from the carried rings.
+  `handbook/specs/region-and-voyage.md`'s borders that are not stroked from the tint rings.
 - Issue #633, PR #642: a place card shrank into the room left beside its mark, so a card near an
   edge was narrow and therefore tall; measured over every place of four seeds, cards taller than the
   box went from 6 of 97 to 0 of 97 at 390 and from 67 of 96 to 0 of 94 at 320, with every number at
