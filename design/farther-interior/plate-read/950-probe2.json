@@ -1,0 +1,243 @@
+{
+ "index": {
+  "n": 939,
+  "bad": [],
+  "dist": [],
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "nLinks": 1929,
+  "links": 990,
+  "iframes": [
+   "pages/dress-capital-42-laukuwelua.html",
+   "pages/dress-realm-border-15-border-chain-0-vertex-102.html",
+   "pages/dress-river-and-road-village-42-won.html",
+   "pages/dress-river-mouth-23-mouth-of-world-river-1.html",
+   "pages/dress-river-town-7-wutoanu.html",
+   "pages/dress-road-town-2-skorsty.html",
+   "pages/dress-sea-edge-42-shore-at-world-cell-143-76.html",
+   "pages/dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.html",
+   "pages/lines.html",
+   "pages/overview.html",
+   "pages/place-capital-42-laukuwelua.html",
+   "pages/place-realm-border-15-border-chain-0-vertex-102.html"
+  ],
+  "fonts": 0
+ },
+ "fetch": {
+  "checked": 990,
+  "missing": []
+ },
+ "cut": [
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  },
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  },
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  },
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  },
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  },
+  {
+   "offset": [
+    172,
+    133
+   ],
+   "boundingBox": [
+    176.1,
+    138.8
+   ],
+   "natural": [
+    1500,
+    1158
+   ],
+   "css": [
+    "169.594px",
+    "130.891px"
+   ],
+   "rotate": "-2deg",
+   "aspectNatural": 1.2953367875647668,
+   "aspectOffset": 1.2932330827067668
+  }
+ ],
+ "lens": [
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  },
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  },
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  },
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  },
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  },
+  {
+   "lens": [
+    244,
+    244
+   ],
+   "img": [
+    1666,
+    1286
+   ],
+   "aspect": 1.2955,
+   "natural": 1.2953,
+   "coversLens": true
+  }
+ ],
+ "frames": [],
+ "errs": {
+  "ce": [],
+  "h4": []
+ }
+}

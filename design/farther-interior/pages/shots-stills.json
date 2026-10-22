@@ -1,0 +1,5890 @@
+[
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 395,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 499,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 499,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 499,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 499,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 499,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 397,
+   "y": 308,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 365,
+   "y": 277,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/capital-42-laukuwelua--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=capital-42-laukuwelua--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/capital-42-laukuwelua--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 482,
+   "y": 392,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 364,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 364,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 364,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 364,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 364,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 469,
+   "y": 297,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 508,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-town-7-wutoanu--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-town-7-wutoanu--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-town-7-wutoanu--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 379,
+   "y": 331,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 498,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 498,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 498,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 498,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 498,
+   "y": 323,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 395,
+   "y": 307,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 361,
+   "y": 403,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/road-town-2-skorsty--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=road-town-2-skorsty--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/road-town-2-skorsty--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 449,
+   "y": 328,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 468,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 468,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 468,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 468,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 468,
+   "y": 318,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 507,
+   "y": 296,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 413,
+   "y": 381,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-mouth-23-mouth-of-world-river-1--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 424,
+   "y": 298,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 418,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 418,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 418,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 418,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 418,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 406,
+   "y": 302,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 383,
+   "y": 393,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/realm-border-15-border-chain-0-vertex-102--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 377,
+   "y": 384,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 495,
+   "y": 301,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 495,
+   "y": 301,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 495,
+   "y": 301,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 495,
+   "y": 301,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 495,
+   "y": 301,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 389,
+   "y": 391,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 348,
+   "y": 315,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-42-shore-at-world-cell-143-76--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 489,
+   "y": 353,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 378,
+   "y": 368,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 378,
+   "y": 368,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 378,
+   "y": 368,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 378,
+   "y": 368,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 378,
+   "y": 368,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 497,
+   "y": 397,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 393,
+   "y": 327,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/river-and-road-village-42-won--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=river-and-road-village-42-won--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/river-and-road-village-42-won--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ }
+]

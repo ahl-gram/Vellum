@@ -1,0 +1,938 @@
+[
+ {
+  "url": "/out/950/pages/overview.html",
+  "width": 2398,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/overview.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-capital-42-laukuwelua.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-capital-42-laukuwelua.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-river-town-7-wutoanu.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-river-town-7-wutoanu.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-road-town-2-skorsty.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-road-town-2-skorsty.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-river-mouth-23-mouth-of-world-river-1.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-river-mouth-23-mouth-of-world-river-1.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-realm-border-15-border-chain-0-vertex-102.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-realm-border-15-border-chain-0-vertex-102.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-sea-edge-42-shore-at-world-cell-143-76.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-sea-edge-42-shore-at-world-cell-143-76.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-river-and-road-village-42-won.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-river-and-road-village-42-won.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/place-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.html",
+  "width": 2575,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-capital-42-laukuwelua.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-capital-42-laukuwelua.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-river-town-7-wutoanu.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-river-town-7-wutoanu.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-road-town-2-skorsty.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-road-town-2-skorsty.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-river-mouth-23-mouth-of-world-river-1.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-river-mouth-23-mouth-of-world-river-1.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-realm-border-15-border-chain-0-vertex-102.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-realm-border-15-border-chain-0-vertex-102.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-sea-edge-42-shore-at-world-cell-143-76.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-sea-edge-42-shore-at-world-cell-143-76.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-river-and-road-village-42-won.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-river-and-road-village-42-won.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.html",
+  "width": 2204,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/lines.html",
+  "width": 2304,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/sheet-lines.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/surfaces-capital-42-laukuwelua.html",
+  "width": 1736,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/surfaces-capital-42-laukuwelua.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/surfaces-river-town-7-wutoanu.html",
+  "width": 1736,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/surfaces-river-town-7-wutoanu.png",
+  "waitMs": 3500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b3--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 475,
+   "y": 286,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b4--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 350,
+   "y": 361,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--vegetation.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--climate.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--moisture.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b5--population.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b5--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 441,
+   "y": 383,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--Binside--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B0--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--tier--b6--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 452,
+   "y": 299,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--A-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--B-held16--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.svg&w=833",
+  "width": 833,
+  "height": 643,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/full/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.png",
+  "waitMs": 900
+ },
+ {
+  "url": "/out/950/pages/plate.html?f=sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.svg&w=1500",
+  "width": 1500,
+  "height": 1158,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/950/stills/crop/sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47--today-held24--b3--plain.png",
+  "waitMs": 900,
+  "clip": {
+   "x": 430,
+   "y": 339,
+   "width": 640,
+   "height": 480,
+   "scale": 1
+  }
+ }
+]

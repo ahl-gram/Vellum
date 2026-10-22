@@ -1,0 +1,23 @@
+[
+ {
+  "seed": 7,
+  "band": 2,
+  "window": {
+   "u0": 0.25,
+   "v0": 0.25,
+   "u1": 0.5,
+   "v1": 0.5
+  },
+  "index": 5,
+  "points": 190,
+  "terminal": {
+   "x": 44,
+   "y": 70
+  },
+  "terminalElev": 0.44835412296913163,
+  "parentElevAtTerminal": 0.012988810005478135,
+  "endsInOcean": false,
+  "projected": false,
+  "cellsToSea": -1
+ }
+]

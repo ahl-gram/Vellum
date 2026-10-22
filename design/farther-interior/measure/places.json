@@ -1,0 +1,134 @@
+{
+ "sha": "cbf57b8f",
+ "band": 5,
+ "picks": [
+  {
+   "seed": 42,
+   "kind": "capital",
+   "name": "Laukuwelua",
+   "x": 163,
+   "y": 95,
+   "window": {
+    "u0": 0.49609375,
+    "v0": 0.3828125,
+    "u1": 0.52734375,
+    "v1": 0.4140625
+   },
+   "score": 0,
+   "why": "seed 42's capital; at band 5 its close-up draws no road where four of the world's roads cross the window (the breakdown's witness)",
+   "pickedBecause": "the breakdown's witness"
+  },
+  {
+   "seed": 7,
+   "kind": "river town",
+   "name": "Wutoanu",
+   "x": 171,
+   "y": 136,
+   "window": {
+    "u0": 0.51953125,
+    "v0": 0.5546875,
+    "u1": 0.55078125,
+    "v1": 0.5859375
+   },
+   "score": 11,
+   "why": "1 world river(s) within one world cell of the town (1 minor); 1 minor and 0 major world rivers cross its band-5 window",
+   "pickedBecause": "best river town by score on a seed not yet used (score 11.00; best overall 11.00 on seed 42)"
+  },
+  {
+   "seed": 2,
+   "kind": "road town",
+   "name": "Skorsty",
+   "x": 158,
+   "y": 123,
+   "window": {
+    "u0": 0.48046875,
+    "v0": 0.5,
+    "u1": 0.51171875,
+    "v1": 0.53125
+   },
+   "score": 4,
+   "why": "1 world road(s) run through the town; 4 world roads cross its band-5 window",
+   "pickedBecause": "best road town by score on a seed not yet used (score 4.00; best overall 4.00 on seed 7)"
+  },
+  {
+   "seed": 23,
+   "kind": "river mouth",
+   "name": "mouth of world river 1",
+   "x": 180,
+   "y": 164,
+   "window": {
+    "u0": 0.546875,
+    "v0": 0.671875,
+    "u1": 0.578125,
+    "v1": 0.703125
+   },
+   "score": 2996,
+   "why": "the last land point of a major world river; 2996 close-up land cells stand within 3 cells of the detailed shore in its band-5 window",
+   "pickedBecause": "best river mouth by score on a seed not yet used (score 2996.00; best overall 2996.00 on seed 23)"
+  },
+  {
+   "seed": 15,
+   "kind": "realm border",
+   "name": "border chain 0, vertex 102",
+   "x": 164.3125,
+   "y": 144.4375,
+   "window": {
+    "u0": 0.5,
+    "v0": 0.58984375,
+    "u1": 0.53125,
+    "v1": 0.62109375
+   },
+   "score": 64.21768672085966,
+   "why": "66 vertices of the world's border chain 0 fall in the band-5 window; the nearest town stands 17.8 world cells off",
+   "pickedBecause": "best realm border by score on a seed not yet used (score 64.22; best overall 76.04 on seed 42)"
+  },
+  {
+   "seed": 42,
+   "kind": "sea edge",
+   "name": "shore at world cell 143,76",
+   "x": 143,
+   "y": 76,
+   "window": {
+    "u0": 0.43359375,
+    "v0": 0.30078125,
+    "u1": 0.46484375,
+    "v1": 0.33203125
+   },
+   "score": 3343,
+   "why": "3343 close-up sea cells within 3 cells of the detailed shore are shut by the sea gate (the world charts land at their nearest world cell), of 62659 sea cells in its band-5 window",
+   "pickedBecause": "best sea edge by score on a seed not yet used (score 3343.00; best overall 3343.00 on seed 42)"
+  },
+  {
+   "seed": 42,
+   "kind": "river and road village",
+   "name": "Won",
+   "x": 236,
+   "y": 161,
+   "window": {
+    "u0": 0.72265625,
+    "v0": 0.65625,
+    "u1": 0.75390625,
+    "v1": 0.6875
+   },
+   "score": 0,
+   "why": "the breakdown's second witness: at band 5 its close-up draws no river and no road where the world has one river and two roads",
+   "pickedBecause": "the breakdown's witness"
+  },
+  {
+   "seed": 23,
+   "kind": "sea edge on the open sea",
+   "name": "shore at world cell 106,47",
+   "x": 106,
+   "y": 47,
+   "window": {
+    "u0": 0.31640625,
+    "v0": 0.1796875,
+    "u1": 0.34765625,
+    "v1": 0.2109375
+   },
+   "score": 744,
+   "why": "744 close-up water cells beside the detailed shore are shut by the sea gate with genuine sea within 6 cells of them (791 beside the shore stay open), the most of 390 shores on the world's genuine sea",
+   "pickedBecause": "best on any seed by node out/950/mock/sweep-sea-edge.ts, which replaces the first sweep's sea-edge measure"
+  }
+ ]
+}

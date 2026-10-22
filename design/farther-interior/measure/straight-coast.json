@@ -1,0 +1,842 @@
+[
+ {
+  "seed": 42,
+  "band": 1,
+  "town": "Laukuwelua",
+  "onGrid": 19,
+  "offGrid": 0
+ },
+ {
+  "seed": 42,
+  "band": 1,
+  "town": "Toatauhe",
+  "onGrid": 13,
+  "offGrid": 0
+ },
+ {
+  "seed": 42,
+  "band": 1,
+  "town": "Won",
+  "onGrid": 12,
+  "offGrid": 0
+ },
+ {
+  "seed": 42,
+  "band": 1,
+  "town": "Haireno",
+  "onGrid": 19,
+  "offGrid": 0
+ },
+ {
+  "seed": 42,
+  "band": 2,
+  "town": "Laukuwelua",
+  "onGrid": 19,
+  "offGrid": 15
+ },
+ {
+  "seed": 42,
+  "band": 2,
+  "town": "Toatauhe",
+  "onGrid": 9,
+  "offGrid": 11
+ },
+ {
+  "seed": 42,
+  "band": 2,
+  "town": "Won",
+  "onGrid": 13,
+  "offGrid": 10
+ },
+ {
+  "seed": 42,
+  "band": 2,
+  "town": "Haireno",
+  "onGrid": 18,
+  "offGrid": 19
+ },
+ {
+  "seed": 42,
+  "band": 3,
+  "town": "Laukuwelua",
+  "onGrid": 23,
+  "offGrid": 13
+ },
+ {
+  "seed": 42,
+  "band": 3,
+  "town": "Toatauhe",
+  "onGrid": 5,
+  "offGrid": 10
+ },
+ {
+  "seed": 42,
+  "band": 3,
+  "town": "Won",
+  "onGrid": 12,
+  "offGrid": 17
+ },
+ {
+  "seed": 42,
+  "band": 3,
+  "town": "Haireno",
+  "onGrid": 22,
+  "offGrid": 16
+ },
+ {
+  "seed": 42,
+  "band": 4,
+  "town": "Laukuwelua",
+  "onGrid": 34,
+  "offGrid": 22
+ },
+ {
+  "seed": 42,
+  "band": 4,
+  "town": "Toatauhe",
+  "onGrid": 5,
+  "offGrid": 12
+ },
+ {
+  "seed": 42,
+  "band": 4,
+  "town": "Won",
+  "onGrid": 10,
+  "offGrid": 14
+ },
+ {
+  "seed": 42,
+  "band": 4,
+  "town": "Haireno",
+  "onGrid": 8,
+  "offGrid": 14
+ },
+ {
+  "seed": 42,
+  "band": 5,
+  "town": "Laukuwelua",
+  "onGrid": 31,
+  "offGrid": 11
+ },
+ {
+  "seed": 42,
+  "band": 5,
+  "town": "Toatauhe",
+  "onGrid": 9,
+  "offGrid": 21
+ },
+ {
+  "seed": 42,
+  "band": 5,
+  "town": "Won",
+  "onGrid": 10,
+  "offGrid": 16
+ },
+ {
+  "seed": 42,
+  "band": 5,
+  "town": "Haireno",
+  "onGrid": 15,
+  "offGrid": 23
+ },
+ {
+  "seed": 42,
+  "band": 6,
+  "town": "Laukuwelua",
+  "onGrid": 2,
+  "offGrid": 15
+ },
+ {
+  "seed": 42,
+  "band": 6,
+  "town": "Toatauhe",
+  "onGrid": 2,
+  "offGrid": 26
+ },
+ {
+  "seed": 42,
+  "band": 6,
+  "town": "Won",
+  "onGrid": 6,
+  "offGrid": 4
+ },
+ {
+  "seed": 42,
+  "band": 6,
+  "town": "Haireno",
+  "onGrid": 7,
+  "offGrid": 36
+ },
+ {
+  "seed": 7,
+  "band": 1,
+  "town": "Numowopua",
+  "onGrid": 19,
+  "offGrid": 0
+ },
+ {
+  "seed": 7,
+  "band": 1,
+  "town": "Loloa",
+  "onGrid": 14,
+  "offGrid": 0
+ },
+ {
+  "seed": 7,
+  "band": 1,
+  "town": "Halolua",
+  "onGrid": 18,
+  "offGrid": 0
+ },
+ {
+  "seed": 7,
+  "band": 1,
+  "town": "Laulume",
+  "onGrid": 19,
+  "offGrid": 0
+ },
+ {
+  "seed": 7,
+  "band": 2,
+  "town": "Numowopua",
+  "onGrid": 23,
+  "offGrid": 12
+ },
+ {
+  "seed": 7,
+  "band": 2,
+  "town": "Loloa",
+  "onGrid": 17,
+  "offGrid": 16
+ },
+ {
+  "seed": 7,
+  "band": 2,
+  "town": "Halolua",
+  "onGrid": 14,
+  "offGrid": 10
+ },
+ {
+  "seed": 7,
+  "band": 2,
+  "town": "Laulume",
+  "onGrid": 14,
+  "offGrid": 12
+ },
+ {
+  "seed": 7,
+  "band": 3,
+  "town": "Numowopua",
+  "onGrid": 27,
+  "offGrid": 13
+ },
+ {
+  "seed": 7,
+  "band": 3,
+  "town": "Loloa",
+  "onGrid": 12,
+  "offGrid": 31
+ },
+ {
+  "seed": 7,
+  "band": 3,
+  "town": "Halolua",
+  "onGrid": 12,
+  "offGrid": 12
+ },
+ {
+  "seed": 7,
+  "band": 3,
+  "town": "Laulume",
+  "onGrid": 6,
+  "offGrid": 11
+ },
+ {
+  "seed": 7,
+  "band": 4,
+  "town": "Numowopua",
+  "onGrid": 42,
+  "offGrid": 12
+ },
+ {
+  "seed": 7,
+  "band": 4,
+  "town": "Loloa",
+  "onGrid": 8,
+  "offGrid": 27
+ },
+ {
+  "seed": 7,
+  "band": 4,
+  "town": "Halolua",
+  "onGrid": 9,
+  "offGrid": 22
+ },
+ {
+  "seed": 7,
+  "band": 4,
+  "town": "Laulume",
+  "onGrid": 9,
+  "offGrid": 11
+ },
+ {
+  "seed": 7,
+  "band": 5,
+  "town": "Numowopua",
+  "onGrid": 40,
+  "offGrid": 11
+ },
+ {
+  "seed": 7,
+  "band": 5,
+  "town": "Loloa",
+  "onGrid": 2,
+  "offGrid": 42
+ },
+ {
+  "seed": 7,
+  "band": 5,
+  "town": "Halolua",
+  "onGrid": 15,
+  "offGrid": 35
+ },
+ {
+  "seed": 7,
+  "band": 5,
+  "town": "Laulume",
+  "onGrid": 18,
+  "offGrid": 14
+ },
+ {
+  "seed": 7,
+  "band": 6,
+  "town": "Numowopua",
+  "onGrid": 7,
+  "offGrid": 40
+ },
+ {
+  "seed": 7,
+  "band": 6,
+  "town": "Loloa",
+  "onGrid": 1,
+  "offGrid": 47
+ },
+ {
+  "seed": 7,
+  "band": 6,
+  "town": "Halolua",
+  "onGrid": 14,
+  "offGrid": 18
+ },
+ {
+  "seed": 7,
+  "band": 6,
+  "town": "Laulume",
+  "onGrid": 36,
+  "offGrid": 13
+ },
+ {
+  "seed": 2,
+  "band": 1,
+  "town": "Vunsvyov",
+  "onGrid": 13,
+  "offGrid": 0
+ },
+ {
+  "seed": 2,
+  "band": 1,
+  "town": "Nydstagrad",
+  "onGrid": 12,
+  "offGrid": 0
+ },
+ {
+  "seed": 2,
+  "band": 1,
+  "town": "Tror",
+  "onGrid": 12,
+  "offGrid": 0
+ },
+ {
+  "seed": 2,
+  "band": 1,
+  "town": "Lyrkol",
+  "onGrid": 11,
+  "offGrid": 0
+ },
+ {
+  "seed": 2,
+  "band": 2,
+  "town": "Vunsvyov",
+  "onGrid": 12,
+  "offGrid": 8
+ },
+ {
+  "seed": 2,
+  "band": 2,
+  "town": "Nydstagrad",
+  "onGrid": 15,
+  "offGrid": 15
+ },
+ {
+  "seed": 2,
+  "band": 2,
+  "town": "Tror",
+  "onGrid": 16,
+  "offGrid": 10
+ },
+ {
+  "seed": 2,
+  "band": 2,
+  "town": "Lyrkol",
+  "onGrid": 11,
+  "offGrid": 14
+ },
+ {
+  "seed": 2,
+  "band": 3,
+  "town": "Vunsvyov",
+  "onGrid": 8,
+  "offGrid": 12
+ },
+ {
+  "seed": 2,
+  "band": 3,
+  "town": "Nydstagrad",
+  "onGrid": 9,
+  "offGrid": 16
+ },
+ {
+  "seed": 2,
+  "band": 3,
+  "town": "Tror",
+  "onGrid": 7,
+  "offGrid": 8
+ },
+ {
+  "seed": 2,
+  "band": 3,
+  "town": "Lyrkol",
+  "onGrid": 11,
+  "offGrid": 12
+ },
+ {
+  "seed": 2,
+  "band": 4,
+  "town": "Vunsvyov",
+  "onGrid": 11,
+  "offGrid": 14
+ },
+ {
+  "seed": 2,
+  "band": 4,
+  "town": "Nydstagrad",
+  "onGrid": 13,
+  "offGrid": 15
+ },
+ {
+  "seed": 2,
+  "band": 4,
+  "town": "Tror",
+  "onGrid": 6,
+  "offGrid": 10
+ },
+ {
+  "seed": 2,
+  "band": 4,
+  "town": "Lyrkol",
+  "onGrid": 12,
+  "offGrid": 10
+ },
+ {
+  "seed": 2,
+  "band": 5,
+  "town": "Vunsvyov",
+  "onGrid": 3,
+  "offGrid": 17
+ },
+ {
+  "seed": 2,
+  "band": 5,
+  "town": "Nydstagrad",
+  "onGrid": 24,
+  "offGrid": 9
+ },
+ {
+  "seed": 2,
+  "band": 5,
+  "town": "Tror",
+  "onGrid": 10,
+  "offGrid": 13
+ },
+ {
+  "seed": 2,
+  "band": 5,
+  "town": "Lyrkol",
+  "onGrid": 15,
+  "offGrid": 19
+ },
+ {
+  "seed": 2,
+  "band": 6,
+  "town": "Vunsvyov",
+  "onGrid": 0,
+  "offGrid": 16
+ },
+ {
+  "seed": 2,
+  "band": 6,
+  "town": "Nydstagrad",
+  "onGrid": 13,
+  "offGrid": 26
+ },
+ {
+  "seed": 2,
+  "band": 6,
+  "town": "Tror",
+  "onGrid": 10,
+  "offGrid": 23
+ },
+ {
+  "seed": 2,
+  "band": 6,
+  "town": "Lyrkol",
+  "onGrid": 7,
+  "offGrid": 32
+ },
+ {
+  "seed": 15,
+  "band": 1,
+  "town": "Stanbyl",
+  "onGrid": 20,
+  "offGrid": 0
+ },
+ {
+  "seed": 15,
+  "band": 1,
+  "town": "Radin",
+  "onGrid": 15,
+  "offGrid": 0
+ },
+ {
+  "seed": 15,
+  "band": 1,
+  "town": "Rulba",
+  "onGrid": 13,
+  "offGrid": 0
+ },
+ {
+  "seed": 15,
+  "band": 1,
+  "town": "Trukba",
+  "onGrid": 15,
+  "offGrid": 0
+ },
+ {
+  "seed": 15,
+  "band": 2,
+  "town": "Stanbyl",
+  "onGrid": 23,
+  "offGrid": 13
+ },
+ {
+  "seed": 15,
+  "band": 2,
+  "town": "Radin",
+  "onGrid": 16,
+  "offGrid": 15
+ },
+ {
+  "seed": 15,
+  "band": 2,
+  "town": "Rulba",
+  "onGrid": 20,
+  "offGrid": 15
+ },
+ {
+  "seed": 15,
+  "band": 2,
+  "town": "Trukba",
+  "onGrid": 17,
+  "offGrid": 15
+ },
+ {
+  "seed": 15,
+  "band": 3,
+  "town": "Stanbyl",
+  "onGrid": 21,
+  "offGrid": 31
+ },
+ {
+  "seed": 15,
+  "band": 3,
+  "town": "Radin",
+  "onGrid": 8,
+  "offGrid": 15
+ },
+ {
+  "seed": 15,
+  "band": 3,
+  "town": "Rulba",
+  "onGrid": 14,
+  "offGrid": 28
+ },
+ {
+  "seed": 15,
+  "band": 3,
+  "town": "Trukba",
+  "onGrid": 10,
+  "offGrid": 10
+ },
+ {
+  "seed": 15,
+  "band": 4,
+  "town": "Stanbyl",
+  "onGrid": 14,
+  "offGrid": 24
+ },
+ {
+  "seed": 15,
+  "band": 4,
+  "town": "Radin",
+  "onGrid": 12,
+  "offGrid": 20
+ },
+ {
+  "seed": 15,
+  "band": 4,
+  "town": "Rulba",
+  "onGrid": 10,
+  "offGrid": 20
+ },
+ {
+  "seed": 15,
+  "band": 4,
+  "town": "Trukba",
+  "onGrid": 9,
+  "offGrid": 10
+ },
+ {
+  "seed": 15,
+  "band": 5,
+  "town": "Stanbyl",
+  "onGrid": 12,
+  "offGrid": 18
+ },
+ {
+  "seed": 15,
+  "band": 5,
+  "town": "Radin",
+  "onGrid": 9,
+  "offGrid": 13
+ },
+ {
+  "seed": 15,
+  "band": 5,
+  "town": "Rulba",
+  "onGrid": 3,
+  "offGrid": 27
+ },
+ {
+  "seed": 15,
+  "band": 5,
+  "town": "Trukba",
+  "onGrid": 10,
+  "offGrid": 11
+ },
+ {
+  "seed": 15,
+  "band": 6,
+  "town": "Stanbyl",
+  "onGrid": 5,
+  "offGrid": 12
+ },
+ {
+  "seed": 15,
+  "band": 6,
+  "town": "Radin",
+  "onGrid": 7,
+  "offGrid": 10
+ },
+ {
+  "seed": 15,
+  "band": 6,
+  "town": "Rulba",
+  "onGrid": 1,
+  "offGrid": 30
+ },
+ {
+  "seed": 15,
+  "band": 6,
+  "town": "Trukba",
+  "onGrid": 19,
+  "offGrid": 18
+ },
+ {
+  "seed": 23,
+  "band": 1,
+  "town": "Uatzuaxcan",
+  "onGrid": 12,
+  "offGrid": 0
+ },
+ {
+  "seed": 23,
+  "band": 1,
+  "town": "Tzixua",
+  "onGrid": 12,
+  "offGrid": 0
+ },
+ {
+  "seed": 23,
+  "band": 1,
+  "town": "Tluacuo",
+  "onGrid": 13,
+  "offGrid": 0
+ },
+ {
+  "seed": 23,
+  "band": 1,
+  "town": "Lelix",
+  "onGrid": 17,
+  "offGrid": 0
+ },
+ {
+  "seed": 23,
+  "band": 2,
+  "town": "Uatzuaxcan",
+  "onGrid": 18,
+  "offGrid": 15
+ },
+ {
+  "seed": 23,
+  "band": 2,
+  "town": "Tzixua",
+  "onGrid": 20,
+  "offGrid": 16
+ },
+ {
+  "seed": 23,
+  "band": 2,
+  "town": "Tluacuo",
+  "onGrid": 13,
+  "offGrid": 17
+ },
+ {
+  "seed": 23,
+  "band": 2,
+  "town": "Lelix",
+  "onGrid": 17,
+  "offGrid": 24
+ },
+ {
+  "seed": 23,
+  "band": 3,
+  "town": "Uatzuaxcan",
+  "onGrid": 14,
+  "offGrid": 9
+ },
+ {
+  "seed": 23,
+  "band": 3,
+  "town": "Tzixua",
+  "onGrid": 7,
+  "offGrid": 15
+ },
+ {
+  "seed": 23,
+  "band": 3,
+  "town": "Tluacuo",
+  "onGrid": 11,
+  "offGrid": 18
+ },
+ {
+  "seed": 23,
+  "band": 3,
+  "town": "Lelix",
+  "onGrid": 13,
+  "offGrid": 13
+ },
+ {
+  "seed": 23,
+  "band": 4,
+  "town": "Uatzuaxcan",
+  "onGrid": 6,
+  "offGrid": 9
+ },
+ {
+  "seed": 23,
+  "band": 4,
+  "town": "Tzixua",
+  "onGrid": 7,
+  "offGrid": 9
+ },
+ {
+  "seed": 23,
+  "band": 4,
+  "town": "Tluacuo",
+  "onGrid": 21,
+  "offGrid": 23
+ },
+ {
+  "seed": 23,
+  "band": 4,
+  "town": "Lelix",
+  "onGrid": 19,
+  "offGrid": 23
+ },
+ {
+  "seed": 23,
+  "band": 5,
+  "town": "Uatzuaxcan",
+  "onGrid": 4,
+  "offGrid": 13
+ },
+ {
+  "seed": 23,
+  "band": 5,
+  "town": "Tzixua",
+  "onGrid": 5,
+  "offGrid": 5
+ },
+ {
+  "seed": 23,
+  "band": 5,
+  "town": "Tluacuo",
+  "onGrid": 5,
+  "offGrid": 11
+ },
+ {
+  "seed": 23,
+  "band": 5,
+  "town": "Lelix",
+  "onGrid": 6,
+  "offGrid": 23
+ },
+ {
+  "seed": 23,
+  "band": 6,
+  "town": "Uatzuaxcan",
+  "onGrid": 6,
+  "offGrid": 7
+ },
+ {
+  "seed": 23,
+  "band": 6,
+  "town": "Tzixua",
+  "onGrid": 3,
+  "offGrid": 8
+ },
+ {
+  "seed": 23,
+  "band": 6,
+  "town": "Tluacuo",
+  "onGrid": 6,
+  "offGrid": 16
+ },
+ {
+  "seed": 23,
+  "band": 6,
+  "town": "Lelix",
+  "onGrid": 17,
+  "offGrid": 16
+ }
+]

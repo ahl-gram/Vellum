@@ -1,0 +1,23 @@
+556 figures checked, 0 inconsistent
+
+
+dress-capital-42-laukuwelua: 20 figures checked
+dress-realm-border-15-border-chain-0-vertex-102: 20 figures checked
+dress-river-and-road-village-42-won: 20 figures checked
+dress-river-mouth-23-mouth-of-world-river-1: 20 figures checked
+dress-river-town-7-wutoanu: 20 figures checked
+dress-road-town-2-skorsty: 20 figures checked
+dress-sea-edge-42-shore-at-world-cell-143-76: 20 figures checked
+dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47: 20 figures checked
+lines: 80 figures checked
+overview: 48 figures checked
+place-capital-42-laukuwelua: 27 figures checked
+place-realm-border-15-border-chain-0-vertex-102: 27 figures checked
+place-river-and-road-village-42-won: 27 figures checked
+place-river-mouth-23-mouth-of-world-river-1: 27 figures checked
+place-river-town-7-wutoanu: 27 figures checked
+place-road-town-2-skorsty: 27 figures checked
+place-sea-edge-42-shore-at-world-cell-143-76: 27 figures checked
+place-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47: 27 figures checked
+surfaces-capital-42-laukuwelua: 26 figures checked
+surfaces-river-town-7-wutoanu: 26 figures checked

@@ -1,0 +1,4 @@
+rivers ending on dry land at cbf57b8f, every lattice window of bands 1 to 3 (the windows scripts/region-detail/sweep.ts walks), seeds 42, 7, 2, 15, 23, detail on
+band 1: today 0 of 154 rivers over 20 windows; arm A 0 of 211 rivers over 20 windows; arm B 0 of 214 rivers over 20 windows
+band 2: today 1 of 167 rivers over 80 windows; arm A 1 of 250 rivers over 80 windows; arm B 0 of 237 rivers over 80 windows
+band 3: today 0 of 212 rivers over 320 windows; arm A 2 of 330 rivers over 320 windows; arm B 0 of 302 rivers over 320 windows

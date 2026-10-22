@@ -1,0 +1,13 @@
+river towns at cbf57b8f: towns and villages the world sets on a river (onRiver), on the measurement sample's close-ups, and their distance to the nearest river the close-up draws, world cells (Infinity: the close-up draws no river at all).
+band 3, today: 25 river towns; 2 with no river drawn on the sheet; within half a world cell of a drawn river 2; median distance 1.03, largest 21.30
+band 3, A: 25 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 4; median distance 0.79, largest 1.38
+band 3, B: 25 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 2; median distance 0.75, largest 4.14
+band 4, today: 18 river towns; 10 with no river drawn on the sheet; within half a world cell of a drawn river 1; median distance 0.95, largest 5.99
+band 4, A: 18 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 2; median distance 0.77, largest 1.32
+band 4, B: 18 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 4; median distance 0.80, largest 1.54
+band 5, today: 16 river towns; 11 with no river drawn on the sheet; within half a world cell of a drawn river 1; median distance 0.70, largest 1.01
+band 5, A: 16 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 3; median distance 0.77, largest 1.35
+band 5, B: 16 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 4; median distance 0.77, largest 1.38
+band 6, today: 16 river towns; 11 with no river drawn on the sheet; within half a world cell of a drawn river 1; median distance 0.71, largest 1.00
+band 6, A: 16 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 3; median distance 0.78, largest 1.39
+band 6, B: 16 river towns; 0 with no river drawn on the sheet; within half a world cell of a drawn river 3; median distance 0.78, largest 1.61

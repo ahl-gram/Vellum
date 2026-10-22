@@ -1,0 +1,14 @@
+selfcheck at cbf57b8f: the fork with no hook against the engine
+ok   seed 42 band 1 (Laukuwelua): field true, rivers true, close-up SVG true
+ok   seed 42 band 3 (Laukuwelua): field true, rivers true, close-up SVG true
+ok   seed 42 band 5 (Laukuwelua): field true, rivers true, close-up SVG true
+ok   seed 42 band 6 (Laukuwelua): field true, rivers true, close-up SVG true
+ok   seed 7 band 1 (Numowopua): field true, rivers true, close-up SVG true
+ok   seed 7 band 3 (Numowopua): field true, rivers true, close-up SVG true
+ok   seed 7 band 5 (Numowopua): field true, rivers true, close-up SVG true
+ok   seed 7 band 6 (Numowopua): field true, rivers true, close-up SVG true
+ok   seed 2 band 1 (Vunsvyov): field true, rivers true, close-up SVG true
+ok   seed 2 band 3 (Vunsvyov): field true, rivers true, close-up SVG true
+ok   seed 2 band 5 (Vunsvyov): field true, rivers true, close-up SVG true
+ok   seed 2 band 6 (Vunsvyov): field true, rivers true, close-up SVG true
+all equal

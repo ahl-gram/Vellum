@@ -1,0 +1,122 @@
+[
+ {
+  "file": "overview.html",
+  "title": "the round at a glance",
+  "out": "overview.png",
+  "width": 2398
+ },
+ {
+  "file": "place-capital-42-laukuwelua.html",
+  "title": "capital: Laukuwelua, chart 42",
+  "out": "sheet-capital-42-laukuwelua.png",
+  "width": 2575
+ },
+ {
+  "file": "place-river-town-7-wutoanu.html",
+  "title": "river town: Wutoanu, chart 7",
+  "out": "sheet-river-town-7-wutoanu.png",
+  "width": 2575
+ },
+ {
+  "file": "place-road-town-2-skorsty.html",
+  "title": "road town: Skorsty, chart 2",
+  "out": "sheet-road-town-2-skorsty.png",
+  "width": 2575
+ },
+ {
+  "file": "place-river-mouth-23-mouth-of-world-river-1.html",
+  "title": "river mouth: mouth of world river 1, chart 23",
+  "out": "sheet-river-mouth-23-mouth-of-world-river-1.png",
+  "width": 2575
+ },
+ {
+  "file": "place-realm-border-15-border-chain-0-vertex-102.html",
+  "title": "realm border: border chain 0, vertex 102, chart 15",
+  "out": "sheet-realm-border-15-border-chain-0-vertex-102.png",
+  "width": 2575
+ },
+ {
+  "file": "place-sea-edge-42-shore-at-world-cell-143-76.html",
+  "title": "lake shore (the first sweep's sea edge): shore at world cell 143,76, chart 42",
+  "out": "sheet-sea-edge-42-shore-at-world-cell-143-76.png",
+  "width": 2575
+ },
+ {
+  "file": "place-river-and-road-village-42-won.html",
+  "title": "river and road village: Won, chart 42",
+  "out": "sheet-river-and-road-village-42-won.png",
+  "width": 2575
+ },
+ {
+  "file": "place-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.html",
+  "title": "sea edge on the open sea: shore at world cell 106,47, chart 23",
+  "out": "sheet-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.png",
+  "width": 2575
+ },
+ {
+  "file": "dress-capital-42-laukuwelua.html",
+  "title": "every dress: Laukuwelua, chart 42",
+  "out": "dress-capital-42-laukuwelua.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-river-town-7-wutoanu.html",
+  "title": "every dress: Wutoanu, chart 7",
+  "out": "dress-river-town-7-wutoanu.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-road-town-2-skorsty.html",
+  "title": "every dress: Skorsty, chart 2",
+  "out": "dress-road-town-2-skorsty.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-river-mouth-23-mouth-of-world-river-1.html",
+  "title": "every dress: mouth of world river 1, chart 23",
+  "out": "dress-river-mouth-23-mouth-of-world-river-1.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-realm-border-15-border-chain-0-vertex-102.html",
+  "title": "every dress: border chain 0, vertex 102, chart 15",
+  "out": "dress-realm-border-15-border-chain-0-vertex-102.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-sea-edge-42-shore-at-world-cell-143-76.html",
+  "title": "every dress: shore at world cell 143,76, chart 42",
+  "out": "dress-sea-edge-42-shore-at-world-cell-143-76.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-river-and-road-village-42-won.html",
+  "title": "every dress: Won, chart 42",
+  "out": "dress-river-and-road-village-42-won.png",
+  "width": 2204
+ },
+ {
+  "file": "dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.html",
+  "title": "every dress: shore at world cell 106,47, chart 23",
+  "out": "dress-sea-edge-on-the-open-sea-23-shore-at-world-cell-106-47.png",
+  "width": 2204
+ },
+ {
+  "file": "lines.html",
+  "title": "the arms against the world's line, bands 5 and 6",
+  "out": "sheet-lines.png",
+  "width": 2304
+ },
+ {
+  "file": "surfaces-capital-42-laukuwelua.html",
+  "title": "every surface: Laukuwelua, chart 42",
+  "out": "surfaces-capital-42-laukuwelua.png",
+  "width": 1736
+ },
+ {
+  "file": "surfaces-river-town-7-wutoanu.html",
+  "title": "every surface: Wutoanu, chart 7",
+  "out": "surfaces-river-town-7-wutoanu.png",
+  "width": 1736
+ }
+]

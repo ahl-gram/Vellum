@@ -1,0 +1,46 @@
+seed	band	settlement	variant	rivers	majorsDrawn	minorsDrawn	endingOnLand	ms
+42	4	Laukuwelua	carve only (no inflow, no outlet)	0	0 of 1	0 of 0	0	443
+42	4	Laukuwelua	inflow and outlet, no carve	1	1 of 1	0 of 0	0	186
+42	4	Laukuwelua	carve and inflow, no outlet	1	1 of 1	0 of 0	0	458
+42	5	Laukuwelua	carve only (no inflow, no outlet)	0	0 of 1	0 of 0	0	480
+42	5	Laukuwelua	inflow and outlet, no carve	1	1 of 1	0 of 0	0	173
+42	5	Laukuwelua	carve and inflow, no outlet	1	1 of 1	0 of 0	0	480
+42	6	Laukuwelua	carve only (no inflow, no outlet)	0	0 of 1	0 of 0	0	511
+42	6	Laukuwelua	inflow and outlet, no carve	1	1 of 1	0 of 0	0	173
+42	6	Laukuwelua	carve and inflow, no outlet	1	1 of 1	0 of 0	0	520
+7	4	Numowopua	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	439
+7	4	Numowopua	inflow and outlet, no carve	1	0 of 0	1 of 1	0	176
+7	4	Numowopua	carve and inflow, no outlet	1	0 of 0	1 of 1	0	440
+7	5	Numowopua	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	466
+7	5	Numowopua	inflow and outlet, no carve	1	0 of 0	1 of 1	0	167
+7	5	Numowopua	carve and inflow, no outlet	1	0 of 0	1 of 1	0	465
+7	6	Numowopua	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	505
+7	6	Numowopua	inflow and outlet, no carve	1	0 of 0	1 of 1	0	174
+7	6	Numowopua	carve and inflow, no outlet	1	0 of 0	1 of 1	0	525
+2	4	Vunsvyov	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	449
+2	4	Vunsvyov	inflow and outlet, no carve	1	0 of 0	1 of 1	0	172
+2	4	Vunsvyov	carve and inflow, no outlet	1	0 of 0	1 of 1	0	460
+2	5	Vunsvyov	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	477
+2	5	Vunsvyov	inflow and outlet, no carve	1	0 of 0	1 of 1	0	171
+2	5	Vunsvyov	carve and inflow, no outlet	1	0 of 0	1 of 1	0	478
+2	6	Vunsvyov	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	517
+2	6	Vunsvyov	inflow and outlet, no carve	1	0 of 0	1 of 1	0	177
+2	6	Vunsvyov	carve and inflow, no outlet	1	0 of 0	1 of 1	0	522
+15	4	Stanbyl	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	447
+15	4	Stanbyl	inflow and outlet, no carve	1	0 of 0	0 of 1	0	176
+15	4	Stanbyl	carve and inflow, no outlet	1	0 of 0	1 of 1	0	447
+15	5	Stanbyl	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	488
+15	5	Stanbyl	inflow and outlet, no carve	1	0 of 0	0 of 1	0	172
+15	5	Stanbyl	carve and inflow, no outlet	1	0 of 0	1 of 1	0	487
+15	6	Stanbyl	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	525
+15	6	Stanbyl	inflow and outlet, no carve	1	0 of 0	0 of 1	0	170
+15	6	Stanbyl	carve and inflow, no outlet	1	0 of 0	1 of 1	0	533
+23	4	Uatzuaxcan	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	437
+23	4	Uatzuaxcan	inflow and outlet, no carve	1	0 of 0	1 of 1	0	162
+23	4	Uatzuaxcan	carve and inflow, no outlet	1	0 of 0	1 of 1	0	438
+23	5	Uatzuaxcan	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	472
+23	5	Uatzuaxcan	inflow and outlet, no carve	1	0 of 0	1 of 1	0	165
+23	5	Uatzuaxcan	carve and inflow, no outlet	1	0 of 0	1 of 1	0	470
+23	6	Uatzuaxcan	carve only (no inflow, no outlet)	0	0 of 0	0 of 1	0	509
+23	6	Uatzuaxcan	inflow and outlet, no carve	1	0 of 0	1 of 1	0	162
+23	6	Uatzuaxcan	carve and inflow, no outlet	1	0 of 0	1 of 1	0	510
