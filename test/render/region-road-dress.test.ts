@@ -46,6 +46,6 @@ test("a close-up draws its roads and their key in the heavier dress, and a world
     "the world sheet keeps its own dress, both ranks present",
   );
   const worldKey = keyDresses(worldSvg);
-  assert.equal(worldKey.get("Road"), "1.5|5.0 3.5|0.85");
-  assert.equal(worldKey.get("Track"), "1.0|2.5 3.5|0.7");
+  assert.equal(worldKey.get("Road"), "1.5|5.0 3.5|0.85", "the world sheet's key draws a road as the sheet does");
+  assert.equal(worldKey.get("Track"), "1.0|2.5 3.5|0.7", "the world sheet's key draws a track as the sheet does");
 });
