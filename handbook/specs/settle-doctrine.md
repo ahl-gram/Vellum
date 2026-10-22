@@ -103,7 +103,8 @@ headless browser actually do, so a green run can be believed.
     files the issue and skips the step as item 11 says, with no offer first, so recurring flakes become
     issues rather than piling up as rows. Only a row from a run on GitHub's machines counts, the CI
     workflow's or the proof runner's, and a run counts once however many rows it produced, so three
-    CI rows are three runs. A local run's red still gets its row and its trail, and local rows never
+    CI rows are three runs. A row whose cause a later change settled (its disposition reads settled)
+    no longer counts: the count starts again from the fix. A local run's red still gets its row and its trail, and local rows never
     file the issue. A launch hiccup is a lane, not a step: its CI rows count toward one launch issue, and at three with
     none open that issue is filed about the harness, with nothing to skip.
 13. **A stillness assertion in a fixture that crosses the ambient idle delay needs a tolerance sized
