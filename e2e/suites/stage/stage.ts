@@ -323,7 +323,7 @@ const median = (xs: number[]): number => {
   return s[Math.floor(s.length / 2)]!;
 };
 
-type Ground = { piece: string; t: string; ratio: number };
+type Ground = { piece: string; t: string; ratio: number; row: number };
 
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
 export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
@@ -344,7 +344,7 @@ export async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Prom
     const out: Ground[] = [];
     for (const g of glyphs) {
       const row = await sampleRow(ctx.send, g.x, g.row, g.w);
-      out.push({ piece: g.piece, t: g.t, ratio: ratio(relative(g.ink), median(row.map(relative))) });
+      out.push({ piece: g.piece, t: g.t, ratio: ratio(relative(g.ink), median(row.map(relative))), row: g.row });
     }
     return out;
   });
