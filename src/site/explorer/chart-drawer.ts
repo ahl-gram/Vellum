@@ -2,12 +2,12 @@
 import {
   TABLE_CAP,
   emitTable,
+  isRung,
   prospectItemFrom,
   tableWindow,
   type TableItem,
   type SurveyItem,
   type ProspectItem,
-  type Rung,
   type TableOverrides,
 } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
@@ -134,12 +134,12 @@ export function surveyItemFrom(c: {
   readonly band: number;
   readonly seat: { readonly lx: number; readonly ly: number } | null;
 }): SurveyItem | null {
-  if (!c.seat || c.band < 1 || c.band > 3 || !c.render.style) return null;
+  if (!c.seat || !isRung(c.band) || !c.render.style) return null;
   const o = c.overrides ?? {};
   return {
     kind: "survey",
     seed: c.seed,
-    rung: c.band as Rung,
+    rung: c.band,
     lx: c.seat.lx,
     ly: c.seat.ly,
     overrides: {

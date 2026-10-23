@@ -16,11 +16,13 @@ export const LOD_BANDS: readonly LodBand[] = [
   { index: 1, k: 2, sizeUV: 0.5, gridW: 320, gridH: 240, isRegion: true },
   { index: 2, k: 4, sizeUV: 0.25, gridW: 320, gridH: 240, isRegion: true },
   { index: 3, k: 8, sizeUV: 0.125, gridW: 320, gridH: 240, isRegion: true },
+  { index: 4, k: 16, sizeUV: 0.0625, gridW: 320, gridH: 240, isRegion: true },
+  { index: 5, k: 32, sizeUV: 0.03125, gridW: 320, gridH: 240, isRegion: true },
 ];
 
 const LAST_BAND = LOD_BANDS.length - 1;
 
-export const DEEPEST_K = 8;
+export const DEEPEST_K = (LOD_BANDS[LAST_BAND] as LodBand).k;
 
 const BOUNDARIES: readonly number[] = LOD_BANDS.slice(0, LAST_BAND).map((b, i) =>
   Math.sqrt(b.k * (LOD_BANDS[i + 1] as LodBand).k),

@@ -47,7 +47,7 @@ export interface TableWorld {
   readonly overrides: TableOverrides;
 }
 
-export const RUNGS = [1, 2, 3] as const;
+export const RUNGS = [1, 2, 3, 4, 5] as const;
 export type Rung = (typeof RUNGS)[number];
 export const isRung = (n: number): n is Rung => (RUNGS as readonly number[]).includes(n);
 
@@ -147,7 +147,7 @@ function readItem(chunk: string): TableItem | null {
     const theme = allowed(fields.get("theme"), THEME_NAMES);
     const rung = nat(fields.get("rung"));
     if (legend == null || arms == null || beasts == null || theme === null || rung == null) return null;
-    const seat = regionBand(rung) ? (rung as Rung) : null;
+    const seat = isRung(rung) ? rung : null;
     const band = seat === null ? null : LOD_BANDS[seat];
     if (!band || seat === null) return null;
     const lx = nat(fields.get("lx"));

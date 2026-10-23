@@ -288,7 +288,7 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
 
 test("latticeFromCentre refuses a centre that is not a settle, and a rung that is not the Glass's", () => {
   assert.equal(latticeFromCentre(0.5, 0.5, 0), null, "band 0 has no lattice");
-  assert.equal(latticeFromCentre(0.5, 0.5, 4), null);
+  assert.equal(latticeFromCentre(0.5, 0.5, 6), null, "band 6 does not exist");
   assert.equal(latticeFromCentre(-0.1, 0.5, 2), null, "off the sheet is not a settle");
   assert.equal(latticeFromCentre(1.4, 0.5, 2), null);
   assert.deepEqual(latticeFromCentre(0.5, 0.5, 1), { lx: 8, ly: 8 }, "the middle of the sheet at rung 1");

@@ -4,13 +4,15 @@ import { createZoomController, type ZoomController, type ZoomState } from "../sh
 import { createLodController } from "./lod-controller.ts";
 import { createHold, type Hold } from "./glass-hold.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
+import { DEEPEST_K } from "../../world/lod.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
 // Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
 export const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
-const GLASS_MAX = 8;
-const HELD_MAX = 24;
+const GLASS_MAX = DEEPEST_K;
+const HOLD_STRETCH = 3;
+const HELD_MAX = HOLD_STRETCH * GLASS_MAX;
 
 interface GlassDeps {
   mapViewport: HTMLElement;
