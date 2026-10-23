@@ -168,14 +168,8 @@ function watchInput(
   });
 }
 
-const NONE: RoomSlide = { follow: () => {}, measured: () => {}, arm: () => {}, point: () => {}, fill: () => Infinity };
-
-export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
-  const head = document.querySelector<HTMLElement>("header.chrome");
-  const folio = document.querySelector<HTMLElement>(".corner.bl");
-  if (head === null || folio === null) return NONE;
-  const slip = document.querySelector<HTMLElement>(".slip");
-  const slide = bindSlideAway({
+const bindOnPage = (head: HTMLElement, folio: HTMLElement): SlideAway =>
+  bindSlideAway({
     head,
     folio,
     atelier: head.querySelector<HTMLDetailsElement>("details.atelier-fold"),
@@ -185,6 +179,15 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
     after: (run, ms) => window.setTimeout(run, ms),
     cancel: (timer) => window.clearTimeout(timer),
   });
+
+const NONE: RoomSlide = { follow: () => {}, measured: () => {}, arm: () => {}, point: () => {}, fill: () => Infinity };
+
+export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
+  const head = document.querySelector<HTMLElement>("header.chrome");
+  const folio = document.querySelector<HTMLElement>(".corner.bl");
+  if (head === null || folio === null) return NONE;
+  const slip = document.querySelector<HTMLElement>(".slip");
+  const slide = bindOnPage(head, folio);
   let last = Infinity;
   let from = 0;
   let measuredOnce = false;
