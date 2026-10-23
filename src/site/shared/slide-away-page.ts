@@ -186,21 +186,26 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
     cancel: (timer) => window.clearTimeout(timer),
   });
   let last = Infinity;
+  let from = 0;
   let measuredOnce = false;
+  let armedOnce = false;
   const remeasure = (): void => {
     const m = measure(parts, head, folio, slip);
     if (m === null) return;
     measuredOnce = true;
     last = m.fill;
+    from = m.from;
     slide.measured(m);
   };
-  const once = (): void => {
-    if (!measuredOnce) remeasure();
-  };
   watchLayout(parts, head, folio, remeasure);
-  watchInput(slide, parts, head, folio, document.querySelector(".corner.br"));
+  const arm = (): void => {
+    if (!armedOnce) remeasure();
+    armedOnce = true;
+    slide.arm();
+  };
+  watchInput({ ...slide, arm }, parts, head, folio, document.querySelector(".corner.br"));
   const follow = (k: number): void => {
-    once();
+    if (!measuredOnce || k <= from) remeasure();
     slide.follow(k);
   };
   const { camera } = parts;
@@ -212,8 +217,9 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
   return {
     ...slide,
     follow,
+    arm,
     fill: () => {
-      once();
+      remeasure();
       return last;
     },
   };

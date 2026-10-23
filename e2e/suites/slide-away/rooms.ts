@@ -74,7 +74,10 @@ async function sw4Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   }
   for (const g of read.filter((x) => x.ratio < FLOOR_PLAIN))
     faults.push(`${room.id}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
-  return { faults, detail: `${room.id} worst ${worstOf(read).toFixed(2)}, bare ${worstOf(bare).toFixed(2)}` };
+  return {
+    faults,
+    detail: `${room.id} worst ${worstOf(read).toFixed(2)}, bare ${keep.map((p) => `${p} ${worstOf(bare, p).toFixed(2)}`).join(" and ")} (${bare.map((g) => `${g.piece} ${g.t.slice(0, 12)} ${g.ratio.toFixed(2)}`).join(", ")})`,
+  };
 }
 
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {

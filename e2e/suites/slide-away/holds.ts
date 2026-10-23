@@ -36,16 +36,17 @@ async function leanedFrom(ctx: SuiteContext, before: string, label: string): Pro
   return moved;
 }
 
-async function enterOnSecondRow(ctx: SuiteContext): Promise<boolean> {
+async function enterOnLastRow(ctx: SuiteContext): Promise<boolean> {
   const focused = await ctx.evaluate<boolean>(
-    `(() => { const b = document.querySelectorAll(${JSON.stringify(ROW_LEAN)})[1]; if (!b) return false; b.focus(); return document.activeElement === b; })()`,
+    `(() => { const b = [...document.querySelectorAll(${JSON.stringify(ROW_LEAN)})].pop(); if (!b) return false; b.focus(); return document.activeElement === b; })()`,
   );
-  if (!focused) throw new Error("SW5: the second itinerary row's lean button took no focus");
+  if (!focused) throw new Error("SW5: the last itinerary row's lean button took no focus");
   const before = await ctx.evaluate(TRANSFORM);
   const key = { key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 };
   await ctx.send("Input.dispatchKeyEvent", { type: "keyDown", ...key, text: "\r" });
   await ctx.send("Input.dispatchKeyEvent", { type: "keyUp", ...key });
-  return leanedFrom(ctx, before, "SW5 Enter");
+  const moved = await leanedFrom(ctx, before, "SW5 Enter");
+  return moved;
 }
 
 const allHome = (reads: readonly Pieces[]): boolean =>
@@ -67,7 +68,7 @@ export async function sw5RowLean(ctx: SuiteContext): Promise<void> {
     if (!(leaned.k >= fill))
       faults.push(`the lean landed at ${leaned.k.toFixed(3)}, short of the fill ${fill.toFixed(3)} (the witness)`);
     if (!allHome(await gather(ctx, 1000))) faults.push("a row's press moved a piece");
-    if (!(await enterOnSecondRow(ctx))) faults.push("Enter on the second row leaned nothing");
+    if (!(await enterOnLastRow(ctx))) faults.push("Enter on the last row leaned nothing");
     if (!allHome(await gather(ctx, 1000))) faults.push("Enter on a row moved a piece");
     const at = await ctx.evaluate(CENTRE);
     const kBefore = (await ctx.evaluate(PIECES)).k;
