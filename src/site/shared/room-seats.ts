@@ -9,10 +9,18 @@ const LEGEND_GAP = 16;
 const LEGEND_RISE = 12;
 const SAME_LINE = 1;
 
+export function translateOf(value: string): { readonly x: number; readonly y: number } {
+  if (!value || value === "none") return { x: 0, y: 0 };
+  const [x, y] = value.split(" ");
+  return { x: parseFloat(x ?? "") || 0, y: parseFloat(y ?? "") || 0 };
+}
+
 export const rectOf = (el: Element | null): DOMRect | null => {
   if (el === null) return null;
   const r = el.getBoundingClientRect();
-  return r.height > 0 ? r : null;
+  if (!(r.height > 0)) return null;
+  const t = translateOf(getComputedStyle(el).translate);
+  return t.x === 0 && t.y === 0 ? r : new DOMRect(r.left - t.x, r.top - t.y, r.width, r.height);
 };
 
 // A wrapped line reads as the box, so a short survey line leaves the legend more room than the box's max-width would.

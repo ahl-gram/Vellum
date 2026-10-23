@@ -7,7 +7,7 @@ import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
 // Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
-const ZOOM_STEP = 1.4;
+export const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
 const GLASS_MAX = 8;
 const HELD_MAX = 24;
@@ -28,7 +28,7 @@ interface GlassDeps {
   regionEligible: () => boolean;
   syncHash: () => void;
   busy: () => boolean;
-  onView: () => void;
+  onView: (k: number) => void;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
   buttons: { touch: HTMLElement; hold: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
@@ -56,7 +56,7 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
     }
     // Issue #387/Issue #388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
-    deps.onView();
+    deps.onView(k);
   }
   return { setCardZoom };
 }

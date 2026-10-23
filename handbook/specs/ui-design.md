@@ -119,10 +119,11 @@ identical geometry to the sea beasts; this file is the site around it.
 Two room patterns, both ratified whole after live use (#462, ratified at #454).
 
 **A chart room.** The chart is the room: full bleed on the deep, pannable and zoomable, fitted to
-what the chrome leaves and **measured off the chrome's own rects, never guessed** (and measured after
-the chrome has its text, or the fit reads an empty box, and again once the fonts are ready, on
-every resize, and whenever the head cluster or the room folio changes size, which `bindRoom` in
-`src/site/shared/room.ts` wires). **The stage is the fixed
+what the chrome leaves and **measured off the chrome's own rects where each piece stands at home,
+never off a piece slid toward its edge, and never guessed** (`rectOf` in
+`src/site/shared/room-seats.ts`; and measured after the chrome has its text, or the fit reads an
+empty box, and again once the fonts are ready, on every resize, and whenever the head cluster or
+the room folio changes size, which `bindRoom` in `src/site/shared/room.ts` wires). **The stage is the fixed
 box the chart is mounted in, the whole window or the desk frame below**, declared as `body.chart-room .stage` in
 `src/styles/shared/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
 none, and the Gallery is that room today. No band, no footer: a chart room with a
@@ -168,6 +169,20 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   narrows it toward the kit's width wherever the cap would run under the nav.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
+
+**On the Explorer the head cluster and the chart folio follow the zoom to thin lines** (Alex,
+2026-10-22, Issue #989): past the depth where the Glass's first press lands they slide toward their
+nearest edge, the head up and the folio down, in step with the camera's depth, finishing exactly as
+the chart, magnified about its centre, covers the screen beside the Broadside, and leave the trail
+with the chart of the atelier press as a thin top line and the chart's name and number as a thin
+bottom line. A link that opens zoomed keeps them home until the reader's first zoom, pan or key; a
+mouse brought to rest on a thin line brings that piece back, keyboard focus or the chart of the
+atelier opened brings the head back, and neither ever leaves the tab order or the accessibility
+tree (`bindSlideAway` in `src/site/explorer/slide-away-bind.ts`). **Provisional until the post-use
+review:** where the follow starts and its curve, what a fold or the Chart Table does mid-zoom (part
+way back on a wide window, further out on 1024 by 768), the thin lines' margins and their panels
+running off the edge, the hover's rest and linger, the ease, the 1024 Press staying risen, the jump
+under reduced motion, and every room but the Explorer (Issue #997).
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
   main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit
   while it does (Alex, 2026-10-13, Issue #778). On the Explorer two presses of the room's own stand
@@ -249,8 +264,9 @@ carries none.** **Zoomed, every corner but the Glass stands on home's crisp pane
 2026-10-22, Issue #988 issuecomment-6352761013): the head cluster, the chart folio, the legend row
 and the room folio, on a short window as on a tall one, so a zoomed chart room's corners read
 alike, each the same as home's legend row; the Reading Room's strip alone keeps a blurred pool
-there. Each panel stops short of the window's edge at the room folio's margins, and where two
-panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
+there. Each panel stops short of the window's edge at the room folio's margins, save the edge an
+Explorer piece has slid past, which its panel runs off with it (Alex, 2026-10-23, Issue #996), and
+where two panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
 section mark beside the Press, take parchment, without which they read under 4.5:1 over a pale
 chart (`EZ1` in `e2e/suites/stage/zoomed.ts`). **Provisional until the post-use review:** the crisp
 panels under the cluster and the chart folio, their margins at the window's edge, where two panels
@@ -410,7 +426,10 @@ something that goes somewhere is the house's
 gesture; a tip on something that does not is a false affordance, and the glossary term tip was
 removed for exactly that reason. A non-navigating gesture is either a chart instrument, which is its
 own ratified class, or it goes on the list awaiting a ruling. A new tip joins one of those lists
-consciously, or `vellum/css-tip-goes-somewhere` refuses it.
+consciously, or `vellum/css-tip-goes-somewhere` refuses it. **The one ruled exception**: a mouse
+brought to rest on the Explorer's thin top or bottom line brings the head cluster or the chart folio
+back (Alex, 2026-10-22, Issue #989, ruled for that use alone). It reveals rather than goes
+anywhere, carries no tip, and is no precedent for another reveal.
 
 **Where touch is the main pointer a finger belongs to the page until the reader gives it to the
 chart**, with the Glass's manicule (Issue #778): a pinch zooms the page and a swipe scrolls it, on the chart and
@@ -460,6 +479,13 @@ which ones transition: `handbook/specs/cascade-traps.md`), and three things foll
 
 **Read the preference live.** A component that freezes the media query at construction stops responding
 when the reader changes the setting.
+
+**A piece that follows the camera moves on the camera's own frame and eases only where it starts to
+move while the camera stands still.** The Explorer's slid head and folio are written on every camera
+apply with no transition and take a timed ease for a hold, an arming or a re-measure that moves
+them; a camera move inside that ease rides it to the follow's value rather than jumping, and the
+follow is exact once it ends; under reduced motion they do not travel with the zoom, home short of
+the fill depth and away at and past it.
 
 **A piece seated by a transform is placed with the individual properties**, `translate` and `rotate`,
 because the house lift writes `transform` and would replace the seat.
