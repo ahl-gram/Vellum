@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  type Edges,
   arms,
   fillDepth,
   folioTravel,
@@ -74,8 +75,9 @@ test("SA7 a piece's hold zone is its home box grown by its panel's reach and str
     bottom: 0,
   });
   const home = { left: 26, top: 22, right: 510, bottom: 127 };
-  const near = (a: Record<string, number>, b: Record<string, number>) => {
-    for (const k of Object.keys(b)) assert.ok(Math.abs(a[k]! - b[k]!) < 1e-9, `${k}: ${a[k]} vs ${b[k]}`);
+  const near = (a: Edges, b: Edges) => {
+    for (const k of ["left", "top", "right", "bottom"] as const)
+      assert.ok(Math.abs(a[k] - b[k]) < 1e-9, `${k}: ${a[k]} vs ${b[k]}`);
   };
   near(holdZone(home, reach, "top", 800), { left: 11.6, top: 0, right: 524.4, bottom: 139.8 });
   near(holdZone(home, reach, "bottom", 800), { left: 11.6, top: 10.8, right: 524.4, bottom: 800 });

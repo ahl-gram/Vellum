@@ -47,9 +47,9 @@ function build(flags: { reduce?: boolean; focusVisible?: boolean } = {}) {
     reduce: () => state.reduce,
     focusVisible: () => state.focusVisible,
     easeMs: () => EASE_MS,
-    after: (run, ms) => timers.push({ run, ms, live: true }) - 1,
+    after: (run, ms) => timers.push({ run, ms, live: true }),
     cancel: (id) => {
-      timers[id]!.live = false;
+      timers[id - 1]!.live = false;
     },
   });
   const runLive = (ms?: number): void => {

@@ -197,7 +197,12 @@ function installDesk(
     readonly right: number;
     readonly bottom: number;
     constructor(x: number, y: number, width: number, height: number) {
-      Object.assign(this, { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height });
+      this.x = this.left = x;
+      this.y = this.top = y;
+      this.width = width;
+      this.height = height;
+      this.right = x + width;
+      this.bottom = y + height;
     }
   };
   g.getComputedStyle = (el?: El) => ({
