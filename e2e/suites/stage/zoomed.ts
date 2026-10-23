@@ -38,10 +38,17 @@ const LINE_TAN: Record<Sub, string> = {
 
 type Reads = Awaited<ReturnType<typeof grounds>>;
 type Ask = { pieces: readonly Piece[]; mark: boolean; bare: boolean; lineTan: readonly Sub[] };
-type Ring = { visible: boolean; colour: number[] } | null;
+type Ring = {
+  visible: boolean;
+  colour: number[];
+  box: number[];
+  text: number[];
+  prevRight: number | null;
+  reach: number;
+} | null;
 
 const RING = (selector: string): Payload<Ring> =>
-  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); return { visible: a.matches(":focus-visible"), colour: (${PAGE_RGBA})(getComputedStyle(a).outlineColor) }; })()`;
+  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); const cs = getComputedStyle(a), b = a.getBoundingClientRect(), rg = new Range(); rg.selectNodeContents(a); const t = rg.getBoundingClientRect(), prev = a.previousElementSibling; return { visible: a.matches(":focus-visible"), colour: (${PAGE_RGBA})(cs.outlineColor), box: [b.left, b.top, b.right, b.bottom], text: [t.left, t.top, t.right, t.bottom], prevRight: prev ? prev.getBoundingClientRect().right : null, reach: parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset) }; })()`;
 
 // The colour is read on a later task than the focus: in the focus's own task the ring still reads the colour it started from (measured 2026-10-22, 1024x768 zoomed Explorer, [1,0,1,0] for the mark), so the read polls until two reads agree.
 async function ringOf(ctx: SuiteContext, selector: string): Promise<Ring> {
@@ -155,6 +162,20 @@ function roomFaults(r: RoomRead, ask: Ask, floored: boolean): string[] {
       sameInk(r.ring.mark.colour, "--parchment-bright") &&
       !!r.ring.control?.visible &&
       sameInk(r.ring.control.colour, "--ink-dark");
+    const m = r.ring?.mark;
+    const encloses =
+      !!m &&
+      m.box[0]! <= m.text[0]! + 0.5 &&
+      m.box[1]! <= m.text[1]! + 0.5 &&
+      m.box[2]! >= m.text[2]! - 0.5 &&
+      m.box[3]! >= m.text[3]! - 0.5;
+    const clear = !!m && m.prevRight !== null && m.box[0]! - m.reach >= m.prevRight + 1;
+    if (!encloses)
+      say(`the section mark's ring does not enclose its glyph: ${JSON.stringify(m && { box: m.box, text: m.text })}`);
+    if (!clear)
+      say(
+        `the section mark's ring lies on the neighbouring chip's border, not a pixel clear of it: ${JSON.stringify(m && { left: m.box[0]! - m.reach, prevRight: m.prevRight })}`,
+      );
     if (!ok)
       say(
         `the section mark's focus ring is not parchment-bright beside the control's ink-dark: ${JSON.stringify(r.ring)}`,
@@ -198,7 +219,7 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   }
   const faults = rows.flatMap(({ r, ask }) => roomFaults(r, ask, false));
   ctx.check(
-    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), the Reading Room's strip on its blurred pool, and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run (Alex, 2026-10-22, Issue #988)",
+    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), the Reading Room's strip on its blurred pool, and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988)",
     faults.length === 0,
     rows.map(({ r, ask }) => detail(r, ask)).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
