@@ -1,4 +1,4 @@
-import { chaikinSmooth, closedIsoRings, marchingSquares } from "../../terrain/contours.ts";
+import { chaikinSmooth, filledIsoRings, marchingSquares } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 
@@ -25,7 +25,7 @@ export function hypsometricLayer(ctx: RenderCtx): SvgNode | null {
   for (const stop of style.hypsometric) {
     if (stop.t === 0) continue; // base painted by the land layer
     const iso = world.seaLevel + stop.t * elevSpan;
-    const rings = closedIsoRings(world.elev, iso).map((c) => chaikinSmooth(c.points, true, 2));
+    const rings = filledIsoRings(world.elev, iso, (p) => chaikinSmooth(p, true, 2));
     if (rings.length === 0) continue;
     const d = rings
       .map((r) =>

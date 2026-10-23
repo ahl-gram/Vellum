@@ -1,10 +1,18 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createField, minMax } from "../../src/core/grid.ts";
+import { createRng } from "../../src/core/rng.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { coastRingsGrid } from "../../src/render/coast.ts";
+import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
+import { hypsometricLayer } from "../../src/render/layers/land.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { STYLES, type StyleName } from "../../src/render/style.ts";
+import { pathFrom, renderSvg } from "../../src/render/svg.ts";
+import { createProjection, marginFor } from "../../src/render/transform.ts";
 import { chaikinSmooth, closedIsoRings, type Point } from "../../src/terrain/contours.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 
 // The metric is self-consistent in GRID space (no rasterizer, no golden): a small residual survives even with no smoothing (the half-cell iso quantization), so the contract is that pinning lands near that floor.
@@ -122,4 +130,169 @@ test("world coast is unpinned: region gate does not touch world charts (#223)", 
   const world = generateWorld(defaultRecipe(42));
   assert.equal(world.region, undefined);
   assert.deepEqual(coastRingsGrid(world, COAST_ITERS), plainRings(world, COAST_ITERS));
+});
+
+const WAPAUWAU_BAND3: UvWindow = { u0: 0.484375, v0: 0.1875, u1: 0.609375, v1: 0.3125 };
+const MARA_BAND4: UvWindow = { u0: 0.4140625, v0: 0.6328125, u1: 0.4765625, v1: 0.6953125 };
+const PLOT = createProjection(320, 240, 1500, marginFor(1500));
+const FRAME_CORNERS: Point[] = [
+  [0, 0],
+  [319, 0],
+  [319, 239],
+  [0, 239],
+];
+const FRAME_D = pathFrom(
+  FRAME_CORNERS.map(([x, y]) => [PLOT.px(x), PLOT.py(y)] as const),
+  true,
+);
+
+function regionAt(seed: number, window: UvWindow): World {
+  const world = generateWorld(defaultRecipe(seed));
+  return generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Test Region" });
+}
+
+let wapauwau: World | undefined;
+const wapauwauBand3 = (): World => (wapauwau ??= regionAt(11, WAPAUWAU_BAND3));
+let mara: World | undefined;
+const maraBand4 = (): World => (mara ??= regionAt(7, MARA_BAND4));
+
+const maraSvgs = new Map<StyleName, string>();
+function maraSvg(style: StyleName): string {
+  const cached = maraSvgs.get(style);
+  if (cached !== undefined) return cached;
+  const svg = renderMap(maraBand4(), { style, widthPx: 1500 });
+  maraSvgs.set(style, svg);
+  return svg;
+}
+
+function frameOf(world: World): Point[] {
+  const { w, h } = world.elev;
+  return [
+    [0, 0],
+    [w - 1, 0],
+    [w - 1, h - 1],
+    [0, h - 1],
+  ];
+}
+
+function frameAbove(world: World, iso: number): boolean {
+  const { elev } = world;
+  for (let x = 0; x < elev.w; x++) if (elev.at(x, 0) <= iso || elev.at(x, elev.h - 1) <= iso) return false;
+  for (let y = 0; y < elev.h; y++) if (elev.at(0, y) <= iso || elev.at(elev.w - 1, y) <= iso) return false;
+  return true;
+}
+
+function phantomLandFraction(world: World, rings: ReadonlyArray<ReadonlyArray<Point>>): number {
+  const { elev, seaLevel } = world;
+  let water = 0;
+  let phantom = 0;
+  const EPS = 1e-4;
+  for (let y = 0; y < elev.h; y++) {
+    for (let x = 0; x < elev.w; x++) {
+      if (elev.at(x, y) > seaLevel) continue;
+      water++;
+      if (drawnAsLand(rings, x + EPS, y + EPS)) phantom++;
+    }
+  }
+  return water === 0 ? 0 : phantom / water;
+}
+
+function firstPathIn(svg: string, anchor: string): string {
+  const at = svg.indexOf(anchor);
+  assert.notEqual(at, -1, `the sheet holds ${anchor}`);
+  const d = /<path d="([^"]*)"/.exec(svg.slice(at, svg.indexOf("</", at)))?.[1];
+  assert.ok(d !== undefined, `a path opens ${anchor}`);
+  return d;
+}
+
+test("chart 11's Wapauwau at band 3, its frame all land round a lake, draws its land as land and its lake as water (Issue #972)", () => {
+  const region = wapauwauBand3();
+  assert.ok(
+    frameAbove(region, region.seaLevel),
+    "Wapauwau's band-3 window must hold land on every frame vertex, or this test cannot fail; re-sweep for a window that does",
+  );
+  assert.ok(closedIsoRings(region.elev, region.seaLevel).length > 0, "Wapauwau's band-3 window must hold a lake");
+  const rings = coastRingsGrid(region, COAST_ITERS);
+  const floor = [frameOf(region), ...plainRings(region, 0)];
+  const sea = phantomSeaFraction(region, rings);
+  const seaFloor = phantomSeaFraction(region, floor);
+  assert.ok(
+    sea <= seaFloor + 0.005,
+    `phantom sea ${(sea * 100).toFixed(2)}% must sit near the floor ${(seaFloor * 100).toFixed(2)}%`,
+  );
+  const land = phantomLandFraction(region, rings);
+  const landFloor = phantomLandFraction(region, floor);
+  assert.ok(
+    land <= landFloor + 0.005,
+    `phantom land ${(land * 100).toFixed(2)}% must sit near the floor ${(landFloor * 100).toFixed(2)}%`,
+  );
+});
+
+test("the drawn close-up opens its land fill and its land clip with the frame (Issue #972)", () => {
+  const svg = renderMap(wapauwauBand3(), { style: "antique", widthPx: 1500 });
+  assert.ok(
+    firstPathIn(svg, '<g id="layer-land">').startsWith(FRAME_D),
+    "the land fill must open on the frame, so the lake is cut out of the land",
+  );
+  assert.ok(
+    firstPathIn(svg, '<clipPath id="region-land-clip">').startsWith(FRAME_D),
+    "the land clip must open on the frame, so the rivers and tints stand on the land",
+  );
+});
+
+test("chart 7's Mara at band 4 opens its first hypsometric tint with the frame (Issue #972)", () => {
+  const region = maraBand4();
+  const t = STYLES.topographic.hypsometric?.[1]?.t;
+  assert.ok(t === 0.14, "the first tinted stop is 0.14");
+  const { max } = minMax(region.elev);
+  assert.ok(
+    frameAbove(region, region.seaLevel + t * Math.max(1e-9, max - region.seaLevel)),
+    "Mara's band-4 frame must stand above the first tinted stop, or this test cannot fail",
+  );
+  assert.ok(
+    firstPathIn(maraSvg("topographic"), '<g id="layer-hypsometric">').startsWith(FRAME_D),
+    "the first tint must open on the frame, so the lake is cut out of the tint",
+  );
+});
+
+test("chart 7's Mara at band 4 opens its first deep band with the frame (Issue #972)", () => {
+  assert.ok(
+    frameAbove(maraBand4(), maraBand4().seaLevel),
+    "Mara's band-4 frame must be all land, and so above every water level",
+  );
+  assert.ok(
+    firstPathIn(maraSvg("topographic"), '<g id="layer-ocean">').startsWith(FRAME_D),
+    "the first deep band must open on the frame",
+  );
+});
+
+test("chart 7's Mara at band 4 opens its shoal with the frame on the nautical dress (Issue #972)", () => {
+  assert.ok(
+    frameAbove(maraBand4(), maraBand4().seaLevel),
+    "Mara's band-4 frame must be all land, and so above every water level",
+  );
+  assert.ok(
+    firstPathIn(maraSvg("nautical"), '<g id="layer-ocean">').startsWith(FRAME_D),
+    "the shoal must open on the frame",
+  );
+});
+
+test("a tint the whole close-up stands above is painted to the frame (Issue #972)", () => {
+  const region = maraBand4();
+  const world: World = { ...region, elev: createField(320, 240, () => region.seaLevel + 1) };
+  const ctx: RenderCtx = {
+    world,
+    style: STYLES.topographic,
+    proj: PLOT,
+    coastRings: [],
+    elevSpan: 2,
+    rng: createRng(7).fork("render"),
+    realmTint: [],
+    labels: createLabelArena(),
+  };
+  const layer = hypsometricLayer(ctx);
+  assert.ok(layer, "the topographic dress has a hypsometric layer");
+  const svg = renderSvg(layer);
+  assert.equal(svg.split("<path").length - 1, 3, "three stops under the field, each painted");
+  assert.equal(svg.split('<path d="' + FRAME_D + '"').length - 1, 3, "each painted as the frame alone");
 });

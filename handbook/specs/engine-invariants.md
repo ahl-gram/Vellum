@@ -263,7 +263,9 @@ by measurement. State it that way.
 **The candidate path if the deferral is ever revisited** is the regional survey, which generates an
 edge-spanning window as a `World` in its own right: `generateRegionWorld` in `src/world/region.ts`.
 The closing of coasts against the window boundary is not in that file. It is `closedIsoRings` in
-`src/terrain/contours.ts`, reached from `src/render/coast.ts` and the land and water layers.
+`src/terrain/contours.ts`, wrapped for every even-odd fill by `filledIsoRings` beside it, which adds
+the frame where the ground holds the whole of it, and reached from `src/render/coast.ts`, the land
+and water layers and `src/world/realm-carry.ts`.
 
 ## Gates run before selection
 
