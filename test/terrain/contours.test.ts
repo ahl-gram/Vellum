@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField } from "../../src/core/grid.ts";
 import {
+  closedIsoRings,
+  filledIsoRings,
   marchingSquares,
   chaikinSmooth,
   chaikinSmoothPinned,
@@ -191,4 +193,64 @@ test("coastSmoothingIterations ramps up for big posters, monotonic and capped (#
     assert.ok(it >= prev, `non-decreasing at width ${w}`);
     prev = it;
   }
+});
+
+const lake = (x: number, y: number): number => (x >= 4 && x <= 7 && y >= 3 && y <= 6 ? 0 : 1);
+const same = (p: ReadonlyArray<Pt>): Pt[] => [...p];
+
+test("a field above the iso on every frame vertex takes the frame first, unsmoothed, and its lake's ring smoothed (Issue #972)", () => {
+  const f = createField(12, 10, lake);
+  const closed = closedIsoRings(f, 0.5);
+  assert.equal(closed.length, 1, "the lake has one ring");
+  assert.deepEqual(
+    filledIsoRings(f, 0.5, (p) => chaikinSmooth(p, true, 1)),
+    [
+      [
+        [0, 0],
+        [11, 0],
+        [11, 9],
+        [0, 9],
+      ],
+      chaikinSmooth(closed[0]!.points, true, 1),
+    ],
+  );
+});
+
+test("a frame vertex at the iso, on any of the four sides, adds no frame ring (Issue #972)", () => {
+  for (const [side, sx, sy] of [
+    ["top", 6, 0],
+    ["bottom", 6, 9],
+    ["left", 0, 5],
+    ["right", 11, 5],
+  ] as const) {
+    const f = createField(12, 10, (x, y) => (x === sx && y === sy ? 0.5 : lake(x, y)));
+    const closed = closedIsoRings(f, 0.5);
+    assert.equal(closed.length, 2, side + ": the lake and the land closed round the notch");
+    assert.deepEqual(
+      filledIsoRings(f, 0.5, same),
+      closed.map((c) => [...c.points]),
+      side,
+    );
+  }
+});
+
+test("a field above the iso everywhere is the frame alone, and a field below it everywhere is no ring (Issue #972)", () => {
+  const high = createField(6, 5, () => 1);
+  assert.deepEqual(closedIsoRings(high, 0.5), []);
+  assert.deepEqual(filledIsoRings(high, 0.5, same), [
+    [
+      [0, 0],
+      [5, 0],
+      [5, 4],
+      [0, 4],
+    ],
+  ]);
+  assert.deepEqual(
+    filledIsoRings(
+      createField(6, 5, () => 0),
+      0.5,
+      same,
+    ),
+    [],
+  );
 });
