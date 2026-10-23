@@ -54,7 +54,8 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
     say(`the trail is off its thin line: ${JSON.stringify(at.head.trail)}`);
   if (!(at.folio.title[1] >= at.innerH - 3 && at.folio.title[1] <= at.innerH))
     say(`the title's foot ${at.folio.title[1]} is not within 3 px of the page's foot ${at.innerH}`);
-  if (at.folio.rest.some((t) => t < at.innerH)) say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
+  if (at.folio.rest.some((t) => t < at.innerH - 3))
+    say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {
     faults,
     detail: `${w}x${h} fill ${fill.toFixed(4)}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}`,

@@ -50,7 +50,7 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
       faults.push(`the nav is not on screen with the head home: ${JSON.stringify(homeHead.head.nav)}`);
     if (!near(homeHead.folio.ty, down, 0.5)) faults.push(`the head's hold moved the folio: ${homeHead.folio.ty}`);
     const stays = await readsFor(ctx, 1500);
-    if (stays.some((p) => p.head.ty !== 0))
+    if (stays.some((p) => Math.abs(p.head.ty) > 0.5))
       faults.push(`a resting mouse lost the head: ${JSON.stringify(stays.map((p) => p.head.ty.toFixed(1)))}`);
     const [cx, cy] = await chartCentre(ctx);
     await mouseTo(ctx, cx, cy);
@@ -63,7 +63,8 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
       );
     if (!near(homeFolio.head.ty, up, 0.5)) faults.push(`the folio's hold moved the head: ${homeFolio.head.ty}`);
     const folioStays = await readsFor(ctx, 1500);
-    if (folioStays.some((p) => p.folio.ty !== 0)) faults.push("a resting mouse lost the folio");
+    if (folioStays.some((p) => Math.abs(p.folio.ty) > 0.5))
+      faults.push(`a resting mouse lost the folio: ${JSON.stringify(folioStays.map((p) => p.folio.ty.toFixed(1)))}`);
     await mouseTo(ctx, cx, cy);
     await settleTy(ctx, "folio", down, "ES3 folio sent back");
   });

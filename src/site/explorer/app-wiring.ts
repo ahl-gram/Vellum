@@ -4,8 +4,9 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { makeDogEar, surveyItemFrom } from "./chart-drawer.ts";
 import type { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
-import { createGlass, type Glass } from "./glass.ts";
+import { createGlass, ZOOM_STEP, type Glass } from "./glass.ts";
 import { pageLoupe } from "./loupe-page.ts";
+import { pageSlideAway } from "./slide-away-page.ts";
 import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
@@ -100,6 +101,7 @@ export function pageGlass({
   buttons,
 }: PageGlassDeps): Glass {
   const loupe = pageLoupe({ press: buttons.loupe, motion, worldSvg, glass: () => glass });
+  const slide = pageSlideAway({ reduce: prefersReduce, firstPress: ZOOM_STEP, tokenMs });
   const glass = createGlass({
     mapViewport,
     mapDiv,
@@ -118,7 +120,10 @@ export function pageGlass({
     regionEligible,
     syncHash,
     busy: motion.busy,
-    onView: () => loupe.follow(),
+    onView: (k) => {
+      loupe.follow();
+      slide.follow(k);
+    },
     decorateInset: (el: HTMLElement) => {
       insetDogEar(el, glass, chartTable, earLabel, prefersReduce, token, tokenMs);
     },
