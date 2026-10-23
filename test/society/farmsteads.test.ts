@@ -238,6 +238,7 @@ test("farmstead and mill marks draw their own glyphs and are labelled like hamle
     );
     const spokes = g.body.match(/<path d="([^"]*)"/)?.[1] ?? "";
     assert.equal(spokes.split("M").length - 1, 2, "with two spokes, a cross");
+    assert.ok(/<path d="[^"]*"[^>]*stroke-width="1\.2"/.test(g.body), "drawn at 1.2");
   }
   const sizes = farms.map((g) => g.body.match(/<text[^>]*font-size="([\d.]+)"/)?.[1]).filter((v) => v !== undefined);
   assert.ok(sizes.length >= 1, "a farmstead is labelled");
@@ -261,6 +262,16 @@ test("the legend keys Farmstead and Mill only on sheets that have them (Issue #9
   assert.ok(!PAUKILUA_SVG.includes(">Mill<"), "and no mill, having none");
   assert.ok(W16_SVG.includes(">Hamlet<"), "the sixteenth's sheet still keys its hamlets");
   assert.ok(!W16_SVG.includes(">Farmstead<") && !W16_SVG.includes(">Mill<"), "and neither of the tier");
+
+  const legend = layerOf(WITNESS_SVG, "layer-legend");
+  const dot = Number(legend.match(/<circle cx="[^"]*" cy="([^"]*)" r="1\.5"/)?.[1]);
+  const houses = [...legend.matchAll(/<path d="([^"]*Z)"/g)].filter((m) => m[1]!.split("L").length === 5);
+  assert.equal(houses.length, 1, "the key holds one house");
+  const foot = Math.max(...(houses[0]![1]!.match(/-?\d+(\.\d+)?/g) ?? []).filter((_, i) => i % 2 === 1).map(Number));
+  assert.ok(
+    Math.abs(foot - dot - (19 + 4)) < 0.05,
+    "the key's house stands on its row lowered 4 units, a row below the hamlet's dot",
+  );
 });
 
 function textsOf(layer: string): string[] {
