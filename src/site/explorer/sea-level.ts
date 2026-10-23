@@ -1,12 +1,10 @@
 // Sea-level slider: the slider value is landFraction x 1000, clamped strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash; the landTouched gate and redraw wiring stay in app.ts.
 import { defaultRecipe } from "../../world/generate.ts";
 import type { WorldRecipe } from "../../world/types.ts";
+import { LAND_MAX, LAND_MIN } from "../shared/address-grammar.ts";
 
 const landSlider = document.getElementById("land") as HTMLInputElement;
 const landReadout = document.getElementById("land-readout") as HTMLElement;
-
-const LAND_MIN = 0.1;
-const LAND_MAX = 0.7;
 
 export const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
 export const sliderToLand = (v: string | number): number => clampLand(Number(v) / 1000);
