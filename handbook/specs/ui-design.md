@@ -170,19 +170,26 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
 
-**On the Explorer the head cluster and the chart folio follow the zoom to thin lines** (Alex,
-2026-10-22, Issue #989): past the depth where the Glass's first press lands they slide toward their
-nearest edge, the head up and the folio down, in step with the camera's depth, finishing exactly as
-the chart, magnified about its centre, covers the screen beside the Broadside, and leave the trail
-with the chart of the atelier press as a thin top line and the chart's name and number as a thin
-bottom line. A link that opens zoomed keeps them home until the reader's first zoom, pan or key; a
-mouse brought to rest on a thin line brings that piece back, keyboard focus or the chart of the
-atelier opened brings the head back, and neither ever leaves the tab order or the accessibility
-tree (`bindSlideAway` in `src/site/shared/slide-away-bind.ts`). **Provisional until the post-use
-review:** where the follow starts and its curve, what a fold or the Chart Table does mid-zoom (part
-way back on a wide window, further out on 1024 by 768), the thin lines' margins and their panels
-running off the edge, the hover's rest and linger, the ease, the 1024 Press staying risen, the jump
-under reduced motion, and every room but the Explorer (Issue #997).
+**In every zoom room the head cluster and the chart folio follow the zoom to thin lines** (Alex,
+2026-10-22, Issue #989; every room, Alex, 2026-10-23, Issue #997): from the depth where the Glass's
+press before the press that fills lands they slide toward their nearest edge, the head up and the
+folio down, in step with the camera's depth, finishing exactly as the chart, magnified as the Glass
+magnifies it, covers the screen beside the room's slip, so nothing moves until the press that fills;
+they leave the trail with the chart of the atelier press as a thin top line, on the Prospect with
+its alias line under it, and the chart folio's title as a thin bottom line, on the Reading Room
+under its strip. The Seed of the Day, whose Glass magnifies about its whole stage, is judged where
+its chart really grows, against the left, the top and the foot. A link that opens zoomed, and a zoom
+a room makes for the reader (the Ribbon's itinerary row, the Specimen Book's leaned state), keep
+them home until the reader's own first zoom, pan or key on the chart, or on the Explorer a key
+anywhere; a mouse brought to rest on a thin line brings that piece back, keyboard focus or the chart
+of the atelier opened brings the head back, and neither ever leaves the tab order or the
+accessibility tree (`bindSlideAway` in `src/site/shared/slide-away-bind.ts`). **Provisional until
+the post-use review:** where the follow starts and its curve, what a fold or the Chart Table does
+mid-zoom (part way back on a wide window, further out on 1024 by 768), the thin lines' margins and
+their panels running off the edge, the hover's rest and linger, the ease, the 1024 Press staying
+risen, the jump under reduced motion, the Reading Room's folio under its strip and back by a mouse
+resting on Play's lower half or the strip's foot, the Prospect's two lines, the Seed of the Day's
+edges, and the Specimen Book's leaned and slid away states.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
   main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit
   while it does (Alex, 2026-10-13, Issue #778). On the Explorer two presses of the room's own stand
@@ -264,8 +271,8 @@ carries none.** **Zoomed, every corner but the Glass stands on home's crisp pane
 2026-10-22, Issue #988 issuecomment-6352761013): the head cluster, the chart folio, the legend row
 and the room folio, on a short window as on a tall one, so a zoomed chart room's corners read
 alike, each the same as home's legend row; the Reading Room's strip alone keeps a blurred pool
-there. Each panel stops short of the window's edge at the room folio's margins, save the edge an
-Explorer piece has slid past, which its panel runs off with it (Alex, 2026-10-23, Issue #996), and
+there. Each panel stops short of the window's edge at the room folio's margins, save the edge a
+slid piece has passed, which its panel runs off with it (Alex, 2026-10-23, Issue #996), and
 where two panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
 section mark beside the Press, take parchment, without which they read under 4.5:1 over a pale
 chart (`EZ1` in `e2e/suites/stage/zoomed.ts`). **Provisional until the post-use review:** the crisp
@@ -427,8 +434,10 @@ gesture; a tip on something that does not is a false affordance, and the glossar
 removed for exactly that reason. A non-navigating gesture is either a chart instrument, which is its
 own ratified class, or it goes on the list awaiting a ruling. A new tip joins one of those lists
 consciously, or `vellum/css-tip-goes-somewhere` refuses it. **The one ruled exception**: a mouse
-brought to rest on the Explorer's thin top or bottom line brings the head cluster or the chart folio
-back (Alex, 2026-10-22, Issue #989, ruled for that use alone). It reveals rather than goes
+brought to rest on a zoom room's thin top or bottom line, or on the Reading Room's strip where its
+slid folio's panel lies beneath (Play's lower half and the strip's foot), brings the head cluster or
+the chart folio back (Alex, 2026-10-22, Issue #989, ruled for that use alone; every zoom room, Alex,
+2026-10-23, Issue #997). It reveals rather than goes
 anywhere, carries no tip, and is no precedent for another reveal.
 
 **Where touch is the main pointer a finger belongs to the page until the reader gives it to the
@@ -481,7 +490,7 @@ which ones transition: `handbook/specs/cascade-traps.md`), and three things foll
 when the reader changes the setting.
 
 **A piece that follows the camera moves on the camera's own frame and eases only where it starts to
-move while the camera stands still.** The Explorer's slid head and folio are written on every camera
+move while the camera stands still.** A zoom room's slid head and folio are written on every camera
 apply with no transition and take a timed ease for a hold, an arming or a re-measure that moves
 them; a camera move inside that ease rides it to the follow's value rather than jumping, and the
 follow is exact once it ends; under reduced motion they do not travel with the zoom, home short of

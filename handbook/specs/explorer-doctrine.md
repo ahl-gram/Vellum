@@ -143,12 +143,17 @@ make an unqualified rule false. Read the surface, not just the rule.
   because the tween rewrites the stored transform every frame and would discard the refit. A refit
   that wrote the address before the boot read it lands a bare visit on the wrong seed, since
   `seedFromHash` in `src/site/explorer/address.ts` takes digits only.
-- **Chrome that follows the camera is driven by the depth the Glass hands `onView` on every apply**
-  (`setCardZoom` in `src/site/explorer/glass.ts`), never by the `.zoomed` class; it reads the fill
-  depth off the sheet's resting box, so a pan never moves it, and measures again when the room lays
-  out, never on a fold's class, which lands before the refit; a piece it slides is read at home by
-  every seat (`rectOf` in `src/site/shared/room-seats.ts`), and a mouse holds it by the place card's
-  rule, read against the moving pointer, never by a piece that takes the pointer.
+- **Chrome that follows the camera is driven by the camera's own depth on every apply**, never by
+  the `.zoomed` class: on the Explorer the depth the Glass hands `onView` (`setCardZoom` in
+  `src/site/explorer/glass.ts`), in a room the controller's `onApply` (`createZoomController` in
+  `src/site/shared/zoom-controller.ts`), and on the Seed of the Day, whose controller takes no hook
+  (`vellum/hunt-fixed-world`), the controller's depth read on every write of its target's transform
+  (`pageSlideAway` in `src/site/shared/slide-away-page.ts`). It reads the fill depth off the sheet's
+  resting box, the box with the camera taken off where the sheet rides inside the transform, so a pan
+  never moves it, and measures again when the room lays out, never on a fold's class, which lands
+  before the refit; a piece it slides is read at home by every seat (`rectOf` in
+  `src/site/shared/room-seats.ts`), and a mouse holds it by the place card's rule, read against the
+  moving pointer, never by a piece that takes the pointer.
 - **The hold freezes the redraft and widens the camera, and every home lets it go** (Alex,
   2026-10-04 and 2026-10-20, Issue #751). While the Glass's hold press is lit, a settle still writes
   the address and never reaches the redraft, so the sheet on the table, a region inset or the bare
