@@ -134,9 +134,11 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
     await settleSlid(ctx, "head", "ES9 head away");
     await pressSelector(ctx, ".slip-fold");
     // Wiring, said at the check: a regional survey landing in the folio mid-fold is a race, so the folio's growth by a line is made inside the fold's 340 ms by hand.
-    await ctx.evaluate(`document.querySelector(".corner.bl").style.paddingBottom = "18px"`);
+    await ctx.evaluate(
+      `(() => { const p = document.createElement("p"); p.id = "es9-line"; p.textContent = "a line the survey adds"; document.querySelector(".corner.bl").append(p); return true; })()`,
+    );
     const held = await readsFor(ctx, 1000);
-    await ctx.evaluate(`document.querySelector(".corner.bl").style.paddingBottom = ""`);
+    await ctx.evaluate(`document.getElementById("es9-line").remove()`);
     if (held.some((p) => !near(p.head.ty, up, 0.5)))
       faults.push(
         `folding past both fill depths moved the head: ${JSON.stringify(held.map((p) => p.head.ty.toFixed(1)))}`,
