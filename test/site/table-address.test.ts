@@ -209,7 +209,7 @@ test("the rung is the Glass's, 1 to 5: band 0 is a world sheet and no survey at 
   }
   for (const rung of [1, 2, 3, 4, 5]) {
     const parsed = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`));
-    assert.equal((parsed as [SurveyItem])[0].rung, rung);
+    assert.equal((parsed as SurveyItem[])[0]?.rung, rung);
   }
 });
 
@@ -381,7 +381,7 @@ test("every lattice seat round-trips through the settle it came from (#520)", ()
   }
 });
 
-// The control: the raw sheet-fraction camera is the wrong space, and the seat it names must differ, or the sweep above proves nothing about the conversion latticeFromSettle owns. Measured 2026-09-07 at every rung.
+// The control: the raw sheet-fraction camera is the wrong space, and the seat it names must differ, or the sweep above proves nothing about the conversion latticeFromSettle owns. Measured 2026-09-07 at rungs 1 to 3, and 2026-10-23 at rungs 4 and 5 (Issue #954).
 test("the sheet-fraction camera names a different seat, which is why the conversion is not the caller's (#520)", () => {
   const m = { mx: 0.045, my: 0.045 };
   for (const [rung, c] of [

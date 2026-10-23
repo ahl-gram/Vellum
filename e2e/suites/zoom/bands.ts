@@ -259,11 +259,12 @@ export async function z21bOneBandUp(
   );
 }
 
-const CAPITAL_DEEPEST =
+// 2026-10-23, Issue #954: of seed 42's 26 settlement-centred band-5 windows, Lamahai's is the one whose hamlet (Kaki), 9 farmsteads and mill all keep their names; a null tier in Z21c's dry read means a label lost its box, not a dry-in fault.
+const TOWN_DEEPEST =
   `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
   `const {quantizeCenter,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
   `const {marginFor}=await import("/explorer/engine/render/transform.js");` +
-  `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));const s=world.settlements[0];` +
+  `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));const s=world.settlements[6];` +
   `const q=quantizeCenter(s.x/(world.recipe.gridW-1),s.y/(world.recipe.gridH-1),LOD_BANDS[LOD_BANDS.length-1].sizeUV);` +
   `const svg=document.querySelector("#map > svg");const vb=svg.getAttribute("viewBox").split(" ").map(Number);` +
   `const m=marginFor(vb[2]);const mx=m/vb[2],my=m/vb[3];` +
@@ -278,7 +279,7 @@ async function z21cRead({ evaluate }: Pick<ZoomKit, "evaluate">) {
     ordered: boolean;
     known: boolean;
     outside: number;
-    dry: Record<"capital" | "hamlet" | "farmstead" | "mill", string | null>;
+    dry: Record<"town" | "hamlet" | "farmstead" | "mill", string | null>;
   }>(
     `(async()=>{const isvg=[...document.querySelectorAll("#map .region-inset svg")].pop();` +
       `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
@@ -294,7 +295,7 @@ async function z21cRead({ evaluate }: Pick<ZoomKit, "evaluate">) {
       `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity",detail:true});` +
       `const engine=region.settlements.filter(s=>kind(s.kind));const names=new Set(engine.map(s=>s.name));` +
       `const added=[];if(!isvg.classList.contains("redrafting")){isvg.classList.add("redrafting");added.push([isvg,"redrafting"]);}` +
-      `const dry={capital:null,hamlet:null,farmstead:null,mill:null};` +
+      `const dry={town:null,hamlet:null,farmstead:null,mill:null};` +
       `for(const t of Object.keys(dry)){const g=[...isvg.querySelectorAll('g.settlement[data-tier="'+t+'"]')].find((x)=>x.querySelector("text"));if(!g)continue;` +
       `if(!g.classList.contains("dry-in")){g.classList.add("dry-in");added.push([g,"dry-in"]);}` +
       `dry[t]=getComputedStyle(g.querySelector("text")).animationDelay;}` +
@@ -315,7 +316,7 @@ export async function z21cFarmsteads({
   waitRedraft,
   insetView,
 }: ZoomKit): Promise<void> {
-  const target = await evaluate<{ cx: number; cy: number; name: string }>(CAPITAL_DEEPEST, true);
+  const target = await evaluate<{ cx: number; cy: number; name: string }>(TOWN_DEEPEST, true);
   const before = (await rgn()).redrafts;
   await enterAt(32, target.cx, target.cy);
   const deep = await waitRedraft(before);
@@ -328,7 +329,8 @@ export async function z21cFarmsteads({
   const r = await z21cRead({ evaluate });
   check(
     "Z21c the Glass at its ceiling, k 32, commits band 5: the inset stamps detail 5, draws the farmsteads and mills the engine places on the stamped window, name for name, after every other tier, and their names dry in when the hamlets' do (Issue #954)",
-    deep.band === 5 &&
+    target.name === "Lamahai" &&
+      deep.band === 5 &&
       r.detail === "5" &&
       r.farms >= 3 &&
       r.farms === r.expected &&
@@ -338,8 +340,8 @@ export async function z21cFarmsteads({
       r.outside === 0 &&
       r.dry.hamlet !== null &&
       r.dry.hamlet !== "0s" &&
-      r.dry.capital !== null &&
-      r.dry.capital !== r.dry.hamlet &&
+      r.dry.town !== null &&
+      r.dry.town !== r.dry.hamlet &&
       r.dry.farmstead === r.dry.hamlet &&
       r.dry.mill === r.dry.hamlet,
     JSON.stringify({ band: deep.band, ...r, target }),
