@@ -128,7 +128,7 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const last = <T>(a: readonly T[]): T => a[a.length - 1]!;
   await motionOn(ctx, async () => {
-    await openAt(ctx, SEED_42, 1280, 800, "ES9");
+    await openAt(ctx, SEED_42, 1280, 800, "ES9", true);
     const { up } = travelsOf(await ctx.evaluate(PIECES_READ));
     await press(ctx, 2);
     await settleSlid(ctx, "head", "ES9 head away");
@@ -147,7 +147,7 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
       faults.push(`folding at 1.65 left the head at ${part.head.ty}, not part way between ${up} and 0`);
   });
   ctx.check(
-    "ES9 folding the Broadside while the chart fills the screen past both its fill depths leaves the head cluster at its thin line throughout the fold, and folding it at a depth between them brings the head part way home (Alex, 2026-10-23, Issue #996 step 6 ruling 4)",
+    "ES9 folding the Broadside while the chart fills the screen past both its fill depths leaves the head cluster at its thin line throughout the fold, with the draft the fold starts landing in the chart folio mid-fold, and folding it at a depth between them brings the head part way home (Alex, 2026-10-23, Issue #996 step 6 ruling 4)",
     faults.length === 0,
     faults.length
       ? faults.join("; ")

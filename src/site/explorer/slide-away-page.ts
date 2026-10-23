@@ -47,8 +47,9 @@ function lineFoot(el: Element | null, shift: number): number | null {
 
 const shiftOf = (el: Element): number => translateOf(getComputedStyle(el).translate).y;
 
+// The fold's class lands at once and the refit 340 ms later, and a measure between them (the survey line landing in the folio) would pair the new class with the old sheet, so the room is read as the layout last wrote it: the reserve it left for an open slip.
 function roomRight(slip: HTMLElement | null): number {
-  if (slip === null || slip.classList.contains("folded")) return pageBox().w;
+  if (slip === null || !(parseFloat(stageEl.style.getPropertyValue("--reserve-right")) > 0)) return pageBox().w;
   return pageBox().w - parseFloat(getComputedStyle(slip).right) - slip.getBoundingClientRect().width;
 }
 
