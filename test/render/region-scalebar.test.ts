@@ -45,12 +45,12 @@ function tickLabels(node: SvgNode): Array<{ x: number; value: string }> {
   return out;
 }
 
-/** Numeric league ticks (drops the italic "Leagues" caption), beside the plan whose box they are held to. */
+/** Numeric league ticks (drops the italic "Leagues" caption). */
 function numericTicks(w: World): { ticks: Array<{ x: number; value: string }>; plan: ReturnType<typeof planScalebar> } {
   const ctx = ctxFor(w);
   const plan = planScalebar(ctx);
   const labels = tickLabels(scalebarLayer(ctx, plan));
-  return { ticks: labels.filter((l) => /^(\d+|[½¼])$/.test(l.value)), plan };
+  return { ticks: labels.filter((l) => /^[\d.½¼]+$/.test(l.value)), plan };
 }
 
 function regionOfBand(sizeUV: number): World {

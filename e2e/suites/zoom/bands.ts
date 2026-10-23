@@ -259,7 +259,7 @@ export async function z21bOneBandUp(
   );
 }
 
-// 2026-10-23, Issue #954: of seed 42's 26 settlement-centred band-5 windows, Lamahai's is the one whose hamlet (Kaki), 9 farmsteads and mill all keep their names; a null tier in Z21c's dry read means a label lost its box, not a dry-in fault.
+// 2026-10-23, Issue #954: of seed 42's settlement-centred band-5 windows, Lamahai's is the one whose hamlet (Kaki), farmsteads and mill all keep their names; a null tier in Z21c's dry read means a label lost its box, not a dry-in fault.
 const TOWN_DEEPEST =
   `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
   `const {quantizeCenter,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
