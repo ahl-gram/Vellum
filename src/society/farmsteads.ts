@@ -1,7 +1,7 @@
 import { createRng } from "../core/rng.ts";
 import type { Field } from "../core/grid.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
-import { landSnapRadius, snapToLand } from "../world/snap-to-land.ts";
+import { landSnapRadius, snapToStandingLand, type Footprint } from "../world/snap-to-land.ts";
 import type { NamedSettlement, World } from "../world/types.ts";
 import {
   HAMLET_LATTICE_WORLD_CELLS,
@@ -18,6 +18,8 @@ export const FARMSTEAD_DENSITY = 0.11;
 export const FARMSTEAD_SPACING_WORLD_CELLS = 0.45;
 export const MILL_REACH_WORLD_CELLS = 0.18;
 export const FARMSTEAD_MAX_WINDOW_UV = 1 / 32;
+
+export const MARK_FOOTPRINT: Footprint = { up: 3, down: 1, side: 2 };
 
 const JITTER = 0.7;
 
@@ -136,7 +138,7 @@ export function placeFarmsteads(
   for (const c of farmsteadCandidates(world, window)) {
     const gx = Math.round(((c.u - window.u0) / du) * (w - 1));
     const gy = Math.round(((c.v - window.v0) / dv) * (h - 1));
-    const cell = snapToLand(elev, seaLevel, gx, gy, radius);
+    const cell = snapToStandingLand(elev, seaLevel, gx, gy, radius, MARK_FOOTPRINT);
     if (cell === null) continue;
     const mill = nearestRiverCell(riverCells, w, h, cell.x, cell.y, reach2) >= 0;
     out.push({

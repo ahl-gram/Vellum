@@ -49,3 +49,16 @@ export function snapToLand(elev: Field, seaLevel: number, gx: number, gy: number
   }
   return null;
 }
+
+export type Footprint = { readonly up: number; readonly down: number; readonly side: number };
+
+export function snapToStandingLand(
+  elev: Field,
+  seaLevel: number,
+  gx: number,
+  gy: number,
+  radius: number,
+  _foot: Footprint,
+): Cell | null {
+  return snapToLand(elev, seaLevel, gx, gy, radius);
+}
