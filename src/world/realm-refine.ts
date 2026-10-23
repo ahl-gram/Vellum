@@ -1,4 +1,4 @@
-import { NEIGHBORS_8, type Field } from "../core/grid.ts";
+import { NEIGHBORS_4, NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { createMinHeap } from "../core/heap.ts";
 import { SLOPE_WEIGHT, RIVER_WEIGHT } from "../society/realms.ts";
 import { slopeField } from "../terrain/slope.ts";
@@ -6,13 +6,6 @@ import type { UvWindow } from "../terrain/heightfield.ts";
 import { grownRealmLabels } from "./realm-carry.ts";
 import { cellsPerWorldCell, nearestParentCells } from "./region-parent.ts";
 import type { World } from "./types.ts";
-
-const NEIGHBORS_4 = [
-  [1, 0],
-  [-1, 0],
-  [0, 1],
-  [0, -1],
-] as const;
 
 export type RealmTown = { readonly x: number; readonly y: number; readonly realm: number };
 
@@ -35,9 +28,9 @@ function contestedParentCells(grownParent: Int16Array, parentW: number, parentH:
     for (let x = 0; x < parentW; x++) {
       const a = grownParent[x + y * parentW] as number;
       if (a < 0) continue;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = x + dx;
-        const ny = y + dy;
+      for (const offset of NEIGHBORS_8) {
+        const nx = x + offset[0];
+        const ny = y + offset[1];
         if (nx < 0 || nx >= parentW || ny < 0 || ny >= parentH) continue;
         const b = grownParent[nx + ny * parentW] as number;
         if (b >= 0 && b !== a) contested[x + y * parentW] = 1;
@@ -63,9 +56,9 @@ function seedLabels(input: RefineInput, contested: Uint8Array): { labels: Int16A
 function touchesCorridor(corridor: Uint8Array, w: number, h: number, i: number): boolean {
   const x = i % w;
   const y = (i / w) | 0;
-  for (const [dx, dy] of NEIGHBORS_8) {
-    const nx = x + dx;
-    const ny = y + dy;
+  for (const offset of NEIGHBORS_8) {
+    const nx = x + offset[0];
+    const ny = y + offset[1];
     if (nx >= 0 && nx < w && ny >= 0 && ny < h && corridor[nx + ny * w] === 1) return true;
   }
   return false;
@@ -108,13 +101,13 @@ function refloodCorridor(input: RefineInput, seeded: { labels: Int16Array; corri
     done[i] = 1;
     const x = i % w;
     const y = (i / w) | 0;
-    for (const [dx, dy, step] of NEIGHBORS_8) {
-      const nx = x + dx;
-      const ny = y + dy;
+    for (const offset of NEIGHBORS_8) {
+      const nx = x + offset[0];
+      const ny = y + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const j = nx + ny * w;
       if (done[j] === 1 || fixed[j] === 1 || corridor[j] === 0 || !isLand(j)) continue;
-      const cost = step * (1 + travelPenalty(input, slope, j));
+      const cost = offset[2] * (1 + travelPenalty(input, slope, j));
       const nd = (dist[i] as number) + cost;
       if (nd < (dist[j] as number)) {
         dist[j] = nd;
@@ -162,9 +155,9 @@ function wholeIslets(
       if (onParentLand(i)) anchored = true;
       const x = i % w;
       const y = (i / w) | 0;
-      for (const [dx, dy] of NEIGHBORS_4) {
-        const nx = x + dx;
-        const ny = y + dy;
+      for (const offset of NEIGHBORS_4) {
+        const nx = x + offset[0];
+        const ny = y + offset[1];
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
         const j = nx + ny * w;
         if (seen[j] === 1 || !isLand(j)) continue;

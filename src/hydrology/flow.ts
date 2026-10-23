@@ -38,9 +38,9 @@ function priorityFill(elev: Field, seaLevel: number): Float64Array {
     const i = heap.pop();
     const x = i % w;
     const y = (i / w) | 0;
-    for (const [dx, dy] of NEIGHBORS_8) {
-      const nx = x + dx;
-      const ny = y + dy;
+    for (const offset of NEIGHBORS_8) {
+      const nx = x + offset[0];
+      const ny = y + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const ni = nx + ny * w;
       if (visited[ni]) continue;
@@ -62,12 +62,12 @@ function flowDirections(elev: Field, seaLevel: number, fill: Float64Array): Int3
       if ((data[i] as number) <= seaLevel) continue;
       let best = -1;
       let bestDrop = 0;
-      for (const [dx, dy, dist] of NEIGHBORS_8) {
-        const nx = x + dx;
-        const ny = y + dy;
+      for (const offset of NEIGHBORS_8) {
+        const nx = x + offset[0];
+        const ny = y + offset[1];
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
         const ni = nx + ny * w;
-        const drop = ((fill[i] as number) - (fill[ni] as number)) / dist;
+        const drop = ((fill[i] as number) - (fill[ni] as number)) / offset[2];
         if (drop > bestDrop) {
           bestDrop = drop;
           best = ni;
