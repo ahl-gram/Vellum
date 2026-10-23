@@ -26,6 +26,9 @@ function zoomInsetView({ evaluate }: Pick<SuiteContext, "evaluate">) {
   return { insetView };
 }
 
+// 2026-10-23, Issue #954: 375 polls of 40 ms, 15 s; the slowest redraft a suite waits on, band 5's cold first descent, drew in 1775 ms locally (seed 42's capital, three loads within 15 ms), times CI's 3.3 (handbook/specs/settle-doctrine.md item 10) is 5.9 s, so 15 s keeps twice that.
+export const REDRAFT_TRIES = 375;
+
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   // Fixed sleeps only outlasted the Issue #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
@@ -58,8 +61,7 @@ export function zoomKit(ctx: SuiteContext) {
       `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
     );
   const waitRedraft = async (prev: number) => {
-    // 15s, not the old 4s: Issue #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
-    for (let i = 0; i < 375; i++) {
+    for (let i = 0; i < REDRAFT_TRIES; i++) {
       const s = await rgn();
       if (s.redrafts > prev) return s;
       await sleep(40);

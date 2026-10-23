@@ -3,6 +3,7 @@ import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { g9PressFace } from "./glass-ceremony/dress.ts";
 import { g10PressDark } from "./glass-ceremony/gestures.ts";
+import { REDRAFT_TRIES } from "./zoom/kit.ts";
 
 type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
 export type GlassKit = ReturnType<typeof glassKit>;
@@ -57,7 +58,7 @@ function glassKit(ctx: SuiteContext) {
     );
   const waitRedraft = async (prev: number, wantBand: number) => {
     // 15s, not 4s (the same note at `waitRedraft` in `e2e/suites/zoom/kit.ts`): Issue #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
-    for (let i = 0; i < 375; i++) {
+    for (let i = 0; i < REDRAFT_TRIES; i++) {
       const s = await rgn();
       if (s.redrafts > prev && s.band === wantBand) return s;
       await sleep(40);
