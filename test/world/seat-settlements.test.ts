@@ -122,6 +122,62 @@ test("a river town with no river within its reach keeps its cell", () => {
   });
 });
 
+test("a town on a river cell with no river beside it stays", () => {
+  const lone = riversWhere((x, y) => x === 5 && y === 10);
+  assert.deepEqual(seatOnRiver(allLand(), SEA, lone, { x: 5, y: 10 }, 3), { x: 5, y: 10 });
+});
+
+test("the walk seats on land only, reaches a cell exactly its radius away, and counts sea-level ground as water", () => {
+  const sea = createField(21, 21, (x) => (x >= 15 ? SEA : 1));
+  assert.deepEqual(
+    seatOnShore(sea, SEA, { x: 17, y: 10 }, 3),
+    { x: 14, y: 10 },
+    "the shore, 3 cells off, not the water",
+  );
+  assert.equal(
+    seatOnRiver(
+      sea,
+      SEA,
+      riversWhere((x) => x === 16),
+      { x: 17, y: 10 },
+      3,
+    ),
+    null,
+    "a river under water",
+  );
+});
+
+test("the neighbour walk does not wrap from the last column to the next row", () => {
+  const edge = { x: 20, y: 10 };
+  assert.equal(
+    seatOnShore(
+      createField(21, 21, (x, y) => (x === 0 && y === 11 ? -1 : 1)),
+      SEA,
+      edge,
+      1,
+    ),
+    null,
+  );
+  assert.equal(
+    seatOnRiver(
+      allLand(),
+      SEA,
+      riversWhere((x, y) => x === 0 && y === 11),
+      edge,
+      1,
+    ),
+    null,
+  );
+});
+
+test("only a town that is both seeks a mouth", () => {
+  const reach = { harbour: 20, river: 20 };
+  const from = { x: 5, y: 10 };
+  const land = { elev: shoreAtX15(), seaLevel: SEA, riverCells: riversWhere((x, y) => y === 4 && x <= 14) };
+  assert.deepEqual(seatProjected({ harbor: true, onRiver: false }, from, land, reach), { x: 14, y: 10 }, "shore");
+  assert.deepEqual(seatProjected({ harbor: false, onRiver: true }, from, land, reach), { x: 5, y: 5 }, "river");
+});
+
 test("each step walks its own reach", () => {
   const reach = { harbour: 8, river: 12 };
   const from = { x: 5, y: 10 };
