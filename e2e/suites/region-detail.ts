@@ -1,6 +1,7 @@
 // The Glass sees it e2e (RD, Issue #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { REDRAFT_TRIES } from "./zoom/kit.ts";
 
 const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (Issue #376)
 // A region sheet is ~500KB, far past what a CDP evaluate should carry back, so the digest is computed IN the page (both sides of every compare hashed by the same engine); the LAST inset, never the first, because during a crossing the outgoing sheet is still mounted and a plain querySelector reads the one on its way off screen.
@@ -26,7 +27,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 function regionKit(ctx: SuiteContext) {
   const { evaluate, sleep, PORT } = ctx;
-  const LINK = `http://127.0.0.1:${PORT}/explorer/#seed=${SEED}&style=antique&legend=1&arms=0&beasts=0&cx=0.5625&cy=0.4375&k=8`;
+  const LINK = `http://127.0.0.1:${PORT}/explorer/#seed=${SEED}&style=antique&legend=1&arms=0&beasts=0&cx=0.5625&cy=0.4375&k=32`;
 
   const rgn = () => evaluate<{ redrafts: number; band: number }>(`window.__vellumRegion()`);
   const enterAt = (k: number, cu: number, cv: number) =>
@@ -34,7 +35,7 @@ function regionKit(ctx: SuiteContext) {
       `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
     );
   const waitRedraft = async (prev: number) => {
-    for (let i = 0; i < 375; i++) {
+    for (let i = 0; i < REDRAFT_TRIES; i++) {
       const s = await rgn();
       if (s.redrafts > prev) return s;
       await sleep(40);
@@ -42,7 +43,7 @@ function regionKit(ctx: SuiteContext) {
     return await rgn();
   };
   const waitInset = async () => {
-    for (let i = 0; i < 375; i++) {
+    for (let i = 0; i < REDRAFT_TRIES; i++) {
       if (await evaluate<boolean>(`document.querySelectorAll("#map .region-inset").length === 1`)) return;
       await sleep(40);
     }
@@ -91,6 +92,8 @@ async function rd1Ladder({ check, shoot, rgn, enterAt, waitRedraft, waitInset, i
     [1, 2],
     [2, 4],
     [3, 8],
+    [4, 16],
+    [5, 32],
   ] as const) {
     await enterAt(k, 0.5625, 0.4375);
     const settled = await waitRedraft(redrafts);
@@ -101,7 +104,7 @@ async function rd1Ladder({ check, shoot, rgn, enterAt, waitRedraft, waitInset, i
     await shoot(`explorer-region-detail-band${band}.png`);
   }
   check(
-    "RD1 the band ladder stamps the detail it drew: bands 1, 2, 3 read 1, 2, 3 on the committed inset (#400 AC1, AC2)",
+    "RD1 the band ladder stamps the detail it drew: bands 1 to 5 read 1 to 5 on the committed inset (#400 AC1, AC2, Issue #954)",
     ladder.every((r) => r.reported === r.band && r.detail === String(r.band)),
     JSON.stringify(ladder.map((r) => ({ band: r.reported, detail: r.detail, ms: r.ms }))),
   );
@@ -130,7 +133,7 @@ async function rd2CoastGains({ evaluate, check }: RegionKit, deepest: Ladder[num
     true,
   );
   check(
-    "RD2 the coast gains real detail: the band-3 sheet on screen draws the detail arm's shore rings, not the bare field's (#400 AC1)",
+    "RD2 the coast gains real detail: the band-5 sheet on screen draws the detail arm's shore rings, not the bare field's (#400 AC1)",
     gained.drawn === gained.detail && gained.detail > gained.bare && gained.bare > 0,
     `drawn ${gained.drawn} rings; bare ${gained.bare} -> detail ${gained.detail}; shore length ${gained.bareLen} -> ${gained.detailLen}`,
   );
@@ -161,7 +164,7 @@ async function rd3SameBytes(
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await waitSettled("region-detail-direct");
   let redrafts = (await rgn()).redrafts;
-  await enterAt(8, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
+  await enterAt(32, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
   await waitRedraft(redrafts);
   await waitInset();
   const direct = await insetDigest();
@@ -173,14 +176,14 @@ async function rd3SameBytes(
   const directMs = await captionMs();
 
   redrafts = (await rgn()).redrafts;
-  await enterAt(8, 0.5625 - 0.015625, 0.4375);
+  await enterAt(32, 0.5625 - 0.015625, 0.4375);
   const panned = await waitRedraft(redrafts);
   await waitInset();
   const neighbour = await insetDigest();
   const panMs = await captionMs();
   check(
     "RD4 a pan at the deepest band commits its own detailed survey (cost reported, not asserted: it is machine-bound)",
-    panned.band === 3 && neighbour !== null && neighbour.detail === "3" && neighbour.digest !== direct!.digest,
+    panned.band === 5 && neighbour !== null && neighbour.detail === "5" && neighbour.digest !== direct!.digest,
     `first descent ${directMs}ms, pan ${panMs}ms, ladder ${ladder.map((r) => r.ms).join("/")}ms`,
   );
 }
@@ -199,8 +202,8 @@ async function rd5SharedLink(
     linked.push(await insetDigest());
   }
   check(
-    "RD5 a shared link round-trips to a byte-identical detailed draw across a cold reload (#400 AC2)",
-    linked[0] !== null && linked[1] !== null && linked[0]!.digest === linked[1]!.digest && linked[0]!.detail === "3",
+    "RD5 a shared link at the bottom, k 32, round-trips to a byte-identical band-5 draw across a cold reload (#400 AC2, Issue #954)",
+    linked[0] !== null && linked[1] !== null && linked[0]!.digest === linked[1]!.digest && linked[0]!.detail === "5",
     JSON.stringify(linked),
   );
   await shoot("explorer-region-detail-shared-link.png");

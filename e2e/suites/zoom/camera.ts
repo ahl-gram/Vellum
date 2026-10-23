@@ -41,14 +41,14 @@ export async function z1ZoomTo({ evaluate, check }: SuiteContext): Promise<void>
 
 export async function z2MaxClamp({ evaluate, check, shoot }: SuiteContext): Promise<void> {
   const z2 = await evaluate<{ s: Cam; ex: number; ey: number; W: number; H: number }>(
-    `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:99,x:-99999,y:-99999});const s=window.__vellumZoomState();return{s,ex:-(7*W),ey:-(7*H),W,H};})()`,
+    `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:99,x:-99999,y:-99999});const s=window.__vellumZoomState();return{s,ex:-(31*W),ey:-(31*H),W,H};})()`,
   );
   check(
-    "Z2 clamps at the max extent (k->8, pan pinned to the far edge so the sheet still covers the viewport)",
-    z2.s.k === 8 && Math.abs(z2.s.x - z2.ex) < 0.5 && Math.abs(z2.s.y - z2.ey) < 0.5,
+    "Z2 clamps at the max extent (k->32, the deepest band's k, pan pinned to the far edge so the sheet still covers the viewport) (Issue #954)",
+    z2.s.k === 32 && Math.abs(z2.s.x - z2.ex) < 0.5 && Math.abs(z2.s.y - z2.ey) < 0.5,
     JSON.stringify(z2),
   );
-  await shoot("explorer-zoom-k8.png");
+  await shoot("explorer-zoom-k32.png");
 }
 
 export async function zK4Shot({ evaluate, shoot }: SuiteContext): Promise<void> {

@@ -155,15 +155,17 @@ export async function z20gInkBlocks({
   );
 }
 
+const RANK = "{capital:0,seat:1,town:2,village:3,hamlet:4,farmstead:5,mill:5}";
+
 export async function z21Target({ evaluate, goHome }: ZoomKit) {
   await goHome();
   const target21 = await evaluate<{ cx: number; cy: number; n: number }>(
     `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
-      `const {hamletCandidates}=await import("/explorer/engine/society/hamlets.js");` +
-      `const {quantizeCenter,lodWindowFor,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
+      `const {hamletCandidates,HAMLET_MAX_WINDOW_UV}=await import("/explorer/engine/society/hamlets.js");` +
+      `const {quantizeCenter,lodWindowFor}=await import("/explorer/engine/world/lod.js");` +
       `const {marginFor}=await import("/explorer/engine/render/transform.js");` +
       `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
-      `const size=LOD_BANDS[LOD_BANDS.length-1].sizeUV;let best=null;` +
+      `const size=HAMLET_MAX_WINDOW_UV;let best=null;` +
       `for(const s of world.settlements){` +
       `const q=quantizeCenter(s.x/(world.recipe.gridW-1),s.y/(world.recipe.gridH-1),size);` +
       `const n=hamletCandidates(world,lodWindowFor(q.cx,q.cy,size)).length;` +
@@ -189,7 +191,7 @@ async function z21HamletsRead({ evaluate }: Pick<ZoomKit, "evaluate">) {
       `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
       `u1:+isvg.getAttribute("data-vellum-region-u1"),v1:+isvg.getAttribute("data-vellum-region-v1")};` +
       `const tiers=[...isvg.querySelectorAll("g.settlement")].map(g=>g.dataset.tier);` +
-      `const RANK={capital:0,seat:1,town:2,village:3,hamlet:4};` +
+      `const RANK=${RANK};` +
       `const ordered=tiers.every((t,i)=>i===0||RANK[t]>=RANK[tiers[i-1]]);` +
       `const domNames=[...isvg.querySelectorAll('g.settlement[data-tier="hamlet"]')].map(g=>g.dataset.name);` +
       `const outside=document.querySelectorAll('#map > svg g.settlement[data-tier="hamlet"]').length;` +
@@ -221,7 +223,7 @@ export async function z21Hamlets(
   await shoot("explorer-hamlets-band3.png");
   const dom21 = await z21HamletsRead({ evaluate });
   check(
-    "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
+    "Z21 hamlets: band 3, the first band the smallest tier grows on, engine count/name parity over the stamped window, tier order held",
     deep21.band === 3 &&
       dom21.hamlets! >= 3 &&
       dom21.hamlets === dom21.expected &&
@@ -254,6 +256,95 @@ export async function z21bOneBandUp(
     "Z21b hamlets vanish one band up: the band-2 survey of the same centre draws none",
     step21.band === 2 && shallow21 === 0,
     `band=${step21.band} band2Hamlets=${shallow21}`,
+  );
+}
+
+// 2026-10-23, Issue #954: of seed 42's settlement-centred band-5 windows, Lamahai's is the one whose hamlet (Kaki), farmsteads and mill all keep their names; a null tier in Z21c's dry read means a label lost its box, not a dry-in fault.
+const TOWN_DEEPEST =
+  `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
+  `const {quantizeCenter,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
+  `const {marginFor}=await import("/explorer/engine/render/transform.js");` +
+  `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));const s=world.settlements[6];` +
+  `const q=quantizeCenter(s.x/(world.recipe.gridW-1),s.y/(world.recipe.gridH-1),LOD_BANDS[LOD_BANDS.length-1].sizeUV);` +
+  `const svg=document.querySelector("#map > svg");const vb=svg.getAttribute("viewBox").split(" ").map(Number);` +
+  `const m=marginFor(vb[2]);const mx=m/vb[2],my=m/vb[3];` +
+  `return {cx:mx+q.cx*(1-2*mx),cy:my+q.cy*(1-2*my),name:s.name};})()`;
+
+async function z21cRead({ evaluate }: Pick<ZoomKit, "evaluate">) {
+  return await evaluate<{
+    detail: string | null;
+    farms: number;
+    expected: number;
+    namesMatch: boolean;
+    ordered: boolean;
+    known: boolean;
+    outside: number;
+    dry: Record<"town" | "hamlet" | "farmstead" | "mill", string | null>;
+  }>(
+    `(async()=>{const isvg=[...document.querySelectorAll("#map .region-inset svg")].pop();` +
+      `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
+      `u1:+isvg.getAttribute("data-vellum-region-u1"),v1:+isvg.getAttribute("data-vellum-region-v1")};` +
+      `const RANK=${RANK};const kind=(t)=>t==="farmstead"||t==="mill";` +
+      `const marks=[...isvg.querySelectorAll("g.settlement")];const tiers=marks.map(g=>g.dataset.tier);` +
+      `const farmMarks=marks.filter(g=>kind(g.dataset.tier));` +
+      `const ordered=tiers.every((t,i)=>i===0||RANK[t]>=RANK[tiers[i-1]]);const known=tiers.every(t=>t in RANK);` +
+      `const outside=document.querySelectorAll('#map > svg g.settlement[data-tier="farmstead"],#map > svg g.settlement[data-tier="mill"]').length;` +
+      `const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
+      `const {generateRegionWorld}=await import("/explorer/engine/world/region.js");` +
+      `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
+      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity",detail:true});` +
+      `const engine=region.settlements.filter(s=>kind(s.kind));const names=new Set(engine.map(s=>s.name));` +
+      `const added=[];if(!isvg.classList.contains("redrafting")){isvg.classList.add("redrafting");added.push([isvg,"redrafting"]);}` +
+      `const dry={town:null,hamlet:null,farmstead:null,mill:null};` +
+      `for(const t of Object.keys(dry)){const g=[...isvg.querySelectorAll('g.settlement[data-tier="'+t+'"]')].find((x)=>x.querySelector("text"));if(!g)continue;` +
+      `if(!g.classList.contains("dry-in")){g.classList.add("dry-in");added.push([g,"dry-in"]);}` +
+      `dry[t]=getComputedStyle(g.querySelector("text")).animationDelay;}` +
+      `for(const [n,c] of added)n.classList.remove(c);` +
+      `return {detail:isvg.getAttribute("data-vellum-region-detail"),farms:farmMarks.length,expected:engine.length,` +
+      `namesMatch:farmMarks.every(g=>names.has(g.dataset.name)),ordered,known,outside,dry};})()`,
+    true,
+  );
+}
+
+export async function z21cFarmsteads({
+  evaluate,
+  check,
+  shoot,
+  sleep,
+  rgn,
+  enterAt,
+  waitRedraft,
+  insetView,
+}: ZoomKit): Promise<void> {
+  const target = await evaluate<{ cx: number; cy: number; name: string }>(TOWN_DEEPEST, true);
+  const before = (await rgn()).redrafts;
+  await enterAt(32, target.cx, target.cy);
+  const deep = await waitRedraft(before);
+  let view = await insetView();
+  for (let i = 0; i < 50 && view.insets !== 1; i++) {
+    await sleep(40);
+    view = await insetView();
+  }
+  await shoot("explorer-farmsteads-band5.png");
+  const r = await z21cRead({ evaluate });
+  check(
+    "Z21c the Glass at its ceiling, k 32, commits band 5: the inset stamps detail 5, draws the farmsteads and mills the engine places on the stamped window, name for name, after every other tier, and their names dry in when the hamlets' do (Issue #954)",
+    target.name === "Lamahai" &&
+      deep.band === 5 &&
+      r.detail === "5" &&
+      r.farms >= 3 &&
+      r.farms === r.expected &&
+      !!r.namesMatch &&
+      !!r.ordered &&
+      !!r.known &&
+      r.outside === 0 &&
+      r.dry.hamlet !== null &&
+      r.dry.hamlet !== "0s" &&
+      r.dry.town !== null &&
+      r.dry.town !== r.dry.hamlet &&
+      r.dry.farmstead === r.dry.hamlet &&
+      r.dry.mill === r.dry.hamlet,
+    JSON.stringify({ band: deep.band, ...r, target }),
   );
 }
 

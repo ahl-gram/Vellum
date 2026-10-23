@@ -246,7 +246,7 @@ async function lensVersusCamera(k: ZoomKit, at: Point): Promise<Arm> {
   await k.evaluate(`window.__vellumZoomTo(${JSON.stringify(want)})`);
   await makeSettle(k)<{ k: number; hashK: string | null }>(
     DEEP,
-    (d) => d.k === want.k && d.hashK === Math.min(want.k, 8).toFixed(4),
+    (d) => d.k === want.k && d.hashK === Math.min(want.k, 32).toFixed(4),
     "zl3-camera",
   );
   const got = await k.evaluate<Cam>(STATE);
@@ -283,7 +283,11 @@ async function worldArm(k: ZoomKit): Promise<Arm> {
 async function regionArm(k: ZoomKit, pick: HamletWindow): Promise<Arm> {
   await ensureHeldDeepInset(k, pick);
   await k.enterAt(12, pick.cx, pick.cy);
-  await makeSettle(k)<{ k: number; hashK: string | null }>(DEEP, (d) => d.k === 12 && d.hashK === "8.0000", "zl3-deep");
+  await makeSettle(k)<{ k: number; hashK: string | null }>(
+    DEEP,
+    (d) => d.k === 12 && d.hashK === "12.0000",
+    "zl3-deep",
+  );
   const b = await k.evaluate<Centre>(CENTRE);
   const at = await k.evaluate<Point | null>(HAMLET_DOT(b));
   return at ? lensVersusCamera(k, at) : NONE;

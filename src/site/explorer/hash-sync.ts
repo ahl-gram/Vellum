@@ -4,7 +4,8 @@ import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.t
 import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
 import { coastFromAddress, landFromAddress } from "../shared/address-grammar.ts";
 import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
-import type { Camera } from "./camera.ts";
+import { addressCamera, type Camera } from "./camera.ts";
+import { DEEPEST_K } from "../../world/lod.ts";
 
 export interface Controls {
   seedInput: HTMLInputElement;
@@ -67,16 +68,7 @@ export function readHash(controls: Controls): {
   if (beasts !== null) beastsChk.checked = beasts === "1";
   const landTouched = landFromHash(params, controls);
   const coastTouched = coastFromHash(params, controls);
-  const cxRaw = params.get("cx");
-  const cyRaw = params.get("cy");
-  const kRaw = params.get("k");
-  let camera: Camera | null = null;
-  if (cxRaw !== null && cyRaw !== null && kRaw !== null) {
-    const cx = Number(cxRaw);
-    const cy = Number(cyRaw);
-    const k = Number(kRaw);
-    if ([cx, cy, k].every(Number.isFinite) && k >= 1 && k <= 8) camera = { cx, cy, k };
-  }
+  const camera = addressCamera(params, DEEPEST_K);
   return { land: landTouched, coast: coastTouched, camera, live: parseLive(params), table: parseTable(location.hash) };
 }
 
