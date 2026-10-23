@@ -96,21 +96,17 @@ export async function sb4Folded({ check, settle, setState }: SpecimenKit, rest: 
 
 export function sb5Leaned({ check }: SpecimenKit, leaned: Specimen): void {
   check(
-    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the cluster and the room folio stand on their panels",
+    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed one press in, and the cluster and the room folio stand on their panels",
     leaned.st!.zoomed &&
       !leaned.st!.folded &&
       leaned.slipVis === "visible" &&
       leaned.pool === '""' &&
-      leaned.poolChrome === '""' &&
-      leaned.map!.x < 0 &&
-      leaned.map!.y < 0 &&
-      leaned.map!.bottom > 800,
+      leaned.poolChrome === '""',
     JSON.stringify({
       st: leaned.st,
       slip: leaned.slipVis,
       pool: leaned.pool,
       poolChrome: leaned.poolChrome,
-      map: leaned.map,
     }),
   );
 }
@@ -139,35 +135,35 @@ export function sb5fCornerPanels({ check }: Pick<SpecimenKit, "check">, leaned: 
 
 export async function sb5dGlassBare(
   { check, brightest }: SpecimenKit,
-  leaned: Specimen,
+  zoomed: Specimen,
   interior: number,
 ): Promise<void> {
-  const underGlass = await brightest(Math.round(leaned.glass!.x) + 2, 797);
+  const underGlass = await brightest(Math.round(zoomed.glass!.x) + 2, 797);
   check(
-    "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the cluster's interior)",
-    leaned.poolGlass === "none" && underGlass > interior + 30,
-    JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
+    "SB5d slid away, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the cluster's interior)",
+    zoomed.poolGlass === "none" && underGlass > interior + 30,
+    JSON.stringify({ poolGlass: zoomed.poolGlass, underGlass, interior }),
   );
 }
 
 export async function sb5eFolioPanel(
   { check, brightest }: SpecimenKit,
   rest: Specimen | null,
-  leaned: Specimen,
+  zoomed: Specimen,
 ): Promise<void> {
-  const panelLeft = Math.round(leaned.folio!.x - 0.9 * leaned.rem),
-    panelY = Math.round(leaned.folio!.y + leaned.folio!.h / 2);
+  const panelLeft = Math.round(zoomed.folio!.x - 0.9 * zoomed.rem),
+    panelY = Math.round(zoomed.folio!.y + zoomed.folio!.h / 2);
   const panelIn = await brightest(panelLeft + 3, panelY),
     panelOut = await brightest(panelLeft - 11, panelY);
   check(
-    "SB5e leaned, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
-    /^linear-gradient\((?!to top)/.test(leaned.folioPanel!) &&
-      leaned.folioFilter === "none" &&
+    "SB5e slid away, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
+    /^linear-gradient\((?!to top)/.test(zoomed.folioPanel!) &&
+      zoomed.folioFilter === "none" &&
       panelOut - panelIn > 60 &&
       rest!.pool === "none",
     JSON.stringify({
-      panel: leaned.folioPanel!.slice(0, 44),
-      filter: leaned.folioFilter,
+      panel: zoomed.folioPanel!.slice(0, 44),
+      filter: zoomed.folioFilter,
       panelIn,
       panelOut,
       rest: rest!.pool,

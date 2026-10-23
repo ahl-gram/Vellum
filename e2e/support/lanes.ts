@@ -54,7 +54,7 @@ export const E2E_LANES: readonly E2eLane[] = [
   },
   {
     name: "D",
-    suites: ["landfall", "survey", "chart-drawer", "document-rooms", "region-detail"],
+    suites: ["landfall", "survey", "chart-drawer", "document-rooms", "region-detail", "slide-away"],
     port: DEFAULT_E2E_PORT + 3,
     dport: DEFAULT_E2E_DPORT + 3,
   },

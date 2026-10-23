@@ -35,7 +35,11 @@ test("SA2 the follow starts where the Glass's press before the press that fills 
   assert.equal(followStart(2.5827, 1.4), 1.4 * 1.4);
   assert.equal(followStart(3, 1.4), 1.4 * 1.4 * 1.4);
   assert.equal(followStart(1.4 * 1.4, 1.4), 1.4, "a fill exactly at the second press's landing is the second press's");
-  assert.equal(followStart(1.9615, 1.4), 1.4 * 1.4, "the Prospect's 1280x640 fill lies past the second press's 1.9599999999999997");
+  assert.equal(
+    followStart(1.9615, 1.4),
+    1.4 * 1.4,
+    "the Prospect's 1280x640 fill lies past the second press's 1.9599999999999997",
+  );
   assert.equal(followStart(Infinity, 1.4), Infinity);
 });
 
@@ -59,12 +63,15 @@ test("SA10 the Seed of the Day's fill is the magnification about the gesture box
 });
 
 test("SA11 a sheet inside the camera's transform reads its resting box with the camera taken off", () => {
-  assert.deepEqual(restingBox({ left: 50, top: 20, right: 650, bottom: 520 }, { x: 10, y: 10 }, { x: -100, y: -50, k: 2 }), {
-    left: 80,
-    top: 40,
-    right: 380,
-    bottom: 290,
-  });
+  assert.deepEqual(
+    restingBox({ left: 50, top: 20, right: 650, bottom: 520 }, { x: 10, y: 10 }, { x: -100, y: -50, k: 2 }),
+    {
+      left: 80,
+      top: 40,
+      right: 380,
+      bottom: 290,
+    },
+  );
   const box = { left: 50, top: 20, right: 650, bottom: 520 };
   assert.deepEqual(restingBox(box, { x: 10, y: 10 }, { x: 0, y: 0, k: 1 }), box);
 });

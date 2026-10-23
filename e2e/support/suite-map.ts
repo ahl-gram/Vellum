@@ -29,6 +29,7 @@ import { run as runCluster } from "../suites/cluster.ts";
 import { run as runChartDrawer } from "../suites/chart-drawer.ts";
 import { run as runCorners } from "../suites/corners.ts";
 import { run as runStage } from "../suites/stage.ts";
+import { run as runSlideAway } from "../suites/slide-away.ts";
 import { run as runDocumentRooms } from "../suites/document-rooms.ts";
 import { run as runRegionDetail } from "../suites/region-detail.ts";
 import { run as runSpecimen } from "../suites/specimen.ts";
@@ -66,4 +67,5 @@ export const SUITES = {
   specimen: runSpecimen,
   corners: runCorners,
   stage: runStage,
+  "slide-away": runSlideAway,
 } satisfies Record<E2eSuiteName, (ctx: SuiteContext) => Promise<void>>;

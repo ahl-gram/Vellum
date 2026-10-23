@@ -38,6 +38,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   specimen: 9.8,
   corners: 213.6,
   stage: 360.2,
+  "slide-away": 150,
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) => suites.reduce((sum, name) => sum + MEASURED_SECONDS[name], 0);
