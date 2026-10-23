@@ -1,4 +1,4 @@
-// The arithmetic of the Explorer's slide-away (Issue #996): how deep the chart fills the screen beside the Broadside, how far the head cluster and the chart folio have followed the zoom there, and where a pointer holds them.
+// The arithmetic of a chart room's slide-away (Issue #996, lifted for every zoom room in Issue #1034): how deep the chart fills the screen beside the room's slip, where the follow starts, how far the head cluster and the chart folio have followed the zoom, and where a pointer holds them.
 export interface Edges {
   readonly left: number;
   readonly top: number;
@@ -24,8 +24,11 @@ export function fillDepth(sheet: Edges, room: Edges): number {
     (room.bottom - cy) / (sheet.bottom - cy),
   );
 }
-export function followStart(fill: number, firstPress: number): number {
-  return Math.min(firstPress, fill);
+export function fillPress(_fill: number, step: number): number {
+  return step;
+}
+export function followStart(fill: number, step: number): number {
+  return Math.min(step, fill);
 }
 export function slideProgress(k: number, from: number, fill: number, reduce: boolean): number {
   if (k >= fill) return 1;
@@ -39,8 +42,18 @@ export function folioTravel(pageHeight: number, titleBottom: number): number {
   return Math.ceil(pageHeight - FOOT_CLEAR - titleBottom);
 }
 export type ArmingEvent = { readonly type: "keydown" | "wheel" | "pointerdown"; readonly onChart: boolean };
-export function arms(e: ArmingEvent): boolean {
+export function arms(e: ArmingEvent, _keyAnywhere: boolean): boolean {
   return e.type === "keydown" || e.onChart;
+}
+export function fillAboutCentre(sheet: Edges, room: Edges, _gesture: Edges): number {
+  return fillDepth(sheet, room);
+}
+export function restingBox(
+  onScreen: Edges,
+  _origin: { readonly x: number; readonly y: number },
+  _cam: { readonly x: number; readonly y: number; readonly k: number },
+): Edges {
+  return onScreen;
 }
 export function steers(pointerType: string): boolean {
   return pointerType === "mouse" || pointerType === "pen";

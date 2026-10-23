@@ -1,4 +1,4 @@
-// The Explorer's slide-away state (Issue #996): the head cluster and the chart folio follow the camera's depth to thin lines, eased only where they move while the camera stands still, held home by a resting mouse, keyboard focus or the chart of the atelier opened, and unarmed until the reader's first zoom, pan or key.
+// A chart room's slide-away state (Issue #996, lifted in Issue #1034): the head cluster and the chart folio follow the camera's depth to thin lines, eased only where they move while the camera stands still, held home by a resting mouse, keyboard focus or the chart of the atelier opened, and unarmed until the reader's first zoom, pan or key.
 import { slideProgress } from "./slide-away.ts";
 
 export type Hold = "pointer" | "focus" | "atelier";

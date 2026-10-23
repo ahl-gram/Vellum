@@ -2,7 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { lensRest } from "../print-room/print.ts";
-import { LINGER_MS, REST_MS } from "../../../src/site/explorer/slide-away-bind.ts";
+import { LINGER_MS, REST_MS } from "../../../src/site/shared/slide-away-bind.ts";
 import { rest } from "./stage.ts";
 import {
   aimAt,

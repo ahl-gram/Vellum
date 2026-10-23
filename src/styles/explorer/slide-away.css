@@ -1,5 +1,0 @@
-/* The Explorer's head cluster and chart folio, slid toward their edges as the zoom fills the screen (`bindSlideAway` in `src/site/explorer/slide-away-bind.ts`), ease only where they move while the camera stands still; following the camera they take no transition. */
-header.chrome.easing,
-.corner.bl.easing {
-  transition: translate var(--paper-settle) var(--ease-paper);
-}

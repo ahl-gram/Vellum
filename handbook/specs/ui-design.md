@@ -178,7 +178,7 @@ with the chart of the atelier press as a thin top line and the chart's name and 
 bottom line. A link that opens zoomed keeps them home until the reader's first zoom, pan or key; a
 mouse brought to rest on a thin line brings that piece back, keyboard focus or the chart of the
 atelier opened brings the head back, and neither ever leaves the tab order or the accessibility
-tree (`bindSlideAway` in `src/site/explorer/slide-away-bind.ts`). **Provisional until the post-use
+tree (`bindSlideAway` in `src/site/shared/slide-away-bind.ts`). **Provisional until the post-use
 review:** where the follow starts and its curve, what a fold or the Chart Table does mid-zoom (part
 way back on a wide window, further out on 1024 by 768), the thin lines' margins and their panels
 running off the edge, the hover's rest and linger, the ease, the 1024 Press staying risen, the jump

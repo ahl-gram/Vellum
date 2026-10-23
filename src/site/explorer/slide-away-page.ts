@@ -1,5 +1,5 @@
 // The Explorer's slide-away on its page (Issue #996): the head cluster's and the chart folio's measurements on every layout, the reader's first zoom, pan or key, and a moving mouse or pen read against each piece.
-import { bindSlideAway, OFF, type Measured, type SlideAway, type Spot } from "./slide-away-bind.ts";
+import { bindSlideAway, OFF, type Measured, type SlideAway, type Spot } from "../shared/slide-away-bind.ts";
 import {
   arms,
   fillDepth,
@@ -12,7 +12,7 @@ import {
   steers,
   within,
   type Edges,
-} from "./slide-away.ts";
+} from "../shared/slide-away.ts";
 import { rectOf, translateOf } from "../shared/room-seats.ts";
 import { pageBottom, pageBox, pageX, pageY } from "../shared/page-box.ts";
 import { chartDrawer, mapViewport, sheetEl, stageEl } from "./elements.ts";
@@ -94,14 +94,14 @@ function watchInput(slide: SlideAway, head: HTMLElement, folio: HTMLElement, gla
   window.addEventListener(
     "wheel",
     (e) => {
-      if (arms({ type: "wheel", onChart: onChart(e.target) })) slide.arm();
+      if (arms({ type: "wheel", onChart: onChart(e.target) }, true)) slide.arm();
     },
     { capture: true, passive: true },
   );
   window.addEventListener(
     "pointerdown",
     (e) => {
-      if (arms({ type: "pointerdown", onChart: onChart(e.target) })) slide.arm();
+      if (arms({ type: "pointerdown", onChart: onChart(e.target) }, true)) slide.arm();
     },
     true,
   );

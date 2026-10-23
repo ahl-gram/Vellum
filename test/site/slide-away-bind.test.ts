@@ -7,7 +7,7 @@ import {
   REST_MS,
   type Measured,
   type SlideAway,
-} from "../../src/site/explorer/slide-away-bind.ts";
+} from "../../src/site/shared/slide-away-bind.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 
 installShim();
