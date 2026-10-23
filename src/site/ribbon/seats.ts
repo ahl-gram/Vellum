@@ -1,6 +1,7 @@
 // The Wayfarer's Ribbon's chart-room seats: the scroll as the sheet's one face, the Glass on it, the fit at the scroll's own aspect, the folio's lines and the itinerary on the slip, each row leaning the Glass on its stretch. app.ts stays the conductor.
 import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { contentsRow, type RowPart } from "../shared/contents-row.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
@@ -32,11 +33,18 @@ export interface Sheet {
 }
 
 export function bindRibbonRoom(roomEls: RoomFurniture): Sheet {
+  const slide = pageSlideAway({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    gesture: roomEls.viewport,
+    step: ZOOM_STEP,
+  });
   const zoom = createZoomController({
     viewportEl: roomEls.viewport,
     targetEl: roomEls.map,
     scaleExtent: [1, 8],
     glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+    onApply: (s) => slide.follow(s.k),
   });
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);

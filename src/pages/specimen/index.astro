@@ -29,6 +29,7 @@ const contents = [
   description="The Atelier Kit's specimen book: every piece of the room furniture at its seat, in every state, for the closing review's eye."
   path="/specimen/"
   chartRoom
+  extraCss={["/shared/slide-away.css"]}
   noindex
 >
 <Fog />
@@ -51,6 +52,7 @@ const contents = [
       <option value="rest" selected>at rest</option>
       <option value="folded">folded</option>
       <option value="leaned">leaned</option>
+      <option value="slid">slid away</option>
     </select>
     <button id="sb-rest" class="primary" type="button">At rest</button>
   </div>

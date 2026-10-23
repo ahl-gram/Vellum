@@ -9,7 +9,9 @@ import { startArrival } from "../explorer/draw-ceremony.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
 import { bindRoom } from "../shared/room.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
+import { fillAboutCentre, restingBox } from "../shared/slide-away.ts";
 import { errorText } from "../shared/error-text.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 
@@ -40,6 +42,15 @@ for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-road]")) {
 // The SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
 // Deliberately NO onSettle: the Hunt is a FIXED world; a semantic redraft would reveal new places and change clue difficulty, so the magnify stays purely geometric.
 // The guess-click math is ratio-based against getBoundingClientRect(), and d3-zoom's click-distance handling keeps a drag-pan from registering as a guess.
+pageSlideAway({
+  frame: $("map"),
+  sheet: $("sheet"),
+  gesture: $("map-viewport"),
+  step: ZOOM_STEP,
+  fill: fillAboutCentre,
+  resting: (onScreen, gesture) => restingBox(onScreen, { x: gesture.left, y: gesture.top }, zoomController.getState()),
+  camera: { target: $("map"), depth: () => zoomController.getState().k },
+});
 const zoomController = createZoomController({
   viewportEl: $("map-viewport"),
   targetEl: $("map"),

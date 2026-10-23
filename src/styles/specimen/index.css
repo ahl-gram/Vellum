@@ -39,9 +39,9 @@
   display: block;
 }
 
-/* The corner's state select at the Print Room's width, so "slip folded" is not clipped beside the chevron. */
 .folio-controls select.control {
-  width: 7.4rem;
+  width: 5.8rem;
+  flex-shrink: 0;
 }
 
 @media print {

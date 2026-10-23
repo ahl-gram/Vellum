@@ -1,6 +1,9 @@
 // The Specimen Book's conductor (Issue #487 item 4): the kit's own binders fit the sheet, bind the slip and run the Glass, so every state the page shows is reached the way a room reaches it. The corner's select names the state, the dice rolls one, the primary rests the room, and the foot's button empties and refills the status pill.
 import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
+import { fillPress } from "../shared/slide-away.ts";
+import { FOLD_SETTLE_MS } from "../shared/slip.ts";
 import { bindRoom } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 
@@ -10,10 +13,7 @@ declare global {
   }
 }
 
-const STEP = 1.4;
-// Leaned in, the sheet spills under every corner (the mockup's magnified look, the state the pool exists for): three of the Glass's steps at 1280x800.
-const LEAN = STEP ** 3;
-const STATES = ["rest", "folded", "leaned"] as const;
+const STATES = ["rest", "folded", "leaned", "slid"] as const;
 type State = (typeof STATES)[number];
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -25,11 +25,18 @@ const stateSel = $<HTMLSelectElement>("sb-state");
 const pill = $("sb-status");
 const PILL_TEXT = pill.textContent;
 
+const slide = pageSlideAway({
+  frame: document.querySelector<HTMLElement>(".stage")!,
+  sheet: $("sheet"),
+  gesture: viewport,
+  step: ZOOM_STEP,
+});
 const zoom = createZoomController({
   viewportEl: viewport,
   targetEl: map,
   scaleExtent: [1, 8],
   glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+  onApply: (s) => slide.follow(s.k),
 });
 zoom.attach();
 bindGlassKeys(viewport, zoom);
@@ -60,11 +67,19 @@ plate.addEventListener("load", room.layout);
 
 const folded = (): boolean => slip.classList.contains("folded");
 const press = (sel: string): void => document.querySelector<HTMLElement>(sel)?.click();
+const glideTo = (k: number): void => zoom.glideBy(k / (zoom.glideTarget() ?? zoom.getState().k));
 function setState(s: State): void {
   stateSel.value = s;
+  const unfolding = s !== "folded" && folded();
   if (s === "folded" && !folded()) press(".slip-fold");
-  if (s !== "folded" && folded()) press(".slip-tab");
-  if (s === "leaned") zoom.glideBy(LEAN);
+  if (unfolding) press(".slip-tab");
+  if (s === "slid") slide.arm();
+  if (s === "leaned") glideTo(ZOOM_STEP);
+  else if (s === "slid" && unfolding)
+    window.setTimeout(() => {
+      if (stateSel.value === "slid") glideTo(fillPress(slide.fill(), ZOOM_STEP));
+    }, FOLD_SETTLE_MS);
+  else if (s === "slid") glideTo(fillPress(slide.fill(), ZOOM_STEP));
   else zoom.glideHome();
 }
 stateSel.addEventListener("change", () => setState(stateSel.value as State));
