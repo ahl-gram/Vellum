@@ -20,6 +20,8 @@ export const LOD_BANDS: readonly LodBand[] = [
 
 const LAST_BAND = LOD_BANDS.length - 1;
 
+export const DEEPEST_K = 8;
+
 const BOUNDARIES: readonly number[] = LOD_BANDS.slice(0, LAST_BAND).map((b, i) =>
   Math.sqrt(b.k * (LOD_BANDS[i + 1] as LodBand).k),
 );

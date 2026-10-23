@@ -14,6 +14,7 @@ import {
   thumbNames,
   layPressFace,
   filingAt,
+  surveyItemFrom,
   sheetsThatLeft,
   type FilingSheet,
   LAY_ON_CARD,
@@ -23,14 +24,18 @@ import {
   TABLE_CAP,
   TABLE_KEY,
   emitTable,
+  parseTable,
   emitTableKey,
   type ProspectItem,
   type SurveyItem,
   type TableItem,
 } from "../../src/site/shared/table-address.ts";
 
+import { LOD_BANDS, lodWindowFor } from "../../src/world/lod.ts";
+import { hashOf } from "../../test-support/table-address-fixtures.ts";
+
 const REPO = resolve(import.meta.dirname, "..", "..");
-import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
+import type { ProspectJob, ProspectResult, RegionJob, RegionResult } from "../../src/site/explorer/worker-client.ts";
 type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 // The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
@@ -398,4 +403,21 @@ test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the 
     "the cap line names no kind and is unchanged",
   );
   assert.equal(refusalLine("full", "prospect"), "the table is full: six sheets lie on it");
+});
+
+test("CT12 a settle at any region band is gathered, band 5 the deepest, and none at the world sheet or past the table (Issue #954)", () => {
+  const settle = (band: number) =>
+    surveyItemFrom({ seed: 42, overrides: undefined, render: { style: "antique" }, band, seat: { lx: 3, ly: 4 } });
+  assert.equal(settle(5)?.rung, 5, "band 5, the ruled depth");
+  for (const b of LOD_BANDS.filter((x) => x.isRegion)) assert.equal(settle(b.index)?.rung, b.index, `band ${b.index}`);
+  assert.equal(settle(0), null);
+  assert.equal(settle(LOD_BANDS.length), null);
+});
+
+test("CT13 a rung-5 sheet carried in the address redraws its own band-5 window (Issue #954)", () => {
+  const [item] = parseTable(hashOf("k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-5.lx-131.ly-105")) ?? [];
+  assert.ok(item && item.kind === "survey", "a rung-5 survey parses");
+  const job = thumbJobFor(item) as RegionJob;
+  assert.equal(job.band, 5);
+  assert.deepEqual(job.window, lodWindowFor(131 / 256, 105 / 256, 1 / 32));
 });

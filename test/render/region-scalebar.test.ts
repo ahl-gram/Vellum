@@ -45,11 +45,12 @@ function tickLabels(node: SvgNode): Array<{ x: number; value: string }> {
   return out;
 }
 
-/** Numeric league ticks (drops the italic "Leagues" caption). */
-function numericTicks(w: World): Array<{ x: number; value: string }> {
+/** Numeric league ticks (drops the italic "Leagues" caption), beside the plan whose box they are held to. */
+function numericTicks(w: World): { ticks: Array<{ x: number; value: string }>; plan: ReturnType<typeof planScalebar> } {
   const ctx = ctxFor(w);
-  const labels = tickLabels(scalebarLayer(ctx, planScalebar(ctx)));
-  return labels.filter((l) => /^\d+(\.\d+)?$/.test(l.value));
+  const plan = planScalebar(ctx);
+  const labels = tickLabels(scalebarLayer(ctx, plan));
+  return { ticks: labels.filter((l) => /^(\d+|[½¼])$/.test(l.value)), plan };
 }
 
 function regionOfBand(sizeUV: number): World {
@@ -65,7 +66,7 @@ function regionOfBand(sizeUV: number): World {
 
 test("#249: the deepest-band region scale bar fits within the frame", () => {
   const deepest = LOD_BANDS[LOD_BANDS.length - 1]!;
-  const ticks = numericTicks(regionOfBand(deepest.sizeUV));
+  const { ticks } = numericTicks(regionOfBand(deepest.sizeUV));
   const maxX = Math.max(...ticks.map((t) => t.x));
   assert.ok(
     maxX <= PLOT_RIGHT,
@@ -73,29 +74,48 @@ test("#249: the deepest-band region scale bar fits within the frame", () => {
   );
 });
 
-test("#249: every region band's scale bar fits within the frame", () => {
+test("Issue #954: on the two windows Issue #954 opens, 1/16 and 1/32, the scale bar's ticks stand inside its claimed box", () => {
+  for (const size of [1 / 16, 1 / 32]) {
+    const w = generateRegionWorld(world, {
+      window: windowAround(world, world.settlements[0]!, size),
+      gridW: 320,
+      gridH: 240,
+      title: "A Survey",
+    });
+    const { ticks, plan } = numericTicks(w);
+    const edge = plan.box.x + plan.box.w;
+    for (const t of ticks)
+      assert.ok(t.x <= edge, `window ${size}: tick "${t.value}" at x=${t.x.toFixed(1)} > box edge ${edge}`);
+  }
+});
+
+test("#249, Issue #954: every region band's scale bar has its ticks inside its claimed box, so its labels stay on their paper", () => {
   for (const band of LOD_BANDS) {
     if (!band.isRegion) continue;
-    const ticks = numericTicks(regionOfBand(band.sizeUV));
+    const { ticks, plan } = numericTicks(regionOfBand(band.sizeUV));
+    const edge = plan.box.x + plan.box.w;
     const maxX = Math.max(...ticks.map((t) => t.x));
     assert.ok(
-      maxX <= PLOT_RIGHT,
-      `band ${band.index} (${band.sizeUV}) scale bar overruns: rightmost tick x=${maxX.toFixed(1)} > ${PLOT_RIGHT}`,
+      maxX <= edge,
+      `band ${band.index} (${band.sizeUV}) scale bar overruns its box: rightmost tick x=${maxX.toFixed(1)} > ${edge}`,
     );
   }
 });
 
-test("#249: region scale-bar tick labels stay whole numbers (no fractional mid tick)", () => {
-  for (const band of LOD_BANDS) {
-    if (!band.isRegion) continue;
-    for (const t of numericTicks(regionOfBand(band.sizeUV))) {
-      assert.ok(Number.isInteger(Number(t.value)), `band ${band.index} emitted a fractional tick label "${t.value}"`);
-    }
-  }
+test("Issue #954: a region scale bar's ticks are whole leagues to band 3, and below it a half or a quarter printed as its own glyph (Alex, 2026-10-23)", () => {
+  const regions = LOD_BANDS.filter((b) => b.isRegion);
+  assert.equal(regions.length, 5, "the bar is read at every band the Glass draws, 1 to 5");
+  const ticksOf = (band: number): string[] =>
+    numericTicks(regionOfBand((regions[band - 1] as (typeof regions)[number]).sizeUV)).ticks.map((t) => t.value);
+  assert.deepEqual(ticksOf(1), ["0", "5", "10"]);
+  assert.deepEqual(ticksOf(2), ["0", "2", "4"]);
+  assert.deepEqual(ticksOf(3), ["0", "1", "2"]);
+  assert.deepEqual(ticksOf(4), ["0", "½", "1"]);
+  assert.deepEqual(ticksOf(5), ["0", "¼", "½"]);
 });
 
 test("#249 guard: the world sheet scale bar is unchanged (goldens safe)", () => {
-  const ticks = numericTicks(world);
+  const { ticks } = numericTicks(world);
   assert.deepEqual(
     ticks.map((t) => t.value),
     ["0", "10", "20"],

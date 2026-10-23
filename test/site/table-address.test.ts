@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   TABLE_KEY,
   TABLE_CAP,
+  RUNGS,
   parseTable,
   emitTable,
   latticeFromCentre,
@@ -198,24 +199,22 @@ test("an unknown field is ignored, not fatal: a later field must not empty an ol
   assert.deepEqual(parseTable(hashOf(`${SURVEY}.pinned-1`)), [survey]);
 });
 
-test("the rung is the Glass's, 1 to 3: band 0 is a world sheet and no survey at all", () => {
-  for (const rung of ["0", "4", "-1", "2.5", "abc"]) {
+test("the rung is the Glass's, 1 to 5: band 0 is a world sheet and no survey at all, and band 6 does not exist (Issue #954)", () => {
+  for (const rung of ["0", "6", "-1", "2.5", "abc"]) {
     assert.deepEqual(
       parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`)),
       [],
       `rung ${rung} is not a survey`,
     );
   }
-  for (const rung of [1, 2, 3]) {
-    const parsed = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`)) as [
-      SurveyItem,
-    ];
-    assert.equal(parsed[0].rung, rung);
+  for (const rung of [1, 2, 3, 4, 5]) {
+    const parsed = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`));
+    assert.equal((parsed as [SurveyItem])[0].rung, rung);
   }
 });
 
 test("a lattice index off the lattice drops the item (the centre must name a real settle)", () => {
-  for (const rung of [1, 2, 3]) {
+  for (const rung of RUNGS) {
     const size = (LOD_BANDS[rung] as LodBand).sizeUV;
     const max = LATTICE_DIVISIONS / size;
     // Both axes, both directions: a guard that only watches lx is half a guard.
@@ -354,7 +353,7 @@ test("every lattice seat round-trips through the settle it came from (#520)", ()
     beasts: false,
     theme: null,
   } as const;
-  for (const rung of [1, 2, 3] as const) {
+  for (const rung of RUNGS) {
     const band = LOD_BANDS[rung] as LodBand;
     const step = band.sizeUV / LATTICE_DIVISIONS;
     const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
@@ -389,6 +388,8 @@ test("the sheet-fraction camera names a different seat, which is why the convers
     [1, 0.22],
     [2, 0.2],
     [3, 0.2],
+    [4, 0.2],
+    [5, 0.2],
   ] as const) {
     const cam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
     assert.notDeepEqual(

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
+import { addressCamera, cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
+import { DEEPEST_K } from "../../src/world/lod.ts";
 
 // The camera <-> transform bridge a shared link stores as cx/cy/k; the centre is in uv (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is the e2e suite-zoom's.
 
@@ -50,4 +51,20 @@ test("a camera round-trips through a transform and back, independent of viewport
     assert.ok(Math.abs(back.cy - cam.cy) < 1e-12, `cy ${W}x${H}: ${back.cy}`);
     assert.equal(back.k, cam.k);
   }
+});
+
+const at = (h: string) => addressCamera(new URLSearchParams(h), DEEPEST_K);
+
+test("a shared link's camera is read up to the deepest band's k, 32, and refused past it (Issue #954)", () => {
+  assert.deepEqual(at("cx=0.5&cy=0.25&k=32"), { cx: 0.5, cy: 0.25, k: 32 });
+  assert.deepEqual(at("cx=0.5&cy=0.25&k=8"), { cx: 0.5, cy: 0.25, k: 8 });
+  assert.equal(at("cx=0.5&cy=0.25&k=32.0001"), null);
+  assert.equal(at("cx=0.5&cy=0.25&k=0.99"), null);
+});
+
+test("a link missing a key, or carrying one that is not a number, carries no camera (the parse readHash made, moved, Issue #954)", () => {
+  assert.equal(at("cx=0.5&k=2"), null);
+  assert.equal(at("cy=0.5&k=2"), null);
+  assert.equal(at("cx=0.5&cy=x&k=2"), null);
+  assert.equal(at(""), null);
 });
