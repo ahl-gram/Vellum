@@ -138,7 +138,6 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
       `(() => { const p = document.createElement("p"); p.id = "es9-line"; p.textContent = "a line the survey adds"; document.querySelector(".corner.bl").append(p); return true; })()`,
     );
     const held = await readsFor(ctx, 1000);
-    await ctx.evaluate(`document.getElementById("es9-line").remove()`);
     if (held.some((p) => !near(p.head.ty, up, 0.5)))
       faults.push(
         `folding past both fill depths moved the head: ${JSON.stringify(held.map((p) => p.head.ty.toFixed(1)))}`,
