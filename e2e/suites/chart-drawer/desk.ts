@@ -1,7 +1,7 @@
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { tabInto, type DrawerKit } from "./kit.ts";
-import { DEEP, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
+import { DEEP, DEEPEST, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
 import type { Read } from "./reads.ts";
 
 export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void> {
@@ -316,5 +316,30 @@ export async function cd8Home({ evaluate, check, settle }: DrawerKit): Promise<v
     "CD8 going home drops the inset and the dog-ear with it: the handle never outlives the survey it belongs to, and the table it filled is untouched (#520 build item 2)",
     home.ear === null && home.insetSvgs === 0 && home.cuttings === 6,
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
+  );
+}
+
+export async function cd63DeepestLays({ evaluate, check, settle, go, clickEar }: DrawerKit): Promise<void> {
+  await go(`${DRESS}&${DEEPEST}`);
+  await settle(READ, atInset, "chart-drawer-deepest-inset", DRAWN);
+  await clickEar();
+  const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-deepest-laid", DRAWN);
+  const carried = laid.hashTable ?? "";
+  await go(`${DRESS}&table=${carried}`);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  const filled = await settle(
+    READ,
+    (d) => d.imgs >= 1 && d.decoded.every(Boolean),
+    "chart-drawer-deepest-filled",
+    DRAWN,
+  );
+  check(
+    "CD63 a survey laid from the Glass's deepest band is carried in the address as rung 5, and a reload redraws it from the address alone (Issue #954)",
+    /(^|\.)rung-5\./.test(carried) &&
+      filled.cuttings === 1 &&
+      filled.imgs === 1 &&
+      filled.decoded[0] === true &&
+      filled.titles[0] !== "Chart № 42",
+    JSON.stringify({ carried, cuttings: filled.cuttings, imgs: filled.imgs, titles: filled.titles }),
   );
 }
