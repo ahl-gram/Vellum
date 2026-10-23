@@ -45,10 +45,11 @@ type Ring = {
   text: number[];
   prevRight: number | null;
   reach: number;
+  font: number;
 } | null;
 
 const RING = (selector: string): Payload<Ring> =>
-  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); const cs = getComputedStyle(a), b = a.getBoundingClientRect(), rg = new Range(); rg.selectNodeContents(a); const t = rg.getBoundingClientRect(), prev = a.previousElementSibling; return { visible: a.matches(":focus-visible"), colour: (${PAGE_RGBA})(cs.outlineColor), box: [b.left, b.top, b.right, b.bottom], text: [t.left, t.top, t.right, t.bottom], prevRight: prev ? prev.getBoundingClientRect().right : null, reach: parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset) }; })()`;
+  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); const cs = getComputedStyle(a), b = a.getBoundingClientRect(), rg = new Range(); rg.selectNodeContents(a); const t = rg.getBoundingClientRect(), prev = a.previousElementSibling; return { visible: a.matches(":focus-visible"), colour: (${PAGE_RGBA})(cs.outlineColor), box: [b.left, b.top, b.right, b.bottom], text: [t.left, t.top, t.right, t.bottom], prevRight: prev ? prev.getBoundingClientRect().right : null, reach: parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset), font: parseFloat(cs.fontSize) }; })()`;
 
 // The colour is read on a later task than the focus: in the focus's own task the ring still reads the colour it started from (measured 2026-10-22, 1024x768 zoomed Explorer, [1,0,1,0] for the mark), so the read polls until two reads agree.
 async function ringOf(ctx: SuiteContext, selector: string): Promise<Ring> {
@@ -147,15 +148,17 @@ function ringFaults(ring: RoomRead["ring"]): string[] {
     faults.push(
       `the section mark's focus ring is not parchment-bright beside the control's ink-dark: ${JSON.stringify(ring)}`,
     );
+  // The § inks 0.92em of a line box 1.32em tall (measured 2026-10-22 at 15.2px), so the box must stand at least 1em tall about the line's centre and span its width, and no taller: the Press head line's lettering stands just above the box.
   const around =
     !!m &&
     m.box[0]! <= m.text[0]! + 0.5 &&
-    m.box[1]! <= m.text[1]! + 0.5 &&
     m.box[2]! >= m.text[2]! - 0.5 &&
-    m.box[3]! >= m.text[3]! - 0.5;
+    m.box[3]! - m.box[1]! >= m.font &&
+    Math.abs((m.box[1]! + m.box[3]!) / 2 - (m.text[1]! + m.text[3]!) / 2) <= 1 &&
+    m.box[3]! - m.box[1]! <= 1.2 * m.font;
   if (!around)
     faults.push(
-      `the section mark's ring does not enclose its glyph: ${JSON.stringify(m && { box: m.box, text: m.text })}`,
+      `the section mark's ring box is not 1em to 1.2em tall about its glyph and as wide as it: ${JSON.stringify(m && { box: m.box, text: m.text })}`,
     );
   const clear = !!m && m.prevRight !== null && m.box[0]! - m.reach >= m.prevRight + 1;
   if (!clear)

@@ -255,8 +255,8 @@ body.chart-room .stage {
 .legend-row a.fn {
   color: var(--line-tan);
   align-self: flex-start;
-  padding: 0.75em 0.05em;
-  margin: -0.75em 0.1em -0.75em calc(-0.45rem + 0.1em);
+  padding: 0.55em 0.05em;
+  margin: -0.55em 0.1em -0.55em calc(-0.45rem + 0.1em);
 }
 .legend-row a.fn:hover {
   color: var(--parchment-bright);
