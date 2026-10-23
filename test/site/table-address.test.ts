@@ -176,14 +176,11 @@ test("land and coast clamp to the engine's range, the way every other host clamp
 
 test("a land or coast that is not a run of digits drops the item, by the seed's grammar (Issue #1003)", () => {
   const rest = ".style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1";
-  assert.equal(parseTable(hashOf(`k-s.seed-42.land-350.coast-55${rest}`)).length, 1);
+  const at = (field: string) => parseTable(hashOf(`k-s.seed-42.${field}${rest}`));
+  assert.equal(at("land-350.coast-55")?.length, 1);
   for (const key of ["land", "coast"])
     for (const raw of NOT_A_SEED.filter((r) => !r.includes(".")))
-      assert.deepEqual(
-        parseTable(hashOf(`k-s.seed-42.${key}-${encodeURIComponent(raw)}${rest}`)),
-        [],
-        `${key} ${JSON.stringify(raw)}`,
-      );
+      assert.deepEqual(at(`${key}-${encodeURIComponent(raw)}`), [], `${key} ${JSON.stringify(raw)}`);
 });
 
 test("the selects' own empty option is spelled by leaving the field out, never by an empty value", () => {

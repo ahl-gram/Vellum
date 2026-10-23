@@ -1,16 +1,14 @@
 // The Issue #192 address grammar, pure and DOM-free. Ratified vocabulary (the 2026-07-26 comment on Issue #192): a bare `survey` flag or `year=N`, never both and no sentinel year; `survey=<t>` is reserved for mid-sweep addresses and deliberately not built.
 import { TABLE_KEY, emitTable, type TableItem } from "../shared/table-address.ts";
+import { parseYear } from "../shared/year.ts";
 
 export type Live = { kind: "survey" } | { kind: "year"; year: number };
 
 export function parseLive(params: URLSearchParams): Live | null {
-  const hasSurvey = params.has("survey");
   const yearRaw = params.get("year");
-  const year = Number(yearRaw);
-  const hasYear = yearRaw !== null && yearRaw !== "" && Number.isInteger(year) && year > 0;
-  if (hasSurvey && hasYear) return null;
-  if (hasSurvey) return { kind: "survey" };
-  return hasYear ? { kind: "year", year } : null;
+  const year = yearRaw === null ? null : parseYear(yearRaw);
+  if (params.has("survey")) return year === null ? { kind: "survey" } : null;
+  return year === null ? null : { kind: "year", year };
 }
 
 // URLSearchParams cannot serialize a bare flag (`set("survey", "")` emits `survey=`), so finalizeHash respells exactly that one pair to the ratified bare form. Call finalizeHash INSTEAD of params.toString(), never after it.
