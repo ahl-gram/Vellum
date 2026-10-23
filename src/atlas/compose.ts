@@ -62,7 +62,8 @@ function gazetteerHtml(world: World): string {
     .map((i) => {
       const s = world.settlements[i]!;
       const realmId = world.realms.labels[s.x + s.y * world.elev.w] as number;
-      const realm = realmId >= 0 && world.names.realms.length > 0 ? (world.names.realms[realmId] ?? "—") : "—";
+      const realm =
+        realmId >= 0 && world.names.realms.length > 0 ? (world.names.realms[realmId] ?? "Independent") : "Independent";
       const note = notes.get(i)!;
       const former = s.formerName ? `<span class="former">Once called ${escapeXml(s.formerName)}.</span>` : "";
       return `<tr>

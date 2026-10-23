@@ -147,7 +147,7 @@ export default defineConfig(
     name: "Issue #981: no em-dash is written in a string in shipped code",
     files: ["src/**/*.ts", "scripts/**/*.ts", "e2e/**/*.ts"],
     plugins: { vellum },
-    rules: { "vellum/no-em-dash-in-string": ["error", { allow: { "e2e/harness.ts": 1, "src/atlas/compose.ts": 2 } }] },
+    rules: { "vellum/no-em-dash-in-string": ["error", { allow: { "e2e/harness.ts": 1 } }] },
   },
   {
     name: "Issue #675: the living-chart engine takes its elements from the host",
