@@ -14,9 +14,9 @@ function realmBeside(frozen: Int16Array, i: number, w: number, h: number): numbe
   const ix = i % w;
   const iy = (i / w) | 0;
   let hit = -1;
-  for (const [dx, dy] of NEIGHBORS_4) {
-    const nx = ix + dx;
-    const ny = iy + dy;
+  for (const offset of NEIGHBORS_4) {
+    const nx = ix + offset[0];
+    const ny = iy + offset[1];
     if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
     const r = frozen[nx + ny * w] as number;
     if (r >= 0 && (hit === -1 || r < hit)) hit = r; // lowest realm id breaks ties
@@ -35,9 +35,9 @@ function nearestRealmBySea(frozen: Int16Array, cells: ReadonlyArray<number>, ele
   const enqueueSeaAround = (c: number): void => {
     const cx = c % w;
     const cy = (c / w) | 0;
-    for (const [dx, dy] of NEIGHBORS_4) {
-      const nx = cx + dx;
-      const ny = cy + dy;
+    for (const offset of NEIGHBORS_4) {
+      const nx = cx + offset[0];
+      const ny = cy + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const ni = nx + ny * w;
       if (visited[ni] || !isOcean(ni)) continue;

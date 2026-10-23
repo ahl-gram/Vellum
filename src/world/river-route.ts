@@ -87,13 +87,13 @@ export function cheapestPath(
     }
     const x = cell % w;
     const y = (cell / w) | 0;
-    for (const [dx, dy, length] of NEIGHBORS_8) {
-      const nx = x + dx;
-      const ny = y + dy;
+    for (const offset of NEIGHBORS_8) {
+      const nx = x + offset[0];
+      const ny = y + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const next = nx + ny * w;
       if (settled[next] === 1 || (!passable(next) && !isTarget(next))) continue;
-      const cost = (best[cell] as number) + length * stepCost(next);
+      const cost = (best[cell] as number) + offset[2] * stepCost(next);
       if (cost < (best[next] as number)) {
         best[next] = cost;
         prev[next] = cell;

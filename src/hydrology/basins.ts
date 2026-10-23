@@ -63,9 +63,9 @@ export function watershedDivides(basins: Basins, w: number, h: number, frac: num
       const i = x + y * w;
       const b = ids[i] as number;
       if (b < 0 || !major.has(b)) continue;
-      for (const [dx, dy] of NEIGHBORS_4) {
-        const nx = x + dx;
-        const ny = y + dy;
+      for (const offset of NEIGHBORS_4) {
+        const nx = x + offset[0];
+        const ny = y + offset[1];
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
         const b2 = ids[nx + ny * w] as number;
         if (b2 >= 0 && b2 !== b && major.has(b2)) {
