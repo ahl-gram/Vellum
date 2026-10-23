@@ -85,11 +85,14 @@ about a rule, the rulebook wins.
   (`FARMSTEAD_MAX_WINDOW_UV` in `src/society/farmsteads.ts`), on their own fixed world-space
   lattice, each point forked off the seed by its lattice indices alone and spaced from the world's
   towns' places in the world and from the hamlets' spots by world-space tests alone, so a mark's
-  existence, its world-space spot, its name and its founding year never depend on the window. A
-  harbour town seated on the close-up's shore is drawn away from its place in the world, so a farm
-  may be drawn nearer to it than the spacing. A farmstead within reach of a river the close-up draws
-  is a mill, labelled with its name and the word Mill, so whether it is one can differ between two
-  overlapping windows. Their marks are reserved before any name is set, so every name placed by
+  existence, its world-space spot, its name and its founding year never depend on the window. Each is
+  placed on the nearest cell within the snap's reach whose ground under its whole mark is land, a
+  block of whole cells round it (`snapToStandingLand` in `src/world/snap-to-land.ts` with
+  `MARK_FOOTPRINT` in `src/society/farmsteads.ts`), so its mark stands on land cells; one with no such
+  cell is not placed. A harbour town seated on the close-up's shore is drawn away from its place in
+  the world, so a farm may be drawn nearer to it than the spacing. A farmstead within reach of a
+  river the close-up draws is a mill, labelled with its name and the word Mill, so whether it is one
+  can differ between two overlapping windows. Their marks are reserved before any name is set, so every name placed by
   search steps around them (a town's or a realm's name forced into place when no spot is free, and a
   river's name grazing within its allowance, are the exceptions), and their names claim after the
   feature labels, so they are the first words a crowded sheet drops
@@ -106,8 +109,8 @@ about a rule, the rulebook wins.
   scores them in (`seatProjected`, `HARBOUR_REACH_WORLD_CELLS` and `RIVER_REACH_WORLD_CELLS` in
   `src/world/seat-settlements.ts`, after `siteScore` in `src/society/sites.ts`). A drawn river that
   leaves its corridor can lie beyond that reach, and the town then takes the next seat its flags
-  allow. Never seat a town by editing `snapToLand`, which the hamlets share. A region hamlet is not
-  seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
+  allow. Never seat a town by editing `snapToLand`, which the projected towns, the road anchors and the
+  hamlets share. A region hamlet is not seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
 - **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
