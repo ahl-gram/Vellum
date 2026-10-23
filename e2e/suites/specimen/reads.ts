@@ -37,6 +37,12 @@ export type Specimen = {
   folioInset: string[] | null;
   pool: string | null;
   poolChrome: string | null;
+  chromeGround: string | null;
+  chromeFilter: string | null;
+  chartFolioOn: string | null;
+  chartFolioGround: string | null;
+  chartFolioFilter: string | null;
+  legendFilter: string | null;
   poolGlass: string | null;
   folioPanel: string | null;
   folioFilter: string | null;
@@ -85,6 +91,8 @@ export const READ: Payload<Specimen> = `(() => {
 
     folioInset: (() => { const e = document.querySelector(".corner.tr"); if (!e) return null; const c = getComputedStyle(e, "::before"); return [c.top, c.right, c.bottom, c.left]; })(),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"), folioPanel: cs(".corner.tr", "backgroundImage", "::before"), folioFilter: cs(".corner.tr", "filter", "::before"),
+    chromeGround: cs("header.chrome", "backgroundImage", "::before"), chromeFilter: cs("header.chrome", "filter", "::before"),
+    chartFolioOn: cs(".corner.bl", "content", "::before"), chartFolioGround: cs(".corner.bl", "backgroundImage", "::before"), chartFolioFilter: cs(".corner.bl", "filter", "::before"), legendFilter: cs(".legend", "filter", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent, pill: r("#sb-status"),
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
     crNum: cs(".contents .cr-num", "color"), inked: cs(".index li.inked", "opacity"), unInked: cs(".index > li:not(.inked)", "opacity"),

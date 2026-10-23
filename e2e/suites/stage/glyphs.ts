@@ -1,4 +1,4 @@
-// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts).
+// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts) and over a zoomed one (EZ1 and EZ2 in zoomed.ts).
 import type { Payload } from "../../types.ts";
 
 export type Glyph = {
@@ -13,7 +13,7 @@ export type Glyph = {
 const PIECES = "header.chrome, .corner, .strip, .legend";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
-const glyphsOverSheet = (perLine: boolean): Payload<Glyph[]> => `(() => {
+const glyphsOver = (perLine: boolean, sheetOnly: boolean): Payload<Glyph[]> => `(() => {
   const sheet = document.getElementById("sheet").getBoundingClientRect();
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
@@ -27,7 +27,7 @@ const glyphsOverSheet = (perLine: boolean): Payload<Glyph[]> => `(() => {
       for (const b of ${perLine} ? [...rg.getClientRects()] : [rg.getBoundingClientRect()]) {
         if (!(b.width > 0)) continue;
         const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-        if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
+        if (${sheetOnly} && (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom)) continue;
         const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
         out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)), disabled: !!el.closest(":disabled") });
       }
@@ -37,13 +37,15 @@ const glyphsOverSheet = (perLine: boolean): Payload<Glyph[]> => `(() => {
       const b = input.getBoundingClientRect(), cs = getComputedStyle(input);
       const x = b.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth), w = b.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
       const cx = x + w / 2, cy = b.top + b.height / 2;
-      if (!(w > 0) || cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
+      if (!(w > 0) || (${sheetOnly} && (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom))) continue;
       const m = cs.color.match(/[0-9.]+/g).map(Number);
       out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)), disabled: input.disabled });
     }
   }
   return out;
 })()`;
-export const GLYPHS_OVER_SHEET = glyphsOverSheet(false);
+export const GLYPHS_OVER_SHEET = glyphsOver(false, true);
 // One entry per line box, so a sampled row crosses that line's glyphs and not the gap between two lines of a wrapped node (NS1's painted read; a node's union box put the chart folio's two-line title's row between its lines).
-export const GLYPH_LINES_OVER_SHEET = glyphsOverSheet(true);
+export const GLYPH_LINES_OVER_SHEET = glyphsOver(true, true);
+// Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`).
+export const GLYPH_LINES = glyphsOver(true, false);

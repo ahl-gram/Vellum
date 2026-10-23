@@ -244,17 +244,26 @@ under its own state, but an arm made only of kit classes may set no colour, bord
 tracking. `vellum/css-kit-not-redressed` refuses exactly that.
 
 **When the reader is zoomed in, or the room has no stage, or the sheet is floored under the chrome,
-the furniture stands on a pool**: a blurred box that follows the cluster, running well past the
-viewport edge on its edge-facing sides so the fade never lands on screen. At rest on a chart fitted
-clear of the chrome, the chrome carries none. Zoomed, or with no stage, the
-legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
-room's corners read the same as home's, corner for corner. **Over a floored sheet they stand on the
-cluster's blurred pool instead** (Alex, 2026-10-06, Issue #762: soft): the legend row's pool box ends
-inside the rise gap above the chart folio, so no backing box lies over another piece's lines, while
-its blur reaches a few pixels over the caption's top line, which is why every line there is read as
-it is painted, at 4.5:1 or better (`NS1` in `e2e/suites/stage/short.ts`). Over a floored sheet
-the strip alone takes none: its lines stand on its own panel, and a pool there would lie over the
-chart folio and the Glass. The room folio's pool reaches only a little way toward the nav there.
+the furniture stands on a backing; at rest on a chart fitted clear of the chrome, the chrome
+carries none.** **Zoomed, every corner but the Glass stands on home's crisp panel** (Alex,
+2026-10-22, Issue #988 issuecomment-6352761013): the head cluster, the chart folio, the legend row
+and the room folio, on a short window as on a tall one, so a zoomed chart room's corners read
+alike, each the same as home's legend row; the Reading Room's strip alone keeps a blurred pool
+there. Each panel stops short of the window's edge at the room folio's margins, and where two
+panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
+section mark beside the Press, take parchment, without which they read under 4.5:1 over a pale
+chart (`EZ1` in `e2e/suites/stage/zoomed.ts`). **Provisional until the post-use review:** the crisp
+panels under the cluster and the chart folio, their margins at the window's edge, where two panels
+meet, all four corners crisp on a short window, and the parchment on the folio's lines. With no
+stage, the legend row and the room folio take the crisp panel and the cluster a blurred pool,
+running well past the viewport edge on its edge-facing sides so the fade never lands on screen.
+**Over a floored sheet at rest they all stand on the cluster's blurred pool instead** (Alex,
+2026-10-06, Issue #762: soft): the legend row's pool box ends inside the rise gap above the chart
+folio, so no backing box lies over another piece's lines, while its blur reaches a few pixels over
+the caption's top line, which is why every line there is read as it is painted, at 4.5:1 or better
+(`NS1` in `e2e/suites/stage/short.ts`). Over a floored sheet the strip alone takes none: its lines
+stand on its own panel, and a pool there would lie over the chart folio and the Glass. The room
+folio's pool reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
 looks like padding is the row's own pseudo-element drawn at those insets, so the row's box, which the
@@ -357,9 +366,9 @@ knowing, including a keyboard focus ring that fell to about 1.0:1.
 **A lens over the chart never puts paper under the chrome where it lies past the sheet as the sheet
 lies on screen.** There the loupe shows opaque chart ink, so every piece of chrome painted over that
 part of it keeps a dark ground (Alex, 2026-10-21, Issue #751: the cream folio, masthead, room folio
-and Glass read as low as 1.07:1 over the light lens before). It answers what the pools answer for a
+and Glass read as low as 1.07:1 over the light lens before). It answers what the panels answer for a
 pale chart reaching the chrome while zoomed, but opaque, because the lens lies under the fog and the
-pools above it: in a chart room the fog paints above the stage, and a darkness of 0.92 or 0.95 under
+panels above it: in a chart room the fog paints above the stage, and a darkness of 0.92 or 0.95 under
 the fog's peak leaves the faintest chrome ink under 4.5:1.
 
 **The focus ring is one face**, ratified on #324 and pinned: a control that draws its own is

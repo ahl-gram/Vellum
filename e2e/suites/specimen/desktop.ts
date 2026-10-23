@@ -96,7 +96,7 @@ export async function sb4Folded({ check, settle, setState }: SpecimenKit, rest: 
 
 export function sb5Leaned({ check }: SpecimenKit, leaned: Specimen): void {
   check(
-    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
+    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the cluster and the room folio stand on their panels",
     leaned.st!.zoomed &&
       !leaned.st!.folded &&
       leaned.slipVis === "visible" &&
@@ -115,19 +115,25 @@ export function sb5Leaned({ check }: SpecimenKit, leaned: Specimen): void {
   );
 }
 
-export async function sb5bEdgesDark({ check, brightest }: SpecimenKit, interior: number): Promise<void> {
-  // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
-  const corners: { name: string; max: number }[] = [];
-  // The edges the spilled chart reaches under a pooled piece: the two left corners; the right side is the slip's, the legend row carries home's footing (SB5c) and the Glass no pool at all (SB5d).
-  for (const [x, y, name] of [
-    [0, 2, "top-left"],
-    [0, 797, "bottom-left"],
-  ] as const)
-    corners.push({ name, max: await brightest(x, y) });
+export function sb5fCornerPanels({ check }: Pick<SpecimenKit, "check">, leaned: Specimen): void {
   check(
-    "SB5b leaned, every viewport edge under a pooled piece is as dark as the pool's interior: no chart paper bleeds through the pool's fade at the edge (eight edge pixels at each place within 15 of the cluster's interior, which the old inset failed at 97 against 60)",
-    corners.every((c) => c.max <= interior + 15),
-    JSON.stringify({ interior, corners }),
+    "SB5f leaned, the head cluster and the chart folio stand on the legend row's own footing: each one's ::before resolves the very ground the row's does, a top-to-bottom gradient, and none of the three is blurred (Alex, 2026-10-22, Issue #988: \"the same as the foot underneath in the middle\")",
+    leaned.poolChrome === '""' &&
+      leaned.chartFolioOn === '""' &&
+      /^linear-gradient\((?!to top)/.test(leaned.legendGround ?? "") &&
+      leaned.chromeGround === leaned.legendGround &&
+      leaned.chartFolioGround === leaned.legendGround &&
+      leaned.chromeFilter === "none" &&
+      leaned.chartFolioFilter === "none" &&
+      leaned.legendFilter === "none",
+    JSON.stringify({
+      cluster: leaned.chromeGround?.slice(0, 44),
+      chartFolio: leaned.chartFolioGround?.slice(0, 44),
+      legend: leaned.legendGround?.slice(0, 44),
+      clusterFilter: leaned.chromeFilter,
+      chartFolioFilter: leaned.chartFolioFilter,
+      legendFilter: leaned.legendFilter,
+    }),
   );
 }
 
@@ -138,7 +144,7 @@ export async function sb5dGlassBare(
 ): Promise<void> {
   const underGlass = await brightest(Math.round(leaned.glass!.x) + 2, 797);
   check(
-    "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the pooled interior)",
+    "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the cluster's interior)",
     leaned.poolGlass === "none" && underGlass > interior + 30,
     JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
   );
@@ -214,7 +220,7 @@ export async function sb6RestAgain({ evaluate, check, sleep, setState, read }: S
     `(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display};})()`,
   );
   check(
-    "SB6 at rest again the camera is home and the pool gone; the foot's press empties the status pill (which then hides, :empty) and fills it back",
+    "SB6 at rest again the camera is home and the room folio's panel gone; the foot's press empties the status pill (which then hides, :empty) and fills it back",
     !back.st!.zoomed &&
       back.pool === "none" &&
       emptied.text === "" &&

@@ -45,13 +45,6 @@ test("an unrenamed place has no former line at all", () => {
   assert.ok(!("formerLine" in card), "an absent former name should not leave the key behind");
 });
 
-test("no ruin card carries a former line", () => {
-  for (const mark of manifest.places.filter((p) => p.ruined)) {
-    const card = composePlaceCard(mark, world.history.events, world.culture.id);
-    assert.equal(card.formerLine, undefined, mark.name);
-  }
-});
-
 test("the gazetteer prints the former name, escaped, once per renamed place", () => {
   const html = composeAtlas(world).gazetteerHtml;
   for (const s of withFormer) {

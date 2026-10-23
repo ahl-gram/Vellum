@@ -251,16 +251,23 @@ body.chart-room .stage {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
+/* The block margins take back the block padding that gives the focus ring a box around the glyph, and the inline ones the narrower padding, so the glyph and its neighbours stay where they were (Issue #988). */
 .legend-row a.fn {
   color: var(--line-tan);
   align-self: flex-start;
-  margin-left: -0.45rem;
+  padding: 0.55em 0.05em;
+  margin: -0.55em 0.1em -0.55em calc(-0.45rem + 0.1em);
 }
-.legend-row a.fn:hover,
-.legend-row a.fn:focus-visible {
+.legend-row a.fn:hover {
   color: var(--parchment-bright);
 }
-body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) {
+.legend-row a.fn:focus-visible {
+  color: var(--parchment-bright);
+  outline-color: var(--parchment-bright);
+  outline-offset: 0;
+}
+body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible),
+body:has(#map-viewport.zoomed) .legend .legend-row a.fn:not(:hover, :focus-visible) {
   color: var(--parchment);
 }
 
