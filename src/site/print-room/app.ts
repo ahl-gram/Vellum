@@ -23,6 +23,8 @@ import {
   type RoomFurniture,
 } from "./seats.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
+import { parsePrintRoomAddress } from "./address.ts";
+import { STYLE_NAMES, oneOf } from "../shared/address-grammar.ts";
 import { errorText } from "../shared/error-text.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -50,12 +52,6 @@ declare global {
 }
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads
-
-// Boundary discipline: allowlists mirrored from the Explorer's <select> values, so a crafted hash can never inject an unknown recipe param.
-const STYLES = ["antique", "topographic", "ink", "nautical"];
-const TYPES = ["island", "archipelago", "continent", "citystate"];
-const BANDS = ["temperate", "tropical", "polar"];
-const THEMES = ["vegetation", "climate", "moisture", "population"];
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const seedInput = $<HTMLInputElement>("pr-seed");
@@ -122,37 +118,18 @@ function refreshOrderControls(): void {
 }
 
 function applyHash(): void {
-  const p = new URLSearchParams(location.hash.slice(1));
-  const seedRaw = p.get("seed");
-  const seed = Number(seedRaw);
-  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and silently pin every bare visit to seed 0.
-  if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
-  const style = p.get("style");
-  if (style !== null && STYLES.includes(style)) styleSel.value = style;
-  const type = p.get("type");
-  if (type !== null && TYPES.includes(type)) carried.type = type as MapType;
-  const band = p.get("band");
-  if (band !== null && BANDS.includes(band)) carried.band = band as ClimateBand;
-  const theme = p.get("theme");
-  if (theme !== null && THEMES.includes(theme)) carried.theme = theme as ThemeName;
-  const legend = p.get("legend");
-  if (legend !== null) carried.legend = legend === "1";
-  const arms = p.get("arms");
-  if (arms !== null) carried.arms = arms === "1";
-  const beasts = p.get("beasts");
-  if (beasts !== null) carried.beasts = beasts === "1";
-  const land = p.get("land");
-  if (land !== null) {
-    const f = Number(land) / 1000;
-    if (Number.isFinite(f)) carried.land = Math.min(0.7, Math.max(0.1, f));
-  }
-  // coast= carries coastWarp x 100, the Explorer's encoding; clamp so a crafted hash can never push the engine out of range.
-  const coast = p.get("coast");
-  if (coast !== null) {
-    const w = Number(coast) / 100;
-    if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
-  }
-  carried.table = p.get(TABLE_KEY);
+  const a = parsePrintRoomAddress(location.hash);
+  if (a.seed !== null) seedInput.value = String(a.seed);
+  if (a.style !== null) styleSel.value = a.style;
+  if (a.type !== null) carried.type = a.type;
+  if (a.band !== null) carried.band = a.band;
+  if (a.theme !== null) carried.theme = a.theme;
+  if (a.legend !== null) carried.legend = a.legend;
+  if (a.arms !== null) carried.arms = a.arms;
+  if (a.beasts !== null) carried.beasts = a.beasts;
+  if (a.land !== null) carried.land = a.land;
+  if (a.coast !== null) carried.coast = a.coast;
+  carried.table = a.table;
 }
 
 function writeHash(seed: number, style: string): void {
@@ -202,7 +179,7 @@ function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: P
 
 function draw(): void {
   const seed = Number(seedInput.value) >>> 0;
-  const style = STYLES.includes(styleSel.value) ? (styleSel.value as StyleName) : "antique";
+  const style = oneOf(styleSel.value, STYLE_NAMES) ?? "antique";
   const myGen = ++drawGen;
   drawing = true;
   status.textContent = "Pulling a proof…";

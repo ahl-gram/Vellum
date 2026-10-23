@@ -23,11 +23,11 @@ import {
   TABLE_CAP,
   TABLE_KEY,
   emitTable,
+  emitTableKey,
   type ProspectItem,
   type SurveyItem,
   type TableItem,
 } from "../../src/site/shared/table-address.ts";
-import { emitTableKey } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";

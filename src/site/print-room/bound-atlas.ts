@@ -148,7 +148,7 @@ function mint(p: AtlasPlate, section: PlateSection, ordinal: number): Bound {
   return { plate: { key: p.key, title: p.title, href }, section, ordinal, aspect: plateAspect(p.svg) };
 }
 
-// innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
+// innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `parsePrintRoomAddress` in `src/site/print-room/address.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
   const hero = mint(atlas.hero, "hero", 0);
   const draughtings = atlas.draughtings.map((p) => mint(p, "draughting", 0));

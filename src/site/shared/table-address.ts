@@ -10,6 +10,16 @@ import {
 } from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { parseYear } from "./year.ts";
+import {
+  CLIMATE_BANDS,
+  MAP_TYPES,
+  STYLE_NAMES,
+  THEME_NAMES,
+  coastFromAddress,
+  landFromAddress,
+  oneOf,
+} from "./address-grammar.ts";
+import { seedFromHash } from "../explorer/address.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -23,12 +33,6 @@ export const TABLE_CAP = 6;
 const ITEMS = "_";
 const FIELDS = ".";
 const PAIR = "-";
-
-// Boundary discipline: allowlists mirrored from the Explorer's <select> values (the Print Room's exact idiom).
-const STYLES = ["antique", "topographic", "ink", "nautical"];
-const TYPES = ["island", "archipelago", "continent", "citystate"];
-const BANDS = ["temperate", "tropical", "polar"];
-const THEMES = ["vegetation", "climate", "moisture", "population"];
 
 /** The Explorer's own override set (`app.ts`), presence-gated: an absent land is the world's natural waterline, not a default. */
 export interface TableOverrides {
@@ -81,14 +85,14 @@ export interface TableGroup {
 // undefined = not stated; null = stated and unreadable, which drops the whole ITEM rather than quietly drafting a different world. Continuous values clamp instead.
 type Field<T> = T | null | undefined;
 
-const allowed = <T extends string>(raw: string | undefined, list: readonly string[]): Field<T> =>
-  raw === undefined ? undefined : list.includes(raw) ? (raw as T) : null;
+const allowed = <T extends string>(raw: string | undefined, list: readonly T[]): Field<T> =>
+  raw === undefined ? undefined : oneOf(raw, list);
 
-const nat = (raw: string | undefined): Field<number> =>
-  raw === undefined ? undefined : /^\d+$/.test(raw) ? Number(raw) : null;
+const nat = (raw: string | undefined): Field<number> => (raw === undefined ? undefined : seedFromHash(raw));
 
-const scaled = (raw: string | undefined, divisor: number, lo: number, hi: number): Field<number> =>
-  raw === undefined ? undefined : /^\d+$/.test(raw) ? Math.min(hi, Math.max(lo, Number(raw) / divisor)) : null;
+const landField = (raw: string | undefined): Field<number> => (raw === undefined ? undefined : landFromAddress(raw));
+
+const coastField = (raw: string | undefined): Field<number> => (raw === undefined ? undefined : coastFromAddress(raw));
 
 const seal = (raw: string | undefined): Field<boolean> =>
   raw === undefined ? undefined : raw === "1" ? true : raw === "0" ? false : null;
@@ -115,10 +119,10 @@ function readFields(chunk: string): Map<string, string> | null {
 
 function readWorld(fields: Map<string, string>): TableWorld | null {
   const seed = nat(fields.get("seed"));
-  const mapType = allowed<MapType>(fields.get("type"), TYPES);
-  const band = allowed<ClimateBand>(fields.get("band"), BANDS);
-  const landFraction = scaled(fields.get("land"), 1000, 0.1, 0.7);
-  const coastWarp = scaled(fields.get("coast"), 100, 0, 1);
+  const mapType = allowed(fields.get("type"), MAP_TYPES);
+  const band = allowed(fields.get("band"), CLIMATE_BANDS);
+  const landFraction = landField(fields.get("land"));
+  const coastWarp = coastField(fields.get("coast"));
   if (seed == null || mapType === null || band === null || landFraction === null || coastWarp === null) return null;
   return {
     seed,
@@ -136,13 +140,13 @@ function readItem(chunk: string): TableItem | null {
   if (!fields) return null;
   const kind = fields.get("k");
   const world = readWorld(fields);
-  const style = allowed<StyleName>(fields.get("style"), STYLES);
+  const style = allowed(fields.get("style"), STYLE_NAMES);
   if (!world || style == null) return null;
   if (kind === "s") {
     const legend = seal(fields.get("legend"));
     const arms = seal(fields.get("arms"));
     const beasts = seal(fields.get("beasts"));
-    const theme = allowed<ThemeName>(fields.get("theme"), THEMES);
+    const theme = allowed(fields.get("theme"), THEME_NAMES);
     const rung = nat(fields.get("rung"));
     if (legend == null || arms == null || beasts == null || theme === null || rung == null) return null;
     const seat = regionBand(rung) ? (rung as Rung) : null;
@@ -182,7 +186,7 @@ export function parseTable(hash: string): ReadonlyArray<TableItem> | null {
 const keptKeys = (hash: string, drop: RegExp): string[] =>
   (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
 
-/** One address with its table key replaced, keeping every other key verbatim and in place. Issue #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; Issue #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. An empty table writes no key at all, the rule `emitTableKey` in ../explorer/address.ts already keeps. */
+/** One address with its table key replaced, keeping every other key verbatim and in place. Issue #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; Issue #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. */
 export function tableHash(hash: string, table: string): string {
   const keys = keptKeys(hash, new RegExp(`^${TABLE_KEY}(=|$)`));
   const all = table === "" ? keys : [...keys, `${TABLE_KEY}=${table}`];
@@ -224,6 +228,11 @@ const emitItem = (item: TableItem): string =>
 /** The key's VALUE, in one canonical field order, capped. The host writes NO key at all when this is empty (ruled 2026-09-07), the way `emitLive` omits its own. */
 export function emitTable(items: ReadonlyArray<TableItem>): string {
   return items.slice(0, TABLE_CAP).map(emitItem).join(ITEMS);
+}
+
+export function emitTableKey(params: URLSearchParams, items: ReadonlyArray<TableItem> | null | undefined): void {
+  if (!items || items.length === 0) return;
+  params.set(TABLE_KEY, emitTable(items));
 }
 
 // There is deliberately no window-to-lattice twin: `lodWindowFor` clamps at the sheet edge, so that direction is lossy (1200 of 4225 band-3 windows rebuild differently from their own midpoint), and every caller has the camera anyway.

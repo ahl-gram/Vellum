@@ -25,6 +25,7 @@ import {
 } from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
 import { SURVEY, PROSPECT, survey, prospect, hashOf } from "../../test-support/table-address-fixtures.ts";
+import { NOT_A_SEED } from "../../test-support/hash-grammar-fixtures.ts";
 
 test("the key is the ruled one and the cap is the ruled six (#518's sitting, #401 ruling 5)", () => {
   assert.equal(TABLE_KEY, "table");
@@ -171,6 +172,15 @@ test("land and coast clamp to the engine's range, the way every other host clamp
     hashOf("k-s.seed-42.land-10.coast-0.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"),
   ) as [SurveyItem];
   assert.deepEqual(low[0].overrides, { landFraction: 0.1, coastWarp: 0 });
+});
+
+test("a land or coast that is not a run of digits drops the item, by the seed's grammar (Issue #1003)", () => {
+  const rest = ".style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1";
+  const at = (field: string) => parseTable(hashOf(`k-s.seed-42.${field}${rest}`));
+  assert.equal(at("land-350.coast-55")?.length, 1);
+  for (const key of ["land", "coast"])
+    for (const raw of NOT_A_SEED.filter((r) => !r.includes(".")))
+      assert.deepEqual(at(`${key}-${encodeURIComponent(raw)}`), [], `${key} ${JSON.stringify(raw)}`);
 });
 
 test("the selects' own empty option is spelled by leaving the field out, never by an empty value", () => {

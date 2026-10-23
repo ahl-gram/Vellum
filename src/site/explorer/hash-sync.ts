@@ -1,8 +1,9 @@
 // The URL hash <-> controls bridge: readHash seeds the controls from a link on load, writeHash mirrors them back on every draw; the touched gates stay OWNED by app.ts (readHash only reports whether the link carried a value).
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
-import { parseLive, emitLive, emitTableKey, finalizeHash, seedFromHash, type Live } from "./address.ts";
-import { parseTable, type TableItem } from "../shared/table-address.ts";
+import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
+import { coastFromAddress, landFromAddress } from "../shared/address-grammar.ts";
+import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
 import type { Camera } from "./camera.ts";
 
 export interface Controls {
@@ -20,32 +21,20 @@ export interface Controls {
 
 function landFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
   const { landSlider } = controls;
-  const land = params.get("land");
-  let landTouched = false;
-  if (land !== null) {
-    const f = Number(land) / 1000;
-    if (Number.isFinite(f)) {
-      landSlider.value = String(landToSlider(f));
-      updateLandReadout();
-      landTouched = true;
-    }
-  }
-  return landTouched;
+  const land = landFromAddress(params.get("land"));
+  if (land === null) return false;
+  landSlider.value = String(landToSlider(land));
+  updateLandReadout();
+  return true;
 }
 
 function coastFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
   const { coastSlider } = controls;
-  const coast = params.get("coast");
-  let coastTouched = false;
-  if (coast !== null) {
-    const w = Number(coast) / 100;
-    if (Number.isFinite(w)) {
-      coastSlider.value = String(coastToSlider(w));
-      updateCoastReadout();
-      coastTouched = true;
-    }
-  }
-  return coastTouched;
+  const coast = coastFromAddress(params.get("coast"));
+  if (coast === null) return false;
+  coastSlider.value = String(coastToSlider(coast));
+  updateCoastReadout();
+  return true;
 }
 
 /** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the Issue #165 camera if carried (restored by the conductor after the first chart lands), and the Issue #192 live address; absent params mean home, still, disarmed. */

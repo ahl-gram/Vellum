@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "../../src/site/ribbon/address.ts";
+import { NOT_A_SEED } from "../../test-support/hash-grammar-fixtures.ts";
 
 test("parseRibbonAddress reads the Explorer's world keys plus a and b", () => {
   const a = parseRibbonAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&a=3&b=9");
@@ -95,4 +96,24 @@ test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= th
     "/prospect/#seed=42&i=2",
     "a hand-shared hash already carrying the Prospect's keys loses them, or the first i= wins on parse (skeptic on PR #500)",
   );
+});
+
+test("parseRibbonAddress reads seed, a and b by the seed's grammar: nothing but a run of digits is a number (Issue #1003)", () => {
+  for (const raw of NOT_A_SEED) {
+    const v = encodeURIComponent(raw);
+    const a = parseRibbonAddress(`#seed=${v}&a=${v}&b=${v}`);
+    assert.deepEqual([a.seed, a.from, a.to], [null, null, null], JSON.stringify(raw));
+  }
+  const padded = parseRibbonAddress("#seed=0300&a=07&b=10");
+  assert.deepEqual([padded.seed, padded.from, padded.to], [300, 7, 10], "leading zeros read as the number");
+});
+
+test("parseRibbonAddress reads land and coast by the seed's grammar, so an empty land= is no land (Issue #1003)", () => {
+  for (const raw of NOT_A_SEED) {
+    const v = encodeURIComponent(raw);
+    const a = parseRibbonAddress(`#land=${v}&coast=${v}`);
+    assert.deepEqual([a.land, a.coast], [null, null], JSON.stringify(raw));
+  }
+  const padded = parseRibbonAddress("#land=0350&coast=055");
+  assert.deepEqual([padded.land, padded.coast], [0.35, 0.55]);
 });

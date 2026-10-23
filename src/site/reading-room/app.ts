@@ -12,7 +12,8 @@ import { plateDressFor } from "../../prospect/dress/context.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
 import { errorText } from "../shared/error-text.ts";
-import { parseLive, emitLive, finalizeHash, liveNow, seedFromHash, type Live } from "../explorer/address.ts";
+import { emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
+import { parseReadingRoomAddress } from "./address.ts";
 import { createReadingFrame } from "../shared/reading-frame/index.ts";
 import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
 import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../shared/living-chart/index.ts";
@@ -29,12 +30,6 @@ declare global {
     __vellumReadingRoomAges?: LivingChart["agesState"];
   }
 }
-
-// Boundary discipline: allowlists mirrored from the Explorer's <select> values; unknown keys (an Explorer link's cx/cy/k camera) are ignored, not errors.
-const STYLES = ["antique", "topographic", "ink", "nautical"];
-const TYPES = ["island", "archipelago", "continent", "citystate"];
-const BANDS = ["temperate", "tropical", "polar"];
-const THEMES = ["vegetation", "climate", "moisture", "population"];
 
 const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElement;
 const q = <T extends HTMLElement = HTMLElement>(sel: string): T => document.querySelector<T>(sel) as T;
@@ -92,35 +87,19 @@ const carried: {
 } = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null, table: null };
 
 function applyHash(): void {
-  const p = new URLSearchParams(location.hash.slice(1));
-  const s = seedFromHash(p.get("seed"));
-  seed = s !== null ? s >>> 0 : seedForDate(new Date());
-  const st = p.get("style");
-  if (st !== null && STYLES.includes(st)) style = st as StyleName;
-  const type = p.get("type");
-  if (type !== null && TYPES.includes(type)) carried.type = type as MapType;
-  const band = p.get("band");
-  if (band !== null && BANDS.includes(band)) carried.band = band as ClimateBand;
-  const theme = p.get("theme");
-  if (theme !== null && THEMES.includes(theme)) carried.theme = theme as ThemeName;
-  const legend = p.get("legend");
-  if (legend !== null) carried.legend = legend === "1";
-  const arms = p.get("arms");
-  if (arms !== null) carried.arms = arms === "1";
-  const beasts = p.get("beasts");
-  if (beasts !== null) carried.beasts = beasts === "1";
-  const land = p.get("land");
-  if (land !== null) {
-    const f = Number(land) / 1000;
-    if (Number.isFinite(f)) carried.land = Math.min(0.7, Math.max(0.1, f));
-  }
-  const coast = p.get("coast");
-  if (coast !== null) {
-    const w = Number(coast) / 100;
-    if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
-  }
-  carried.table = p.get(TABLE_KEY);
-  pendingLive = parseLive(p);
+  const a = parseReadingRoomAddress(location.hash);
+  seed = a.seed !== null ? a.seed >>> 0 : seedForDate(new Date());
+  if (a.style !== null) style = a.style;
+  if (a.type !== null) carried.type = a.type;
+  if (a.band !== null) carried.band = a.band;
+  if (a.theme !== null) carried.theme = a.theme;
+  if (a.legend !== null) carried.legend = a.legend;
+  if (a.arms !== null) carried.arms = a.arms;
+  if (a.beasts !== null) carried.beasts = a.beasts;
+  if (a.land !== null) carried.land = a.land;
+  if (a.coast !== null) carried.coast = a.coast;
+  carried.table = a.table;
+  pendingLive = a.live;
 }
 
 // The plate's way in: canonical recipe keys (the room owns this writer, no verbatim rule) plus the plate's own settlement and year, so the page opens on exactly the engraving shown.
