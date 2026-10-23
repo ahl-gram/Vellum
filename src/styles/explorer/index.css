@@ -120,7 +120,9 @@ body.chart-room .stage {
 #map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
   animation-delay: var(--redraft-dry-wait-village, 500ms);
 }
-#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text {
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text,
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="farmstead"] text,
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="mill"] text {
   animation-delay: var(--redraft-dry-wait-hamlet, 740ms);
 }
 

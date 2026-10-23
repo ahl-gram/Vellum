@@ -1,9 +1,11 @@
-import { el, type SvgNode } from "../svg.ts";
-import { textBox, WIDTH_FACTOR } from "../geometry.ts";
+import { el, pathFrom, type SvgNode } from "../svg.ts";
+import { textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
 
 export type SettlementTier = NamedSettlement["kind"] | "seat";
+
+const FINER_TIER: ReadonlySet<SettlementTier> = new Set<SettlementTier>(["farmstead", "mill"]);
 
 export const FONT_SIZE: Record<SettlementTier, number> = {
   capital: 19,
@@ -11,6 +13,8 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   town: 13,
   village: 10.5,
   hamlet: 8.5,
+  farmstead: 8.5,
+  mill: 8.5,
 };
 
 export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
@@ -19,9 +23,14 @@ export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
   town: 17.5,
   village: 15,
   hamlet: 13,
+  farmstead: 13,
+  mill: 13,
 };
 
 const CAPITAL_GLYPH_SCALE = 1.25;
+const HOUSE_SCALE = 1.8;
+const WHEEL_RADIUS = 3.9;
+const SPOKE_WIDTH = 1.2;
 const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
 
@@ -78,6 +87,8 @@ export function settlementGlyph(tier: SettlementTier, px: number, py: number, ct
       "stroke-width": 0.8 * k,
     });
   }
+  if (tier === "farmstead") return farmsteadGlyph(px, py, k, style.ink, style.labelHalo);
+  if (tier === "mill") return millGlyph(px, py, k, style.ink, style.labelHalo);
   return el("circle", {
     cx: px,
     cy: py,
@@ -86,6 +97,51 @@ export function settlementGlyph(tier: SettlementTier, px: number, py: number, ct
     stroke: style.ink,
     "stroke-width": 1.3 * k,
   });
+}
+
+function farmsteadGlyph(px: number, py: number, k: number, ink: string, paper: string): SvgNode {
+  const s = HOUSE_SCALE * k;
+  const d = pathFrom(
+    [
+      [px - 2.4 * s, py],
+      [px - 2.4 * s, py - 2.6 * s],
+      [px, py - 4.8 * s],
+      [px + 2.4 * s, py - 2.6 * s],
+      [px + 2.4 * s, py],
+    ],
+    true,
+  );
+  return el("path", { d, fill: ink, stroke: paper, "stroke-width": 0.7 * k, "stroke-linejoin": "round" });
+}
+
+const WHEEL_SPOKES: ReadonlyArray<readonly [number, number]> = [
+  [1, 0],
+  [0, 1],
+];
+
+function millGlyph(px: number, py: number, k: number, ink: string, paper: string): SvgNode {
+  const r = WHEEL_RADIUS * k;
+  const spokes = WHEEL_SPOKES.map(([ux, uy]) =>
+    pathFrom(
+      [
+        [px - r * ux, py - r * uy],
+        [px + r * ux, py + r * uy],
+      ],
+      false,
+    ),
+  ).join("");
+  return el("g", {}, [
+    el("circle", { cx: px, cy: py, r, fill: paper, stroke: ink, "stroke-width": 1 * k }),
+    el("path", { d: spokes, stroke: ink, "stroke-width": SPOKE_WIDTH * k }),
+  ]);
+}
+
+export function finerMarkBox(tier: SettlementTier, px: number, py: number, k: number): Box {
+  const house = 4.8 * HOUSE_SCALE * k;
+  const wheel = 2 * WHEEL_RADIUS * k;
+  return tier === "farmstead"
+    ? { x: px - house / 2, y: py - house, w: house, h: house }
+    : { x: px - wheel / 2, y: py - wheel / 2, w: wheel, h: wheel };
 }
 
 function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNode {
@@ -224,7 +280,15 @@ function settlementOrder(world: World): { ordered: OrderedSettlement[]; seatReal
   const seatRealm = new Map<number, number>();
   seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
 
-  const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3, hamlet: 4 };
+  const RANK: Record<SettlementTier, number> = {
+    capital: 0,
+    seat: 1,
+    town: 2,
+    village: 3,
+    hamlet: 4,
+    farmstead: 5,
+    mill: 5,
+  };
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
     s.kind === "capital" ? "capital" : seatRealm.has(i) ? "seat" : s.kind;
 
@@ -245,10 +309,10 @@ function placeSettlementLabel(
   const k = proj.widthPx / 1500;
   const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
   const fs = sized[tier] * k;
-  const gap =
-    (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k;
+  const small = tier === "hamlet" || FINER_TIER.has(tier);
+  const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : small ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k;
   const upper = tier === "capital" || tier === "seat";
-  const text = s.name;
+  const text = tier === "mill" ? `${s.name} Mill` : s.name;
   const display = upper ? text.toUpperCase() : text;
   const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
   const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
@@ -260,7 +324,7 @@ function placeSettlementLabel(
     if (!labels.tryClaim(box)) continue;
     return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
   }
-  if (tier !== "village" && tier !== "hamlet") {
+  if (tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier)) {
     const t = tries[0]!;
     return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
   }
@@ -300,14 +364,24 @@ function settlementGroup(
   );
 }
 
-export function settlementsLayer(ctx: RenderCtx): SvgNode {
-  const { world, style } = ctx;
+export type SettlementsDraft = { readonly finish: () => SvgNode };
+
+export function settlementsLayer(ctx: RenderCtx): SettlementsDraft {
+  const { world, style, proj } = ctx;
   const { ordered, seatRealm } = settlementOrder(world);
   const showHalo = style.politicalTints && world.realms.seats.length > 1 && world.region === undefined;
+  const k = proj.widthPx / 1500;
+  const finer = ordered.filter((e) => FINER_TIER.has(e.tier));
+  for (const e of finer) ctx.labels.claim(finerMarkBox(e.tier, proj.px(e.s.x), proj.py(e.s.y), k));
+  const early = ordered
+    .filter((e) => !FINER_TIER.has(e.tier))
+    .map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo));
 
-  return el(
-    "g",
-    { id: "layer-settlements" },
-    ordered.map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo)),
-  );
+  return {
+    finish: () =>
+      el("g", { id: "layer-settlements" }, [
+        ...early,
+        ...finer.map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo)),
+      ]),
+  };
 }

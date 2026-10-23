@@ -356,7 +356,7 @@ export function measure(
   detail: boolean,
 ): { readonly row: WindowResult; readonly failures: ReadonlyArray<RiverFailure> } {
   const region = regionFor(world, band, window, detail);
-  const placed = region.settlements.filter((s) => s.kind !== "hamlet");
+  const placed = region.settlements.filter((s) => s.kind === "capital" || s.kind === "town" || s.kind === "village");
   const hamlets = region.settlements.filter((s) => s.kind === "hamlet");
   const expected = expectedProjections(world, window);
   const seatsKept = region.realms.seats.filter((i) => i >= 0).length;

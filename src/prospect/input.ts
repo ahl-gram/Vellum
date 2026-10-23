@@ -75,7 +75,9 @@ function transects(
 }
 
 function prospectKind(world: World, s: Site, index: number): ProspectKind {
-  return s.kind === "capital" ? "capital" : world.realms.seats.includes(index) ? "seat" : s.kind;
+  if (s.kind === "capital") return "capital";
+  if (world.realms.seats.includes(index)) return "seat";
+  return s.kind === "farmstead" || s.kind === "mill" ? "hamlet" : s.kind;
 }
 
 /** World sheets only: a region world carries no realm labels, arms, or chronicle, so a region-sourced input would silently degrade; region insets must resolve those through the parent world. */

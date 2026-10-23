@@ -8,6 +8,7 @@ import type { River } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import type { Road } from "../society/roads.ts";
 import { HAMLET_MAX_WINDOW_UV, placeHamlets } from "../society/hamlets.ts";
+import { FARMSTEAD_MAX_WINDOW_UV, placeFarmsteads } from "../society/farmsteads.ts";
 import { layRegionRivers } from "./region-rivers.ts";
 import { layWorldRoads } from "./region-roads.ts";
 import { chainedFieldAndGround, detailForWindow, type ChainCache } from "./detail-chain.ts";
@@ -276,7 +277,9 @@ function regionPeople(
 
   const hamlets =
     window.u1 - window.u0 <= HAMLET_MAX_WINDOW_UV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
-  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
+  const farms = window.u1 - window.u0 <= FARMSTEAD_MAX_WINDOW_UV + 1e-9 ? placeFarmsteads(world, window, land) : [];
+  const smallest = [...hamlets, ...farms];
+  const peopled = smallest.length > 0 ? [...settlements, ...smallest] : settlements;
   return { peopled, roads, roadLabels, seats };
 }
 

@@ -95,9 +95,15 @@ function hamletLattice(world: World, window: UvWindow): HamletLattice {
   return { stepU, stepV, u0, u1, v0, v1, ix0, ix1, iy0, iy1 };
 }
 
-type HamletGround = { readonly slope: Field; readonly span: number };
+export type HamletGround = { readonly slope: Field; readonly span: number };
 
-function hamletSite(world: World, ground: HamletGround, wx: number, wy: number): number | null {
+export function hamletGround(world: World): HamletGround {
+  let worldMax = -Infinity;
+  for (const v of world.elev.data) worldMax = Math.max(worldMax, v);
+  return { slope: slopeField(world.elev), span: Math.max(1e-9, worldMax - world.seaLevel) };
+}
+
+export function hamletSite(world: World, ground: HamletGround, wx: number, wy: number): number | null {
   const { gridW, gridH } = world.recipe;
   const { data } = world.elev;
   if (wx < EDGE_MARGIN || wy < EDGE_MARGIN || wx >= gridW - EDGE_MARGIN || wy >= gridH - EDGE_MARGIN) {
@@ -129,23 +135,21 @@ function shoreAndRiver(world: World, wx: number, wy: number): { harbor: boolean;
   return { harbor, onRiver: world.riverCells[wx + wy * gridW] === 1 || riverNear };
 }
 
-function hamletAt(
+function hamletAtPoint(
   world: World,
-  lattice: HamletLattice,
   ground: HamletGround,
-  cell: { readonly r: Rng; readonly ix: number; readonly iy: number },
   taken: ReadonlySet<string>,
+  ix: number,
+  iy: number,
 ): HamletCandidate | null {
   const { gridW, gridH } = world.recipe;
-  const { stepU, stepV, u0, u1, v0, v1 } = lattice;
-  const { r, ix, iy } = cell;
   // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
+  const r = createRng(world.recipe.seed).fork(`hamlet:${ix},${iy}`);
   const roll = r.next();
   const ju = r.next();
   const jv = r.next();
-  const u = (ix + 0.5 + (ju - 0.5) * JITTER) * stepU;
-  const v = (iy + 0.5 + (jv - 0.5) * JITTER) * stepV;
-  if (u < u0 || u > u1 || v < v0 || v > v1) return null;
+  const u = (ix + 0.5 + (ju - 0.5) * JITTER) * (HAMLET_LATTICE_WORLD_CELLS / (gridW - 1));
+  const v = (iy + 0.5 + (jv - 0.5) * JITTER) * (HAMLET_LATTICE_WORLD_CELLS / (gridH - 1));
 
   const wx = Math.round(u * (gridW - 1));
   const wy = Math.round(v * (gridH - 1));
@@ -168,24 +172,27 @@ function hamletAt(
   return { u, v, name, harbor, onRiver, score, founded };
 }
 
+export function hamletSpotAt(
+  world: World,
+  ground: HamletGround,
+  taken: ReadonlySet<string>,
+  ix: number,
+  iy: number,
+): { readonly x: number; readonly y: number } | null {
+  const c = hamletAtPoint(world, ground, taken, ix, iy);
+  return c === null ? null : { x: c.u * (world.recipe.gridW - 1), y: c.v * (world.recipe.gridH - 1) };
+}
+
 export function hamletCandidates(world: World, window: UvWindow): HamletCandidate[] {
-  const { seed } = world.recipe;
-  const { data } = world.elev;
-  const slope = slopeField(world.elev);
+  const ground = hamletGround(world);
   const taken = worldNameSet(world);
-  const root = createRng(seed);
-
-  let worldMax = -Infinity;
-  for (const v of data) worldMax = Math.max(worldMax, v);
-  const span = Math.max(1e-9, worldMax - world.seaLevel);
-
   const lattice = hamletLattice(world, window);
+  const { u0, u1, v0, v1 } = lattice;
   const out: HamletCandidate[] = [];
   for (let iy = lattice.iy0; iy <= lattice.iy1; iy++) {
     for (let ix = lattice.ix0; ix <= lattice.ix1; ix++) {
-      const r = root.fork(`hamlet:${ix},${iy}`);
-      const hamlet = hamletAt(world, lattice, { slope, span }, { r, ix, iy }, taken);
-      if (hamlet) out.push(hamlet);
+      const hamlet = hamletAtPoint(world, ground, taken, ix, iy);
+      if (hamlet && hamlet.u >= u0 && hamlet.u <= u1 && hamlet.v >= v0 && hamlet.v <= v1) out.push(hamlet);
     }
   }
   return out;

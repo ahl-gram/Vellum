@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField, NEIGHBORS_8 } from "../../src/core/grid.ts";
-import { landSnapRadius, snapToLand } from "../../src/world/snap-to-land.ts";
+import { landSnapRadius, snapToLand, snapToStandingLand } from "../../src/world/snap-to-land.ts";
 
 const SEA = 0;
 
@@ -82,4 +82,50 @@ test("at radius 1 the snap agrees with the 8-neighbour scan it replaces, tie-bre
     }
     assert.deepEqual(snapToLand(elev, SEA, 8, 8, 1), expected, `neighbour mask ${mask}`);
   }
+});
+
+// The footprint here is the function's own argument, not the farmsteads' constant.
+const FOOT = { up: 2, down: 1, side: 1 };
+const landExcept = (water: (x: number, y: number) => boolean) => createField(9, 9, (x, y) => (water(x, y) ? -1 : 1));
+
+test("snapToStandingLand moves a coastal cell to the nearest cell whose ground under the whole mark is land (Issue #952)", () => {
+  const elev = landExcept((_x, y) => y <= 1);
+  assert.deepEqual(
+    snapToLand(elev, SEA, 4, 2, 4),
+    { x: 4, y: 2 },
+    "the plain snap keeps the coastal cell, which is land",
+  );
+  assert.deepEqual(snapToStandingLand(elev, SEA, 4, 2, 4, FOOT), { x: 4, y: 4 });
+});
+
+test("a cell that already stands does not move (Issue #952)", () => {
+  assert.deepEqual(
+    snapToStandingLand(
+      landExcept(() => false),
+      SEA,
+      4,
+      4,
+      2,
+      FOOT,
+    ),
+    { x: 4, y: 4 },
+  );
+});
+
+test("with no standing cell in reach the snap gives up (Issue #952)", () => {
+  const elev = landExcept((_x, y) => y % 2 === 0);
+  assert.equal(snapToStandingLand(elev, SEA, 4, 3, 2, FOOT), null);
+});
+
+test("the standing snap stays on the grid and ignores block cells past the frame (Issue #952)", () => {
+  const elev = landExcept(() => false);
+  assert.deepEqual(snapToStandingLand(elev, SEA, 0, 0, 2, FOOT), { x: 0, y: 0 });
+  assert.equal(snapToStandingLand(elev, SEA, -1, 0, 2, FOOT), null);
+});
+
+test("the standing snap keeps the row below and the cells beside the mark on land (Issue #952)", () => {
+  const below = landExcept((_x, y) => y === 7);
+  assert.deepEqual(snapToStandingLand(below, SEA, 4, 6, 4, FOOT), { x: 4, y: 5 }, "the row below");
+  const beside = landExcept((x) => x === 5);
+  assert.deepEqual(snapToStandingLand(beside, SEA, 4, 4, 4, FOOT), { x: 3, y: 4 }, "the column beside");
 });
