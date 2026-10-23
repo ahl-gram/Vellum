@@ -81,12 +81,18 @@ about a rule, the rulebook wins.
   band read from `LOD_BANDS`, and append it after the projected settlements so seats and roads stay
   valid. Never put it on a world sheet or on a seat, and never wire a road to it: a through road may
   pass a hamlet, but no road departs from or arrives at one.
-- **A projected harbour town stands on the region's own shore.** A world harbour stands beside water at
-  world resolution, and at depth the close-up's shore lies up to a world cell and a half from its
-  cell's centre, so a projected harbour is seated on the nearest region land cell beside water,
-  within the farthest its water can lie (`seatProjected` and `HARBOUR_REACH_WORLD_CELLS` in
-  `src/world/seat-settlements.ts`). Never seat a town by editing `snapToLand`, which the hamlets
-  share. A region hamlet's `harbor` flag is not seated and stays at world resolution (Issue #976).
+- **A projected harbour or river town stands on the region's own shore or river.** A world town
+  stands beside water or a river at world resolution, and at depth the close-up's shore and the
+  rivers it lays from the world lie up to a few world cells from the town's cell, so a projected
+  town is seated on the nearest region land cell beside what it stands by: a harbour on the shore,
+  within the farthest its water can lie; a river town beside a river laid from the world, never a
+  stream the close-up extracts on its own, within a diagonal step plus the rivers' corridor; and a
+  town that is both at its river's mouth, else on the shore, else on the river, the order the world
+  scores them in (`seatProjected`, `HARBOUR_REACH_WORLD_CELLS` and `RIVER_REACH_WORLD_CELLS` in
+  `src/world/seat-settlements.ts`, after `siteScore` in `src/society/sites.ts`). A drawn river that
+  leaves its corridor can lie beyond that reach, and the town then takes the next seat its flags
+  allow. Never seat a town by editing `snapToLand`, which the hamlets share. A region hamlet is not
+  seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
 - **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
