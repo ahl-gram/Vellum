@@ -224,6 +224,12 @@ test("farmstead and mill marks draw their own glyphs and are labelled like hamle
   for (const g of farms) {
     assert.ok(g.body.includes("<path"), "a farmstead is a house in profile, a path");
     assert.ok(!g.body.includes("<circle"), "and not the hamlet's dot");
+    const nums = (g.body.match(/<path d="([^"]*)"/)?.[1] ?? "").match(/-?\d+(\.\d+)?/g)?.map(Number) ?? [];
+    const xs = nums.filter((_, i) => i % 2 === 0);
+    const ys = nums.filter((_, i) => i % 2 === 1);
+    const side = 4.8 * 1.8;
+    assert.ok(Math.abs(Math.max(...xs) - Math.min(...xs) - side) < 0.05, "the house is 8.64 wide at the sheet's size");
+    assert.ok(Math.abs(Math.max(...ys) - Math.min(...ys) - side) < 0.05, "and 8.64 tall");
   }
   for (const g of mills) {
     assert.ok(
