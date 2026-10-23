@@ -1,8 +1,8 @@
 // The URL hash <-> controls bridge: readHash seeds the controls from a link on load, writeHash mirrors them back on every draw; the touched gates stay OWNED by app.ts (readHash only reports whether the link carried a value).
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
-import { parseLive, emitLive, emitTableKey, finalizeHash, seedFromHash, type Live } from "./address.ts";
-import { parseTable, type TableItem } from "../shared/table-address.ts";
+import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
+import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
 import type { Camera } from "./camera.ts";
 
 export interface Controls {

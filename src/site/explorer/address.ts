@@ -1,5 +1,4 @@
 // The Issue #192 address grammar, pure and DOM-free. Ratified vocabulary (the 2026-07-26 comment on Issue #192): a bare `survey` flag or `year=N`, never both and no sentinel year; `survey=<t>` is reserved for mid-sweep addresses and deliberately not built.
-import { TABLE_KEY, emitTable, type TableItem } from "../shared/table-address.ts";
 import { parseYear } from "../shared/year.ts";
 
 export type Live = { kind: "survey" } | { kind: "year"; year: number };
@@ -16,11 +15,6 @@ export function emitLive(params: URLSearchParams, live: Live | null | undefined)
   if (!live) return;
   if (live.kind === "survey") params.set("survey", "");
   else params.set("year", String(live.year));
-}
-
-export function emitTableKey(params: URLSearchParams, items: ReadonlyArray<TableItem> | null | undefined): void {
-  if (!items || items.length === 0) return;
-  params.set(TABLE_KEY, emitTable(items));
 }
 
 export function finalizeHash(params: URLSearchParams): string {
