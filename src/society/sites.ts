@@ -5,7 +5,7 @@ import type { FlowResult } from "../hydrology/flow.ts";
 import { slopeField } from "../terrain/slope.ts";
 import { clamp } from "../core/math.ts";
 
-export type SettlementKind = "capital" | "town" | "village" | "hamlet";
+export type SettlementKind = "capital" | "town" | "village" | "hamlet" | "farmstead" | "mill";
 
 export type Settlement = {
   readonly x: number;

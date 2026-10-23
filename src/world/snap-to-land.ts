@@ -49,3 +49,38 @@ export function snapToLand(elev: Field, seaLevel: number, gx: number, gy: number
   }
   return null;
 }
+
+export type Footprint = { readonly up: number; readonly down: number; readonly side: number };
+
+function stands(elev: Field, seaLevel: number, x: number, y: number, foot: Footprint): boolean {
+  const { w, h, data } = elev;
+  for (let dy = -foot.up; dy <= foot.down; dy++) {
+    for (let dx = -foot.side; dx <= foot.side; dx++) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+      if ((data[nx + ny * w] as number) <= seaLevel) return false;
+    }
+  }
+  return true;
+}
+
+export function snapToStandingLand(
+  elev: Field,
+  seaLevel: number,
+  gx: number,
+  gy: number,
+  radius: number,
+  foot: Footprint,
+): Cell | null {
+  const { w, h } = elev;
+  if (gx < 0 || gx >= w || gy < 0 || gy >= h) return null;
+  if (stands(elev, seaLevel, gx, gy, foot)) return { x: gx, y: gy };
+  for (const [dx, dy] of offsetsWithin(Math.max(1, Math.trunc(radius)))) {
+    const nx = gx + dx;
+    const ny = gy + dy;
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+    if (stands(elev, seaLevel, nx, ny, foot)) return { x: nx, y: ny };
+  }
+  return null;
+}

@@ -247,7 +247,9 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
     const caption = eventCaption(e, rng);
     switch (e.kind) {
       case "waypoint": {
-        nodes.push(settlementCluster(c, p.sx, p.sy - 1, e.tier));
+        nodes.push(
+          settlementCluster(c, p.sx, p.sy - 1, e.tier === "farmstead" || e.tier === "mill" ? "hamlet" : e.tier),
+        );
         const lines = waypointLines(e, caption);
         laid = captionNodes(c, strip, p.sx, p.sy, freeSide, lines, laid);
         break;

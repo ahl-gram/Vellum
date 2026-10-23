@@ -74,13 +74,31 @@ about a rule, the rulebook wins.
   `src/core/segment-chains.ts`), and its tint rings are blurred from the same labels
   (`regionRealmRings`), so the tint ends where the border is drawn. A land-to-land segment cannot
   sit on a coastline, so no border on a coast holds by construction.
-- **A region's smallest settlement tier is grown on a FIXED world-space lattice**, each point forked
-  off the seed by its cell indices alone, so existence, spot and name are independent of the window
-  and of the order the reader interacted. Screen it on the PARENT grid, grow it on every window no
-  larger than `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and never the deepest
-  band read from `LOD_BANDS`, and append it after the projected settlements so seats and roads stay
-  valid. Never put it on a world sheet or on a seat, and never wire a road to it: a through road may
-  pass a hamlet, but no road departs from or arrives at one.
+- **A region's hamlets are grown on a FIXED world-space lattice**, each point forked off the seed by
+  its cell indices alone, so existence, spot and name are independent of the window and of the order
+  the reader interacted. Screen them on the PARENT grid, grow them on every window no larger than
+  `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and never the deepest band read
+  from `LOD_BANDS`, and append them after the projected settlements so seats and roads stay valid.
+  Never put one on a world sheet or on a seat, and never wire a road to one: a through road may pass
+  a hamlet, but no road departs from or arrives at one.
+- **Below the hamlets, farmsteads and mills grow from band 5's window size**
+  (`FARMSTEAD_MAX_WINDOW_UV` in `src/society/farmsteads.ts`), on their own fixed world-space
+  lattice, each point forked off the seed by its lattice indices alone and spaced from the world's
+  towns' places in the world and from the hamlets' spots by world-space tests alone, so a mark's
+  existence, its world-space spot, its name and its founding year never depend on the window. Each is
+  placed on the nearest cell within the snap's reach whose ground under its whole mark is land, a
+  block of whole cells round it (`snapToStandingLand` in `src/world/snap-to-land.ts` with
+  `MARK_FOOTPRINT` in `src/society/farmsteads.ts`), so its mark stands on land cells; one with no such
+  cell is not placed. A harbour town seated on the close-up's shore is drawn away from its place in
+  the world, so a farm may be drawn nearer to it than the spacing. A farmstead within reach of a
+  river the close-up draws is a mill, labelled with its name and the word Mill, so whether it is one
+  can differ between two overlapping windows. Their marks are reserved before any name is set, so every name placed by
+  search steps around them (a town's or a realm's name forced into place when no spot is free, and a
+  river's name grazing within its allowance, are the exceptions), and their names claim after the
+  feature labels, so they are the first words a crowded sheet drops
+  (`handbook/specs/chart-dress.md`). Never put one on a world sheet or on a seat, and never wire a
+  road to one: a through road may pass it, but no road departs from or arrives at one. Fords are not
+  drawn here: they are Issue #966's.
 - **A projected harbour or river town stands on the region's own shore or river.** A world town
   stands beside water or a river at world resolution, and at depth the close-up's shore and the
   rivers it lays from the world lie up to a few world cells from the town's cell, so a projected
@@ -91,8 +109,8 @@ about a rule, the rulebook wins.
   scores them in (`seatProjected`, `HARBOUR_REACH_WORLD_CELLS` and `RIVER_REACH_WORLD_CELLS` in
   `src/world/seat-settlements.ts`, after `siteScore` in `src/society/sites.ts`). A drawn river that
   leaves its corridor can lie beyond that reach, and the town then takes the next seat its flags
-  allow. Never seat a town by editing `snapToLand`, which the hamlets share. A region hamlet is not
-  seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
+  allow. Never seat a town by editing `snapToLand`, which the projected towns, the road anchors and the
+  hamlets share. A region hamlet is not seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
 - **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
@@ -150,8 +168,8 @@ about a rule, the rulebook wins.
   `src/site/explorer/lod-controller.ts`), from which its drawing and its dog-ear are placed exactly;
   why no fractional offset may place them is that file's Counter-scale.
 - **What a finer survey reveals is LABELS.** A region sheet's settlement set is a crop of the world's
-  until the smallest tier appears, so a reveal ceremony keys on placed labels and never on place
-  presence.
+  until its own tiers appear (the hamlets, and deeper the farmsteads and mills), so a reveal ceremony
+  keys on placed labels and never on place presence.
 - **The redraft stands down while the survey track is armed or the sheet is flipped**, because the
   track narrates the WORLD survey at world coordinates and the verso holds the world sheet
   (`regionEligible` in `src/site/explorer/app.ts`). **It stands down too while the reader holds the

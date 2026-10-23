@@ -1,5 +1,6 @@
 import type { PlaceMark } from "./place-manifest.ts";
 import type { HistoricalEvent } from "../society/history.ts";
+import type { SettlementKind } from "../society/sites.ts";
 import { glossName, tongueName, cultureById } from "../society/philology.ts";
 
 /** Deliberately NOT createLoreWriter: its prose depends on call order and its own rng, and would silently disagree with the bound-atlas gazetteer for the same town. */
@@ -31,11 +32,13 @@ function hedgeFor(name: string): string {
   return HEDGES[h % HEDGES.length] as string;
 }
 
-const RANK_LABEL: Record<"capital" | "town" | "village" | "hamlet", string> = {
+const RANK_LABEL: Record<SettlementKind, string> = {
   capital: "Capital",
   town: "Town",
   village: "Village",
   hamlet: "Hamlet",
+  farmstead: "Farmstead",
+  mill: "Mill",
 };
 
 const SEAT_LABEL = "Realm Seat";

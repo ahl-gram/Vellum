@@ -74,6 +74,8 @@ function settlementRows(world: World): Row[] {
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
   if (tiers.has("hamlet")) rows.push({ icon: { kind: "settlement", tier: "hamlet" }, label: "Hamlet" });
+  if (tiers.has("farmstead")) rows.push({ icon: { kind: "settlement", tier: "farmstead" }, label: "Farmstead" });
+  if (tiers.has("mill")) rows.push({ icon: { kind: "settlement", tier: "mill" }, label: "Mill" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
   return rows;
 }
