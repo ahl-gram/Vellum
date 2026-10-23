@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { windowAround } from "../../src/world/region.ts";
 import { corridorRadius } from "../../src/world/river-route.ts";
-import { harbourReachCells } from "../../src/world/seat-settlements.ts";
+import { riverReachCells } from "../../src/world/seat-settlements.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 import { distanceToPolyline, inWindowCourse, worldRoadsDrawn } from "../../scripts/region-detail/feature-match.ts";
@@ -91,7 +91,7 @@ test("a leg the corridor cannot carry goes round by land: seed 23's Lelix band-2
     .filter((c) => c.length > 0);
   const bound =
     corridorRadius(LELIX_BAND_2, GRID_W, world.recipe.gridW) +
-    harbourReachCells(GRID_W, LELIX_BAND_2, world.recipe.gridW);
+    riverReachCells(GRID_W, LELIX_BAND_2, world.recipe.gridW);
   const straying = region.roads.flatMap((road) =>
     road.points.filter((p) => Math.min(...courses.map((course) => distanceToPolyline(p, course))) > bound),
   );
@@ -107,8 +107,7 @@ test("a close-up draws the world's roads and none of its own weaving (Issue #952
   const courses = HERO.roads
     .map((r) => inWindowCourse(r.points, HERO, window, GRID_W, GRID_H))
     .filter((c) => c.length > 0);
-  const bound =
-    corridorRadius(window, GRID_W, HERO.recipe.gridW) + harbourReachCells(GRID_W, window, HERO.recipe.gridW);
+  const bound = corridorRadius(window, GRID_W, HERO.recipe.gridW) + riverReachCells(GRID_W, window, HERO.recipe.gridW);
   assert.ok(
     courses.length > 0 && region.roads.length > 0,
     "precondition: roads cross the capital's band-1 window and are laid",
