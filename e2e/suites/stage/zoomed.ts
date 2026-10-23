@@ -112,17 +112,30 @@ async function zoomIn(ctx: SuiteContext, page: string): Promise<boolean> {
   return zoomed;
 }
 
-const SLID: Payload<{ drafting: boolean; folio: string }> =
-  `({ drafting: document.getElementById("caption").textContent.startsWith("Drafting"), folio: getComputedStyle(document.querySelector(".corner.bl")).translate })`;
+const SLID: Payload<{ drafting: boolean; folio: string; region: string }> =
+  `({ drafting: document.getElementById("caption").textContent.startsWith("Drafting"), folio: getComputedStyle(document.querySelector(".corner.bl")).translate + document.querySelector(".corner.bl").getBoundingClientRect().height, region: JSON.stringify(window.__vellumRegion()) })`;
+const SLID_READS = 6;
 const sameJson = (d: unknown, last: unknown): boolean => !!last && JSON.stringify(d) === JSON.stringify(last);
+
+async function settleSlid(ctx: SuiteContext, page: string): Promise<void> {
+  let same = 0;
+  await makeSettle(ctx)(
+    SLID,
+    (d, last) => {
+      same = !d.drafting && sameJson(d, last) ? same + 1 : 0;
+      return same >= SLID_READS;
+    },
+    `EZ ${page} slid`,
+    300,
+  );
+}
 
 async function readRoom(ctx: SuiteContext, page: string, w: number, h: number, ask: Ask): Promise<RoomRead> {
   await size(ctx, w, h);
   const at = await open(ctx, page, w, h, { w, h }, "EZ");
   const zoomed = at !== null && (await zoomIn(ctx, page));
   const s = await rest(ctx, w, h, `EZ ${page} zoomed`);
-  if (!ask.held && page.split("#")[0] === "/explorer/")
-    await makeSettle(ctx)(SLID, (d, last) => !d.drafting && sameJson(d, last), `EZ ${page} slid`);
+  if (!ask.held && page.split("#")[0] === "/explorer/") await settleSlid(ctx, page);
   const read = () => readZoomed(ctx, page, h, ask);
   const zoomedRead = ask.held ? await withStyle(ctx, "ez-held", HELD, read) : await read();
   return { page, at, s, zoomed, ...zoomedRead };
@@ -302,7 +315,8 @@ function thinFaults(r: RoomRead, title: string, h: number): string[] {
     say("the chart of the atelier press is not on the thin top line");
   for (const g of foot.filter((x) => x.row < h - 32))
     say(`chart folio "${g.t}" stands at row ${g.row}, above the thin bottom line`);
-  for (const g of foot.filter((x) => !x.t.startsWith(title))) say(`chart folio "${g.t}" is not the chart's name`);
+  for (const g of foot.filter((x) => !x.t.startsWith(title)))
+    say(`chart folio "${g.t}" at row ${g.row} is not the chart's name`);
   for (const g of r.read.filter((x) => x.ratio < FLOOR_PLAIN)) say(`${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
   for (const p of ["cluster", "chart folio"])
     if (!(worstOf(r.bare, p) < FLOOR_PLAIN))
