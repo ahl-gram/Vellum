@@ -152,9 +152,10 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The hold freezes the redraft and widens the camera, and every home lets it go** (Alex,
   2026-10-04 and 2026-10-20, Issue #751). While the Glass's hold press is lit, a settle still writes
   the address and never reaches the redraft, so the sheet on the table, a region inset or the bare
-  world sheet, stays whatever the camera does, and the camera's ceiling rises from `GLASS_MAX` to
-  `HELD_MAX` (`createGlass` in `src/site/explorer/glass.ts`, through `setScaleMax` in
-  `src/site/shared/zoom-controller.ts`); pressing it drops a draft still in flight (`cancelPending`
+  world sheet, stays whatever the camera does, and the camera's ceiling rises from `GLASS_MAX`, the
+  deepest band's k, to `HELD_MAX`, three times it, so the hold magnifies the deepest drawn sheet and
+  never draws a band of its own (`createGlass` in `src/site/explorer/glass.ts`, through `setScaleMax`
+  in `src/site/shared/zoom-controller.ts`); pressing it drops a draft still in flight (`cancelPending`
   in `src/site/explorer/lod-controller.ts`). Letting go lowers the ceiling, which stops where it
   stands any glide not started through `glideBy` (a double-click's, whose end d3 fixed against the
   held ceiling, or a home's), wherever it was headed (`setScaleMax` in
@@ -263,7 +264,10 @@ make an unqualified rule false. Read the surface, not just the rule.
   pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
   passed verbatim and never re-serialized. The hold is the reader's and the address never carries it:
   a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
-  (`cameraForAddress` in `src/site/explorer/glass.ts`), so the camera's bound in `readHash` stands.
+  (`cameraForAddress` in `src/site/explorer/glass.ts`). `GLASS_MAX` is the deepest band's k
+  (`DEEPEST_K` in `src/world/lod.ts`), and a shared link's camera is read under that same bound
+  (`addressCamera` in `src/site/explorer/camera.ts`), so a link written at the bottom reads back at
+  the bottom.
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
   address decides an ARRIVAL and the device decides a RETURN (Issue #634, 2026-09-19, superseding Issue #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all

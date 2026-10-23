@@ -90,6 +90,8 @@ spot is free can still cover one, and a river's name may graze one as it may any
 settlement mark reserves room. Terrain glyphs are the exception that reserve nothing, so grazing a
 stand of trees costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
 
+**A scale bar is ruled in leagues at every band.** Where two leagues outrun the bar's claimed box, a close-up's bar totals one league or a half and marks its halves and quarters with their own glyphs, never a second unit (`REGION_NICE_TOTALS` and `FRACTIONS` in `src/render/layers/scalebar.ts`), and every tick stands inside the box the bar claims before any label runs.
+
 **A sea beast is drawn last and yields to everything.** `beastsLayer`
 (`src/render/layers/beasts.ts`) claims the arena after the settlements and the feature labels, keeps
 its ink off the land, and escalates as the sheet fills: the full label, then the name alone, then the

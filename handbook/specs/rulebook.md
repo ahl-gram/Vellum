@@ -255,9 +255,9 @@ byte-identical, and the drift guard is green.**
   golden tail if the spike moves it out of the cheap tier. The band 5-6 ceiling is respected, not fought:
   #376 measured the parent-dominated fraction compounding 50% at band 1 to 92% at band 7, and lifting
   that means local guarantee enforcement, which is a separate ratification and not this epic's to
-  take. `LOD_BANDS` and the Glass `scaleExtent` move LAST, in Sub 4, only after the layers agree.
-  The held sheet's higher ceiling (Issue #751) magnifies a sheet already drawn and adds no band, so
-  it does not wait on that sub.
+  take. **The Glass descends to band 5 and no further**: `LOD_BANDS` in `src/world/lod.ts` ends
+  there, and a deeper band is a separate ratification under the ceiling above. The held sheet
+  magnifies the deepest drawn sheet three times and adds no band.
 - **#401 (The Chart Table) HAS ITS SLOT, ratified 2026-09-05**, with its own board phase and its subs
   filed the same day against a spec-recon re-baseline. Sub 0 (#518) was the mockup sitting and gated
   the rest. It ruled the full table as a drawer in the Explorer, by the exception recorded on the
