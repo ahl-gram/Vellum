@@ -28,6 +28,9 @@ export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
 };
 
 const CAPITAL_GLYPH_SCALE = 1.25;
+const HOUSE_SCALE = 1.8;
+const WHEEL_RADIUS = 3.9;
+const SPOKE_WIDTH = 1.2;
 const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
 
@@ -97,7 +100,7 @@ export function settlementGlyph(tier: SettlementTier, px: number, py: number, ct
 }
 
 function farmsteadGlyph(px: number, py: number, k: number, ink: string, paper: string): SvgNode {
-  const s = 1.15 * k;
+  const s = HOUSE_SCALE * k;
   const d = pathFrom(
     [
       [px - 2.4 * s, py],
@@ -113,13 +116,11 @@ function farmsteadGlyph(px: number, py: number, k: number, ink: string, paper: s
 
 const WHEEL_SPOKES: ReadonlyArray<readonly [number, number]> = [
   [1, 0],
-  [Math.SQRT1_2, Math.SQRT1_2],
   [0, 1],
-  [-Math.SQRT1_2, Math.SQRT1_2],
 ];
 
 function millGlyph(px: number, py: number, k: number, ink: string, paper: string): SvgNode {
-  const r = 3.2 * k;
+  const r = WHEEL_RADIUS * k;
   const spokes = WHEEL_SPOKES.map(([ux, uy]) =>
     pathFrom(
       [
@@ -131,14 +132,16 @@ function millGlyph(px: number, py: number, k: number, ink: string, paper: string
   ).join("");
   return el("g", {}, [
     el("circle", { cx: px, cy: py, r, fill: paper, stroke: ink, "stroke-width": 1 * k }),
-    el("path", { d: spokes, stroke: ink, "stroke-width": 0.7 * k }),
+    el("path", { d: spokes, stroke: ink, "stroke-width": SPOKE_WIDTH * k }),
   ]);
 }
 
-function finerMarkBox(tier: SettlementTier, px: number, py: number, k: number): Box {
+export function finerMarkBox(tier: SettlementTier, px: number, py: number, k: number): Box {
+  const house = 4.8 * HOUSE_SCALE * k;
+  const wheel = 2 * WHEEL_RADIUS * k;
   return tier === "farmstead"
-    ? { x: px - 2.76 * k, y: py - 5.52 * k, w: 5.52 * k, h: 5.52 * k }
-    : { x: px - 3.2 * k, y: py - 3.2 * k, w: 6.4 * k, h: 6.4 * k };
+    ? { x: px - house / 2, y: py - house, w: house, h: house }
+    : { x: px - wheel / 2, y: py - wheel / 2, w: wheel, h: wheel };
 }
 
 function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNode {

@@ -73,7 +73,7 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
       return settlementGlyph(
         icon.tier,
         cx,
-        cy + (icon.tier === "capital" || icon.tier === "seat" || icon.tier === "farmstead" ? 3 * k : 0),
+        cy + (icon.tier === "capital" || icon.tier === "seat" ? 3 * k : icon.tier === "farmstead" ? 4 * k : 0),
         ctx,
       );
     case "ruin":

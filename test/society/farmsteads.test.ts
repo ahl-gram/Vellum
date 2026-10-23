@@ -270,8 +270,8 @@ test("a farmstead's name gives way to every feature name (Issue #952, M7)", () =
 });
 
 const MARK_BOX: Record<string, (px: number, py: number) => Box> = {
-  farmstead: (px, py) => ({ x: px - 2.76, y: py - 5.52, w: 5.52, h: 5.52 }),
-  mill: (px, py) => ({ x: px - 3.2, y: py - 3.2, w: 6.4, h: 6.4 }),
+  farmstead: (px, py) => ({ x: px - 4.32, y: py - 8.64, w: 8.64, h: 8.64 }),
+  mill: (px, py) => ({ x: px - 3.9, y: py - 3.9, w: 7.8, h: 7.8 }),
 };
 
 const overlap = (a: Box, b: Box): boolean => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
