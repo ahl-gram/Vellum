@@ -59,7 +59,6 @@ async function ringOf(ctx: SuiteContext, selector: string): Promise<Ring> {
 }
 
 async function markRing(ctx: SuiteContext): Promise<{ mark: Ring; control: Ring }> {
-  // A key first, so the focus that follows is a keyboard one and :focus-visible applies.
   await ctx.send("Input.dispatchKeyEvent", {
     type: "keyDown",
     key: "Shift",
