@@ -136,8 +136,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    point moved to land your own work leaves the assertion alone and is mutation-proved on its
    original defect (Issue #540, PR #545).
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
-   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter. The hook refuses the
-   single-escaped form in every `.ts` and `.mjs` under `scripts/`, `out/` and `e2e/` (and so under `test/e2e/` too).
+   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
 6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
    (stillness at the start looks like stillness at the end), and never carries the check's own claim.
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
@@ -184,14 +183,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     check why the instrument is artificial (#366).
 15. **A clamped value saturates and hides the regression**: measure what the clamp acts ON
     (Issue #522).
-16. **A browser check a plan names comes with two readings the planner took on the built site**,
-    on its fixture and under its mutation, which the **Tests** line of the finished-plan bar in
-    `.claude/agents/vellum-planner.md` owes. Read them before you type the check. A planned check
-    without them, or a run of it whose reading on the fixture or under the mutation falls on the
-    other side of its assertion from the one the plan printed, is a plan proved wrong and goes
-    back as `handbook/specs/development-workflow.md` step 6 says, never a fixture to swap; a
-    reading the plan printed as UNVERIFIABLE answers to the stop condition it names instead
-    (Issue #954's Z21c, Issue #1034's SW4; Alex, 2026-10-23, Issue #1037).
+16. **Read the two readings a plan printed for a browser check before you type it**
+    (`vellum-planner`'s **Tests** line; Issue #1037).
 
 ## Gate 3: before writing CSS or moving layout
 
