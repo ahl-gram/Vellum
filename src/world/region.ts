@@ -15,7 +15,7 @@ import { terrainInputsOf } from "./terrain-inputs.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { realmOwners, refineRegionRealms, type RealmTown } from "./realm-refine.ts";
 import { regionSeaGate } from "./region-sea-gate.ts";
-import { harbourReachCells, seatProjected } from "./seat-settlements.ts";
+import { seatProjected, seatReach } from "./seat-settlements.ts";
 import { regionRealmBorders, regionRealmRings } from "./realm-carry.ts";
 import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
@@ -86,7 +86,7 @@ function regionWaters(
   g: RegionGrid,
   land: { readonly elev: Field; readonly ground: Field; readonly seaLevel: number },
   elevSpan: number,
-): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
+): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array; laidRiverCells: Uint8Array } {
   const { world, window, gridW, gridH, worldAspect } = g;
   const { elev, ground, seaLevel } = land;
   const { recipe } = world;
@@ -104,11 +104,17 @@ function regionWaters(
   const flow = computeFlow(elev, seaLevel, rain);
   const { laid, extracted } = layRegionRivers(world, window, { elev, flow, seaLevel, ground });
   const rivers = [...laid, ...extracted];
-  const riverCells = new Uint8Array(gridW * gridH);
+  const riverCells = markRiverCells(rivers, gridW, gridH);
+  const laidRiverCells = markRiverCells(laid, gridW, gridH);
+  return { flow, rivers, riverCells, laidRiverCells };
+}
+
+function markRiverCells(rivers: ReadonlyArray<River>, gridW: number, gridH: number): Uint8Array {
+  const cells = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
-    for (const p of r.points) riverCells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
+    for (const p of r.points) cells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
   }
-  return { flow, rivers, riverCells };
+  return cells;
 }
 
 function regionClimate(
@@ -132,7 +138,12 @@ function regionClimate(
   return { climate, biomes };
 }
 
-type RegionLand = { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array };
+type RegionLand = {
+  readonly elev: Field;
+  readonly seaLevel: number;
+  readonly riverCells: Uint8Array;
+  readonly laidRiverCells: Uint8Array;
+};
 
 function projectSettlements(
   g: RegionGrid,
@@ -146,7 +157,8 @@ function projectSettlements(
   const dv = window.v1 - window.v0;
   const inset = 0.02;
   const snapRadius = landSnapRadius(gridW, window, recipe.gridW);
-  const harbourReach = harbourReachCells(gridW, window, recipe.gridW);
+  const reach = seatReach(gridW, window, recipe.gridW);
+  const seatLand = { elev, seaLevel, riverCells: land.laidRiverCells };
   const settlements: NamedSettlement[] = [];
   const regionIdxOf = new Map<number, number>();
   const drowned: string[] = [];
@@ -169,7 +181,7 @@ function projectSettlements(
       return;
     }
     regionIdxOf.set(worldIdx, settlements.length);
-    const seat = seatProjected(s, cell, land, harbourReach);
+    const seat = seatProjected(s, cell, seatLand, reach);
     settlements.push({ ...s, x: seat.x, y: seat.y });
   });
   if (drowned.length > 0) {
@@ -277,10 +289,10 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const seaLevel = world.seaLevel;
   const { elev, ground } = regionElevation(g, spec, seaLevel);
   const elevSpan = worldElevSpan(world, seaLevel);
-  const { flow, rivers, riverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
+  const { flow, rivers, riverCells, laidRiverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
   const { climate, biomes } = regionClimate(g, elev, seaLevel, riverCells, elevSpan);
 
-  const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells });
+  const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells, laidRiverCells });
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) => (elev.data[x + y * gridW] as number) > seaLevel);
 

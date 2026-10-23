@@ -1,9 +1,13 @@
 import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
 import { cellsPerWorldCell } from "./region-parent.ts";
+import { CORRIDOR_WORLD_CELLS } from "./river-route.ts";
 import type { Cell } from "./snap-to-land.ts";
 
 export const HARBOUR_REACH_WORLD_CELLS = 1.5 * Math.SQRT2;
+export const RIVER_REACH_WORLD_CELLS = Math.SQRT2 + CORRIDOR_WORLD_CELLS;
+export type SeatReach = { readonly harbour: number; readonly river: number };
+type SeatLand = { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array };
 
 type Offset = readonly [number, number];
 
@@ -47,12 +51,32 @@ export function seatOnShore(elev: Field, seaLevel: number, at: Cell, radius: num
   return null;
 }
 
+export function riverReachCells(gridW: number, window: UvWindow, worldGridW: number): number {
+  return harbourReachCells(gridW, window, worldGridW);
+}
+
+export function seatReach(gridW: number, window: UvWindow, worldGridW: number): SeatReach {
+  return {
+    harbour: harbourReachCells(gridW, window, worldGridW),
+    river: riverReachCells(gridW, window, worldGridW),
+  };
+}
+
+export function seatOnRiver(
+  elev: Field,
+  seaLevel: number,
+  riverCells: Uint8Array,
+  at: Cell,
+  radius: number,
+): Cell | null {
+  return seatOnShore(elev, seaLevel, at, radius);
+}
+
 export function seatProjected(
-  s: { readonly harbor: boolean },
+  s: { readonly harbor: boolean; readonly onRiver: boolean },
   cell: Cell,
-  land: { readonly elev: Field; readonly seaLevel: number },
-  harbourReach: number,
+  land: SeatLand,
+  reach: SeatReach,
 ): Cell {
-  if (!s.harbor) return cell;
-  return seatOnShore(land.elev, land.seaLevel, cell, harbourReach) ?? cell;
+  return s.harbor ? (seatOnShore(land.elev, land.seaLevel, cell, reach.harbour) ?? cell) : cell;
 }
