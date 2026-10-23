@@ -5,7 +5,8 @@ import type { MapStyle } from "../style.ts";
 
 export const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
-const REGION_NICE_TOTALS = [2, 4, 10, ...NICE_TOTALS];
+const REGION_NICE_TOTALS = [0.5, 1, 2, 4, 10, ...NICE_TOTALS];
+const FRACTIONS: Readonly<Record<string, string>> = { "0.25": "¼", "0.5": "½" };
 
 export type ScalebarPlan = { readonly box: Box };
 
@@ -85,7 +86,7 @@ function scalebarLabel(style: MapStyle, bar: Bar, lx: number, value: number): Sv
       "font-size": (9.5 * k).toFixed(1),
       fill: style.ink,
     },
-    [String(value)],
+    [Number.isInteger(value) ? String(value) : (FRACTIONS[String(value)] ?? String(value))],
   );
 }
 
