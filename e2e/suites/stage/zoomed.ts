@@ -137,6 +137,34 @@ async function readRoom(ctx: SuiteContext, page: string, w: number, h: number, a
 const sameInk = (c: number[] | undefined, token: "--parchment-bright" | "--ink-dark"): boolean =>
   nearRgba(c, tokenRgba(token));
 
+function ringFaults(ring: RoomRead["ring"]): string[] {
+  const m = ring?.mark;
+  const c = ring?.control;
+  const faults: string[] = [];
+  const inked =
+    !!m?.visible && sameInk(m.colour, "--parchment-bright") && !!c?.visible && sameInk(c.colour, "--ink-dark");
+  if (!inked)
+    faults.push(
+      `the section mark's focus ring is not parchment-bright beside the control's ink-dark: ${JSON.stringify(ring)}`,
+    );
+  const around =
+    !!m &&
+    m.box[0]! <= m.text[0]! + 0.5 &&
+    m.box[1]! <= m.text[1]! + 0.5 &&
+    m.box[2]! >= m.text[2]! - 0.5 &&
+    m.box[3]! >= m.text[3]! - 0.5;
+  if (!around)
+    faults.push(
+      `the section mark's ring does not enclose its glyph: ${JSON.stringify(m && { box: m.box, text: m.text })}`,
+    );
+  const clear = !!m && m.prevRight !== null && m.box[0]! - m.reach >= m.prevRight + 1;
+  if (!clear)
+    faults.push(
+      `the section mark's ring lies on the neighbouring chip's border, not a pixel clear of it: ${JSON.stringify(m && { left: m.box[0]! - m.reach, prevRight: m.prevRight })}`,
+    );
+  return faults;
+}
+
 function roomFaults(r: RoomRead, ask: Ask, floored: boolean): string[] {
   const faults: string[] = [];
   const say = (m: string): number => faults.push(`${r.page}: ${m}`);
@@ -156,30 +184,7 @@ function roomFaults(r: RoomRead, ask: Ask, floored: boolean): string[] {
   for (const g of r.read.filter((x) => x.ratio < FLOOR_PLAIN)) say(`${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
   if (ask.mark) {
     if (!r.read.some((g) => g.t.startsWith("the section mark"))) say("no section mark line was read");
-    const ok =
-      !!r.ring &&
-      !!r.ring.mark?.visible &&
-      sameInk(r.ring.mark.colour, "--parchment-bright") &&
-      !!r.ring.control?.visible &&
-      sameInk(r.ring.control.colour, "--ink-dark");
-    const m = r.ring?.mark;
-    const encloses =
-      !!m &&
-      m.box[0]! <= m.text[0]! + 0.5 &&
-      m.box[1]! <= m.text[1]! + 0.5 &&
-      m.box[2]! >= m.text[2]! - 0.5 &&
-      m.box[3]! >= m.text[3]! - 0.5;
-    const clear = !!m && m.prevRight !== null && m.box[0]! - m.reach >= m.prevRight + 1;
-    if (!encloses)
-      say(`the section mark's ring does not enclose its glyph: ${JSON.stringify(m && { box: m.box, text: m.text })}`);
-    if (!clear)
-      say(
-        `the section mark's ring lies on the neighbouring chip's border, not a pixel clear of it: ${JSON.stringify(m && { left: m.box[0]! - m.reach, prevRight: m.prevRight })}`,
-      );
-    if (!ok)
-      say(
-        `the section mark's focus ring is not parchment-bright beside the control's ink-dark: ${JSON.stringify(r.ring)}`,
-      );
+    for (const m of ringFaults(r.ring)) say(m);
   }
   if (ask.bare)
     for (const p of ["cluster", "chart folio"])
