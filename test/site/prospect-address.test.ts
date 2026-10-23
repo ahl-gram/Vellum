@@ -9,6 +9,7 @@ import {
 } from "../../src/site/prospect/address.ts";
 // Issue #634 moved tableHash to the table's own grammar, since the Explorer's road to the Portfolio now builds its address the same way the Prospect page builds its own.
 import { tableHash } from "../../src/site/shared/table-address.ts";
+import { NOT_A_SEED, NOT_A_YEAR } from "../../test-support/hash-grammar-fixtures.ts";
 
 test("parseProspectAddress reads the Explorer's world keys plus i and year", () => {
   const a = parseProspectAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&i=3&year=814");
@@ -97,8 +98,7 @@ test("parseYear reads a typed year: digits making a positive whole number, or no
   assert.equal(parseYear("812"), 812);
   assert.equal(parseYear(" 1059 "), 1059, "surrounding space is the typist's, not the year's");
   assert.equal(parseYear("1"), 1);
-  for (const bad of ["", "0", "-5", "8.5", "abc", "12a", "1e3"])
-    assert.equal(parseYear(bad), null, `${JSON.stringify(bad)} is not a year`);
+  for (const bad of NOT_A_YEAR) assert.equal(parseYear(bad), null, `${JSON.stringify(bad)} is not a year`);
   assert.equal(parseYear("0300"), 300, "leading zeros read as the number");
   assert.equal(parseYear("999999999"), 999999999, "nine digits is the ceiling");
   assert.equal(
@@ -143,4 +143,24 @@ test("yearHash replaces or adds the year and keeps every other key, i included, 
     "#note=a%20b&flag&year=2",
     "a valueless key and an encoded value survive verbatim",
   );
+});
+
+test("parseProspectAddress reads seed and i by the seed's grammar: nothing but a run of digits is a number (Issue #1003)", () => {
+  for (const raw of NOT_A_SEED) {
+    const v = encodeURIComponent(raw);
+    const a = parseProspectAddress(`#seed=${v}&i=${v}`);
+    assert.deepEqual([a.seed, a.index], [null, null], JSON.stringify(raw));
+  }
+  const padded = parseProspectAddress("#seed=0300&i=07");
+  assert.deepEqual([padded.seed, padded.index], [300, 7], "leading zeros read as the number");
+});
+
+test("parseProspectAddress reads land and coast by the seed's grammar, so an empty land= is no land (Issue #1003)", () => {
+  for (const raw of NOT_A_SEED) {
+    const v = encodeURIComponent(raw);
+    const a = parseProspectAddress(`#land=${v}&coast=${v}`);
+    assert.deepEqual([a.land, a.coast], [null, null], JSON.stringify(raw));
+  }
+  const padded = parseProspectAddress("#land=0350&coast=055");
+  assert.deepEqual([padded.land, padded.coast], [0.35, 0.55]);
 });

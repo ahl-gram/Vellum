@@ -9,6 +9,7 @@ import {
   forwardTarget,
   prospectTarget,
 } from "../../src/site/explorer/address.ts";
+import { NOT_A_YEAR } from "../../test-support/hash-grammar-fixtures.ts";
 
 const P = (s: string) => new URLSearchParams(s);
 
@@ -33,6 +34,27 @@ test("parseLive: year has no sentinel and no garbage; invalid years are ignored"
   assert.equal(parseLive(P("year=8.5")), null);
   assert.equal(parseLive(P("year=abc")), null);
   assert.equal(parseLive(P("year=")), null);
+});
+
+test("parseLive: the year reads by the one year grammar, so a number Number() would coerce is no year (Issue #1003)", () => {
+  for (const raw of NOT_A_YEAR)
+    assert.equal(parseLive(new URLSearchParams([["year", raw]])), null, JSON.stringify(raw));
+  assert.deepEqual(parseLive(P("year=999999999")), { kind: "year", year: 999999999 }, "nine digits is the ceiling");
+  assert.deepEqual(parseLive(P("year=0300")), { kind: "year", year: 300 });
+});
+
+test("parseLive: a non-year beside the survey flag is ignored, as year=abc already is, so the survey stands (Issue #1003)", () => {
+  for (const raw of NOT_A_YEAR)
+    assert.deepEqual(
+      parseLive(
+        new URLSearchParams([
+          ["survey", ""],
+          ["year", raw],
+        ]),
+      ),
+      { kind: "survey" },
+      JSON.stringify(raw),
+    );
 });
 
 test("parseLive: both keys at once is a nonsensical set and is ignored whole", () => {
@@ -129,6 +151,8 @@ test("forwardTarget: a malformed year stays in the Explorer, ignored as today", 
   assert.equal(forwardTarget("#seed=42&year=8.5"), null);
   assert.equal(forwardTarget("#seed=42&year=abc"), null);
   assert.equal(forwardTarget("#seed=42&year="), null);
+  assert.equal(forwardTarget("#seed=42&year=1e3"), null);
+  assert.equal(forwardTarget("#seed=42&year=0x10"), null);
   assert.equal(forwardTarget(""), null);
   assert.equal(forwardTarget("#seed=42&style=antique"), null);
 });
