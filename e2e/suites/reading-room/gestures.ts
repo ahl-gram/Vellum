@@ -9,7 +9,8 @@ import { BAR, RR_LENS, scrubTo } from "./kit.ts";
 const park = (send: SuiteContext["send"]) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
 
 type Unfurl = { name: string; fill: string; origin: string; half: number; open: number[] | null; end: number | null };
-const UNFURL: Payload<Unfurl | null> = `(() => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"); if (!i) return null;
+const UNFURL: Payload<Unfurl | null> = `(async () => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"); if (!i) return null;
+  await Promise.all(i.getAnimations().map((a) => a.finished));
   const cs = getComputedStyle(i), base = { name: cs.animationName, fill: cs.animationFillMode, origin: cs.transformOrigin, half: i.getBoundingClientRect().width / 2 };
   const tilt = () => { const m = /^matrix3d\\(([^)]*)\\)$/.exec(getComputedStyle(i).transform); if (!m) return 0; const v = m[1].split(",").map(Number); return Math.atan2(v[6], v[5]) * 180 / Math.PI; };
   f.hidden = true; void i.offsetWidth; f.hidden = false;
@@ -82,7 +83,7 @@ export async function rr42PlateReveal(ctx: SuiteContext): Promise<void> {
   await clearMetrics({ evaluate, send, sleep }, 1440, 900);
   await park(send);
   try {
-    const unfurl = await evaluate(UNFURL);
+    const unfurl = await evaluate(UNFURL, true);
     const { hovered, keyed, away } = await plateLifts(ctx);
     const opened = !!unfurl?.open && unfurl.open[0] === 0 && Math.abs(unfurl.open[1]!) > 20;
     check(
