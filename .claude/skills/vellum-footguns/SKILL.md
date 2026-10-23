@@ -184,6 +184,14 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     check why the instrument is artificial (#366).
 15. **A clamped value saturates and hides the regression**: measure what the clamp acts ON
     (Issue #522).
+16. **A browser check a plan names comes with two readings the planner took on the built site**,
+    on its fixture and under its mutation, which the **Tests** line of the finished-plan bar in
+    `.claude/agents/vellum-planner.md` owes. Read them before you type the check. A planned check
+    without them, or a run of it whose reading on the fixture or under the mutation falls on the
+    other side of its assertion from the one the plan printed, is a plan proved wrong and goes
+    back as `handbook/specs/development-workflow.md` step 6 says, never a fixture to swap; a
+    reading the plan printed as UNVERIFIABLE answers to the stop condition it names instead
+    (Issue #954's Z21c, Issue #1034's SW4; Alex, 2026-10-23, Issue #1037).
 
 ## Gate 3: before writing CSS or moving layout
 
