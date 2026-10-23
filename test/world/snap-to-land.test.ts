@@ -84,7 +84,7 @@ test("at radius 1 the snap agrees with the 8-neighbour scan it replaces, tie-bre
   }
 });
 
-// Issue #952: a farm's whole mark stands on land. The footprint here is the function's own argument, not the farmsteads' constant.
+// The footprint here is the function's own argument, not the farmsteads' constant.
 const FOOT = { up: 2, down: 1, side: 1 };
 const landExcept = (water: (x: number, y: number) => boolean) => createField(9, 9, (x, y) => (water(x, y) ? -1 : 1));
 

@@ -10,8 +10,6 @@ import { finerMarkBox } from "../../src/render/layers/settlements.ts";
 import { marginFor } from "../../src/render/transform.ts";
 import type { Field } from "../../src/core/grid.ts";
 
-// Issue #952 review fixes: a farm's mark stands on ground that is land under the whole of it, so no house is drawn over the sea.
-
 const world15 = generateWorld(defaultRecipe(15));
 const RADIN_WINDOW = lodWindowFor(0.453125, 0.47265625, 1 / 32);
 const RADIN = generateRegionWorld(world15, {
