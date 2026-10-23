@@ -186,7 +186,7 @@ export function parseTable(hash: string): ReadonlyArray<TableItem> | null {
 const keptKeys = (hash: string, drop: RegExp): string[] =>
   (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
 
-/** One address with its table key replaced, keeping every other key verbatim and in place. Issue #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; Issue #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. An empty table writes no key at all, the rule `emitTableKey` below already keeps. */
+/** One address with its table key replaced, keeping every other key verbatim and in place. Issue #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; Issue #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. */
 export function tableHash(hash: string, table: string): string {
   const keys = keptKeys(hash, new RegExp(`^${TABLE_KEY}(=|$)`));
   const all = table === "" ? keys : [...keys, `${TABLE_KEY}=${table}`];
