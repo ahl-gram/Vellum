@@ -241,16 +241,16 @@ function floodRealms(
     const x = i % w;
     const y = (i / w) | 0;
     const lm = landmassIds[i] as number;
-    for (const [dx, dy, stepDist] of NEIGHBORS_8) {
-      const nx = x + dx;
-      const ny = y + dy;
+    for (const offset of NEIGHBORS_8) {
+      const nx = x + offset[0];
+      const ny = y + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const ni = nx + ny * w;
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
       if ((landmassIds[ni] as number) !== lm) continue;
-      if (cutsBarrierCorner(barrier, x, y, dx, dy, w)) continue;
-      const nd = d + realmStepCost(stepDist, slope, riverCells, ni);
+      if (cutsBarrierCorner(barrier, x, y, offset[0], offset[1], w)) continue;
+      const nd = d + realmStepCost(offset[2], slope, riverCells, ni);
       if (nd < (dist[ni] as number)) {
         dist[ni] = nd;
         labels[ni] = labels[i] as number;

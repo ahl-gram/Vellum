@@ -66,9 +66,9 @@ function siteNeighbourhood(
   let harbor = false;
   let riverNear = false;
   let riverNeighbors = 0;
-  for (const [dx, dy] of NEIGHBORS_8) {
-    const nx = x + dx;
-    const ny = y + dy;
+  for (const offset of NEIGHBORS_8) {
+    const nx = x + offset[0];
+    const ny = y + offset[1];
     if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
     const ni = nx + ny * w;
     if ((data[ni] as number) <= seaLevel) harbor = true;
