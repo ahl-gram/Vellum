@@ -74,24 +74,7 @@ function describeChart(world: World, styleName: StyleName, theme: ThemeName | un
 
 function projectedCoastRings(world: World, proj: Projection): ReadonlyArray<PxRing> {
   const coastIters = coastSmoothingIterations(proj.widthPx);
-  const coastRings = coastRingsGrid(world, coastIters).map((ring) =>
-    ring.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
-  );
-  if (coastRings.length === 0) {
-    const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
-    if (mid > world.seaLevel) {
-      const m = proj.margin;
-      return [
-        [
-          [m, m],
-          [proj.widthPx - m, m],
-          [proj.widthPx - m, proj.heightPx - m],
-          [m, proj.heightPx - m],
-        ],
-      ];
-    }
-  }
-  return coastRings;
+  return coastRingsGrid(world, coastIters).map((ring) => ring.map(([x, y]) => [proj.px(x), proj.py(y)] as const));
 }
 
 function renderContext(

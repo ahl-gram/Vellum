@@ -1,8 +1,8 @@
 import { boxBlur } from "../core/box-blur.ts";
-import { createField, type Field } from "../core/grid.ts";
+import { createField } from "../core/grid.ts";
 import { chainBorderSegments, labelBorderSegments } from "../core/segment-chains.ts";
 import { frameVertexPredicate } from "../render/coast.ts";
-import { chaikinSmooth, chaikinSmoothPinned, closedIsoRings } from "../terrain/contours.ts";
+import { chaikinSmooth, chaikinSmoothPinned, filledIsoRings } from "../terrain/contours.ts";
 import type { World } from "./types.ts";
 
 // Ratified 2026-08-20: measured max reach today is 4 parent cells and Issue #376's coast excursion adds up to ~2.4 more (the sweep is recorded on Issue #423), so 8 is generous without letting a realm wander the open ocean.
@@ -62,16 +62,6 @@ export function grownRealmLabels(world: World): Int16Array {
   return grown;
 }
 
-function holdsFrame(soft: Field, gridW: number, gridH: number): boolean {
-  for (let x = 0; x < gridW; x++) {
-    if ((soft.data[x] as number) <= 0.5 || (soft.data[x + (gridH - 1) * gridW] as number) <= 0.5) return false;
-  }
-  for (let y = 0; y < gridH; y++) {
-    if ((soft.data[y * gridW] as number) <= 0.5 || (soft.data[gridW - 1 + y * gridW] as number) <= 0.5) return false;
-  }
-  return true;
-}
-
 export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number): RealmRings {
   const present = new Set<number>();
   for (const o of owner) if (o >= 0) present.add(o);
@@ -80,15 +70,7 @@ export function regionRealmRings(owner: Int16Array, gridW: number, gridH: number
   for (const realm of [...present].sort((a, b) => a - b)) {
     const indicator = createField(gridW, gridH, (x, y) => (owner[x + y * gridW] === realm ? 1 : 0));
     const soft = boxBlur(indicator, 3);
-    const rings = closedIsoRings(soft, 0.5).map((c) => chaikinSmoothPinned(c.points, 2, onFrame) as RealmRing);
-    if (holdsFrame(soft, gridW, gridH)) {
-      rings.unshift([
-        [0, 0],
-        [gridW - 1, 0],
-        [gridW - 1, gridH - 1],
-        [0, gridH - 1],
-      ]);
-    }
+    const rings = filledIsoRings(soft, 0.5, (p) => chaikinSmoothPinned(p, 2, onFrame));
     if (rings.length > 0) out.push({ realm, rings });
   }
   return out;

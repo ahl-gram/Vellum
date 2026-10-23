@@ -370,8 +370,8 @@ export function filledIsoRings(
   const frame: Point[] = [
     [0, 0],
     [field.w - 1, 0],
-    [field.w - 1, 0],
-    [0, 0],
+    [field.w - 1, field.h - 1],
+    [0, field.h - 1],
   ];
   return [frame, ...rings];
 }
