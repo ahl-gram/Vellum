@@ -119,6 +119,13 @@ about a rule, the rulebook wins.
   smoothing pass rounds the frame's right-angle corners inward and carves real land over the ocean
   painted behind it; `chaikinSmoothPinned` in `src/terrain/polyline.ts` pins the window-frame
   vertices.
+- **Where the ground stands above a fill's iso on every vertex of the frame, the frame rect is that
+  fill's first ring.** No contour reaches the frame to close against, so the rings are the water
+  inside alone, and an even-odd fill would paint the water and leave the land bare. Every even-odd
+  fill built from contours takes its rings from `filledIsoRings` in `src/terrain/contours.ts`, which
+  closes them with `closedIsoRings`, smooths them with the caller's smoother, and puts the frame
+  first, never smoothed, where the ground holds it: the coast (`coastRingsGrid` in
+  `src/render/coast.ts`), the hypsometric tints, the deep and shoal water, and the realm tints.
 - **The region stamp is GEOMETRIC only.** The title is not stamped, so it must be DERIVED
   deterministically from the window (`regionTitle` in `src/world/region.ts`) or a stamped sheet's
   redraw breaks byte identity. The derivation is the engine's, so a live redraft and a downloaded

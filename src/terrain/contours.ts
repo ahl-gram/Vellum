@@ -349,4 +349,31 @@ export function closedIsoRings(field: Field, iso: number): Contour[] {
   return closeChainsOnBoundary(marchingSquares(field, iso), field.w, field.h);
 }
 
+function holdsFrame(field: Field, iso: number): boolean {
+  const { w, h, data } = field;
+  for (let x = 0; x < w; x++) {
+    if ((data[x] as number) <= iso || (data[x + (h - 1) * w] as number) <= iso) return false;
+  }
+  for (let y = 0; y < h; y++) {
+    if ((data[y * w] as number) <= iso || (data[w - 1 + y * w] as number) <= iso) return false;
+  }
+  return true;
+}
+
+export function filledIsoRings(
+  field: Field,
+  iso: number,
+  smooth: (points: ReadonlyArray<Point>) => Point[],
+): Array<ReadonlyArray<Point>> {
+  const rings: Array<ReadonlyArray<Point>> = closedIsoRings(field, iso).map((c) => smooth(c.points));
+  if (!holdsFrame(field, iso)) return rings;
+  const frame: Point[] = [
+    [0, 0],
+    [field.w - 1, 0],
+    [field.w - 1, field.h - 1],
+    [0, field.h - 1],
+  ];
+  return [frame, ...rings];
+}
+
 export { chaikinSmooth, chaikinSmoothPinned, coastSmoothingIterations, ringArea } from "./polyline.ts";

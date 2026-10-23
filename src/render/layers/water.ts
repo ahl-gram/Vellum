@@ -1,5 +1,5 @@
 import { minMax } from "../../core/grid.ts";
-import { chaikinSmooth, closedIsoRings } from "../../terrain/contours.ts";
+import { chaikinSmooth, filledIsoRings } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
@@ -26,7 +26,7 @@ function deepBandPaths(ctx: RenderCtx): SvgNode[] {
   ];
   for (const band of bands) {
     const iso = world.seaLevel - band.frac * below;
-    const rings = closedIsoRings(world.elev, iso).map((c) => chaikinSmooth(c.points, true, 1));
+    const rings = filledIsoRings(world.elev, iso, (p) => chaikinSmooth(p, true, 1));
     if (rings.length === 0) continue;
     paths.push(
       el("path", {
@@ -44,7 +44,7 @@ function shoalPaths(ctx: RenderCtx, shoalTint: string): SvgNode[] {
   const { proj, style, world } = ctx;
   const { min } = minMax(world.elev);
   const iso = world.seaLevel - 0.08 * (world.seaLevel - min);
-  const rings = closedIsoRings(world.elev, iso).map((c) => chaikinSmooth(c.points, true, 2));
+  const rings = filledIsoRings(world.elev, iso, (p) => chaikinSmooth(p, true, 2));
   if (rings.length === 0) return [];
   const d = ringsPath(proj, rings);
   return [
