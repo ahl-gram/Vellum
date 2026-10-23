@@ -194,3 +194,13 @@ test("SB9 a camera move inside an ease rides it and writes the follow's value", 
   t.runLive(EASE_MS);
   assert.equal(t.easing(t.head), false);
 });
+
+test("SB10 a second eased move inside an ease cancels the first ease's timer, so the first cannot strip the ease from the second", () => {
+  const t = build();
+  t.armedAt(2);
+  t.head.fire("focusin", { target: t.inside });
+  assert.equal(t.liveAt(EASE_MS), 1, "one ease timer after the first move");
+  t.head.fire("focusout", { relatedTarget: null });
+  assert.equal(t.liveAt(EASE_MS), 1, "still one: the second cancelled the first");
+  assert.equal(t.easing(t.head), true);
+});
