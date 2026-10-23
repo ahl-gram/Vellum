@@ -119,3 +119,7 @@ export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   }
   Object.assign(legendEl.style, { transition: "", left: to });
 }
+
+export function translateOf(_value: string): { readonly x: number; readonly y: number } {
+  return { x: 0, y: 0 };
+}

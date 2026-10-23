@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DESK_FRAME } from "../../src/site/shared/page-box.ts";
-import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
+import { GLASS_GAP_REM, pressRowStacks, rowSheds, translateOf } from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
 import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
@@ -27,7 +27,7 @@ class WrappingLegend extends El {
 // The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on Issue #463: the Print Room's sheet over a freshly wrapped row until the next layout).
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const g = globalThis as Record<string, unknown>;
-  const names = ["document", "window", "ResizeObserver"] as const;
+  const names = ["document", "window", "ResizeObserver", "getComputedStyle"] as const;
   const saved = names.map((n) => [n, n in g, g[n]] as const);
   const legend = new WrappingLegend("nav");
   g.document = {
@@ -36,6 +36,7 @@ test("bindRoom seats the legend row before it fits the sheet", () => {
     body: new El("body"),
   };
   g.window = { addEventListener: () => {}, scrollX: 0, scrollY: 0 };
+  g.getComputedStyle = () => ({ translate: "none" });
   g.ResizeObserver = class {
     observe() {}
   };
@@ -147,7 +148,7 @@ const deskEls = (): Map<string, El> =>
     [".strip", new PageEl("div", { left: 0, top: 700, right: 1024, bottom: 760 })],
   ]);
 
-const ROOM_GLOBALS = ["document", "window", "ResizeObserver", "getComputedStyle"] as const;
+const ROOM_GLOBALS = ["document", "window", "ResizeObserver", "getComputedStyle", "DOMRect"] as const;
 
 function withRoomGlobals(body: () => void): void {
   const g = globalThis as Record<string, unknown>;
@@ -164,7 +165,10 @@ function withRoomGlobals(body: () => void): void {
 
 type DeskWindow = { scrollY: number; readonly visualViewport: { scale: number } };
 
-function installDesk(els: Map<string, El>): { root: { classList: El["classList"] }; body: El; win: DeskWindow } {
+function installDesk(
+  els: Map<string, El>,
+  shifts = new Map<El, string>(),
+): { root: { classList: El["classList"] }; body: El; win: DeskWindow } {
   const root = {
     clientWidth: SIDEWAYS.clientWidth,
     clientHeight: SIDEWAYS.clientHeight,
@@ -183,10 +187,24 @@ function installDesk(els: Map<string, El>): { root: { classList: El["classList"]
   g.ResizeObserver = class {
     observe() {}
   };
-  g.getComputedStyle = () => ({
+  g.DOMRect = class {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+    readonly left: number;
+    readonly top: number;
+    readonly right: number;
+    readonly bottom: number;
+    constructor(x: number, y: number, width: number, height: number) {
+      Object.assign(this, { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height });
+    }
+  };
+  g.getComputedStyle = (el?: El) => ({
     getPropertyValue: (p: string) => (p === "--desk-frame-h" ? `${FRAME_H}px` : ""),
     fontSize: "16px",
     top: "",
+    translate: (el && shifts.get(el)) ?? "none",
   });
   return { root, body, win };
 }
@@ -198,9 +216,18 @@ type DeskRoom = {
   readonly win: DeskWindow;
 };
 
-function bindDeskRoom(): DeskRoom {
+function bindDeskRoom(slid = false): DeskRoom {
   const els = deskEls();
-  const { root, body, win } = installDesk(els);
+  const shifts = new Map<El, string>();
+  if (slid) {
+    const head = new PageEl("header", { left: 32, top: -89, right: 600, bottom: 23 });
+    const folio = new PageEl("div", { left: 32, top: 737, right: 300, bottom: 809 });
+    els.set("header.chrome", head);
+    els.set(".corner.bl", folio);
+    shifts.set(head, "0px -105px");
+    shifts.set(folio, "0px 57px");
+  }
+  const { root, body, win } = installDesk(els, shifts);
   const frame = new El("div");
   const { layout } = bindRoom({
     frame: frame as unknown as HTMLElement,
@@ -265,4 +292,23 @@ test("UD2 a pinch past full size after the room binds leaves the desk frame stan
       `laid out again after the pinch, the room still lays out on the frame's ${FRAME_H}, not the window's ${SIDEWAYS.clientHeight}`,
     );
   });
+});
+
+test("UD3 a head cluster slid up and a chart folio slid down by their own translate leave every seat where it stands with them home (Issue #996)", () => {
+  withRoomGlobals(() => {
+    const room = bindDeskRoom(true);
+    room.layout();
+    assert.deepEqual(room.seats(), DESK_SEATS, "unscrolled, the seats read the pieces at home");
+    room.win.scrollY = FOOT;
+    room.layout();
+    assert.deepEqual(room.seats(), DESK_SEATS, `laid out again at the frame's foot, scrolled ${FOOT}`);
+  });
+});
+
+test("SA6 a computed translate reads as px, x first, and none as nothing", () => {
+  assert.deepEqual(translateOf("none"), { x: 0, y: 0 });
+  assert.deepEqual(translateOf(""), { x: 0, y: 0 });
+  assert.deepEqual(translateOf("12px"), { x: 12, y: 0 });
+  assert.deepEqual(translateOf("0px -105px"), { x: 0, y: -105 });
+  assert.deepEqual(translateOf("3px 4px 5px"), { x: 3, y: 4 });
 });
