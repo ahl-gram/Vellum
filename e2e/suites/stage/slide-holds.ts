@@ -2,7 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { lensRest } from "../print-room/print.ts";
-import { REST_MS } from "../../../src/site/explorer/slide-away-bind.ts";
+import { LINGER_MS, REST_MS } from "../../../src/site/explorer/slide-away-bind.ts";
 import { rest } from "./stage.ts";
 import {
   aimAt,
@@ -31,9 +31,23 @@ async function chartCentre(ctx: SuiteContext): Promise<[number, number]> {
   return [x!, y!];
 }
 
-async function toLine(ctx: SuiteContext, selector: string): Promise<void> {
+async function toLine(ctx: SuiteContext, selector: string, dx = 0): Promise<{ x: number; y: number }> {
   const at = await ctx.evaluate(lineAim(selector));
-  await mouseTo(ctx, at.x, at.y);
+  await mouseTo(ctx, at.x + dx, at.y);
+  return at;
+}
+
+async function holdAtEdge(
+  ctx: SuiteContext,
+  piece: "head" | "folio",
+  x: number,
+  y: number,
+  where: string,
+): Promise<string[]> {
+  await mouseTo(ctx, x, y);
+  const reads = await readsFor(ctx, LINGER_MS + EASE_WAIT + 300);
+  if (!reads.some((p) => Math.abs(p[piece].ty) > 0.5)) return [];
+  return [`a mouse ${where} let the ${piece} go: ${JSON.stringify(reads.map((p) => p[piece].ty.toFixed(1)))}`];
 }
 
 export async function es3Rest(ctx: SuiteContext): Promise<void> {
@@ -44,7 +58,7 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
     await press(ctx, 2);
     await settleTy(ctx, "head", up, "ES3 head away");
     await settleTy(ctx, "folio", down, "ES3 folio away");
-    await toLine(ctx, "header.chrome .trail");
+    const headAt = await toLine(ctx, "header.chrome .trail");
     const homeHead = await settleTy(ctx, "head", 0, "ES3 head home");
     if (!(homeHead.head.nav[0] >= 0))
       faults.push(`the nav is not on screen with the head home: ${JSON.stringify(homeHead.head.nav)}`);
@@ -52,10 +66,11 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
     const stays = await readsFor(ctx, 1500);
     if (stays.some((p) => Math.abs(p.head.ty) > 0.5))
       faults.push(`a resting mouse lost the head: ${JSON.stringify(stays.map((p) => p.head.ty.toFixed(1)))}`);
+    faults.push(...(await holdAtEdge(ctx, "head", headAt.x, 1, "at the page's top edge, above the head's home box")));
     const [cx, cy] = await chartCentre(ctx);
     await mouseTo(ctx, cx, cy);
     await settleTy(ctx, "head", up, "ES3 head sent back");
-    await toLine(ctx, "#folio-title");
+    const folioAt = await toLine(ctx, "#folio-title");
     const homeFolio = await settleTy(ctx, "folio", 0, "ES3 folio home");
     if (!(homeFolio.folio.title[1] <= homeFolio.innerH && homeFolio.folio.rest.every((t) => t < homeFolio.innerH)))
       faults.push(
@@ -65,11 +80,20 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
     const folioStays = await readsFor(ctx, 1500);
     if (folioStays.some((p) => Math.abs(p.folio.ty) > 0.5))
       faults.push(`a resting mouse lost the folio: ${JSON.stringify(folioStays.map((p) => p.folio.ty.toFixed(1)))}`);
+    faults.push(
+      ...(await holdAtEdge(
+        ctx,
+        "folio",
+        folioAt.x,
+        homeFolio.innerH - 1,
+        "at the page's foot, below the folio's home box",
+      )),
+    );
     await mouseTo(ctx, cx, cy);
     await settleTy(ctx, "folio", down, "ES3 folio sent back");
   });
   ctx.check(
-    "ES3 on the Explorer zoomed past its fill depth, a mouse brought to rest on the thin top line brings the whole head cluster home and keeps it there while it rests, one on the thin bottom line does the same for the whole chart folio, each alone, and each slides back after the mouse leaves (Alex, 2026-10-22, Issue #989 ruling 3; Alex, 2026-10-23, Issue #996 step 6 ruling 5)",
+    "ES3 on the Explorer zoomed past its fill depth, a mouse brought to rest on the thin top line brings the whole head cluster home and keeps it there while it rests, one on the thin bottom line does the same for the whole chart folio, each alone, holding while the mouse stays in the band of page between its home box and the edge it slid toward, and each slides back after the mouse leaves (Alex, 2026-10-22, Issue #989 ruling 3; Alex, 2026-10-23, Issue #996 step 6 ruling 5)",
     faults.length === 0,
     faults.length
       ? faults.join("; ")
@@ -111,11 +135,28 @@ export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
       faults.push(
         `a still mouse over the chart held the head: ${JSON.stringify(reads.map((p) => p.head.ty.toFixed(1)))}`,
       );
-    await toLine(ctx, "header.chrome .trail");
+    await mouseTo(ctx, x - 2, y);
+    const nudged = await readsFor(ctx, REST_MS + EASE_WAIT + 300);
+    if (nudged.some((p) => !near(p.head.ty, up, 0.5)))
+      faults.push(
+        `a mouse moving inside the head's home box over the chart, the head away, held it: ${JSON.stringify(nudged.map((p) => p.head.ty.toFixed(1)))}`,
+      );
+    const [cx, cy] = await chartCentre(ctx);
+    const line = await ctx.evaluate(lineAim("header.chrome .trail"));
+    const drag = { button: "left", clickCount: 1 };
+    await ctx.send("Input.dispatchMouseEvent", { type: "mousePressed", x: cx, y: cy, buttons: 1, ...drag });
+    await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: line.x, y: line.y, buttons: 1, ...drag });
+    const dragged = await readsFor(ctx, REST_MS + EASE_WAIT + 300);
+    await ctx.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: line.x, y: line.y, buttons: 0, ...drag });
+    if (dragged.some((p) => !near(p.head.ty, up, 0.5)))
+      faults.push(
+        `a pan dragged across the thin line brought the head home: ${JSON.stringify(dragged.map((p) => p.head.ty.toFixed(1)))}`,
+      );
+    await toLine(ctx, "header.chrome .trail", 2);
     await settleTy(ctx, "head", 0, "ES8 control: a moving mouse on the line");
   });
   ctx.check(
-    "ES8 a mouse standing still over the chart under the head cluster while the reader wheels in past the fill depth does not hold the head there: it slides to its thin line and stays, and a mouse then brought onto that line brings it home (Issue #996)",
+    "ES8 a mouse standing still over the chart under the head cluster while the reader wheels in past the fill depth does not hold the head there: it slides to its thin line and stays, a mouse moving there with no button down, or a pan dragged across the line, does not bring it home, and a mouse then brought onto that line brings it home (Issue #996)",
     faults.length === 0,
     faults.length ? faults.join("; ") : "the head slid away under a still mouse and came home for a moving one",
   );

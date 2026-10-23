@@ -37,7 +37,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "region-detail": 44.1,
   specimen: 9.8,
   corners: 213.6,
-  stage: 291.0,
+  stage: 312.7,
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) => suites.reduce((sum, name) => sum + MEASURED_SECONDS[name], 0);

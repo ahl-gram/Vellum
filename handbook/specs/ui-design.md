@@ -485,7 +485,7 @@ move while the camera stands still.** The Explorer's slid head and folio are wri
 apply with no transition and take a timed ease for a hold, an arming or a re-measure that moves
 them; a camera move inside that ease rides it to the follow's value rather than jumping, and the
 follow is exact once it ends; under reduced motion they do not travel with the zoom, home short of
-the fill depth and away from it.
+the fill depth and away at and past it.
 
 **A piece seated by a transform is placed with the individual properties**, `translate` and `rotate`,
 because the house lift writes `transform` and would replace the seat.

@@ -114,7 +114,6 @@ export async function pressSelector(ctx: SuiteContext, selector: string): Promis
 export const mouseTo = (ctx: SuiteContext, x: number, y: number): Promise<unknown> =>
   ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y, button: "none", buttons: 0 });
 
-// The centre of a line box, a Range over the element, and whether it is the topmost thing there or the piece sits under another surface.
 export const lineAim = (selector: string): Payload<Aim & { inside: boolean }> =>
   `(() => { const e = document.querySelector(${JSON.stringify(selector)}); const r = new Range(); r.selectNodeContents(e); const b = r.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2, h = document.elementFromPoint(x, y); return { x, y, hit: !!h && !!h.closest(${JSON.stringify(selector)}), inside: !!h && !!h.closest("#chart-drawer") }; })()`;
 
