@@ -121,7 +121,7 @@ async function readRoom(ctx: SuiteContext, page: string, w: number, h: number, a
   const at = await open(ctx, page, w, h, { w, h }, "EZ");
   const zoomed = at !== null && (await zoomIn(ctx, page));
   const s = await rest(ctx, w, h, `EZ ${page} zoomed`);
-  if (!ask.held && page.startsWith("/explorer/"))
+  if (!ask.held && page.split("#")[0] === "/explorer/")
     await makeSettle(ctx)(SLID, (d, last) => !d.drafting && sameJson(d, last), `EZ ${page} slid`);
   const read = () => readZoomed(ctx, page, h, ask);
   const zoomedRead = ask.held ? await withStyle(ctx, "ez-held", HELD, read) : await read();
