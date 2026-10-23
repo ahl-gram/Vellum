@@ -227,10 +227,11 @@ test("farmstead and mill marks draw their own glyphs and are labelled like hamle
   }
   for (const g of mills) {
     assert.ok(
-      g.body.includes("<circle") && /<circle[^>]* r="3\.2"/.test(g.body),
-      "a mill's wheel is a circle of radius 3.2",
+      g.body.includes("<circle") && /<circle[^>]* r="3\.9"/.test(g.body),
+      "a mill's wheel is a circle of radius 3.9",
     );
-    assert.ok(g.body.includes("<path"), "with spokes");
+    const spokes = g.body.match(/<path d="([^"]*)"/)?.[1] ?? "";
+    assert.equal(spokes.split("M").length - 1, 2, "with two spokes, a cross");
   }
   const sizes = farms.map((g) => g.body.match(/<text[^>]*font-size="([\d.]+)"/)?.[1]).filter((v) => v !== undefined);
   assert.ok(sizes.length >= 1, "a farmstead is labelled");
