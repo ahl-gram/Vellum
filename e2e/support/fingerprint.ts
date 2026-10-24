@@ -1,8 +1,10 @@
 import { release as osRelease } from "node:os";
+import type { StartOptions } from "../types.ts";
 
 export const FINGERPRINT_LEAD = "fingerprint: ";
 export const NUMERO_TEXT = "Chart № 42";
 export const NUMERO_GLYPH = "№";
+export const NOT_PROBED = "the harness stopped before the browser was probed";
 
 export interface HostFacts {
   readonly platform: string;
@@ -56,3 +58,15 @@ export function environmentFingerprint(facts: EnvironmentFacts): string {
 
 export const laneFingerprint = (line: string): string | null =>
   line.startsWith(FINGERPRINT_LEAD) ? line.slice(FINGERPRINT_LEAD.length) : null;
+
+export function fingerprinted<C>(
+  start: (options: StartOptions) => Promise<C>,
+  readBrowser: (ctx: C) => Promise<BrowserFacts>,
+  host: HostFacts,
+  out: (line: string) => void,
+): (options: StartOptions) => Promise<C> {
+  void readBrowser;
+  void host;
+  void out;
+  return start;
+}
