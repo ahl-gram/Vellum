@@ -136,8 +136,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    point moved to land your own work leaves the assertion alone and is mutation-proved on its
    original defect (Issue #540, PR #545).
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
-   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter. The hook refuses the
-   single-escaped form in every `.ts` and `.mjs` under `scripts/`, `out/` and `e2e/` (and so under `test/e2e/` too).
+   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
 6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
    (stillness at the start looks like stillness at the end), and never carries the check's own claim.
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
@@ -184,6 +183,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     check why the instrument is artificial (#366).
 15. **A clamped value saturates and hides the regression**: measure what the clamp acts ON
     (Issue #522).
+16. **Read the two readings a plan printed for a browser check before you type it**
+    (`vellum-planner`'s **Tests** line; Issue #1037).
 
 ## Gate 3: before writing CSS or moving layout
 
