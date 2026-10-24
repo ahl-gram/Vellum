@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
 import { findBrowser } from "../../src/cli/raster.ts";
+import { laneFingerprint } from "./fingerprint.ts";
 import {
   ambientSelectionRefusal,
   laneCheckTally,
@@ -77,15 +78,17 @@ function runLane(lane: E2eLane, io: LaneDriverIo): Promise<LaneResult> {
     });
     let skipped = false;
     let tally: LaneTally | null = null;
+    let fingerprint: string | null = null;
     const readLine = (line: string) => {
       if (laneLineIsSkip(line)) skipped = true;
       tally = laneCheckTally(line) ?? tally;
+      fingerprint = laneFingerprint(line) ?? fingerprint;
     };
     const prefix = `[${lane.name}]`;
     streamLines(child.stdout, prefix, io.out, readLine);
     streamLines(child.stderr, prefix, io.err, readLine);
     const done = (code: number | null) =>
-      settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally, fingerprint: null });
+      settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally, fingerprint });
     child.on("error", (err) => {
       io.err(`${prefix} FAIL: lane could not start: ${err.message}`);
       done(2);

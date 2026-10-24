@@ -172,6 +172,9 @@ const laneDetail = (r: LaneResult): string => {
   return `${r.name} ${r.skipped ? "SKIPPED" : "ok"} ${took}`;
 };
 
+const failedOn = (failed: readonly LaneResult[]): string =>
+  [...new Set(failed.map((r) => r.fingerprint ?? `(lane ${r.name} printed no fingerprint)`))].join(" | ");
+
 export function laneOutcome(results: readonly LaneResult[], selected: readonly E2eLane[] = E2E_LANES): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
   if (selected.length === 0) {
@@ -200,7 +203,7 @@ export function laneOutcome(results: readonly LaneResult[], selected: readonly E
   const failed = results.filter((r) => r.code !== 0);
   if (failed.length > 0) {
     const which = failed.map((r) => r.name).join(" and ");
-    return { ok: false, line: `LANE ${which} FAILED  (${scope}${detail})` };
+    return { ok: false, line: `LANE ${which} FAILED  (${scope}${detail})  on ${failedOn(failed)}` };
   }
   const skipped = results.filter((r) => r.skipped);
   if (skipped.length > 0) {
