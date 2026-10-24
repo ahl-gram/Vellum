@@ -442,14 +442,19 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
   CI. Home: `handbook/specs/rulebook.md`, the bullet opening "NEVER byte-compare SVGs", with
   `vellum-footguns` Gate 6 item 5 at the moment of typing; and a bound fitted to a Mac's runs alone
   flakes on CI (`CLAUDE.md`, Process, the bullet opening "A bound is derived").
-- **File names: macOS folds case and Linux does not**, so a path whose case is wrong resolves on a
-  Mac and fails on CI, and Node's test runner matches a wildcard segment of its pattern without
-  regard to case on macOS and not on Linux. Home: the comments at `COLLECTED` and `inTestDir` in
-  `test/repo/test-collection.test.ts`, the misses at the head of `test/repo/prose-paths.test.ts`,
-  and the Issue #562 entry in `.claude/skills/vellum-footguns/references/scars.md`.
-- **One unit test runs on a Mac alone**: `rasterizeSvg produces a real PNG` in
-  `test/cli/raster.test.ts` skips under CI, so CI never rasterises through a real browser. Home: the
-  test.
+- **File names: a name or a pattern can find a file on a Mac that it does not find on CI.** macOS
+  folds case and Linux does not, so a path whose case is wrong resolves on a Mac and fails on CI; a
+  file git does not track, such as a draft or a module a rename left in the build-output folder, is
+  on the Mac's disk and not in CI's fresh checkout; and Node's test runner matches a wildcard
+  segment of its pattern without regard to case on macOS and not on Linux. Home: the comments at
+  `COLLECTED` and `inTestDir` in `test/repo/test-collection.test.ts`, the misses at the head of
+  `test/repo/prose-paths.test.ts`, the PR #630 row in `handbook/errata/guards.md`, the Issue #562
+  entry in `.claude/skills/vellum-footguns/references/scars.md`, and, for the build-output folder,
+  the bullet opening "Clean before regenerate" in `handbook/specs/site-architecture.md`.
+- **Skips: one unit test runs on a Mac and skips under CI**: `rasterizeSvg produces a real PNG` in
+  `test/cli/raster.test.ts`, so CI never runs `rasterizeSvg` in `src/cli/raster.ts`, the command
+  line's rasteriser. The Print Room's PNG checks run the page's own, `rasterizeSvg` in
+  `src/site/shared/rasterize.ts`, on both. Home: the test.
 
 Hidden from both: macOS draws overlay scrollbars and the harness launches with `--hide-scrollbars`
 (`e2e/harness.ts`) on both sides, so no check, local or on CI, sees a classic, space-taking
