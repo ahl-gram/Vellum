@@ -389,3 +389,81 @@ section points there rather than restating it.
   is not the case clause 14 governs**: there the VIEWPORT is the runner's job because the reset on
   the ERROR path decides what the NEXT suite inherits, while here a suite sizes its own fixture
   inside its own run, and leaving that to the runner is what loses the fixture.
+
+### Where the Mac and the CI runner disagree
+
+Each case below is one that a record in the repo says comes out differently on a Mac and on the CI
+runner, with the home that holds it: the rule where one exists and otherwise the record, which also
+carries the reading that showed it. Nothing here restates a home. A difference found later joins
+this list, in the change that records it, as one more line; a behaviour recorded on one side only,
+with nothing said of the other, joins the last paragraph instead.
+
+**The CI runner** is GitHub's `ubuntu-latest`, which every job in `.github/workflows/ci.yml` and
+`.github/workflows/proof-runner.yml` runs on, under the Node release its `node-version:` names, and
+whose e2e lanes drive the image's own Google Chrome (`VELLUM_BROWSER` in both files). Neither the
+image nor its Chrome is pinned, so both move when GitHub updates the image. A CI job's log says what
+it ran on: its "Set up job" step names the image and its version and links that image's Readme,
+which lists its Chrome, and in the e2e lanes of `.github/workflows/ci.yml` the step
+"Runner shape and dist/ hash" prints the runner's cores and memory. **A run on a Mac** drives the
+first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Chrome, unless
+`VELLUM_BROWSER` names another.
+
+- **Layout: a chart room's furniture sits a few pixels off on the runner, and every number read off
+  the room's fit moves with it.** Home: the bullet above opening
+  "CI's browser lays a chart room's furniture out", whose causes, the "№" drawn from another face
+  and a row holding a `select` dressed `appearance: none` laid out shorter, are the PR #1042 entry
+  in `.claude/skills/vellum-footguns/references/scars.md`; the two PR #1042 rows in
+  `handbook/errata/site.md` are the "№" and the Press row seat it moves.
+- **Paint: a read taken off paint differs**: a thin line's darkest pixel paints lighter on the
+  runner, and a die's bare contrast reads lower there. Home: the bullet above opening
+  "A visual claim in a suite is carried by a control taken in the same run";
+  `painted` in `e2e/suites/stage/short.ts`, which reads computed ink against the painted ground for
+  that reason; NS1's rows of 2026-10-06 in
+  `.claude/skills/vellum-footguns/references/flake-record.md`; and, in `handbook/errata/guards.md`,
+  the PR #777 row on `EA4`'s witnesses and the PR #307 row on screenshot goldens.
+- **Gestures: CI's browser neither zooms the page under a synthesized pinch nor scrolls a chart
+  room under a synthesized touch scroll**, where the Mac's does both. Home: the bullet above
+  opening "CI's browser does not move the page", and `vellum-footguns` Gate 2 item 14.
+- **Taps: CI's headless Chrome delivers a CDP tap as browser-adjusted mouse events alone**, with no
+  touch or pointer event, so near an element's edge the tap lands on its neighbour, where the Mac's
+  browser also sends the `pointerdown` that says where the finger came down. Home: `p30Tablet` in
+  `e2e/suites/cards/hold-tablet.ts`, and the PR #770 row in `handbook/errata/guards.md`.
+- **Media queries: with no pointing device, CI's browser reports `hover: none` together with
+  `pointer: none`**, so a bare `(hover: none)` matches there and not on a Mac. Home:
+  `handbook/specs/cascade-traps.md`, the bullet opening "An affordance gate is".
+- **Speed: the runner is slower**, so a wait sized on a Mac runs out there. Home: clause 10 and
+  `vellum-footguns` Gate 2 item 8 for a budget, with a dated factor at `REDRAFT_TRIES` in
+  `e2e/suites/zoom/kit.ts`.
+- **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
+  session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
+  above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.
+- **Floats: trigonometry is not correctly rounded, so a rendered SVG's coordinates differ between
+  macOS and Linux and between Node versions**, and a byte comparison passes on a Mac and fails on
+  CI. Home: `handbook/specs/rulebook.md`, the bullet opening "NEVER byte-compare SVGs", with
+  `vellum-footguns` Gate 6 item 5 at the moment of typing; and a bound fitted to a Mac's runs alone
+  flakes on CI (`CLAUDE.md`, Process, the bullet opening "A bound is derived").
+- **File names: a name or a pattern can find a file on a Mac that it does not find on CI.** macOS
+  folds case and Linux does not, so a path whose case is wrong resolves on a Mac and fails on CI; a
+  file git does not track, such as a draft or a module a rename left in the build-output folder, is
+  on the Mac's disk and not in CI's fresh checkout; and Node's test runner matches a wildcard
+  segment of its pattern without regard to case on macOS and not on Linux. Home: the comments at
+  `COLLECTED` and `inTestDir` in `test/repo/test-collection.test.ts`, the misses at the head of
+  `test/repo/prose-paths.test.ts`, the PR #630 row in `handbook/errata/guards.md`, the Issue #562
+  entry in `.claude/skills/vellum-footguns/references/scars.md`, and, for the build-output folder,
+  the bullet opening "Clean before regenerate" in `handbook/specs/site-architecture.md`.
+- **Skips: one unit test runs on a Mac and skips under CI**: `rasterizeSvg produces a real PNG` in
+  `test/cli/raster.test.ts`, so CI never runs `rasterizeSvg` in `src/cli/raster.ts`, the command
+  line's rasteriser. The Print Room's PNG checks run the page's own, `rasterizeSvg` in
+  `src/site/shared/rasterize.ts`, on both. Home: the test.
+
+Hidden from both: macOS draws overlay scrollbars and the harness launches with `--hide-scrollbars`
+(`e2e/harness.ts`) on both sides, so no check, local or on CI, sees a classic, space-taking
+scrollbar (the PR #795 scrollbar row in `handbook/errata/guards.md`). Recorded on one side only,
+with nothing said of the other: a child that drains a large `input` wedges `spawnSync` on darwin
+(`vellum-footguns` Gate 1 item 10, and `BOUND_MS` in `test/repo/footgun-deployed-run.test.ts`); on
+macOS `tmpdir()` sits under /var, a symlink to /private/var (`withRepo` in
+`test-support/sandbox-repo.ts`); a real CDP Escape key wedged headless Brave (`RESET` in
+`e2e/suites/cards/hold.ts`); headless Brave loaded every frame of a page opened from disk,
+`loading="lazy"` or not (the bullet above opening "Do not count on"); and a cold browser on
+GitHub's runners can take long to bind its debug port (the bullet above opening
+"A launch retry is a retry only").
