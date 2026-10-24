@@ -11,6 +11,7 @@ import {
   grown,
   headTravel,
   holdZone,
+  keptStart,
   reachOf,
   restingBox,
   slideProgress,
@@ -74,6 +75,20 @@ test("SA11 a sheet inside the camera's transform reads its resting box with the 
   );
   const box = { left: 50, top: 20, right: 650, bottom: 520 };
   assert.deepEqual(restingBox(box, { x: 10, y: 10 }, { x: 0, y: 0, k: 1 }), box);
+});
+
+test("SA12 a measure taken while the camera stands past the start and short of the fill keeps that start, and at or under the start or at or past the fill takes the room's own (Issue #996 step 6 ruling 4; Alex, 2026-10-23, Issue #1034)", () => {
+  assert.equal(keptStart(1.96, 1.4, 1.96, 2.1118), 1.4, "a fold at the second press keeps the first press's start");
+  assert.equal(keptStart(1.96, 1.4, 1.4, 2.1118), 1.96, "at the start both pieces stand home, so the room's own");
+  assert.equal(keptStart(1.96, 1.4, 1.2, 2.1118), 1.96);
+  assert.equal(keptStart(1.96, 1.4, 2.744, 2.1118), 1.96, "past the fill the room's own");
+  assert.equal(keptStart(1.96, 1.4, 2.1118, 2.1118), 1.96, "at the fill exactly");
+  assert.equal(
+    keptStart(1.4, 1.96, 2.744, 1.8015),
+    1.4,
+    "a fold that narrows the room: its own start, its fill lying under the depth",
+  );
+  assert.equal(keptStart(Infinity, 1.4, 1.96, Infinity), 1.4, "a room that never fills keeps the start");
 });
 
 test("SA3 the slide follows the log of depth from the start to the fill, and reduced motion leaves at the fill alone", () => {

@@ -8,6 +8,7 @@ import {
   grown,
   headTravel,
   holdZone,
+  keptStart,
   reachOf,
   steers,
   within,
@@ -190,19 +191,24 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
   const slide = bindOnPage(head, folio);
   let last = Infinity;
   let from = 0;
+  let own = 0;
+  let depth = 1;
   let measuredOnce = false;
   const remeasure = (): void => {
     const m = measure(parts, head, folio, slip);
     if (m === null) return;
+    const start = measuredOnce ? keptStart(m.from, from, depth, m.fill) : m.from;
     measuredOnce = true;
+    own = m.from;
     last = m.fill;
-    from = m.from;
-    slide.measured(m);
+    from = start;
+    slide.measured({ ...m, from: start });
   };
   watchLayout(parts, head, folio, remeasure);
   watchInput(slide, parts, head, folio, document.querySelector(".corner.br"));
   const follow = (k: number): void => {
-    if (!measuredOnce || k <= from) remeasure();
+    depth = k;
+    if (!measuredOnce || k <= from || (from < own && k >= last)) remeasure();
     slide.follow(k);
   };
   const { camera } = parts;

@@ -41,6 +41,9 @@ export function followStart(fill: number, step: number): number {
   const { before } = pressesTo(fill, step);
   return before === 1 ? fill : before;
 }
+export function keptStart(fresh: number, kept: number, k: number, fill: number): number {
+  return fresh;
+}
 export function slideProgress(k: number, from: number, fill: number, reduce: boolean): number {
   if (k >= fill) return 1;
   if (reduce || k <= from) return 0;
