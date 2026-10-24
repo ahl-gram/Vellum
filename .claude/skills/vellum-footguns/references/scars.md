@@ -146,6 +146,19 @@ left open and the session failed to write down).
   real run; and a cap nothing ever reaches cannot bite, which is why one child deliberately outlives
   it. It pins what reaches the spawn rather than what the option builder returns because the seam
   between them is where a default cap goes missing with every child still green.
+- Later, PR #1042 (Issue #1034): two slide-away witnesses pinned the local harness browser's layout
+  of a chart room, and CI lane D went red twice on the same numbers. On the linux runner a room
+  folio or a Press row that holds a select dressed `appearance: none` laid out 1 to 5 px shorter,
+  and the "№" in a chart folio's title, which the Latin subset of the house's faces lacks, came from
+  another system face 2.31 px narrower (CI run 40051585426 read against a local run of the same
+  checks). So the Print Room's fill at 1280x800 read 1.7709 against 1.7962, and at 1024x768 its
+  Press row stayed beside the chart folio instead of rising above it, the local layout standing 1.25
+  to 1.5 px of title width from that edge, so the press that fills went from the Glass's third to
+  its fourth (2.2070 to 2.8810) and SW4's bare read of the folio's title from 3.68 to 9.77. Staging
+  the three differences locally, in a style sheet the document adopted before its scripts ran,
+  reproduced every runner number before the witnesses were rewritten to read the press off the room.
+  Stands behind `handbook/specs/settle-doctrine.md`'s bullet that CI's browser lays a chart room's
+  furniture out off the local harness browser's.
 
 ## Promoted from the memory triage (Issue #708)
 

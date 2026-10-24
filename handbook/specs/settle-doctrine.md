@@ -331,6 +331,16 @@ section points there rather than restating it.
   neither moved a root held at `overflow-y: hidden`. A check that needs the page zoomed or scrolled
   on CI reaches that state another way and says why at the check (`vellum-footguns` Gate 2 item
   14).
+- **CI's browser lays a chart room's furniture out a few pixels off the local harness browser's, and
+  every number a check reads off the room's fit moves with it**: the sheet `bindRoom` in
+  `src/site/shared/room.ts` fits, the seat `placeLegendRow` in `src/site/shared/room-seats.ts` gives
+  the Press row, and with them a room's fill depth, the press that fills and the ground under a slid
+  line. A check reads such a number off the room's own layout in the run, as SW2's `thirdPress` in
+  `e2e/suites/slide-away/rooms.ts` reads the press that fills, or asserts it with its margin
+  measured on both browsers' layouts. The runner's layout is read locally before CI by staging what
+  differs in a style sheet the document adopts when it is created, before any of its scripts run;
+  what differs, and the run that showed it, is in
+  `.claude/skills/vellum-footguns/references/scars.md`.
 - **Fail a frame's document through `Fetch.failRequest`; a blocked-URL list does not stop it.** With
   `Network.setBlockedURLs` set, a page's frames still requested their documents (measured
   2026-10-08: ten Documents requested), while failing the request through `Fetch.failRequest` on a
