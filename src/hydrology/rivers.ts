@@ -135,3 +135,11 @@ export function extractRivers(elev: Field, flow: FlowResult, seaLevel: number, o
   if (isRiver === null) return [];
   return traceRivers(elev.w, flow, riverGraph(elev, flow.dir, seaLevel, isRiver), minLength);
 }
+
+export function markRiverCells(rivers: ReadonlyArray<River>, gridW: number, gridH: number): Uint8Array {
+  const cells = new Uint8Array(gridW * gridH);
+  for (const r of rivers) {
+    for (const p of r.points) cells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
+  }
+  return cells;
+}
