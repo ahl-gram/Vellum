@@ -1,5 +1,7 @@
 import { release as osRelease } from "node:os";
+import { basename } from "node:path";
 import type { StartOptions } from "../types.ts";
+import { errorText } from "./suites.ts";
 
 export const FINGERPRINT_LEAD = "fingerprint: ";
 export const NUMERO_TEXT = "Chart № 42";
@@ -65,8 +67,17 @@ export function fingerprinted<C>(
   host: HostFacts,
   out: (line: string) => void,
 ): (options: StartOptions) => Promise<C> {
-  void readBrowser;
-  void host;
-  void out;
-  return start;
+  const print = (browser: string, facts: BrowserFacts): void =>
+    out(environmentFingerprint({ ...host, binary: basename(browser), ...facts }));
+  return async (options) => {
+    let ctx: C;
+    try {
+      ctx = await start(options);
+    } catch (failure) {
+      print(options.browser, unreadBrowser(NOT_PROBED));
+      throw failure;
+    }
+    print(options.browser, await readBrowser(ctx).catch((failure: unknown) => unreadBrowser(errorText(failure))));
+    return ctx;
+  };
 }
