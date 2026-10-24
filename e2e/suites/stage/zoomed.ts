@@ -30,8 +30,9 @@ const crisp = (p: Panel | null): boolean =>
 const pooled = (p: Panel | null): boolean => !!p && p.content === '""' && /^blur\(/.test(p.filter);
 
 // An author `!important` beats the slide's inline `translate`, so a panel's reach under the Explorer's chrome is read with the pieces home (Issue #996).
-const HELD = "header.chrome, .corner.bl { translate: none !important; }";
-const BARE = "body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl)::before { content: none !important; }";
+export const HELD = "header.chrome, .corner.bl { translate: none !important; }";
+export const BARE =
+  "body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl)::before { content: none !important; }";
 // No `!important`: `grounds` hides the text with one at (0,1,0), and one here at (1,5,1) would win over it and leave the text in the ground sample.
 const LINE_TAN: Record<Sub, string> = {
   sub: ":root body:has(#map-viewport.zoomed) .corner.bl .folio-sub { color: var(--line-tan); }",
@@ -258,14 +259,14 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
       mark: explorer,
       bare: explorer || page === "/reading-room/",
       lineTan: explorer ? ["sub", "coords"] : page === "/reading-room/" ? ["sub"] : [],
-      held: explorer,
+      held: true,
       onScreen: false,
     };
     rows.push({ r: await readRoom(ctx, page, 1024, 768, ask), ask });
   }
   const faults = rows.flatMap(({ r, ask }) => roomFaults(r, ask, false));
   ctx.check(
-    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), the Reading Room's strip on its blurred pool, and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; the Explorer's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996)",
+    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), the Reading Room's strip on its blurred pool, and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; every room's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996 and Issue #1034)",
     faults.length === 0,
     rows.map(({ r, ask }) => detail(r, ask)).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),

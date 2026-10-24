@@ -1,4 +1,4 @@
-// The arithmetic of the Explorer's slide-away (Issue #996): how deep the chart fills the screen beside the Broadside, how far the head cluster and the chart folio have followed the zoom there, and where a pointer holds them.
+// The arithmetic of a chart room's slide-away (Issue #996, lifted for every zoom room in Issue #1034): how deep the chart fills the screen beside the room's slip, where the follow starts, how far the head cluster and the chart folio have followed the zoom, and where a pointer holds them.
 export interface Edges {
   readonly left: number;
   readonly top: number;
@@ -24,8 +24,25 @@ export function fillDepth(sheet: Edges, room: Edges): number {
     (room.bottom - cy) / (sheet.bottom - cy),
   );
 }
-export function followStart(fill: number, firstPress: number): number {
-  return Math.min(firstPress, fill);
+function pressesTo(fill: number, step: number): { readonly before: number; readonly at: number } {
+  let before = 1;
+  let at = step;
+  while (at < fill && step > 1) {
+    before = at;
+    at *= step;
+  }
+  return { before, at };
+}
+export function fillPress(fill: number, step: number): number {
+  return Number.isFinite(fill) ? pressesTo(fill, step).at : fill;
+}
+export function followStart(fill: number, step: number): number {
+  if (!Number.isFinite(fill)) return fill;
+  const { before } = pressesTo(fill, step);
+  return before === 1 ? fill : before;
+}
+export function keptStart(fresh: number, kept: number, k: number, fill: number): number {
+  return k <= kept || k >= fill ? fresh : kept;
 }
 export function slideProgress(k: number, from: number, fill: number, reduce: boolean): number {
   if (k >= fill) return 1;
@@ -39,8 +56,32 @@ export function folioTravel(pageHeight: number, titleBottom: number): number {
   return Math.ceil(pageHeight - FOOT_CLEAR - titleBottom);
 }
 export type ArmingEvent = { readonly type: "keydown" | "wheel" | "pointerdown"; readonly onChart: boolean };
-export function arms(e: ArmingEvent): boolean {
-  return e.type === "keydown" || e.onChart;
+export function arms(e: ArmingEvent, keyAnywhere: boolean): boolean {
+  return (e.type === "keydown" && keyAnywhere) || e.onChart;
+}
+export function fillAboutCentre(sheet: Edges, room: Edges, gesture: Edges): number {
+  const cx = (gesture.left + gesture.right) / 2;
+  const cy = (gesture.top + gesture.bottom) / 2;
+  const need = (gap: number, reach: number): number => (reach > 0 ? gap / reach : Infinity);
+  return Math.max(
+    1,
+    need(cx - room.left, cx - sheet.left),
+    need(cy - room.top, cy - sheet.top),
+    need(room.bottom - cy, sheet.bottom - cy),
+  );
+}
+export function restingBox(
+  onScreen: Edges,
+  origin: { readonly x: number; readonly y: number },
+  cam: { readonly x: number; readonly y: number; readonly k: number },
+): Edges {
+  const back = (v: number, o: number, t: number): number => o + (v - o - t) / cam.k;
+  return {
+    left: back(onScreen.left, origin.x, cam.x),
+    top: back(onScreen.top, origin.y, cam.y),
+    right: back(onScreen.right, origin.x, cam.x),
+    bottom: back(onScreen.bottom, origin.y, cam.y),
+  };
 }
 export function steers(pointerType: string): boolean {
   return pointerType === "mouse" || pointerType === "pen";

@@ -18,7 +18,7 @@ import {
 } from "./slide-kit.ts";
 
 const FIRST_PRESS = 1.4;
-const FILL_RANGE: Record<string, [number, number]> = { "1280x800": [1.5, 1.56], "1024x768": [1.9, 1.97] };
+const FILL_RANGE: Record<string, [number, number]> = { "1280x800": [1.5, 1.56], "1024x768": [1.9, 1.959] };
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
   const faults: string[] = [];

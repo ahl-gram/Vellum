@@ -9,8 +9,6 @@ import {
   sb4Folded,
   sb5Leaned,
   sb5fCornerPanels,
-  sb5dGlassBare,
-  sb5eFolioPanel,
   sb8eInsets,
   sb5cFooting,
   sb6RestAgain,
@@ -22,6 +20,7 @@ import {
 } from "./specimen/desktop.ts";
 import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts";
 import { sb15OutPress } from "./specimen/gestures.ts";
+import { sb16LeanedOne, sb19SlidFromRest, slidStep } from "./specimen/slid.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, sleep } = ctx;
@@ -29,7 +28,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = specimenKit({ ...ctx, settle });
-  const { setState, read, goto, brightest } = k;
+  const { setState, read, goto } = k;
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const rest = await goto();
@@ -40,13 +39,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await sleep(900);
     const leaned = await read();
     sb5Leaned(k, leaned);
-    const interior = await brightest(200, 24);
     sb5fCornerPanels(k, leaned);
-    await sb5dGlassBare(k, leaned, interior);
-    await sb5eFolioPanel(k, rest, leaned);
     sb8eInsets(k, leaned);
     await sb5cFooting(k, rest, leaned);
+    await sb16LeanedOne(k);
   });
+  await step("SB17, SB5g, SB5d, SB5e, SB18", () => slidStep(k, rest));
+  await step("SB19", () => sb19SlidFromRest(k));
   await sb6RestAgain(k);
   await step("SB10", () => sb10Route(k));
   await step("SB11", () => sb11Pieces(k));

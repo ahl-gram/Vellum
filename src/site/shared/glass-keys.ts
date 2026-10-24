@@ -3,7 +3,7 @@ import { bindChartTouch, pageTouchEnv } from "./chart-touch.ts";
 import type { ZoomController } from "./zoom-controller.ts";
 
 // The Explorer's own steps (src/site/explorer/glass.ts), not imported: that module carries the LOD schedule the Hunt must never bundle.
-const ZOOM_STEP = 1.4;
+export const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
 
 export function bindGlassKeys(viewport: HTMLElement, zoom: ZoomController): void {

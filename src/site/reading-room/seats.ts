@@ -4,7 +4,8 @@ import type { ReadingFrame } from "../shared/reading-frame/index.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
 import type { ProspectStage } from "./prospect-stage.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { renderScale, scaleTicks } from "../shared/instrument-scale.ts";
 
@@ -39,11 +40,18 @@ export function bindReadingRoom(
   frame: ReadingFrame,
   roomEls: RoomFurniture,
 ): { readonly room: Room; readonly rebase: () => void } {
+  const slide = pageSlideAway({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    gesture: roomEls.viewport,
+    step: ZOOM_STEP,
+  });
   const zoom = createZoomController({
     viewportEl: roomEls.viewport,
     targetEl: frame.host.mapEl,
     scaleExtent: [1, 8],
     glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+    onApply: (s) => slide.follow(s.k),
   });
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);

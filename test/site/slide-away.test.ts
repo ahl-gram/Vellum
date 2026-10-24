@@ -4,16 +4,20 @@ import {
   type Edges,
   arms,
   fillDepth,
+  fillAboutCentre,
+  fillPress,
   folioTravel,
   followStart,
   grown,
   headTravel,
   holdZone,
+  keptStart,
   reachOf,
+  restingBox,
   slideProgress,
   steers,
   within,
-} from "../../src/site/explorer/slide-away.ts";
+} from "../../src/site/shared/slide-away.ts";
 
 const ROOM = { left: 0, top: 0, right: 1000, bottom: 800 };
 
@@ -25,9 +29,66 @@ test("SA1 the fill depth is the magnification about the sheet's centre that reac
   assert.equal(fillDepth({ left: -10, top: -10, right: 1010, bottom: 810 }, ROOM), 1, "a sheet already covering");
 });
 
-test("SA2 the follow starts where the first press lands, or at the fill where the fill comes first", () => {
+test("SA2 the follow starts where the Glass's press before the press that fills lands, at the first press where the second press fills, and at the fill where the first press fills (Alex, 2026-10-23, Issue #997 ruling 5)", () => {
   assert.equal(followStart(1.94, 1.4), 1.4);
   assert.equal(followStart(1.3, 1.4), 1.3);
+  assert.equal(followStart(2.2069, 1.4), 1.4 * 1.4);
+  assert.equal(followStart(2.5827, 1.4), 1.4 * 1.4);
+  assert.equal(followStart(3, 1.4), 1.4 * 1.4 * 1.4);
+  assert.equal(followStart(1.4 * 1.4, 1.4), 1.4, "a fill exactly at the second press's landing is the second press's");
+  assert.equal(
+    followStart(1.9615, 1.4),
+    1.4 * 1.4,
+    "the Prospect's 1280x640 fill lies past the second press's 1.9599999999999997",
+  );
+  assert.equal(followStart(Infinity, 1.4), Infinity);
+});
+
+test("SA9 the press that fills is the first of the Glass's compounded presses at or past the fill", () => {
+  assert.equal(fillPress(1.5334, 1.4), 1.4 * 1.4);
+  assert.equal(fillPress(1.3359, 1.4), 1.4);
+  assert.equal(fillPress(2.0393, 1.4), 1.4 * 1.4 * 1.4);
+  assert.equal(fillPress(1.4 * 1.4, 1.4), 1.4 * 1.4);
+  assert.equal(fillPress(Infinity, 1.4), Infinity);
+});
+
+test("SA10 the Seed of the Day's fill is the magnification about the gesture box's centre that reaches the room's left, top and foot, its right edge unread (Alex, 2026-10-23, Issue #997 ruling 4)", () => {
+  const gesture = { left: 0, top: 0, right: 1000, bottom: 800 };
+  const sheet = { left: 100, top: 200, right: 400, bottom: 600 };
+  assert.equal(fillAboutCentre(sheet, ROOM, gesture), 2);
+  assert.equal(fillDepth(sheet, ROOM), 5, "the plain rule reads the sheet's own centre and differs");
+  assert.equal(fillAboutCentre({ left: 450, top: 0, right: 900, bottom: 800 }, ROOM, gesture), 10, "the left binds");
+  assert.equal(fillAboutCentre({ left: -10, top: -10, right: 1010, bottom: 810 }, ROOM, gesture), 1);
+  const low = { left: 0, top: 100, right: 1000, bottom: 800 };
+  assert.ok(Math.abs(fillAboutCentre(sheet, ROOM, low) - 7 / 3) < 1e-9, "the foot binds about the centre (500, 450)");
+});
+
+test("SA11 a sheet inside the camera's transform reads its resting box with the camera taken off", () => {
+  assert.deepEqual(
+    restingBox({ left: 50, top: 20, right: 650, bottom: 520 }, { x: 10, y: 10 }, { x: -100, y: -50, k: 2 }),
+    {
+      left: 80,
+      top: 40,
+      right: 380,
+      bottom: 290,
+    },
+  );
+  const box = { left: 50, top: 20, right: 650, bottom: 520 };
+  assert.deepEqual(restingBox(box, { x: 10, y: 10 }, { x: 0, y: 0, k: 1 }), box);
+});
+
+test("SA12 a measure taken while the camera stands past the start and short of the fill keeps that start, and at or under the start or at or past the fill takes the room's own (Issue #996 step 6 ruling 4; Alex, 2026-10-23, Issue #1034)", () => {
+  assert.equal(keptStart(1.96, 1.4, 1.96, 2.1118), 1.4, "a fold at the second press keeps the first press's start");
+  assert.equal(keptStart(1.96, 1.4, 1.4, 2.1118), 1.96, "at the start both pieces stand home, so the room's own");
+  assert.equal(keptStart(1.96, 1.4, 1.2, 2.1118), 1.96);
+  assert.equal(keptStart(1.96, 1.4, 2.744, 2.1118), 1.96, "past the fill the room's own");
+  assert.equal(keptStart(1.96, 1.4, 2.1118, 2.1118), 1.96, "at the fill exactly");
+  assert.equal(
+    keptStart(1.4, 1.96, 2.744, 1.8015),
+    1.4,
+    "a fold that narrows the room: its own start, its fill lying under the depth",
+  );
+  assert.equal(keptStart(Infinity, 1.4, 1.96, Infinity), 1.4, "a room that never fills keeps the start");
 });
 
 test("SA3 the slide follows the log of depth from the start to the fill, and reduced motion leaves at the fill alone", () => {
@@ -50,12 +111,14 @@ test("SA4 the head clears its nav by 3 px past the top and the folio keeps its t
   assert.equal(folioTravel(800, 741.5), 57);
 });
 
-test("SA5 a key arms the slide anywhere, a wheel or a press only on the chart or the Glass", () => {
-  assert.equal(arms({ type: "keydown", onChart: false }), true);
-  assert.equal(arms({ type: "wheel", onChart: true }), true);
-  assert.equal(arms({ type: "wheel", onChart: false }), false);
-  assert.equal(arms({ type: "pointerdown", onChart: true }), true);
-  assert.equal(arms({ type: "pointerdown", onChart: false }), false);
+test("SA5 a key arms the slide anywhere on the Explorer and only on the chart or the Glass in a room, and a wheel or a press only on the chart or the Glass (Issue #996; Alex, 2026-10-23, Issue #997 ruling 7)", () => {
+  assert.equal(arms({ type: "keydown", onChart: false }, true), true);
+  assert.equal(arms({ type: "keydown", onChart: false }, false), false);
+  assert.equal(arms({ type: "keydown", onChart: true }, false), true);
+  assert.equal(arms({ type: "wheel", onChart: true }, false), true);
+  assert.equal(arms({ type: "wheel", onChart: false }, true), false);
+  assert.equal(arms({ type: "pointerdown", onChart: true }, false), true);
+  assert.equal(arms({ type: "pointerdown", onChart: false }, true), false);
 });
 
 test("SA8 only a mouse or a pen steers the hold", () => {

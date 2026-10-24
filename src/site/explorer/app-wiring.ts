@@ -6,7 +6,7 @@ import type { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { createGlass, ZOOM_STEP, type Glass } from "./glass.ts";
 import { pageLoupe } from "./loupe-page.ts";
-import { pageSlideAway } from "./slide-away-page.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
 import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
@@ -33,6 +33,8 @@ import {
   mapViewport,
   caption,
   chartDrawer,
+  sheetEl,
+  stageEl,
 } from "./elements.ts";
 
 // The drawer's band is its LAYOUT seat, readable while it is shut and display:none, never its painted rect, which is all zeros shut and mid-slide while open.
@@ -101,7 +103,14 @@ export function pageGlass({
   buttons,
 }: PageGlassDeps): Glass {
   const loupe = pageLoupe({ press: buttons.loupe, motion, worldSvg, glass: () => glass });
-  const slide = pageSlideAway({ reduce: prefersReduce, firstPress: ZOOM_STEP, tokenMs });
+  const slide = pageSlideAway({
+    frame: stageEl,
+    sheet: sheetEl,
+    gesture: mapViewport,
+    step: ZOOM_STEP,
+    keyAnywhere: true,
+    folioCovered: () => chartDrawer.classList.contains("open"),
+  });
   const glass = createGlass({
     mapViewport,
     mapDiv,

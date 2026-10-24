@@ -1,7 +1,8 @@
 // The Portfolio (Issue #521 Sub 3 of Issue #401). The table rides in this page's address, and since Issue #634 falls back to the device when the address names no folio; either way the page reads it ONCE at load and never rewrites it. One job per gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../worker-client.ts";
 import { bindRoom } from "../../shared/room.ts";
-import { bindGlassKeys } from "../../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../../shared/glass-keys.ts";
+import { pageSlideAway } from "../../shared/slide-away-page.ts";
 import { makeAnnouncer } from "../../shared/announce.ts";
 import { createZoomController } from "../../shared/zoom-controller.ts";
 import { chartFilename } from "../../print-room/poster-presets.ts";
@@ -243,11 +244,18 @@ const draft = async (): Promise<void> => {
 };
 
 // The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the Issue #520 scar, a control nobody can use.
+const slide = pageSlideAway({
+  frame: document.querySelector(".stage") as HTMLElement,
+  sheet: document.getElementById("sheet") as HTMLElement,
+  gesture: $("map-viewport"),
+  step: ZOOM_STEP,
+});
 const zoomController = createZoomController({
   viewportEl: $("map-viewport"),
   targetEl: $("map"),
   scaleExtent: [1, 8],
   glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+  onApply: (s) => slide.follow(s.k),
 });
 zoomController.attach();
 bindGlassKeys($("map-viewport"), zoomController);

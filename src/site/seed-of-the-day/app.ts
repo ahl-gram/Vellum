@@ -9,7 +9,9 @@ import { startArrival } from "../explorer/draw-ceremony.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
 import { bindRoom } from "../shared/room.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { pageSlideAway } from "../shared/slide-away-page.ts";
+import { fillAboutCentre, restingBox } from "../shared/slide-away.ts";
 import { errorText } from "../shared/error-text.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 
@@ -47,6 +49,15 @@ const zoomController = createZoomController({
   glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
 });
 zoomController.attach();
+pageSlideAway({
+  frame: $("map"),
+  sheet: $("sheet"),
+  gesture: $("map-viewport"),
+  step: ZOOM_STEP,
+  fill: fillAboutCentre,
+  resting: (onScreen, gesture) => restingBox(onScreen, { x: gesture.left, y: gesture.top }, zoomController.getState()),
+  camera: { target: $("map"), depth: () => zoomController.getState().k },
+});
 // The chart room around the controller; the sheet is fitted once the chart is drawn.
 // The FRAMING is held across a refit, never the raw transform (the RoomCamera contract; the Explorer holds cameraNow the same way).
 const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });

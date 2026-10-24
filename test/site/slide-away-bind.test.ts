@@ -7,7 +7,7 @@ import {
   REST_MS,
   type Measured,
   type SlideAway,
-} from "../../src/site/explorer/slide-away-bind.ts";
+} from "../../src/site/shared/slide-away-bind.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 
 installShim();
@@ -203,4 +203,18 @@ test("SB10 a second eased move inside an ease cancels the first ease's timer, so
   t.head.fire("focusout", { relatedTarget: null });
   assert.equal(t.liveAt(EASE_MS), 1, "still one: the second cancelled the first");
   assert.equal(t.easing(t.head), true);
+});
+
+test("SB11 a follow that carries a measure writes it at its own depth with no ease, where the same measure handed over alone eases (Issue #1034)", () => {
+  const t = build();
+  t.armedAt(1.6);
+  assert.equal(t.read(t.head), "0px -42.98px");
+  t.slide.follow(1.7, { ...MEASURED, from: 1.6 });
+  assert.equal(t.read(t.head), "0px -33.04px");
+  assert.equal(t.read(t.folio), "0px 17.93px");
+  assert.equal(t.easing(t.head) || t.easing(t.folio), false, "a measure the follow carries is not eased");
+  const u = build();
+  u.armedAt(1.6);
+  u.slide.measured({ ...MEASURED, from: 1.6 });
+  assert.equal(u.easing(u.head), true, "the same measure handed over alone eases");
 });
