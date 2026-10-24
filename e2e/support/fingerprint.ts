@@ -77,7 +77,7 @@ export function fingerprinted<C>(
       print(options.browser, unreadBrowser(NOT_PROBED));
       throw failure;
     }
-    const facts = await readBrowser(ctx, "").catch((failure: unknown) => unreadBrowser(errorText(failure)));
+    const facts = await readBrowser(ctx, options.PAGE).catch((failure: unknown) => unreadBrowser(errorText(failure)));
     print(options.browser, facts);
     return ctx;
   };

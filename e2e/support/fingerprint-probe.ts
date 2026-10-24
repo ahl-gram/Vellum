@@ -129,7 +129,36 @@ async function boundedProbe(ctx: ProbeContext): Promise<BrowserFacts> {
   }
 }
 
-export function readBrowserFacts(ctx: ProbeContext, page: string): Promise<BrowserFacts> {
-  void page;
-  return boundedProbe(ctx);
+async function handBack(ctx: ProbeContext, page: string, signal: AbortSignal): Promise<void> {
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  signal.throwIfAborted();
+  await ctx.send("Page.navigate", { url: page });
+}
+
+async function handedBack(ctx: ProbeContext, page: string, facts: BrowserFacts): Promise<BrowserFacts> {
+  const stop = new AbortController();
+  let timer: NodeJS.Timeout | undefined;
+  const gaveUp = new Promise<string>((settle) => {
+    timer = setTimeout(() => {
+      const reason = `the page was not handed back within ${FINGERPRINT_BOUND_MS} ms`;
+      stop.abort(new Error(reason));
+      settle(reason);
+    }, FINGERPRINT_BOUND_MS);
+  });
+  try {
+    const failed = await Promise.race([
+      handBack(ctx, page, stop.signal).then(
+        () => null,
+        (failure: unknown) => `the page was not handed back: ${errorText(failure)}`,
+      ),
+      gaveUp,
+    ]);
+    return failed === null ? facts : { ...facts, unread: failed };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function readBrowserFacts(ctx: ProbeContext, page: string): Promise<BrowserFacts> {
+  return handedBack(ctx, page, await boundedProbe(ctx));
 }
