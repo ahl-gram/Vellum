@@ -142,3 +142,27 @@ test("a page that comes ready only after the bound is never measured, so nothing
   assert.equal(calls.filter((c) => c === "remove").length, 1);
   await reading;
 });
+
+test("a measurement that returns only after the bound asks the page for nothing more, and its box still comes off", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let open: (v: unknown) => void = () => {};
+  const gate = new Promise<unknown>((r) => {
+    open = r;
+  });
+  const { ctx, calls } = page({ measure: () => gate });
+  const reading = readBrowserFacts(ctx);
+  await turn();
+  t.mock.timers.tick(FINGERPRINT_BOUND_MS);
+  await turn();
+  open({ numeroWidth: 100.3125, selectHeight: 34.21875 });
+  await turn();
+  await turn();
+  await turn();
+  assert.deepEqual(
+    calls.filter((c) => c.startsWith("DOM.") || c.startsWith("CSS.")),
+    [],
+    "the probe asked the page for more after its bound",
+  );
+  assert.equal(calls.filter((c) => c === "remove").length, 1);
+  await reading;
+});

@@ -416,4 +416,11 @@ test("a failed verdict ends with the machine each failed lane printed, once howe
   assert.ok(two.endsWith("  on fp-a | fp-b"), two);
   assert.ok(laneOutcome(withLane(a!.name, { code: 1 })).line.endsWith(`  on (lane ${a!.name} printed no fingerprint)`));
   assert.doesNotMatch(laneOutcome(everyLane({ fingerprint: "fp-pass" })).line, /fp-pass/);
+  const [first] = E2E_LANES;
+  const partial = laneOutcome([result({ name: first!.name, fingerprint: "fp-pass" })], [first!]).line;
+  assert.match(partial, /PASS/);
+  assert.doesNotMatch(partial, /fp-pass/);
+  const skipped = laneOutcome([result({ name: first!.name, skipped: true, fingerprint: "fp-pass" })], [first!]).line;
+  assert.match(skipped, /SKIPPED/);
+  assert.doesNotMatch(skipped, /fp-pass/);
 });
