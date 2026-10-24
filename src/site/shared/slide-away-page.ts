@@ -191,7 +191,6 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
   let last = Infinity;
   let from = 0;
   let measuredOnce = false;
-  let armedOnce = false;
   const remeasure = (): void => {
     const m = measure(parts, head, folio, slip);
     if (m === null) return;
@@ -201,12 +200,7 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
     slide.measured(m);
   };
   watchLayout(parts, head, folio, remeasure);
-  const arm = (): void => {
-    if (!armedOnce) remeasure();
-    armedOnce = true;
-    slide.arm();
-  };
-  watchInput({ ...slide, arm }, parts, head, folio, document.querySelector(".corner.br"));
+  watchInput(slide, parts, head, folio, document.querySelector(".corner.br"));
   const follow = (k: number): void => {
     if (!measuredOnce || k <= from) remeasure();
     slide.follow(k);
@@ -220,9 +214,8 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
   return {
     ...slide,
     follow,
-    arm,
     fill: () => {
-      remeasure();
+      if (!measuredOnce) remeasure();
       return last;
     },
   };

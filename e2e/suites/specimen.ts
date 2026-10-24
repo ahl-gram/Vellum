@@ -20,7 +20,7 @@ import {
 } from "./specimen/desktop.ts";
 import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts";
 import { sb15OutPress } from "./specimen/gestures.ts";
-import { sb16LeanedOne, slidStep } from "./specimen/slid.ts";
+import { sb16LeanedOne, sb19SlidFromRest, slidStep } from "./specimen/slid.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, sleep } = ctx;
@@ -45,6 +45,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await sb16LeanedOne(k);
   });
   await step("SB17, SB5g, SB5d, SB5e, SB18", () => slidStep(k, rest));
+  await step("SB19", () => sb19SlidFromRest(k));
   await sb6RestAgain(k);
   await step("SB10", () => sb10Route(k));
   await step("SB11", () => sb11Pieces(k));

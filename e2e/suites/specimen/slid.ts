@@ -82,6 +82,26 @@ async function sb18SlidFromFolded(
   );
 }
 
+export async function sb19SlidFromRest(k: SpecimenKit): Promise<void> {
+  await k.goto();
+  const home = await still(k, "SB19 home");
+  const fill = fillOf(home, "sheet");
+  const travels = travelsOf(home);
+  await k.setState("slid");
+  await lensRest(k, "leaned", "SB19 slid", LENS);
+  const s = await still(k, "SB19 slid");
+  const want = pressDepths(fillPressOf(fill));
+  const faults = awayFaults(s, travels, "slid away from rest");
+  if (Math.abs(s.k - want) > 0.01)
+    faults.push(`the Glass stands at ${s.k.toFixed(4)}, not the press that fills, ${want.toFixed(4)}`);
+  k.check(
+    "SB19 slid away chosen straight from rest on a freshly loaded Book leans the Glass to the press that fills and the head cluster and the chart folio stand at their thin lines (Alex, 2026-10-23, Issue #997 ruling 6)",
+    faults.length === 0,
+    JSON.stringify({ k: s.k, want, fill, ty: [s.head.ty, s.folio.ty] }) +
+      (faults.length ? `; ${faults.join("; ")}` : ""),
+  );
+}
+
 export async function slidStep(k: SpecimenKit, rest: Specimen | null): Promise<void> {
   await k.setState("leaned");
   await lensRest(k, "leaned", "SB17 leaned", LENS);
