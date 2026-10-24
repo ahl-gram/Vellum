@@ -26,7 +26,7 @@ export interface SlideAwayDeps {
   readonly cancel: (timer: number) => void;
 }
 export interface SlideAway {
-  readonly follow: (k: number) => void;
+  readonly follow: (k: number, measure?: Measured) => void;
   readonly measured: (m: Measured) => void;
   readonly arm: () => void;
   readonly point: (head: Spot, folio: Spot) => void;
@@ -114,7 +114,7 @@ export function bindSlideAway(deps: SlideAwayDeps): SlideAway {
   };
   holdOnHead(deps, (why, on) => hold(head, why, on));
   return {
-    follow(next) {
+    follow(next, _measure) {
       k = next;
       write(false);
     },

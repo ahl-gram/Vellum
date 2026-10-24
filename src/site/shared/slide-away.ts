@@ -42,7 +42,7 @@ export function followStart(fill: number, step: number): number {
   return before === 1 ? fill : before;
 }
 export function keptStart(fresh: number, kept: number, k: number, fill: number): number {
-  return fresh;
+  return k <= kept || k >= fill ? fresh : kept;
 }
 export function slideProgress(k: number, from: number, fill: number, reduce: boolean): number {
   if (k >= fill) return 1;
