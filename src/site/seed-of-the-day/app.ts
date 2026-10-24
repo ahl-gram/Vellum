@@ -42,6 +42,13 @@ for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-road]")) {
 // The SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
 // Deliberately NO onSettle: the Hunt is a FIXED world; a semantic redraft would reveal new places and change clue difficulty, so the magnify stays purely geometric.
 // The guess-click math is ratio-based against getBoundingClientRect(), and d3-zoom's click-distance handling keeps a drag-pan from registering as a guess.
+const zoomController = createZoomController({
+  viewportEl: $("map-viewport"),
+  targetEl: $("map"),
+  scaleExtent: [1, 8],
+  glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+});
+zoomController.attach();
 pageSlideAway({
   frame: $("map"),
   sheet: $("sheet"),
@@ -51,13 +58,6 @@ pageSlideAway({
   resting: (onScreen, gesture) => restingBox(onScreen, { x: gesture.left, y: gesture.top }, zoomController.getState()),
   camera: { target: $("map"), depth: () => zoomController.getState().k },
 });
-const zoomController = createZoomController({
-  viewportEl: $("map-viewport"),
-  targetEl: $("map"),
-  scaleExtent: [1, 8],
-  glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
-});
-zoomController.attach();
 // The chart room around the controller; the sheet is fitted once the chart is drawn.
 // The FRAMING is held across a refit, never the raw transform (the RoomCamera contract; the Explorer holds cameraNow the same way).
 const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });
