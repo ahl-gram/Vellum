@@ -10,6 +10,7 @@ import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteCont
 import { debugPortConflictMessage } from "./support/ports.ts";
 import { launchWithRetry } from "./support/launch.ts";
 import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
+import { applyRunnerLayout } from "./support/runner-layout.ts";
 import { serverState, startServer } from "./site-server.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
@@ -315,6 +316,7 @@ async function openSession({
   PORT,
   DPORT,
   PAGE,
+  runnerLayout,
   consoleErrors,
   http4xx,
 }: Omit<StartOptions, "results" | "skippedGroups" | "skippedChecks">): Promise<void> {
@@ -339,6 +341,7 @@ async function openSession({
   try {
     await send("Emulation.setFocusEmulationEnabled", { enabled: true });
   } catch {}
+  if (runnerLayout) console.log(await applyRunnerLayout(send));
   await send("Page.navigate", { url: PAGE });
 }
 
@@ -350,13 +353,14 @@ export async function start({
   PORT,
   DPORT,
   PAGE,
+  runnerLayout,
   results,
   consoleErrors,
   http4xx,
   skippedGroups,
   skippedChecks,
 }: StartOptions): Promise<SuiteContext> {
-  await openSession({ browser, SITE, OUT, PORT, DPORT, PAGE, consoleErrors, http4xx });
+  await openSession({ browser, SITE, OUT, PORT, DPORT, PAGE, runnerLayout, consoleErrors, http4xx });
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);

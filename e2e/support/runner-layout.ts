@@ -17,9 +17,8 @@ export const RUNNER_SELECTS: readonly RunnerSelect[] = [
 ];
 
 export function runnerLayoutCss(family: string, selects: readonly RunnerSelect[]): string {
-  void family;
-  void selects;
-  return "";
+  const face = `@font-face { font-family: "${family}"; src: local("Times New Roman"); unicode-range: U+2116; }`;
+  return [face, ...selects.map((s) => `${s.selector} { height: ${String(s.px)}px; }`)].join(" ");
 }
 
 export const RUNNER_LAYOUT_CSS = runnerLayoutCss(RUNNER_NUMERO_FAMILY, RUNNER_SELECTS);
@@ -28,14 +27,25 @@ export function runnerLayoutScript(css: string): string {
   return `(() => { const s = new CSSStyleSheet(); s.replaceSync(${JSON.stringify(css)}); document.adoptedStyleSheets = [...document.adoptedStyleSheets, s]; })();`;
 }
 
+const E2E_RUNNER_LAYOUT_VAR = "VELLUM_E2E_RUNNER_LAYOUT";
+const RUNNER_MEASURED_ON =
+  "ubuntu-24.04 image 20261012.334.1 with Google Chrome 155.0.8059.39, CI runs 40050364626 and 40051585426 of 2026-10-24";
+const RUNNER_LAYOUT_SCRIPT = runnerLayoutScript(RUNNER_LAYOUT_CSS);
+
+export const RUNNER_LAYOUT_MARK = `runner layout staged (${E2E_RUNNER_LAYOUT_VAR}=1)`;
+
 export function runnerLayoutRequested(env: RunnerLayoutEnv): boolean {
-  void env;
-  return false;
+  const raw = env[E2E_RUNNER_LAYOUT_VAR];
+  if (raw === undefined || raw === "") return false;
+  if (raw === "1") return true;
+  throw new Error(
+    `${E2E_RUNNER_LAYOUT_VAR} must be 1 to stage the CI runner's layout, or unset, not ${JSON.stringify(raw)}: any other value would run on this machine's layout while it reads as the runner's`,
+  );
 }
 
-export function applyRunnerLayout(
+export async function applyRunnerLayout(
   send: (method: string, params: Record<string, unknown>) => Promise<unknown>,
 ): Promise<string> {
-  void send;
-  return Promise.resolve("");
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: RUNNER_LAYOUT_SCRIPT });
+  return `RUNNER LAYOUT: ${E2E_RUNNER_LAYOUT_VAR}=1 stages the CI runner's measured layout (${RUNNER_MEASURED_ON}) over this machine's; a green run here is not a green CI run.`;
 }

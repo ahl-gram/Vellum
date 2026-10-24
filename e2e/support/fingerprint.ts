@@ -2,6 +2,7 @@ import { release as osRelease } from "node:os";
 import { basename } from "node:path";
 import type { StartOptions } from "../types.ts";
 import { errorText } from "./suites.ts";
+import { RUNNER_LAYOUT_MARK } from "./runner-layout.ts";
 
 export const FINGERPRINT_LEAD = "fingerprint: ";
 export const NUMERO_TEXT = "Chart № 42";
@@ -25,6 +26,7 @@ export interface BrowserFacts {
 
 export interface EnvironmentFacts extends HostFacts, BrowserFacts {
   readonly binary: string;
+  readonly runnerLayout?: boolean;
 }
 
 export const hostFacts = (): HostFacts => ({
@@ -53,6 +55,7 @@ export function environmentFingerprint(facts: EnvironmentFacts): string {
     `"${NUMERO_TEXT}" ${px(facts.numeroWidth)}`,
     facts.numeroFace === null ? `${NUMERO_GLYPH} face unread` : `${NUMERO_GLYPH} in ${facts.numeroFace}`,
     `select ${px(facts.selectHeight)}`,
+    ...(facts.runnerLayout === true ? [RUNNER_LAYOUT_MARK] : []),
   ];
   const tail = facts.unread === null ? [] : [`unread because ${firstLine(facts.unread)}`];
   return FINGERPRINT_LEAD + [...parts, ...tail].join("; ");
@@ -67,18 +70,25 @@ export function fingerprinted<C>(
   host: HostFacts,
   out: (line: string) => void,
 ): (options: StartOptions) => Promise<C> {
-  const print = (browser: string, facts: BrowserFacts): void =>
-    out(environmentFingerprint({ ...host, binary: basename(browser), ...facts }));
+  const print = (options: StartOptions, facts: BrowserFacts): void =>
+    out(
+      environmentFingerprint({
+        ...host,
+        binary: basename(options.browser),
+        runnerLayout: options.runnerLayout === true,
+        ...facts,
+      }),
+    );
   return async (options) => {
     let ctx: C;
     try {
       ctx = await start(options);
     } catch (failure) {
-      print(options.browser, unreadBrowser(NOT_PROBED));
+      print(options, unreadBrowser(NOT_PROBED));
       throw failure;
     }
     const facts = await readBrowser(ctx, options.PAGE).catch((failure: unknown) => unreadBrowser(errorText(failure)));
-    print(options.browser, facts);
+    print(options, facts);
     return ctx;
   };
 }
