@@ -194,22 +194,25 @@ export function pageSlideAway(parts: RoomSlideParts): RoomSlide {
   let own = 0;
   let depth = 1;
   let measuredOnce = false;
-  const remeasure = (): void => {
+  const take = (): Measured | undefined => {
     const m = measure(parts, head, folio, slip);
-    if (m === null) return;
+    if (m === null) return undefined;
     const start = measuredOnce ? keptStart(m.from, from, depth, m.fill) : m.from;
     measuredOnce = true;
     own = m.from;
     last = m.fill;
     from = start;
-    slide.measured({ ...m, from: start });
+    return { ...m, from: start };
+  };
+  const remeasure = (): void => {
+    const m = take();
+    if (m !== undefined) slide.measured(m);
   };
   watchLayout(parts, head, folio, remeasure);
   watchInput(slide, parts, head, folio, document.querySelector(".corner.br"));
   const follow = (k: number): void => {
     depth = k;
-    if (!measuredOnce || k <= from || (from < own && k >= last)) remeasure();
-    slide.follow(k);
+    slide.follow(k, !measuredOnce || k <= from || (from < own && k >= last) ? take() : undefined);
   };
   const { camera } = parts;
   if (camera)

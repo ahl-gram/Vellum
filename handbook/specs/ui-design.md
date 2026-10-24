@@ -178,18 +178,22 @@ magnifies it, covers the screen beside the room's slip, so nothing moves until t
 they leave the trail with the chart of the atelier press as a thin top line, on the Prospect with
 its alias line under it, and the chart folio's title as a thin bottom line, on the Reading Room
 under its strip. The Seed of the Day, whose Glass magnifies about its whole stage, is judged where
-its chart really grows, against the left, the top and the foot. A link that opens zoomed, and a zoom
-a room makes for the reader (the Ribbon's itinerary row, the Specimen Book's leaned state), keep
-them home until the reader's own first zoom, pan or key on the chart, or on the Explorer a key
-anywhere; a mouse brought to rest on a thin line brings that piece back, keyboard focus or the chart
-of the atelier opened brings the head back, and neither ever leaves the tab order or the
-accessibility tree (`bindSlideAway` in `src/site/shared/slide-away-bind.ts`). **Provisional until
-the post-use review:** where the follow starts and its curve, what a fold or the Chart Table does
-mid-zoom (part way back on a wide window, further out on 1024 by 768), the thin lines' margins and
-their panels running off the edge, the hover's rest and linger, the ease, the 1024 Press staying
-risen, the jump under reduced motion, the Reading Room's folio under its strip and back by a mouse
-resting on Play's lower half or the strip's foot, the Prospect's two lines, the Seed of the Day's
-edges, and the Specimen Book's leaned and slid away states.
+its chart really grows, against the left, the top and the foot. A fold of the side panel, or the
+Chart Table opened, part way through a zoom keeps the depth the slide started from until the reader
+zooms past the fill or back to that depth, so the pieces come part way back and leave again as the
+zoom goes on, also where the wider room then fills only at a later press (Issue #996 step 6 ruling
+4; Alex, 2026-10-23, Issue #1034). A link that opens zoomed, and a zoom a room makes for the reader
+(the Ribbon's itinerary row, the Specimen Book's leaned state), keep them home until the reader's
+own first zoom, pan or key on the chart, or on the Explorer a key anywhere; a mouse brought to rest
+on a thin line brings that piece back, keyboard focus or the chart of the atelier opened brings the
+head back, and neither ever leaves the tab order or the accessibility tree (`bindSlideAway` in
+`src/site/shared/slide-away-bind.ts`). **Provisional until the post-use review:** where the follow
+starts and its curve, what a fold or the Chart Table does mid-zoom (part way back on a wide window,
+further out on 1024 by 768), the thin lines' margins and their panels running off the edge, the
+hover's rest and linger, the ease, the 1024 Press staying risen, the jump under reduced motion, the
+Reading Room's folio under its strip and back by a mouse resting on Play's lower half or the strip's
+foot, the Prospect's two lines, the Seed of the Day's edges, and the Specimen Book's leaned and slid
+away states.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
   main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit
   while it does (Alex, 2026-10-13, Issue #778). On the Explorer two presses of the room's own stand

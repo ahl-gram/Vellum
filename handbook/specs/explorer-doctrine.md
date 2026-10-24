@@ -151,9 +151,17 @@ make an unqualified rule false. Read the surface, not just the rule.
   (`pageSlideAway` in `src/site/shared/slide-away-page.ts`). It reads the fill depth off the sheet's
   resting box, the box with the camera taken off where the sheet rides inside the transform, so a pan
   never moves it, and measures again when the room lays out, never on a fold's class, which lands
-  before the refit; a piece it slides is read at home by every seat (`rectOf` in
-  `src/site/shared/room-seats.ts`), and a mouse holds it by the place card's rule, read against the
-  moving pointer, never by a piece that takes the pointer.
+  before the refit. It also measures on every apply that leaves the depth at or under the start, where
+  both pieces stand home, since a room can lay out with no change it watches (the Reading Room's strip
+  height, written on the body, moves its chart folio; Issue #1034). A measure taken while the depth
+  stands past the start and short of the fill keeps that start (`keptStart` in
+  `src/site/shared/slide-away.ts`) until the depth next reaches the start or the fill, so a fold, the
+  Chart Table opened or a resize made there moves the pieces with the chart from the start the zoom
+  began at, part way back where the room widens (Issue #996 step 6 ruling 4; Alex, 2026-10-23, Issue
+  #1034; provisional with the rest of the slide's feel, `handbook/specs/ui-design.md`). A piece it
+  slides is read at home by every seat (`rectOf` in `src/site/shared/room-seats.ts`), and a mouse
+  holds it by the place card's rule, read against the moving pointer, never by a piece that takes the
+  pointer.
 - **The hold freezes the redraft and widens the camera, and every home lets it go** (Alex,
   2026-10-04 and 2026-10-20, Issue #751). While the Glass's hold press is lit, a settle still writes
   the address and never reaches the redraft, so the sheet on the table, a region inset or the bare

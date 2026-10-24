@@ -114,7 +114,8 @@ export function bindSlideAway(deps: SlideAwayDeps): SlideAway {
   };
   holdOnHead(deps, (why, on) => hold(head, why, on));
   return {
-    follow(next, _measure) {
+    follow(next, measure) {
+      if (measure !== undefined) m = measure;
       k = next;
       write(false);
     },
