@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
+import { markRiverCells } from "../../src/hydrology/rivers.ts";
 
 test("defaultRecipe is deterministic and respects overrides", () => {
   const a = defaultRecipe(42);
@@ -84,7 +85,8 @@ test("a world's climate is computeClimate's over the world's own rivers, which w
   const recipe = defaultRecipe(42, { gridW: 160, gridH: 120 });
   const world = generateWorld(recipe);
   const opts = { band: recipe.band, windDir: world.winds.dir };
-  const wet = computeClimate(world.elev, world.seaLevel, recipe.seed, { ...opts, riverCells: world.riverCells });
+  const riverCells = markRiverCells(world.rivers, world.elev.w, world.elev.h);
+  const wet = computeClimate(world.elev, world.seaLevel, recipe.seed, { ...opts, riverCells });
   const dry = computeClimate(world.elev, world.seaLevel, recipe.seed, opts);
   const moisture = Array.from(world.climate.moisture.data);
   assert.notDeepEqual(moisture, Array.from(dry.moisture.data), "the world's own rivers wet its moisture");
