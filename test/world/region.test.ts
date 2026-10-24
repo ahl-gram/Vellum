@@ -7,6 +7,7 @@ import { createLoreWriter } from "../../src/society/lore.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { classifyBiomes, BIOMES } from "../../src/climate/biomes.ts";
+import { markRiverCells } from "../../src/hydrology/rivers.ts";
 import { createChainCache } from "../../src/world/detail-chain.ts";
 import { hamletCandidates } from "../../src/society/hamlets.ts";
 
@@ -121,7 +122,8 @@ test("region moisture is computeClimate's over the region's own rivers, laid and
     worldAspect: (bigWorld.recipe.gridW - 1) / (bigWorld.recipe.gridH - 1),
   };
   const seed = bigWorld.recipe.seed;
-  const wet = computeClimate(region.elev, bigWorld.seaLevel, seed, { ...opts, riverCells: region.riverCells });
+  const riverCells = markRiverCells(region.rivers, region.elev.w, region.elev.h);
+  const wet = computeClimate(region.elev, bigWorld.seaLevel, seed, { ...opts, riverCells });
   const dry = computeClimate(region.elev, bigWorld.seaLevel, seed, opts);
   const moisture = Array.from(region.climate.moisture.data);
   assert.notDeepEqual(moisture, Array.from(dry.moisture.data), "the region's own rivers wet its moisture");
