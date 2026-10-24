@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { StartOptions, SuiteContext } from "../types.ts";
 import { browserlessAction } from "./browser-policy.ts";
 import { e2eOutSubdir, resolveE2ePorts } from "./ports.ts";
+import { runnerLayoutRequested } from "./runner-layout.ts";
 import { E2E_SKIPS, unmetSkips } from "./skips.ts";
 import type { E2eSkip } from "./skips.ts";
 import {
@@ -55,13 +56,13 @@ type Plan = Omit<StartOptions, "browser" | keyof Accumulators> & {
   readonly tier: string;
 };
 
-function plan(env: EnvLike): Plan {
+export function plan(env: EnvLike): Plan {
   const SITE = env["VELLUM_SITE_DIR"] ? resolve(env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
   const { PORT, DPORT } = resolveE2ePorts(env);
   const OUT = join(REPO, "out", e2eOutSubdir(PORT));
   const PAGE = `http://127.0.0.1:${PORT}/explorer/`;
   const { names, tier } = resolveSuiteSelection(env);
-  return { SITE, OUT, PORT, DPORT, PAGE, selected: names, tier };
+  return { SITE, OUT, PORT, DPORT, PAGE, runnerLayout: runnerLayoutRequested(env), selected: names, tier };
 }
 
 export function browserlessExit(

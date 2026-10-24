@@ -20,6 +20,7 @@ export type StartOptions = {
   PORT: number;
   DPORT: number;
   PAGE: string;
+  runnerLayout?: boolean;
   results: { name: string; ok: boolean }[];
   consoleErrors: string[];
   http4xx: string[];
