@@ -7,6 +7,7 @@ import { createLoreWriter } from "../../src/society/lore.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { classifyBiomes, BIOMES } from "../../src/climate/biomes.ts";
+import { markRiverCells } from "../../src/hydrology/rivers.ts";
 import { createChainCache } from "../../src/world/detail-chain.ts";
 import { hamletCandidates } from "../../src/society/hamlets.ts";
 
@@ -103,6 +104,33 @@ test("region temperature is continuous with the world via the parent elevSpan (A
     Array.from(region.climate.temperature.data),
     Array.from(ref.temperature.data),
     "the region normalizes lapse-rate against the world span, not its own local max",
+  );
+});
+
+test("region moisture is computeClimate's over the region's own rivers, laid and extracted, which wet it (Issue #1005)", () => {
+  const win = { u0: 0.02, v0: 0.16, u1: 0.37, v1: 0.51 };
+  const region = generateRegionWorld(bigWorld, {
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Lowland Environs",
+  });
+  const opts = {
+    band: bigWorld.recipe.band,
+    windDir: bigWorld.winds.dir,
+    window: win,
+    worldAspect: (bigWorld.recipe.gridW - 1) / (bigWorld.recipe.gridH - 1),
+  };
+  const seed = bigWorld.recipe.seed;
+  const riverCells = markRiverCells(region.rivers, region.elev.w, region.elev.h);
+  const wet = computeClimate(region.elev, bigWorld.seaLevel, seed, { ...opts, riverCells });
+  const dry = computeClimate(region.elev, bigWorld.seaLevel, seed, opts);
+  const moisture = Array.from(region.climate.moisture.data);
+  assert.notDeepEqual(moisture, Array.from(dry.moisture.data), "the region's own rivers wet its moisture");
+  assert.deepEqual(
+    moisture,
+    Array.from(wet.moisture.data),
+    "by exactly the river bonus over all the region's river cells",
   );
 });
 

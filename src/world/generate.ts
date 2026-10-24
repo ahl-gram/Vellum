@@ -2,9 +2,16 @@ import { bfsDistance } from "../core/bfs-distance.ts";
 import { createRng, type Rng } from "../core/rng.ts";
 import type { Field } from "../core/grid.ts";
 import { classifyBiomes, BIOMES } from "../climate/biomes.ts";
-import { computeClimate, type Climate, type ClimateBand } from "../climate/climate.ts";
+import {
+  computeDryClimate,
+  rainFrom,
+  withRiverMoisture,
+  type Climate,
+  type ClimateBand,
+  type DryClimate,
+} from "../climate/climate.ts";
 import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
-import { extractRivers, isMajorRiver, type River } from "../hydrology/rivers.ts";
+import { extractRivers, isMajorRiver, markRiverCells, type River } from "../hydrology/rivers.ts";
 import { mountainCrests } from "../hydrology/crests.ts";
 import { findLakes } from "../hydrology/lakes.ts";
 import { buildHeightfield, looseningOf, type MapType } from "../terrain/heightfield.ts";
@@ -97,38 +104,25 @@ function hydrologyStage(
   elev: Field,
   seaLevel: number,
   winds: Winds,
-): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
+): { dry: DryClimate; flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
   const { seed, gridW, gridH } = recipe;
-  const preClimate = computeClimate(elev, seaLevel, seed, {
+  const dry = computeDryClimate(elev, seaLevel, seed, {
     band: recipe.band,
     windDir: winds.dir,
   });
-  const rain = new Float64Array(gridW * gridH);
-  for (let i = 0; i < rain.length; i++) {
-    rain[i] = 0.3 + 1.4 * (preClimate.moisture.data[i] as number);
-  }
-
-  const flow = computeFlow(elev, seaLevel, rain);
+  const flow = computeFlow(elev, seaLevel, rainFrom(dry.moisture));
   const rivers = extractRivers(elev, flow, seaLevel);
-  const riverCells = new Uint8Array(gridW * gridH);
-  for (const r of rivers) {
-    for (const p of r.points) riverCells[p.x + p.y * gridW] = 1;
-  }
-  return { flow, rivers, riverCells };
+  const riverCells = markRiverCells(rivers, gridW, gridH);
+  return { dry, flow, rivers, riverCells };
 }
 
 function climateStage(
-  recipe: WorldRecipe,
   elev: Field,
   seaLevel: number,
-  winds: Winds,
+  dry: DryClimate,
   riverCells: Uint8Array,
 ): { climate: Climate; biomes: Uint8Array } {
-  const climate = computeClimate(elev, seaLevel, recipe.seed, {
-    band: recipe.band,
-    riverCells,
-    windDir: winds.dir,
-  });
+  const climate = withRiverMoisture(dry, riverCells);
   const biomes = classifyBiomes(elev, seaLevel, climate);
   return { climate, biomes };
 }
@@ -330,8 +324,8 @@ export function generateWorld(recipe: WorldRecipe): World {
   const rng = createRng(seed);
 
   const { elev, seaLevel, winds } = terrainStage(recipe, rng);
-  const { flow, rivers, riverCells } = hydrologyStage(recipe, elev, seaLevel, winds);
-  const { climate, biomes } = climateStage(recipe, elev, seaLevel, winds, riverCells);
+  const { dry, flow, rivers, riverCells } = hydrologyStage(recipe, elev, seaLevel, winds);
+  const { climate, biomes } = climateStage(elev, seaLevel, dry, riverCells);
   const ground: Ground = { elev, seaLevel, flow, rivers, riverCells, biomes };
 
   const citystate = mapType === "citystate";
