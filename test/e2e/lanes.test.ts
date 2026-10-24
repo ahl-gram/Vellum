@@ -27,6 +27,7 @@ const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
   ms: 1000,
   skipped: false,
   tally: null,
+  fingerprint: null,
   ...over,
 });
 
@@ -395,4 +396,24 @@ test("lanes that skipped for want of a browser never read as a pass", () => {
 
   const required = laneOutcome(withLane(E2E_LANES[1]!.name, { code: 1, skipped: true }));
   assert.equal(required.ok, false, "a lane that exited non-zero must fail even if it printed SKIP");
+});
+
+test("a failed verdict ends with the machine each failed lane printed, once however many share it, and a passing verdict carries none", () => {
+  const [a, b] = E2E_LANES;
+  assert.ok(laneOutcome([result({ name: a!.name, code: 1, fingerprint: "fp-a" })], [a!]).line.endsWith("  on fp-a"));
+  const same = laneOutcome(everyLane({ code: 1, fingerprint: "fp-same" })).line;
+  assert.ok(same.endsWith("  on fp-same"), same);
+  assert.equal(same.split("fp-same").length, 2, same);
+  const two = laneOutcome(
+    E2E_LANES.map((lane) =>
+      result({
+        name: lane.name,
+        ...(lane === a ? { code: 1, fingerprint: "fp-a" } : {}),
+        ...(lane === b ? { code: 1, fingerprint: "fp-b" } : {}),
+      }),
+    ),
+  ).line;
+  assert.ok(two.endsWith("  on fp-a | fp-b"), two);
+  assert.ok(laneOutcome(withLane(a!.name, { code: 1 })).line.endsWith(`  on (lane ${a!.name} printed no fingerprint)`));
+  assert.doesNotMatch(laneOutcome(everyLane({ fingerprint: "fp-pass" })).line, /fp-pass/);
 });

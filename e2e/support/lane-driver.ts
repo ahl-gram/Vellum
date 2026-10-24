@@ -85,7 +85,7 @@ function runLane(lane: E2eLane, io: LaneDriverIo): Promise<LaneResult> {
     streamLines(child.stdout, prefix, io.out, readLine);
     streamLines(child.stderr, prefix, io.err, readLine);
     const done = (code: number | null) =>
-      settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
+      settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally, fingerprint: null });
     child.on("error", (err) => {
       io.err(`${prefix} FAIL: lane could not start: ${err.message}`);
       done(2);

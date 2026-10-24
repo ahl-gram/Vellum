@@ -109,6 +109,7 @@ export interface LaneResult {
   readonly ms: number;
   readonly skipped: boolean;
   readonly tally: LaneTally | null;
+  readonly fingerprint: string | null;
 }
 
 export function laneChildEnv(lane: E2eLane, base: E2eSuiteEnv): Record<string, string> {
