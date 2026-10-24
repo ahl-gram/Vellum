@@ -26,6 +26,7 @@ import {
 import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
 import { pr38BoundDress } from "./print-room/dress.ts";
 import { pr36Authored } from "./print-room/room.ts";
+import { pr40RunnerLayout } from "./print-room/runner-layout.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
@@ -68,6 +69,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr8Fallback(ctx);
   // PRW/PRW2 (Issue #137) run after every check on the shared page: they navigate away from it.
   await prwWarp(ctx);
+  await step("PR40", () => pr40RunnerLayout(ctx));
   // PR36 runs last so prlLink's start, print-room's NEEDS_PREDECESSOR entry and the PR #701 row's reasoning stay true; it leaves a scripts-off page, which the next suite's own navigation replaces.
   await step("PR36", () => pr36Authored(ctx));
 }
