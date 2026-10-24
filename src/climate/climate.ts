@@ -128,7 +128,9 @@ export function computeDryClimate(elev: Field, seaLevel: number, seed: number, o
 }
 
 export function withRiverMoisture(dry: DryClimate, riverCells: Uint8Array): Climate {
-  return { temperature: dry.temperature, moisture: dry.moisture };
+  const { w, h } = dry.moistureSum;
+  const riverDist = bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1);
+  return { temperature: dry.temperature, moisture: moistureField(dry.moistureSum, riverDist) };
 }
 
 export function computeClimate(elev: Field, seaLevel: number, seed: number, opts: ClimateOptions): Climate {
