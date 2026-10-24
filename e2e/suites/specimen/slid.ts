@@ -1,7 +1,8 @@
 // The Specimen Book's leaned and slid away states (Issue #1034, Alex's ruling 6 on Issue #997): leaned stands one press of the Glass in with the head cluster and the chart folio home on their panels, slid away arms the slide and leans to the press that fills, and the sheet's spill and the Glass's bare ground and the room folio's edge are read there.
+import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import { LENS, lensRest } from "../print-room/print.ts";
-import { awayFaults, fillOf, fillPressOf, pressDepths, still, travelsOf } from "../slide-away/kit.ts";
+import { awayFaults, fillOf, fillPressOf, PIECES, pressDepths, still, travelsOf } from "../slide-away/kit.ts";
 import type { Pieces } from "../slide-away/kit.ts";
 import { sb5dGlassBare, sb5eFolioPanel } from "./desktop.ts";
 import type { SpecimenKit } from "./kit.ts";
@@ -62,11 +63,19 @@ async function sb18SlidFromFolded(
   openFill: number,
   travels: { up: number; down: number },
 ): Promise<void> {
+  const open = await k.evaluate(PIECES);
   await k.setState("folded");
   await lensRest(k, "still", "SB18 folded", LENS);
+  // Wiring, said at the check: the fold's class lands before the refit, so the read waits for the sheet to have moved to its folded box.
+  await makeSettle(k)(PIECES, (d) => d.slip?.open === false && d.sheet[2] !== open.sheet[2], "SB18 folded sheet", 60);
   const folded = await still(k, "SB18 folded");
   const faults: string[] = [];
   if (folded.slip?.open !== false) faults.push("the slip is not folded before the choice (the precondition)");
+  const foldedFill = fillOf(folded, "sheet");
+  if (!(fillPressOf(foldedFill) > fillPressOf(openFill)))
+    faults.push(
+      `the folded room fills at ${foldedFill.toFixed(4)}, press ${fillPressOf(foldedFill)}, no later than the open room's press ${fillPressOf(openFill)}, so a glide aimed by the folded measure lands where the open one does (the witness)`,
+    );
   await k.setState("slid");
   await lensRest(k, "leaned", "SB18 slid", LENS);
   const slid = await still(k, "SB18 slid");
@@ -78,7 +87,8 @@ async function sb18SlidFromFolded(
   k.check(
     "SB18 slid away chosen from folded unfolds the slip and leans the Glass to the press that fills the open room, where the head cluster and the chart folio stand at their thin lines (Alex, 2026-10-23, Issue #997 ruling 6)",
     faults.length === 0,
-    JSON.stringify({ k: slid.k, want, open: slid.slip?.open }) + (faults.length ? `; ${faults.join("; ")}` : ""),
+    JSON.stringify({ k: slid.k, want, foldedFill, open: slid.slip?.open }) +
+      (faults.length ? `; ${faults.join("; ")}` : ""),
   );
 }
 

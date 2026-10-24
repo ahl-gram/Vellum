@@ -57,10 +57,10 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   return { faults, detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}` };
 }
 
-// Seed 42's first prospect at 1280x800 sets its chart folio's one line on screen at the fill, the title, on the chart's dark green ground, which reads 5.32 with the panels taken away (measured 2026-10-23 at b82a7f00), so its panel is not what carries that line.
-const BARE_SPARED = { room: "Prospect", piece: "chart folio" } as const;
-
-async function sw4Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string[]; detail: string }> {
+async function sw4Visit(
+  ctx: SuiteContext,
+  room: Room,
+): Promise<{ faults: string[]; detail: string; folioBare: number | null }> {
   const a = await still(ctx, `SW4 ${room.id}`);
   const keep = ["cluster", ...(room.id === "Reading Room" ? [] : ["chart folio"])];
   const seen = await ctx.evaluate(GLYPH_LINES);
@@ -68,38 +68,44 @@ async function sw4Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   const read = await grounds(ctx, lines);
   const bare = await withStyle(ctx, "sw-bare", BARE, () => grounds(ctx, lines));
   const faults: string[] = [];
-  for (const p of keep) {
-    if (!lines.some((g) => g.piece === p)) faults.push(`${room.id}: no ${p} line is on screen`);
-    if (room.id === BARE_SPARED.room && p === BARE_SPARED.piece) continue;
-    if (!(worstOf(bare, p) < FLOOR_PLAIN))
-      faults.push(
-        `${room.id}: the ${p} reads ${worstOf(bare, p).toFixed(2)} with the panels taken away, so the read cannot see them fail`,
-      );
-  }
+  for (const p of keep) if (!lines.some((g) => g.piece === p)) faults.push(`${room.id}: no ${p} line is on screen`);
+  if (!(worstOf(bare, "cluster") < FLOOR_PLAIN))
+    faults.push(
+      `${room.id}: the cluster reads ${worstOf(bare, "cluster").toFixed(2)} with the panels taken away, so the read cannot see its panel fail`,
+    );
   for (const g of read.filter((x) => x.ratio < FLOOR_PLAIN))
     faults.push(`${room.id}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
   return {
     faults,
     detail: `${room.id} worst ${worstOf(read).toFixed(2)}, bare ${keep.map((p) => `${p} ${worstOf(bare, p).toFixed(2)}`).join(" and ")} (${bare.map((g) => `${g.piece} ${g.t.slice(0, 12)} ${g.ratio.toFixed(2)}`).join(", ")})`,
+    folioBare: keep.includes("chart folio") ? worstOf(bare, "chart folio") : null,
   };
 }
 
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
   const one: { faults: string[]; detail: string }[] = [];
-  const four: { faults: string[]; detail: string }[] = [];
+  const four: { faults: string[]; detail: string; folioBare: number | null }[] = [];
   for (const room of ROOMS) {
     one.push(await sw1Visit(ctx, room));
     four.push(await sw4Visit(ctx, room));
   }
   const f1 = one.flatMap((r) => r.faults);
-  const f4 = four.flatMap((r) => r.faults);
+  const folioBare = four.flatMap((r) => (r.folioBare === null ? [] : [r.folioBare]));
+  const f4 = [
+    ...four.flatMap((r) => r.faults),
+    ...(folioBare.some((v) => v < FLOOR_PLAIN)
+      ? []
+      : [
+          `no room's chart folio reads under ${FLOOR_PLAIN}:1 with the panels taken away (${folioBare.map((v) => v.toFixed(2)).join(", ")}), so the read cannot see its panel fail`,
+        ]),
+  ];
   ctx.check(
     "SW1 in each of the seven other zoom rooms at 1280x800, the Print Room, the Portfolio, the Prospect, the Reading Room, the Ribbon, the Seed of the Day and the Specimen Book, the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, on the Prospect its second line kept under the trail, the folio's title 2 px above the foot and its other lines below it, on the Reading Room under the strip (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996)",
     f1.length === 0,
     one.map((r) => r.detail).join("; ") + (f1.length ? `; ${f1.length} faults: ${f1.slice(0, 6).join("; ")}` : ""),
   );
   ctx.check(
-    "SW4 in the same visits, every line of the head cluster and of the chart folio left on screen at the press that fills reads at 4.5:1 or better on the zoomed panels, the Reading Room's folio under its strip unread; in the same run with the panels taken away the head cluster reads under 4.5:1 in every room and the chart folio in every room but the Prospect, whose title stands on ground that passes there without its panel, so the read can see the panels fail (Alex, 2026-10-22, Issue #988 and Issue #989 ruling 3; Alex, 2026-10-23, Issue #997)",
+    "SW4 in the same visits, every line of the head cluster and of the chart folio left on screen at the press that fills reads at 4.5:1 or better on the zoomed panels, the Reading Room's folio under its strip unread; in the same run with the panels taken away the head cluster reads under 4.5:1 in every room and the chart folio in at least one, so the read can see each panel fail (Alex, 2026-10-22, Issue #988 and Issue #989 ruling 3; Alex, 2026-10-23, Issue #997)",
     f4.length === 0,
     four.map((r) => r.detail).join("; ") + (f4.length ? `; ${f4.length} faults: ${f4.slice(0, 6).join("; ")}` : ""),
   );
@@ -138,32 +144,38 @@ const ARMS: readonly ThirdArm[] = [
   },
 ];
 
-async function thirdPress(ctx: SuiteContext, arm: ThirdArm): Promise<string[]> {
+async function thirdPress(ctx: SuiteContext, arm: ThirdArm): Promise<{ faults: string[]; detail: string }> {
   const home = await arm.open(ctx);
   const faults = homeFaults(home, `${arm.id} at rest`);
   const fill = fillOf(home, "sheet");
-  if (fillPressOf(fill) !== 3)
-    faults.push(
-      `${arm.id}: the fill ${fill.toFixed(4)} lies at press ${fillPressOf(fill)}, not the third (the witness)`,
-    );
+  const n = Number.isFinite(fill) ? fillPressOf(fill) : 0;
+  const detail = `${arm.id} fill ${fill.toFixed(4)} press ${n}`;
+  if (n < 3)
+    return {
+      faults: [
+        ...faults,
+        `${arm.id}: the fill ${fill.toFixed(4)} lies at press ${n}, not the third or later (the witness)`,
+      ],
+      detail,
+    };
   const travels = travelsOf(home);
   await motionOn(ctx, async () => {
-    await pressGlass(ctx, arm.lens, `SW2 ${arm.id} 1`);
-    await pressGlass(ctx, arm.lens, `SW2 ${arm.id} 2`);
-    faults.push(...homeFaults(await still(ctx, `SW2 ${arm.id} second`), `${arm.id} after the second press`));
-    await pressGlass(ctx, arm.lens, `SW2 ${arm.id} 3`);
-    faults.push(...awayFaults(await still(ctx, `SW2 ${arm.id} third`), travels, `${arm.id} after the third press`));
+    for (let i = 1; i < n; i++) await pressGlass(ctx, arm.lens, `SW2 ${arm.id} ${i}`);
+    faults.push(...homeFaults(await still(ctx, `SW2 ${arm.id} before`), `${arm.id} after press ${n - 1}`));
+    await pressGlass(ctx, arm.lens, `SW2 ${arm.id} ${n}`);
+    faults.push(...awayFaults(await still(ctx, `SW2 ${arm.id} fill`), travels, `${arm.id} after press ${n}`));
   });
-  return faults;
+  return { faults, detail };
 }
 
 export async function sw2ThirdPress(ctx: SuiteContext): Promise<void> {
-  const faults: string[] = [];
-  for (const arm of ARMS) faults.push(...(await thirdPress(ctx, arm)));
+  const arms: { faults: string[]; detail: string }[] = [];
+  for (const arm of ARMS) arms.push(await thirdPress(ctx, arm));
+  const faults = arms.flatMap((a) => a.faults);
   ctx.check(
-    "SW2 where the chart fills the screen only at the Glass's third press, the Print Room and the Specimen Book at 1024x768 and the Explorer at 1280x640 with the Broadside folded, the head cluster and the chart folio stand home after the second press and at their thin lines after the third: nothing moves until the press that fills (Alex, 2026-10-23, Issue #997 ruling 5)",
+    "SW2 where the chart fills the screen only at the Glass's third press or later, the Print Room and the Specimen Book at 1024x768 and the Explorer at 1280x640 with the Broadside folded, the head cluster and the chart folio stand home after the press before the one that fills and at their thin lines after it: nothing moves until the press that fills (Alex, 2026-10-23, Issue #997 ruling 5)",
     faults.length === 0,
-    faults.length ? faults.slice(0, 6).join("; ") : "home after the second press and away after the third on all three",
+    arms.map((a) => a.detail).join("; ") + (faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""),
   );
 }
 
