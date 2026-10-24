@@ -24,9 +24,9 @@ export function bfsPath(
     const i = queue[head++] as number;
     const x = i % w;
     const y = (i / w) | 0;
-    for (const [dx, dy] of NEIGHBORS_8) {
-      const nx = x + dx;
-      const ny = y + dy;
+    for (const offset of NEIGHBORS_8) {
+      const nx = x + offset[0];
+      const ny = y + offset[1];
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
       const ni = nx + ny * w;
       if (seen[ni] || !passable(ni)) continue;

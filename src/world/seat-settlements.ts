@@ -50,9 +50,9 @@ export function seatReach(gridW: number, window: UvWindow, worldGridW: number): 
 }
 
 function besideWhere(w: number, h: number, x: number, y: number, hit: (i: number) => boolean): boolean {
-  return NEIGHBORS_8.some(([dx, dy]) => {
-    const nx = x + dx;
-    const ny = y + dy;
+  return NEIGHBORS_8.some((offset) => {
+    const nx = x + offset[0];
+    const ny = y + offset[1];
     return nx >= 0 && nx < w && ny >= 0 && ny < h && hit(nx + ny * w);
   });
 }

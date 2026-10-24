@@ -46,6 +46,7 @@ import {
   z21Target,
   z21Hamlets,
   z21bOneBandUp,
+  z21cFarmsteads,
   zRestore,
   type Target21,
 } from "./zoom/bands.ts";
@@ -129,6 +130,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const target21 = await z21Target(k);
   const deep21 = await z21Hamlets(k, target21);
   await z21bOneBandUp(k, target21, deep21);
+  await step("Z21c", () => z21cFarmsteads(k));
   const pick = await zHold(step, k, target21);
   await zLoupe(step, k, pick);
   await step("Z restore", () => zRestore(k));

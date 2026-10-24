@@ -124,9 +124,9 @@ function shoreAndRiver(world: World, wx: number, wy: number): { harbor: boolean;
   const { data } = world.elev;
   let harbor = false;
   let riverNear = false;
-  for (const [dx, dy] of NEIGHBORS_8) {
-    const nx = wx + dx;
-    const ny = wy + dy;
+  for (const offset of NEIGHBORS_8) {
+    const nx = wx + offset[0];
+    const ny = wy + offset[1];
     if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) continue;
     const ni = nx + ny * gridW;
     if ((data[ni] as number) <= world.seaLevel) harbor = true;

@@ -47,10 +47,11 @@ export interface TableWorld {
   readonly overrides: TableOverrides;
 }
 
-/** A committed redraft: the RegionJob tuple with `window` as (rung, lattice centre) and `render` decomposed. `rung` is the Glass's LOD band, NOT called `band`, which every host key name already spends on the climate band. */
-/** The Glass's region bands. Narrow on purpose: `tableWindow` indexes LOD_BANDS with it. */
-export type Rung = 1 | 2 | 3;
+export const RUNGS = [1, 2, 3, 4, 5] as const;
+export type Rung = (typeof RUNGS)[number];
+export const isRung = (n: number): n is Rung => (RUNGS as readonly number[]).includes(n);
 
+/** A committed redraft: the RegionJob tuple with `window` as (rung, lattice centre) and `render` decomposed. `rung` is the Glass's LOD band, NOT called `band`, which every host key name already spends on the climate band. */
 export interface SurveyItem extends TableWorld {
   readonly kind: "survey";
   readonly rung: Rung;
@@ -97,10 +98,7 @@ const coastField = (raw: string | undefined): Field<number> => (raw === undefine
 const seal = (raw: string | undefined): Field<boolean> =>
   raw === undefined ? undefined : raw === "1" ? true : raw === "0" ? false : null;
 
-const regionBand = (rung: number): LodBand | null => {
-  const band = LOD_BANDS[rung];
-  return band && band.isRegion ? band : null;
-};
+const regionBand = (rung: number): LodBand | null => (isRung(rung) ? (LOD_BANDS[rung] as LodBand) : null);
 
 const latticeStep = (band: LodBand): number => band.sizeUV / LATTICE_DIVISIONS;
 const latticeMax = (band: LodBand): number => LATTICE_DIVISIONS / band.sizeUV;
@@ -149,7 +147,7 @@ function readItem(chunk: string): TableItem | null {
     const theme = allowed(fields.get("theme"), THEME_NAMES);
     const rung = nat(fields.get("rung"));
     if (legend == null || arms == null || beasts == null || theme === null || rung == null) return null;
-    const seat = regionBand(rung) ? (rung as Rung) : null;
+    const seat = isRung(rung) ? rung : null;
     const band = seat === null ? null : LOD_BANDS[seat];
     if (!band || seat === null) return null;
     const lx = nat(fields.get("lx"));

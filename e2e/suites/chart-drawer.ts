@@ -21,6 +21,7 @@ import {
   cd8Home,
   cd51NoTipKeyed,
   cd52LayWrites,
+  cd63DeepestLays,
 } from "./chart-drawer/desk.ts";
 import { cd45SnapBack, cd46ReducedCarry, cd47FullCarry, cd53Ceremony } from "./chart-drawer/drag.ts";
 import { cd54PortfolioLines, cd55WhereAuthored, cd56WorkerBlocked } from "./chart-drawer/room.ts";
@@ -91,6 +92,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("CD46", () => cd46ReducedCarry(kd));
   await step("CD4", () => cd4Reload(kd, laid));
   await step("CD5", () => cd5CuttingOff(kd));
+  await step("CD63", () => cd63DeepestLays(kd));
   const SIX = [
     "rung-1.lx-4.ly-4",
     "rung-1.lx-3.ly-3",

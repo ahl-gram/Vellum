@@ -35,7 +35,7 @@ async function deep(k: ZoomKit, cu: number, cv: number): Promise<void> {
   await k.enterAt(DEPTH, cu, cv);
   await makeSettle(k)<{ k: number; hashK: string | null }>(
     DEEP,
-    (d) => d.k === DEPTH && d.hashK === "8.0000",
+    (d) => d.k === DEPTH && d.hashK === "24.0000",
     "zh-deep",
   );
 }
@@ -70,11 +70,11 @@ const HAMLET_WITNESSES = WITNESSES(
 
 const PICK_WINDOW =
   `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
-  `const {hamletCandidates}=await import("/explorer/engine/society/hamlets.js");` +
-  `const {quantizeCenter,lodWindowFor,insetSheetRect,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
+  `const {hamletCandidates,HAMLET_MAX_WINDOW_UV}=await import("/explorer/engine/society/hamlets.js");` +
+  `const {quantizeCenter,lodWindowFor,insetSheetRect}=await import("/explorer/engine/world/lod.js");` +
   `const {marginFor}=await import("/explorer/engine/render/transform.js");` +
   `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
-  `const size=LOD_BANDS[LOD_BANDS.length-1].sizeUV;` +
+  `const size=HAMLET_MAX_WINDOW_UV;` +
   `const svg=document.querySelector("#map > svg");const vb=svg.getAttribute("viewBox").split(" ").map(Number);` +
   `const m=marginFor(vb[2]);const mx=m/vb[2],my=m/vb[3];` +
   `const r=document.getElementById("map").getBoundingClientRect();const k=window.__vellumZoomState().k;const W=r.width/k,H=r.height/k;` +
@@ -336,14 +336,14 @@ export async function zh14PressIgnoredWhileDrafting(k: ZoomKit): Promise<void> {
   const after = await k.evaluate<{ pressed: string | null; away: string | null; caption: string }>(HOLD_READ);
   const ceiling = await k.evaluate<number>(CEILING);
   k.check(
-    "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, the ceiling stays at 8, and a screen reader hears it unavailable only while the world is in motion (Issue #751)",
+    "ZH14 a hold pressed while a world is being drawn is ignored: the press stays unlit, the new world's caption carries no mark, the ceiling stays at 32, and a screen reader hears it unavailable only while the world is in motion (Issue #751)",
     now.drafting &&
       now.pressed === "false" &&
       now.away === "true" &&
       after.away === "false" &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
-      ceiling === 8,
+      ceiling === 32,
     JSON.stringify({ now, after, ceiling }),
   );
 }
@@ -361,14 +361,14 @@ export async function zh14bPressIgnoredWhileTurning(k: ZoomKit): Promise<void> {
   const after = await k.evaluate<{ pressed: string | null; away: string | null; caption: string }>(HOLD_READ);
   const ceiling = await k.evaluate<number>(CEILING);
   k.check(
-    "ZH14b a hold pressed while a style change's sheet is turning is ignored too: the press stays unlit, the caption carries no mark, the ceiling stays at 8, and a screen reader hears it unavailable only while the sheet is in motion (Issue #751)",
+    "ZH14b a hold pressed while a style change's sheet is turning is ignored too: the press stays unlit, the caption carries no mark, the ceiling stays at 32, and a screen reader hears it unavailable only while the sheet is in motion (Issue #751)",
     now.turning &&
       now.pressed === "false" &&
       now.away === "true" &&
       after.away === "false" &&
       after.pressed === "false" &&
       !after.caption.endsWith("held") &&
-      ceiling === 8,
+      ceiling === 32,
     JSON.stringify({ now, after, ceiling }),
   );
 }

@@ -3,7 +3,7 @@
 import { createChainCache } from "../../world/detail-chain.ts";
 import { LOD_BANDS } from "../../world/lod.ts";
 
-// Capacity: the deepest window's whole ancestry plus a lattice ring of neighbour targets (not their ancestors, so a full ring pan still turns the LRU over); about 7 MB held at 320x240 Float64.
+// Capacity: the deepest window's whole ancestry plus a lattice ring of neighbour targets (not their ancestors, so a full ring pan still turns the LRU over); about 8.6 MB held at 320x240 Float64.
 const NEIGHBOURS = 8;
 const CAPACITY = LOD_BANDS.length + NEIGHBOURS;
 

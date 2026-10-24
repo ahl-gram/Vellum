@@ -19,3 +19,13 @@ export function cameraFromTransform(t: CameraTransform, W: number, H: number): C
 export function transformFromCamera(c: Camera, W: number, H: number): CameraTransform {
   return { x: W / 2 - c.cx * c.k * W, y: H / 2 - c.cy * c.k * H, k: c.k };
 }
+
+export function addressCamera(params: URLSearchParams, ceiling: number): Camera | null {
+  const cx = params.get("cx");
+  const cy = params.get("cy");
+  const k = params.get("k");
+  if (cx === null || cy === null || k === null) return null;
+  const camera = { cx: Number(cx), cy: Number(cy), k: Number(k) };
+  const finite = [camera.cx, camera.cy, camera.k].every(Number.isFinite);
+  return finite && camera.k >= 1 && camera.k <= ceiling ? camera : null;
+}

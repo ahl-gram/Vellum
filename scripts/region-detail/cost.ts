@@ -34,16 +34,16 @@ function regionAt(world: World, window: UvWindow, band: LodBand, detail: boolean
 
 const sameWindow = (a: UvWindow, b: UvWindow): boolean => Math.abs(a.u0 - b.u0) < 1e-9 && Math.abs(a.v0 - b.v0) < 1e-9;
 
-const DEEPEST = LOD_BANDS[LOD_BANDS.length - 1] as LodBand;
-const STEP = DEEPEST.sizeUV / 8; // the lattice step quantizeCenter snaps to
+const CACHE_BAND = LOD_BANDS[3] as LodBand;
+const STEP = CACHE_BAND.sizeUV / 8; // the lattice step quantizeCenter snaps to
 
-/** The two kinds of neighbour a pan at the deepest band reaches: one whose canonical parent is the one just built, one whose is not. Which is which is a property of the lattice, so it is derived here rather than assumed. */
+/** The two kinds of neighbour a pan at the cache band reaches: one whose canonical parent is the one just built, one whose is not. Which is which is a property of the lattice, so it is derived here rather than assumed. */
 function neighbours(home: UvWindow): { readonly shared: UvWindow; readonly fresh: UvWindow } {
   const homeParent = canonicalParent(home);
   let shared: UvWindow | null = null;
   let fresh: UvWindow | null = null;
   for (const sign of [-1, 1]) {
-    const win = lodWindowFor(CX + sign * STEP, CY, DEEPEST.sizeUV);
+    const win = lodWindowFor(CX + sign * STEP, CY, CACHE_BAND.sizeUV);
     if (sameWindow(canonicalParent(win), homeParent)) shared ??= win;
     else fresh ??= win;
   }
@@ -83,12 +83,12 @@ function heldCacheCosts(world: World): CacheCost {
     worldAspect,
     seaLevel: world.seaLevel,
   });
-  const home = lodWindowFor(CX, CY, DEEPEST.sizeUV);
+  const home = lodWindowFor(CX, CY, CACHE_BAND.sizeUV);
   const { shared, fresh } = neighbours(home);
   const cache = createChainCache(64);
-  const cold = bestOf(1, () => buildChainedField(chainSpec(home, DEEPEST), cache));
-  const warmShared = bestOf(1, () => buildChainedField(chainSpec(shared, DEEPEST), cache));
-  const warmFresh = bestOf(1, () => buildChainedField(chainSpec(fresh, DEEPEST), cache));
+  const cold = bestOf(1, () => buildChainedField(chainSpec(home, CACHE_BAND), cache));
+  const warmShared = bestOf(1, () => buildChainedField(chainSpec(shared, CACHE_BAND), cache));
+  const warmFresh = bestOf(1, () => buildChainedField(chainSpec(fresh, CACHE_BAND), cache));
   console.log("  terrain only, one chain cache held across the calls");
   console.log(
     `    ${"first descent".padEnd(16)} ${fmt(cold)}   pan to a neighbour sharing its parent ${fmt(warmShared)}   pan to one that does not ${fmt(warmFresh)}`,
@@ -125,7 +125,7 @@ function main(): void {
   }
   console.log("mean over seeds, terrain only with a held cache");
   console.log(
-    `  ${"band 3".padEnd(16)} first ${fmt(cacheTotals.cold / cacheTotals.n)}   parent-sharing pan ${fmt(cacheTotals.shared / cacheTotals.n)}   fresh-parent pan ${fmt(cacheTotals.fresh / cacheTotals.n)}`,
+    `  ${`band ${CACHE_BAND.index}`.padEnd(16)} first ${fmt(cacheTotals.cold / cacheTotals.n)}   parent-sharing pan ${fmt(cacheTotals.shared / cacheTotals.n)}   fresh-parent pan ${fmt(cacheTotals.fresh / cacheTotals.n)}`,
   );
 }
 

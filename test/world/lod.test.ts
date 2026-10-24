@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   LOD_BANDS,
+  DEEPEST_K,
   LATTICE_DIVISIONS,
   bandFor,
   quantizeCenter,
@@ -14,23 +15,31 @@ import {
 } from "../../src/world/lod.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { windowAround } from "../../src/world/region.ts";
+import { RUNGS } from "../../src/site/shared/table-address.ts";
 
 // The Glass LOD schedule: camera k to a band, a fixed lattice that snaps nearby settles to one window, and a window clamped exactly like windowAround.
 
-test("LOD_BANDS: four bands, sizeUV = 1/k, grid fixed at 320x240", () => {
-  assert.equal(LOD_BANDS.length, 4);
+test("LOD_BANDS: six bands to the ruled depth, band 5, sizeUV = 1/k, grid fixed at 320x240 (Issue #954)", () => {
+  assert.equal(LOD_BANDS.length, 6);
   LOD_BANDS.forEach((b, i) => {
     assert.equal(b.index, i, "index matches array position");
     assert.ok(Math.abs(b.sizeUV - 1 / b.k) < 1e-12, `sizeUV=1/k for band ${i}`);
     assert.equal(b.gridW, 320, "grid width fixed per band");
     assert.equal(b.gridH, 240, "grid height fixed per band");
-    assert.equal(b.isRegion, i > 0, "band 0 is the world sheet; 1..3 are regions");
+    assert.equal(b.isRegion, i > 0, "band 0 is the world sheet; 1..5 are regions");
   });
   assert.deepEqual(
     LOD_BANDS.map((b) => b.k),
-    [1, 2, 4, 8],
-    "the k ladder is 1,2,4,8",
+    [1, 2, 4, 8, 16, 32],
+    "the k ladder is 1,2,4,8,16,32",
   );
+  assert.equal(DEEPEST_K, 32, "the Glass's ceiling is the deepest band's k");
+  assert.equal(DEEPEST_K, (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).k);
+});
+
+test("the Chart Table's rungs are the Glass's region bands, every one (Issue #954)", () => {
+  const regions = LOD_BANDS.filter((b) => b.isRegion).map((b) => b.index);
+  assert.deepEqual([...RUNGS], regions);
 });
 
 test("bandFor with no current band picks the nominal band for k", () => {
@@ -39,7 +48,9 @@ test("bandFor with no current band picks the nominal band for k", () => {
   assert.equal(bandFor(2.0), 1, "at the k=2 rung");
   assert.equal(bandFor(4.0), 2, "at the k=4 rung");
   assert.equal(bandFor(8.0), 3, "at the k=8 rung");
-  assert.equal(bandFor(100), 3, "clamps to the finest band");
+  assert.equal(bandFor(16.0), 4, "at the k=16 rung");
+  assert.equal(bandFor(32.0), 5, "at the k=32 rung");
+  assert.equal(bandFor(100), 5, "clamps to the finest band");
 });
 
 test("bandFor is hysteretic: the SAME k resolves differently by current band", () => {
@@ -51,12 +62,18 @@ test("bandFor is hysteretic: the SAME k resolves differently by current band", (
 
   assert.equal(bandFor(5.3, 2), 2, "held below at the 2/3 boundary");
   assert.equal(bandFor(5.3, 3), 3, "held above at the 2/3 boundary");
+
+  assert.equal(bandFor(10.7, 3), 3, "held below at the 3/4 boundary");
+  assert.equal(bandFor(10.7, 4), 4, "held above at the 3/4 boundary");
+
+  assert.equal(bandFor(21.4, 4), 4, "held below at the 4/5 boundary");
+  assert.equal(bandFor(21.4, 5), 5, "held above at the 4/5 boundary");
 });
 
 test("bandFor climbs one band at a time on an ascending zoom", () => {
   let band = 0;
-  const walk = [1.0, 1.5, 1.7, 3.0, 3.3, 6.0, 6.5];
-  const expected = [0, 0, 1, 1, 2, 2, 3];
+  const walk = [1.0, 1.5, 1.7, 3.0, 3.3, 6.0, 6.5, 12.0, 13.0, 24.0, 26.0];
+  const expected = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5];
   walk.forEach((k, i) => {
     band = bandFor(k, band);
     assert.equal(band, expected[i], `k=${k} -> band ${expected[i]}`);
@@ -64,9 +81,9 @@ test("bandFor climbs one band at a time on an ascending zoom", () => {
 });
 
 test("bandFor drops one band at a time on a descending zoom", () => {
-  let band = 3;
-  const walk = [6.0, 5.0, 2.6, 2.5, 1.3, 1.2];
-  const expected = [3, 2, 2, 1, 1, 0];
+  let band = 5;
+  const walk = [24.0, 20.0, 12.0, 10.0, 6.0, 5.0, 2.6, 2.5, 1.3, 1.2];
+  const expected = [5, 4, 4, 3, 3, 2, 2, 1, 1, 0];
   walk.forEach((k, i) => {
     band = bandFor(k, band);
     assert.equal(band, expected[i], `k=${k} -> band ${expected[i]}`);
@@ -74,8 +91,10 @@ test("bandFor drops one band at a time on a descending zoom", () => {
 });
 
 test("bandFor honours a multi-band jump in one settle (hysteresis is per-boundary, not a one-step limiter)", () => {
-  assert.equal(bandFor(8, 0), 3, "a fast zoom from home lands directly at the finest band");
-  assert.equal(bandFor(1, 3), 0, "a fast zoom-out from the finest band lands home");
+  assert.equal(bandFor(8, 0), 3, "a fast zoom from home to k 8 lands directly on band 3");
+  assert.equal(bandFor(1, 3), 0, "a fast zoom-out from band 3 lands home");
+  assert.equal(bandFor(32, 0), 5, "a fast zoom from home lands directly at the finest band");
+  assert.equal(bandFor(1, 5), 0, "a fast zoom-out from the finest band lands home");
 });
 
 test("quantizeCenter snaps to a fixed lattice: nearby settles collapse to one window", () => {
@@ -245,6 +264,13 @@ test("decideSettle: a partial zoom-out steps down ONE region band (band-by-band,
   assert.equal(d.action, "region", "an intermediate zoom-out redrafts, it does not revert to world");
   assert.equal(d.band, 2, "band 3 steps to band 2, not straight to band 0");
   assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.25));
+});
+
+test("decideSettle: a camera at the ceiling commits band 5 on its own 1/32 lattice window (Issue #954)", () => {
+  const d = decideSettle({ camera: { cx: 0.5, cy: 0.5, k: 32 }, currentWindow: FULL_WINDOW, currentBand: 0 });
+  assert.equal(d.action, "region");
+  assert.equal(d.band, 5);
+  assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 1 / 32));
 });
 
 test("decideSettle: staying on the world sheet is a no-op", () => {

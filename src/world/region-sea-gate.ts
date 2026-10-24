@@ -32,9 +32,9 @@ export function coastalParentCells(
     for (let x = 0; x < parentW; x++) {
       const p = x + y * parentW;
       if (parentLand[p] !== 1) continue;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = x + dx;
-        const ny = y + dy;
+      for (const offset of NEIGHBORS_8) {
+        const nx = x + offset[0];
+        const ny = y + offset[1];
         if (nx < 0 || nx >= parentW || ny < 0 || ny >= parentH) continue;
         if (worldSea[nx + ny * parentW] === 1) {
           coastal[p] = 1;

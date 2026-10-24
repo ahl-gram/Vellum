@@ -26,8 +26,8 @@ const READ =
   `insets:document.querySelectorAll("#map .region-inset").length,u0:svg?svg.getAttribute("data-vellum-region-u0"):null,` +
   `v0:svg?svg.getAttribute("data-vellum-region-v0"):null,k:z.k,hashK:new URLSearchParams(location.hash.slice(1)).get("k"),glide:!!document.getElementById("map-viewport").__transition};})()`;
 
-// Asks for 24 and goes straight home in the same task, so no settle runs at the deep camera and nothing is drafted.
-export const CEILING = `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:24,x:W/2-12*W,y:H/2-12*H});const k=window.__vellumZoomState().k;window.__vellumZoomTo({k:1,x:0,y:0});return k;})()`;
+// Asks for 200 and goes straight home in the same task, so no settle runs at the deep camera and nothing is drafted.
+export const CEILING = `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:200,x:W/2-100*W,y:H/2-100*H});const k=window.__vellumZoomState().k;window.__vellumZoomTo({k:1,x:0,y:0});return k;})()`;
 const LET_GO = `(()=>{document.getElementById("zoom-hold").click();return{glide:!!document.getElementById("map-viewport").__transition};})()`;
 const OUT_THEN_LET_GO = `(()=>{document.getElementById("zoom-out").click();document.getElementById("zoom-hold").click();return{k:window.__vellumZoomState().k,glide:!!document.getElementById("map-viewport").__transition,pressed:document.getElementById("zoom-hold").getAttribute("aria-pressed")};})()`;
 const ZOOM_THEN_LET_GO = (target: Target21): string =>
@@ -179,7 +179,7 @@ function homeCheck(k: ZoomKit, name: string, r: Homed): void {
       r.after.pressed === "false" &&
       !marked(r.after) &&
       r.after.k === 1 &&
-      r.ceiling === 8,
+      r.ceiling === 32,
     JSON.stringify(r),
   );
 }
@@ -188,21 +188,21 @@ export async function zh4aVoicedHome(k: ZoomKit, target: Target21): Promise<void
   const r = await letGoBy(k, target, () => viaHome(k));
   homeCheck(
     k,
-    "ZH4a the voiced home lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    "ZH4a the voiced home lets the hold go first: unlit, the mark gone, the ceiling back at 32 (Issue #751)",
     r,
   );
 }
 
 export async function zh4bDraw(k: ZoomKit, target: Target21): Promise<void> {
   const r = await letGoBy(k, target, () => viaDraw(k));
-  homeCheck(k, "ZH4b a draw lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)", r);
+  homeCheck(k, "ZH4b a draw lets the hold go first: unlit, the mark gone, the ceiling back at 32 (Issue #751)", r);
 }
 
 export async function zh4cTurn(k: ZoomKit, target: Target21): Promise<void> {
   const r = await letGoBy(k, target, () => viaTurn(k));
   homeCheck(
     k,
-    "ZH4c the turned sheet lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    "ZH4c the turned sheet lets the hold go first: unlit, the mark gone, the ceiling back at 32 (Issue #751)",
     r,
   );
   await viaTurn(k);
@@ -212,7 +212,7 @@ export async function zh4dInk(k: ZoomKit, target: Target21): Promise<void> {
   const r = await letGoBy(k, target, () => viaInk(k));
   homeCheck(
     k,
-    "ZH4d the survey ink lets the hold go first: unlit, the mark gone, the ceiling back at 8 (Issue #751)",
+    "ZH4d the survey ink lets the hold go first: unlit, the mark gone, the ceiling back at 32 (Issue #751)",
     r,
   );
   await k.evaluate(
@@ -291,8 +291,10 @@ export async function zh5bKeepsCaption(k: ZoomKit, target: Target21): Promise<vo
   );
 }
 
-const FIRST_HAMLET = (name: string | null): string =>
-  `(()=>{const gs=[...document.querySelectorAll('#map .region-inset svg g.settlement[data-tier="hamlet"]')];` +
+const DEEPEST_ENTRY = 28;
+
+const FIRST_LABEL = (name: string | null): string =>
+  `(()=>{const gs=[...document.querySelectorAll('#map .region-inset svg g.settlement')];` +
   `const g=gs.find((x)=>x.querySelector("text")&&(${JSON.stringify(name)}===null||x.dataset.name===${JSON.stringify(name)}));` +
   `return g?{name:g.dataset.name,h:g.querySelector("text").getBoundingClientRect().height}:null;})()`;
 
@@ -302,37 +304,40 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
   const settle = makeSettle(k);
   await home(k);
   const before = (await k.rgn()).redrafts;
-  await k.enterAt(6.5, target.cx, target.cy);
+  await k.enterAt(DEEPEST_ENTRY, target.cx, target.cy);
   await k.waitRedraft(before);
+  const entered = await read(k);
   const rest = await settle<Label>(
-    FIRST_HAMLET(null),
+    FIRST_LABEL(null),
     (d, last) => !!last && Math.abs(d.h - last.h) < 1e-6,
     "zh6-label",
   );
   await press(k);
   const was = await read(k);
-  await k.enterAt(24, target.cx, target.cy);
+  await k.enterAt(96, target.cx, target.cy);
   const deep = await read(k);
-  const big = await k.evaluate<Label | null>(FIRST_HAMLET(rest.name));
+  const big = await k.evaluate<Label | null>(FIRST_LABEL(rest.name));
   const hashed = await settle<Read>(READ, (d) => d.hashK !== was.hashK, "zh6-held-hash");
   const letGo = await k.evaluate<{ glide: boolean }>(LET_GO);
   const back = await settle<Read>(READ, (d) => !d.glide, "zh6-glide-back");
-  await k.enterAt(24, target.cx, target.cy);
+  await k.enterAt(96, target.cx, target.cy);
   const unheld = await read(k);
-  const want = 24 / 6.5;
+  const want = 96 / DEEPEST_ENTRY;
   k.check(
-    "ZH6 held, the camera reaches 24 and the hamlet's label is 24 / 6.5 times its first size, the address says 8, letting go glides back to 8, and unheld 24 lands on 8 (Issue #751)",
-    deep.k === 24 &&
+    "ZH6 held, the camera reaches 96 and a label is 96 / 28 times its first size, the address says 32, letting go glides back to 32 on band 5, and unheld 96 lands on 32 (Issue #751, Issue #954)",
+    entered.band === 5 &&
+      entered.committed &&
+      deep.k === 96 &&
       !!big &&
-      // 2026-10-20 at the Z21 target: 24.3076 / 6.5835 = 3.6923 against 24 / 6.5 = 3.6923; a growth that tracked a ceiling of 8 would read 1.23, so 2% is headroom for a pixel of label rounding and nothing else.
+      // 2026-10-23 at the Z21 target: 20.6992 / 6.0371 = 3.4287 against 96 / 28 = 3.4286; a growth that tracked a ceiling of 32 would read 1.14, so 2% is headroom for label rounding and nothing else.
       Math.abs(big.h / rest.h / want - 1) < 0.02 &&
-      hashed.hashK === "8.0000" &&
+      hashed.hashK === "32.0000" &&
       letGo.glide &&
-      Math.abs(back.k - 8) < 1e-6 &&
-      back.band === 3 &&
+      Math.abs(back.k - 32) < 1e-6 &&
+      back.band === 5 &&
       back.committed &&
       back.pressed === "false" &&
-      unheld.k === 8,
+      unheld.k === 32,
     JSON.stringify({ rest, big, want, deepK: deep.k, hashK: hashed.hashK, letGo, back, unheldK: unheld.k }),
   );
 }
@@ -340,22 +345,22 @@ export async function zh6HeldCeiling(k: ZoomKit, target: Target21): Promise<void
 export async function zh7LetGoMidGlide(k: ZoomKit, target: Target21): Promise<void> {
   await home(k);
   const before = (await k.rgn()).redrafts;
-  await k.enterAt(6.5, target.cx, target.cy);
+  await k.enterAt(DEEPEST_ENTRY, target.cx, target.cy);
   await k.waitRedraft(before);
   await press(k);
-  await k.enterAt(24, target.cx, target.cy);
+  await k.enterAt(96, target.cx, target.cy);
   const lit = await read(k);
-  // One task, so no frame runs between the presses: the camera is still at 24 and "Stand off" has queued a glide toward 24 / 1.4 when the let-go reads it, the case where reading the camera instead of the glide's pending target lands at 24 / 1.4 * 8 / 24 = 5.71.
+  // One task, so no frame runs between the presses: the camera is still at 96 and "Stand off" has queued a glide toward 96 / 1.4 when the let-go reads it, the case where reading the camera instead of the glide's pending target lands at 96 / 1.4 * 32 / 96 = 22.86.
   const now = await k.evaluate<{ k: number; glide: boolean; pressed: string | null }>(OUT_THEN_LET_GO);
   const rest = await makeSettle(k)<Read>(READ, (d) => !d.glide, "zh7-landing");
   k.check(
-    "ZH7 letting go while a glide out from above 8 is in flight lands the camera on 8, not further out (Issue #751)",
+    "ZH7 letting go while a glide out from above 32 is in flight lands the camera on 32, not further out (Issue #751)",
     lit.pressed === "true" &&
-      lit.k === 24 &&
-      now.k === 24 &&
+      lit.k === 96 &&
+      now.k === 96 &&
       now.glide &&
       now.pressed === "false" &&
-      Math.abs(rest.k - 8) < 1e-6 &&
+      Math.abs(rest.k - 32) < 1e-6 &&
       rest.pressed === "false",
     JSON.stringify({ lit: { k: lit.k, pressed: lit.pressed }, now, rest }),
   );
@@ -372,7 +377,7 @@ export async function zh8LetGoGlidingOut(k: ZoomKit, target: Target21): Promise<
   );
   const rest = await makeSettle(k)<Read>(READ, (d) => !d.glide, "zh8-landing");
   k.check(
-    "ZH8 letting go while a glide toward a depth at or under 8 is in flight drafts nothing at the press, and the glide lands where it was headed (Issue #751)",
+    "ZH8 letting go while a glide toward a depth at or under 32 is in flight drafts nothing at the press, and the glide lands where it was headed (Issue #751)",
     lit.band === 1 &&
       lit.committed &&
       lit.pressed === "true" &&

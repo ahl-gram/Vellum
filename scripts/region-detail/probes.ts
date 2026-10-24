@@ -3,7 +3,7 @@ import { buildHeightfield, type UvWindow } from "../../src/terrain/heightfield.t
 import { buildChainedField, detailForWindow } from "../../src/world/detail-chain.ts";
 import { parentSurfaceOnWindow } from "../../src/terrain/detail-guarantees.ts";
 import { landSnapRadius, snapToLand } from "../../src/world/snap-to-land.ts";
-import { hamletCandidates } from "../../src/society/hamlets.ts";
+import { HAMLET_MAX_WINDOW_UV, hamletCandidates } from "../../src/society/hamlets.ts";
 import { windowAround } from "../../src/world/region.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
 import type { World } from "../../src/world/types.ts";
@@ -82,8 +82,7 @@ function counterfactualCount(): { count: CountWindow; tally: Map<string, Counter
     for (const s of world.settlements) {
       probe(s.x / (world.recipe.gridW - 1), s.y / (world.recipe.gridH - 1), `town ${s.name}`);
     }
-    const deepest = (LOD_BANDS[LOD_BANDS.length - 1] as LodBand).sizeUV;
-    if (du <= deepest + 1e-9) {
+    if (du <= HAMLET_MAX_WINDOW_UV + 1e-9) {
       for (const c of hamletCandidates(world, window)) probe(c.u, c.v, `hamlet ${c.name}`);
     }
     tally.set(label, row);
