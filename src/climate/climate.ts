@@ -11,13 +11,20 @@ export type Climate = {
   readonly moisture: Field;
 };
 
-export type ClimateOptions = {
+export type DryClimate = Climate & {
+  readonly moistureSum: Field;
+};
+
+export type DryClimateOptions = {
   band?: ClimateBand;
-  riverCells?: Uint8Array;
   windDir: number;
   window?: { u0: number; v0: number; u1: number; v1: number };
   worldAspect?: number;
   elevSpan?: number;
+};
+
+export type ClimateOptions = DryClimateOptions & {
+  riverCells?: Uint8Array;
 };
 
 const BANDS: Record<ClimateBand, { base: number; latSpan: number }> = {
@@ -32,7 +39,7 @@ const MOIST_SEED_SALT = 0xcc9e2d51;
 
 type WindowMap = { readonly toU: (x: number) => number; readonly toV: (y: number) => number };
 
-function windowMap(elev: Field, opts: ClimateOptions): WindowMap {
+function windowMap(elev: Field, opts: DryClimateOptions): WindowMap {
   const { w, h } = elev;
   const win = opts.window ?? { u0: 0, v0: 0, u1: 1, v1: 1 };
   const toU = (x: number): number => win.u0 + (x / (w - 1)) * (win.u1 - win.u0);
@@ -79,12 +86,7 @@ function temperatureField(
   });
 }
 
-function moistureField(
-  elev: Field,
-  frame: ClimateFrame,
-  windRain: Float64Array,
-  riverDist: Float64Array | null,
-): Field {
+function moistureSumField(elev: Field, frame: ClimateFrame, windRain: Float64Array): Field {
   const { w, h } = elev;
   const { seed, aspect, map } = frame;
   const { toU, toV } = map;
@@ -99,12 +101,20 @@ function moistureField(
         0.22;
     const i = x + y * w;
     const windBonus = 0.5 * (windRain[i] as number) - 0.06;
-    const riverBonus = riverDist ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number)) : 0;
-    return clamp(base + windBonus + riverBonus, 0, 1);
+    return base + windBonus;
   });
 }
 
-export function computeClimate(elev: Field, seaLevel: number, seed: number, opts: ClimateOptions): Climate {
+function moistureField(moistureSum: Field, riverDist: Float64Array | null): Field {
+  const { w, h, data } = moistureSum;
+  return createField(w, h, (x, y) => {
+    const i = x + y * w;
+    const riverBonus = riverDist ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number)) : 0;
+    return clamp((data[i] as number) + riverBonus, 0, 1);
+  });
+}
+
+export function computeDryClimate(elev: Field, seaLevel: number, seed: number, opts: DryClimateOptions): DryClimate {
   const { w, h } = elev;
   const band = BANDS[opts.band ?? "temperate"];
   const aspect = opts.worldAspect ?? (w - 1) / (h - 1);
@@ -112,13 +122,26 @@ export function computeClimate(elev: Field, seaLevel: number, seed: number, opts
   const elevSpan = climateElevSpan(elev, seaLevel, opts.elevSpan);
 
   const temperature = temperatureField(elev, frame, band, elevSpan);
-
   const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
+  const moistureSum = moistureSumField(elev, frame, windRain);
+  return { temperature, moisture: moistureField(moistureSum, null), moistureSum };
+}
 
-  const riverCells = opts.riverCells;
-  const riverDist = riverCells ? bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1) : null;
+export function withRiverMoisture(dry: DryClimate, riverCells: Uint8Array): Climate {
+  return { temperature: dry.temperature, moisture: dry.moisture };
+}
 
-  const moisture = moistureField(elev, frame, windRain, riverDist);
+export function computeClimate(elev: Field, seaLevel: number, seed: number, opts: ClimateOptions): Climate {
+  const dry = computeDryClimate(elev, seaLevel, seed, opts);
+  return opts.riverCells
+    ? withRiverMoisture(dry, opts.riverCells)
+    : { temperature: dry.temperature, moisture: dry.moisture };
+}
 
-  return { temperature, moisture };
+export function rainFrom(moisture: Field): Float64Array {
+  const rain = new Float64Array(moisture.data.length);
+  for (let i = 0; i < rain.length; i++) {
+    rain[i] = 0.3 + 1.4 * (moisture.data[i] as number);
+  }
+  return rain;
 }

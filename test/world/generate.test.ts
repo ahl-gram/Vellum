@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
+import { computeClimate } from "../../src/climate/climate.ts";
 
 test("defaultRecipe is deterministic and respects overrides", () => {
   const a = defaultRecipe(42);
@@ -77,4 +78,16 @@ test("different seeds yield different worlds", () => {
   const b = generateWorld(defaultRecipe(2, { gridW: 100, gridH: 80 }));
   assert.notDeepEqual(a.elev.data, b.elev.data);
   assert.notEqual(a.title.title, b.title.title);
+});
+
+test("a world's climate is computeClimate's over the world's own rivers, which wet it (Issue #1005)", () => {
+  const recipe = defaultRecipe(42, { gridW: 160, gridH: 120 });
+  const world = generateWorld(recipe);
+  const opts = { band: recipe.band, windDir: world.winds.dir };
+  const wet = computeClimate(world.elev, world.seaLevel, recipe.seed, { ...opts, riverCells: world.riverCells });
+  const dry = computeClimate(world.elev, world.seaLevel, recipe.seed, opts);
+  const moisture = Array.from(world.climate.moisture.data);
+  assert.notDeepEqual(moisture, Array.from(dry.moisture.data), "the world's own rivers wet its moisture");
+  assert.deepEqual(moisture, Array.from(wet.moisture.data), "by exactly the river bonus over the world's river cells");
+  assert.deepEqual(Array.from(world.climate.temperature.data), Array.from(wet.temperature.data));
 });

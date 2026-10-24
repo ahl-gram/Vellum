@@ -1,10 +1,10 @@
 import { bfsDistance } from "../core/bfs-distance.ts";
 import { clamp } from "../core/math.ts";
-import { computeClimate, type Climate } from "../climate/climate.ts";
+import { computeDryClimate, rainFrom, withRiverMoisture, type Climate, type DryClimate } from "../climate/climate.ts";
 import type { Field } from "../core/grid.ts";
 import { classifyBiomes } from "../climate/biomes.ts";
 import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
-import type { River } from "../hydrology/rivers.ts";
+import { markRiverCells, type River } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import type { Road } from "../society/roads.ts";
 import { HAMLET_MAX_WINDOW_UV, placeHamlets } from "../society/hamlets.ts";
@@ -87,54 +87,33 @@ function regionWaters(
   g: RegionGrid,
   land: { readonly elev: Field; readonly ground: Field; readonly seaLevel: number },
   elevSpan: number,
-): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array; laidRiverCells: Uint8Array } {
+): { dry: DryClimate; flow: FlowResult; rivers: River[]; riverCells: Uint8Array; laidRiverCells: Uint8Array } {
   const { world, window, gridW, gridH, worldAspect } = g;
   const { elev, ground, seaLevel } = land;
   const { recipe } = world;
-  const preClimate = computeClimate(elev, seaLevel, recipe.seed, {
+  const dry = computeDryClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     windDir: world.winds.dir, // the same wind blows over a region of the same world
     window,
     worldAspect,
     elevSpan,
   });
-  const rain = new Float64Array(gridW * gridH);
-  for (let i = 0; i < rain.length; i++) {
-    rain[i] = 0.3 + 1.4 * (preClimate.moisture.data[i] as number);
-  }
-  const flow = computeFlow(elev, seaLevel, rain);
+  const flow = computeFlow(elev, seaLevel, rainFrom(dry.moisture));
   const { laid, extracted } = layRegionRivers(world, window, { elev, flow, seaLevel, ground });
   const rivers = [...laid, ...extracted];
   const riverCells = markRiverCells(rivers, gridW, gridH);
   const laidRiverCells = markRiverCells(laid, gridW, gridH);
-  return { flow, rivers, riverCells, laidRiverCells };
-}
-
-function markRiverCells(rivers: ReadonlyArray<River>, gridW: number, gridH: number): Uint8Array {
-  const cells = new Uint8Array(gridW * gridH);
-  for (const r of rivers) {
-    for (const p of r.points) cells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
-  }
-  return cells;
+  return { dry, flow, rivers, riverCells, laidRiverCells };
 }
 
 function regionClimate(
-  g: RegionGrid,
   elev: Field,
   seaLevel: number,
+  dry: DryClimate,
   riverCells: Uint8Array,
   elevSpan: number,
 ): { climate: Climate; biomes: Uint8Array } {
-  const { world, window, worldAspect } = g;
-  const { recipe } = world;
-  const climate = computeClimate(elev, seaLevel, recipe.seed, {
-    band: recipe.band,
-    riverCells,
-    windDir: world.winds.dir,
-    window,
-    worldAspect,
-    elevSpan,
-  });
+  const climate = withRiverMoisture(dry, riverCells);
   const biomes = classifyBiomes(elev, seaLevel, climate, elevSpan);
   return { climate, biomes };
 }
@@ -292,8 +271,8 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const seaLevel = world.seaLevel;
   const { elev, ground } = regionElevation(g, spec, seaLevel);
   const elevSpan = worldElevSpan(world, seaLevel);
-  const { flow, rivers, riverCells, laidRiverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
-  const { climate, biomes } = regionClimate(g, elev, seaLevel, riverCells, elevSpan);
+  const { dry, flow, rivers, riverCells, laidRiverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
+  const { climate, biomes } = regionClimate(elev, seaLevel, dry, riverCells, elevSpan);
 
   const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells, laidRiverCells });
 

@@ -106,6 +106,32 @@ test("region temperature is continuous with the world via the parent elevSpan (A
   );
 });
 
+test("region moisture is computeClimate's over the region's own rivers, laid and extracted, which wet it (Issue #1005)", () => {
+  const win = { u0: 0.02, v0: 0.16, u1: 0.37, v1: 0.51 };
+  const region = generateRegionWorld(bigWorld, {
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Lowland Environs",
+  });
+  const opts = {
+    band: bigWorld.recipe.band,
+    windDir: bigWorld.winds.dir,
+    window: win,
+    worldAspect: (bigWorld.recipe.gridW - 1) / (bigWorld.recipe.gridH - 1),
+  };
+  const seed = bigWorld.recipe.seed;
+  const wet = computeClimate(region.elev, bigWorld.seaLevel, seed, { ...opts, riverCells: region.riverCells });
+  const dry = computeClimate(region.elev, bigWorld.seaLevel, seed, opts);
+  const moisture = Array.from(region.climate.moisture.data);
+  assert.notDeepEqual(moisture, Array.from(dry.moisture.data), "the region's own rivers wet its moisture");
+  assert.deepEqual(
+    moisture,
+    Array.from(wet.moisture.data),
+    "by exactly the river bonus over all the region's river cells",
+  );
+});
+
 test("region biomes are continuous with the world via the parent elevSpan (AC #162)", () => {
   // An inland highland window: under its own local span every hilltop would read snow/alpine; the climate unit tests pass even if region.ts forgets to thread elevSpan, this does not.
   const win = { u0: 0.15, v0: 0.22, u1: 0.31, v1: 0.38 };
