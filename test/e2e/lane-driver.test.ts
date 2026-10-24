@@ -201,6 +201,14 @@ test("the exit code is the lanes' outcome: a red or killed lane fails the run, a
   assert.equal(await runLanes(killed.io), 1);
 });
 
+test("a failed lane's verdict carries the fingerprint its child printed, and the child's line reaches the log prefixed", async (t) => {
+  noExit(t);
+  const red = rig(["--lane", "A"], {}, () => ({ out: ["fingerprint: fp-child", "SOME FAILED  (1/2)"], code: 1 }));
+  assert.equal(await runLanes(red.io), 1);
+  assert.ok(red.out.includes("[A] fingerprint: fp-child"), JSON.stringify(red.out));
+  assert.ok((red.out.at(-1) ?? "").endsWith("  on fp-child"), JSON.stringify(red.out));
+});
+
 test("the process binding reads the real argv, environment and terminal", async (t) => {
   noExit(t);
   const saved = Object.fromEntries(BROWSERLESS.map((k) => [k, process.env[k]]));

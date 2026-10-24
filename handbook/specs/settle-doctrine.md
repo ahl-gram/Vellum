@@ -413,7 +413,10 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
   "CI's browser lays a chart room's furniture out", whose causes, the "№" drawn from another face
   and a row holding a `select` dressed `appearance: none` laid out shorter, are the PR #1042 entry
   in `.claude/skills/vellum-footguns/references/scars.md`; the two PR #1042 rows in
-  `handbook/errata/site.md` are the "№" and the Press row seat it moves.
+  `handbook/errata/site.md` are the "№" and the Press row seat it moves, and the PR #1054 row there
+  is a folio `select`'s height on each side. Each e2e run's `fingerprint: ` line
+  (`environmentFingerprint` in `e2e/support/fingerprint.ts`) reads the title's width, the face that
+  drew its "№" and a folio `select`'s height in the fallback faces, on the side it ran on.
 - **Paint: a read taken off paint differs**: a thin line's darkest pixel paints lighter on the
   runner, and a die's bare contrast reads lower there. Home: the bullet above opening
   "A visual claim in a suite is carried by a control taken in the same run";
