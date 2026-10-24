@@ -63,7 +63,7 @@ export const laneFingerprint = (line: string): string | null =>
 
 export function fingerprinted<C>(
   start: (options: StartOptions) => Promise<C>,
-  readBrowser: (ctx: C) => Promise<BrowserFacts>,
+  readBrowser: (ctx: C, page: string) => Promise<BrowserFacts>,
   host: HostFacts,
   out: (line: string) => void,
 ): (options: StartOptions) => Promise<C> {
@@ -77,7 +77,8 @@ export function fingerprinted<C>(
       print(options.browser, unreadBrowser(NOT_PROBED));
       throw failure;
     }
-    print(options.browser, await readBrowser(ctx).catch((failure: unknown) => unreadBrowser(errorText(failure))));
+    const facts = await readBrowser(ctx, "").catch((failure: unknown) => unreadBrowser(errorText(failure)));
+    print(options.browser, facts);
     return ctx;
   };
 }

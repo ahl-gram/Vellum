@@ -6,7 +6,7 @@ import { errorText } from "./suites.ts";
 export type ProbeContext = Pick<SuiteContext, "evaluate" | "send" | "sleep">;
 export type Measured = { readonly numeroWidth: number; readonly selectHeight: number } | { readonly missing: string };
 
-// Swept 2026-10-24 over eight fresh launches on the Mac: the harness page ready in 59 to 111 ms and the whole probe within 134 ms, so 5 s is about 37 times the slowest, left for CI's slower runner; past it the line prints unread.
+// Swept 2026-10-24: on the Mac the probe within 134 ms over eight fresh launches and the hand-back within about 40 ms; on CI run 40133750844's four lanes printed the line 1.82 to 2.10 s after their browser came up, a span holding the probe and the launch's tail, so 5 s is at least 2.4 times CI's slowest.
 export const FINGERPRINT_BOUND_MS = 5_000;
 export const READY_POLL_MS = 50;
 export const PROBE_BOX_ID = "fingerprint-probe";
@@ -112,7 +112,7 @@ async function probePage(ctx: ProbeContext, signal: AbortSignal): Promise<Browse
   }
 }
 
-export async function readBrowserFacts(ctx: ProbeContext): Promise<BrowserFacts> {
+async function boundedProbe(ctx: ProbeContext): Promise<BrowserFacts> {
   const stop = new AbortController();
   let timer: NodeJS.Timeout | undefined;
   const gaveUp = new Promise<BrowserFacts>((settle) => {
@@ -127,4 +127,9 @@ export async function readBrowserFacts(ctx: ProbeContext): Promise<BrowserFacts>
   } finally {
     clearTimeout(timer);
   }
+}
+
+export function readBrowserFacts(ctx: ProbeContext, page: string): Promise<BrowserFacts> {
+  void page;
+  return boundedProbe(ctx);
 }

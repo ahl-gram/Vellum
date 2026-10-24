@@ -38,7 +38,7 @@ const BROWSER: BrowserFacts = {
   selectHeight: 34.21875,
   unread: null,
 };
-const OPTIONS = { browser: "/fake/browser" } as StartOptions;
+const OPTIONS = { browser: "/fake/browser", PAGE: "http://127.0.0.1:1/explorer/" } as StartOptions;
 const ROOT = resolve(import.meta.dirname, "..", "..");
 // A cap on a hang, never a budget (2026-10-24: the child exits in about 4.6 s, its launch's two 2 s retry pauses), so a wedged child reds by status instead of holding the unit lane.
 const CHILD_TIMEOUT_MS = 30_000;
@@ -94,8 +94,8 @@ test("a started harness prints the machine once, read from the context it starte
   const reads: unknown[] = [];
   const wrapped = fingerprinted(
     () => Promise.resolve(ctx),
-    (c) => {
-      reads.push(c);
+    (c, page) => {
+      reads.push([c, page]);
       lines.push("(read)");
       return new Promise<BrowserFacts>((settle) => setImmediate(() => settle(BROWSER)));
     },
@@ -103,7 +103,7 @@ test("a started harness prints the machine once, read from the context it starte
     (line) => lines.push(line),
   );
   assert.equal(await wrapped(OPTIONS), ctx);
-  assert.deepEqual(reads, [ctx]);
+  assert.deepEqual(reads, [[ctx, OPTIONS.PAGE]]);
   assert.deepEqual(lines, [
     "(read)",
     'fingerprint: testos 1.2.3 x64; Node v26.0.0; browser Chrome/1.2.3.4; "Chart № 42" 100.31px; № in Palatino; select 34.22px',
