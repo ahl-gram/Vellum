@@ -74,7 +74,8 @@ export async function rb5cLeans({
   evaluate,
   check,
   sleep,
-}: Pick<RibbonKit, "evaluate" | "check" | "sleep">): Promise<void> {
+  glassHome,
+}: Pick<RibbonKit, "evaluate" | "check" | "sleep" | "glassHome">): Promise<void> {
   await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
   let leaned = null;
   for (let i = 0; i < 60; i++) {
@@ -104,17 +105,7 @@ export async function rb5cLeans({
       Math.abs(leaned.cy - leaned.ny) < 1e-3,
     JSON.stringify(leaned),
   );
-  await evaluate(
-    `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
-  );
-  for (let i = 0; i < 60; i++) {
-    let home = null;
-    try {
-      home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
-    } catch {}
-    if (home) break;
-    await sleep(50);
-  }
+  await glassHome();
 }
 
 function rb5dRoadsOut({ check }: Pick<RibbonKit, "check">, first: Ribbon): void {
@@ -133,7 +124,7 @@ function rb5dRoadsOut({ check }: Pick<RibbonKit, "check">, first: Ribbon): void 
   );
 }
 
-async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon): Promise<void> {
+async function rb5bTheSlip({ evaluate, check, sleep, glassHome }: RibbonKit, first: Ribbon): Promise<void> {
   const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(
     `(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`,
   );
@@ -167,7 +158,7 @@ async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon)
     first.fromOptions.length === 25 && !first.fromOptions.includes(24) && first.fromOptions.includes(0),
     JSON.stringify({ count: first.fromOptions.length, has24: first.fromOptions.includes(24) }),
   );
-  await rb5cLeans({ evaluate, check, sleep });
+  await rb5cLeans({ evaluate, check, sleep, glassHome });
   rb5dRoadsOut({ check }, first);
 }
 
