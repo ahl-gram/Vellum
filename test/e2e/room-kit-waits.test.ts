@@ -36,8 +36,8 @@ for (const { room, kit, hop, plate } of KITS) {
     await assert.rejects(kit(p.ctx).goto("#seed=42"), (err: Error) => err.message === `settle timeout ${hop}: false`);
     assert.equal(p.asked.length, 100, "the hop did not spend the 100 reads it is given");
     assert.ok(
-      p.asked.every((expression) => expression.includes(`getElementById("${plate}")`)),
-      `the hop read something other than the room's own plate, ${plate}: ${p.asked[0]}`,
+      p.asked.every((expression) => expression === `!document.getElementById("${plate}")`),
+      `the hop read something other than the absence of the room's own plate, ${plate}: ${p.asked[0]}`,
     );
     assert.deepEqual(p.navigated, [`http://127.0.0.1:${PORT}/faq/`]);
   });
@@ -57,5 +57,18 @@ for (const { room, kit, hop, plate } of KITS) {
       (err: Error) => err.message === `settle timeout ${room} page never drew: never: null`,
     );
     assert.equal(p.asked.length, 300, "the draw did not spend the 300 reads (15 s at 50 ms) it is given");
+  });
+
+  test(`the ${room} kit's opened waits out a read that throws, and polls past a plate that has not finished drawing`, async () => {
+    const drawn = { blob: true, status: "" };
+    const reads = [
+      new Error('{"code":-32000,"message":"Execution context was destroyed."}'),
+      { blob: true, status: "drawing" },
+      { blob: false, status: "" },
+      drawn,
+    ];
+    const p = page((nth) => reads[nth - 1]);
+    assert.equal(await kit(p.ctx).opened("slow"), drawn);
+    assert.equal(p.asked.length, 4, "the draw gave up on a throwing read, or accepted a plate that was not drawn");
   });
 }

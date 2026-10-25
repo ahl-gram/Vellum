@@ -25,12 +25,12 @@ headless browser actually do, so a green run can be believed.
    value settles and asserts on the last sample, never on the first, because the first sample that is
    merely non-null is whatever was still in flight. `makeSettle` in `e2e/support/settle.ts`
    is both at once, and is the shape to copy: it hands the previous sample to the predicate as
-   `settled(d, last)`, and it throws with that last read as the payload. A wait being
-   written whose read can throw before the page answers, across a navigation, a boot or a hop, passes
-   `tolerant: true` to `makeSettle`, and neither hand-writes a loop round a `catch` that swallows nor wraps its `evaluate` in one: a read that throws then counts
-   as no read and forgets the previous one, so a stillness predicate never pairs reads from two
-   documents, and the timeout names the error the last read threw beside its label and last read.
-   **Judging the last sample is
+   `settled(d, last)`, and it throws with that last read as the payload. A wait being written whose
+   read can throw before the page answers, across a navigation, a boot or a hop, passes
+   `tolerant: true` to `makeSettle`, and neither hand-writes a loop round a `catch` that swallows nor wraps its
+   `evaluate` in one: a read that throws then counts as no read and forgets the previous one, so a
+   stillness predicate never pairs reads from two documents, and the timeout names the error the
+   last read threw beside its label and last read. **Judging the last sample is
    not the same as RETURNING it**: a poll that runs out of tries and falls through to its last read
    hands back an unsettled value with nothing marking it as such, which reintroduces the flake
    silently, and one mutation run proved it. The last sample is what the throw CARRIES, so the
