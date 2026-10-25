@@ -212,17 +212,18 @@ scar:
   of what was planned and is never edited afterwards. **The archive holds every plan a build was made
   to**, so a revision is committed beside the plan it revises, never over it. A revision is a plan
   finished again by a fresh `vellum-planner` after the plan came back to it (a builder's hand-back, or
-  a finding about the plan's design at step 14 or 15). It is archived as
+  a finding about the plan's design at step 14 or 15). Its planner names it in the scratchpad by this
+  rule, and the dispatcher's archive and the builder's copy keep that name: it is archived as
   `handbook/plans/<N>/<N>-r<k>-plan.md`, or `handbook/plans/<N>/<N>-<label>-r<k>-plan.md` for a later
-  pull request, `k` one more than the highest revision of that pull request's plan on its branch, on
-  main or in the issue's plan archive (`handbook/specs/orchestration.md`), the plan the pull request
-  first committed counting as 0, so no number is used twice
+  pull request, `k` one more than the highest revision of that pull request's plan on its pushed
+  branch, on main or in the issue's plan archive (`handbook/specs/orchestration.md`), the plan the
+  pull request first committed counting as 0, so no number is used twice
   (`handbook/plans/1048/1048-r1-plan.md` stands beside `handbook/plans/1048/1048-plan.md`); a revision
   copied in after its pull request merged keeps the number its own text gives it. It is copied
   unchanged as it stood after its rulings were folded in, and committed with the first commit its
   builder makes; only the plan file is archived, never a file it names as standing beside it. A
-  revision finished before the pull request's branch carries any plan of its own is the plan that
-  build first commits, under the name of the plan it supersedes, which stays where the dispatcher
+  revision finished before the pull request's pushed branch carries any plan of its own is the plan
+  that build first commits, under the name of the plan it supersedes, which stays where the dispatcher
   archived it (`handbook/specs/orchestration.md`). A change at review that no planner revised is
   named in the PR body with the difference, not a rewritten file.
   `handbook/plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
