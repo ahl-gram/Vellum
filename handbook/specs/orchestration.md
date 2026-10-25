@@ -116,24 +116,35 @@ home's line wins for the lane and this file's for the orchestrator.
   of the same check on several lanes' pull requests at once is read and fixed once, by the lane you
   pick, the others merging `main` after its pull request lands, and their local runs go one at a
   time (`vellum-footguns` Gate 2 item 11). A red its Mac run reproduces is the lane's, by its
-  definition, and is not re-run. Whether a red is explained is step 1 of that spec's "A flake, from
-  red to restore"; an explained red gets no flake row and no re-run: tell the lane, which rewrites
-  the check as its definition says, and no planner sees it (Alex, 2026-10-24). A rewrite made after
-  the cold review's one round is read only by you, before the merge (Merging, below), your report
-  to Alex naming each rewritten check. A check whose rewrite reds again on CI, or that the lane's
-  definition says is not rewritten, goes to no planner (Alex, 2026-10-24): once the lane has given
-  the later checks in its suite their own waits and reported, file an issue recording what it read
-  and tried, put it on the board, take the lane's tree out loud (One writer per tree, above), and
-  add the check's entry as that spec's item 11 says, running its suite there before you push and
-  saying so in the pull request's body, so the pull request merges without it and the lane's build
-  ends there. So a rewrite, and those waits, made after the cold review are read by nobody else,
-  and a check pulled out is unguarded until its issue is fixed. Any other red is re-run once, on
-  `vellum-footguns` Gate 2 item 10's terms: open a pull request of your own that adds its row to
+  definition, and is not re-run. Whether a red is explained is that spec's clause 15; an explained
+  red gets no flake row and no re-run: tell the lane, which rewrites the check as its definition
+  says, and no planner sees it (Alex, 2026-10-24), except on a check the lane rewrote, or one
+  already carrying the marker its definition leaves on a rewrite, where the fix would be a rewrite
+  of the check: it is never rewritten twice, and that red goes to a fresh planner of the lane's own
+  issue with both readings, a browser check and a unit test alike (Alex, 2026-10-25). A red that is
+  neither explained nor the lane's by its definition, on such a check, whichever pull request
+  rewrote it, is never re-run either (Alex, 2026-10-25). An e2e check is pulled out with no flake
+  row: once the lane has given the later checks in its suite their own waits, committed every other
+  fix the run asks of it without pushing, and reported, file an issue holding both readings and what
+  was tried, put it on the board, take the lane's tree out loud (One writer per tree, above), add
+  the check's entry as that spec's item 11 says, run its suite there and push, the one push for that
+  run, saying so in the pull request's body, then hand the tree back out loud and the lane goes on
+  with its build; the pull request merges without the check, which is unguarded until its issue is
+  fixed. A unit test has no skip list, so its red gets its flake row, in a pull request of your own
+  as below, with a disposition that keeps the words `a rewritten unit test re-planned`, and goes to
+  a fresh planner as an explained one does; and you tell Alex at once, plainly and at the head of
+  your message, and again in your next report to him, that a rewritten unit test has failed again on
+  CI: the test, the pull request, the run and job, what the list did and did not explain, and how
+  many times it has happened, the rows with those words in the flake record on `main` and the one
+  you filed (Alex, 2026-10-25). A rewrite, or those waits, made after the cold review's one round is
+  read only by you, before the merge (Merging, below), your report to Alex naming each rewritten or
+  pulled-out check. Any other red is re-run once, on `vellum-footguns` Gate 2 item 10's terms: open
+  a pull request of your own that adds its row to
   `.claude/skills/vellum-footguns/references/flake-record.md`, post the pull request comment that
   item asks for on the lane's, then re-run that job alone (`gh run rerun <run> --job <job>`), your
   pull request's own checks running beside it, and set the row's disposition from the re-run in
-  your pull request, one more for Alex to merge (Alex, 2026-10-24). Where the same run also holds
-  an explained red, the lane's push of its rewrite is that re-run, made once your row's pull
+  your pull request, one more for Alex to merge (Alex, 2026-10-24). Where the same run also needs
+  a rewrite or a pull-out, the push that carries it is that re-run, made once your row's pull
   request is open, since a push cancels a run still in progress for the same pull request (the
   `concurrency` group in `.github/workflows/ci.yml`). Where the row is its step's third, its pull
   request also carries clause 12's issue and skip, no re-run is made, and the lane merges `main`

@@ -241,7 +241,10 @@ is run and PROVEN in a particular way.
   browser, a ratified deviation, a byte-identity or golden claim) and check whether the fact survives
   anywhere in its file. **CSS is the weakest ground for the whole doctrine**, because no unit test
   pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
-  dangerous single loss: without the line the next reader "fixes" the value back.
+  dangerous single loss: without the line the next reader "fixes" the value back. A line holding
+  `rewritten for a red on CI` is never removed by a sweep: it marks a check rewritten once for a red
+  on CI, whose next red `.claude/agents/vellum-implementer.md` routes by it, and only the plan that
+  fixes that check says whether it stays.
 - **Every deletion made on the ground that a test already pins the behaviour NAMES that test**, in a
   ledger written while the grep is still open, because it cannot be reconstructed afterwards. Naming
   a test is not enough by itself: check that the named test actually pins the behaviour the comment

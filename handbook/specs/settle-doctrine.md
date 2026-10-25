@@ -135,6 +135,18 @@ headless browser actually do, so a green run can be believed.
     `e2e/support/lanes.ts`), so a bisect runs the serial script. And `resolveSuiteSelection` reorders
     any selection into the canonical order and auto-adds the suite that consumes the boot draw, so
     an arbitrary order cannot be reproduced by asking for it.
+15. **A red on CI that the list of Mac and runner differences explains, or one on a check already
+    rewritten once for such a red, is never re-run.** A red on CI is explained where an entry of
+    "Where the Mac and the CI runner disagree" below names the difference and the numbers are the
+    ones its home gives, a staged run that reds as CI did included; a wait or a budget that ran out,
+    and a red with no failing check (a launch failure, a job's time cap, a hang), never are, since
+    the runner's speed differs from run to run. An explained red gets no flake row and is fixed
+    instead, as `handbook/specs/orchestration.md`, "While lanes run", says (Alex, 2026-10-24). A red
+    not explained, on a check already rewritten once for an explained one, by this pull request or
+    any earlier one, where the Mac run does not red too and the cause is not in the code, is pulled
+    out of the run under a new issue as item 11 says if it is an e2e check, with no flake row, the
+    issue holding both readings and what was tried; a unit test, which no skip list reaches, gets
+    its flake row and is planned again (Alex, 2026-10-25).
 
 ## A flake, from red to restore
 
@@ -144,12 +156,7 @@ holds only the order.
 1. **A red is yours until proven a flake.** It gets its row in
    `.claude/skills/vellum-footguns/references/flake-record.md` before the one re-run, which is alone;
    a second red is a defect (`vellum-footguns` Gate 2 item 10).
-   A red on CI is explained where an entry of "Where the Mac and the CI runner disagree" below names
-   the difference and the numbers are the ones its home gives, a staged run that reds as CI did
-   included; a wait or a budget that ran out, and a red with no failing check (a launch failure, a
-   job's time cap, a hang), never are, since the runner's speed differs from run to run. An
-   explained red gets neither, and is fixed instead, as `handbook/specs/orchestration.md`, "While
-   lanes run", says (Alex, 2026-10-24).
+   A red on CI that item 15 names is never re-run, and takes the route that item gives.
 2. **It leaves a trail.** A PR comment with the payload; it is never silently re-run away (item 12).
 3. **Recurrence becomes an issue and a skip.** At three CI rows for one step with no issue open, the
    issue is filed and the step skipped, with no offer first (item 12).
@@ -462,7 +469,7 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
   `handbook/specs/cascade-traps.md`, the bullet opening "An affordance gate is".
 - **Speed: the runner is slower**, so a wait sized on a Mac runs out there. Home: clause 10 and
   `vellum-footguns` Gate 2 item 8 for a budget, with a dated factor at `REDRAFT_TRIES` in
-  `e2e/suites/zoom/kit.ts`.
+  `e2e/suites/zoom/kit.ts`; clause 15 never counts it as explaining a wait or a budget that ran out.
 - **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
   session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
   above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.
