@@ -35,7 +35,7 @@ export async function rs18Silent(
   const rs18 = await inkedCount();
   check(
     "RS18 the park is silent: every glyph is up and none carries an ink grade (#155)",
-    rs18 === 0,
+    settled && rs18 === 0,
     `${rs18} groups inked at the park; the room settled: ${settled}`,
   );
 }

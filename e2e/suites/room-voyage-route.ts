@@ -352,25 +352,26 @@ async function rv11Read({ evaluate }: Pick<SuiteContext, "evaluate">) {
 
 export async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
-  await room.goto("#seed=39&style=antique&legend=1&survey");
+  const rv11ok = await room.goto("#seed=39&style=antique&legend=1&survey");
   const rv11 = await rv11Read({ evaluate });
   check(
     "RV11 seed 39: the mark rides to the shore, sails the crossing, and rides again on landfall, narrated",
-    rv11.handoffs === 2 &&
+    rv11ok &&
+      rv11.handoffs === 2 &&
       rv11.embFrom > 0.3 &&
       rv11.landTo < 0.7 &&
       rv11.ridesToShore === "rider" &&
       rv11.sails === "ship" &&
       rv11.ridesFromLandfall === "rider" &&
       rv11.narrated,
-    JSON.stringify(rv11),
+    JSON.stringify({ rv11ok, rv11 }),
   );
   await shoot("reading-room-voyage-handoff.png");
 }
 
 export async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 430445745 puts ports on THREE landmasses; before Issue #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. Issue #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
-  await room.goto("#seed=430445745&style=antique&legend=1&survey");
+  const rv12ok = await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const modes={};
@@ -379,8 +380,8 @@ export async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, r
   })()`);
   check(
     "RV12 seed 430445745: every leg of the three-landmass world rides or sails, none degrades to a straight chord (#309)",
-    rv12.straight === 0 && rv12.road >= 10 && rv12.sea >= 2,
-    JSON.stringify(rv12),
+    rv12ok && rv12.straight === 0 && rv12.road >= 10 && rv12.sea >= 2,
+    JSON.stringify({ rv12ok, rv12 }),
   );
   await shoot("reading-room-voyage-roaded-landmasses.png");
 }
