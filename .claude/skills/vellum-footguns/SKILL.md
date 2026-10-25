@@ -185,6 +185,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     (Issue #522).
 16. **Read the two readings a plan printed for a browser check before you type it**
     (`vellum-planner`'s **Tests** line; Issue #1037).
+17. **Count and time a new or longer check** (settle-doctrine; Issue #1063).
 
 ## Gate 3: before writing CSS or moving layout
 
