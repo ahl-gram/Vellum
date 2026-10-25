@@ -38,7 +38,7 @@ export const INK_READ: Payload<InkSpan> = `(()=>{const k=window.__ink;cancelAnim
       return{inkStarted:!!k.el,inkEnd:k.end||"none",inkClosed:k.closed,inkFrames:k.frames,inkSteps:k.steps,inkGap:r(k.gap),
         inkMedianFrame:s.length?r(s[Math.floor(s.length/2)]):null,
         readMs:k.el&&k.mark?r(k.mark.t-k.start):null,readFrames:k.mark?k.mark.frames:null,readSteps:k.mark?k.mark.steps:null};})()`;
-// 2026-10-25, 6d9245b3: SV2r's read to the span's close read 0 to 1031 ms on the Mac over the fixture, P3, P3b and P4; the span is --ink-draw's 1200 ms, so 100 tries of 50 ms are over three times the span plus CI's largest healthy frame gap (250 ms), and a span still open then throws.
+// 2026-10-25, 6d9245b3: SV2r's read to the span's close read 0 to 1031 ms on the Mac over the fixture, P3, P3b and P4; the span is --ink-draw's 1200 ms, so 100 tries of 50 ms are over three times the span plus CI's largest healthy frame gap (250 ms).
 export const INK_END_TRIES = 100;
 
 export async function sv2pDrawBeat({ evaluate, waitSettled, goto, waitInked }: SurveyKit): Promise<void> {
