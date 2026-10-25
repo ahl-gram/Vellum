@@ -4,17 +4,7 @@ import type { SuiteContext } from "../types.ts";
 import { h19Sideways, h19bOverSlips, h20Reveal } from "./home/floor.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
-import {
-  h0Loads,
-  hVeilDown,
-  h1CornerForm,
-  h2Hook,
-  h4DrawIt,
-  h5Home,
-  h5aRefused,
-  h5bEmptySeed,
-  h6Clean,
-} from "./home/frame.ts";
+import { h0Frame, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
 import {
   h7aVeil,
   h7cAdopted,
@@ -52,10 +42,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
-  const ready = await h0Loads(ctx);
-  await hVeilDown(k, ready);
-  await h1CornerForm(ctx, ready);
-  await h2Hook(ctx, ready);
+  await h0Frame(k);
   await h4DrawIt(ctx);
   const backHome = await h5Home(ctx);
   await h5aRefused(ctx, backHome);

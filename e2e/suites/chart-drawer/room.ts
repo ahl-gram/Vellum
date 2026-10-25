@@ -38,7 +38,7 @@ async function pillLines(k: DrawerKit): Promise<{ counted: Pill[]; next: { hit: 
   await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${TWO}` });
-  await makeSettle({ evaluate: (e: string) => evaluate<Pill | null>(e).catch(() => null), sleep })(
+  await makeSettle({ evaluate, sleep, tolerant: true })(
     PILL,
     (d) => d.drawn === 1 && d.line !== "",
     "portfolio-one-drafted",
@@ -90,11 +90,11 @@ export async function cd55WhereAuthored({ evaluate, send, check, sleep, PORT }: 
     const off = await withScriptsOff(send, async () => {
       await send("Page.navigate", { url: "about:blank" });
       await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
-      return makeSettle({
-        evaluate: (e: string) =>
-          evaluate<{ where: string | null; app: boolean; ready: string } | null>(e).catch(() => null),
-        sleep,
-      })(WHERE, (d) => d.ready === "complete", "portfolio-scripts-off");
+      return makeSettle({ evaluate, sleep, tolerant: true })(
+        WHERE,
+        (d) => d.ready === "complete",
+        "portfolio-scripts-off",
+      );
     });
     check(
       "CD55 the Portfolio's where-line ships promising the sheets gathered at the Explorer, and the script writes the bare voice over it when nothing was gathered (scripts on the control)",
@@ -138,7 +138,7 @@ export async function cd56WorkerBlocked(k: DrawerKit): Promise<void> {
     await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#${DRESS}&table=${ONE}` });
-    const settle = makeSettle({ evaluate: (e: string) => evaluate<Fallback | null>(e).catch(() => null), sleep });
+    const settle = makeSettle({ evaluate, sleep, tolerant: true });
     const read = await settle(FALLBACK, (d) => d.drawn === 1, "portfolio-drafted-inline", DRAWN);
     check(
       "CD56 a Portfolio whose worker never starts says so in its stage, seated over the sheet so the sheet stays centred, and raises the notice before the first drafting line, and a one-sheet folio keeps both its presses (the worker's own load error the witness)",

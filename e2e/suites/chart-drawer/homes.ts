@@ -298,11 +298,7 @@ const PAIR_OF_SURVEYS = [
 async function folioAt({ evaluate, send, sleep, PORT }: TableKit, hash: string): Promise<Folio> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/${hash}` });
-  return makeSettle({ evaluate: (e: string) => evaluate<Folio | null>(e).catch(() => null), sleep })(
-    FOLIO,
-    (d) => d.items > 0,
-    "portfolio-folio",
-  );
+  return makeSettle({ evaluate, sleep, tolerant: true })(FOLIO, (d) => d.items > 0, "portfolio-folio");
 }
 
 export async function cd61FolioHomes(kt: TableKit): Promise<void> {
@@ -325,7 +321,7 @@ export async function cd61FolioHomes(kt: TableKit): Promise<void> {
         break;
     }
     await evaluate(`history.back()`);
-    const back = await makeSettle({ evaluate: (e: string) => evaluate<Folio | null>(e).catch(() => null), sleep })(
+    const back = await makeSettle({ evaluate, sleep, tolerant: true })(
       FOLIO,
       (d) => d.nav === "back_forward",
       "portfolio-back-rebuilt",

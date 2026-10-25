@@ -1,4 +1,4 @@
-import { buttonPoint, readXform } from "../../support/home.ts";
+import { atLandfall, buttonPoint, readXform } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
@@ -26,8 +26,8 @@ export async function l5HowOpens({ evaluate, check, sleep, clickAt }: LandfallKi
   }
   check(
     "L5 (arm 4) a real click opens the how panel and focus lands on its scroller, not the clicked pip",
-    how !== null && how.open && how.focused && how.max > 0,
-    JSON.stringify({ settled2: !!settled2, howPt, how }),
+    atLandfall(settled2) && how !== null && how.open && how.focused && how.max > 0,
+    JSON.stringify({ settled2, howPt, how }),
   );
   // The slip opens mid-flight (the open tween starts while the camera still eases to the station framing), so every scale-unchanged read below first waits for the flight to land or it blames the flight's own tail on the gesture.
   for (let i = 0; i < 40; i++) {

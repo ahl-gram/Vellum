@@ -1,5 +1,5 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
-import { buttonPoint } from "../../support/home.ts";
+import { atLandfall, buttonPoint } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
@@ -78,7 +78,8 @@ export async function h14aCardFits(
 ): Promise<void> {
   check(
     "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor at 0.4 of the stage clear of the slip, the slip whole inside the stage with its enter, close, and the zoom controls all under the hand, arms aboard",
-    visited !== null &&
+    atLandfall(settled14) &&
+      visited !== null &&
       visited.open &&
       Math.abs(visited.scale - visited.fit * 2.6) < 1e-3 &&
       Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 &&
@@ -91,7 +92,7 @@ export async function h14aCardFits(
       visited.title === "The Atlas of Rahai" &&
       visited.enter === "atlas/" &&
       visited.arms === 3,
-    JSON.stringify({ settled14: !!settled14, atlasPt, visited }),
+    JSON.stringify({ settled14, atlasPt, visited }),
   );
   await shoot("home-station-card.png");
 }

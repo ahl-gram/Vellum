@@ -1,5 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { makeStage, readCam } from "../../e2e/support/home.ts";
+import type { Cam } from "../../e2e/support/home.ts";
+import { hVeilDown } from "../../e2e/suites/home/frame.ts";
+import { homeKit } from "../../e2e/suites/home/kit.ts";
 import { prospectKit } from "../../e2e/suites/prospect/kit.ts";
 import { ribbonKit } from "../../e2e/suites/ribbon/kit.ts";
 import { runningHeadKit } from "../../e2e/suites/runninghead/kit.ts";
@@ -134,4 +138,58 @@ test("the running head's visit to home presses on past a read of the veil that t
   );
   assert.equal(await runningHeadKit(p.ctx).visit("/"), true);
   assert.equal(p.keys.length, 2, "a veil read that threw stopped the presses or was read as the veil lifting");
+});
+
+test("the home suite's hVeilDown answers false when the veil never lifts, after its 40 presses of Escape", async () => {
+  const p = page(() => true);
+  assert.equal(await hVeilDown(homeKit(p.ctx), true), false);
+  assert.deepEqual(
+    p.keys,
+    Array.from({ length: 40 }, () => "Escape"),
+    "the wait did not press Escape 40 times",
+  );
+  assert.equal(
+    p.asked.filter((expression) => expression === VEIL).length,
+    40,
+    "the wait did not read the veil once after each press",
+  );
+});
+
+test("the home suite's hVeilDown answers true once the veil lifts, and stops pressing", async () => {
+  let veil = 0;
+  const p = page((nth, expression) => (expression === VEIL ? ++veil < 3 : true));
+  assert.equal(await hVeilDown(homeKit(p.ctx), true), true);
+  assert.equal(p.keys.length, 3, "the wait pressed on after the veil lifted, or stopped before it did");
+});
+
+test("the home suite's hVeilDown presses on past a read of the veil that throws", async () => {
+  let veil = 0;
+  const p = page((nth, expression) =>
+    expression === VEIL ? (++veil === 1 ? new Error("eval exception: TypeError: gone") : false) : true,
+  );
+  assert.equal(await hVeilDown(homeKit(p.ctx), true), true);
+  assert.equal(p.keys.length, 2, "a veil read that threw stopped the presses or was read as the veil lifting");
+});
+
+test("the home suite's hVeilDown answers false and presses nothing on a home that never loaded", async () => {
+  const p = page(() => false);
+  assert.equal(await hVeilDown(homeKit(p.ctx), false), false);
+  assert.equal(p.keys.length, 0, "the wait pressed keys at a page that never loaded");
+});
+
+const VEILED: Cam = { veil: true, lifting: false, status: "Landfall", scale: 1.1, x: 0, y: 0, fit: 1, expected: 1.72 };
+
+test("home's settleHome hands back the last camera it read when home never settles at its landfall, after its 60 presses of Escape and its 80 reads of the camera", async () => {
+  const p = page((nth, expression) => (expression === readCam ? VEILED : true));
+  assert.equal(await makeStage(p.ctx).settleHome(), VEILED);
+  assert.deepEqual(
+    p.keys,
+    Array.from({ length: 60 }, () => "Escape"),
+    "the settle did not press Escape 60 times",
+  );
+  assert.equal(
+    p.asked.filter((expression) => expression === readCam).length,
+    80,
+    "the settle did not read the camera 80 times",
+  );
 });

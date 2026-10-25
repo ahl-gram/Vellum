@@ -25,7 +25,7 @@ const rectOf = (sel: string): Payload<Rect | null> =>
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, clearMobile, waitReady, PORT } = ctx;
-  // CL1 and CL2 are deliberately not stepped: settleHome returns null rather than throwing, and their checks already guard on it.
+  // CL1 and CL2 are deliberately not stepped: settleHome answers with its last read rather than throwing, and CL1 asserts that read stands at its landfall.
   const step = makeStep(ctx);
   const { settleHome } = makeStage(ctx);
 
@@ -68,7 +68,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await waitReady();
 }
 
-async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
+export async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
   const cam = await settleHome();
 
   const wash = await evaluate<{
@@ -95,7 +95,7 @@ async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["set
   );
   check(
     "CL1 the cluster's wash is a soft pool sized by the cluster: it ends 1.5 to 3rem past the nav's right and past the foot of the cluster's last line, the chart's press (Issue #671), blurred, at 0.8 ink or deeper, no gradient box (#480 screenshot 3; the slab measured 736x272 against a nav ending at 510x102)",
-    !!cam &&
+    atLandfall(cam) &&
       wash.image === "none" &&
       /blur\(/.test(wash.filter) &&
       alpha >= 0.8 &&
@@ -105,7 +105,7 @@ async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["set
       wash.box.bottom - wash.foot.bottom <= 3 * REM &&
       wash.box.left <= -2 * REM &&
       wash.box.top <= -2 * REM,
-    JSON.stringify({ cam: !!cam, wash, alpha }),
+    JSON.stringify({ cam, wash, alpha }),
   );
 }
 

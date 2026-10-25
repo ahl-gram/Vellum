@@ -87,8 +87,8 @@ async function ra1Restores(
   await shoot("reading-room-address-year.png");
 }
 
-async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
-  await room.goto("#seed=42&style=antique&year=999999");
+export async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
+  const ra2ok = await room.goto("#seed=42&style=antique&year=999999");
   const ra2 = await evaluate<{
     year: number | null;
     readout: string;
@@ -98,14 +98,14 @@ async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: Worl
       hashYear:new URLSearchParams(location.hash.slice(1)).get("year")};})()`);
   check(
     "RA2 an out-of-range year clamps to the boundary and the hash self-heals",
-    ra2.year === sm.present && ra2.readout === `year ${sm.present}` && ra2.hashYear === String(sm.present),
-    JSON.stringify({ ra2, present: sm.present }),
+    ra2ok && ra2.year === sm.present && ra2.readout === `year ${sm.present}` && ra2.hashYear === String(sm.present),
+    JSON.stringify({ ra2ok, ra2, present: sm.present }),
   );
 }
 
-async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
+export async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // The empty status line is the discriminating clause: an applyVoyage restore would post the completion summary and hang the settle; only the silent rearm path leaves it "".
-  await room.goto("#seed=42&style=antique&survey");
+  const ra3ok = await room.goto("#seed=42&style=antique&survey");
   const ra3 = await evaluate<{
     chamber: string;
     t: number | null;
@@ -130,7 +130,8 @@ async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): 
   })()`);
   check(
     "RA3 a bare survey deep link restores the survey chamber at rest on the closed track, silently",
-    ra3.chamber === "survey" &&
+    ra3ok &&
+      ra3.chamber === "survey" &&
       ra3.t === 1 &&
       ra3.ports > 1 &&
       ra3.first === ra3.last &&
@@ -141,18 +142,18 @@ async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): 
       ra3.status === "" &&
       /(^|&)survey(&|$)/.test(ra3.hash) &&
       !ra3.hash.includes("survey="),
-    JSON.stringify(ra3),
+    JSON.stringify({ ra3ok, ra3 }),
   );
   await shoot("reading-room-address-survey.png");
 }
 
-async function ra4Ignored(
+export async function ra4Ignored(
   { evaluate, check }: SuiteContext,
   room: Room,
   sm: World["sm"],
   midYear: number,
 ): Promise<void> {
-  await room.goto(`#seed=42&style=antique&survey&year=${midYear}`);
+  const ra4ok = await room.goto(`#seed=42&style=antique&survey&year=${midYear}`);
   const ra4 = await evaluate<{
     chamber: string;
     year: number | null;
@@ -161,11 +162,12 @@ async function ra4Ignored(
     return{chamber:a?a.chamber:"",year:a?a.year:-1,hash:location.hash.slice(1)};})()`);
   check(
     "RA4 a link carrying both survey and year=N is ignored whole: the room parks at its default present rest",
-    ra4.chamber === "ages" &&
+    ra4ok &&
+      ra4.chamber === "ages" &&
       ra4.year === sm.present &&
       !/(^|&)survey(=|&|$)/.test(ra4.hash) &&
       new URLSearchParams(ra4.hash).get("year") === String(sm.present),
-    JSON.stringify({ ra4, present: sm.present }),
+    JSON.stringify({ ra4ok, ra4, present: sm.present }),
   );
 }
 
@@ -201,9 +203,9 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
   );
 }
 
-async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
+export async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  await room.goto(`#seed=42&style=antique&year=${midYear}`);
+  const ra6ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra6 = await evaluate<{
     val: number | null;
     playing: boolean;
@@ -216,13 +218,13 @@ async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, m
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(
     "RA6 under reduced motion the deep link lands parked on the year, Play offered, no sweep",
-    ra6.val === midYear && ra6.playing === false && ra6.play === "Play" && ra6.status === "",
-    JSON.stringify(ra6),
+    ra6ok && ra6.val === midYear && ra6.playing === false && ra6.play === "Play" && ra6.status === "",
+    JSON.stringify({ ra6ok, ra6 }),
   );
 }
 
-async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
-  await room.goto(`#seed=42&style=antique&year=${midYear}`);
+export async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
+  const ra7ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra7pre = await evaluate<string | null>(`new URLSearchParams(location.hash.slice(1)).get("year")`);
   await evaluate(
     `(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`,
@@ -250,13 +252,14 @@ async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, 
   }
   check(
     "RA7 a counter draw re-addresses to the NEW world's own present, never the old link's year",
-    ra7pre === String(midYear) &&
+    ra7ok &&
+      ra7pre === String(midYear) &&
       !!ra7 &&
       ra7.chamber === "ages" &&
       ra7.year === ra7.max &&
       new URLSearchParams(ra7.hash).get("year") === String(ra7.max) &&
       /(^|&)seed=100(&|$)/.test(ra7.hash),
-    JSON.stringify({ ra7pre, ra7 }),
+    JSON.stringify({ ra7ok, ra7pre, ra7 }),
   );
 }
 
