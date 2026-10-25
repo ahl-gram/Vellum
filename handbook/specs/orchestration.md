@@ -59,8 +59,11 @@ home's line wins for the lane and this file's for the orchestrator.
   overwrites an earlier copy, and `cmp` the copy against the scratchpad file. Then post it on the
   issue, which survives the machine. Each archive comment opens with the fixed line
   `Plan archive, not a ruling: <plan file name>, part <i> of <k>, sha256 <hex>`, `<hex>` being
-  `shasum -a 256` of the whole plan file on every part, then a blank line and the plan text. A plan
-  too long for one comment is cut at line boundaries into parts of at most 60,000 bytes, posted in
+  `shasum -a 256` of the whole plan file on every part, then a blank line and the plan text. A
+  revision is archived the same way under its own file name, the one its planner gave it (workflow
+  step 8), `<plan file name>` naming that file with nothing added after it. Where two archives name
+  one file, the sha256 on their opening lines says which is which. A plan too long for one comment
+  is cut at line boundaries into parts of at most 60,000 bytes, posted in
   order, one `gh issue comment --body-file` per call. Read the comments back with `gh api` and
   confirm the parts, joined, equal the file apart from a final newline. A lost plan is restored
   from `out/plans/`, or from the comments by joining the parts, dropping each opening line and
@@ -72,7 +75,7 @@ home's line wins for the lane and this file's for the orchestrator.
   with the issue, the plan's path and the hand-back, never a message to the retired one, which has no
   tree to stand in, and from the planner to Alex when it opens a
   decision. Never answer a hand-back yourself with a design call: that puts the decision back in the
-  cheaper lane by another route. The implementer resumes on the revised plan's path.
+  cheaper lane by another route. The implementer resumes on the revised plan's path and commits the revision beside the plans before it (workflow step 8).
 - **A ruling a lane will need before its own record is on the issue before the lane is briefed.** A
   standing ruling above all: a cold plan skeptic reads only the issue, and raises a rule it finds
   nowhere there as a defect.
