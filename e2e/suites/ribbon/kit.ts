@@ -1,7 +1,7 @@
 // The Ribbon suite's kit: the room's address, its state read and the scroll's arrival.
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { HOP_TRIES } from "../prospect/kit.ts";
+import { GLASS_HOME_TRIES, HOP_TRIES } from "../prospect/kit.ts";
 
 export type Ribbon = {
   seed: number;
@@ -44,6 +44,17 @@ export function ribbonKit(ctx: SuiteContext) {
   const state = () => evaluate(STATE);
   const opened = (label: string) =>
     settle(STATE, (s) => s.blob && s.status === "", `ribbon page never drew: ${label}`, 300);
+  const glassHome = async (): Promise<void> => {
+    await evaluate(
+      `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
+    );
+    await makeSettle({ evaluate, sleep })<boolean>(
+      `!document.getElementById("map-viewport").classList.contains("zoomed")`,
+      (home) => home,
+      "ribbon-glass-home",
+      GLASS_HOME_TRIES,
+    );
+  };
   const svgOf = () => evaluate<string>(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
-  return { ...ctx, page, goto, state, opened, svgOf };
+  return { ...ctx, page, goto, state, opened, glassHome, svgOf };
 }

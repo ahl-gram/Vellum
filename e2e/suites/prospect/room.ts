@@ -173,7 +173,7 @@ export async function pb16ScriptsOff(k: ProspectKit): Promise<void> {
   const { evaluate, send, check, sleep, page } = k;
   const control = await evaluate(OFF);
   type Loaded = { ready: string; lay: boolean };
-  const settle = makeSettle({ evaluate: (e: string) => evaluate<Loaded | null>(e).catch(() => null), sleep });
+  const settle = makeSettle({ evaluate, sleep, tolerant: true });
   const off = await withScriptsOff(send, async () => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: page("#seed=42&i=0") });
@@ -267,14 +267,14 @@ const HOME: Payload<Home> = `(() => { const p = document.getElementById("pp-lay"
   return { path: location.pathname, marker: window.__pb18 ?? null, nav: performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type,
     table: new URLSearchParams(location.hash.slice(1)).get("table"), count: (document.getElementById("pp-lay-count") || {}).textContent ?? null, dim: !!p && p.classList.contains("dim"), drawn: !!st }; })()`;
 
-async function backHome(k: ProspectKit, marker: string, unload: boolean): Promise<Home> {
+export async function backHome(k: ProspectKit, marker: string, unload: boolean): Promise<Home> {
   const { evaluate, sleep } = k;
   await evaluate(
     `(() => { window.__pb18 = "${marker}"; ${unload ? `window.addEventListener("unload", () => {});` : ""} setTimeout(() => { location.href = "/faq/"; }, 0); return true; })()`,
   );
   type Away = { path: string; ready: string };
-  const away = makeSettle({ evaluate: (e: string) => evaluate<Away | null>(e).catch(() => null), sleep });
-  const home = makeSettle({ evaluate: (e: string) => evaluate<Home | null>(e).catch(() => null), sleep });
+  const away = makeSettle({ evaluate, sleep, tolerant: true });
+  const home = makeSettle({ evaluate, sleep, tolerant: true });
   await away<Away>(
     `({ path: location.pathname, ready: document.readyState })`,
     (d) => d.path === "/faq/" && d.ready === "complete",
