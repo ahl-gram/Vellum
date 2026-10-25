@@ -48,14 +48,12 @@ export function ribbonKit(ctx: SuiteContext) {
     await evaluate(
       `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
     );
-    for (let i = 0; i < GLASS_HOME_TRIES; i++) {
-      let home = null;
-      try {
-        home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
-      } catch {}
-      if (home) break;
-      await sleep(50);
-    }
+    await makeSettle({ evaluate, sleep })<boolean>(
+      `!document.getElementById("map-viewport").classList.contains("zoomed")`,
+      (home) => home,
+      "ribbon-glass-home",
+      GLASS_HOME_TRIES,
+    );
   };
   const svgOf = () => evaluate<string>(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
   return { ...ctx, page, goto, state, opened, glassHome, svgOf };
