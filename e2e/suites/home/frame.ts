@@ -1,5 +1,6 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
 import type { SuiteContext } from "../../types.ts";
+import { VEIL_PRESSES } from "../runninghead/kit.ts";
 import type { HomeKit } from "./kit.ts";
 import { controlGold } from "./reads.ts";
 
@@ -22,18 +23,17 @@ export async function h0Loads({ evaluate, check, sleep }: SuiteContext) {
 
 export async function hVeilDown({ evaluate, sleep, pressKey }: HomeKit, ready: boolean): Promise<boolean> {
   // First arrival raises the veil (H7 proves it); settle it with a REAL key so H1-H5 and their plates measure the page. Synthetic .click() dispatches no pointerdown, and a key thrown before the module arms the skip hits nothing, so press until it lands.
-  if (ready) {
-    for (let i = 0; i < 40; i++) {
-      await pressKey("Escape", "Escape", 27);
-      await sleep(150);
-      let up = true;
-      try {
-        up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`);
-      } catch {}
-      if (!up) break;
-    }
+  if (!ready) return false;
+  for (let i = 0; i < VEIL_PRESSES; i++) {
+    await pressKey("Escape", "Escape", 27);
+    await sleep(150);
+    let up = true;
+    try {
+      up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`);
+    } catch {}
+    if (!up) return true;
   }
-  return ready;
+  return false;
 }
 
 export async function h1CornerForm({ evaluate, check }: SuiteContext, ready: boolean): Promise<void> {
@@ -100,10 +100,9 @@ export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: bo
 }
 
 export async function h0Frame(k: HomeKit): Promise<void> {
-  const ready = await h0Loads(k);
-  await hVeilDown(k, ready);
-  await h1CornerForm(k, ready);
-  await h2Hook(k, ready);
+  const unveiled = await hVeilDown(k, await h0Loads(k));
+  await h1CornerForm(k, unveiled);
+  await h2Hook(k, unveiled);
 }
 
 export async function h4DrawIt({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
