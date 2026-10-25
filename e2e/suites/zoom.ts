@@ -121,7 +121,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z19bSupersession(k);
   await z20ZoomOutDrops(k);
   await z20bReducedMotion(k);
-  await z20cThrottle(k);
+  await step("Z20c", () => z20cThrottle(k));
   await step("Z20d", () => z20dInkDrops(k));
   await step("Z23", () => z23SurveyOverlay(k));
   await z20eCardSurvives(k);
