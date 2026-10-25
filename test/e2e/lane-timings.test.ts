@@ -22,7 +22,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   ribbon: 15.9,
   home: 125.3,
   landfall: 69.4,
-  survey: 111.8,
+  survey: 109.7,
   broadside: 15.1,
   "reading-room": 82.7,
   "room-instrument": 45.3,
