@@ -144,6 +144,12 @@ holds only the order.
 1. **A red is yours until proven a flake.** It gets its row in
    `.claude/skills/vellum-footguns/references/flake-record.md` before the one re-run, which is alone;
    a second red is a defect (`vellum-footguns` Gate 2 item 10).
+   A red on CI is explained where an entry of "Where the Mac and the CI runner disagree" below names
+   the difference and the numbers are the ones its home gives, a staged run that reds as CI did
+   included; a wait or a budget that ran out, and a red with no failing check (a launch failure, a
+   job's time cap, a hang), never are, since the runner's speed differs from run to run. An
+   explained red gets neither, and is fixed instead, as `handbook/specs/orchestration.md`, "While
+   lanes run", says (Alex, 2026-10-24).
 2. **It leaves a trail.** A PR comment with the payload; it is never silently re-run away (item 12).
 3. **Recurrence becomes an issue and a skip.** At three CI rows for one step with no issue open, the
    issue is filed and the step skipped, with no offer first (item 12).
