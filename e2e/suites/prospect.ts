@@ -148,11 +148,12 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   );
 }
 
-async function pb3fGlassLeans({
+export async function pb3fGlassLeans({
   evaluate,
   check,
   sleep,
-}: Pick<ProspectKit, "evaluate" | "check" | "sleep">): Promise<void> {
+  glassHome,
+}: Pick<ProspectKit, "evaluate" | "check" | "sleep" | "glassHome">): Promise<void> {
   await evaluate(
     `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,
   );
@@ -171,20 +172,10 @@ async function pb3fGlassLeans({
     !!leaned && leaned.zoomed && leaned.k > 1.3,
     JSON.stringify(leaned),
   );
-  await evaluate(
-    `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
-  );
-  for (let i = 0; i < 60; i++) {
-    let home = null;
-    try {
-      home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
-    } catch {}
-    if (home) break;
-    await sleep(50);
-  }
+  await glassHome();
 }
 
-async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit): Promise<string> {
+async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf, glassHome }: ProspectKit): Promise<string> {
   const room = await evaluate<{
     chartRoom: boolean;
     footer: boolean;
@@ -208,7 +199,7 @@ async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit):
       Math.abs(room.ph - room.h) < 1,
     JSON.stringify(room),
   );
-  await pb3fGlassLeans({ evaluate, check, sleep });
+  await pb3fGlassLeans({ evaluate, check, sleep, glassHome });
   check(
     "PB4 the render worker serves the page (no silent inline fallback)",
     await evaluate<boolean>(`window.__vellumProspectUsesWorker() === true`),

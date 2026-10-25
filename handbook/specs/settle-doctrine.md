@@ -346,9 +346,8 @@ section points there rather than restating it.
   every number a check reads off the room's fit moves with it**: the sheet `bindRoom` in
   `src/site/shared/room.ts` fits, the seat `placeLegendRow` in `src/site/shared/room-seats.ts` gives
   the Press row, and with them a room's fill depth, the press that fills and the ground under a slid
-  line. A check reads such a number off the room's own layout in the run, as SW2's `thirdPress` in
-  `e2e/suites/slide-away/rooms.ts` reads the press that fills, or asserts it with its margin
-  measured on both browsers' layouts. The runner's layout is read locally before CI by running a
+  line. How a check takes such a number is `handbook/specs/check-placement.md`'s (The browser lanes
+  and a plate read). The runner's layout is read locally before CI by running a
   suite with `VELLUM_E2E_RUNNER_LAYOUT=1` (`runnerLayoutRequested` in `e2e/support/runner-layout.ts`),
   which stages what the runner was measured to lay out differently (`RUNNER_SELECTS` and
   `RUNNER_NUMERO_FAMILY` there) in a style sheet the document adopts when it is created, before any
@@ -435,7 +434,8 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
 `VELLUM_BROWSER` names another.
 
 - **Layout: a chart room's furniture sits a few pixels off on the runner, and every number read off
-  the room's fit moves with it.** Home: the bullet above opening
+  the room's fit moves with it.** Home: `handbook/specs/check-placement.md`, The browser lanes and a
+  plate read, for how a check takes such a number; the bullet above opening
   "CI's browser lays a chart room's furniture out", whose causes, the "№" drawn from another face
   and a row holding a `select` dressed `appearance: none` laid out shorter, are the PR #1042 entry
   in `.claude/skills/vellum-footguns/references/scars.md`; the two PR #1042 rows in
