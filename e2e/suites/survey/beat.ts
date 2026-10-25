@@ -60,6 +60,7 @@ export async function sv2pDrawBeat({ evaluate, waitSettled, goto, waitInked }: S
         if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames,
           verso:!!document.querySelector("#verso .verso-track")});});
       window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(INK_INSTALL);
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
   await waitSettled("survey-draw-beat-settle");
   await waitInked("survey-draw-beat-ink");
@@ -98,8 +99,9 @@ async function sv2pRead({ evaluate }: Pick<SuiteContext, "evaluate">) {
   return sv2p;
 }
 
-export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promise<void> {
+export async function sv2pSwapThenInk({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   const sv2p = await sv2pRead({ evaluate });
+  const inked = await evaluate(INK_MARK);
   check(
     "SV2p a Draw with the survey inked paints the new chart before the arm: the swap and the ink land in different tasks, a frame apart (#366)",
     // framesBetween is load-bearing: a queueMicrotask fake-deferral left every other clause green (guard-prover run); it alone tells one task from two, do not drop it.
@@ -112,17 +114,33 @@ export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promis
       /(^|&)survey(&|$)/.test(sv2p.hash.slice(1)),
     JSON.stringify(sv2p),
   );
+  const ink = await inkSpan({ evaluate, sleep }, inked);
   check(
     "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
     // The ratified acceptance on the ruled path (a Draw with the box ticked), the only check here that watches the ceremony itself: stroke-dashoffset is not compositable, so a matrix left on the main thread starves it. TWO clauses, because the frame COUNT is environment-scaled (104 steps on the authoring laptop, 35 to 39 on CI, both healthy; 3 with the matrix put back) and the gap is not (capped well clear of the 383.3 a loaded CI runner reported and well under the 1066.6 the mutant reads).
     sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 900,
-    JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
+    JSON.stringify({
+      dashSteps: sv2p.dashSteps,
+      dashSeen: sv2p.dashSeen,
+      gap: sv2p.gap,
+      frames: sv2p.frames,
+      ...ink,
+    }),
   );
   check(
     "SV2k the settle leaves the back face to the deferred arm: no outgoing track over the new ghost, and both faces agree once it lands (#174/#366)",
     sv2p.versoAtSwap === false && sv2p.facesAgree,
     JSON.stringify({ versoAtSwap: sv2p.versoAtSwap, facesAgree: sv2p.facesAgree, batches: sv2p.batches }),
   );
+}
+
+async function inkSpan(
+  { evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">,
+  inked: boolean,
+): Promise<InkSpan> {
+  if (inked)
+    await makeSettle({ evaluate, sleep })(INK_STATE, (d) => d.closed, "SV2r the ink's span closing", INK_END_TRIES);
+  return evaluate(INK_READ);
 }
 
 async function sv2mStyleChange({ evaluate, sleep }: Pick<SurveyKit, "evaluate" | "sleep">) {
