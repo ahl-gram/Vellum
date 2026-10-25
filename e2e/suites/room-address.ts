@@ -87,7 +87,7 @@ async function ra1Restores(
   await shoot("reading-room-address-year.png");
 }
 
-async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
+export async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
   await room.goto("#seed=42&style=antique&year=999999");
   const ra2 = await evaluate<{
     year: number | null;
@@ -103,7 +103,7 @@ async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: Worl
   );
 }
 
-async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
+export async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // The empty status line is the discriminating clause: an applyVoyage restore would post the completion summary and hang the settle; only the silent rearm path leaves it "".
   await room.goto("#seed=42&style=antique&survey");
   const ra3 = await evaluate<{
@@ -146,7 +146,7 @@ async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): 
   await shoot("reading-room-address-survey.png");
 }
 
-async function ra4Ignored(
+export async function ra4Ignored(
   { evaluate, check }: SuiteContext,
   room: Room,
   sm: World["sm"],
@@ -201,7 +201,7 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
   );
 }
 
-async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
+export async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra6 = await evaluate<{
@@ -221,7 +221,7 @@ async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, m
   );
 }
 
-async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
+export async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
   await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra7pre = await evaluate<string | null>(`new URLSearchParams(location.hash.slice(1)).get("year")`);
   await evaluate(

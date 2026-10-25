@@ -12,9 +12,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { setYear } = makeBar(ctx);
   const gate = scopedHealth(ctx);
 
-  await room.goto("#seed=42&style=antique&legend=1");
+  const settled = await room.goto("#seed=42&style=antique&legend=1");
   const sm = await scrubFacts(evaluate, 42);
-  await rs18Silent(ctx, setYear, sm);
+  await rs18Silent(ctx, setYear, sm, settled);
   await rs19Stamp(ctx, setYear, sm);
   await rs20Dries(ctx, setYear, sm);
   await rs21Ruin(ctx, setYear, sm);
@@ -22,7 +22,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
   gate.check("RS25 the ink-in run is clean (no console errors, no new 4xx)");
 }
 
-async function rs18Silent({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
+export async function rs18Silent(
+  { evaluate, check }: SuiteContext,
+  setYear: Bar["setYear"],
+  sm: Facts,
+  settled: boolean,
+): Promise<void> {
   await setYear(sm.present);
   const inkedCount = () =>
     evaluate<number>(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
@@ -31,7 +36,7 @@ async function rs18Silent({ evaluate, check }: SuiteContext, setYear: Bar["setYe
   check(
     "RS18 the park is silent: every glyph is up and none carries an ink grade (#155)",
     rs18 === 0,
-    `${rs18} groups inked at the park`,
+    `${rs18} groups inked at the park; the room settled: ${settled}`,
   );
 }
 

@@ -68,7 +68,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await waitReady();
 }
 
-async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
+export async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
   const cam = await settleHome();
 
   const wash = await evaluate<{

@@ -2,6 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { broadsideKit } from "../../e2e/suites/broadside/kit.ts";
 import { br9Authored } from "../../e2e/suites/broadside/room.ts";
+import { cd61FolioHomes } from "../../e2e/suites/chart-drawer/homes.ts";
+import type { DrawerKit, TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
+import {
+  bareArrived,
+  cd20PlatePortfolio,
+  cd50ScriptsOffHome,
+  cd62PlateReads,
+} from "../../e2e/suites/chart-drawer/portfolio.ts";
+import { cd54PortfolioLines, cd55WhereAuthored, cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
 import { pr36Authored } from "../../e2e/suites/print-room/room.ts";
 import { pr40RunnerLayout } from "../../e2e/suites/print-room/runner-layout.ts";
 import { pb3fGlassLeans } from "../../e2e/suites/prospect.ts";
@@ -75,6 +84,27 @@ const throwsOn =
   (expression: string): unknown =>
     expression.includes(marker) ? new Error(GONE) : null;
 
+const answersThenThrows = (marker: string, answer: unknown, times: number) => {
+  let seen = 0;
+  return (expression: string): unknown =>
+    expression.includes(marker) ? (++seen <= times ? answer : new Error(GONE)) : null;
+};
+
+const drawer = (ctx: SuiteContext): TableKit =>
+  ({
+    ...ctx,
+    forget: (): Promise<void> => Promise.resolve(),
+    clickAt: (): Promise<void> => Promise.resolve(),
+    pressById: (): Promise<{ hit: boolean }> => Promise.resolve({ hit: true }),
+    settle: (): Promise<unknown> => Promise.resolve({ x: 1, y: 1, hit: true, href: "../", ready: "complete" }),
+    serverState: { blockWorker: false },
+    STORE: "localStorage",
+  }) as unknown as TableKit;
+
+const FOLIO = "marker: window.__cd61";
+const ARRIVAL = `room: (document.querySelector(".room-name")`;
+const BARE = "fonts: document.fonts.status";
+
 type Site = {
   site: string;
   label: string;
@@ -121,6 +151,63 @@ const SITES: readonly Site[] = [
     answer: throwsOn('frame: !!document.querySelector(".rf")'),
     run: rr38Authored,
   },
+  {
+    site: "CD61's folio",
+    label: "portfolio-folio",
+    answer: throwsOn(FOLIO),
+    run: (ctx) => cd61FolioHomes(drawer(ctx)),
+  },
+  {
+    site: "CD61's Back",
+    label: "portfolio-back-rebuilt",
+    answer: answersThenThrows(FOLIO, { items: 2, road: null, marker: null, nav: "navigate" }, 2),
+    run: (ctx) => cd61FolioHomes(drawer(ctx)),
+  },
+  {
+    site: "CD50's arrival",
+    label: "chart-drawer-arrival-from-/explorer/portfolio/",
+    answer: throwsOn(ARRIVAL),
+    run: (ctx) => cd50ScriptsOffHome(drawer(ctx)),
+  },
+  {
+    site: "the bare Portfolio's arrival",
+    label: "chart-drawer-bare-portfolio-arrived",
+    answer: throwsOn(BARE),
+    run: (ctx) => bareArrived(drawer(ctx)),
+  },
+  {
+    site: "CD20's worker control",
+    label: "cd20-explorer-worker-control",
+    answer: (expression) =>
+      expression.includes(BARE)
+        ? { ready: "complete", fonts: "loaded", app: true }
+        : expression.includes(ARRIVAL)
+          ? { path: "/explorer/", ready: "complete", table: null, seed: null, items: null, room: null }
+          : throwsOn(`verb: (document.querySelector("#table-road .verb")`)(expression),
+    run: (ctx) => cd20PlatePortfolio(drawer(ctx)),
+  },
+  {
+    site: "CD54",
+    label: "portfolio-one-drafted",
+    answer: throwsOn("held: window.__cd54"),
+    run: (ctx) => cd54PortfolioLines(drawer(ctx)),
+  },
+  {
+    site: "CD55",
+    label: "portfolio-scripts-off",
+    answer: answersThenThrows(
+      `where: (document.querySelector("#portfolio .card-where")`,
+      { where: "no sheets gathered at the Explorer", app: true, ready: "complete" },
+      1,
+    ),
+    run: cd55WhereAuthored,
+  },
+  {
+    site: "CD56",
+    label: "portfolio-drafted-inline",
+    answer: throwsOn("blocked: window.__cd56Failed"),
+    run: (ctx) => cd56WorkerBlocked(drawer(ctx)),
+  },
 ];
 
 for (const { site, label, answer, run } of SITES) {
@@ -131,3 +218,14 @@ for (const { site, label, answer, run } of SITES) {
     );
   });
 }
+
+test("the settles in CD62 fail at once with a read's own error, since nothing navigates while the plate is read across its two windows", async () => {
+  let reads = 0;
+  const ctx = page((expression) => {
+    if (!expression.includes("#portfolio .slip-foot .note")) return null;
+    reads++;
+    return new Error(GONE);
+  });
+  await assert.rejects(cd62PlateReads(ctx as unknown as DrawerKit), (err: Error) => err.message === GONE);
+  assert.equal(reads, 1, "a read that threw was read again");
+});

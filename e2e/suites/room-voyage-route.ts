@@ -350,7 +350,7 @@ async function rv11Read({ evaluate }: Pick<SuiteContext, "evaluate">) {
   return rv11;
 }
 
-async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
+export async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
   await room.goto("#seed=39&style=antique&legend=1&survey");
   const rv11 = await rv11Read({ evaluate });
@@ -368,7 +368,7 @@ async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room):
   await shoot("reading-room-voyage-handoff.png");
 }
 
-async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
+export async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 430445745 puts ports on THREE landmasses; before Issue #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. Issue #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{

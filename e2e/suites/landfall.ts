@@ -84,7 +84,7 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
   await l4l8Enters(k);
 }
 
-async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
+export async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   await k.settleHome();
   await step("L13", () => l13Stations(k));
   await step("L14", () => l14Legend(k));
@@ -108,7 +108,7 @@ async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promi
   await step("L32", () => l32Blanket(k));
 }
 
-async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
+export async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
   // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
   await setMobileViewport(1024, 768);
