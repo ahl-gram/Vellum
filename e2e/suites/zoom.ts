@@ -110,7 +110,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await zrmReducedMotion(ctx);
   await step("Z7", () => z7TouchAction(ctx));
   await step("Z13", () => z13DeepLink(ctx));
-  await z13dRefitHolds(ctx);
+  await step("Z13b, Z13c, Z13d", () => z13dRefitHolds(ctx));
   await z15RegionCrop(ctx);
   await z16CacheHit(ctx);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
