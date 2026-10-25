@@ -166,12 +166,12 @@ skip list, and this section sets no rule for a unit test.
   when its flake issue is filed, at its third counted CI row at the latest, and its fix is tried
   before that row or while it is out: a fix that settles a row's cause starts the count again.
 - **Too slow is what a step holds against what it costs, never its seconds alone (Alex,
-  2026-10-25, Issue #1063 comment 6395758072).** A step is too slow when it holds at most two
-  claims that nothing else holds, on at most two pages or rooms, and costs 10 seconds or more. A
-  step, the unit of the skip list, is counted with every check it prints; a check outside every
-  step is counted alone, as the step item 11 wraps it in before it can be skipped; and a step or
-  check whose result or page state a later check reads is counted together with those readers,
-  since item 11 has each reader set up for itself what the pulled one left.
+  2026-10-25, Issue #1063 comment 6395758072).** A step is too slow when at most two of its claims
+  are held nowhere else, those claims are read on at most two pages or rooms, and it costs 10
+  seconds or more. A step, the unit of the skip list, is counted with every check it prints; a
+  check outside every step is counted alone, as the step item 11 wraps it in before it can be
+  skipped; and a step or check whose result or page state a later check reads is counted together
+  with those readers, since item 11 has each reader set up for itself what the pulled one left.
 - **What a step holds** is its claims, each a rule it can fail on alone, read from its checks'
   sentences and confirmed in its code; the pages, rooms and windows it reads them in; and, for
   each claim, whether another browser check or a unit test also fails when the claim breaks.
@@ -183,8 +183,12 @@ skip list, and this section sets no rule for a unit test.
   from the timestamp the log puts on every result line
   (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`): the time
   from the last result line before the unit counted above to the unit's own last. The harness
-  prints no step's seconds, so the reading errs high: a step's first result also carries the
-  navigation before it, and a suite's first step its boot.
+  prints no step's seconds, so the reading errs high, the direction that pulls a step: it also
+  carries whatever ran between that earlier line and the step's own start, such as its suite's
+  navigation and, for a suite's first step, its suite's boot, which pulling the step does not
+  save. A step with such set-up in its reading, a suite's first step always, is not called too
+  slow on that reading alone: the plan that would pull or rework it first reads its own seconds,
+  and a pull request that adds a suite leaves that suite's first step to the next list.
 - **A cut saves wall clock only where it shortens the slowest lane.** A run waits on its longest
   job, so seconds cut from another lane save nothing until the lanes are re-shared (Issue #1007),
   and a cut from the slowest lane saves only down to the next one. A step's cost counts whatever
@@ -198,9 +202,13 @@ skip list, and this section sets no rule for a unit test.
   own run and two more runs of that lane's job started by hand. Such a change makes a fixed sleep
   a wait on the state it needs (Issue #785), leaves unloaded a page the step loads only to pass
   over, shares a set-up its checks repeat, or moves a claim to the cheapest check that can see it
-  (`handbook/specs/check-placement.md`). A step still too slow after that change is pulled out.
-  Slow steps may share one plan and one pull request, and moving suites between lanes is not a
-  fix of a step.
+  (`handbook/specs/check-placement.md`). A step still too slow after that change is pulled out by
+  a pull request that names its issue with no closing keyword, so the issue stays open as the
+  restore (`vellum-footguns` Gate 5 item 5), and comes back in the pull request that leaves it no
+  longer too slow, read from that pull request's own run and two more runs of the lane's job
+  started by hand: that pull request deletes its entry and closes the issue, as fixing a flake
+  does (item 11). Slow steps may share one plan and one pull request, and moving suites between
+  lanes is not a fix of a step.
 - **Who finds a slow step.** Whoever reads the lane logs for a list of slow steps files an issue
   for each step the rule finds and takes it through the bullet above, with no ruling asked, as a
   flake is. A pull request that adds a browser check or makes one longer counts in its plan what
