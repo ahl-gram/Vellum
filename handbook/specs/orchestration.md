@@ -59,8 +59,11 @@ home's line wins for the lane and this file's for the orchestrator.
   overwrites an earlier copy, and `cmp` the copy against the scratchpad file. Then post it on the
   issue, which survives the machine. Each archive comment opens with the fixed line
   `Plan archive, not a ruling: <plan file name>, part <i> of <k>, sha256 <hex>`, `<hex>` being
-  `shasum -a 256` of the whole plan file on every part, then a blank line and the plan text. A plan
-  too long for one comment is cut at line boundaries into parts of at most 60,000 bytes, posted in
+  `shasum -a 256` of the whole plan file on every part, then a blank line and the plan text. A
+  revision is archived the same way under its own file name, the one its planner gave it (workflow
+  step 8), `<plan file name>` naming that file with nothing added after it. Where two archives name
+  one file, the sha256 on their opening lines says which is which. A plan too long for one comment
+  is cut at line boundaries into parts of at most 60,000 bytes, posted in
   order, one `gh issue comment --body-file` per call. Read the comments back with `gh api` and
   confirm the parts, joined, equal the file apart from a final newline. A lost plan is restored
   from `out/plans/`, or from the comments by joining the parts, dropping each opening line and
@@ -72,7 +75,7 @@ home's line wins for the lane and this file's for the orchestrator.
   with the issue, the plan's path and the hand-back, never a message to the retired one, which has no
   tree to stand in, and from the planner to Alex when it opens a
   decision. Never answer a hand-back yourself with a design call: that puts the decision back in the
-  cheaper lane by another route. The implementer resumes on the revised plan's path.
+  cheaper lane by another route. The implementer resumes on the revised plan's path and commits the revision beside the plans before it (workflow step 8).
 - **A ruling a lane will need before its own record is on the issue before the lane is briefed.** A
   standing ruling above all: a cold plan skeptic reads only the issue, and raises a rule it finds
   nowhere there as a defect.
@@ -106,6 +109,53 @@ home's line wins for the lane and this file's for the orchestrator.
   orchestrator watches the checks with a background loop that exits when none is pending, or a
   monitor that prints only what is new since its last poll, because one that prints the whole state
   on every poll notifies on every poll. Then send the lane on.
+- **A red job on a lane's pull request is read before it is re-run or handed to a planner.** Read
+  the failing job's log
+  (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`), the numbers
+  of its `FAIL` lines and, for an e2e lane, the fingerprint its verdict line ends on, against
+  "Where the Mac and the CI runner disagree" in `handbook/specs/settle-doctrine.md`; then send the
+  lane on with the red, its job id and what you read, and its definition has it take the Mac's
+  reading and the staged one (`VELLUM_E2E_RUNNER_LAYOUT=1`) where it names them, and report. A red
+  of the same check on several lanes' pull requests at once is read and fixed once, by the lane you
+  pick, the others merging `main` after its pull request lands, and their local runs go one at a
+  time (`vellum-footguns` Gate 2 item 11). A red its Mac run reproduces is the lane's, by its
+  definition, and is not re-run. Whether a red is explained is that spec's clause 15; an explained
+  red gets no flake row and no re-run: tell the lane, which rewrites the check as its definition
+  says, and no planner sees it (Alex, 2026-10-24), except on a check the lane rewrote, or one
+  already carrying the marker its definition leaves on a rewrite, where the fix would be a rewrite
+  of the check: it is never rewritten twice, and that red goes to a fresh planner of the lane's own
+  issue with both readings, a browser check and a unit test alike (Alex, 2026-10-25). A red that is
+  neither explained nor the lane's by its definition, on such a check, whichever pull request
+  rewrote it, is never re-run either (Alex, 2026-10-25). An e2e check is pulled out with no flake
+  row: once the lane has given the later checks in its suite their own waits, committed every other
+  fix the run asks of it without pushing, and reported, file an issue holding both readings and what
+  was tried, put it on the board, take the lane's tree out loud (One writer per tree, above), add
+  the check's entry as that spec's item 11 says, run its suite there and push, the one push for that
+  run, saying so in the pull request's body, then hand the tree back out loud and the lane goes on
+  with its build; the pull request merges without the check, which is unguarded until its issue is
+  fixed. A unit test has no skip list, so its red gets its flake row, in a pull request of your own
+  as below, with a disposition that keeps the words `a rewritten unit test re-planned`, and goes to
+  a fresh planner as an explained one does; and you tell Alex at once, plainly and at the head of
+  your message, and again in your next report to him, that a rewritten unit test has failed again on
+  CI: the test, the pull request, the run and job, what the list did and did not explain, and how
+  many times it has happened, the rows with those words in the flake record on `main` and the one
+  you filed (Alex, 2026-10-25). A rewrite, or those waits, made after the cold review's one round is
+  read only by you, before the merge (Merging, below), your report to Alex naming each rewritten or
+  pulled-out check. Any other red is re-run once, on `vellum-footguns` Gate 2 item 10's terms: open
+  a pull request of your own that adds its row to
+  `.claude/skills/vellum-footguns/references/flake-record.md`, post the pull request comment that
+  item asks for on the lane's, then re-run that job alone (`gh run rerun <run> --job <job>`), your
+  pull request's own checks running beside it, and set the row's disposition from the re-run in
+  your pull request, one more for Alex to merge (Alex, 2026-10-24). Where the same run also needs
+  a rewrite or a pull-out, the push that carries it is that re-run, made once your row's pull
+  request is open, since a push cancels a run still in progress for the same pull request (the
+  `concurrency` group in `.github/workflows/ci.yml`). Where the row is its step's third, its pull
+  request also carries clause 12's issue and skip, no re-run is made, and the lane merges `main`
+  once it lands. Your row pull requests merge as two errata rows do (Merging, below). The re-run
+  clears the red only if that check passes, and the lane goes on with its build; a red in another
+  check on it is a new red, read the same way. Any red the lane hands back carries its read, and
+  goes to a fresh planner with it, never as the bare red; a difference the subsection does not
+  name goes named so, since the change that records it adds its line there.
 - **When a lane's next report does not mention a request sent to it, check its branch and send the
   request again.** A message to a lane that has stopped can sit unread.
 - **End the poll loops a lane leaves behind.** A wait loop on a marker that never comes runs for
