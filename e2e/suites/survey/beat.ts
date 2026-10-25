@@ -1,5 +1,45 @@
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
 import type { SurveyKit } from "./kit.ts";
+
+export type InkSpan = {
+  inkStarted: boolean;
+  inkEnd: string;
+  inkClosed: boolean;
+  inkFrames: number;
+  inkSteps: number;
+  inkGap: number;
+  inkMedianFrame: number | null;
+  readMs: number | null;
+  readFrames: number | null;
+  readSteps: number | null;
+};
+export type InkState = { started: boolean; closed: boolean; frames: number; end: string };
+
+// The ink's span is the new chart's own coast animation, timed on its startTime and its effect's end rather than on its events, and never the coast present at install: a stall on the main thread dispatches both events late, and with the prime line deleted the old coast's animationstart arrived after the install (Issue #785, measured 2026-10-25).
+export const INK_INSTALL: Payload<boolean> = `(()=>{const k={base:document.querySelector("#map #layer-land path"),el:null,start:0,endT:0,end:"",closed:false,frames:0,steps:0,last:"",gap:0,prev:0,ivs:[],raf:0,mark:null,on:null};window.__ink=k;
+      const on=(e)=>{if(e.animationName!=="inkDraw")return;
+        if(e.type==="animationstart"){if(k.el||e.target===k.base||e.target!==document.querySelector("#map #layer-land path"))return;
+          const a=e.target.getAnimations().find((x)=>x.animationName==="inkDraw");if(!a||a.startTime===null)return;
+          k.el=e.target;k.start=a.startTime;k.endT=a.startTime+a.effect.getComputedTiming().endTime;k.prev=k.start;return;}
+        if(e.target===k.el&&!k.end)k.end=e.type;};
+      k.on=on;for(const ty of ["animationstart","animationend","animationcancel"])document.addEventListener(ty,on,true);
+      const tick=(now)=>{if(k.el&&!k.closed){const d=now-k.prev;k.ivs.push(d);if(d>k.gap)k.gap=d;k.prev=now;
+          if(now<k.endT&&!k.end){k.frames++;const v=getComputedStyle(k.el).strokeDashoffset;if(v!==k.last){k.last=v;k.steps++;}}
+          else k.closed=true;}
+        if(!k.closed)k.raf=requestAnimationFrame(tick);};
+      k.raf=requestAnimationFrame(tick);return true;})()`;
+// A pending ink counts as one to wait for: with the prime line deleted SV2r's read can come before the main thread takes the new ink's start, and a mark that asked for a started ink missed the span (Issue #785, measured 2026-10-25).
+export const INK_MARK: Payload<boolean> = `(()=>{const k=window.__ink;k.mark={t:performance.now(),frames:k.frames,steps:k.steps};const p=document.querySelector("#map #layer-land path");
+      return !!k.el||(!!p&&p!==k.base&&p.getAnimations().some((a)=>a.animationName==="inkDraw"));})()`;
+export const INK_STATE: Payload<InkState> = `(()=>{const k=window.__ink;return{started:!!k.el,closed:k.closed,frames:k.frames,end:k.end||"none"};})()`;
+export const INK_READ: Payload<InkSpan> = `(()=>{const k=window.__ink;cancelAnimationFrame(k.raf);for(const ty of ["animationstart","animationend","animationcancel"])document.removeEventListener(ty,k.on,true);
+      const s=[...k.ivs].sort((a,b)=>a-b);const r=(x)=>Math.round(x*10)/10;
+      return{inkStarted:!!k.el,inkEnd:k.end||"none",inkClosed:k.closed,inkFrames:k.frames,inkSteps:k.steps,inkGap:r(k.gap),
+        inkMedianFrame:s.length?r(s[Math.floor(s.length/2)]):null,
+        readMs:k.el&&k.mark?r(k.mark.t-k.start):null,readFrames:k.mark?k.mark.frames:null,readSteps:k.mark?k.mark.steps:null};})()`;
+// 2026-10-25, 6d9245b3: SV2r's read to the span's close read 0 to 1031 ms on the Mac over the fixture, P3, P3b and P4; the span is --ink-draw's 1200 ms, so 100 tries of 50 ms are over three times the span plus CI's largest healthy frame gap (250 ms), and a span still open then throws.
+export const INK_END_TRIES = 100;
 
 export async function sv2pDrawBeat({ evaluate, waitSettled, goto, waitInked }: SurveyKit): Promise<void> {
   await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
