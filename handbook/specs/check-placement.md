@@ -139,6 +139,9 @@ belongs in.
   a size in pixels, as the clearances `travelsOf` in `e2e/suites/slide-away/kit.ts` writes again
   are, is ruled, and one a ruling sets as a duration is neither. A tolerance around a relation, a
   window a check holds a ruled clearance within among them, is a bound, derived as `CLAUDE.md` says.
+- **A browser check is kept for what it holds against what it costs.** How what it holds is
+  counted, and when a slow one is pulled out of the run, is `handbook/specs/settle-doctrine.md`'s
+  (When a check is pulled out of the run).
 - How a browser check waits and what the harness environment does is
   `handbook/specs/settle-doctrine.md`'s.
 

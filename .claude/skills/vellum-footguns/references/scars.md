@@ -487,8 +487,9 @@ Issue #789, one row each with the line it stands behind. Each was read from the 
 
 Where a lesson's rule is written down in this repo, it is in one of these: the gate lines in
 `.claude/skills/vellum-footguns/SKILL.md`, each with its incident; `handbook/specs/settle-doctrine.md`
-(how an e2e wait is written and what the harness does); `handbook/specs/development-workflow.md`
-(what a pull request owes, and in what order); `handbook/specs/orchestration.md` (running several
+(how an e2e wait is written, what the harness does, and when a check is pulled out of the run);
+`handbook/specs/development-workflow.md` (what a pull request owes, and in what order);
+`handbook/specs/orchestration.md` (running several
 lanes at once); `handbook/specs/conventions.md` (the comment sweep,
 citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
 section (measuring a ground) and its room and furniture section (the legend row's footing);
