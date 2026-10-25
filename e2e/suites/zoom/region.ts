@@ -251,6 +251,9 @@ export async function z20bReducedMotion({
   await send("Emulation.setEmulatedMedia", { features: [] });
 }
 
+export const Z20C_THROTTLE = 4;
+export const offMainThread = (freeMs: number, perfMs: number): boolean => perfMs >= 0 && perfMs < 4000;
+
 export async function z20cThrottle({
   send,
   check,
