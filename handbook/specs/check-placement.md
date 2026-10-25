@@ -94,6 +94,51 @@ belongs in.
 - **What the browser computes is read in a browser**: a resolved style, a box, an overlap, a contrast,
   a motion. Neither the lint nor a unit test can see the cascade, so a rule about how a page looks is
   pinned here or by `vellum-plate-reader`, whose measurements decide an appearance.
+- **A number the room's layout decides is read from the layout in the run, never copied from one
+  machine's.** Which press of the Glass fills the screen, a fill depth, a clearance between two
+  pieces, a contrast over a ground and a piece's travel all move when a browser lays a room out a
+  few pixels off (`handbook/specs/settle-doctrine.md`, Where the Mac and the CI runner disagree), so
+  a check holding the number one machine gave reds on the other as if the code were wrong. The same
+  holds for a number the check steers by, such as how many presses carry it past the fill. Read it
+  off what the run lays out, the room's own fit (`fillOf` and `fillPressOf` in
+  `e2e/suites/slide-away/kit.ts`, `fillOf` in `e2e/suites/stage/slide-kit.ts`) or the measured box,
+  and assert the relation the rule names: SW2's `thirdPress` in `e2e/suites/slide-away/rooms.ts`
+  presses up to the press that fills, whichever it is, never a count written in advance, and SW4's
+  chart folio clause in `sw1Rooms` in `e2e/suites/slide-away/rooms.ts` asks that some room's folio
+  read under the floor with its panel taken away, never a room named in advance. A witness that the
+  fixture reaches its case asserts that relation too, never the count one machine gave. The window a
+  check opens is its own input, but whether the layout there reaches the case is a reading: a
+  witness names an instance when it faults because that one room or window misses its case, and
+  where the case is such a reading held against a line, a fill against a press's depth or a
+  contrast against the floor, the witness carries one dated line beside the list of what it names,
+  giving each instance's reading on both layouts and its margin to that line, the runner's taken as
+  the next bullet says. `ARMS` in `e2e/suites/slide-away/rooms.ts`, the windows `thirdPress` asks to
+  fill at the third press or later, owes that line. The one exception is a witness that a read can
+  see its panel fail, by reading under the contrast floor with the panel taken away, over more than
+  one room: it may instead ask at least one of them and carry no line, as SW4's chart folio clause
+  does. A plan prints a browser check's reading on its fixture and its reading under the mutation,
+  both off the plan's own build on one machine, before the check is built (the Tests line of
+  `.claude/agents/vellum-planner.md`); neither is the second layout's reading a dated line carries.
+- **A ruled number may stay a literal; a measured one is read, or bounded on both layouts.** Ruled
+  is a size or margin a ruling sets in pixels, a value a rem token gives at the 16 px root where the
+  token holds one value wherever it is read, and a floor the design sets, such as 4.5:1 for
+  contrast: each stands as a named constant whose one dated line names the ruling or the token. A
+  token a page redeclares is read from the page (`handbook/specs/ui-design.md`, the paragraph
+  opening "Derive a clearance from the token"). Measured is any number one run of the layout
+  produced: a press count, a fill depth or a range around it, a depth chosen between two fills, a
+  clearance, a contrast, a travel, and a bound that places a line a ruling names only in words, such
+  as "on the thin top line", since the ruling set the line and not its pixels. Where no read of the
+  layout gives a measured number, measure it on both layouts and set the bound above the worse with
+  its headroom named, on the dated line `CLAUDE.md` gives a bound (Process, the bullet opening "A
+  bound is derived"). The runner's reading comes from a run on GitHub's machines, the CI workflow's
+  or the proof runner's, never from a local run with the runner's layout staged, for the reason
+  `handbook/specs/settle-doctrine.md` gives in its environment bullet opening "CI's browser lays a
+  chart room's furniture out". Neither kind takes in a check's own inputs (the window it opens, the
+  address it loads, the press its claim names) or a constant the product sets that the check writes
+  again (the Glass's step), since the layout decides neither; such a constant that a ruling sets as
+  a size in pixels, as the clearances `travelsOf` in `e2e/suites/slide-away/kit.ts` writes again
+  are, is ruled, and one a ruling sets as a duration is neither. A tolerance around a relation, a
+  window a check holds a ruled clearance within among them, is a bound, derived as `CLAUDE.md` says.
 - How a browser check waits and what the harness environment does is
   `handbook/specs/settle-doctrine.md`'s.
 
