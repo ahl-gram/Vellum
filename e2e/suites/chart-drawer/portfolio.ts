@@ -23,7 +23,7 @@ const ARRIVAL: Payload<Arrival> = `(() => { const p = new URLSearchParams(locati
 
 /** Waits until the page has LEFT `from` and finished loading, wherever it went, and throws with its last read if it never does; where it landed is the caller's claim, so a road to a missing page reds by naming it. A read the navigation interrupts counts as no read. */
 const arrivalFrom = ({ evaluate, sleep }: Pick<TableKit, "evaluate" | "sleep">, from: string): Promise<Arrival> =>
-  makeSettle({ evaluate: (e: string) => evaluate<Arrival>(e).catch(() => null), sleep })(
+  makeSettle({ evaluate, sleep, tolerant: true })(
     ARRIVAL,
     (d) => d.path !== from && d.ready === "complete",
     `chart-drawer-arrival-from-${from}`,
@@ -216,7 +216,7 @@ export async function bareArrived({ evaluate, send, sleep, PORT, forget }: Drawe
   await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
-  await makeSettle({ evaluate: (e: string) => evaluate<BareVisit>(e).catch(() => null), sleep })(
+  await makeSettle({ evaluate, sleep, tolerant: true })(
     BARE_READY,
     (d) => d.ready === "complete" && d.fonts === "loaded" && d.app,
     "chart-drawer-bare-portfolio-arrived",
@@ -274,10 +274,12 @@ export async function cd20PlatePortfolio(kt: TableKit): Promise<void> {
     const press = await kt.pressById("pf-explorer");
     const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
     // The Explorer starts its worker at boot, so this count is the instrument's own control: a counter that never counts reds here and not as a pass on the Portfolio.
-    const road = await makeSettle({
-      evaluate: (e: string) => evaluate<typeof EXPLORER_ROAD>(e).catch(() => null),
-      sleep,
-    })(EXPLORER_ROAD, (d) => (d.workers ?? 0) >= 1, "cd20-explorer-worker-control", DRAWN);
+    const road = await makeSettle({ evaluate, sleep, tolerant: true })(
+      EXPLORER_ROAD,
+      (d) => (d.workers ?? 0) >= 1,
+      "cd20-explorer-worker-control",
+      DRAWN,
+    );
     check(
       "CD20 a Portfolio reached with nothing gathered on either home lays the drawn plate of the three steps on its stage, its picture the committed chart, with no worker started, while the slip and the road say what they said (the 2026-09-08 bare voice); the device's table stays empty, the address names none, a REAL press on the road lands on the Explorer carrying no table, and the plate's gold press reads as the Explorer's own does (Issue #670)",
       visit.plate &&
@@ -321,7 +323,7 @@ const PLATE_WORDS: Payload<PlateWords> = `(() => {
 
 export async function cd62PlateReads(k: DrawerKit): Promise<void> {
   const { evaluate, send, check, sleep } = k;
-  const settle = makeSettle({ evaluate: (e: string) => evaluate<PlateWords>(e).catch(() => null), sleep });
+  const settle = makeSettle({ evaluate, sleep });
   // The first read after arrival is still fitting (657.5 against the rest of 655.2 at 1280, measured 2026-10-16), so the width read is taken at rest like the others.
   const wide = await settle(PLATE_WORDS, (d, last) => !!last && d.width === last.width, "cd62-plate-at-1280", DRAWN);
   try {
