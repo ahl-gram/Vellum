@@ -20,7 +20,8 @@ import { laneLineIsSkip } from "../../e2e/support/lanes.ts";
 import type { StartOptions } from "../../e2e/types.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const BROWSERLESS = ["CI", "VELLUM_REQUIRE_BROWSER", "VELLUM_ALLOW_NO_BROWSER", "VELLUM_E2E_SUITES"] as const;
+const BROWSER_ENV = ["CI", "VELLUM_REQUIRE_BROWSER", "VELLUM_ALLOW_NO_BROWSER", "VELLUM_E2E_SUITES"] as const;
+const BROWSERLESS = [...BROWSER_ENV, "VELLUM_E2E_RUNNER_LAYOUT"] as const;
 
 type Ctx = {
   check: (name: string, ok: unknown, detail?: string) => void;

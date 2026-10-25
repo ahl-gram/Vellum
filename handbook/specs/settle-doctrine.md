@@ -337,9 +337,24 @@ section points there rather than restating it.
   the Press row, and with them a room's fill depth, the press that fills and the ground under a slid
   line. A check reads such a number off the room's own layout in the run, as SW2's `thirdPress` in
   `e2e/suites/slide-away/rooms.ts` reads the press that fills, or asserts it with its margin
-  measured on both browsers' layouts. The runner's layout is read locally before CI by staging what
-  differs in a style sheet the document adopts when it is created, before any of its scripts run;
-  what differs, and the run that showed it, is in
+  measured on both browsers' layouts. The runner's layout is read locally before CI by running a
+  suite with `VELLUM_E2E_RUNNER_LAYOUT=1` (`runnerLayoutRequested` in `e2e/support/runner-layout.ts`),
+  which stages what the runner was measured to lay out differently (`RUNNER_SELECTS` and
+  `RUNNER_NUMERO_FAMILY` there) in a style sheet the document adopts when it is created, before any
+  of its scripts run. Such a run prints the line `applyRunnerLayout` resolves to once the sheet is
+  registered, before its first suite, and its fingerprint line (`environmentFingerprint` in
+  `e2e/support/fingerprint.ts`) carries `runner layout staged (VELLUM_E2E_RUNNER_LAYOUT=1)`, its title
+  width and select height then read off the staged layout; a log without the first line read this
+  machine's layout, whatever its fingerprint says. A staged run is not a CI run: it stages only the
+  differences measured, at the values their constants date, so a difference nobody measured is not
+  staged, a new runner image or a change to a staged piece's own dress leaves its staged value
+  behind, and on a machine without Times New Roman, which the staged "№" is drawn from, the selects
+  are staged and the "№" is not. So a staged run's fingerprint is read against the latest CI run's:
+  a select height that differs, or a title width further apart than the gap the dated line at
+  `RUNNER_NUMERO_FAMILY` gives, means the runner has moved and the constants are re-measured; and
+  where a staged run and CI disagree on a check, the sizes its PR37, PR38 and RB12 details print (the
+  title's line, the Press row, the stage's reserves) are read against the CI run's the same way.
+  What differs, and the run that showed it, is in
   `.claude/skills/vellum-footguns/references/scars.md`.
 - **Fail a frame's document through `Fetch.failRequest`; a blocked-URL list does not stop it.** With
   `Network.setBlockedURLs` set, a page's frames still requested their documents (measured

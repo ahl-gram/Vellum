@@ -140,6 +140,39 @@ test("a probe that throws anyway is printed unread with its reason, and the run 
   ]);
 });
 
+test("a run with the CI runner's layout staged says so on its fingerprint line, whether or not its harness starts, and a run without it does not", async () => {
+  const lines: string[] = [];
+  const out = (line: string): void => {
+    lines.push(line);
+  };
+  const staged: StartOptions = { ...OPTIONS, runnerLayout: true };
+  await fingerprinted(
+    () => Promise.resolve({}),
+    () => Promise.resolve(BROWSER),
+    HOST,
+    out,
+  )(staged);
+  await fingerprinted(
+    () => Promise.resolve({}),
+    () => Promise.resolve(BROWSER),
+    HOST,
+    out,
+  )(OPTIONS);
+  await assert.rejects(
+    fingerprinted(
+      () => Promise.reject(new Error("no devtools page target")),
+      () => Promise.resolve(BROWSER),
+      HOST,
+      out,
+    )(staged),
+  );
+  assert.deepEqual(lines, [
+    'fingerprint: testos 1.2.3 x64; Node v26.0.0; browser Chrome/1.2.3.4; "Chart № 42" 100.31px; № in Palatino; select 34.22px; runner layout staged (VELLUM_E2E_RUNNER_LAYOUT=1)',
+    'fingerprint: testos 1.2.3 x64; Node v26.0.0; browser Chrome/1.2.3.4; "Chart № 42" 100.31px; № in Palatino; select 34.22px',
+    'fingerprint: testos 1.2.3 x64; Node v26.0.0; browser version unread; "Chart № 42" unread; № face unread; select unread; runner layout staged (VELLUM_E2E_RUNNER_LAYOUT=1); unread because the harness stopped before the browser was probed',
+  ]);
+});
+
 test("npm's runner prints the machine it ran on first, even when its browser never starts, and ends as a harness error", () => {
   const tmp = mkdtempSync(join(tmpdir(), "vellum-fingerprint-"));
   try {
@@ -154,6 +187,7 @@ test("npm's runner prints the machine it ran on first, even when its browser nev
         VELLUM_E2E_PORT: "8899",
         VELLUM_E2E_DPORT: "9399",
         TMPDIR: tmp,
+        VELLUM_E2E_RUNNER_LAYOUT: "",
       },
     });
     assert.equal(child.status, 2, child.stdout + child.stderr);
