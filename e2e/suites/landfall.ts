@@ -1,5 +1,6 @@
 // Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup and dress at rest (L13-L32, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { forgetChartTouch, takeChartTouch } from "../support/chart-touch.ts";
+import { landed } from "../support/home.ts";
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
@@ -85,8 +86,11 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
 }
 
 export async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
-  await k.settleHome();
-  await step("L13", () => l13Stations(k));
+  const home = await k.settleHome();
+  await step("L13", async () => {
+    landed(home, "L13");
+    await l13Stations(k);
+  });
   await step("L14", () => l14Legend(k));
   await step("L15", () => l15Shelf(k));
   await step("L16", () => l16NoticeAndPanel(k));
@@ -113,12 +117,16 @@ export async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>)
   // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
   await setMobileViewport(1024, 768);
   await k.send("Page.navigate", { url: "about:blank" });
-  await settleHome();
-  await step("L9i", () => l9iTouchOff(k));
+  const tablet = await settleHome();
+  await step("L9i", async () => {
+    landed(tablet, "L9i");
+    await l9iTouchOff(k);
+  });
   await step("L9j", () => l9jBrowserPinch(k));
   await k.send("Page.navigate", { url: "about:blank" });
-  await settleHome();
+  const reloaded = await settleHome();
   await step("L9 touch given", async () => {
+    landed(reloaded, "L9 touch given");
     await makeSettle(k)(
       `visualViewport.scale`,
       (s) => s === 1,

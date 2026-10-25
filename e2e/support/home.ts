@@ -28,6 +28,10 @@ export const readCam: Payload<Cam | null> = `(() => {
 
 export const atLandfall = (s: Cam | null): boolean => !!s && !s.veil && Math.abs(s.scale - s.expected) < 1e-3;
 
+export function landed(cam: Cam | null, label: string): void {
+  if (!atLandfall(cam)) throw new Error(`${label}: home never settled at its landfall: ${JSON.stringify(cam)}`);
+}
+
 export const readXform: Payload<string | null> =
   `(() => { const s = document.getElementById("lf-sheet"); return s ? getComputedStyle(s).transform : null; })()`;
 
