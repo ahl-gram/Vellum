@@ -75,6 +75,58 @@ const REFITS = [
         ? { ...AT_REST, reserve: `${count(said, "--reserve-right")}px`, resizes: 2, ih: 2263, folded: true }
         : null,
   },
+  {
+    stuck: "the resize's refit never comes to rest",
+    label: "Z13b the resize's refit",
+    answer: (said: readonly Said[], reserve: string) =>
+      overridden(said)
+        ? { ...AT_REST, reserve, resizes: 1, ih: 600, sheet: 443.9 + count(said, "--reserve-right") }
+        : null,
+  },
+  {
+    stuck: "the refit back never comes to rest",
+    label: "Z13b the refit back",
+    answer: (said: readonly Said[], reserve: string) =>
+      count(said, "clearDeviceMetricsOverride") > 0
+        ? { ...AT_REST, reserve, resizes: 2, ih: 2263, sheet: 792.6 + count(said, "--reserve-right") }
+        : null,
+  },
+  {
+    stuck: "the slip never folds",
+    label: "Z13c the fold's refit",
+    answer: (said: readonly Said[]) =>
+      count(said, ".slip-fold") > 0 ? { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263 } : null,
+  },
+  {
+    stuck: "the slip never unfolds",
+    label: "Z13c the unfold's refit",
+    answer: (said: readonly Said[]) =>
+      count(said, '.slip-tab").click()') > 0
+        ? { ...AT_REST, reserve: "487.4px", resizes: 2, ih: 2263, folded: true }
+        : count(said, ".slip-fold") > 0
+          ? { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, folded: true }
+          : null,
+  },
+  {
+    stuck: "the unfold's refit never lands",
+    label: "Z13c the unfold's refit",
+    answer: (said: readonly Said[]) =>
+      count(said, '.slip-tab").click()') > 0
+        ? { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263 }
+        : count(said, ".slip-fold") > 0
+          ? { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, folded: true }
+          : null,
+  },
+  {
+    stuck: "the unfold's refit never comes to rest",
+    label: "Z13c the unfold's refit",
+    answer: (said: readonly Said[]) =>
+      count(said, '.slip-tab").click()') > 0
+        ? { ...AT_REST, reserve: `${count(said, "--reserve-right")}px`, resizes: 2, ih: 2263 }
+        : count(said, ".slip-fold") > 0
+          ? { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, folded: true }
+          : null,
+  },
 ] as const;
 
 for (const { stuck, label, answer } of REFITS) {
@@ -97,10 +149,10 @@ for (const { stuck, label, answer } of REFITS) {
   });
 }
 
-const refitFlow = (walksAt: "resize" | "fold" | null) =>
+const refitFlow = (walksAt: "resize" | "fold" | null, moved: { fx: number } | { fy: number } = { fx: 0.5005 }) =>
   recording((expression, so) => {
     if (!expression.includes("--reserve-right")) return {};
-    const walk = (at: "resize" | "fold") => (walksAt === at ? { fx: 0.5005 } : {});
+    const walk = (at: "resize" | "fold") => (walksAt === at ? moved : {});
     if (count(so, '.slip-tab").click()') > 0) return { ...AT_REST, reserve: "487.4px", resizes: 2, ih: 2263 };
     if (count(so, ".slip-fold") > 0)
       return { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, sheet: 1280, folded: true, ...walk("fold") };
@@ -124,6 +176,38 @@ for (const [walksAt, z13b, z13c] of [
     );
   });
 }
+
+test("Z13b reads false and Z13c true when the camera's framing walks down at the resize while the hash still reads 0.5000", async () => {
+  const { ctx, checked } = refitFlow("resize", { fy: 0.5005 });
+  await z13dRefitHolds(ctx);
+  assert.deepEqual(
+    checked.filter((c) => c.code === "Z13b" || c.code === "Z13c"),
+    [
+      { code: "Z13c", ok: true },
+      { code: "Z13b", ok: false },
+    ],
+  );
+});
+
+test("Z13b and Z13c take the sheet before the resize at rest, not while the page still lays out after the shot before it", async () => {
+  const { ctx, checked } = refitFlow(null);
+  let reads = 0;
+  const settling = {
+    ...ctx,
+    evaluate: async (expression: string): Promise<unknown> => {
+      const read = await ctx.evaluate<object>(expression);
+      return expression.includes("--reserve-right") && reads++ === 0 ? { ...read, sheet: 780 } : read;
+    },
+  } as unknown as SuiteContext;
+  await z13dRefitHolds(settling);
+  assert.deepEqual(
+    checked.filter((c) => c.code === "Z13b" || c.code === "Z13c"),
+    [
+      { code: "Z13c", ok: true },
+      { code: "Z13b", ok: true },
+    ],
+  );
+});
 
 for (const [freeMs, perfMs, offMain] of [
   [366, 364, true],
@@ -179,6 +263,40 @@ test("Z20c puts the CPU throttle back when a read under it throws", async () => 
   );
 });
 
+test("Z20c draws its first redraft before the 4x CPU throttle and its second under it, so a redraft on the main thread fails", async () => {
+  const { k, said, checked } = zoomKitAnswering([]);
+  const rate = () =>
+    Number(
+      said
+        .filter((s) => s.what.startsWith("Emulation.setCPUThrottlingRate "))
+        .at(-1)
+        ?.what.split(" ")[1] ?? 1,
+    );
+  const drawnAt: number[] = [];
+  const onMain = {
+    ...k,
+    waitRedraft: (prev: number) => {
+      drawnAt.push(rate());
+      return k.waitRedraft(prev);
+    },
+    captionMs: () => Promise.resolve(400 * (drawnAt.at(-1) ?? 1)),
+  };
+  await z20cThrottle(onMain);
+  assert.deepEqual(drawnAt, [1, 4], "the CPU rate in force while each redraft was drawn");
+  assert.deepEqual(checked, [{ code: "Z20c", ok: false }]);
+});
+
+test("Z20c fails when the unthrottled redraft never lands, whatever the throttled one reads", async () => {
+  const { k, checked } = zoomKitAnswering([400, 420]);
+  let waits = 0;
+  const stalled = {
+    ...k,
+    waitRedraft: (prev: number) => (waits++ === 0 ? k.rgn() : k.waitRedraft(prev)),
+  };
+  await z20cThrottle(stalled);
+  assert.deepEqual(checked, [{ code: "Z20c", ok: false }]);
+});
+
 const drawerKitAnswering = (rest: (reads: number) => unknown) => {
   const { ctx, said } = recording((expression, so) =>
     expression.includes("__cd2bFrame") && expression.includes("dog-ear") ? rest(count(so, "dog-ear")) : {},
@@ -193,6 +311,24 @@ for (const [stuck, rest] of [
     (reads: number) => ({ ...EAR, frame: reads, ear: { x: 905 + reads, y: 115.7, w: 54.4, h: 54.4 } }),
   ],
   ["no frame is painted", () => ({ ...EAR, frame: 0, ear: { x: 905, y: 115.7, w: 54.4, h: 54.4 } })],
+  [
+    "the window keeps the shot's height",
+    (reads: number) => ({ ...EAR, ih: 2263, frame: reads, ear: { x: 905, y: 115.7, w: 54.4, h: 54.4 } }),
+  ],
+  [
+    "the window is not back at its width",
+    (reads: number) => ({ ...EAR, iw: 1440, frame: reads, ear: { x: 905, y: 115.7, w: 54.4, h: 54.4 } }),
+  ],
+  ["the ear is not there", (reads: number) => ({ ...EAR, frame: reads, ear: null })],
+  [
+    "the camera keeps moving",
+    (reads: number) => ({
+      ...EAR,
+      cam: { ...EAR.cam, x: EAR.cam.x - reads },
+      frame: reads,
+      ear: { x: 905, y: 115.7, w: 54.4, h: 54.4 },
+    }),
+  ],
 ] as const) {
   test(`CD2b waits for the ear to rest across a painted frame after the shot when ${stuck}, and hit-tests nothing before it`, async () => {
     const { k, said } = drawerKitAnswering(rest);
