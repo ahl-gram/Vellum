@@ -1,9 +1,11 @@
 // The wait a CSS transition is owed (Issue #529): a blind sleep samples the animation mid-flight when the runner stalls before the transition starts (a 600ms sleep read the retired phone drawer's 0.32s slide 0.76px from home on CI), and what a rest costs varies by direction (the slip's tab shows at once and hides 0.45s behind its fade, atelier.css), so the predicate belongs to the caller. The second argument is the PREVIOUS read, so a rest with no fixed end value can ask for stillness instead: the specimen's legend starts its 0.32s slide only when the slip it was docked in finishes hiding (measured 2026-09-07: 320ms to 650ms), after every state flag on the page is already final.
 import type { Payload } from "../types.ts";
+import { errorText } from "./suites.ts";
 
 export function makeSettle({
   evaluate,
   sleep,
+  tolerant = false,
 }: {
   evaluate: (expression: string, awaitPromise?: boolean) => Promise<unknown>;
   sleep: (ms: number) => Promise<unknown>;
@@ -17,12 +19,22 @@ export function makeSettle({
     tries = 120,
   ): Promise<NoInfer<NonNullable<T>>> => {
     let last: T | null = null;
+    let threw: string | null = null;
     for (let i = 0; i < tries; i++) {
-      const d = (await evaluate(read)) as T;
+      let d: T | null = null;
+      try {
+        d = (await evaluate(read)) as T;
+        threw = null;
+      } catch (err) {
+        if (!tolerant) throw err;
+        threw = errorText(err);
+      }
       if (d && settled(d, last)) return d;
       last = d;
       await sleep(50);
     }
-    throw new Error(`settle timeout ${label}: ${JSON.stringify(last)}`);
+    throw new Error(
+      `settle timeout ${label}: ${JSON.stringify(last)}${threw === null ? "" : ` (the last read threw: ${threw})`}`,
+    );
   };
 }
