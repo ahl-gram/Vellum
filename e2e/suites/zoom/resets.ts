@@ -134,9 +134,8 @@ type Refit = {
   folded: boolean;
 };
 
-// A refit is waited for on what starts it, never on the sheet the claim reads: the window at the override's height and a resize the page has handled since, counted by a listener added after the room's own so it runs once the room has laid out, and the reserve the fit writes beside the sheet, which a fold moves 340ms after its press.
+// Added after the room's own resize listener, and listeners run in the order they were added, so a count that rose means the room has laid out for that resize.
 const COUNT_RESIZES = `(()=>{if(window.__z13Resizes===undefined){window.__z13Resizes=0;addEventListener("resize",()=>{window.__z13Resizes++;});}return true;})()`;
-// The framing is read off the camera beside the hash: the hash is written by the settle 250ms after the camera moves, so a read taken at rest comes before a walk reaches it.
 const REFIT: Payload<Refit> = `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");const W=vp.clientWidth||1,H=vp.clientHeight||1;return{resizes:window.__z13Resizes,ih:innerHeight,reserve:document.querySelector(".stage").style.getPropertyValue("--reserve-right"),sheet:document.getElementById("sheet").getBoundingClientRect().width,fx:(W/2-s.x)/(s.k*W),fy:(H/2-s.y)/(s.k*H),sk:s.k,cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),folded:document.getElementById("broadside").classList.contains("folded")};})()`;
 const SHORT_H = 600;
 const UNFOLD = `(()=>{if(document.getElementById("broadside").classList.contains("folded"))document.querySelector(".slip-tab").click();return true;})()`;

@@ -132,7 +132,7 @@ type EarRest = {
   ear: { x: number; y: number; w: number; h: number } | null;
   cam: { x: number; y: number; k: number };
 };
-// The ear is read at rest across a painted frame: the full-page shot lays the page out at its document height and back, and a hit test before the room has laid out again reads the ear where that layout left it (the 2026-10-06 CD2b row in `.claude/skills/vellum-footguns/references/flake-record.md`).
+// `shoot` in `e2e/harness.ts` captures beyond the viewport, which lays the page out at its document height and back (the 2026-10-06 CD2b row in `.claude/skills/vellum-footguns/references/flake-record.md` caught a 1x1 viewport in between), so the room lays the ear out again after the shot.
 const FRAMES = `(()=>{window.__cd2bFrame=0;const tick=()=>{if(window.__cd2bFrame<0)return;window.__cd2bFrame++;requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
 const EAR_REST: Payload<EarRest> = `(() => { const e = document.querySelector("#map .region-inset .dog-ear"); const b = e ? e.getBoundingClientRect() : null; const s = window.__vellumZoomState(); return { frame: window.__cd2bFrame, iw: innerWidth, ih: innerHeight, ear: b && { x: b.x, y: b.y, w: b.width, h: b.height }, cam: { x: s.x, y: s.y, k: s.k } }; })()`;
 const earAtRest = (d: EarRest, last: EarRest | null): boolean =>
