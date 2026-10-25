@@ -7,6 +7,7 @@ export function makeSettle({
 }: {
   evaluate: (expression: string, awaitPromise?: boolean) => Promise<unknown>;
   sleep: (ms: number) => Promise<unknown>;
+  tolerant?: boolean;
 }) {
   // THROWS rather than returning the last read: a poll that falls through to the read reintroduces the same flake silently, which one mutation run proved, an unsatisfiable predicate burned the whole budget and the check still passed. The last read rides in the message so the failure keeps the payload a red check would have printed.
   return async <T>(
