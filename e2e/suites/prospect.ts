@@ -148,7 +148,7 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   );
 }
 
-async function pb3fGlassLeans({
+export async function pb3fGlassLeans({
   evaluate,
   check,
   sleep,

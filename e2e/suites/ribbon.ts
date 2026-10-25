@@ -70,7 +70,11 @@ async function rb5PressedPlate({ check, svgOf }: RibbonKit): Promise<string> {
   return svg1;
 }
 
-async function rb5cLeans({ evaluate, check, sleep }: Pick<RibbonKit, "evaluate" | "check" | "sleep">): Promise<void> {
+export async function rb5cLeans({
+  evaluate,
+  check,
+  sleep,
+}: Pick<RibbonKit, "evaluate" | "check" | "sleep">): Promise<void> {
   await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
   let leaned = null;
   for (let i = 0; i < 60; i++) {

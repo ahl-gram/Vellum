@@ -40,6 +40,8 @@ export type ProspectKit = ReturnType<typeof prospectKit>;
 export const STORE = JSON.stringify(TABLE_STORE_KEY);
 // 2026-10-24: a hop to /faq/ read the plate gone on its first read in 10 of 10 hops across this kit and the Ribbon's (Page.navigate returns once the new document commits); 100 reads of 50 ms is a cap on a hang, a hundred times that.
 export const HOP_TRIES = 100;
+// 2026-10-25: the Glass read home 7 or 8 reads after 0 (309 to 361 ms: one glide, `glideMs` in `src/site/prospect/seats.ts`, and a read) in 10 of 10 presses across this kit and the Ribbon's; 60 reads of 50 ms, the loop's own budget and at least 3 s, keeps 2.5 times the slowest at CI's 3.3 (`REDRAFT_TRIES` in `e2e/suites/zoom/kit.ts`).
+export const GLASS_HOME_TRIES = 60;
 
 export function prospectKit(ctx: SuiteContext) {
   const { evaluate, send, sleep, PORT } = ctx;
@@ -56,6 +58,19 @@ export function prospectKit(ctx: SuiteContext) {
   const state = () => evaluate(STATE);
   const opened = (label: string) =>
     settle(STATE, (s) => s.blob && s.status === "", `prospect page never drew: ${label}`, 300);
+  const glassHome = async (): Promise<void> => {
+    await evaluate(
+      `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
+    );
+    for (let i = 0; i < GLASS_HOME_TRIES; i++) {
+      let home = null;
+      try {
+        home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
+      } catch {}
+      if (home) break;
+      await sleep(50);
+    }
+  };
   const svgOf = () => evaluate<string>(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
   const moveTo = async (x: number, y: number): Promise<void> => {
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
@@ -68,7 +83,7 @@ export function prospectKit(ctx: SuiteContext) {
       await evaluate(`localStorage.removeItem(${STORE})`);
     } catch {}
   };
-  return { ...ctx, page, goto, state, opened, svgOf, moveTo, pressAt, parkMouse, forget };
+  return { ...ctx, page, goto, state, opened, glassHome, svgOf, moveTo, pressAt, parkMouse, forget };
 }
 
 export async function axName({ send }: Pick<SuiteContext, "send">, selector: string): Promise<string | null> {
