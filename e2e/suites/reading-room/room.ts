@@ -90,7 +90,7 @@ type Loaded = { ready: string; path: string; frame: boolean };
 const LOADED: Payload<Loaded> = `({ ready: document.readyState, path: location.pathname, frame: !!document.querySelector(".rf") })`;
 
 export async function rr38Authored({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  const settle = makeSettle({ evaluate: (e: string) => evaluate<Loaded | null>(e).catch(() => null), sleep });
+  const settle = makeSettle({ evaluate, sleep, tolerant: true });
   try {
     const read = await withScriptsOff(send, async () => {
       await send("Page.navigate", { url: "about:blank" });
