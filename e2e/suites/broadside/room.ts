@@ -172,7 +172,7 @@ type Notice = { ready: string; w: number };
 const NOTICE: Payload<Notice> = `(() => { const n = document.querySelector(".stage noscript .status"); return { ready: document.readyState, w: n ? n.getBoundingClientRect().width : 0 }; })()`;
 
 export async function br9Authored({ evaluate, send, check, sleep, PORT }: BroadsideKit): Promise<void> {
-  const settle = makeSettle({ evaluate: (e: string) => evaluate<Notice | null>(e).catch(() => null), sleep });
+  const settle = makeSettle({ evaluate, sleep, tolerant: true });
   try {
     const read = await withScriptsOff(send, async (): Promise<Authored> => {
       await send("Page.navigate", { url: "about:blank" });
