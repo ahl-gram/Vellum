@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { errorText } from "../../e2e/support/suites.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 import type { SurveyKit } from "../../e2e/suites/survey/kit.ts";
 import {
@@ -55,58 +56,61 @@ const INK_NONE: InkSpan = {
   readSteps: 0,
 };
 
+const readOf = (four: Four) => ({
+  batches: [
+    { chart: true, overlay: false, frames: 5, verso: false },
+    { chart: false, overlay: true, frames: 16, verso: true },
+  ],
+  chartBatch: 0,
+  inkBatch: 1,
+  chartAlone: true,
+  ...four,
+  framesBetween: 11,
+  versoAtSwap: false,
+  facesAgree: true,
+  overlays: 1,
+  vertices: 40,
+  status: "",
+  hash: "#seed=42&style=antique&survey",
+});
+
 async function swap({ four, ink, inked = true, closedOn = 1 }: Case) {
   const events: string[] = [];
   const checked: Checked[] = [];
   let polls = 0;
-  const evaluate = async (expression: string): Promise<unknown> => {
+  const answer = (expression: string): unknown => {
     if (expression === INK_MARK) {
       events.push("mark");
       return inked;
     }
     if (expression === INK_STATE) {
-      polls++;
       events.push("state");
+      polls++;
       return { started: true, closed: polls >= closedOn, frames: 0, end: "none" };
     }
     if (expression === INK_READ) {
       events.push("ink");
       return ink;
     }
-    if (expression.includes("window.__mo.disconnect()")) {
-      events.push("read");
-      return {
-        batches: [
-          { chart: true, overlay: false, frames: 5, verso: false },
-          { chart: false, overlay: true, frames: 16, verso: true },
-        ],
-        chartBatch: 0,
-        inkBatch: 1,
-        chartAlone: true,
-        ...four,
-        framesBetween: 11,
-        versoAtSwap: false,
-        facesAgree: true,
-        overlays: 1,
-        vertices: 40,
-        status: "",
-        hash: "#seed=42&style=antique&survey",
-      };
-    }
-    throw new Error(`unexpected evaluate: ${expression.slice(0, 60)}`);
+    if (!expression.includes("window.__mo.disconnect()"))
+      throw new Error(`unexpected evaluate: ${expression.slice(0, 60)}`);
+    events.push("read");
+    return readOf(four);
   };
-  const sleep = async () => {
-    events.push("sleep");
-  };
-  const check = (name: string, ok: unknown, detail: string) => {
-    checked.push({ code: name.split(" ")[0]!, ok: !!ok, detail });
-  };
-  const ctx = { evaluate, sleep, check } as unknown as SuiteContext;
-  const outcome = await sv2pSwapThenInk(ctx).then(
-    () => ({ threw: null as Error | null }),
-    (err: Error) => ({ threw: err }),
-  );
-  return { events, checked, ...outcome };
+  const ctx = {
+    evaluate: (expression: string) => Promise.resolve(answer(expression)),
+    sleep: () => Promise.resolve(void events.push("sleep")),
+    check: (name: string, ok: unknown, detail: string) => {
+      checked.push({ code: name.split(" ")[0]!, ok: !!ok, detail });
+    },
+  } as unknown as SuiteContext;
+  let threw: string | null = null;
+  try {
+    await sv2pSwapThenInk(ctx);
+  } catch (err) {
+    threw = errorText(err);
+  }
+  return { events, checked, threw };
 }
 
 const sv2r = (c: Checked[]) => c.find((x) => x.code === "SV2r")!;
@@ -155,10 +159,7 @@ test("the ink's span is read once it has closed, here at the fifth try", async (
 
 test("an ink that never closes stops the step with the wait's label and last state, after INK_END_TRIES tries", async () => {
   const got = await swap({ four: HEALTHY, ink: INK_HEALTHY, closedOn: Infinity });
-  assert.match(
-    got.threw?.message ?? "",
-    /^settle timeout SV2r the ink's span closing: \{"started":true,"closed":false/,
-  );
+  assert.match(got.threw ?? "", /^settle timeout SV2r the ink's span closing: \{"started":true,"closed":false/);
   assert.equal(count(got.events, "state"), INK_END_TRIES);
   assert.equal(count(got.events, "sleep"), INK_END_TRIES);
   assert.equal(count(got.events, "ink"), 0);
@@ -179,7 +180,7 @@ test("with no ink on the new coast at the mark, nothing is waited for and SV2r i
     got.checked.map((x) => x.code),
     ["SV2p", "SV2r", "SV2k"],
   );
-  assert.equal(JSON.parse(sv2r(got.checked).detail).inkStarted, false);
+  assert.equal((JSON.parse(sv2r(got.checked).detail) as InkSpan).inkStarted, false);
 });
 
 test("the read SV2r judges is marked in the ink's span before the wait", async () => {
@@ -195,13 +196,13 @@ test("the read SV2r judges is marked in the ink's span before the wait", async (
 test("the ink's instrument goes in after the read's sampler and before the Draw", async () => {
   const seen: string[] = [];
   const kit = {
-    evaluate: async (expression: string) => {
+    evaluate: (expression: string) => {
       seen.push(expression);
-      return true;
+      return Promise.resolve(true);
     },
-    goto: async () => {},
-    waitInked: async () => 0,
-    waitSettled: async () => {},
+    goto: () => Promise.resolve(),
+    waitInked: () => Promise.resolve(0),
+    waitSettled: () => Promise.resolve(),
   } as unknown as SurveyKit;
   await sv2pDrawBeat(kit);
   const sampler = seen.findIndex((e) => e.includes("window.__land={"));
