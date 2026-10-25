@@ -55,10 +55,7 @@ function reachFaults(reads: Staged[]): string[] {
 }
 
 export async function pr40RunnerLayout(ctx: SuiteContext): Promise<void> {
-  const settle = makeSettle({
-    evaluate: (e: string) => ctx.evaluate<Staged | null>(e).catch(() => null),
-    sleep: ctx.sleep,
-  });
+  const settle = makeSettle({ evaluate: ctx.evaluate, sleep: ctx.sleep, tolerant: true });
   const { identifier } = await ctx.send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
     source: SENTINEL_SCRIPT,
   });
