@@ -37,18 +37,19 @@ const settledReadFixtures = async (settle: ReturnType<typeof makeSettle>): Promi
 };
 void settledReadFixtures;
 
-const reading = (reads: unknown[]) => {
+const reading = (reads: unknown[], options: { tolerant?: boolean } = {}) => {
   const asked: string[] = [];
   const slept: number[] = [];
   const evaluate = (expression: string): Promise<unknown> => {
     asked.push(expression);
-    return Promise.resolve(reads.shift());
+    const next = reads.shift();
+    return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
   };
   const sleep = (ms: number): Promise<void> => {
     slept.push(ms);
     return Promise.resolve();
   };
-  return { asked, slept, settle: makeSettle({ evaluate, sleep }) };
+  return { asked, slept, settle: makeSettle({ evaluate, sleep, ...options }) };
 };
 
 test("a settle hands back the first read its predicate accepts, and polls past a null read without asking the predicate", async () => {
@@ -84,6 +85,64 @@ test("a settle that runs out of tries THROWS with its label and its last read, a
     (err: Error) => err.message === 'settle timeout never: {"n":7}',
   );
   assert.equal(asked.length, 3, "the settle did not spend exactly the tries it was given");
+});
+
+test("a tolerant settle polls past reads that throw, pausing its 50ms after each, and hands back the first read its predicate accepts", async () => {
+  const { asked, slept, settle } = reading(
+    [
+      new Error("eval exception: TypeError: Cannot read properties of null (reading 'scrollWidth')"),
+      new Error('{"code":-32000,"message":"Execution context was destroyed."}'),
+      true,
+    ],
+    { tolerant: true },
+  );
+  const got = await settle<boolean>("READ", (d) => d, "away").catch((err: unknown) => err);
+  assert.equal(got, true);
+  assert.equal(asked.length, 3);
+  assert.deepEqual(
+    slept,
+    [50, 50],
+    "a read that threw was read again with no pause, so a navigation spends the whole budget at once",
+  );
+});
+
+test("a settle not asked to tolerate a throwing read rejects with that read's own error at once and reads nothing more", async () => {
+  const boom = new Error("eval exception: TypeError: boom");
+  const { asked, settle } = reading([boom, true]);
+  await assert.rejects(
+    settle<boolean>("READ", (d) => d, "strict"),
+    (err: unknown) => err === boom,
+  );
+  assert.equal(asked.length, 1, "a strict settle read again after a read threw");
+});
+
+test("a tolerant settle that runs out of tries THROWS with its label, its last read and the error that read threw, and names no error once a later read answered", async () => {
+  const gone = reading([{ n: 0 }, new Error("eval exception: boom")], { tolerant: true });
+  await assert.rejects(
+    gone.settle<{ n: number }>("READ", (d) => d.n > 10, "gone", 2),
+    (err: Error) => err.message === "settle timeout gone: null (the last read threw: eval exception: boom)",
+  );
+  assert.equal(gone.asked.length, 2, "the settle did not spend exactly the tries it was given");
+  const back = reading([new Error("eval exception: boom"), { n: 1 }], { tolerant: true });
+  await assert.rejects(
+    back.settle<{ n: number }>("READ", (d) => d.n > 10, "back", 2),
+    (err: Error) => err.message === 'settle timeout back: {"n":1}',
+  );
+});
+
+test("a tolerant settle forgets the previous read when a read throws, so a stillness predicate never pairs reads from either side of the throw", async () => {
+  const { asked, settle } = reading([{ n: 4 }, new Error("eval exception: gone"), { n: 4 }, { n: 4 }], {
+    tolerant: true,
+  });
+  const lasts: ({ n: number } | null)[] = [];
+  const got = await settle<{ n: number }>(
+    "READ",
+    (d, last) => (lasts.push(last), last !== null && d.n === last.n),
+    "still",
+  ).catch((err: unknown) => err);
+  assert.deepEqual(got, { n: 4 });
+  assert.deepEqual(lasts, [null, null, { n: 4 }]);
+  assert.equal(asked.length, 4);
 });
 
 const REPO = resolve(import.meta.dirname, "..", "..");
