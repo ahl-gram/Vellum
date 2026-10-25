@@ -93,7 +93,7 @@ async function sb18SlidFromFolded(
 }
 
 export async function sb19SlidFromRest(k: SpecimenKit): Promise<void> {
-  await k.goto();
+  if ((await k.goto()) === null) throw new Error("SB19: the Book never came up at rest");
   const home = await still(k, "SB19 home");
   const fill = fillOf(home, "sheet");
   const travels = travelsOf(home);
