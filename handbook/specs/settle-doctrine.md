@@ -100,7 +100,8 @@ headless browser actually do, so a green run can be believed.
     waited back). The issue stays open as the restore, and fixing the flake deletes the entry. The issue
     names each claim the check held and each proof row that named it, and those claims count as
     unprotected until the check returns; no earlier deletion is undone. The list is the one roster of
-    skipped checks.
+    skipped checks. A step too slow for what it holds is pulled out by the same entry, under an issue
+    of its own, as "When a check is pulled out of the run" below says.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a step's CI rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` (counted by the step that runs the
@@ -151,6 +152,61 @@ holds only the order.
 5. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
    until the check returns (item 11).
 6. **Fixing the flake puts the check back** (item 11).
+
+## When a check is pulled out of the run
+
+**Keep a test only while it gives reliable coverage worth its time (Alex, 2026-10-25,
+Issue #1063).** A browser check that is flaky or too slow is fixed, or pulled out of the run, at
+least for now, under an open issue that is its restore as item 11 says: one entry in `E2E_SKIPS`
+(`e2e/support/skips.ts`) naming its suite, its step and the issue, whether it is flaky or slow.
+The bullets say, for each kind, whether the fix or the pull comes first. The unit suite has no
+skip list, and this section sets no rule for a unit test.
+
+- **Flaky is items 11 and 12, in the order the section above gives.** A flaky step is pulled out
+  when its flake issue is filed, at its third counted CI row at the latest, and its fix is tried
+  before that row or while it is out: a fix that settles a row's cause starts the count again.
+- **Too slow is what a step holds against what it costs, never its seconds alone (Alex,
+  2026-10-25, Issue #1063 comment 6395758072).** A step is too slow when it holds at most two
+  claims that nothing else holds, on at most two pages or rooms, and costs 10 seconds or more. A
+  step, the unit of the skip list, is counted with every check it prints; a check outside every
+  step is counted alone, as the step item 11 wraps it in before it can be skipped; and a step or
+  check whose result or page state a later check reads is counted together with those readers,
+  since item 11 has each reader set up for itself what the pulled one left.
+- **What a step holds** is its claims, each a rule it can fail on alone, read from its checks'
+  sentences and confirmed in its code; the pages, rooms and windows it reads them in; and, for
+  each claim, whether another browser check or a unit test also fails when the claim breaks.
+  Find a holder with `git grep` for the selector, symbol or constant the claim turns on, then
+  read it: a mention is not a hold, and a unit test of the arithmetic behind a claim, or of the
+  helper that measures it (`squeezes` in `test/e2e/corners.test.ts`), does not hold the claim on
+  the page.
+- **What a step costs** is its seconds on GitHub's machines, the median of three lane runs, read
+  from the timestamp the log puts on every result line
+  (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`): the time
+  from the last result line before the unit counted above to the unit's own last. The harness
+  prints no step's seconds, so the reading errs high: a step's first result also carries the
+  navigation before it, and a suite's first step its boot.
+- **A cut saves wall clock only where it shortens the slowest lane.** A run waits on its longest
+  job, so seconds cut from another lane save nothing until the lanes are re-shared (Issue #1007),
+  and a cut from the slowest lane saves only down to the next one. A step's cost counts whatever
+  its lane: the slowest lane changes from run to run, and a cut there pays only as far as the next
+  lane's time, so cuts across the lanes together reach the wall clock where one lane's alone stop
+  short. The pull request that pulls a step re-measures its suite as "`MEASURED_SECONDS` is read
+  from CI's own lane logs" in `handbook/specs/site-architecture.md` says, and moves suites only
+  where `test/e2e/lane-timings.test.ts` then reds.
+- **One honest fix** for a slow step is one change aimed at its own seconds, planned, and read as
+  above before and after: before, from main's three latest runs; after, from the pull request's
+  own run and two more runs of that lane's job started by hand. Such a change makes a fixed sleep
+  a wait on the state it needs (Issue #785), leaves unloaded a page the step loads only to pass
+  over, shares a set-up its checks repeat, or moves a claim to the cheapest check that can see it
+  (`handbook/specs/check-placement.md`). A step still too slow after that change is pulled out.
+  Slow steps may share one plan and one pull request, and moving suites between lanes is not a
+  fix of a step.
+- **Who finds a slow step.** Whoever reads the lane logs for a list of slow steps files an issue
+  for each step the rule finds and takes it through the bullet above, with no ruling asked, as a
+  flake is. A pull request that adds a browser check or makes one longer counts in its plan what
+  the step holds, and reads the step's seconds from its own CI run; where that run reads it at or
+  over the rule's line, two more runs of the lane's job started by hand give the median, and a
+  step the rule then finds too slow is reworked before the pull request merges.
 
 ## The environment
 

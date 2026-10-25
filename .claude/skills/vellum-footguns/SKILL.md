@@ -185,6 +185,9 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     (Issue #522).
 16. **Read the two readings a plan printed for a browser check before you type it**
     (`vellum-planner`'s **Tests** line; Issue #1037).
+17. **A new or longer browser check is weighed before it lands**: its plan counts what its step
+    holds, and its pull request reads the step's seconds from its own CI run, against the rule in
+    `handbook/specs/settle-doctrine.md` (When a check is pulled out of the run; Issue #1063).
 
 ## Gate 3: before writing CSS or moving layout
 
