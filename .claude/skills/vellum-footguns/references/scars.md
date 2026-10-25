@@ -158,7 +158,8 @@ left open and the session failed to write down).
   the three differences locally, in a style sheet the document adopted before its scripts ran,
   reproduced every runner number before the witnesses were rewritten to read the press off the room.
   Stands behind `handbook/specs/settle-doctrine.md`'s bullet that CI's browser lays a chart room's
-  furniture out off the local harness browser's.
+  furniture out off the local harness browser's, and `handbook/specs/check-placement.md`'s rule that
+  a browser check reads a number the room's layout decides from the layout in the run.
 
 ## Promoted from the memory triage (Issue #708)
 
