@@ -181,10 +181,11 @@ skip list, and this section sets no rule for a unit test.
 - **Too slow is what a step holds against what it costs, never its seconds alone (Alex,
   2026-10-25, Issue #1063 comment 6395758072).** A step is too slow when at most two of its claims
   are held nowhere else, those claims are read on at most two pages or rooms, and it costs 10
-  seconds or more. A step, the unit of the skip list, is counted with every check it prints; a
-  check outside every step is counted alone, as the step item 11 wraps it in before it can be
-  skipped; and a step or check whose result or page state a later check reads is counted together
-  with those readers, since item 11 has each reader set up for itself what the pulled one left.
+  seconds or more (Issue #1063 comment 6397480702). A step, the unit of the skip list, is counted
+  with every check it prints; a check outside every step is counted alone, as the step item 11
+  wraps it in before it can be skipped; and a step or check whose result or page state a later
+  check reads is counted together with those readers, since item 11 has each reader set up for
+  itself what the pulled one left.
 - **What a step holds** is its claims, each a rule it can fail on alone, read from its checks'
   sentences and confirmed in its code; the pages, rooms and windows it reads them in; and, for
   each claim, whether another browser check or a unit test also fails when the claim breaks.
@@ -193,15 +194,23 @@ skip list, and this section sets no rule for a unit test.
   helper that measures it (`squeezes` in `test/e2e/corners.test.ts`), does not hold the claim on
   the page.
 - **What a step costs** is its seconds on GitHub's machines, the median of three lane runs, read
-  from the timestamp the log puts on every result line
+  from the timestamp the log puts on every line
   (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`): the time
-  from the last result line before the unit counted above to the unit's own last. The harness
-  prints no step's seconds, so the reading errs high, the direction that pulls a step: it also
-  carries whatever ran between that earlier line and the step's own start, such as its suite's
-  navigation and, for a suite's first step, its suite's boot, which pulling the step does not
-  save. A step with such set-up in its reading, a suite's first step always, is not called too
-  slow on that reading alone: the plan that would pull or rework it first reads its own seconds,
-  and a pull request that adds a suite leaves that suite's first step to the next list.
+  from the last result line before the unit counted above to the unit's own last. A suite's first
+  step is timed from its suite's start instead, since the result line before it is the previous
+  suite's, whose closing steps print nothing; no line prints that start, which is the time on the
+  lane's `fingerprint:` line plus the `per-suite wall clock` the lane prints for each suite its
+  `tier:` line names before it. The harness prints no step's own seconds, so the reading errs
+  high, the direction that pulls a step: it also carries any set-up the suite runs before the step
+  that the unit above does not count with it, a step with no check of its own or code outside
+  every step that navigates, waits or sleeps, which pulling the step does not save. A step a list
+  finds with such set-up before it is judged on each reading less that set-up, timed before its
+  one honest fix: that fix's pull request first pushes the unit's entry in `E2E_SKIPS`, naming
+  every step of the unit, and reads the set-up in that run and two more runs of the lane's job
+  started by hand, from the earlier result line to the skip line the log prints where the unit's
+  first step would have begun. Where main's reading less the set-up's median is under 10 seconds,
+  the step is not too slow, and that pull request closes unmerged with its issue, both readings
+  recorded; else its next commit takes the entry out again with the fix.
 - **A cut saves wall clock only where it shortens the slowest lane.** A run waits on its longest
   job, so seconds cut from another lane save nothing until the lanes are re-shared (Issue #1007),
   and a cut from the slowest lane saves only down to the next one. A step's cost counts whatever
@@ -224,10 +233,15 @@ skip list, and this section sets no rule for a unit test.
   lanes is not a fix of a step.
 - **Who finds a slow step.** Whoever reads the lane logs for a list of slow steps files an issue
   for each step the rule finds and takes it through the bullet above, with no ruling asked, as a
-  flake is. A pull request that adds a browser check or makes one longer counts in its plan what
-  the step holds, and reads the step's seconds from its own CI run; where that run reads it at or
-  over the rule's line, two more runs of the lane's job started by hand give the median, and a
-  step the rule then finds too slow is reworked before the pull request merges.
+  flake is. A pull request that adds a browser check or makes one longer, a new suite's first step
+  included, counts in its plan what the step holds and reads the step's seconds from its own CI
+  run as above, one run for a step that is not thin (Issue #1063 comments 6397480702 and
+  6398396394). Of a step the plan counts thin, at most two claims held nowhere else on at most two
+  pages or rooms, one reading under 4 seconds passes, one over 20 seconds is too slow, and one
+  from 4 to 20 seconds, the spread one run on GitHub's machines read a 10-second step at on
+  2026-10-25 (`handbook/plans/1063/1063-r2-plan.md`, call C22), is near the line: two more runs of
+  the lane's job started by hand give the median. A step the rule finds too slow is reworked
+  before the pull request merges.
 
 ## The environment
 
