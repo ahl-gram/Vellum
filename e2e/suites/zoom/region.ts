@@ -251,6 +251,13 @@ export async function z20bReducedMotion({
   await send("Emulation.setEmulatedMedia", { features: [] });
 }
 
+// CDP's setCPUThrottlingRate does NOT slow the Web Worker, so a redraft drawn there takes about as long throttled as not, and one drawn on the main thread about this many times as long.
+export const Z20C_THROTTLE = 4;
+
+// 2026-10-25: throttled over unthrottled read 0.67 to 1.03 in the worker and 2.65 to 4.15 with the worker blocked, five redrafts each on the Mac at 42c45171, and CI's throttled Z20c over its unthrottled Z17 1.14 to 1.37 across nine runs; the bound is the midpoint of 1 and the rate.
+export const offMainThread = (freeMs: number, perfMs: number): boolean =>
+  perfMs >= 0 && perfMs < (freeMs * (1 + Z20C_THROTTLE)) / 2;
+
 export async function z20cThrottle({
   send,
   check,
@@ -260,17 +267,24 @@ export async function z20cThrottle({
   waitRedraft,
   captionMs,
 }: ZoomKit): Promise<void> {
-  // CDP's setCPUThrottlingRate does NOT slow the Web Worker, so this mainly proves the redraft never blocks the main thread; the ms is corroboration.
   await goHome();
-  await send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  const beforePerf = (await rgn()).redrafts;
+  const beforeFree = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
-  const perf = await waitRedraft(beforePerf);
-  const perfMs = await captionMs();
-  await send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  check(
-    "Z20c settle-to-sheet is measured under a 4x CPU throttle (AC3: ~1.5s mid-mobile target)",
-    perf.redrafts === beforePerf + 1 && perfMs >= 0 && perfMs < 4000,
-    `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
-  );
+  const free = await waitRedraft(beforeFree);
+  const freeMs = await captionMs();
+  await goHome();
+  await send("Emulation.setCPUThrottlingRate", { rate: Z20C_THROTTLE });
+  try {
+    const beforePerf = (await rgn()).redrafts;
+    await enterAt(2, 0.5, 0.5);
+    const perf = await waitRedraft(beforePerf);
+    const perfMs = await captionMs();
+    check(
+      "Z20c the redraft is drawn off the main thread: under a 4x CPU throttle its settle-to-sheet stays under 2.5 times an unthrottled redraft's in the same run, where one drawn on the main thread takes about 4 times (AC3)",
+      free.redrafts === beforeFree + 1 && perf.redrafts === beforePerf + 1 && offMainThread(freeMs, perfMs),
+      `drawn in ${perfMs}ms under ${Z20C_THROTTLE}x throttle against ${freeMs}ms unthrottled, ratio ${(perfMs / freeMs).toFixed(2)}`,
+    );
+  } finally {
+    await send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  }
 }

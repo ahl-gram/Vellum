@@ -1,4 +1,4 @@
-import type { Payload, Point, SuiteContext } from "../../types.ts";
+import type { Payload, Point } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { tabInto, type DrawerKit } from "./kit.ts";
 import { DEEP, DEEPEST, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
@@ -125,11 +125,44 @@ export async function cd2Lays({ check, settle }: DrawerKit) {
   return laid;
 }
 
+type EarRest = {
+  frame: number;
+  iw: number;
+  ih: number;
+  ear: { x: number; y: number; w: number; h: number } | null;
+  cam: { x: number; y: number; k: number };
+};
+// `shoot` in `e2e/harness.ts` captures beyond the viewport, which lays the page out at its document height and back (the 2026-10-06 CD2b row in `.claude/skills/vellum-footguns/references/flake-record.md` caught a 1x1 viewport in between), so the room lays the ear out again after the shot.
+const FRAMES = `(()=>{window.__cd2bFrame=0;const tick=()=>{if(window.__cd2bFrame<0)return;window.__cd2bFrame++;requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
+const EAR_REST: Payload<EarRest> = `(() => { const e = document.querySelector("#map .region-inset .dog-ear"); const b = e ? e.getBoundingClientRect() : null; const s = window.__vellumZoomState(); return { frame: window.__cd2bFrame, iw: innerWidth, ih: innerHeight, ear: b && { x: b.x, y: b.y, w: b.width, h: b.height }, cam: { x: s.x, y: s.y, k: s.k } }; })()`;
+const earAtRest = (d: EarRest, last: EarRest | null): boolean =>
+  d.iw === 1280 &&
+  d.ih === 800 &&
+  d.ear !== null &&
+  last !== null &&
+  d.frame > last.frame &&
+  JSON.stringify(d.ear) === JSON.stringify(last.ear) &&
+  JSON.stringify(d.cam) === JSON.stringify(last.cam);
+
+async function shootThenRest({
+  evaluate,
+  shoot,
+  settle,
+}: Pick<DrawerKit, "evaluate" | "shoot" | "settle">): Promise<void> {
+  await evaluate(FRAMES);
+  try {
+    await shoot("chart-drawer-1280-open.png");
+    await settle(EAR_REST, earAtRest, "CD2b the ear at rest after the shot");
+  } finally {
+    await evaluate(`window.__cd2bFrame = -1`);
+  }
+}
+
 export async function cd2bRealPointer(
-  { evaluate, send, check, shoot, sleep }: SuiteContext,
+  { evaluate, send, check, shoot, sleep, settle }: DrawerKit,
   earAt: Point | null,
 ): Promise<void> {
-  await shoot("chart-drawer-1280-open.png");
+  await shootThenRest({ evaluate, shoot, settle });
 
   check(
     "CD2b the handle answers a REAL pointer: the inset box is pointer-events: none, so the corner must restore it or the survey files for a synthetic click and for nobody else (#520 goal: with a click or a tap, everywhere)",

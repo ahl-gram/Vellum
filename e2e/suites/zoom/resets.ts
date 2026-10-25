@@ -1,4 +1,5 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 
 export async function z5VersoHomes({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
@@ -119,33 +120,51 @@ export async function z13DeepLink({
   await shoot("explorer-zoom-deeplink-k4.png");
 }
 
-async function z13dFoldAndNoHash({
-  evaluate,
-  send,
-  check,
-  sleep,
-}: Pick<SuiteContext, "evaluate" | "send" | "check" | "sleep">) {
+type Refit = {
+  resizes: number;
+  ih: number;
+  reserve: string;
+  sheet: number;
+  fx: number;
+  fy: number;
+  sk: number;
+  cx: string | null;
+  cy: string | null;
+  k: string | null;
+  folded: boolean;
+};
+
+// Added after the room's own resize listener, and listeners run in the order they were added, so a count that rose means the room has laid out for that resize.
+const COUNT_RESIZES = `(()=>{if(window.__z13Resizes===undefined){window.__z13Resizes=0;addEventListener("resize",()=>{window.__z13Resizes++;});}return true;})()`;
+const REFIT: Payload<Refit> = `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");const W=vp.clientWidth||1,H=vp.clientHeight||1;return{resizes:window.__z13Resizes,ih:innerHeight,reserve:document.querySelector(".stage").style.getPropertyValue("--reserve-right"),sheet:document.getElementById("sheet").getBoundingClientRect().width,fx:(W/2-s.x)/(s.k*W),fy:(H/2-s.y)/(s.k*H),sk:s.k,cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),folded:document.getElementById("broadside").classList.contains("folded")};})()`;
+const SHORT_H = 600;
+const UNFOLD = `(()=>{if(document.getElementById("broadside").classList.contains("folded"))document.querySelector(".slip-tab").click();return true;})()`;
+const still = (d: Refit, last: Refit | null): boolean => last !== null && JSON.stringify(d) === JSON.stringify(last);
+// Half the last place the hash writes the framing to (`toFixed(4)`), so a camera that writes 0.5000 holds and a walk the hash would show fails.
+const FRAMING_EPS = 5e-5;
+const held = (r: Refit): boolean =>
+  r.cx === "0.5000" &&
+  r.cy === "0.5000" &&
+  r.k === "4.0000" &&
+  Math.abs(r.fx - 0.5) < FRAMING_EPS &&
+  Math.abs(r.fy - 0.5) < FRAMING_EPS;
+
+async function z13dFoldAndNoHash(
+  { evaluate, send, check, sleep }: Pick<SuiteContext, "evaluate" | "send" | "check" | "sleep">,
+  settle: ReturnType<typeof makeSettle>,
+  open: Refit,
+): Promise<{ z13d: Refit; z13e: Refit }> {
   await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
-  await sleep(700); // the fold's 340ms settle, then the layout and the 250ms settle debounce
-  const z13d = await evaluate<{
-    cx: string | null;
-    cy: string | null;
-    k: string | null;
-    sheet: number;
-    folded: boolean;
-  }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`,
+  const z13d = await settle(
+    REFIT,
+    (d, last) => d.folded && d.reserve !== open.reserve && still(d, last),
+    "Z13c the fold's refit",
   );
   await evaluate(`document.querySelector(".slip-tab").click()`);
-  await sleep(700);
-  const z13e = await evaluate<{
-    cx: string | null;
-    cy: string | null;
-    k: string | null;
-    sheet: number;
-    folded: boolean;
-  }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`,
+  const z13e = await settle(
+    REFIT,
+    (d, last) => !d.folded && d.reserve !== z13d.reserve && still(d, last),
+    "Z13c the unfold's refit",
   );
   // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.
   await evaluate(`document.getElementById("seed").value = "777"`);
@@ -166,43 +185,49 @@ async function z13dFoldAndNoHash({
 
 export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
   // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
-  const sheetBefore = await evaluate<number>(`document.getElementById("sheet").getBoundingClientRect().width`);
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
-  await sleep(400); // past the resize layout and the 250ms settle debounce
-  const z13b = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sk: number; sheet: number }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
-  );
-  await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(400);
-  const z13c = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
-  );
-  const { z13d, z13e } = await z13dFoldAndNoHash({ evaluate, send, check, sleep });
-  check(
-    "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
-    z13d.folded &&
-      z13d.sheet > sheetBefore &&
-      z13d.cx === "0.5000" &&
-      z13d.cy === "0.5000" &&
-      z13d.k === "4.0000" &&
-      !z13e.folded &&
-      Math.abs(z13e.sheet - sheetBefore) < 1 &&
-      z13e.cx === "0.5000" &&
-      z13e.cy === "0.5000" &&
-      z13e.k === "4.0000",
-    JSON.stringify({ sheetBefore, z13d, z13e }),
-  );
-  check(
-    "Z13b a resize refits the sheet but holds the camera's framing: cx/cy/k unchanged across a short viewport (height-bound fit) and back (#463)",
-    z13b.sheet !== sheetBefore &&
-      Math.abs(z13c.sheet - sheetBefore) < 1 &&
-      z13b.cx === "0.5000" &&
-      z13b.cy === "0.5000" &&
-      z13b.k === "4.0000" &&
-      z13b.sk === 4 &&
-      z13c.cx === "0.5000" &&
-      z13c.cy === "0.5000" &&
-      z13c.k === "4.0000",
-    JSON.stringify({ sheetBefore, z13b, z13c }),
-  );
+  const settle = makeSettle({ evaluate, sleep });
+  await evaluate(COUNT_RESIZES);
+  try {
+    const before = await settle(REFIT, still, "Z13b before the resize");
+    await send("Emulation.setDeviceMetricsOverride", {
+      width: 1280,
+      height: SHORT_H,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    const z13b = await settle(
+      REFIT,
+      (d, last) => d.resizes > before.resizes && d.ih === SHORT_H && still(d, last),
+      "Z13b the resize's refit",
+    );
+    await send("Emulation.clearDeviceMetricsOverride");
+    const z13c = await settle(
+      REFIT,
+      (d, last) => d.resizes > z13b.resizes && d.ih !== SHORT_H && still(d, last),
+      "Z13b the refit back",
+    );
+    const { z13d, z13e } = await z13dFoldAndNoHash({ evaluate, send, check, sleep }, settle, z13c);
+    check(
+      "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
+      z13d.folded &&
+        z13d.sheet > before.sheet &&
+        held(z13d) &&
+        !z13e.folded &&
+        Math.abs(z13e.sheet - before.sheet) < 1 &&
+        held(z13e),
+      JSON.stringify({ sheetBefore: before.sheet, z13d, z13e }),
+    );
+    check(
+      "Z13b a resize refits the sheet but holds the camera's framing: cx/cy/k unchanged across a short viewport (height-bound fit) and back (#463)",
+      z13b.sheet !== before.sheet &&
+        Math.abs(z13c.sheet - before.sheet) < 1 &&
+        held(z13b) &&
+        z13b.sk === 4 &&
+        held(z13c),
+      JSON.stringify({ sheetBefore: before.sheet, z13b, z13c }),
+    );
+  } finally {
+    await send("Emulation.clearDeviceMetricsOverride");
+    await evaluate(UNFOLD);
+  }
 }
