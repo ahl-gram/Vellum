@@ -186,3 +186,21 @@ test("a build that runs past its budget still writes the result, the unit half k
     }),
   );
 });
+
+test("a row keeps enough of its run's output for a whole suite's result lines", async () => {
+  await withTempRepo(FILES, (dir, sha) =>
+    withTmp(async (tmp) => {
+      const stdout = "PASS  SV2r marker\n" + "x".repeat(80).concat("\n").repeat(500);
+      const run = fakes([], { "e2e/run.ts": { ...ok, stdout } });
+      const got = await runJob(0, job({ unit: undefined, e2e: { suites: "survey", expect: ["SV2r"] } }), sha, dir, {
+        run,
+        reporter: REPORTER,
+        tmp,
+      });
+      assert.ok(
+        got.checks[0]?.tail.includes("PASS  SV2r marker"),
+        "a suite's early result line fell out of the kept output",
+      );
+    }),
+  );
+});

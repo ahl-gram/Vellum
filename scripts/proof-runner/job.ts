@@ -34,7 +34,8 @@ export type JobResult = {
 
 export type JobDeps = { run: Runner; reporter: string; tmp: string };
 
-const TAIL_CHARS = 4000;
+// 2026-10-25: the largest single-suite run measured here wrote 36554 characters (chart-drawer) and a survey run 8564, where 4000 cut SV2r's line 4491 characters from a survey run's end; 64 KiB of every check's output is kept, which holds a single-suite run whole (Issue #785).
+const TAIL_CHARS = 65536;
 const GIT_MS = 60_000;
 const AFTER_KILL_MS = 5_000;
 
