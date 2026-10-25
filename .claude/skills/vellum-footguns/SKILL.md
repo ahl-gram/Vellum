@@ -160,9 +160,9 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
     away. **Give it a row in `references/flake-record.md` BEFORE you re-run**, one row per failure
     (a launch hiccup, a lane whose browser never starts so no check runs, included) with the run id,
-    the payload and the disposition: #578 found CD7b had failed this way three times and that
-    reconstructing even that cost a forty-run dig. Once a flake issue is filed, the check is pulled
-    out of the run: `handbook/specs/settle-doctrine.md` item 11.
+    the payload and the disposition. A red on CI that `handbook/specs/settle-doctrine.md` item 15
+    names is never re-run, and takes the route that item gives; a filed flake issue pulls the check
+    out: item 11 there.
 11. **A run whose log has not moved in ten minutes is hung, not slow.** Before reporting "still
     running", check `ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l` and
     `ps aux | grep '[r]emote-debugging-port'`; a starved machine stalls a lane you did not touch.

@@ -18,6 +18,10 @@ where the proof goes.
 - **A row's disposition is one of three**: *settled* (the wait or the bound was fixed, and the check
   asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue number,
   per `handbook/specs/settle-doctrine.md` item 11), or *open* (seen, recorded, nobody has acted).
+- **A rewritten unit test's red that the list does not explain gets a row with no re-run**
+  (`handbook/specs/settle-doctrine.md` item 15): its disposition keeps the words
+  `a rewritten unit test re-planned` through every change, since `handbook/specs/orchestration.md`
+  reports the count of such rows to Alex.
 - **Only a row from GitHub's machines counts toward the issue** (`handbook/specs/settle-doctrine.md`
   item 12): the CI workflow's or the proof runner's, one per run. A local run's red gets its row and
   its disposition as usual, and local rows never file the issue.
