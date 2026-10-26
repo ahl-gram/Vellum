@@ -396,7 +396,7 @@ it bites yourself, by breaking the behavior it guards and watching it go red, co
 "Commit before you mutate" says, and the PR body names it as proven by the implementing session
 only. A presentation fix made after the plate reader's round is measured by you the same way and
 named the same way. **A NIT is the exception to fixing every own-work finding** (Alex, 2026-10-26, Issue #1089): it is listed once in the Records line and fixed only where cheap, and one left needs no issue or errata row. **In a lane, a finding about the plan's design rather than its build goes back to
-the planner**, and through it to Alex, as step 6 says, before anything is fixed or filed. **A finding
+the planner**, and through it to Alex, as step 6 says, before anything is fixed or filed. **Other than a NIT, a finding
 about this pull request's own work leaves unfixed only when fixing it needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
 which and why. **A finding it found but did not cause**, a sibling defect in code or text it did not
 write, goes to an issue or a row, as `vellum-footguns` Gate 5 item 7 says. **An issue is searched for
