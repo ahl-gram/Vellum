@@ -7,7 +7,7 @@ import { l9bPinch } from "../../e2e/suites/landfall/touch.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
 // A state change an action causes lands LAG evaluates after it, so a pause that resolves at once reads the state before it lands.
-const LAG = 2;
+const LAG = 3;
 type Act = { kind: string; at: number };
 type World = { clock: number; acts: Act[]; reads: { expr: string; out: unknown }[]; checked: Map<string, boolean> };
 const landedOf = (w: World, ...kinds: string[]): number =>

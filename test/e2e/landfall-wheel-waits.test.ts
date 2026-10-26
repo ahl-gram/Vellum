@@ -7,7 +7,7 @@ import { l1aConsumed, l1bCloseClamp, l1eAbsorbed } from "../../e2e/suites/landfa
 import type { SuiteContext } from "../../e2e/types.ts";
 
 // A state change an action causes lands LAG evaluates after it, so a pause that resolves at once reads the state before it lands.
-const LAG = 2;
+const LAG = 3;
 type Act = { kind: string; at: number; dy?: number; instant?: boolean; n?: number; p?: boolean };
 type World = {
   clock: number;
@@ -16,7 +16,7 @@ type World = {
   slept: number[];
   checked: Map<string, boolean>;
 };
-const landed = (w: World, a: Act): boolean => a.instant === true || w.clock - a.at >= LAG;
+const landed = (w: World, a: Act, lag = LAG): boolean => a.instant === true || w.clock - a.at >= lag;
 const acts = (w: World, kind: string): Act[] => w.acts.filter((a) => a.kind === kind);
 const sinceReset = (w: World, kind: string): Act[] => {
   const reset = acts(w, `reset:${kind}`).at(-1)?.at ?? -1;
@@ -115,7 +115,7 @@ test("L1e reads the flick and the wheel after it together, and retries a pair th
   const entries = (w: World) => {
     const q = pairs(w).at(-1);
     if (!q || w.clock - q.at < LAG) return [];
-    return [{ p: q.p, t: 1000 }, ...(q.n! >= 2 && w.clock - q.at >= 5 ? [{ p: q.p, t: 1030 }] : [])];
+    return [{ p: q.p, t: 1000 }, ...(q.n! >= 2 && w.clock - q.at >= LAG + 3 ? [{ p: q.p, t: 1030 }] : [])];
   };
   const { w, k } = world(
     (e, w) => {
@@ -129,8 +129,12 @@ test("L1e reads the flick and the wheel after it together, and retries a pair th
       if (isWheelLog(e)) return { n: acts(w, "wheel").filter((a) => landed(w, a)).length };
       return undefined;
     },
-    (a, w) =>
-      a.dy === 480 ? { n: pairs(w).length + 1, p: acts(w, "wheel").some((x) => x.dy === -240 && landed(w, x)) } : {},
+    (a, w) => {
+      const wheelIn = acts(w, "wheel")
+        .filter((x) => x.dy === -240)
+        .at(-1);
+      return a.dy === 480 ? { n: pairs(w).length + 1, p: wheelIn !== undefined && landed(w, wheelIn) } : {};
+    },
   );
   await l1eAbsorbed(k, PT, cam(1.5));
   assert.equal(w.checked.get("L1e"), true, "L1e certified a stream it had not read whole");
@@ -158,7 +162,7 @@ test("ArrowDown's scroll is read only once the prose's scroll has ended", async 
 
 test("the prose is wheeled once per finished scroll until its end", async () => {
   const { w, k } = world((e, w) => {
-    const n = acts(w, "wheel").filter((a) => landed(w, a)).length;
+    const n = acts(w, "wheel").filter((a) => landed(w, a, LAG + 1)).length;
     if (e === readCam) return cam(2);
     if (e === "window.scrollY") return 0;
     if (PROSE_ENDS(e)) return { ends: n, top: Math.min(240, 120 * n), max: 240, y: 0 };

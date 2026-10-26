@@ -125,7 +125,7 @@ test("CD21 reads the camera only once the zoom press's glide has come to rest", 
 
 test("CD48's control is read only once the pan beside the ear has landed", async () => {
   const cam = (x: number, y: number) => ({ x, y, k: 1 });
-  const next = sequence([cam(5, 5), cam(5, 5), cam(85, 65), cam(85, 65)]);
+  const next = sequence([cam(5, 5), cam(5, 5), cam(5, 5), cam(85, 65), cam(85, 65)]);
   const { w, ctx, stable } = world((e) => {
     if (e.includes(".region-inset")) return { x: 10, y: 20, on: "DIV" };
     if (e === "window.__vellumZoomState()") return next();
