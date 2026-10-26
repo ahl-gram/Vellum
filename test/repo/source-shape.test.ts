@@ -45,7 +45,7 @@ test("the reading frame looks up no element by id, spelled any way the engine's 
   assert.deepEqual(
     await houseReports(ID_LOOKUP_PLANT, "src/site/shared/reading-frame/index.ts"),
     at(FRAME_IDS, [1, 2, 3, 4, 5, 6, 10, 11, 13]),
-    "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, and a lookup made inside another module the frame imports, as for the engine's rule",
+    "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, an import of the shared lookup spelled as an absolute path, and a lookup made inside another module the frame imports, as for the engine's rule",
   );
 });
 
