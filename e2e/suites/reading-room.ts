@@ -48,7 +48,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr18Park(ctx);
   await rr20Superseded(ctx);
   await rr21Dice(ctx);
-  await rr22MidPlay(ctx);
+  await step("RR22", () => rr22MidPlay(ctx));
   await rr23Usurped(k);
   await rr24BeforeArm(k);
   await rr25TearDown(k);
