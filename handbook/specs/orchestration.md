@@ -31,12 +31,12 @@ home's line wins for the lane and this file's for the orchestrator.
   listing cut short is not an absence (the Never list).
 - **A sub Alex calls small gets a brief that carries his cap and names the reviews he skips.** The
   brief quotes his words on time and tokens (a cap, or "keep time and tokens down") and lists the
-  rounds he skips (the plan, the plan skeptic, the guard prover, the cold skeptic); the lane runs no
+  rounds he skips (the plan, the guard prover, the cold skeptic); the lane runs no
   more than that and stops at the open pull request. Where he skips the plan, the issue body is
   the plan and the implementer is dispatched on it, handing back if the issue is not true on main.
   The pull request body's Records line says which reviews were skipped by his order, with the date.
   A sub is small when he calls it so, never on the orchestrator's own judgement.
-- **Several planners may run at once.** Recon, the plan and the plan skeptic write no code,
+- **Several planners may run at once.** Recon and the plan write no code,
   so running them together is cheap and batches Alex's menus into one sitting; the builds are the
   expensive part.
 - **No agent in a parallel run runs the full local e2e lanes.** A starved machine stalls the lanes
@@ -77,7 +77,7 @@ home's line wins for the lane and this file's for the orchestrator.
   decision. Never answer a hand-back yourself with a design call: that puts the decision back in the
   cheaper lane by another route. The implementer resumes on the revised plan's path and commits the revision beside the plans before it (workflow step 8).
 - **A ruling a lane will need before its own record is on the issue before the lane is briefed.** A
-  standing ruling above all: a cold plan skeptic reads only the issue, and raises a rule it finds
+  standing ruling above all: a cold skeptic reads only the issue, and raises a rule it finds
   nowhere there as a defect.
 - **The orchestrator's own condition on a ruling is posted labelled as the orchestrator's**, never
   folded into Alex's words.
@@ -271,7 +271,7 @@ home's line wins for the lane and this file's for the orchestrator.
 - **Plan a handover at each pull request boundary of an issue that ships as several**, and take a
   lane's own estimate of its remaining context as a guess. A fresh `vellum-planner` takes over from
   the committed plan, the issue's comments (the rulings and the numbered calls) and the earlier
-  lane's prefixed scratch tools, and runs recon and the plan skeptic on its own pull request's row,
+  lane's prefixed scratch tools, and runs recon on its own pull request's row,
   as workflow step 8's plan per pull request implies; a fresh implementer builds that plan.
 - **Retire a lane's tree once its last pull request has merged and it has reported.** Copy its `out/`
   first, giving each delivery folder copied its page as workflow step 6 says: `git worktree remove`
