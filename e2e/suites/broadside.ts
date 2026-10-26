@@ -259,7 +259,7 @@ async function tapAt({ evaluate, sleep, touch }: BroadsideKit, settle: Settle): 
   await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
   await touch("touchEnd", []);
   await settle(CLICKS, (d) => d.n > n, "BR6 the tap's click");
-  await sleep(500);
+  await sleep(500, "window: a wrongful anchor navigation would commit in it");
   return true;
 }
 

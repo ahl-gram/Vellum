@@ -1,3 +1,4 @@
+import { LANDFALL_HOLD_MS } from "../../../src/site/home/ceremony.ts";
 import { veilMarkup } from "../../../src/site/home/veil.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { readCam, atLandfall } from "../../support/home.ts";
@@ -132,7 +133,7 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
   // The skip must CANCEL the armed hold timer, not just close the veil: move the camera with a real "+" zoom, then prove no phantom lift flies it back (guard-prover round 2: land(0)'s deletion went red here, but an uncancelled holdTimer escaped, because its stray flight targets the destination the camera already holds and only a moved camera can see it).
   await evaluate(`document.getElementById("lf-stage").focus()`);
   await pressKey("+", "Equal", 187);
-  await sleep(1400);
+  await sleep(LANDFALL_HOLD_MS + 900, "window: past the hold, where a phantom lift would fly the camera");
   let zoomed8b = null;
   try {
     zoomed8b = await evaluate(readCam);

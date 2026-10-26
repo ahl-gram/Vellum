@@ -184,7 +184,7 @@ export async function p26TailScrolls(
     `(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`,
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
-  await sleep(120);
+  await sleep(120, "pace: the hover lands before the wheel");
   const afterWheel = await scrollAfter(
     { evaluate, sleep },
     async () => {
@@ -209,7 +209,7 @@ export async function p23CapHolds(
     `(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`,
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });
-  await sleep(120);
+  await sleep(120, "pace: the hover lands before the wheel");
   await wheel(bare.x, bare.y, -240);
   const deep = await settle<{ k: number; w: number; h: number; boxH: number; over: number } | null>(
     `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
@@ -303,7 +303,7 @@ export async function p24NothingToScroll({
   );
   const card = await p24PinKralgov({ send, settle }, at);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
-  await sleep(120);
+  await sleep(120, "pace: the hover lands before the wheel");
   await evaluate(WHEELS.arm);
   await wheel(card.x, card.y, -240);
   const after = (await stable(WHEELED, "P24 the wheel handled", { departed: (d) => d.wheels > 0 })).k;

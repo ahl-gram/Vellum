@@ -27,7 +27,7 @@ async function breathes({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sl
   const settle = makeSettle({ evaluate, sleep });
   const rest = await evaluate(readXform);
   const first = await settle(BREATH, (d) => d.xform !== null && d.xform !== rest, label, DRIFT_TRIES);
-  await sleep(900);
+  await sleep(900, "window: the two samples the drift must move between");
   const second = await evaluate(BREATH);
   return { rest, first, second };
 }
@@ -59,9 +59,9 @@ export async function h15bWheelStops({ evaluate, send, check, sleep }: SuiteCont
     tries: WHEEL_TRIES,
   });
   const still1 = await evaluate(readXform);
-  await sleep(900);
+  await sleep(900, "window: the transform must hold still across it");
   const still2 = await evaluate(readXform);
-  await sleep(900);
+  await sleep(900, "window: the transform must hold still across it");
   const still3 = await evaluate(readXform);
   check(
     "H15b a real wheel stops the drift at once: the zoom lands and the transform holds still through three samples",
@@ -89,7 +89,7 @@ export async function h15dFlightStops({ evaluate, check, sleep, pressKey, clickA
     });
   }
   const flight1 = await evaluate(readXform);
-  await sleep(900);
+  await sleep(900, "window: the transform must hold still across it");
   const flight2 = await evaluate(readXform);
   check(
     "H15d this sub's own station flight stops the drift too: after the flight settles the transform holds still",
@@ -102,9 +102,9 @@ export async function h15dFlightStops({ evaluate, check, sleep, pressKey, clickA
 export async function h16NoDrift({ evaluate, send, check, sleep, settleHome }: HomeKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const settled16 = await settleHome();
-  await sleep(9800);
+  await sleep(IDLE_DELAY_MS + 800, "window: past the idle delay, where a drift would begin");
   const calm1 = await evaluate(readXform);
-  await sleep(900);
+  await sleep(900, "window: the transform must hold still across it");
   const calm2 = await evaluate(readXform);
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(

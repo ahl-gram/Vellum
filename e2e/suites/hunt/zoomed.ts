@@ -83,7 +83,7 @@ export async function hg2Taps(
     `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`,
   );
   await mouseDrag(fr.cx, fr.cy, fr.cx + 150, fr.cy + 95);
-  await sleep(100);
+  await sleep(100, "window: a drag must not solve in it");
   const after = await evaluate<{ solved: boolean; status: string; dots: number }>(
     `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`,
   );

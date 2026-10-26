@@ -68,7 +68,7 @@ async function pressWatching(ctx: SuiteContext, id: "zoom-in" | "zoom-out", labe
   let easing = 0;
   for (let i = 0; i < 30; i++) {
     if (await ctx.evaluate(EASING)) easing++;
-    await ctx.sleep(30);
+    await ctx.sleep(30, "window: reads 30 ms apart across the glide and its ease");
   }
   await lensRest(ctx, "still", label, LENS);
   return easing;

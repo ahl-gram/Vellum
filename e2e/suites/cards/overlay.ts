@@ -293,7 +293,7 @@ export async function p15RealHover({ evaluate, send, check, sleep }: SuiteContex
     `(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');h.scrollIntoView({block:"center"});const r=h.getBoundingClientRect();return{x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`,
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
-  await sleep(40);
+  await sleep(40, "pace: the move away lands before the move onto the town");
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p15c.x, y: p15c.y, buttons: 0 });
   // Poll, never sleep: ringOp is read to 2dp so it tolerates 0.005, and this is the same ring Z8b reads in suite-zoom, where a fixed wait with four times the slack still went red under Issue #381's second lane.
   const readP15 = () =>

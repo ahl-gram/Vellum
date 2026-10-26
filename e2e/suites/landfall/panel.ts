@@ -117,7 +117,7 @@ export async function l3HeadSwallows(
   const headBox = await centerOf("#lf-card-how .lf-card-title");
   const scale3a = await camScale();
   await wheelAt(headBox, 120);
-  await sleep(200);
+  await sleep(200, "window: a wheel over the head must be swallowed in it");
   const after3 = { scale: await camScale(), y: await scrollY() };
   check(
     "L3 (arm 2) wheel over the panel's non-scrolling head is swallowed whole: no page scroll, no zoom step (the round-2 regression scrolled 120px a tick here)",
@@ -212,7 +212,7 @@ async function tapKeeps(k: LandfallKit): Promise<{ kept: boolean; closed: boolea
   const zoom = await evaluate(buttonPoint("#zoom-in"));
   if (!zoom) throw new Error("L28: no #zoom-in to press inside the stage");
   await clickAt(Math.round(zoom.x), Math.round(zoom.y));
-  await sleep(600);
+  await sleep(600, "window: the slip must stay open in it after a press inside the stage");
   const kept = (await evaluate(OPEN("gallery"))).open;
   const bare = await evaluate(BARE);
   if (bare) await clickAt(bare.x, bare.y);
@@ -234,7 +234,7 @@ export async function l28SlipGestures(k: LandfallKit): Promise<void> {
       const head = await centerOf(`#lf-card-${id} .lf-card-title`);
       const [y0, s0] = [await scrollY(), await camScale()];
       await wheelAt(head, 120);
-      await sleep(250);
+      await sleep(250, "window: a wheel over the slip's head must be swallowed in it");
       const [y1, s1] = [await scrollY(), await camScale()];
       const swallowed = !!head && y1 === y0 && s0 !== null && s1 !== null && Math.abs(s1 / s0 - 1) < 0.005;
       const focused = !s.hasScroller && s.focus === "card";

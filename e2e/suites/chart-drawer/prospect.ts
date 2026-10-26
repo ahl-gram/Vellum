@@ -219,7 +219,7 @@ async function cd35NothingLaid(
   const dwell = [];
   for (let i = 0; i < 8; i++) {
     dwell.push(await evaluate(PP));
-    await sleep(50);
+    await sleep(50, "window: a dwell of eight reads in which nothing may be laid");
   }
   const stillFull = dwell[dwell.length - 1]!;
   const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);

@@ -322,7 +322,7 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   const garbage = await evaluate<boolean>(
     `(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`,
   );
-  await sleep(300);
+  await sleep(300, "window: a refused year must not re-engrave in it");
   const refused = await state();
   await evaluate(
     `(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`,

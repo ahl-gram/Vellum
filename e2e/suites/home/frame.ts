@@ -180,7 +180,7 @@ export async function h5aRefused({ evaluate, check, sleep }: SuiteContext, backH
         document.querySelector("#seed-form button").click();
         return { flagged: !i.validity.valid };
       })()`);
-      await sleep(600);
+      await sleep(600, "window: a refused form must not navigate in it");
       const stayed = await evaluate<boolean>(`location.pathname === "/" && !!document.getElementById("seed-form")`);
       refused = { ...refused, stayed };
     } catch {

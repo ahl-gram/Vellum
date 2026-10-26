@@ -287,7 +287,7 @@ export async function es6Link(ctx: SuiteContext): Promise<void> {
   if (slipPress.head.ty !== 0 || slipPress.folio.ty !== 0) faults.push("a press on the Broadside moved a piece");
   const slip = await ctx.evaluate(aimAt(".slip"));
   await ctx.wheel(slip.x, slip.y, 100);
-  await ctx.sleep(300);
+  await ctx.sleep(300, "window: a wheel over the Broadside must move no piece in it");
   const slipWheel = await ctx.evaluate(PIECES_READ);
   if (slipWheel.head.ty !== 0 || slipWheel.folio.ty !== 0) faults.push("a wheel over the Broadside moved a piece");
   const [cx, cy] = await chartCentre(ctx);

@@ -21,7 +21,7 @@ export async function rs29Pace(
     `(()=>{const g=document.querySelector(".rf-instrument .rf-pace");const b=g?[...g.querySelectorAll("button")]:[];const read=()=>({pressed:b.map((x)=>x.getAttribute("aria-pressed")),pace:window.__vellumAgesState().pace});const rest=read();if(b[2])b[2].click();const after=read();return{role:g&&g.getAttribute("role"),label:g&&g.getAttribute("aria-label"),labels:b.map((x)=>x.textContent),shown:!!g&&getComputedStyle(g).display!=="none",rest,after};})()`,
   );
   await clickPlay();
-  await sleep(150);
+  await sleep(150, "pace: the gap between two presses");
   await clickPlay();
   const settle = makeSettle({ evaluate, sleep });
   const rs29hash = (
@@ -57,9 +57,9 @@ export async function rs30Rate(
     "RS30 the sweep left its start",
   );
   await startSweepSamples();
-  await sleep(PACE_LEG_MS);
+  await sleep(PACE_LEG_MS, "window: a leg of the rate sample");
   await evaluate(`document.querySelector('.rf-pace button[data-pace="4"]').click()`);
-  await sleep(PACE_LEG_MS);
+  await sleep(PACE_LEG_MS, "window: a leg of the rate sample");
   const rs30samples = await stopSweepSamples();
   const rs30lbl = await playLabel();
   const rs30range = await evaluate<{ min: number; max: number }>(

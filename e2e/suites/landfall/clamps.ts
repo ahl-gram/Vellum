@@ -85,12 +85,12 @@ export async function l9d2Debt(
       { x: stagePt9.x - 80, y: stagePt9.y, id: 0 },
       { x: stagePt9.x + 80, y: stagePt9.y, id: 1 },
     ]);
-    await sleep(120);
+    await sleep(120, "pace: a step of the pinch");
     await touch("touchMove", [
       { x: stagePt9.x - 40, y: stagePt9.y, id: 0 },
       { x: stagePt9.x + 40, y: stagePt9.y, id: 1 },
     ]);
-    await sleep(120);
+    await sleep(120, "pace: a step of the pinch");
     await touch("touchEnd", []);
     await gestureEnded(lifted, "L9d2 the pinch's fingers lifted");
   }

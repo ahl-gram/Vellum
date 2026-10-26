@@ -62,7 +62,7 @@ export async function l9fPipGestures({
     ]);
     await touch("touchEnd", []);
   }
-  await sleep(300);
+  await sleep(300, "window: a gesture on the pip must not move the camera in it");
   const onPipAfter = await camNow();
   const cardStayed = await evaluate<boolean>(
     `(() => { const c = document.getElementById("lf-card-how"); return c !== null && c.hidden; })()`,

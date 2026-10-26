@@ -197,7 +197,7 @@ export async function cd2bRealPointer(
       });
     }
   }
-  await sleep(900);
+  await sleep(900, "window: a double click must not zoom in it");
   const afterDbl = await evaluate<{ k: number; band: number | null }>(
     `(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`,
   );
