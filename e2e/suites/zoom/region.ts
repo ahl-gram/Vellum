@@ -147,7 +147,7 @@ export async function z18Pan({ evaluate, check, sleep, rgn, goHome, enterAt, wai
   await enterAt(2, 0.5, 0.5);
   const enter18 = await waitRedraft(before18); // window A, band 1, centred 0.5
   await enterAt(2.2, 0.5, 0.5);
-  await sleep(500); // well past the 250ms settle debounce; assert NO new commit
+  await sleep(500, "window: well past the 250 ms settle debounce, no new commit may land in it");
   const same18 = await rgn();
   await enterAt(2, 0.42, 0.42);
   const new18 = await waitRedraft(same18.redrafts);
@@ -174,7 +174,7 @@ export async function z19RapidSettles({ evaluate, check, sleep, rgn, goHome, wai
       `const z=(cu,cv)=>window.__vellumZoomTo({k:2,x:W/2-cu*2*W,y:H/2-cv*2*H});z(0.35,0.35);z(0.5,0.5);z(0.62,0.62);})()`,
   );
   const s19 = await waitRedraft(before19);
-  await sleep(500); // any superseded straggler would land here; assert it did not
+  await sleep(500, "window: a superseded straggler would land in it");
   const after19 = await rgn();
   check(
     "Z19 rapid settles commit only the last (AC2: one redraft despite three framings)",
@@ -190,7 +190,7 @@ export async function z19bSupersession({ evaluate, check, sleep, rgn, goHome, en
   await enterAt(2, 0.5, 0.5);
   await settle(DRAFTING, (d) => d.drafting && d.redrafts === before19b, "Z19b the region job in flight");
   await goHome(); // bumps regionGen mid-flight; the job's commit must be dropped
-  await sleep(1200); // the worker resolved long since; assert the result went nowhere
+  await sleep(1200, "window: the dropped job's result must not land in it");
   const after19b = await rgn();
   const insets19b = await evaluate<number>(`document.querySelectorAll("#map .region-inset").length`);
   check(

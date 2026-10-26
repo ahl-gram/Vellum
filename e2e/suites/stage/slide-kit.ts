@@ -122,7 +122,7 @@ export async function readsFor(ctx: SuiteContext, ms: number): Promise<Pieces[]>
   const end = Date.now() + ms;
   do {
     out.push(await ctx.evaluate(PIECES_READ));
-    await ctx.sleep(100);
+    await ctx.sleep(100, "window: reads 100 ms apart across the span asked for");
   } while (Date.now() < end);
   return out;
 }

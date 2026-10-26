@@ -123,7 +123,7 @@ export async function cd48TouchHandle(kd: DragKit): Promise<void> {
     }
     await touch("touchEnd", []);
   }
-  await sleep(500);
+  await sleep(500, "window: the handle's touch must move no camera and lay no ghost in it");
   const afterHandle = await evaluate<{ cam: Cam; ghost: boolean; drag: boolean; cuttings: number }>(
     `({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`,
   );

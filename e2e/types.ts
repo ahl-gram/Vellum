@@ -12,6 +12,7 @@ type Check = (name: string, ok: unknown, detail?: string) => void;
 export type Point = { x: number; y: number };
 export type TouchPoint = Point & { id?: number };
 export type Clip = { x: number; y: number; width: number; height: number; scale: number };
+export type Pause = `pace: ${string}` | `window: ${string}`;
 
 export type StartOptions = {
   browser: string;
@@ -33,7 +34,7 @@ export type SuiteContext = {
   send: Send;
   check: Check;
   shoot: (file: string, clip?: Clip) => Promise<void>;
-  sleep: (ms: number) => Promise<void>;
+  sleep: (ms: number, why?: Pause) => Promise<void>;
   alive: () => Promise<boolean>;
   waitSettled: (label?: string) => Promise<void>;
   waitReady: () => Promise<boolean>;

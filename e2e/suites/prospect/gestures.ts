@@ -96,7 +96,7 @@ async function pb15Held(k: ProspectKit): Promise<{ under: Press; away: Press; ke
   await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
   const keyed = await held(k, "prospect-dim-keyed", (p) => p.active);
   await pressAt(keyed.x, keyed.y);
-  await sleep(REFUSAL_DWELL_MS);
+  await sleep(REFUSAL_DWELL_MS, "window: the refusal's dwell, before the press is read again");
   const again = await held(k, "prospect-press-again", () => true);
   return { under, away, keyed, again };
 }

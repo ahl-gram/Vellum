@@ -63,7 +63,7 @@ export async function z10bNoDblclickLeak({ evaluate, check, sleep }: SuiteContex
   await evaluate(
     `(()=>{window.__vellumZoomTo({k:1,x:0,y:0});document.getElementById("zoom-in").dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window}));})()`,
   );
-  await sleep(350); // let any leaked d3 dblclick-zoom animation finish
+  await sleep(350, "window: a leaked dblclick zoom would move the camera in it");
   const z10b = await evaluate<Cam>(`window.__vellumZoomState()`);
   check(
     "Z10b a double-click on a zoom button does not leak into d3's dblclick-zoom (no lurch/pan)",

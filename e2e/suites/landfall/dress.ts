@@ -233,7 +233,7 @@ async function heldPip(k: LandfallKit): Promise<{ shift: number; gap: number }> 
   const rest = await evaluate(PIP_AT);
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: rest.x, y: rest.y, button: "left", clickCount: 1 });
   try {
-    await sleep(300);
+    await sleep(300, "pace: the press is held for its duration");
     const held = await evaluate(PIP_AT);
     return { shift: Math.hypot((held.fx - rest.fx) * held.w, (held.fy - rest.fy) * held.h), gap: held.t - rest.t };
   } finally {
@@ -244,7 +244,7 @@ async function heldPip(k: LandfallKit): Promise<{ shift: number; gap: number }> 
       button: "left",
       clickCount: 1,
     });
-    await sleep(300);
+    await sleep(300, "pace: the release lands before the key");
     await shutSlips("L20 the pip's slip set aside");
   }
 }

@@ -86,7 +86,7 @@ export async function sv2bAtRest({ evaluate, check, sleep }: SuiteContext): Prom
   const p0 = await evaluate<string | null>(
     `document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`,
   );
-  await sleep(400);
+  await sleep(400, "window: the overlay must stay at rest in it");
   const sv2b = await evaluate<{ anims: number }>(`(()=>{
       const ov=document.querySelector("#map .voyage-overlay");
       return{anims:ov&&ov.getAnimations?ov.getAnimations({subtree:true}).length:-1};
@@ -142,7 +142,7 @@ export async function sv2dInsideBeat({ evaluate, check, sleep, waitInked, waitBe
       c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
       c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitInked("survey-retick");
-  await sleep(300); // let any superseded arm that was going to fire, fire
+  await sleep(300, "window: a superseded arm must not fire in it");
   const sv2dOn = await evaluate<{
     overlays: number;
     checked: boolean;

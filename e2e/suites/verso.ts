@@ -143,7 +143,7 @@ async function v3RestyleWhileFlipped({ evaluate, check, sleep, armTurnWatch, wai
     `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
   await waitRectoAttr("data-vellum-style", "ink", "verso-restyle");
-  await sleep(80); // __turned is sticky: a (wrong) turn would already have flagged it
+  await sleep(80, "window: a wrong turn would flag __turned in it");
   const v3 = await evaluate<{
     turned: boolean;
     turning: boolean;

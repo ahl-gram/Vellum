@@ -128,7 +128,7 @@ export async function z20gInkBlocks({
       `k:window.__vellumZoomState().k};})()`,
   );
   await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
-  await sleep(600); // past the debounce + any would-be dispatch
+  await sleep(600, "window: past the debounce and any would-be dispatch, no redraft may start in it");
   const vsettle = await rgn();
   await evaluate(
     `(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`,

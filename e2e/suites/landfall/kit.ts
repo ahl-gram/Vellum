@@ -18,7 +18,7 @@ function stageScrolls({ evaluate, sleep, scrollY }: Pick<StageKit, "evaluate" | 
   // 450ms outwaits GESTURE_BREAK_MS (300, src/site/home/valve.ts) so the next wheel opens a FRESH gesture.
   const freshGesture = async () => {
     await scrollToTop();
-    await sleep(450);
+    await sleep(450, "pace: outwait GESTURE_BREAK_MS so the next wheel opens a fresh gesture");
   };
   const readHint = () =>
     evaluate<{ op: string; stood: boolean } | null>(`(() => {
@@ -220,7 +220,7 @@ export function entersKit(k1: GestureKit) {
         const yA = await scrollY();
         const sA = await camScale();
         await wheelAt(cardPt, 120);
-        await sleep(200);
+        await sleep(200, "window: a wheel over the card must be swallowed in it");
         swallowed = { yA, sA, y: await scrollY(), scale: await camScale() };
       }
       await shutSlips(`L4, L8 the ${id} slip set aside`);

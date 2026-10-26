@@ -48,7 +48,7 @@ export async function l9aOneFinger(
     await touch("touchMove", [{ x: stagePt9.x + 60, y: stagePt9.y + 90, id: 0 }]);
     await touch("touchEnd", []);
   }
-  await sleep(300);
+  await sleep(300, "window: one finger must not move the camera in it");
   const oneAfter = await camNow();
   await l9aMouseWitness({ send }, stagePt9);
   const mouseWitness = await camNow();
@@ -123,7 +123,7 @@ async function tapTwice({ touch, sleep }: LandfallKit, p: Point): Promise<void> 
   for (const gap of [60, 0]) {
     await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
     await touch("touchEnd", []);
-    await sleep(gap);
+    await sleep(gap, "pace: the gap between the two taps of a double tap");
   }
 }
 
@@ -146,7 +146,7 @@ export async function l9iTouchOff(k: LandfallKit): Promise<void> {
     (d) => d >= 1,
     "L9i the double tap reaches the stage as a double click",
   );
-  await sleep(PAST_DIVE_MS);
+  await sleep(PAST_DIVE_MS, "window: a double tap must not dive in it");
   const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9i the camera rests");
   check(
     "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a double tap leaves the camera where it was (Issue #778)",

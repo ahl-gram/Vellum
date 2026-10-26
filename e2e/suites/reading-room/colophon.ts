@@ -145,7 +145,7 @@ export async function rr20Superseded({ evaluate, check, sleep }: SuiteContext): 
     }
     await sleep(50);
   }
-  await sleep(2000);
+  await sleep(2000, "window: a superseded draw must not land in it");
   const held = await evaluate<{ seed: number; title: string; hash: string }>(
     `(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`,
   );

@@ -170,9 +170,9 @@ async function z13dFoldAndNoHash(
   // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.
   await evaluate(`document.getElementById("seed").value = "777"`);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
-  await sleep(500);
+  await sleep(500, "window: no hash write may land in it, across the resize");
   await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(500);
+  await sleep(500, "window: no hash write may land in it");
   const z13f = await evaluate<{ seed: string | null; k: string | null }>(
     `(()=>{const p=new URLSearchParams(location.hash.slice(1));document.getElementById("seed").value="42";return{seed:p.get("seed"),k:p.get("k")};})()`,
   );

@@ -1,3 +1,5 @@
+import type { Pause } from "../types.ts";
+
 type BrowserExit = { readonly code: number | null; readonly signal: NodeJS.Signals | null };
 
 type DataSource = { on(event: "data", listener: (chunk: unknown) => void): unknown };
@@ -43,7 +45,7 @@ export const LAUNCH_TUNING: LaunchTuning = {
 
 const OUTPUT_CHARS = 2000;
 
-const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+const sleep: (ms: number, why?: Pause) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms));
 const messageOf = (e: unknown): string => String((e as { message?: string } | null)?.message ?? e);
 
 interface Life {
@@ -155,7 +157,7 @@ async function attemptOnce<T>(
     deps.log(
       `  e2e: browser launch attempt ${attempt}/${tuning.attempts} exposed no devtools target: ${reason}; pid ${child.pid ?? "none"}, ${stopped}; retrying with a fresh profile in ${tuning.retryPauseMs}ms...`,
     );
-    await sleep(tuning.retryPauseMs);
+    await sleep(tuning.retryPauseMs, "pace: the gap between two launch attempts");
     return { failure };
   }
 }

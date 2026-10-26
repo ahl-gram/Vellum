@@ -49,7 +49,7 @@ export async function pr24bInFlight({ evaluate, check, sleep }: SuiteContext): P
     }
     await sleep(50);
   }
-  await sleep(250); // let any (wrongly) surviving stale bind inject before asserting emptiness
+  await sleep(250, "window: a stale bind must not inject in it");
   const btdAtlas = await evaluate<{ figs: number; hasAtlas: boolean }>(
     `(()=>({figs:document.querySelectorAll("#pr-atlas figure").length,hasAtlas:document.body.classList.contains("has-atlas")}))()`,
   );

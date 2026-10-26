@@ -259,7 +259,7 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
     `band=${s4.band} ${JSON.stringify(g4)} (expected dry-in exactly ["Lokai"] at seed 42)`,
   );
   await shoot("explorer-sub9-redraft-inking.png");
-  await sleep(600); // into the village wait: the newly revealed name is mid-dry
+  await sleep(600, "window: the dry-in shot lands with the newly revealed name mid-dry");
   await shoot("explorer-sub9-redraft-dryin.png");
 }
 

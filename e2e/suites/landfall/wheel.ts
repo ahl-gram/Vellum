@@ -43,7 +43,7 @@ export async function l1bCloseClamp(
   }
   await evaluate(`window.__lfWheel = []`);
   await wheelAt(pt, -120);
-  await sleep(150);
+  await sleep(150, "window: a wheel at the clamp must not zoom in it");
   const atMax = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
   check(
     "L1b at the close-in clamp (scale 7) a further wheel-in is released: no zoom step, not defaultPrevented, and the page holds (nothing above to scroll to)",

@@ -55,7 +55,7 @@ export async function rs10Drag(
     s.value=String(Number(s.max)/2+(mid-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     return{before,after:document.querySelector(".rf-play").textContent,year:window.__vellumAgesState().year,mid};
   })()`);
-  await sleep(150);
+  await sleep(150, "window: the sweep must not advance in it");
   const rs10after = await yearNow();
   check(
     "RS10 a manual drag during Play pauses it and the sweep stops advancing",
@@ -77,7 +77,7 @@ export async function rs11Forward(
     const y = await yearNow();
     if (y! < rs11min) rs11min = y!;
     if (y! > rs11max) rs11max = y!;
-    await sleep(70);
+    await sleep(70, "window: reads 70 ms apart across the sweep");
   }
   check(
     "RS11 drag-then-Play runs FORWARD from the dragged year (#220: play from any year)",
@@ -97,10 +97,10 @@ export async function rs12Pause(
   const frozen = await evaluate<{ year: number | null; lbl: string }>(
     `(()=>{document.querySelector(".rf-play").click();return{year:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent};})()`,
   );
-  await sleep(260);
+  await sleep(260, "window: a paused sweep must not advance in it");
   const stillFrozen = await yearNow();
   await clickPlay();
-  await sleep(120);
+  await sleep(120, "window: the resumed sweep's first steps, which must not fall below the frozen year");
   const resumedEarly = await yearNow();
   const resumed = (
     await settle(

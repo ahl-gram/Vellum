@@ -77,7 +77,7 @@ async function t2NewWorldSettles({ evaluate, check, sleep, waitSettled, armTurnW
   await armTurnWatch();
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitSettled("seed-settle-no-turn");
-  await sleep(120); // a (wrong) turn would have set .turning by now
+  await sleep(120, "window: a wrong turn would set .turning in it");
   const g2 = await evaluate<{ turned: boolean; seed: string | null; svgCount: number }>(
     `(()=>{const svg=document.querySelector("#map svg");return{turned:window.__turned,seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length};})()`,
   );
@@ -110,7 +110,7 @@ export async function t3InterruptTurn({
     `(()=>{const s=document.getElementById("style");s.value="topographic";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
   await waitTurned("style->topo-after-interrupt");
-  await sleep(250); // settle-window: a leaked turn/anim would surface here
+  await sleep(250, "window: a leaked turn would surface in it");
   const g3 = await evaluate<{ style: string | null; svgCount: number; back: number; turning: boolean; anims: number }>(
     `(()=>{const svg=document.querySelector("#map svg");const inner=document.getElementById("sheet-inner");const anims=inner&&inner.getAnimations?inner.getAnimations().length:-1;return{style:svg?svg.getAttribute("data-vellum-style"):null,svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length,turning:!!document.querySelector(".sheet.turning"),anims};})()`,
   );
@@ -144,7 +144,7 @@ export async function t5SettleSupersedes({
   await settle(TURNING, (d) => d.turning, "T5 the nautical turn under way");
   await evaluate(`(()=>{document.getElementById("seed").value="7";document.getElementById("draw").click();})()`);
   await waitTurned("settle-supersedes-turn");
-  await sleep(200);
+  await sleep(200, "window: a leaked turn would surface in it");
   const g5 = await evaluate<{ seed: string | null; svgCount: number; back: number; turning: boolean }>(
     `(()=>{const svg=document.querySelector("#map svg");return{seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length,turning:!!document.querySelector(".sheet.turning")};})()`,
   );

@@ -32,7 +32,7 @@ async function tapAt(k: GesturesKit, p: Point): Promise<void> {
 
 async function doubleTap(k: GesturesKit, p: Point): Promise<void> {
   await tapAt(k, p);
-  await k.sleep(60);
+  await k.sleep(60, "pace: the gap between the two taps of a double tap");
   await tapAt(k, p);
 }
 

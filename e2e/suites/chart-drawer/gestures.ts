@@ -194,7 +194,7 @@ async function midTurn(
   const after: Turn[] = [];
   for (let i = 0; i < 6; i++) {
     after.push(await evaluate(TURN));
-    await sleep(50);
+    await sleep(50, "window: six reads 50 ms apart across the turn");
   }
   return { at, face, focused, after };
 }
