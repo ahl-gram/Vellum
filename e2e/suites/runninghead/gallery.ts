@@ -1,8 +1,10 @@
 import { GALLERY_COUNT, GALLERY_SEED } from "../../../src/cli/gallery.ts";
 import { GRADIENT_STOPS, luminance, nearRgba, PAGE_RGBA, SHADE, sampleRow, tokenRgba } from "../../support/pixel.ts";
-import { makeSettle } from "../../support/settle.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
+
+export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
 
 export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit }: RunningHeadKit): Promise<void> {
   // The harness window is tall, so this check pins its own viewport; the Gallery is the one chart room that scrolls.
@@ -20,7 +22,10 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
     if (scrolled.plate && scrolled.loaded) break;
     await sleep(100);
   }
-  await sleep(300);
+  if (scrolled)
+    await makeStable(makeSettle({ evaluate, sleep }))(SCROLLED, "RH10 the Gallery's plates landed", {
+      animated: ".grid",
+    });
   const plateRow = scrolled && scrolled.plate ? await sampleRow(send, scrolled.plate.x, scrolled.plate.y, 8) : [];
   const cornerRow = scrolled ? await sampleRow(send, 8, 8, 8) : [];
   const plateLum = plateRow.length ? Math.round(Math.max(...plateRow.map(luminance))) : -1;

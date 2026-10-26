@@ -5,6 +5,9 @@ import type { LandfallKit } from "./kit.ts";
 
 type How = Awaited<ReturnType<typeof l5HowOpens>>;
 
+const PROSE: Payload<{ ends: number; top: number; max: number; y: number } | null> =
+  `(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; if (window.__lfProseEnds === undefined) { window.__lfProseEnds = 0; s.addEventListener("scrollend", () => { window.__lfProseEnds++; }); } return { ends: window.__lfProseEnds, top: s.scrollTop, max: s.scrollHeight - s.clientHeight, y: window.scrollY }; })()`;
+
 export async function l5HowOpens({ evaluate, check, sleep, clickAt }: LandfallKit, settled2: Cam | null) {
   const howPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
   if (howPt !== null) await clickAt(Math.round(howPt.x), Math.round(howPt.y));
@@ -39,12 +42,13 @@ export async function l5HowOpens({ evaluate, check, sleep, clickAt }: LandfallKi
 }
 
 export async function l5bArrowScrolls(
-  { evaluate, check, sleep, pressKey, scrollY }: LandfallKit,
+  { evaluate, check, stable, pressKey, scrollY }: LandfallKit,
   how: How,
   y5: number,
 ): Promise<void> {
+  const before = await evaluate(PROSE);
   await pressKey("ArrowDown", "ArrowDown", 40);
-  await sleep(200);
+  if (before !== null) await stable(PROSE, "L5b the prose's scroll ended", { departed: (d) => d.ends > before.ends });
   const arrowed = await evaluate<number | null>(
     `document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`,
   );
@@ -56,7 +60,7 @@ export async function l5bArrowScrolls(
 }
 
 export async function l2ProseScrolls(
-  { evaluate, check, sleep, scrollY, centerOf, camScale, wheelAt }: LandfallKit,
+  { evaluate, check, stable, scrollY, centerOf, camScale, wheelAt }: LandfallKit,
   y5: number,
 ) {
   const proseBox = await centerOf("#lf-card-how .lf-card-scroll");
@@ -66,8 +70,9 @@ export async function l2ProseScrolls(
   const scale2a = await camScale();
   let prose = null;
   for (let i = 0; i < 30 && proseBox !== null; i++) {
+    const before = await evaluate(PROSE);
     await wheelAt(proseBox, 240);
-    await sleep(90);
+    if (before !== null) await stable(PROSE, "L2 the prose's scroll ended", { departed: (d) => d.ends > before.ends });
     prose = await evaluate<{ top: number; max: number } | null>(
       `(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`,
     );
@@ -220,7 +225,7 @@ async function tapKeeps(k: LandfallKit): Promise<{ kept: boolean; closed: boolea
 }
 
 export async function l28SlipGestures(k: LandfallKit): Promise<void> {
-  const { check, sleep, pressKey, scrollY, centerOf, camScale, wheelAt } = k;
+  const { check, sleep, shutSlips, scrollY, centerOf, camScale, wheelAt } = k;
   const rows: string[] = [];
   let ok = true;
   try {
@@ -235,15 +240,13 @@ export async function l28SlipGestures(k: LandfallKit): Promise<void> {
       const focused = !s.hasScroller && s.focus === "card";
       ok &&= s.open && swallowed && focused;
       rows.push(`${id}: open ${s.open}, focus ${s.focus}, page ${y0} to ${y1}, scale ${s0} to ${s1}`);
-      await pressKey("Escape", "Escape", 27);
-      await sleep(500);
+      await shutSlips(`L28 the ${id} slip set aside`);
     }
     const tap = await tapKeeps(k);
     ok &&= tap.kept && tap.closed;
     rows.push(`a press inside the stage kept the slip ${tap.kept}, a tap on bare chart closed it ${tap.closed}`);
   } finally {
-    await pressKey("Escape", "Escape", 27);
-    await sleep(400);
+    await shutSlips("L28 the last slip set aside");
   }
   check(
     "L28 every station slip swallows a wheel over its head, the page and the chart both unmoved, and takes focus on itself, having no scroller; a press on a control inside the stage leaves an open slip open, while a tap on bare chart sets it aside, the same run's control (#459)",

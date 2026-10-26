@@ -20,7 +20,7 @@ import { sv9NoSeams, sv10TurnKeepsTrack, sv2nReducedSwap } from "./survey/turn.t
 import { sv8NoYear, sv11Clean } from "./survey/closing.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, sleep, consoleErrors, http4xx } = ctx;
+  const { evaluate, consoleErrors, http4xx } = ctx;
   const k = surveyKit(ctx);
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
@@ -54,7 +54,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("SV5d", () => sv5dBothKeys(k));
   await step("SV6", () => sv6VersoMirrors(k));
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1500);
   await sv7Journal(ctx, room);
   await step("SV9", () => sv9NoSeams(k));
   await step("SV10", () => sv10TurnKeepsTrack(k));

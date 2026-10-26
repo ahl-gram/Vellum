@@ -1,6 +1,12 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 
 export type SurveyKit = ReturnType<typeof surveyKit>;
+
+const LEAF: Payload<{ t: string; m11: number }> =
+  `(() => { const i = document.querySelector("#sheet .sheet-inner"); if (!i) return null; const t = getComputedStyle(i).transform; return { t, m11: t === "none" ? 1 : new DOMMatrixReadOnly(t).m11 }; })()`;
+export const restOnVerso = (k: Pick<SuiteContext, "evaluate" | "sleep">, label: string) =>
+  makeStable(makeSettle(k))(LEAF, label, { departed: (d) => d.m11 < -0.999 });
 
 export function surveyKit(ctx: SuiteContext) {
   const { evaluate, send, sleep, waitSettled, waitReady, PORT } = ctx;

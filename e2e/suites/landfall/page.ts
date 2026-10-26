@@ -1,3 +1,6 @@
+import { DRIFT_SCALE, DRIFT_SECONDS } from "../../../src/site/home/drift.ts";
+import { STATION_SCALE_FACTOR } from "../../../src/site/home/station-flight.ts";
+import { readCam } from "../../support/home.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
@@ -42,18 +45,9 @@ export async function l1jHint({ evaluate, check, sleep, wheelAt, freshGesture, r
   );
 }
 
-export async function l1kSurfaces({
-  evaluate,
-  check,
-  sleep,
-  pressKey,
-  clickAt,
-  camNow,
-  scrollY,
-  centerOf,
-  scrollToTop,
-  scrollToFloor,
-}: LandfallKit): Promise<void> {
+export async function l1kSurfaces(k: LandfallKit): Promise<void> {
+  const { evaluate, check, sleep, shutSlips, clickAt, camNow, scrollY, centerOf, scrollToTop, scrollToFloor, stable } =
+    k;
   await scrollToFloor();
   const surfCamBefore = await camNow();
   // centerOf, never buttonPoint: buttonPoint scrollIntoViews the stage first, which un-scrolls the page and dissolves the very trap this arm exists to pin (the instruments' remnant is reachable down there).
@@ -84,15 +78,25 @@ export async function l1kSurfaces({
       break;
     }
   }
-  await pressKey("Escape", "Escape", 27);
-  await sleep(300);
+  await shutSlips("L1k the gallery slip set aside");
   check(
     "L1k a map action taken from down the page glides the reader back up to watch it (#472, 2026-08-28 ruling): the zoom control surfaces and zooms, the legend button surfaces and opens its card",
     zoomInPt !== null && legendPt !== null && surfaced !== null && surfacedCard !== null,
     JSON.stringify({ zoomInPt, legendPt, surfCamBefore, surfaced, surfacedCard }),
   );
+  await galleryAtRest(stable);
   await scrollToTop();
 }
+
+// The idle drift's fastest scale step in one 50ms poll (sine.inOut over DRIFT_SECONDS), which clause 13 of the settle doctrine sizes a stillness tolerance from; the flight's tail steps by more than twice that until its last few percent.
+const DRIFT_STEP = (((DRIFT_SCALE - 1) * Math.PI) / 2 / DRIFT_SECONDS) * 0.05;
+
+// The legend press flies the camera to STATION_SCALE_FACTOR of the fit with a slow tail the next check would otherwise open on; its departure is the last 3% of the way, which the camera is nowhere near before the press.
+const galleryAtRest = (stable: LandfallKit["stable"]) =>
+  stable(readCam, "L1k the gallery flight at rest", {
+    departed: (d) => d.scale > d.fit * STATION_SCALE_FACTOR * 0.97,
+    same: (d, last) => Math.abs(d.scale / last.scale - 1) < 2 * DRIFT_STEP,
+  });
 
 export async function l1fScrolledPage({
   evaluate,
@@ -104,10 +108,11 @@ export async function l1fScrolledPage({
   wheelAt,
   scrollToTop,
   freshGesture,
+  wheelsNow,
+  wheelLanded,
 }: LandfallKit): Promise<void> {
   await scrollToTop();
   await evaluate(`window.scrollTo(0, 240)`);
-  await sleep(200);
   const yMid = await scrollY();
   await evaluate(`window.__lfWheel = []`);
   const midCamBefore = await camNow();
@@ -124,8 +129,10 @@ export async function l1fScrolledPage({
   }
   await freshGesture();
   const topCamBefore = await camNow();
-  await wheelAt(await evaluate(stagePoint), -120);
-  await sleep(200);
+  const atTop = await wheelsNow();
+  const ptTop = await evaluate(stagePoint);
+  await wheelAt(ptTop, -120);
+  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
   const topZoom = await camNow();
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
@@ -139,7 +146,7 @@ export async function l1fScrolledPage({
       topCamBefore !== null &&
       topZoom !== null &&
       topZoom.scale > topCamBefore.scale * 1.05,
-    JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
+    JSON.stringify({ yMid, midCamBefore, backUp, topCamBefore, topZoom }),
   );
 }
 
@@ -219,14 +226,15 @@ export async function l1gKeys({
 }
 
 export async function l1hDrift(
-  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop }: LandfallKit,
+  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop, wheelsNow, wheelLanded }: LandfallKit,
   pt: Point | null,
 ): Promise<void> {
   // L1h's fixture PROVES the drift wandered before flicking, or it certifies nothing (a reduced-motion lane never drifts).
   let floor2 = await camNow();
   for (let i = 0; i < 24 && pt !== null; i++) {
+    const before = await wheelsNow();
     await wheelAt(pt, 480);
-    await sleep(90);
+    await wheelLanded(before, "L1h the wheel toward the stand-off clamp landed");
     const next = await camNow();
     if (next !== null && floor2 !== null && Math.abs(next.scale - floor2.scale) < 1e-9) {
       floor2 = next;
@@ -263,9 +271,8 @@ export async function l1hDrift(
   );
 }
 
-export async function l1iCluster({ evaluate, check, sleep, scrollToTop }: LandfallKit): Promise<void> {
+export async function l1iCluster({ evaluate, check, scrollToTop }: LandfallKit): Promise<void> {
   await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
-  await sleep(300);
   const cluster = await evaluate<{ pos: string; washPos: string; bottom: number } | null>(`(() => {
     const h = document.querySelector("header.chrome");
     if (!h) return null;

@@ -1,14 +1,19 @@
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { GOVERNING_BUDGET, stripRead, WIDE_WORST } from "./reads.ts";
-import type { Room, Strip } from "./reads.ts";
+import { atDesk, DESK, GOVERNING_BUDGET, sameSheet, stripRead, WIDE_WORST } from "./reads.ts";
+import type { Desk, Room, Strip } from "./reads.ts";
+
+type Wide = Desk & { strip: Strip | null };
+export const WIDE: Payload<Wide> = `(() => ({ ...(${DESK}), strip: (${stripRead}) }))()`;
+const ENVELOPE_WIDTHS = [1024, 900, 768] as const;
+const AT_DESK = { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false } as const;
 
 export async function rr31StripStands(
-  { evaluate, check, sleep }: SuiteContext,
+  { evaluate, check }: SuiteContext,
   deskRest: Strip | null,
   room: Room,
 ): Promise<void> {
   await evaluate(`(()=>{window.scrollTo(0,document.documentElement.scrollHeight);return null;})()`);
-  await sleep(200);
   const afterScroll = await evaluate(stripRead);
   check(
     "RR31 at 1440x900 the strip stands on the viewport's bottom edge and a chart room has no page scroll to leave it by (#463, ruling 6)",
@@ -17,17 +22,15 @@ export async function rr31StripStands(
   );
 }
 
-export async function rr35GoverningBudget({ evaluate, check, sleep }: SuiteContext, deskRest: Strip | null) {
+export async function rr35GoverningBudget({ evaluate, check }: SuiteContext, deskRest: Strip | null) {
   // BOTH halves at the governing width: deskRest alone is the chronicle half's short last annal, which reads 100 at every width and cannot exceed the budget; the survey half carries the long prose and can.
   await evaluate(
     `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
   );
-  await sleep(150);
   const deskSurvey = await evaluate(stripRead);
   await evaluate(
     `(()=>{const r=document.querySelector(".rf-range");r.value=r.max;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
   );
-  await sleep(150);
   const deskChron = await evaluate(stripRead);
   check(
     `RR35 at the governing 1440x900 the strip costs no more than ${GOVERNING_BUDGET}px, in EITHER half (#442, re-pinned for the bottom strip at #463)`,
@@ -52,16 +55,26 @@ export async function rr37Envelope(
   await evaluate(
     `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
   );
-  await sleep(120);
-  const byWidth: { w: number; h: number | null; told: string | null; gutter: string | undefined | null }[] = [];
-  for (const w of [1024, 900, 768]) {
-    await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
-    await sleep(250);
-    const s = await evaluate(stripRead);
-    byWidth.push({ w, h: s && s.h, told: s && s.toldDisplay, gutter: s && s.gutter });
-  }
-  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await sleep(200);
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  const across = async (): Promise<Wide[]> => {
+    const reads: Wide[] = [];
+    for (const w of ENVELOPE_WIDTHS) {
+      await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
+      reads.push(await stable(WIDE, `RR37 the strip at ${w}`, { departed: (d) => d.iw === w }));
+    }
+    return reads;
+  };
+  const reads = await across().finally(() => send("Emulation.setDeviceMetricsOverride", AT_DESK));
+  const narrowest = reads[reads.length - 1]!;
+  await stable(DESK, "RR37 the room laid out again at 1440x900", {
+    departed: (d) => atDesk(d) && !sameSheet(d, narrowest),
+  });
+  const byWidth = reads.map(({ iw, strip: s }) => ({
+    w: iw,
+    h: s && s.h,
+    told: s && s.toldDisplay,
+    gutter: s && s.gutter,
+  }));
   check(
     `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024, and at 900 and 768 the strip is the 1024 page's, the told row standing and the height the same (#462 ruling 6; the 1024 floor, Alex, 2026-10-06, Issue #762)`,
     byWidth.length === 3 &&

@@ -228,7 +228,7 @@ const slides = ([props, durations]: [string, string]) => {
 
 // The press is released where it was made, so it is a tap: the slip it opens is set aside again before the next read.
 async function heldPip(k: LandfallKit): Promise<{ shift: number; gap: number }> {
-  const { evaluate, send, sleep, pressKey } = k;
+  const { evaluate, send, sleep, shutSlips } = k;
   await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
   const rest = await evaluate(PIP_AT);
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: rest.x, y: rest.y, button: "left", clickCount: 1 });
@@ -245,8 +245,7 @@ async function heldPip(k: LandfallKit): Promise<{ shift: number; gap: number }> 
       clickCount: 1,
     });
     await sleep(300);
-    await pressKey("Escape", "Escape", 27);
-    await sleep(500);
+    await shutSlips("L20 the pip's slip set aside");
   }
 }
 
@@ -310,7 +309,7 @@ const SIBLINGS = [
 ];
 
 export async function l29SlipBox(k: LandfallKit): Promise<void> {
-  const { evaluate, check, clickAt, pressKey, sleep } = k;
+  const { evaluate, check, clickAt, shutSlips, sleep } = k;
   const at = await evaluate(buttonPoint('.lf-legend-btn[data-station="gallery"]'));
   if (!at) throw new Error("L29: no Gallery press on the legend");
   await clickAt(Math.round(at.x), Math.round(at.y));
@@ -330,8 +329,7 @@ export async function l29SlipBox(k: LandfallKit): Promise<void> {
       JSON.stringify(b),
     );
   } finally {
-    await pressKey("Escape", "Escape", 27);
-    await sleep(500);
+    await shutSlips("L29 the gallery slip set aside");
   }
 }
 

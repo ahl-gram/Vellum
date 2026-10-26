@@ -10,8 +10,8 @@ async function l9gPipTap({
   check,
   sleep,
   touch,
-  pressKey,
-}: Pick<LandfallKit, "evaluate" | "check" | "sleep" | "touch" | "pressKey">): Promise<void> {
+  shutSlips,
+}: Pick<LandfallKit, "evaluate" | "check" | "sleep" | "touch" | "shutSlips">): Promise<void> {
   const tapPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
   if (tapPt !== null) {
     await touch("touchStart", [{ x: Math.round(tapPt.x), y: Math.round(tapPt.y), id: 0 }]);
@@ -32,8 +32,7 @@ async function l9gPipTap({
     tapPt !== null && tapped === true,
     JSON.stringify({ tapPt, tapped }),
   );
-  await pressKey("Escape", "Escape", 27);
-  await sleep(400);
+  await shutSlips("L9g the how slip set aside");
 }
 
 export async function l9fPipGestures({
@@ -41,7 +40,7 @@ export async function l9fPipGestures({
   check,
   sleep,
   touch,
-  pressKey,
+  shutSlips,
   camNow,
   headroom,
   recenter,
@@ -79,7 +78,7 @@ export async function l9fPipGestures({
       cardStayed === true,
     JSON.stringify({ pipPt9, room9f, onPipBefore, onPipAfter, cardStayed }),
   );
-  await l9gPipTap({ evaluate, check, sleep, touch, pressKey });
+  await l9gPipTap({ evaluate, check, sleep, touch, shutSlips });
 }
 
 export async function l9hControlTap({ evaluate, check, sleep, touch, camNow, recenter }: LandfallKit): Promise<void> {

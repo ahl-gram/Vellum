@@ -51,7 +51,6 @@ export async function l9aOneFinger(
   await sleep(300);
   const oneAfter = await camNow();
   await l9aMouseWitness({ send }, stagePt9);
-  await sleep(300);
   const mouseWitness = await camNow();
   check(
     "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the body is unlocked with the shelf below the fold to scroll to (#472 retired the #461 lock; that the one-finger swipe then MOVES the page is CDP-blind, phone-owed like the pan-y line itself)",
@@ -67,10 +66,16 @@ export async function l9aOneFinger(
   );
 }
 
-export async function l9bPinch({ check, sleep, pinch, camNow }: LandfallKit, stagePt9: Point | null): Promise<void> {
+export async function l9bPinch(
+  { check, pinch, camNow, gestureMark, gestureEnded }: LandfallKit,
+  stagePt9: Point | null,
+): Promise<void> {
   const twoBefore = await camNow();
-  if (stagePt9 !== null) await pinch(stagePt9.x, stagePt9.y, 60, 180);
-  await sleep(300);
+  if (stagePt9 !== null) {
+    const lifted = await gestureMark();
+    await pinch(stagePt9.x, stagePt9.y, 60, 180);
+    await gestureEnded(lifted, "L9b the pinch's fingers lifted");
+  }
   const twoAfter = await camNow();
   check(
     "L9b two fingers drive the map: a real pinch-out zooms the sheet in",
