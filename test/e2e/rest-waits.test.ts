@@ -7,31 +7,7 @@ import { offMainThread, z20cThrottle } from "../../e2e/suites/zoom/region.ts";
 import { z13dRefitHolds } from "../../e2e/suites/zoom/resets.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
-
-type Said = { kind: "send" | "evaluate"; what: string };
-type Checked = { code: string | undefined; ok: boolean };
-
-const recording = (answer: (expression: string, said: readonly Said[]) => unknown) => {
-  const said: Said[] = [];
-  const checked: Checked[] = [];
-  const ctx = {
-    evaluate: (expression: string): Promise<unknown> => {
-      said.push({ kind: "evaluate", what: expression });
-      return Promise.resolve(answer(expression, said));
-    },
-    send: (method: string, params?: { rate?: number }): Promise<unknown> => {
-      said.push({ kind: "send", what: params?.rate === undefined ? method : `${method} ${params.rate}` });
-      return Promise.resolve({});
-    },
-    sleep: (): Promise<void> => Promise.resolve(),
-    check: (name: string, ok: unknown): void => void checked.push({ code: name.split(" ")[0], ok: !!ok }),
-    shoot: (): Promise<void> => Promise.resolve(),
-    PORT: 8765,
-  } as unknown as SuiteContext;
-  return { ctx, said, checked };
-};
-const count = (said: readonly Said[], part: string) => said.filter((s) => s.what.includes(part)).length;
-const lastOf = (said: readonly Said[], kind: Said["kind"]) => said.filter((s) => s.kind === kind).at(-1)?.what ?? "";
+import { count, lastOf, recording, type Said } from "../../test-support/recording-ctx.ts";
 
 const AT_REST = { sheet: 792.6, fx: 0.5, fy: 0.5, sk: 4, cx: "0.5000", cy: "0.5000", k: "4.0000", folded: false };
 const overridden = (said: readonly Said[]) =>
@@ -149,15 +125,20 @@ for (const { stuck, label, answer } of REFITS) {
   });
 }
 
-const refitFlow = (walksAt: "resize" | "fold" | null, moved: { fx: number } | { fy: number } = { fx: 0.5005 }) =>
+const refitFlow = (
+  walksAt: "resize" | "back" | "fold" | "unfold" | null,
+  moved: { fx: number } | { fy: number } | { sk: number } = { fx: 0.5005 },
+) =>
   recording((expression, so) => {
     if (!expression.includes("--reserve-right")) return {};
-    const walk = (at: "resize" | "fold") => (walksAt === at ? moved : {});
-    if (count(so, '.slip-tab").click()') > 0) return { ...AT_REST, reserve: "487.4px", resizes: 2, ih: 2263 };
+    const walk = (at: "resize" | "back" | "fold" | "unfold") => (walksAt === at ? moved : {});
+    if (count(so, '.slip-tab").click()') > 0)
+      return { ...AT_REST, reserve: "487.4px", resizes: 2, ih: 2263, ...walk("unfold") };
     if (count(so, ".slip-fold") > 0)
       return { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, sheet: 1280, folded: true, ...walk("fold") };
     if (overridden(so)) return { ...AT_REST, reserve: "487.4px", resizes: 1, ih: 600, sheet: 443.9, ...walk("resize") };
-    return { ...AT_REST, reserve: "487.4px", resizes: count(so, "clearDeviceMetricsOverride") > 0 ? 2 : 0, ih: 2263 };
+    const cleared = count(so, "clearDeviceMetricsOverride") > 0;
+    return { ...AT_REST, reserve: "487.4px", resizes: cleared ? 2 : 0, ih: 2263, ...(cleared ? walk("back") : {}) };
   });
 for (const [walksAt, z13b, z13c] of [
   [null, true, true],
@@ -188,6 +169,25 @@ test("Z13b reads false and Z13c true when the camera's framing walks down at the
     ],
   );
 });
+
+for (const [walksAt, z13b, z13c] of [
+  ["resize", false, true],
+  ["back", false, true],
+  ["fold", true, false],
+  ["unfold", true, false],
+] as const) {
+  test(`Z13b reads ${z13b} and Z13c ${z13c} when the camera's depth walks at the ${walksAt} while the hash still reads 4.0000`, async () => {
+    const { ctx, checked } = refitFlow(walksAt, { sk: 3 });
+    await z13dRefitHolds(ctx);
+    assert.deepEqual(
+      checked.filter((c) => c.code === "Z13b" || c.code === "Z13c"),
+      [
+        { code: "Z13c", ok: z13c },
+        { code: "Z13b", ok: z13b },
+      ],
+    );
+  });
+}
 
 test("Z13b and Z13c take the sheet before the resize at rest, not while the page still lays out after the shot before it", async () => {
   const { ctx, checked } = refitFlow(null);

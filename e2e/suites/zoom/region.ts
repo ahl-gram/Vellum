@@ -1,6 +1,13 @@
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import type { Cam } from "./reads.ts";
+
+export const INSET_OPAQUE: Payload<{ insets: number; opacity: number }> =
+  `(()=>{const all=document.querySelectorAll("#map .region-inset");const last=all[all.length-1];return{insets:all.length,opacity:last?+getComputedStyle(last).opacity:-1};})()`;
+export const SETTLED_AT: Payload<{ k: string | null; drafting: boolean; insets: number; opacity: number }> =
+  `(()=>{const p=new URLSearchParams(location.hash.slice(1));const all=document.querySelectorAll("#map .region-inset");const last=all[all.length-1];return{k:p.get("k"),drafting:/^Drafting/.test(document.getElementById("caption").textContent||""),insets:all.length,opacity:last?+getComputedStyle(last).opacity:-1};})()`;
+export const DRAFTING: Payload<{ drafting: boolean; redrafts: number }> =
+  `(()=>({drafting:/^Drafting the finer survey/.test(document.getElementById("caption").textContent||""),redrafts:window.__vellumRegion().redrafts}))()`;
 
 export async function z15RegionCrop({ evaluate, check }: SuiteContext): Promise<void> {
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.

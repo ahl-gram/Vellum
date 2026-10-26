@@ -1,9 +1,12 @@
 // Glass ceremony e2e (G, Issue #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
 import { makeStep } from "../support/step.ts";
-import type { SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 import { g9PressFace } from "./glass-ceremony/dress.ts";
 import { g10PressDark } from "./glass-ceremony/gestures.ts";
 import { REDRAFT_TRIES } from "./zoom/kit.ts";
+
+export const HASH: Payload<{ cx: string | null; cy: string | null; k: string | null }> =
+  `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`;
 
 type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
 export type GlassKit = ReturnType<typeof glassKit>;
@@ -148,7 +151,7 @@ async function g2bCompounds({ evaluate, check, settleK }: GlassKit): Promise<voi
   );
 }
 
-async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
+export async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(
     `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,

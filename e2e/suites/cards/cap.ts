@@ -1,9 +1,26 @@
-import type { Point, SuiteContext } from "../../types.ts";
+import { countEvents } from "../../support/witness.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
 
 type Pinned = Awaited<ReturnType<typeof p20PinnedTakesPointer>>;
+
+export type Scrolled = { scrollTop: number; k: number; frame: number };
+export const COUNT_FRAMES: Payload<boolean> = `(()=>{const g=(window.__capGen=(window.__capGen||0)+1);window.__capFrame=0;const tick=()=>{if(window.__capGen!==g)return;window.__capFrame++;requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
+export const STOP_FRAMES = `window.__capGen = (window.__capGen || 0) + 1`;
+export const SCROLLED: Payload<Scrolled> = `(() => ({ scrollTop: +document.querySelector("#place-card .pc-inner").scrollTop.toFixed(2), k: window.__vellumZoomState().k, frame: window.__capFrame }))()`;
+// 2026-10-26, unmeasured at planning: a smooth scroll moves on the first frame it paints, so ten painted frames with nothing moved is an input that scrolled nothing, five times the two a started scroll needs to show.
+export const QUIET_FRAMES = 10;
+export const scrollRested = (d: Scrolled, last: Scrolled): boolean =>
+  d.scrollTop === last.scrollTop && d.k === last.k && d.frame > last.frame;
+export const scrollOutcome =
+  (from: Scrolled) =>
+  (d: Scrolled): boolean =>
+    d.scrollTop !== from.scrollTop || d.k !== from.k || d.frame >= QUIET_FRAMES;
+const WHEELS = countEvents(["wheel"]);
+export const WHEELED: Payload<{ wheels: number; k: number }> =
+  `(() => ({ wheels: ${WHEELS.seen}, k: window.__vellumZoomState().k }))()`;
 
 export async function p19CardsFit({ check, sweepAt }: CardsKit, narrowCount: number): Promise<void> {
   const verdict = (d: Swept, width: number) => {

@@ -1,5 +1,12 @@
-import type { SuiteContext } from "../../types.ts";
+import { countEvents } from "../../support/witness.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { HuntKit, Quarry, Zoom } from "../hunt.ts";
+
+const CLICKS = countEvents(["click"]);
+export const HG2_READ: Payload<{ clicks: number; dots: number; inSvg: boolean; solved: boolean; status: string }> =
+  `(()=>({clicks:${CLICKS.seen},dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent}))()`;
+export const HG4_READ: Payload<{ clicks: number; solved: boolean; status: string; star: boolean }> =
+  `(()=>({clicks:${CLICKS.seen},solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`;
 
 export async function hg0Boots({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
   // HG uses REAL CDP mouse input so d3-zoom's own click-distance handling runs: a clean tap (no move) fires the guess click, a moved drag suppresses the trailing click.

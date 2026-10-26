@@ -9,6 +9,9 @@ const TAPLOG: Payload<boolean> = `(() => { window.__p30 = []; const name = (t) =
   for (const type of ["touchstart", "pointerdown", "mousedown", "click"]) document.addEventListener(type, (e) => { const p = e.touches && e.touches[0] ? e.touches[0] : e; window.__p30.push(type + "@" + Math.round(p.clientX) + "," + Math.round(p.clientY) + ">" + name(e.target) + (type === "click" ? " d" + e.detail : "")); }, { capture: true, once: true });
   return true; })()`;
 
+export const TAPPED: Payload<{ clicked: boolean; shown: boolean; rest: boolean }> =
+  `(() => { const c = document.getElementById("place-card"); const a = c && !c.hidden ? c.querySelector(".pc-inner").getAnimations() : []; return { clicked: (window.__p30 || []).some((e) => e.startsWith("click@")), shown: !!c && !c.hidden, rest: a.length > 0 && a.every((x) => x.playState === "finished") }; })()`;
+
 export async function p30Tablet(k: Kit): Promise<void> {
   const marks = (await k.boot(true)).filter((m) => TABLET.includes(m.idx));
   const rows: string[] = [];

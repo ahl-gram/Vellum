@@ -1,6 +1,10 @@
 // Motion e2e (D the Issue #127 arrival ceremony, F the Issue #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
 import { makeStep } from "../support/step.ts";
-import type { SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../types.ts";
+
+export const MARK_SHEET: Payload<boolean> = `(()=>{document.querySelector("#map svg").__d3Old=true;return true;})()`;
+export const NEW_SHEET: Payload<{ fresh: boolean }> =
+  `(()=>{const s=document.querySelector("#map svg");return{fresh:!!s&&!s.__d3Old};})()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
@@ -61,7 +65,7 @@ async function d1ArrivalCeremony({ evaluate, check, waitSettled }: SuiteContext)
   );
 }
 
-async function d3DragQuiet({ evaluate, check, sleep, waitSettled }: SuiteContext): Promise<void> {
+export async function d3DragQuiet({ evaluate, check, sleep, waitSettled }: SuiteContext): Promise<void> {
   await evaluate(
     `(()=>{const l=document.getElementById("land");l.value="300";l.dispatchEvent(new Event("input",{bubbles:true}));})()`,
   );

@@ -2,7 +2,7 @@
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 
-type VersoKit = ReturnType<typeof versoKit>;
+export type VersoKit = ReturnType<typeof versoKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
@@ -23,7 +23,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("V restore", () => vRestore(k));
 }
 
-function versoKit(ctx: SuiteContext) {
+export function versoKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const waitFlip3dGone = async (label: string): Promise<void> => {
     for (let i = 0; i < 50; i++) {
@@ -69,7 +69,10 @@ async function v0TurnDisables({ evaluate, check, waitSettled }: VersoKit): Promi
   await waitSettled("verso-v0-restore");
 }
 
-async function v1FlipsToVerso({ evaluate, check, shoot, sleep }: VersoKit, vTitle: string | null): Promise<void> {
+export async function v1FlipsToVerso(
+  { evaluate, check, shoot, sleep }: VersoKit,
+  vTitle: string | null,
+): Promise<void> {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(80);
   const v1 = await evaluate<{
@@ -111,7 +114,7 @@ async function v1FlipsToVerso({ evaluate, check, shoot, sleep }: VersoKit, vTitl
   await shoot("explorer-verso.png");
 }
 
-async function v2RedrawWhileFlipped({ evaluate, check, sleep, waitRectoAttr }: VersoKit): Promise<void> {
+export async function v2RedrawWhileFlipped({ evaluate, check, sleep, waitRectoAttr }: VersoKit): Promise<void> {
   const ghostSrcBefore = await evaluate<string>(`document.querySelector("#verso .verso-ghost").src`);
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitRectoAttr("data-vellum-seed", "100", "verso-rebuild-seed");
@@ -168,7 +171,7 @@ async function v4LeavesVerso({ evaluate, check }: VersoKit): Promise<void> {
   check("V4 clicking Turn again leaves the verso immediately (.versoed dropped)", v4immediate === false);
 }
 
-async function v4bFlipBack({ evaluate, check, sleep, waitFlip3dGone }: VersoKit): Promise<void> {
+export async function v4bFlipBack({ evaluate, check, sleep, waitFlip3dGone }: VersoKit): Promise<void> {
   await waitFlip3dGone("verso-flip-back");
   await sleep(60);
   const v4 = await evaluate<{
