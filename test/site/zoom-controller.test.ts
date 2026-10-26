@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test, type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import {
   zoomTransformToCss,
@@ -76,7 +76,14 @@ test("otherwise the camera keeps d3-zoom's own filter: a ctrl-held wheel is a tr
   assert.equal(gestureAllowed({ type: "mousedown", button: 2 }, "mouse", true), false);
 });
 
-test("a glide stopped before its first frame leaves no pending target (Issue #751)", () => {
+const fakeClock = (t: TestContext): void => {
+  t.mock.timers.enable({ apis: ["setTimeout", "setInterval", "Date"] });
+  t.mock.method(performance, "now", () => Date.now());
+  t.after(() => t.mock.timers.runAll());
+};
+
+test("a glide stopped before its first frame leaves no pending target (Issue #751)", (t) => {
+  fakeClock(t);
   const zc = createZoomController({ viewportEl: el(), targetEl: el(), reducedMotion: false, glideMs: 300 });
   zc.glideBy(1.4);
   assert.equal(zc.glideTarget(), 1.4, "a press queues a glide toward 1.4");
@@ -84,23 +91,25 @@ test("a glide stopped before its first frame leaves no pending target (Issue #75
   assert.equal(zc.glideTarget(), null);
 });
 
-test("a settle is still to come while a glide is queued or the settle debounce is armed, and not once it has run (Issue #751)", async () => {
+test("a settle is still to come while a glide is queued or the settle debounce is armed, and not once it has run (Issue #751)", (t) => {
+  fakeClock(t);
   const glider = createZoomController({ viewportEl: el(), targetEl: el(), reducedMotion: false, glideMs: 300 });
   glider.glideBy(1.4);
   assert.equal(glider.settlePending(), true, "a queued glide counts as a settle to come");
   glider.rebase();
 
+  const SETTLE_MS = 20;
   const settled: number[] = [];
   const zc = createZoomController({
     viewportEl: el(),
     targetEl: el(),
-    settleMs: 20,
+    settleMs: SETTLE_MS,
     onSettle: (s) => settled.push(s.k),
   });
   assert.equal(zc.settlePending(), false, "a camera that never moved has no settle to come");
   zc.zoomTo({ k: 2, x: 0, y: 0 });
   assert.equal(zc.settlePending(), true, "a move arms the settle");
-  await new Promise((r) => setTimeout(r, 60));
+  t.mock.timers.tick(SETTLE_MS);
   assert.deepEqual(settled, [2], "the armed settle ran");
   assert.equal(zc.settlePending(), false, "once it has run, none is to come");
 });
@@ -123,7 +132,8 @@ const centred = (k: number) => ({ k, x: 500 - 0.5 * k * 1000, y: 400 - 0.5 * k *
 const viewport = () =>
   Object.assign(new El("div"), { clientWidth: 1000, clientHeight: 800, clientLeft: 0, clientTop: 0 });
 
-test("lowering the ceiling stops a double-click's glide where it stands, and raising it leaves the glide to land (Issue #751)", async () => {
+test("lowering the ceiling stops a double-click's glide where it stands, and raising it leaves the glide to land (Issue #751)", (t) => {
+  fakeClock(t);
   const held = viewport();
   const zc = createZoomController({
     viewportEl: held as unknown as HTMLElement,
@@ -136,7 +146,7 @@ test("lowering the ceiling stops a double-click's glide where it stands, and rai
   zc.zoomTo(centred(6));
   doubleClick(held);
   zc.setScaleMax(8);
-  await new Promise((r) => setTimeout(r, 400));
+  t.mock.timers.tick(400);
   assert.deepEqual(
     zc.getState(),
     { x: -2500, y: -2000, k: 6 },
@@ -154,7 +164,7 @@ test("lowering the ceiling stops a double-click's glide where it stands, and rai
   zf.zoomTo(centred(3));
   doubleClick(free);
   zf.setScaleMax(24);
-  await new Promise((r) => setTimeout(r, 400));
+  t.mock.timers.tick(400);
   assert.deepEqual(
     zf.getState(),
     { x: -2500, y: -2000, k: 6 },
