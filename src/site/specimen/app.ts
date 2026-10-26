@@ -6,6 +6,7 @@ import { fillPress } from "../shared/slide-away.ts";
 import { FOLD_SETTLE_MS } from "../shared/slip.ts";
 import { bindRoom } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { $ } from "../shared/by-id.ts";
 
 declare global {
   interface Window {
@@ -16,7 +17,6 @@ declare global {
 const STATES = ["rest", "folded", "leaned", "slid"] as const;
 type State = (typeof STATES)[number];
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const viewport = $("map-viewport");
 const map = $("map");
 const slip = document.querySelector<HTMLElement>(".slip")!;

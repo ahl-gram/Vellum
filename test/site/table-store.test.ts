@@ -194,6 +194,10 @@ test("TS8 the device holds the table in the ONE grammar, byte for byte (#634)", 
 
 test("TS9 a store that refuses to answer leaves the page working (#634, the private-mode path src/site/home/ceremony.ts already keeps)", () => {
   assert.doesNotThrow(() => writeStoredTable(shut, fill(2)));
+  assert.doesNotThrow(
+    () => writeStoredTable(shut, []),
+    "emptying the table on a store that refuses must not throw either",
+  );
   assert.equal(
     readStoredTable(shut),
     null,

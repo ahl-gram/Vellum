@@ -1,3 +1,5 @@
+import { readStored, writeStored } from "../storage.ts";
+
 export const DESK_NOTICE_KEY = "vellum.desk-notice.v1";
 const FLOOR = 1024;
 
@@ -14,17 +16,11 @@ export function noticeDue(scale: number, innerHeight: number): boolean {
 }
 
 export function dismissed(getStorage: () => Storage): boolean {
-  try {
-    return getStorage().getItem(DESK_NOTICE_KEY) !== null;
-  } catch {
-    return false;
-  }
+  return readStored(getStorage, DESK_NOTICE_KEY) !== null;
 }
 
 export function dismiss(getStorage: () => Storage): void {
-  try {
-    getStorage().setItem(DESK_NOTICE_KEY, "1");
-  } catch {}
+  writeStored(getStorage, DESK_NOTICE_KEY, "1");
 }
 
 export function bindNotice(notice: NoticeHost, view: NoticeView, innerHeight: number, getStorage: () => Storage): void {

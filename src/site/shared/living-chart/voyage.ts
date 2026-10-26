@@ -15,6 +15,7 @@ import type { ToldEntry } from "./told.ts";
 import type { PlaceManifest } from "../../../render/place-manifest.ts";
 import type { Survey } from "../../../render/survey.ts";
 import type { Pt } from "../../../core/rdp.ts";
+import { prefersReduce } from "../reduced-motion.ts";
 
 /** Issue #174: where the resting track mirrors to (the Explorer's verso). The engine paints ONLY where the survey rests, never from the rAF tick, and clears when the voyage leaves. */
 export interface RestingTrackSink {
@@ -28,10 +29,6 @@ export interface VoyageDeps {
   logPanel: VoyageLogPanel;
   restingTrackSink?: RestingTrackSink;
   tourOrder?: TourOrderSource;
-}
-
-function prefersReduce(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 const fmt = (p: Pt) => `${p.x},${p.y}`;

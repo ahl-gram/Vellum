@@ -23,6 +23,8 @@ import { errorText } from "../shared/error-text.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
+import { $ } from "../shared/by-id.ts";
+import { nextObjectUrl } from "../shared/object-url.ts";
 
 declare global {
   interface Window {
@@ -42,7 +44,6 @@ declare global {
   }
 }
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pp-status");
 const warning = $("pp-warning");
 const chartLink = $<HTMLAnchorElement>("pp-chart-link");
@@ -158,8 +159,7 @@ function draw(year: number | null, writeAddress: boolean): void {
   runJob({ kind: "prospect", seed, overrides, index: addr.index, dress, year })
     .then((res) => {
       if (myGen !== drawGen) return;
-      if (lastUrl !== null) URL.revokeObjectURL(lastUrl);
-      lastUrl = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+      lastUrl = nextObjectUrl(lastUrl, new Blob([res.svg], { type: "image/svg+xml" }));
       showPlate(furniture, res, seed, lastUrl);
       sheet.rebase();
       if (writeAddress) history.replaceState(null, "", yearHash(location.hash, res.year));

@@ -21,6 +21,7 @@ import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
+import { $ } from "../shared/by-id.ts";
 
 // The ages hook is typed as the engine's own ReturnType, so tsc breaks this file if the hook ever grows, loses a member, or silently narrows again.
 declare global {
@@ -31,7 +32,6 @@ declare global {
   }
 }
 
-const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElement;
 const q = <T extends HTMLElement = HTMLElement>(sel: string): T => document.querySelector<T>(sel) as T;
 const mount = $("rr-mount");
 const warning = $("rr-warning");

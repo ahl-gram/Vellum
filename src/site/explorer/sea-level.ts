@@ -2,9 +2,10 @@
 import { defaultRecipe } from "../../world/generate.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import { LAND_MAX, LAND_MIN } from "../shared/address-grammar.ts";
+import { $ } from "../shared/by-id.ts";
 
-const landSlider = document.getElementById("land") as HTMLInputElement;
-const landReadout = document.getElementById("land-readout") as HTMLElement;
+const landSlider = $<HTMLInputElement>("land");
+const landReadout = $("land-readout");
 
 export const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
 export const sliderToLand = (v: string | number): number => clampLand(Number(v) / 1000);

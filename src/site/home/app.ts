@@ -20,9 +20,7 @@ import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
 import { createValve, overhangOf, sidewaysToPage } from "./valve.ts";
 import { playCeremony } from "./veil.ts";
-
-const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-const reduced = () => reducedQuery.matches;
+import { prefersReduce as reduced } from "../shared/reduced-motion.ts";
 
 const stage = document.getElementById("lf-stage");
 const sheetEl = document.getElementById("lf-sheet");
