@@ -4,7 +4,7 @@ import { rh10GalleryScrolled, SCROLLED } from "../../e2e/suites/runninghead/gall
 import type { RunningHeadKit } from "../../e2e/suites/runninghead/kit.ts";
 import { recordingSuite } from "../../test-support/recording-suite.ts";
 
-const galleryRun = (lands: boolean) => {
+const galleryRun = (lands: boolean, up = true) => {
   let witnessed = 0;
   let landed = false;
   let sampledLanded: boolean | null = null;
@@ -24,7 +24,7 @@ const galleryRun = (lands: boolean) => {
     sampledLanded = landed;
     return Promise.resolve({ exceptionDetails: { text: "stub stop" } });
   };
-  const k = { ...run.ctx, send, visit: () => Promise.resolve(true) } as unknown as RunningHeadKit;
+  const k = { ...run.ctx, send, visit: () => Promise.resolve(up) } as unknown as RunningHeadKit;
   return { ...run, rh10: () => rh10GalleryScrolled(k), sampled: () => sampledLanded };
 };
 
@@ -43,4 +43,11 @@ test("RH10 times out naming the landing when the Gallery never finishes landing,
     err.message.startsWith("settle timeout RH10 the Gallery's plates landed: "),
   );
   assert.equal(sampled(), null, "RH10 sampled the plate though the Gallery never landed");
+});
+
+test("RH10 waits for no landing, and reds its own check, when the Gallery never comes up", async () => {
+  const { rh10, said, checked } = galleryRun(true, false);
+  await rh10();
+  assert.deepEqual(checked, [{ code: "RH10", ok: false }]);
+  assert.ok(!said.some((e) => e.includes("getAnimations")), "RH10 waited for a landing on a page that never came up");
 });

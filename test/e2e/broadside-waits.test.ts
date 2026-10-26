@@ -83,6 +83,8 @@ test("BR1c reads each size only once the room has laid out there and the legend 
       "Emulation.clearDeviceMetricsOverride",
     ],
   );
+  assert.deepEqual(sent[0]!.params, { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
+  assert.deepEqual(sent[1]!.params, { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   assert.deepEqual(
     last(),
     AT_1280,
