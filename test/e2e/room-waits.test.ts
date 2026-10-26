@@ -156,7 +156,7 @@ test("the Specimen Book's goto hands the page over only once the legend has inke
   const kit = specimen((e) => {
     if (e.includes("getAnimations")) {
       const w = seen[Math.min(witnessed++, seen.length - 1)]!;
-      return { read: w.read, anims: e.includes(`".legend"`) ? w.anims : null };
+      return { read: w.read, anims: e.includes(`const e = document.querySelector(".legend")`) ? w.anims : null };
     }
     if (e !== READ) return null;
     plain += 1;
