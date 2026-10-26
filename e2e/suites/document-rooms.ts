@@ -141,7 +141,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await waitReady();
 }
 
-function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
+export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
   const { evaluate, send, sleep, PORT } = ctx;
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
   const goto = async (path: string) => {

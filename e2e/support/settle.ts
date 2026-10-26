@@ -38,3 +38,24 @@ export function makeSettle({
     );
   };
 }
+
+export type Settle = ReturnType<typeof makeSettle>;
+
+export const STILL_ONLY = {
+  carry: "none: the moves land before their dispatch returns, and mid itself is the claim",
+  deskNotice:
+    "none: the page has loaded or switched its media before the read, and every field read is a check's own claim",
+} as const satisfies Record<string, `none: ${string}`>;
+type Departure<T> = ((d: T) => boolean) | (typeof STILL_ONLY)[keyof typeof STILL_ONLY];
+export type StableOptions<T> = { readonly same?: (d: T, last: T) => boolean; readonly tries?: number } & (
+  | { readonly departed: Departure<T>; readonly animated?: string }
+  | { readonly departed?: Departure<T>; readonly animated: string }
+);
+
+export function makeStable(settle: Settle) {
+  return async <T>(
+    read: Payload<T>,
+    label: string,
+    options: StableOptions<NoInfer<NonNullable<T>>>,
+  ): Promise<NoInfer<NonNullable<T>>> => settle(read, () => true, label, options.tries);
+}

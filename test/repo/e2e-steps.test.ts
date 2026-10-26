@@ -20,10 +20,11 @@ const reports = async (lines: readonly string[], path: string): Promise<number[]
 const HEAD = [
   'import type { SuiteContext } from "../types.ts";',
   'import { makeStep } from "../support/step.ts";',
-  'import { makeSettle } from "../support/settle.ts";',
+  'import { makeSettle, makeStable, STILL_ONLY } from "../support/settle.ts";',
   'import { sampleRow } from "../support/pixel.ts";',
   'import { deskKit, dnTablet } from "./cluster/desk-notice.ts";',
   'import { specimenKit } from "./specimen/kit.ts";',
+  'import { drawerKit } from "./chart-drawer/kit.ts";',
   "export async function run(ctx: SuiteContext): Promise<void> {",
   "  const step = makeStep(ctx);",
 ];
@@ -72,11 +73,15 @@ const BODY = [
   "  await tb(1);",
   "  await tc(1);",
   '  await ctx.evaluate("1");',
+  "  const stable = makeStable(makeSettle(ctx));",
+  '  await stable("x" as never, "y", { departed: STILL_ONLY.carry });',
+  "  const { stable: kept } = drawerKit({ ...ctx, settle: makeSettle(ctx) });",
+  '  await kept("x" as never, "y", { departed: STILL_ONLY.carry });',
   "}",
 ];
-const REPORTED = [1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29, 30, 31, 33, 35, 36, 37, 41, 42, 43].map(
-  (n) => n + HEAD.length,
-);
+const REPORTED = [
+  1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29, 30, 31, 33, 35, 36, 37, 41, 42, 43, 46, 48,
+].map((n) => n + HEAD.length);
 
 test("in a suite's own run, a wait or a throw that can fail stands inside a step, the thrower read through the type checker into a support module, a part file or a destructured kit member (Issue #560)", async () => {
   assert.deepEqual(

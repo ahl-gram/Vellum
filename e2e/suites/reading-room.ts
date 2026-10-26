@@ -1,7 +1,7 @@
 // Reading Room e2e (RR0-RR43; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { readingRoomKit } from "./reading-room/kit.ts";
+import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
@@ -34,8 +34,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr4AtRest(ctx);
   // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (Issue #442 reversing Issue #402); RR29 shows Play bringing one.
   await rr26BareVisit(k);
-  await atTheDesk(ctx, step);
-  await rr29Play(k);
+  await atTheDesk(ctx, step, k);
   await step("RR42", () => rr42PlateReveal(ctx));
   await step("RR40", () => rr40Glass(ctx));
   await rr6Survey(k);
@@ -57,7 +56,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr14Fallback(ctx);
 }
 
-async function atTheDesk(ctx: SuiteContext, step: Step): Promise<void> {
+export async function atTheDesk(ctx: SuiteContext, step: Step, k: ReadingRoomKit): Promise<void> {
   const { evaluate, send, sleep } = ctx;
   // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -69,4 +68,5 @@ async function atTheDesk(ctx: SuiteContext, step: Step): Promise<void> {
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(200);
+  await step("RR29", () => rr29Play(k));
 }

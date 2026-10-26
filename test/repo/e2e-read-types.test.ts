@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import ts from "typescript";
 import type { Evaluate, Payload } from "../../e2e/types.ts";
-import { makeSettle } from "../../e2e/support/settle.ts";
+import { makeSettle, makeStable } from "../../e2e/support/settle.ts";
 import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 
@@ -36,6 +36,16 @@ const settledReadFixtures = async (settle: ReturnType<typeof makeSettle>): Promi
   void s;
 };
 void settledReadFixtures;
+
+const stableOptionFixtures = async (stable: ReturnType<typeof makeStable>): Promise<void> => {
+  // @ts-expect-error a wait for something to stop moving names its departure, an animation, or why it has none
+  await stable(readCam, "bare", {});
+  // @ts-expect-error a reason in place of a departure is never free text
+  await stable(readCam, "bare", { departed: "because" });
+  // @ts-expect-error a reason in place of a departure is one of STILL_ONLY's, the two waits clause 5 allows one
+  await stable(readCam, "bare", { departed: "none: a third wait" });
+};
+void stableOptionFixtures;
 
 const reading = (reads: unknown[], options: { tolerant?: boolean } = {}) => {
   const asked: string[] = [];
