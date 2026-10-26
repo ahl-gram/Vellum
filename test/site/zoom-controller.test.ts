@@ -89,6 +89,8 @@ test("a glide stopped before its first frame leaves no pending target (Issue #75
   assert.equal(zc.glideTarget(), 1.4, "a press queues a glide toward 1.4");
   zc.zoomTo({ k: 2, x: 0, y: 0 });
   assert.equal(zc.glideTarget(), null);
+  t.mock.timers.tick(300);
+  assert.deepEqual(zc.getState(), { x: 0, y: 0, k: 2 }, "no frame of the stopped glide moved the camera afterwards");
 });
 
 test("a settle is still to come while a glide is queued or the settle debounce is armed, and not once it has run (Issue #751)", (t) => {
