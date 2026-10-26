@@ -1,3 +1,4 @@
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import { countEvents } from "../../support/witness.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
@@ -21,6 +22,22 @@ export const scrollOutcome =
 const WHEELS = countEvents(["wheel"]);
 export const WHEELED: Payload<{ wheels: number; k: number }> =
   `(() => ({ wheels: ${WHEELS.seen}, k: window.__vellumZoomState().k }))()`;
+
+async function scrollAfter(
+  { evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">,
+  input: () => Promise<unknown>,
+  label: string,
+): Promise<Scrolled> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  await evaluate(COUNT_FRAMES);
+  try {
+    const from = await evaluate(SCROLLED);
+    await input();
+    return await stable(SCROLLED, label, { departed: scrollOutcome(from), same: scrollRested });
+  } finally {
+    await evaluate(STOP_FRAMES);
+  }
+}
 
 export async function p19CardsFit({ check, sweepAt }: CardsKit, narrowCount: number): Promise<void> {
   const verdict = (d: Swept, width: number) => {
@@ -127,29 +144,32 @@ async function p27PageDown({
     `(() => { const i = document.querySelector("#place-card .pc-inner"); i.focus(); return { tabIndex: i.tabIndex, focused: document.activeElement === i, scrollTop: +i.scrollTop.toFixed(2), scrolls: document.getElementById("place-card").classList.contains("pc-scrolls"), pinned: document.getElementById("place-card").classList.contains("pinned") }; })()`,
   );
   // PageDown, not ArrowDown: measured 2026-09-20, an arrow key does not scroll a focused scroll container in this build while PageDown does, and the cold review measured all three leaving scrollTop at 0 before the tab stop existed.
-  await send("Input.dispatchKeyEvent", {
-    type: "rawKeyDown",
-    windowsVirtualKeyCode: 34,
-    nativeVirtualKeyCode: 34,
-    code: "PageDown",
-    key: "PageDown",
-  });
-  await send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    windowsVirtualKeyCode: 34,
-    nativeVirtualKeyCode: 34,
-    code: "PageDown",
-    key: "PageDown",
-  });
-  await sleep(400);
-  const kbAfter = await evaluate<number>(`+document.querySelector("#place-card .pc-inner").scrollTop.toFixed(2)`);
+  const kbAfter = await scrollAfter(
+    { evaluate, sleep },
+    async () => {
+      await send("Input.dispatchKeyEvent", {
+        type: "rawKeyDown",
+        windowsVirtualKeyCode: 34,
+        nativeVirtualKeyCode: 34,
+        code: "PageDown",
+        key: "PageDown",
+      });
+      await send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        windowsVirtualKeyCode: 34,
+        nativeVirtualKeyCode: 34,
+        code: "PageDown",
+        key: "PageDown",
+      });
+    },
+    "P27 PageDown's outcome at rest",
+  );
   check(
     "P27 a reader with no pointer can reach the tail the cap hides: the card takes a tab stop and PageDown scrolls it (#633)",
-    kb.tabIndex === 0 && kb.focused === true && kbAfter > kb.scrollTop + 1,
-    JSON.stringify({ ...kb, afterPageDown: kbAfter }),
+    kb.tabIndex === 0 && kb.focused === true && kbAfter.scrollTop > kb.scrollTop + 1,
+    JSON.stringify({ ...kb, afterPageDown: kbAfter.scrollTop, frame: kbAfter.frame }),
   );
   await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
-  await sleep(200);
 }
 
 export async function p26TailScrolls(
@@ -165,10 +185,10 @@ export async function p26TailScrolls(
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
   await sleep(120);
-  await wheel(onCard.x, onCard.y, 240);
-  await sleep(600);
-  const afterWheel = await evaluate<{ scrollTop: number; k: number }>(
-    `(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`,
+  const afterWheel = await scrollAfter(
+    { evaluate, sleep },
+    () => wheel(onCard.x, onCard.y, 240),
+    "P26 the wheel's outcome at rest",
   );
   check(
     "P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put, the wheel aimed where the card itself takes the pointer (#633)",
@@ -176,7 +196,6 @@ export async function p26TailScrolls(
     JSON.stringify({ reaches, before: beforeWheel, after: afterWheel }),
   );
   await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
-  await sleep(200);
   await p27PageDown({ evaluate, send, check, sleep });
 }
 
@@ -272,6 +291,7 @@ export async function p24NothingToScroll({
   setNarrowViewport,
   PORT,
 }: CardsKit): Promise<void> {
+  const stable = makeStable(settle);
   await setNarrowViewport(1280, 800);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
@@ -282,9 +302,9 @@ export async function p24NothingToScroll({
   const card = await p24PinKralgov({ send, settle }, at);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
   await sleep(120);
+  await evaluate(WHEELS.arm);
   await wheel(card.x, card.y, -240);
-  await sleep(600);
-  const after = await evaluate<number>(`window.__vellumZoomState().k`);
+  const after = (await stable(WHEELED, "P24 the wheel handled", { departed: (d) => d.wheels > 0 })).k;
   check(
     "P24 a pinned card with nothing to scroll does NOT swallow the camera under it (#633)",
     card.tail <= 1 && card.scrolls === false && card.pe === "none" && after > card.k + 0.05,

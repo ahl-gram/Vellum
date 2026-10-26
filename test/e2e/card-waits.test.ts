@@ -39,7 +39,7 @@ const scrollFake = (p26: Reads, p27: Reads) => {
   const log: { p26: Scrolled[]; p27: Scrolled[] } = { p26: [], p27: [] };
   const { ctx, said, checked, slept } = recording((expression, so) => {
     if (expression === SCROLLED) {
-      const phase = count(so, "Input.dispatchKeyEvent") > 0 ? "p27" : "p26";
+      const phase = count(so, "tabIndex") > 0 ? "p27" : "p26";
       const read = (phase === "p27" ? p27 : p26)(++n[phase]);
       log[phase].push(read);
       return read;

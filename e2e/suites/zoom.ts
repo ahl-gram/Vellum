@@ -95,7 +95,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = zoomKit(ctx);
   // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
-  await zGeometric(ctx, k);
+  await zGeometric(step, ctx, k);
   await step("Z22", () => z22HitAndRing(ctx));
   await step("Z24", () => z24CardSeats(ctx));
   await step("Z25", () => z25ClampFlush(ctx));
@@ -172,14 +172,14 @@ async function zLoupe(step: ReturnType<typeof makeStep>, k: ZoomKit, pick: Hamle
   await step("ZL7", () => zl7DarkPastSheet(k));
 }
 
-async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
+async function zGeometric(step: ReturnType<typeof makeStep>, ctx: SuiteContext, k: ZoomKit): Promise<void> {
   await z1ZoomTo(ctx);
   await z2MaxClamp(ctx);
   await zK4Shot(ctx);
   await z3MinClamp(ctx);
   await z4RoundTrip(ctx);
-  await z6PinnedCard(ctx);
-  await z8CardConstant(ctx);
+  await step("Z6", () => z6PinnedCard(ctx));
+  await step("Z8", () => z8CardConstant(ctx));
   await z8bHoverRing(k);
   await z9Keyboard(ctx);
   await z10Buttons(ctx);

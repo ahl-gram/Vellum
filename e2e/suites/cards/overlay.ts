@@ -1,3 +1,5 @@
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Point, SuiteContext } from "../../types.ts";
 
 export type Manifest = Awaited<ReturnType<typeof pManifest>>;
@@ -92,6 +94,7 @@ async function p5bRealmSeat(
   pm: Manifest,
 ): Promise<void> {
   if (pm.seatIdx >= 0) {
+    const stable = makeStable(makeSettle({ evaluate, sleep }));
     const p5b = await evaluate<{
       hidden: boolean;
       name: string | undefined;
@@ -111,8 +114,9 @@ async function p5bRealmSeat(
       JSON.stringify(p5b),
     );
     // Wait out paperUnfurl before shooting: the card mounts at the animation's first keyframe (fill both), so an immediate shot catches it at zero scale and shows no card at all.
+    const before = await evaluate(CARD_ROLL);
     await evaluate(`(()=>{document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]').click();})()`);
-    await sleep(500);
+    await stable(CARD_ROLL, "P5b the seat's card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
     await shoot("explorer-place-card-seat.png");
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   } else {
