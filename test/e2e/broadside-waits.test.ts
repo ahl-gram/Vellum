@@ -27,7 +27,6 @@ type LegendRoom = {
   fonts: string;
   moving: boolean;
 };
-// Clear wherever the row stands at 256 or more and its right edge clears the slip and the Glass; a row at 100 or 150 sits over the folio.
 const legendRoom = (w: number, h: number, sheetR: number, lgL: number, over: Partial<LegendRoom> = {}): LegendRoom => ({
   lg: box(lgL, lgL + 300, h - 60, h - 30),
   bl: box(20, 260, h - 120, h - 20),
@@ -44,7 +43,6 @@ const legendRoom = (w: number, h: number, sheetR: number, lgL: number, over: Par
 const AT_1280 = legendRoom(1280, 2263, 700, 300);
 const AT_1680 = legendRoom(1680, 900, 1000, 500);
 const AT_800 = legendRoom(1280, 800, 650, 320);
-// After an override: a stray layout at the old window, the new window over the old layout, the row still in its transition, then rest.
 const resized = (from: LegendRoom, to: LegendRoom, strayR: number): Stage<LegendRoom> => ({
   phases: [
     [2, { ...from, sh: box(40, strayR, 40, from.h - 200), lg: box(100, 400, from.h - 60, from.h - 30) }],

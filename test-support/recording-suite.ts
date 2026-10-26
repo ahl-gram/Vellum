@@ -39,7 +39,6 @@ export const emulations = (sent: readonly Sent[]): number =>
   sent.filter((s) => s.method.startsWith("Emulation.")).length;
 export const lastSent = (sent: readonly Sent[]): Sent | undefined => sent.at(-1);
 
-// The page lays out only as far as it is watched: each read of the room after an emulation moves it one phase on, so a wait that stops reading early acts on a room still in flight.
 export type Phase<R> = readonly [reads: number, room: R];
 export type Stage<R> = { readonly phases: readonly Phase<R>[]; readonly rest: R };
 export const timeline = <R>(stages: readonly Stage<R>[]) => {

@@ -22,7 +22,6 @@ type Room = {
   moving: boolean;
 };
 
-// The row's left transitions 0.32s to the seat the room writes, and the room writes it again on `document.fonts.ready` and on every resize, so a read waits for the fonts and for no animation running on the row.
 export const LEGEND_ROOM: Payload<Room> = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
       const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
       const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
@@ -260,7 +259,7 @@ async function tapAt({ evaluate, sleep, touch }: BroadsideKit, settle: Settle): 
   await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
   await touch("touchEnd", []);
   await settle(CLICKS, (d) => d.n > n, "BR6 the tap's click");
-  await sleep(500); // past any pending navigation's commit
+  await sleep(500);
   return true;
 }
 
