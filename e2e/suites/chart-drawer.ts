@@ -64,7 +64,6 @@ type Step = ReturnType<typeof makeStep>;
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send } = ctx;
   const settle = makeSettle(ctx);
-  // A group that only navigates needs no step: go()'s bounded loop returns rather than throwing.
   const step = makeStep(ctx);
   // Since Issue #634 the table has a second home on the DEVICE, and this suite fills it on nearly every group: every arrival below that carries no table key would otherwise inherit whatever the group before it laid, which is a bleed inside one suite and not only across a lane. So an arrival is bare unless it says otherwise, and the four checks that are ABOUT the device seed it themselves. about:blank has no storage of its own, so the clear rides on the site's origin.
   const k = drawerKit({ ...ctx, settle });
@@ -128,8 +127,10 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   // CD18 / CD19 / CD20 (Issue #521 Sub 3): the road the table has carried disabled since Issue #520 turns on, and the Portfolio
   // drafts what it carries. The page reads the table from its OWN address once at load and never rewrites it.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await go(`${DRESS}&table=${SIX}`);
-  await step("CD18", () => cd18RoadOn(kd));
+  await step("CD18", async () => {
+    await go(`${DRESS}&table=${SIX}`);
+    await cd18RoadOn(kd);
+  });
   await step("CD18b", () => cd18bRoadCarries(kd, SIX));
   await cd19PortfolioDrafts(kd);
   await cd24PortfolioSays(kd);
