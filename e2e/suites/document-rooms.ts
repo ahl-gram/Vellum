@@ -89,6 +89,11 @@ const READ: Payload<Index> = `(() => {
   };
 })()`;
 
+const SCROLLS: Payload<{ n: number }> =
+  `(() => { if (window.__ixScrolls === undefined) { window.__ixScrolls = 0; addEventListener("scroll", () => { window.__ixScrolls++; }, { passive: true }); } return { n: window.__ixScrolls }; })()`;
+const INPUTS: Payload<{ n: number; value: string | null }> =
+  `(() => { if (window.__ixInputs === undefined) { window.__ixInputs = 0; addEventListener("input", () => { window.__ixInputs++; }); } return { n: window.__ixInputs, value: document.querySelector(".find input")?.value ?? null }; })()`;
+
 const LANDING: Payload<{ sheet: number[] | null; slip: number[] | null }> =
   `(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)); }; return { sheet: r(".sheet"), slip: r("#index") }; })()`;
 
@@ -188,16 +193,18 @@ async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Inde
   return faq;
 }
 
-export async function ix2InksRow({ evaluate, check, sleep }: DocRoomsKit, faq: Index): Promise<void> {
+export async function ix2InksRow({ evaluate, check, settle }: DocRoomsKit, faq: Index): Promise<void> {
   const target = faq.h2s[2];
   const firstEntryOf = await evaluate<string | null>(
     `(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`,
   );
+  const s0 = await evaluate(SCROLLS);
   await evaluate(`document.getElementById(${JSON.stringify(target)}).scrollIntoView()`);
-  await sleep(250);
+  await settle(SCROLLS, (d) => d.n > s0.n, "IX2 the page scrolled to the section's head");
   const atHead = await evaluate(READ);
+  const s1 = await evaluate(SCROLLS);
   await evaluate(`document.getElementById(${JSON.stringify(firstEntryOf)}).scrollIntoView()`);
-  await sleep(250);
+  await settle(SCROLLS, (d) => d.n > s1.n, "IX2 the page scrolled to its first question");
   const atEntry = await evaluate(READ);
   check(
     "IX2 following a section's head inks that row alone with no question marked yet (never the section above's last one); reaching its first question marks that one, the reader's place kept as the page moves (#462 ruling 1)",
@@ -235,12 +242,13 @@ async function ix3Folds({ evaluate, check, settle }: DocRoomsKit, faq: Index): P
   );
 }
 
-export async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoomsKit): Promise<void> {
+export async function ix4FindBox({ evaluate, send, check, settle, goto }: DocRoomsKit): Promise<void> {
   await goto(GLOSSARY);
   const glossary = await evaluate(READ);
+  const typed = await evaluate(INPUTS);
   await evaluate(`document.querySelector(".find input").focus()`);
   await send("Input.insertText", { text: "glass" });
-  await sleep(150);
+  await settle(INPUTS, (d) => d.n > typed.n && d.value === "glass", "IX4 the find box took the query");
   const found = await evaluate<{
     hits: string[];
     shown: number;
@@ -260,7 +268,6 @@ export async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoom
   await evaluate(
     `(() => { const i = document.querySelector(".find input"); i.value = ""; i.dispatchEvent(new Event("input", { bubbles: true })); })()`,
   );
-  await sleep(100);
   const cleared = await evaluate<{ shown: number; total: number; hits: number; empty: number }>(
     `(() => { const links = [...document.querySelectorAll("#index .terms a")]; return { shown: links.filter((a) => getComputedStyle(a).display !== "none").length, total: links.length, hits: links.filter((a) => a.classList.contains("hit")).length, empty: [...document.querySelectorAll("#index .index > li")].filter((li) => getComputedStyle(li).display === "none").length }; })()`,
   );
