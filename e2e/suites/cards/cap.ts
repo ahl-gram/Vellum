@@ -187,7 +187,9 @@ export async function p26TailScrolls(
   await sleep(120);
   const afterWheel = await scrollAfter(
     { evaluate, sleep },
-    () => wheel(onCard.x, onCard.y, 240),
+    async () => {
+      await wheel(onCard.x, onCard.y, 240);
+    },
     "P26 the wheel's outcome at rest",
   );
   check(
