@@ -66,6 +66,10 @@ belongs in.
 
 - **A unit test runs the code and asserts what it does.** Assert the outcome, never the declaration
   (`vellum-footguns` Gate 1).
+- **A unit test of date logic passes its own date**, as `test/world/seed-of-the-day.test.ts` passes
+  each `Date` it asserts on, and no unit test reads the clock as a day. A browser check's day is the
+  harness's (`handbook/specs/settle-doctrine.md`, The environment, the bullet opening "Every page the
+  harness opens").
 - **A unit test does not open a source file and search its text.** Where the rule under test is about
   how code is written, write it as a lint rule; where it is about what a page shows, write it as a
   browser check. A text search over source passes when the string sits in a comment, reds when a

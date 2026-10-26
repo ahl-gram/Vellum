@@ -11,6 +11,7 @@ import { debugPortConflictMessage } from "./support/ports.ts";
 import { launchWithRetry } from "./support/launch.ts";
 import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
 import { applyRunnerLayout } from "./support/runner-layout.ts";
+import { fixTheDay } from "./support/fixed-day.ts";
 import { serverState, startServer } from "./site-server.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
@@ -341,6 +342,7 @@ async function openSession({
   try {
     await send("Emulation.setFocusEmulationEnabled", { enabled: true });
   } catch {}
+  await fixTheDay(send);
   if (runnerLayout) console.log(await applyRunnerLayout(send));
   await send("Page.navigate", { url: PAGE });
 }

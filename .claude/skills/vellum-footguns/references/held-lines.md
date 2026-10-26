@@ -101,6 +101,8 @@ Noted 2026-09-16, overtaken before the move: shipped in PR #620 (merged 2026-09-
 
 The date-flake clause, that a hunt-suite red not reproducing locally is a date flake first since that suite runs the world today's UTC date seeds, is HELD: Alex's flake-record ruling freezes this clause of Gate 2 item 10 until he lifts it; the pointer to the pull-out rule in that item is Issue #872's, ruled by Alex.
 
+Noted 2026-10-26, overtaken: the clause's premise no longer holds. Every page the harness opens runs on one fixed day and the hunt suite on a day of its own (`onDay` in `e2e/support/fixed-day.ts`, Issue #785), so no suite runs the world today's UTC date seeds. The clause itself stays frozen with Gate 2 item 10 until Alex lifts the freeze.
+
 ## Closed out here, no promotion owed
 
 Already written where they are read: the label-parsing helper and the nonexistent-browser fixture (Gate 1's degenerate-fixture line); the bestiary fixture drift (its own test); gitlinked worktrees (`.gitignore`); a rect read mid-transition (`src/site/shared/room-seats.ts`); a colour compared by channel and emulated-media overrides (a comment at each site, plus `handbook/specs/settle-doctrine.md`'s same-run control); the oracle's metric and caption (`scripts/design/oracle.ts` and `scripts/design/compare.ts`, the method in `handbook/specs/settle-doctrine.md`, The environment); a clip inside the viewport (harness default); the harness window height (Issue #607); the wait on the unfurl (`handbook/specs/settle-doctrine.md`, The environment). No cause ever recorded: the camera check that establishes its own state and blurs first. Retired or falsified: the mask byte-compare, the ANSI grep count, two shipped capture rows.

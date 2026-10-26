@@ -305,6 +305,21 @@ section points there rather than restating it.
   build and this file ranks neither: that one, and an orphaned browser still holding the debug port,
   whose conflict message in `e2e/support/ports.ts` says in its own words that the run would report
   results from that browser's stale build instead of this one.
+- **Every page the harness opens runs on one fixed day.** `openSession` in `e2e/harness.ts`
+  registers the clock `fixTheDay` writes (`e2e/support/fixed-day.ts`) before its first navigation,
+  so in every document of the run, every frame included, `Date` reads `FIXED_DAY` plus the time
+  since that document was created, and a bare visit to a chart room, which draws the day's seed
+  (`seedForDate` in `src/world/seed-of-the-day.ts`), draws `FIXED_SEED`'s world on every date. The
+  sweep and the design shooter start the same harness, so their shots share the day. A browser
+  check never reads the real date: a check that asserts what a day produces takes the day from
+  `FIXED_SEED` or from the page's own clock, never from the Node process's, which runs on the real
+  date; and a suite that tests date logic on a day of its own wraps itself in `onDay`, whose clock
+  wins over the harness's whichever of the two the browser runs first, as the hunt suite does with
+  the day its checks need. The clock does not reach a Web Worker, another browser target, or a read
+  of the time that bypasses the global `Date` (`Intl.DateTimeFormat`'s `format()` with no date); no
+  page reads the date in any of them, and each errs toward a check that depends on the date again
+  without the run saying so. So does a Node read of the date used only to build an address, while
+  one a check compares against the page reds on its first run on any day but the fixed one.
 - **A browserless run's meaning is decided by policy, not by luck.** `browserlessAction` in
   `e2e/support/browser-policy.ts` fixes the precedence: `VELLUM_REQUIRE_BROWSER` forces a FAIL and is
   read first, so a contradictory pair resolves to fail; `VELLUM_ALLOW_NO_BROWSER` is the
@@ -355,8 +370,8 @@ section points there rather than restating it.
   and at 1024x768, the narrowest the site is laid out for: a page that runs a live chart app as its head box, the Specimen Book
   as one screen, every other page whole down to 16000px, with motion reduced unless `--motion` is
   passed; below that cap only the page height the probe records is compared. Shoot the
-  unchanged build twice and the branch once, all on one date, since the Seed of the Day's head box
-  carries it, then run `node scripts/design/compare.ts <control-a> <control-b> <branch>`. A row
+  unchanged build twice and the branch once, then run
+  `node scripts/design/compare.ts <control-a> <control-b> <branch>`. A row
   whose two control shots differ is UNTRUSTED and is not compared, because a page can disagree with
   itself between two runs of the same build, with motion reduced as well as on; trust only 0
   against nonzero on every other row, and read `magick compare -metric AE` as a float, because it
