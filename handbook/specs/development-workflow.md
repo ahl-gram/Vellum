@@ -32,7 +32,6 @@ its definition under `.claude/agents/`.
 | agent | step | what it runs | the failure it catches |
 |---|---|---|---|
 | `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
-| `vellum-plan-skeptic` | 4 | the plan's claims, checked by command, cold, before any code | a wrong approach, a missing case or a false premise, while it is still cheapest to drop |
 | `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
 | `vellum-pr-skeptic` | 14 | the pull request, attacked cold in its own sandbox with commands of its own | what the implementing session believed and never checked, against the issue and the house contracts |
@@ -90,17 +89,9 @@ from one to another, `handbook/specs/orchestration.md` before dispatching a lane
 an issue from one lane to another, and `handbook/specs/cloud-routine.md` before labelling an issue for
 the cloud routine.
 
-**4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
-diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its
-sizing, its evidence and its silences, and it is where a wrong approach is cheapest to kill. This
-step is why the file exists: it was the missing one.
+**4. Retired.** The plan no longer gets a cold read of its own (Alex, 2026-10-26, Issue #1087; `handbook/specs/rulebook.md`, Retired rules). The number stays so the steps after it keep theirs.
 
-**Hand it step 2's ledger when step 2 ran in this session, and nothing else when it did not**
-(Alex, 2026-09-10). Re-verifying what recon already checked is waste, not independence; what the
-plan skeptic must never inherit is the planning session's framing, which the ledger does not carry.
-With no ledger it runs truly cold, on the issue number and the plan alone.
-
-**5. Fold in what survives.** A finding you reject is rejected in writing, with the reason.
+**5. Fold in what recon surfaced.** A finding you reject is rejected in writing, with the reason.
 
 **6. Put the open decisions to Alex as a menu, and STOP.** Every option in plain words with its
 consequence, no jargon, no acronyms, in `AskUserQuestion` rather than in prose. **A decision that is
@@ -207,8 +198,8 @@ scar:
   as several pull requests archives one plan per pull request: the first is
   `handbook/plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
   request archives its own reviewed design beside it as `handbook/plans/<N>/<N>-<label>-plan.md`, `<label>`
-  naming the row or pull request (`row8a`, `pr2`), copied as it stood after the plan skeptic's
-  findings and Alex's rulings were folded in and committed with that pull request's first commit. Each is a record
+  naming the row or pull request (`row8a`, `pr2`), copied as it stood after Alex's rulings
+  were folded in and committed with that pull request's first commit. Each is a record
   of what was planned and is never edited afterwards. **The archive holds every plan a build was made
   to**, so a revision is committed beside the plan it revises, never over it. A revision is a plan
   finished again by a fresh `vellum-planner` after the plan came back to it (a builder's hand-back, or

@@ -172,8 +172,7 @@ which is the difference that stopped the same defects reaching PR after PR. Its
 refuses the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
 
 **The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at
-which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan before the decisions
-go to Alex, `vellum-guard-prover` on every new or strengthened guard before the PR,
+which step: `vellum-spec-recon` at the start, `vellum-guard-prover` on every new or strengthened guard before the PR,
 `vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
 pushed PR (the cloud routine runs the guard prover and the cold skeptic only as `handbook/specs/cloud-routine.md` says, and neither plan nor plate reader). A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
 what lands on the PR**. `vellum-planner` runs one issue through step 6 on the most capable model and
@@ -181,7 +180,7 @@ hands back a plan with no decision left open; `vellum-implementer` builds that p
 on a cheaper model, and hands back rather than decides wherever the plan is wrong.
 `vellum-designer` draws a design round's mockups for Alex's sitting and breaks an epic into its
 subs, handing its menu to whoever dispatched it.
-Every project agent under `.claude/agents/` sets an `effort` in its frontmatter, because an agent without one inherits the session's level: `xhigh` for `vellum-planner` and `vellum-designer`, `high` for `vellum-implementer` and the two skeptics, `medium` for `vellum-spec-recon`, `vellum-guard-prover` and `vellum-plate-reader` (Alex, 2026-09-13 set every agent to `xhigh`; 2026-10-13 ruled it per agent, after a week of weekly-limit exhaustion). The check is `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some level other than that agent's own, since a session at the same level cannot tell the frontmatter from inheritance.
+Every project agent under `.claude/agents/` sets an `effort` in its frontmatter, because an agent without one inherits the session's level: `xhigh` for `vellum-planner` and `vellum-designer`, `high` for `vellum-implementer` and the cold skeptic, `medium` for `vellum-spec-recon`, `vellum-guard-prover` and `vellum-plate-reader` (Alex, 2026-09-13 set every agent to `xhigh`; 2026-10-13 ruled it per agent, after a week of weekly-limit exhaustion). The check is `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some level other than that agent's own, since a session at the same level cannot tell the frontmatter from inheritance.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks, and a
   clearance to merge covers what it names (`handbook/specs/orchestration.md`). The one standing

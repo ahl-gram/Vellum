@@ -23,16 +23,6 @@ type Kept = {
 
 const KEPT: ReadonlyArray<Kept> = [
   {
-    file: ".claude/agents/vellum-plan-skeptic.md",
-    phrase: "an auto-memory pointer once sent six subagents",
-    why: "history",
-  },
-  {
-    file: ".claude/agents/vellum-plan-skeptic.md",
-    phrase: "or the auto-memory files. They carry the planning session's framing",
-    why: "forbids reading it",
-  },
-  {
     file: ".claude/agents/vellum-pr-skeptic.md",
     phrase: "or the auto-memory files. They carry the implementing session's framing",
     why: "forbids reading it",
@@ -190,7 +180,7 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
 
 const PASSED: ReadonlyArray<readonly [string, string]> = [
   [".claude/skills/vellum-footguns/references/scars.md", "that Issue #708 moved out of private\nmemory, one row"],
-  [".claude/agents/vellum-plan-skeptic.md", "or the auto-memory files. They carry\nthe planning session's framing"],
+  [".claude/agents/vellum-pr-skeptic.md", "or the auto-memory files. They carry\nthe implementing session's framing"],
   [".claude/agents/vellum-spec-recon.md", "Auto-memory is a pointer, not a citation."],
   [OUTSIDE, "a plan is usually written from memory"],
   [OUTSIDE, "`a7e3018`, `chore/708-memory-to-specs-round-two`"],

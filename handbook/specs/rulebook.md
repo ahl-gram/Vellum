@@ -401,6 +401,7 @@ checks against.
 
 ## Retired rules, do not resurrect
 
+- **The plan skeptic is retired** (Alex, 2026-10-26, Issue #1087). A count over 85 issues found the plans it had read were handed back by the implementer about as often as any, for causes only a browser, CI or the proof runner shows, which it does not run. Its definition is archived byte for byte at `handbook/retired/vellum-plan-skeptic.md`, out of `.claude/agents/` so the harness no longer loads it; moving the file back restores it. Workflow step 4 keeps its number as a stub.
 - **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a
   READING page is one `.astro` file plus its entries in `src/layouts/nav.ts`. That prices the
   reading-page kind only; a working page that mounts a bundle owes a good deal more, and
