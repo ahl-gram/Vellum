@@ -577,8 +577,10 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) {
   color: var(--parchment-bright);
 }
 
-/* The chrome's parchment lettering reads 1.1:1 over chart paper run under it, so the cluster and the chart folio stand on a blurred pool over a floored sheet at rest; none does at rest over a chart fitted clear (`RH9b` in `e2e/suites/runninghead/heads.ts`, `EA4` in `e2e/suites/stage/stage.ts`). */
-body.stage-under:not(:has(#map-viewport.zoomed)) :is(header.chrome, .corner.bl)::before {
+/* The chrome's parchment lettering reads 1.1:1 over chart paper run under it, so the cluster and the chart folio stand on a blurred pool over a floored sheet at rest or in a room with no stage, and the strip does while the Glass is zoomed; none does at rest over a chart fitted clear (`RH9b` in `e2e/suites/runninghead/heads.ts`, `EA4` in `e2e/suites/stage/stage.ts`). */
+body:has(#map-viewport.zoomed) .strip::before,
+body.stage-under:not(:has(#map-viewport.zoomed)) :is(header.chrome, .corner.bl)::before,
+body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -587,7 +589,7 @@ body.stage-under:not(:has(#map-viewport.zoomed)) :is(header.chrome, .corner.bl):
   background: rgb(from var(--chart-ink) r g b / 0.92);
   filter: blur(16px);
 }
-/* Edge-facing sides run 4rem out, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner; the Glass carries no pool, its presses stand on their own half-ink fill. */
+/* Edge-facing sides run 4rem out, matching home's inset in src/styles/index.css, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner; the Glass carries no pool, its presses stand on their own half-ink fill. */
 body.chart-room header.chrome {
   --pool-top: -4rem;
   --pool-left: -4rem;
@@ -596,9 +598,12 @@ body.chart-room .corner.bl {
   --pool-bottom: -4rem;
   --pool-left: -4rem;
 }
-body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl)::before,
-body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before,
-body:not(.room) > header.chrome::before {
+body.chart-room .strip {
+  --pool-bottom: -4rem;
+  --pool-left: -4rem;
+  --pool-right: -4rem;
+}
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl)::before {
   content: "";
   position: absolute;
   inset: -0.7rem -0.9rem -0.8rem;

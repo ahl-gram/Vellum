@@ -10,7 +10,7 @@ import type { Glyph } from "./glyphs.ts";
 import { CHART_ROOM_FLOOR, FLOOR_PLAIN, grounds, open, rest, size, withStyle, worstOf } from "./stage.ts";
 import type { Stage } from "./stage.ts";
 
-type Panel = { content: string; stops: number[][]; filter: string };
+export type Panel = { content: string; stops: number[][]; filter: string };
 type Piece = "cluster" | "chart folio" | "Press" | "room folio" | "strip";
 type Sub = "sub" | "coords";
 
@@ -20,7 +20,7 @@ const PANELS: Payload<Record<Piece, Panel | null>> =
   return { cluster: read("header.chrome"), "chart folio": read(".corner.bl"), Press: read(".legend"), "room folio": read(".corner.tr"), strip: read(".strip") };
 })()`;
 
-const crisp = (p: Panel | null): boolean =>
+export const crisp = (p: Panel | null): boolean =>
   !!p &&
   p.content === '""' &&
   p.filter === "none" &&

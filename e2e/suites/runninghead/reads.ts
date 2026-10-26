@@ -1,4 +1,5 @@
 import type { Payload } from "../../types.ts";
+import { GRADIENT_STOPS, PAGE_RGBA } from "../../support/pixel.ts";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
 export const SHELLED = [
@@ -85,7 +86,7 @@ type Member = {
   color: string;
 } | null;
 export type Head = {
-  chromeWash: { content: string; backgroundColor: string; filter: string } | null;
+  chromeWash: { content: string; backgroundColor: string; filter: string; stops: number[][] } | null;
   chromePosition: string | null;
   chromeBottom: number | null;
   bandClip: string | null;
@@ -97,6 +98,7 @@ export type Heads = Record<string, Head | undefined>;
 export type Bad = (pred: (h: Head, r: string) => boolean) => string[];
 
 export const HEAD_READ: Payload<string> = `(() => {
+  const rgba = ${PAGE_RGBA}, stops = ${GRADIENT_STOPS};
   const read = (sel) => {
     const el = document.querySelector(sel);
     if (!el) return null;
@@ -111,7 +113,7 @@ export const HEAD_READ: Payload<string> = `(() => {
   const band = document.querySelector(".band");
   const chrome = document.querySelector("header.chrome");
   return JSON.stringify({
-    chromeWash: chrome ? (({ content, backgroundColor, filter }) => ({ content, backgroundColor, filter }))(getComputedStyle(chrome, "::before")) : null,
+    chromeWash: chrome ? (({ content, backgroundColor, filter, backgroundImage }) => ({ content, backgroundColor, filter, stops: stops(backgroundImage) }))(getComputedStyle(chrome, "::before")) : null,
     wordmark: read("header.chrome .wordmark"), tagline: read("header.chrome .tagline"),
     rooms: read("header.chrome nav.rooms"),
     roomName: read("body > :is(main, .desk-layer) .room-name"), roomTagline: read("body > :is(main, .desk-layer) .room-tagline"),

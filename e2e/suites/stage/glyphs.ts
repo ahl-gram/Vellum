@@ -48,7 +48,7 @@ export const GLYPHS_OVER_SHEET = glyphsOver(false, true);
 // One entry per line box, so a sampled row crosses that line's glyphs and not the gap between two lines of a wrapped node (NS1's painted read; a node's union box put the chart folio's two-line title's row between its lines).
 export const GLYPH_LINES_OVER_SHEET = glyphsOver(true, true);
 // Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`), and on home and in the Gallery, which have no #sheet (CL1 in `e2e/suites/cluster.ts`, RH33 in `e2e/suites/runninghead/gallery.ts`).
-export const GLYPH_LINES =glyphsOver(true, false);
+export const GLYPH_LINES = glyphsOver(true, false);
 // Every glyph the instrument strip paints, aria-hidden ones included, since every letter on it but Play carries aria-hidden (the told line, the year readout, the scale's labels) and each is read on screen; one entry per line box (EZ4 in `e2e/suites/stage/strip.ts`).
 export const STRIP_INK: Payload<Glyph[]> = `(() => {
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };

@@ -196,7 +196,8 @@ type Dress = {
   line: number[];
   legendLeft: number;
   half: number;
-  pool: [number[], string];
+  cluster: Panel;
+  clusterFilter: string;
   panel: Panel;
   footing: Panel;
 };
@@ -212,7 +213,7 @@ const DRESS_READ: Payload<Dress> = `(() => { ${PARTS}
   return { padTop: parseFloat(getComputedStyle(q("main")).paddingTop), bandH: parseFloat(root.getPropertyValue("--band-h")) * rem, rem,
     landing: getComputedStyle(q(".grid")).animationName, border: [img.borderTopWidth, img.borderTopStyle, rgba(img.borderTopColor)], plate: shade(img.boxShadow),
     caption: rgba(getComputedStyle(q("figcaption")).color), title: rgba(getComputedStyle(q("figcaption strong")).color), line: rgba(getComputedStyle(q("figcaption span")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
-    pool: [rgba(pool.backgroundColor), pool.filter], panel: panel(".corner.tr"), footing: panel("nav.legend") };
+    cluster: panel("header.chrome"), clusterFilter: pool.filter, panel: panel(".corner.tr"), footing: panel("nav.legend") };
 })()`;
 
 const CHART_INK = (a: number) => tokenRgba("--chart-ink", a);
@@ -236,8 +237,8 @@ const dressed = (d: Dress) =>
   nearRgba(d.title, tokenRgba("--parchment-bright")) &&
   nearRgba(d.line, tokenRgba("--parchment")) &&
   Math.abs(d.legendLeft - d.half) < 0.5 &&
-  nearRgba(d.pool[0], CHART_INK(0.92)) &&
-  d.pool[1] === "blur(16px)" &&
+  panelOf(d.cluster, d.rem, [-0.7, -0.9, -0.8, -0.9]) &&
+  d.clusterFilter === "none" &&
   panelOf(d.panel, d.rem, [-0.7, -0.9, -0.8, -0.9]) &&
   panelOf(d.footing, d.rem, [-0.5, -1.1, -0.6, -1.1]);
 
@@ -294,7 +295,7 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
     ?.split(", ")
     .map(Number);
   k.check(
-    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions and their lines in parchment and their titles parchment-bright, no ink on the deep, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
+    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions and their lines in parchment and their titles parchment-bright, no ink on the deep, the legend row centred, the cluster's, the corner's and the legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
     scroll[1] < scroll[0] &&
       dressed(screen) &&
       !!turned &&

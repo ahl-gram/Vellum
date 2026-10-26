@@ -110,23 +110,18 @@ const VISITED = {
   arms: 3,
 };
 
-const WASH = {
-  filter: "blur(8px)",
-  bg: "rgba(18, 14, 10, 0.85)",
-  image: "none",
-  box: { left: -40, top: -40, right: 532, bottom: 152 },
-  nav: { right: 500, bottom: 100 },
-  foot: { bottom: 120 },
-  cluster: { right: 520, bottom: 140, left: 0, top: 0 },
-};
-
-test("CL1 fails when settleHome's answer never reached its landfall, though the wash it reads passes", async () => {
-  const at = page(() => WASH);
-  await cl1Wash(at.ctx, () => Promise.resolve(LANDED));
-  const never = page(() => WASH);
-  await cl1Wash(never.ctx, () => Promise.resolve(VEILED));
-  assert.deepEqual(at.checked, [{ code: "CL1", ok: true }], "the wash read does not pass, so this test proves nothing");
-  assert.deepEqual(never.checked, [{ code: "CL1", ok: false }], "CL1 passed on a home that never settled");
+test("CL1 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
+  const ctx = page(() => new Error(READ_THE_PAGE)).ctx;
+  await assert.rejects(
+    cl1Wash(ctx, () => Promise.resolve(LANDED)),
+    (err: Error) => err.message === READ_THE_PAGE,
+    "a settled home did not reach CL1's own read",
+  );
+  await assert.rejects(
+    cl1Wash(ctx, () => Promise.resolve(VEILED)),
+    (err: Error) => err.message === unsettled("CL1"),
+    "CL1 ran on a home that never settled, or failed for another reason",
+  );
 });
 
 test("H14a fails when settleHome's answer never reached its landfall, though the flight it reads passes", async () => {
