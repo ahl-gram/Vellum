@@ -250,12 +250,14 @@ test("P5b shoots the seat's card only after reading it pinned with its roll fini
   );
 });
 
-const rollFake = (read: unknown, anims: string[]) =>
-  recording((expression) => {
-    if (expression === CARD_ROLL) return HIDDEN;
+const rollFake = (read: unknown, anims: string[]) => {
+  let plain = 0;
+  return recording((expression) => {
+    if (expression === CARD_ROLL) return ++plain === 1 ? HIDDEN : read;
     if (isWitnessed(expression)) return witnessedRead(read, anims);
     return {};
   });
+};
 const SHOWN = { shown: true, pinned: false, card: BOX };
 
 test("P5b does not shoot the seat's card while its roll is still running", async () => {
