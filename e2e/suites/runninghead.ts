@@ -18,7 +18,14 @@ import {
   rh9ContrastPins,
   rhSweep,
 } from "./runninghead/heads.ts";
-import { rh10cPrinted, rh10GalleryScrolled, rh21Room, rh22CornerAndRoad, rh23Dress } from "./runninghead/gallery.ts";
+import {
+  rh10cPrinted,
+  rh10GalleryScrolled,
+  rh21Room,
+  rh22CornerAndRoad,
+  rh23Dress,
+  rh33ClusterReads,
+} from "./runninghead/gallery.ts";
 import { kitChecks } from "./runninghead/room.ts";
 import {
   rh11Deep,
@@ -73,6 +80,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RH21", () => rh21Room(k));
   await step("RH22", () => rh22CornerAndRoad(k));
   await step("RH23", () => rh23Dress(k));
+  await step("RH33", () => rh33ClusterReads(k));
   // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.

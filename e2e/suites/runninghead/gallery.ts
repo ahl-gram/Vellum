@@ -2,6 +2,8 @@ import { GALLERY_COUNT, GALLERY_SEED } from "../../../src/cli/gallery.ts";
 import { GRADIENT_STOPS, luminance, nearRgba, PAGE_RGBA, SHADE, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
+import { GLYPH_LINES } from "../stage/glyphs.ts";
+import { FLOOR_PLAIN, grounds, withStyle, worstOf } from "../stage/stage.ts";
 import type { RunningHeadKit } from "./kit.ts";
 
 export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
@@ -307,5 +309,36 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
       nearRgba(paper.title, tokenRgba("--ink-dark")) &&
       nearRgba(paper.line, tokenRgba("--ink-brown")),
     JSON.stringify({ scroll, screen, lift, paper }),
+  );
+}
+
+const FIRST_PLATE_LOADED: Payload<boolean> = `(() => { const i = document.querySelector(".grid img"); return !!i && i.complete && i.naturalWidth > 0; })()`;
+const PLATE_UNDER_CLUSTER: Payload<boolean> = `(() => { const p = document.querySelector(".grid img").getBoundingClientRect(); window.scrollTo(0, scrollY + p.top - 8); return true; })()`;
+
+export async function rh33ClusterReads(k: RunningHeadKit): Promise<void> {
+  const { evaluate, send, sleep, check, visit } = k;
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await send("Page.navigate", { url: "about:blank" });
+  if (!(await visit("/gallery/"))) throw new Error("RH33: the Gallery never came up");
+  await makeSettle(k)(FIRST_PLATE_LOADED, (loaded) => loaded, "RH33 the first plate loaded");
+  await evaluate(PLATE_UNDER_CLUSTER);
+  const { y } = await makeStable(makeSettle({ evaluate, sleep }))(SCROLLED, "RH33 the Gallery's plates landed", {
+    animated: ".grid",
+  });
+  const lines = (await evaluate(GLYPH_LINES)).filter((g) => g.piece === "cluster");
+  const read = await grounds(k, lines);
+  const bare = await withStyle(k, "rh33-bare", "header.chrome::before { content: none !important; }", () =>
+    grounds(k, lines),
+  );
+  const worst = worstOf(read);
+  check(
+    "RH33 in the Gallery at 1280x800, scrolled until its first plate lies under the head cluster, every line of the cluster reads at 4.5:1 or better against the ground under it on the kit's crisp panel, where the same lines with the panel taken away read under 4.5:1 over the plate, so the read can see the panel fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052)",
+    lines.length > 0 && worst >= FLOOR_PLAIN && worstOf(bare) < FLOOR_PLAIN,
+    JSON.stringify({
+      scroll: y,
+      lines: lines.length,
+      worst: [worst, read.find((g) => g.ratio === worst)?.t],
+      bare: worstOf(bare),
+    }),
   );
 }
