@@ -15,7 +15,6 @@ function stageScrolls({ evaluate, sleep, scrollY }: Pick<StageKit, "evaluate" | 
       if ((await scrollY()) === 0) break;
     }
   };
-  // 450ms outwaits GESTURE_BREAK_MS (300, src/site/home/valve.ts) so the next wheel opens a FRESH gesture.
   const freshGesture = async () => {
     await scrollToTop();
     await sleep(450, "pace: outwait GESTURE_BREAK_MS so the next wheel opens a fresh gesture");

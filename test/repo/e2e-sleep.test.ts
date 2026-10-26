@@ -135,7 +135,7 @@ const PLANT: ReadonlyArray<readonly [string, boolean]> = [
 ];
 const REFUSED = PLANT.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOT =
-  "BLIND SPOTS, declared, each with its direction: a sleep reached under another name, an alias of sleep or a promise around setTimeout, is no call to sleep (a miss); a timer inside an evaluate payload is a string (a miss); a counted loop that leaves on what it reads passes whatever its pause is for, a gesture repeated until the read stops moving or a pacing loop such as travel in e2e/suites/cards/hold.ts among them (a miss); a while, do or for...of loop is never a poll here, however it leaves (a false red, since a poll here is counted); a sleep in a function written inside a poll's loop is read as outside the poll (a false red)";
+  "BLIND SPOTS, declared, each with its direction: a sleep reached under another name, an alias of sleep or a promise around setTimeout, is no call to sleep (a miss); a timer inside an evaluate payload is a string (a miss); a for loop that leaves on what it reads passes whatever its pause is for, a gesture repeated until the read stops moving or a pacing loop such as travel in e2e/suites/cards/hold.ts among them (a miss); a for loop whose exit reads a name its body writes from the counter, a counter declared outside the loop or after a second declarator, or a catch around the sleep itself passes though it reads nothing from the page (a miss); a while, do or for...of loop is never a poll here, however it leaves (a false red, since a poll here is a for statement); an exit read through a destructured declaration, const { done } = await ..., names nothing the loop writes (a false red); a sleep in a function written inside a poll's loop is read as outside the poll (a false red)";
 
 const reported = async (path: string): Promise<number[]> => {
   const [result] = await eslint.lintText(PLANT.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });
@@ -147,7 +147,7 @@ const reported = async (path: string): Promise<number[]> => {
   return result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line);
 };
 
-test("an e2e sleep stands inside a counted poll that leaves on what it reads, or names itself at the call as a pace or a window with its reason (Issue #785)", async () => {
+test("an e2e sleep stands inside a for poll that leaves on what it reads, or names itself at the call as a pace or a window with its reason (Issue #785)", async () => {
   assert.ok(REFUSED.length > 0 && REFUSED.length < PLANT.length, "the plant cannot tell the rule from its negation");
   assert.deepEqual(await reported("e2e/suites/health.ts"), REFUSED, BLIND_SPOT);
   assert.deepEqual(await reported("e2e/support/settle.ts"), REFUSED, "a support module is held as a suite is");

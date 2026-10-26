@@ -35,7 +35,7 @@ headless browser actually do, so a green run can be believed.
    `vellum/e2e-throw-inside-step` follows a wait built there and asks for its step, and does not
    follow a member a hand-written type declares. The stillness predicates written by hand before it
    stay as they are.
-   A `sleep` anywhere under `e2e/` stands inside a counted `for` loop that leaves on what it reads,
+   A `sleep` anywhere under `e2e/` stands inside a `for` loop that leaves on what it reads,
    or names itself at the call with its reason as a string literal: `sleep(ms, "pace: why")` for a
    gap the harness keeps between the input events of one gesture or between two of its own
    attempts, and `sleep(ms, "window: why")` for a window a check reads an absence over or a timed
