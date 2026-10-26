@@ -1,6 +1,7 @@
 // Reading Room e2e (RR0-RR43; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import type { SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
@@ -21,6 +22,10 @@ import { rr39AtRest, rr43OverlayUnshadowed } from "./reading-room/dress.ts";
 import { rr40Glass, rr41ReadRefits, rr42PlateReveal } from "./reading-room/gestures.ts";
 
 type Step = ReturnType<typeof makeStep>;
+type Desk = { iw: number; ih: number; sheet: number[] | null };
+const DESK: Payload<Desk> = `(() => { const e = document.getElementById("sheet"); const b = e ? e.getBoundingClientRect() : null; return { iw: innerWidth, ih: innerHeight, sheet: b && [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
+const atDesk = (d: Desk): boolean => d.iw === 1440 && d.ih === 900;
+const sameSheet = (a: Desk, b: Desk): boolean => JSON.stringify(a.sheet) === JSON.stringify(b.sheet);
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
@@ -57,16 +62,25 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 export async function atTheDesk(ctx: SuiteContext, step: Step, k: ReadingRoomKit): Promise<void> {
-  const { evaluate, send, sleep } = ctx;
+  const { evaluate, send } = ctx;
+  const stable = makeStable(makeSettle(ctx));
+  const harness = await evaluate(DESK);
   // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await sleep(200);
-  await step("RR31, RR35, RR37, RR36", () => rrDeskReads(ctx));
+  await step("RR31, RR35, RR37, RR36", async () => {
+    await stable(DESK, "the room laid out at 1440x900", { departed: (d) => atDesk(d) && !sameSheet(d, harness) });
+    await rrDeskReads(ctx);
+  });
   await step("RR39", () => rr39AtRest(ctx));
   await step("RR43", () => rr43OverlayUnshadowed(ctx));
   await step("RR41", () => rr41ReadRefits(ctx));
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
+  const desk = await evaluate(DESK);
   await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(200);
-  await step("RR29", () => rr29Play(k));
+  await step("RR29", async () => {
+    await stable(DESK, "the room laid out again after the 1440x900 override", {
+      departed: (d) => !atDesk(d) && !sameSheet(d, desk),
+    });
+    await rr29Play(k);
+  });
 }
