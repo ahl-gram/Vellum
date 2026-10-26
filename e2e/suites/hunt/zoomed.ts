@@ -1,3 +1,4 @@
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import { countEvents } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HuntKit, Quarry, Zoom } from "../hunt.ts";
@@ -66,13 +67,12 @@ export async function hg2Taps(
   { evaluate, check, sleep, mouseTap, mouseDrag, framePoint }: HuntKit,
   tgt: Quarry,
 ): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
+  await evaluate(CLICKS.arm);
   await mouseTap(fr.px, fr.py);
-  await sleep(80);
-  const hg2 = await evaluate<{ dots: number; inSvg: boolean; solved: boolean; status: string }>(
-    `(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`,
-  );
+  const hg2 = await stable(HG2_READ, "HG2 the miss tap handled", { departed: (d) => d.clicks > 0 });
   check(
     "HG2 a miss tap while zoomed drops a sounding at the tapped spot over #map, and does not solve (AC2)",
     hg2.dots >= 1 && !hg2.inSvg && !hg2.solved && hg2.status.length > 0,
@@ -98,12 +98,11 @@ export async function hg4Solves(
   { evaluate, check, shoot, sleep, mouseTap, framePoint }: HuntKit,
   tgt: Quarry,
 ): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   const fr2 = await framePoint(2, tgt.hit.fx, tgt.hit.fy);
+  await evaluate(CLICKS.arm);
   await mouseTap(fr2.px, fr2.py);
-  await sleep(120);
-  const hg4 = await evaluate<{ solved: boolean; status: string; star: boolean }>(
-    `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`,
-  );
+  const hg4 = await stable(HG4_READ, "HG4 the guess tap handled", { departed: (d) => d.clicks > 0 });
   check(
     "HG4 a guess tap resolves to the correct settlement while zoomed (AC2: solves at k=2 via a real tap)",
     hg4.solved === true && /found it/i.test(hg4.status) && hg4.star === true,

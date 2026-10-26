@@ -41,15 +41,7 @@ export async function z20dInkDrops({
   );
 }
 
-export async function z20eCardSurvives({
-  evaluate,
-  check,
-  sleep,
-  rgn,
-  goHome,
-  enterAt,
-  waitRedraft,
-}: ZoomKit): Promise<void> {
+export async function z20eCardSurvives({ evaluate, check, rgn, goHome, enterAt, waitRedraft }: ZoomKit): Promise<void> {
   await goHome();
   const before20e = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -67,7 +59,6 @@ export async function z20eCardSurvives({
   })()`);
   await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
   await waitRedraft(e20e1.redrafts);
-  await sleep(80);
   const kept = await evaluate<{ hidden: boolean; name: string | null; zoomK: string }>(
     `(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");` +
       `return{hidden:card.hidden,name:nm?nm.textContent:null,zoomK:card.style.getPropertyValue("--zoom-k")};})()`,

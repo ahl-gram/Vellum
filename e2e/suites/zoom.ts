@@ -114,11 +114,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z15RegionCrop(ctx);
   await z16CacheHit(ctx);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
-  await z17Inset(k);
-  await zInsetContextShot(k);
+  await step("Z17", async () => {
+    await z17Inset(k);
+    await zInsetContextShot(k);
+  });
   await z18Pan(k);
   await z19RapidSettles(k);
-  await z19bSupersession(k);
+  await step("Z19b", () => z19bSupersession(k));
   await z20ZoomOutDrops(k);
   await z20bReducedMotion(k);
   await step("Z20c", () => z20cThrottle(k));

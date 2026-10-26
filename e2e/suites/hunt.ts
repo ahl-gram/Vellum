@@ -1,5 +1,6 @@
 // Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
 import { dropExpectedCancellations } from "../support/console.ts";
+import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { huntRoom } from "./hunt/room.ts";
 import { hd1Dispatch, h8Reload } from "./hunt/solved.ts";
@@ -18,6 +19,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const huntErrBase = consoleErrors.length;
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;
   const k = huntKit(ctx);
+  const step = makeStep(ctx);
   await h1Opens(ctx, HUNT_PAGE);
   await huntRoom(ctx);
   await h2Clues(ctx);
@@ -29,8 +31,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await h8Reload(ctx, HUNT_PAGE);
   await hg0Boots(ctx, HUNT_PAGE);
   await hg1Zoom(ctx);
-  await hg2Taps(k, tgt);
-  await hg4Solves(k, tgt);
+  await step("HG2, HG3", () => hg2Taps(k, tgt));
+  await step("HG4", () => hg4Solves(k, tgt));
   h9Clean(ctx, huntErrBase);
   h10LegendClear(ctx, tgt);
   await h11Labels(ctx);
