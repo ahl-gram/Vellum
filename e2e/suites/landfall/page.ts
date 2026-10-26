@@ -1,3 +1,5 @@
+import { STATION_SCALE_FACTOR } from "../../../src/site/home/station-flight.ts";
+import { readCam } from "../../support/home.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
@@ -93,20 +95,25 @@ export async function l1kSurfaces({
   await scrollToTop();
 }
 
-export async function l1fScrolledPage({
-  evaluate,
-  check,
-  sleep,
-  lastWheel,
-  camNow,
-  scrollY,
-  wheelAt,
-  scrollToTop,
-  freshGesture,
-  wheelsNow,
-  wheelLanded,
-}: LandfallKit): Promise<void> {
+// L1k's legend press started the gallery flight to STATION_SCALE_FACTOR of the fit, still in its slow tail when L1f begins (the 200ms pause that hid it is gone); 0.97 keeps the idle drift's 1.5% from failing the departure.
+const galleryAtRest = (stable: LandfallKit["stable"]) =>
+  stable(readCam, "L1f the gallery flight at rest", {
+    departed: (d) => d.scale > d.fit * STATION_SCALE_FACTOR * 0.97,
+  });
+
+async function wheelUpAtTop({ evaluate, camNow, wheelAt, wheelsNow, wheelLanded }: LandfallKit) {
+  const topCamBefore = await camNow();
+  const atTop = await wheelsNow();
+  const ptTop = await evaluate(stagePoint);
+  await wheelAt(ptTop, -120);
+  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
+  return { topCamBefore, topZoom: await camNow() };
+}
+
+export async function l1fScrolledPage(k: LandfallKit): Promise<void> {
+  const { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop, freshGesture, stable } = k;
   await scrollToTop();
+  await galleryAtRest(stable);
   await evaluate(`window.scrollTo(0, 240)`);
   const yMid = await scrollY();
   await evaluate(`window.__lfWheel = []`);
@@ -123,12 +130,7 @@ export async function l1fScrolledPage({
     }
   }
   await freshGesture();
-  const topCamBefore = await camNow();
-  const atTop = await wheelsNow();
-  const ptTop = await evaluate(stagePoint);
-  await wheelAt(ptTop, -120);
-  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
-  const topZoom = await camNow();
+  const { topCamBefore, topZoom } = await wheelUpAtTop(k);
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
     // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at Issue #463 (CI red twice, green locally).
