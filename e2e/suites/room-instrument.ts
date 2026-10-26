@@ -34,9 +34,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rs5Scrub(k, sm);
   await rs7Ruin(k, sm);
   await rs8Sweeps(k, sm);
-  await rs10Drag(k, sm);
+  await step("RS10", () => rs10Drag(k, sm));
   await rs11Forward(k, sm);
-  await rs12Pause(k, sm);
+  await step("RS12", () => rs12Pause(k, sm));
   await setYear(sm.present);
   await rs14Glyphs(k);
   await rs15Slide(k);
@@ -48,7 +48,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rs28Cancel(k);
   // Issue #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
-  await rs29Pace(k, smNow);
+  await step("RS29", () => rs29Pace(k, smNow));
   await step("RS30", () => rs30Rate(k, smNow));
   await step("RS31", () => rs31PaceDress(k));
   await step("RS32", () => rs32BarDress(k));

@@ -1,6 +1,8 @@
 import { makeRoom, makeBar } from "../../support/room.ts";
 import type { scrubFacts } from "../../support/room.ts";
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
+
+export const SWEEP: Payload<{ year: number | null }> = `({ year: window.__vellumAgesState().year })`;
 
 export type InstrumentKit = ReturnType<typeof instrumentKit>;
 export type Facts = Awaited<ReturnType<typeof scrubFacts>>;
