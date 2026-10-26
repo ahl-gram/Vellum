@@ -46,7 +46,7 @@ export async function l1kSurfaces({
   evaluate,
   check,
   sleep,
-  pressKey,
+  shutSlips,
   clickAt,
   camNow,
   scrollY,
@@ -84,8 +84,7 @@ export async function l1kSurfaces({
       break;
     }
   }
-  await pressKey("Escape", "Escape", 27);
-  await sleep(300);
+  await shutSlips("L1k the gallery slip set aside");
   check(
     "L1k a map action taken from down the page glides the reader back up to watch it (#472, 2026-08-28 ruling): the zoom control surfaces and zooms, the legend button surfaces and opens its card",
     zoomInPt !== null && legendPt !== null && surfaced !== null && surfacedCard !== null,
@@ -104,10 +103,11 @@ export async function l1fScrolledPage({
   wheelAt,
   scrollToTop,
   freshGesture,
+  wheelsNow,
+  wheelLanded,
 }: LandfallKit): Promise<void> {
   await scrollToTop();
   await evaluate(`window.scrollTo(0, 240)`);
-  await sleep(200);
   const yMid = await scrollY();
   await evaluate(`window.__lfWheel = []`);
   const midCamBefore = await camNow();
@@ -124,8 +124,10 @@ export async function l1fScrolledPage({
   }
   await freshGesture();
   const topCamBefore = await camNow();
-  await wheelAt(await evaluate(stagePoint), -120);
-  await sleep(200);
+  const atTop = await wheelsNow();
+  const ptTop = await evaluate(stagePoint);
+  await wheelAt(ptTop, -120);
+  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
   const topZoom = await camNow();
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
@@ -219,14 +221,15 @@ export async function l1gKeys({
 }
 
 export async function l1hDrift(
-  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop }: LandfallKit,
+  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop, wheelsNow, wheelLanded }: LandfallKit,
   pt: Point | null,
 ): Promise<void> {
   // L1h's fixture PROVES the drift wandered before flicking, or it certifies nothing (a reduced-motion lane never drifts).
   let floor2 = await camNow();
   for (let i = 0; i < 24 && pt !== null; i++) {
+    const before = await wheelsNow();
     await wheelAt(pt, 480);
-    await sleep(90);
+    await wheelLanded(before, "L1h the wheel toward the stand-off clamp landed");
     const next = await camNow();
     if (next !== null && floor2 !== null && Math.abs(next.scale - floor2.scale) < 1e-9) {
       floor2 = next;
@@ -263,9 +266,8 @@ export async function l1hDrift(
   );
 }
 
-export async function l1iCluster({ evaluate, check, sleep, scrollToTop }: LandfallKit): Promise<void> {
+export async function l1iCluster({ evaluate, check, scrollToTop }: LandfallKit): Promise<void> {
   await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
-  await sleep(300);
   const cluster = await evaluate<{ pos: string; washPos: string; bottom: number } | null>(`(() => {
     const h = document.querySelector("header.chrome");
     if (!h) return null;

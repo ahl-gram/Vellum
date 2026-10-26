@@ -3,14 +3,15 @@ import type { LandfallKit } from "./kit.ts";
 import { roomDir } from "./reads.ts";
 
 async function l9dSaturate(
-  { sleep, pinch, camNow }: Pick<LandfallKit, "sleep" | "pinch" | "camNow">,
+  { pinch, camNow, gestureMark, gestureEnded }: Pick<LandfallKit, "pinch" | "camNow" | "gestureMark" | "gestureEnded">,
   stagePt9: Point | null,
 ) {
   // Saturate to the close-in clamp by real pinches alone (no mouse mixing inside the touch block).
   let top9 = await camNow();
   for (let i = 0; i < 12 && stagePt9 !== null; i++) {
+    const lifted = await gestureMark();
     await pinch(stagePt9.x, stagePt9.y, 60, 180);
-    await sleep(200);
+    await gestureEnded(lifted, "L9d the pinch toward the ceiling lifted");
     const next = await camNow();
     if (next !== null && top9 !== null && Math.abs(next.scale - top9.scale) < 1e-9) {
       top9 = next;
@@ -22,10 +23,10 @@ async function l9dSaturate(
 }
 
 export async function l9dCeiling(
-  { evaluate, check, sleep, pinch, camNow, headroom, twoFingerDrag }: LandfallKit,
+  { evaluate, check, pinch, camNow, headroom, twoFingerDrag, gestureMark, gestureEnded }: LandfallKit,
   stagePt9: Point | null,
 ): Promise<void> {
-  const top9 = await l9dSaturate({ sleep, pinch, camNow }, stagePt9);
+  const top9 = await l9dSaturate({ pinch, camNow, gestureMark, gestureEnded }, stagePt9);
   const room9d = await headroom();
   const dir9d = roomDir(room9d);
   // Before/after sampling is blind to a mid-gesture dip that saturates back to the ceiling (guard-prover round 2), so the arm watches every synchronous transform write and keeps the minimum.
@@ -68,10 +69,14 @@ export async function l9dCeiling(
   );
 }
 
-export async function l9d2Debt({ check, sleep, touch, camNow }: LandfallKit, stagePt9: Point | null): Promise<void> {
+export async function l9d2Debt(
+  { check, sleep, touch, camNow, gestureMark, gestureEnded }: LandfallKit,
+  stagePt9: Point | null,
+): Promise<void> {
   // The from-start ratio's own contract: a clamped pinch-in owes its debt, so returning to the starting spread lands back on the clamp exactly (a per-frame relative ratio forgets the clamped half and undershoots).
   const debtBefore = await camNow();
   if (stagePt9 !== null) {
+    const lifted = await gestureMark();
     await touch("touchStart", [
       { x: stagePt9.x - 40, y: stagePt9.y, id: 0 },
       { x: stagePt9.x + 40, y: stagePt9.y, id: 1 },
@@ -87,8 +92,8 @@ export async function l9d2Debt({ check, sleep, touch, camNow }: LandfallKit, sta
     ]);
     await sleep(120);
     await touch("touchEnd", []);
+    await gestureEnded(lifted, "L9d2 the pinch's fingers lifted");
   }
-  await sleep(300);
   const debtAfter = await camNow();
   check(
     "L9d2 the pinch owes its debt at the ceiling: one gesture that pinches in past the clamp and returns to its starting spread lands exactly back on 7",
@@ -101,13 +106,14 @@ export async function l9d2Debt({ check, sleep, touch, camNow }: LandfallKit, sta
 }
 
 export async function l9eFloor(
-  { check, sleep, pinch, camNow, headroom, twoFingerDrag }: LandfallKit,
+  { check, pinch, camNow, headroom, twoFingerDrag, gestureMark, gestureEnded }: LandfallKit,
   stagePt9: Point | null,
 ): Promise<void> {
   let floor9 = await camNow();
   for (let i = 0; i < 14 && stagePt9 !== null; i++) {
+    const lifted = await gestureMark();
     await pinch(stagePt9.x, stagePt9.y, 180, 60);
-    await sleep(200);
+    await gestureEnded(lifted, "L9e the pinch toward the floor lifted");
     const next = await camNow();
     if (next !== null && floor9 !== null && Math.abs(next.scale - floor9.scale) < 1e-9) {
       floor9 = next;

@@ -1,4 +1,5 @@
 import { readCam, buttonPoint, makeStage } from "../../support/home.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { Headroom } from "./reads.ts";
 
@@ -42,18 +43,23 @@ const WHEELS: Payload<{ n: number }> = `({ n: window.__lfWheel.length })`;
 const SLIPS: Payload<{ open: number }> =
   `({ open: [...document.querySelectorAll(".lf-card")].filter((c) => !c.hidden).length })`;
 
+const ENTER_REST = (id: string): Payload<{ op: string; t: string; w: number; h: number } | null> =>
+  `(() => { const c = document.getElementById("lf-card-${id}"); const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!c || !a) return null; const r = a.getBoundingClientRect(); const cs = getComputedStyle(c); return { op: cs.opacity, t: cs.transform, w: r.width, h: r.height }; })()`;
+
 function stageWaits(ctx: SuiteContext, pressKey: (key: string, code: string, vk: number) => Promise<void>) {
   const { evaluate } = ctx;
+  const settle = makeSettle(ctx);
+  const stable = makeStable(settle);
   const wheelsNow = () => evaluate(WHEELS);
-  const wheelLanded = (before: { n: number }, label: string) => Promise.resolve([before, label]).then(() => undefined);
+  const wheelLanded = (before: { n: number }, label: string) => settle(WHEELS, (d) => d.n > before.n, label);
   const gestureMark = () => evaluate(ENDS);
-  const gestureEnded = (before: Ends, label: string) => Promise.resolve([before, label]).then(() => undefined);
+  const gestureEnded = (before: Ends, label: string) => settle(ENDS, (d) => d.ends - before.ends >= 2, label);
   const shutSlips = async (label: string): Promise<void> => {
-    await evaluate(SLIPS);
+    const before = await evaluate(SLIPS);
     await pressKey("Escape", "Escape", 27);
-    void label;
+    if (before.open > 0) await settle(SLIPS, (d) => d.open === 0, label);
   };
-  return { wheelsNow, wheelLanded, gestureMark, gestureEnded, shutSlips };
+  return { settle, stable, wheelsNow, wheelLanded, gestureMark, gestureEnded, shutSlips };
 }
 
 export function stageKit(ctx: SuiteContext) {
@@ -122,11 +128,12 @@ async function navKeys(
 }
 
 async function twoFingers(
-  { touch, sleep }: Pick<SuiteContext, "touch" | "sleep">,
+  { touch, evaluate, settle }: Pick<StageKit, "touch" | "evaluate" | "settle">,
   p: Point,
   sx: number,
   sy: number,
 ): Promise<void> {
+  const before = await evaluate(ENDS);
   await touch("touchStart", [
     { x: p.x - 40, y: p.y, id: 0 },
     { x: p.x + 40, y: p.y, id: 1 },
@@ -136,11 +143,11 @@ async function twoFingers(
     { x: p.x + 40 + sx * 40, y: p.y + sy * 30, id: 1 },
   ]);
   await touch("touchEnd", []);
-  await sleep(300);
+  await settle(ENDS, (d) => d.ends - before.ends >= 2, "the two-finger drag's fingers lifted");
 }
 
 export function gestureKit(k0: StageKit) {
-  const { evaluate, send, sleep, touch, pressKey } = k0;
+  const { evaluate, send, sleep, touch, pressKey, settle, stable } = k0;
   // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default. The navigation keys carry only their codes.
   const pressNav = async (key: string, code: string, vk: number, text?: string) => {
     await navKeys({ send }, key, code, vk, text);
@@ -155,12 +162,14 @@ export function gestureKit(k0: StageKit) {
     return { cx: m.e + (1500 * m.a) / 2, cy: m.f + (1157.931 * m.a) / 2, w: r.width, h: r.height };
   })()`);
   const twoFingerDrag = async (p: Point, sx = 1, sy = 1) => {
-    await twoFingers({ touch, sleep }, p, sx, sy);
+    await twoFingers({ touch, evaluate, settle }, p, sx, sy);
   };
   const recenter = async () => {
     await evaluate(`document.getElementById("lf-stage")?.focus()`);
     await pressKey("0", "Digit0", 48);
-    await sleep(1600);
+    await stable(readCam, "the camera recentred by the 0 key", {
+      departed: (d) => Math.abs(d.scale / d.fit - 1) < 1e-3,
+    });
   };
   const seedShown = async () => {
     for (let i = 0; i < 200; i++) {
@@ -183,7 +192,7 @@ export function gestureKit(k0: StageKit) {
 }
 
 export function entersKit(k1: GestureKit) {
-  const { evaluate, sleep, pressKey, clickAt, scrollY, centerOf, camScale, wheelAt } = k1;
+  const { evaluate, sleep, clickAt, scrollY, centerOf, camScale, wheelAt, stable, shutSlips } = k1;
   const measureEnters = async () => {
     const boxes = [];
     let swallowed = null;
@@ -200,7 +209,8 @@ export function entersKit(k1: GestureKit) {
         if (open === true) break;
         await sleep(75);
       }
-      await sleep(400);
+      if (open)
+        await stable(ENTER_REST(id), `L4, L8 the ${id} slip finished opening`, { departed: (d) => d.op === "1" });
       const box = await evaluate<{ id: string; open: boolean; w: number; h: number } | null>(
         `(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`,
       );
@@ -213,8 +223,7 @@ export function entersKit(k1: GestureKit) {
         await sleep(200);
         swallowed = { yA, sA, y: await scrollY(), scale: await camScale() };
       }
-      await pressKey("Escape", "Escape", 27);
-      await sleep(400);
+      await shutSlips(`L4, L8 the ${id} slip set aside`);
     }
     return { boxes, swallowed };
   };

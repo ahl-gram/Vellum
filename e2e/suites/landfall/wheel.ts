@@ -1,18 +1,22 @@
 import { atLandfall } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
-import type { Point } from "../../types.ts";
+import type { Payload, Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { stagePoint } from "./reads.ts";
 
 type Floor = Awaited<ReturnType<typeof l1dStandOff>>;
 
+const FLICK: Payload<{ n: number; age: number }> =
+  `(() => { const w = window.__lfW2; return { n: w.length, age: w.length ? performance.now() - w[0].t : 0 }; })()`;
+
 export async function l1aConsumed(
-  { check, sleep, lastWheel, camNow, wheelAt }: LandfallKit,
+  { check, lastWheel, camNow, wheelAt, wheelsNow, wheelLanded }: LandfallKit,
   settled1: Cam | null,
   pt: Point | null,
 ): Promise<void> {
+  const before = await wheelsNow();
   await wheelAt(pt, -120);
-  await sleep(150);
+  if (pt !== null) await wheelLanded(before, "L1a the wheel landed");
   const mid = { prevented: await lastWheel(), cam: await camNow() };
   check(
     "L1a mid-range a real wheel is consumed: the zoom steps and the event is defaultPrevented",
@@ -22,13 +26,14 @@ export async function l1aConsumed(
 }
 
 export async function l1bCloseClamp(
-  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt }: LandfallKit,
+  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, wheelsNow, wheelLanded }: LandfallKit,
   pt: Point | null,
 ): Promise<void> {
   let sat = await camNow();
   for (let i = 0; i < 24 && pt !== null; i++) {
+    const before = await wheelsNow();
     await wheelAt(pt, -480);
-    await sleep(90);
+    await wheelLanded(before, "L1b the wheel toward the close-in clamp landed");
     const next = await camNow();
     if (next !== null && sat !== null && Math.abs(next.scale - sat.scale) < 1e-9) {
       sat = next;
@@ -51,9 +56,13 @@ export async function l1bCloseClamp(
   );
 }
 
-export async function l1cNotDeadZone({ check, sleep, camNow, wheelAt }: LandfallKit, pt: Point | null): Promise<void> {
+export async function l1cNotDeadZone(
+  { check, camNow, wheelAt, wheelsNow, wheelLanded }: LandfallKit,
+  pt: Point | null,
+): Promise<void> {
+  const before = await wheelsNow();
   await wheelAt(pt, 120);
-  await sleep(150);
+  if (pt !== null) await wheelLanded(before, "L1c the wheel-out landed");
   const backOff = await camNow();
   check(
     "L1c the release is limit-specific, not a dead zone: the very next wheel-out zooms again",
@@ -62,11 +71,12 @@ export async function l1cNotDeadZone({ check, sleep, camNow, wheelAt }: Landfall
   );
 }
 
-export async function l1dStandOff({ sleep, camNow, wheelAt }: LandfallKit, pt: Point | null) {
+export async function l1dStandOff({ camNow, wheelAt, wheelsNow, wheelLanded }: LandfallKit, pt: Point | null) {
   let floor = await camNow();
   for (let i = 0; i < 24 && pt !== null; i++) {
+    const before = await wheelsNow();
     await wheelAt(pt, 480);
-    await sleep(90);
+    await wheelLanded(before, "L1d the wheel toward the stand-off clamp landed");
     const next = await camNow();
     if (next !== null && floor !== null && Math.abs(next.scale - floor.scale) < 1e-9) {
       floor = next;
@@ -111,7 +121,7 @@ export async function l1dReleased(
 }
 
 export async function l1eAbsorbed(
-  { evaluate, check, sleep, camNow, scrollY, wheelAt, freshGesture }: LandfallKit,
+  { evaluate, check, camNow, scrollY, wheelAt, freshGesture, stable, wheelsNow, wheelLanded }: LandfallKit,
   pt: Point | null,
   floor: Floor,
 ): Promise<void> {
@@ -122,12 +132,16 @@ export async function l1eAbsorbed(
   let usedUp = null;
   for (let i = 0; i < 5 && pt !== null && usedUp === null; i++) {
     await freshGesture();
+    const zoomedIn = await wheelsNow();
     await wheelAt(pt, -240);
-    await sleep(400);
+    await wheelLanded(zoomedIn, "L1e the wheel-in landed");
     await evaluate(`window.__lfW2 = []`);
     await wheelAt(pt, 4000);
     await wheelAt(pt, 480);
-    await sleep(250);
+    await stable(FLICK, "L1e the flick and the wheel after it landed", {
+      departed: (d) => d.n >= 2 || (d.n === 1 && d.age > 280),
+      same: (d, last) => d.n === last.n,
+    });
     const log = await evaluate<{ p: boolean; t: number }[]>(`window.__lfW2`);
     if (log.length === 2 && log[1]!.t - log[0]!.t < 280) {
       usedUp = { log, y: await scrollY(), cam: await camNow() };

@@ -1,6 +1,7 @@
 // Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup and dress at rest (L13-L32, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { forgetChartTouch, takeChartTouch } from "../support/chart-touch.ts";
 import { landed } from "../support/home.ts";
+import type { Cam } from "../support/home.ts";
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
@@ -45,7 +46,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k1 = gestureKit(k0);
   const k = entersKit(k1);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await l1Desktop(k);
+  await l1Desktop(k, makeStep(ctx));
   await l13Home(k, makeStep(ctx));
   await l9Touch(k, makeStep(ctx));
   await l10NoScriptGet(k);
@@ -53,36 +54,43 @@ export async function run(ctx: SuiteContext): Promise<void> {
   gate.check("L12 the landfall hardening flow is clean (no console errors, no new 4xx)");
 }
 
-async function l1Desktop(k: LandfallKit): Promise<void> {
-  const { evaluate, sleep, pressKey, settleHome, armWheelLog, scrollY } = k;
+async function l1Desktop(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
+  const { evaluate, settleHome, armWheelLog, scrollY } = k;
   const settled1 = await settleHome();
   await armWheelLog();
   const pt = await evaluate(stagePoint);
-  await l1aConsumed(k, settled1, pt);
-  await l1bCloseClamp(k, pt);
-  await l1cNotDeadZone(k, pt);
-  const floor = await l1dStandOff(k, pt);
-  // Any released wheel above already scrolled the page, so the probe POLLS its way back to top (a one-shot reset raced still-in-flight wheels and certified the old L1d from 44px, skeptic round 1) and re-reads the stage point at that scroll, or it proves nothing.
-  await l1dReleased(k, floor);
-  await l1eAbsorbed(k, pt, floor);
+  await step("L1a", () => l1aConsumed(k, settled1, pt));
+  await step("L1b", () => l1bCloseClamp(k, pt));
+  await step("L1c", () => l1cNotDeadZone(k, pt));
+  let floor: Cam | null = null;
+  await step("L1d", async () => {
+    floor = await l1dStandOff(k, pt);
+    // Any released wheel above already scrolled the page, so the probe POLLS its way back to top (a one-shot reset raced still-in-flight wheels and certified the old L1d from 44px, skeptic round 1) and re-reads the stage point at that scroll, or it proves nothing.
+    await l1dReleased(k, floor);
+  });
+  await step("L1e", () => l1eAbsorbed(k, pt, floor));
   await l1jHint(k);
-  await l1kSurfaces(k);
-  await l1fScrolledPage(k);
+  await step("L1k", () => l1kSurfaces(k));
+  await step("L1f", () => l1fScrolledPage(k));
   await l1gKeys(k);
-  await l1hDrift(k, pt);
+  await step("L1h", () => l1hDrift(k, pt));
   await l1iCluster(k);
   // The how flight stops the idle drift and re-arms its 9s timer, so every scale read below brackets its own gesture tightly, tolerating only sub-step drift (a wheel step is ~19%, the drift tween 1.5% over 14s).
   const settled2 = await settleHome();
   const how = await l5HowOpens(k, settled2);
   const y5 = await scrollY();
-  await l5bArrowScrolls(k, how, y5);
-  const closeBox0 = await l2ProseScrolls(k, y5);
+  await step("L5b", () => l5bArrowScrolls(k, how, y5));
+  let closeBox0: number[] | null = null;
+  await step("L2", async () => {
+    closeBox0 = await l2ProseScrolls(k, y5);
+  });
   await l6HeadStays(k, closeBox0, y5);
   await l3HeadSwallows(k, y5);
   await l7WideClear(k);
-  await pressKey("Escape", "Escape", 27);
-  await sleep(500);
-  await l4l8Enters(k);
+  await step("L4, L8", async () => {
+    await k.shutSlips("L4 the how slip set aside");
+    await l4l8Enters(k);
+  });
 }
 
 export async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
@@ -138,14 +146,14 @@ export async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>)
     const stagePt9 = await evaluate(stagePoint);
     // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
     await l9aOneFinger(k, stagePt9);
-    await l9bPinch(k, stagePt9);
+    await step("L9b", () => l9bPinch(k, stagePt9));
     // L9c-L9g: the real two-finger contract (Issue #475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
-    await l9cTwoFingerPan(k, stagePt9);
-    await l9dCeiling(k, stagePt9);
-    await l9d2Debt(k, stagePt9);
-    await l9eFloor(k, stagePt9);
-    await l9fPipGestures(k);
-    await l9hControlTap(k);
+    await step("L9c", () => l9cTwoFingerPan(k, stagePt9));
+    await step("L9d", () => l9dCeiling(k, stagePt9));
+    await step("L9d2", () => l9d2Debt(k, stagePt9));
+    await step("L9e", () => l9eFloor(k, stagePt9));
+    await step("L9f, L9g", () => l9fPipGestures(k));
+    await step("L9h", () => l9hControlTap(k));
     await step("L9 touch taken back", () => takeChartTouch(k, false));
   } finally {
     await evaluate(forgetChartTouch);
