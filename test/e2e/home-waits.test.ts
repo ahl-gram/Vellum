@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { h8KeySkip, h8bHoldSkip } from "../../e2e/suites/home/ceremony.ts";
+import { IDLE_DELAY_MS } from "../../src/site/home/drift.ts";
 import { DRIFT_TRIES, h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops } from "../../e2e/suites/home/drift.ts";
 import { homeKit } from "../../e2e/suites/home/kit.ts";
 import { h14cLegend, h14dPipHover } from "../../e2e/suites/home/stations.ts";
@@ -80,6 +81,28 @@ test("H8 fails when the key starts a flight rather than the jump", async () => {
   assert.deepEqual(w.checked, [{ code: "H8", ok: false }]);
 });
 
+test("H8 times out when the skip lands later than the key's own handler", async () => {
+  let n = 0;
+  const w = world((e, sent) => {
+    if (e !== readCam) return null;
+    return keysDown(sent).length === 0 || n++ < 5 ? ANCHORED : LANDED;
+  });
+  await assert.rejects(h8KeySkip(homeKit(w.ctx)), (err: Error) =>
+    err.message.startsWith("settle timeout H8 the key moved the camera off the anchorage: "),
+  );
+});
+
+test("H8b times out when the skip lands later than the key's own handler", async () => {
+  let n = 0;
+  const w = world((e, sent) => {
+    if (e !== readCam) return null;
+    return keysDown(sent).length === 0 || n++ < 5 ? HOLD : LANDED;
+  });
+  await assert.rejects(h8bHoldSkip(homeKit(w.ctx)), (err: Error) =>
+    err.message.startsWith("settle timeout H8b the key moved the camera off the anchorage: "),
+  );
+});
+
 test("H8b reads the camera only once the key has taken the hold off the anchorage", async () => {
   let n = 0;
   const w = world((e, sent) => {
@@ -114,6 +137,7 @@ test("H15a times out naming the drift after the idle delay and its headroom", as
     err.message.startsWith("settle timeout H15a the drift started: "),
   );
   assert.equal(w.asked.filter((e) => e.includes("clampHeld")).length, DRIFT_TRIES);
+  assert.ok(DRIFT_TRIES * 50 > IDLE_DELAY_MS, "the budget outlasts the idle delay");
 });
 
 test("H15c samples the drift only once it has left the rest again", async () => {
@@ -143,6 +167,18 @@ test("H15b takes its first stillness sample only once the wheel's zoom has lande
   });
   await h15bWheelStops(w.ctx);
   assert.deepEqual(w.checked, [{ code: "H15b", ok: true }]);
+});
+
+test("H15b times out when the drift keeps moving after the wheel", async () => {
+  let n = 0;
+  const w = world((e, sent) => {
+    if (e.includes(`getElementById("lf-stage").getBoundingClientRect()`)) return { x: 400, y: 300 };
+    if (e !== readCam) return null;
+    return wheeled(sent) ? cam({ scale: 1.9965, x: n++ }) : cam({ scale: 1.65 });
+  });
+  await assert.rejects(h15bWheelStops(w.ctx), (err: Error) =>
+    err.message.startsWith("settle timeout H15b the wheel's zoom landed: "),
+  );
 });
 
 test("H15d takes its first stillness sample only once the station flight has landed", async () => {

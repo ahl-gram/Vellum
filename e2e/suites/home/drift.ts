@@ -4,7 +4,10 @@ import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 
+// 2026-10-26: the sine.inOut start moves the printed transform about 0.25 s in; 3000 ms is runner-stall headroom, unswept (no browser reading when set); lane C CI read H15a at 9.2 s.
 const DRIFT_HEADROOM_MS = 3000;
+// 2026-10-26: the wheel's zoom is applied with duration 0, so 9 tries keep the 400 ms the old pause allowed.
+const WHEEL_TRIES = 9;
 export const DRIFT_TRIES = Math.ceil((IDLE_DELAY_MS + DRIFT_HEADROOM_MS) / 50);
 
 const BREATH: Payload<{ xform: string | null; clampHeld: boolean }> = `({ xform: ${readXform}, clampHeld: (() => {
@@ -53,6 +56,7 @@ export async function h15bWheelStops({ evaluate, send, check, sleep }: SuiteCont
   });
   await stable(readCam, "H15b the wheel's zoom landed", {
     departed: (d) => before !== null && Math.abs(d.scale / before.scale - 1) > DRIFT_SCALE - 1,
+    tries: WHEEL_TRIES,
   });
   const still1 = await evaluate(readXform);
   await sleep(900);

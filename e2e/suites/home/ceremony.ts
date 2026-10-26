@@ -78,6 +78,9 @@ export async function h7bLandfall({ evaluate, check, shoot, sleep }: SuiteContex
   await shoot("home-landfall.png");
 }
 
+// 2026-10-26: the skip lands inside the key's own handler (veil.ts calls land(0) synchronously), so 4 tries keep the 120 ms the old pause allowed.
+const SKIP_TRIES = 4;
+
 export async function h8KeySkip({ evaluate, send, check, sleep, PORT, pressKey }: HomeKit): Promise<void> {
   // H8's teeth: before the key the camera provably sits at the wide anchorage (0.78 of fit), so the jump to the landfall scale can only come from the skip's land(0). The poll waits for the ANCHORAGE, not merely the veil: the pre-paint veil stands before the module boots, and a key in that window has no skip listener to hit (CI caught exactly that).
   await evaluate(`sessionStorage.clear()`);
@@ -93,7 +96,12 @@ export async function h8KeySkip({ evaluate, send, check, sleep, PORT, pressKey }
   const anchored8 = anchored(before8);
   const settle = makeSettle({ evaluate, sleep });
   await pressKey("Escape", "Escape", 27);
-  const skipped = await settle(readCam, (d) => !anchored(d), "H8 the key moved the camera off the anchorage");
+  const skipped = await settle(
+    readCam,
+    (d) => !anchored(d),
+    "H8 the key moved the camera off the anchorage",
+    SKIP_TRIES,
+  );
   check(
     "H8 a real key skips the sounding: the veil is gone at once and the camera jumps from the anchorage to its destination",
     anchored8 && atLandfall(skipped),
@@ -115,7 +123,12 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
   const held8b = at8b !== null && at8b.veil && at8b.status === "Landfall" && !at8b.lifting;
   const settle = makeSettle({ evaluate, sleep });
   await pressKey("Escape", "Escape", 27);
-  const after8b = await settle(readCam, (d) => !anchored(d), "H8b the key moved the camera off the anchorage");
+  const after8b = await settle(
+    readCam,
+    (d) => !anchored(d),
+    "H8b the key moved the camera off the anchorage",
+    SKIP_TRIES,
+  );
   // The skip must CANCEL the armed hold timer, not just close the veil: move the camera with a real "+" zoom, then prove no phantom lift flies it back (guard-prover round 2: land(0)'s deletion went red here, but an uncancelled holdTimer escaped, because its stray flight targets the destination the camera already holds and only a moved camera can see it).
   await evaluate(`document.getElementById("lf-stage").focus()`);
   await pressKey("+", "Equal", 187);
