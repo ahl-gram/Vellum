@@ -1,3 +1,4 @@
+import { DRIFT_SCALE, DRIFT_SECONDS } from "../../../src/site/home/drift.ts";
 import { STATION_SCALE_FACTOR } from "../../../src/site/home/station-flight.ts";
 import { readCam } from "../../support/home.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
@@ -44,18 +45,9 @@ export async function l1jHint({ evaluate, check, sleep, wheelAt, freshGesture, r
   );
 }
 
-export async function l1kSurfaces({
-  evaluate,
-  check,
-  sleep,
-  shutSlips,
-  clickAt,
-  camNow,
-  scrollY,
-  centerOf,
-  scrollToTop,
-  scrollToFloor,
-}: LandfallKit): Promise<void> {
+export async function l1kSurfaces(k: LandfallKit): Promise<void> {
+  const { evaluate, check, sleep, shutSlips, clickAt, camNow, scrollY, centerOf, scrollToTop, scrollToFloor, stable } =
+    k;
   await scrollToFloor();
   const surfCamBefore = await camNow();
   // centerOf, never buttonPoint: buttonPoint scrollIntoViews the stage first, which un-scrolls the page and dissolves the very trap this arm exists to pin (the instruments' remnant is reachable down there).
@@ -92,28 +84,34 @@ export async function l1kSurfaces({
     zoomInPt !== null && legendPt !== null && surfaced !== null && surfacedCard !== null,
     JSON.stringify({ zoomInPt, legendPt, surfCamBefore, surfaced, surfacedCard }),
   );
+  await galleryAtRest(stable);
   await scrollToTop();
 }
 
-// L1k's legend press started the gallery flight to STATION_SCALE_FACTOR of the fit, still in its slow tail when L1f begins (the 200ms pause that hid it is gone); 0.97 keeps the idle drift's 1.5% from failing the departure.
+// The idle drift's fastest scale step in one 50ms poll (sine.inOut over DRIFT_SECONDS), which clause 13 of the settle doctrine sizes a stillness tolerance from; the flight's tail steps by more than twice that until its last few percent.
+const DRIFT_STEP = (((DRIFT_SCALE - 1) * Math.PI) / 2 / DRIFT_SECONDS) * 0.05;
+
+// The legend press flies the camera to STATION_SCALE_FACTOR of the fit with a slow tail the next check would otherwise open on; its departure is the last 3% of the way, which the camera is nowhere near before the press.
 const galleryAtRest = (stable: LandfallKit["stable"]) =>
-  stable(readCam, "L1f the gallery flight at rest", {
+  stable(readCam, "L1k the gallery flight at rest", {
     departed: (d) => d.scale > d.fit * STATION_SCALE_FACTOR * 0.97,
+    same: (d, last) => Math.abs(d.scale / last.scale - 1) < 2 * DRIFT_STEP,
   });
 
-async function wheelUpAtTop({ evaluate, camNow, wheelAt, wheelsNow, wheelLanded }: LandfallKit) {
-  const topCamBefore = await camNow();
-  const atTop = await wheelsNow();
-  const ptTop = await evaluate(stagePoint);
-  await wheelAt(ptTop, -120);
-  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
-  return { topCamBefore, topZoom: await camNow() };
-}
-
-export async function l1fScrolledPage(k: LandfallKit): Promise<void> {
-  const { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop, freshGesture, stable } = k;
+export async function l1fScrolledPage({
+  evaluate,
+  check,
+  sleep,
+  lastWheel,
+  camNow,
+  scrollY,
+  wheelAt,
+  scrollToTop,
+  freshGesture,
+  wheelsNow,
+  wheelLanded,
+}: LandfallKit): Promise<void> {
   await scrollToTop();
-  await galleryAtRest(stable);
   await evaluate(`window.scrollTo(0, 240)`);
   const yMid = await scrollY();
   await evaluate(`window.__lfWheel = []`);
@@ -130,7 +128,12 @@ export async function l1fScrolledPage(k: LandfallKit): Promise<void> {
     }
   }
   await freshGesture();
-  const { topCamBefore, topZoom } = await wheelUpAtTop(k);
+  const topCamBefore = await camNow();
+  const atTop = await wheelsNow();
+  const ptTop = await evaluate(stagePoint);
+  await wheelAt(ptTop, -120);
+  if (ptTop !== null) await wheelLanded(atTop, "L1f the wheel at the top landed");
+  const topZoom = await camNow();
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
     // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at Issue #463 (CI red twice, green locally).
