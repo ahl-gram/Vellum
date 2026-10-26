@@ -28,7 +28,9 @@ headless browser actually do, so a green run can be believed.
    leaves the list when it ends, and a class retired on `animationend` empties it, so a wait on either
    times out and is written on its departure instead. Like
    `makeSettle` it never settles on a read of 0, `false` or an empty string, so a count is read inside
-   an object, and it refuses a read written as an `async` function, whose promise arrives as `{}`.
+   an object, and it refuses a read written as an `async` function, whose promise arrives as `{}`;
+   a read that returns a promise in any other form arrives as `{}` unrefused, so a wait never reads
+   a promise.
    Build it in the module or kit that calls it, from that module's own settle:
    `vellum/e2e-throw-inside-step` follows a wait built there and asks for its step, and does not
    follow a member a hand-written type declares. The stillness predicates written by hand before it
@@ -84,8 +86,10 @@ headless browser actually do, so a green run can be believed.
    throws if the page never loads; clause 6 is why the wait cannot depart on those fields itself.
    Those two waits are the only ones the exception covers: their reasons are the two in
    `STILL_ONLY` in `e2e/support/settle.ts`, the type takes no reason written anywhere else, and a
-   unit test pins the list to those two names, so a third is a visible change to that test and a
-   ruling to cite. A departure that already holds before the action is one in name only, and
+   unit test pins the list to those two names, so a third reason is a visible change to that test
+   and a ruling to cite; a third wait that reuses one of the two reasons passes the type and the
+   test alike, and review holds it, each reason naming the wait it belongs to. A departure that
+   already holds before the action is one in name only, and
    neither the type nor the throw that refuse a missing departure can see it, so each predicate is
    read against the state its action starts from.
 6. **The predicate never carries the check's own claim.** A settle that waits for "the drawer is

@@ -32,7 +32,6 @@ const element = (selector: string, node: FakeNode, asked: Asked[], clicked: (sel
   click: () => clicked(selector),
 });
 
-// A page for the e2e kits' payloads to run against in Node: each evaluate runs its expression in a fresh context over the frame the test answers at that moment, so a payload reads the selectors it names and nothing else; a selector the frame does not carry reads as absent.
 export function fakePage(
   frame: (clock: number) => FakeFrame,
   clicked: (selector: string) => void = () => {},
