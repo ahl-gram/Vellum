@@ -174,7 +174,7 @@ test("H15b times out when the drift keeps moving after the wheel", async () => {
   const w = world((e, sent) => {
     if (e.includes(`getElementById("lf-stage").getBoundingClientRect()`)) return { x: 400, y: 300 };
     if (e !== readCam) return null;
-    return wheeled(sent) ? cam({ scale: 1.9965, x: n++ }) : cam({ scale: 1.65 });
+    return wheeled(sent) ? cam({ scale: 1.9965, x: Math.min(n++, 20) }) : cam({ scale: 1.65 });
   });
   await assert.rejects(h15bWheelStops(w.ctx), (err: Error) =>
     err.message.startsWith("settle timeout H15b the wheel's zoom landed: "),
