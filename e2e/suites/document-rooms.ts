@@ -188,7 +188,7 @@ async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Inde
   return faq;
 }
 
-async function ix2InksRow({ evaluate, check, sleep }: DocRoomsKit, faq: Index): Promise<void> {
+export async function ix2InksRow({ evaluate, check, sleep }: DocRoomsKit, faq: Index): Promise<void> {
   const target = faq.h2s[2];
   const firstEntryOf = await evaluate<string | null>(
     `(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`,
@@ -235,7 +235,7 @@ async function ix3Folds({ evaluate, check, settle }: DocRoomsKit, faq: Index): P
   );
 }
 
-async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoomsKit): Promise<void> {
+export async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoomsKit): Promise<void> {
   await goto(GLOSSARY);
   const glossary = await evaluate(READ);
   await evaluate(`document.querySelector(".find input").focus()`);

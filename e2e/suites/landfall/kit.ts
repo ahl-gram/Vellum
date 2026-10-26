@@ -1,5 +1,5 @@
 import { readCam, buttonPoint, makeStage } from "../../support/home.ts";
-import type { Point, SuiteContext } from "../../types.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { Headroom } from "./reads.ts";
 
 export type StageKit = ReturnType<typeof stageKit>;
@@ -36,9 +36,30 @@ function stageScrolls({ evaluate, sleep, scrollY }: Pick<StageKit, "evaluate" | 
   return { scrollToTop, freshGesture, readHint, scrollToFloor };
 }
 
+type Ends = { ends: number };
+const ENDS: Payload<Ends> = `(() => { if (window.__lfEnds === undefined) { window.__lfEnds = 0; const end = (e) => { if (e.pointerType === "touch") window.__lfEnds++; }; addEventListener("pointerup", end, true); addEventListener("pointercancel", end, true); } return { ends: window.__lfEnds }; })()`;
+const WHEELS: Payload<{ n: number }> = `({ n: window.__lfWheel.length })`;
+const SLIPS: Payload<{ open: number }> =
+  `({ open: [...document.querySelectorAll(".lf-card")].filter((c) => !c.hidden).length })`;
+
+function stageWaits(ctx: SuiteContext, pressKey: (key: string, code: string, vk: number) => Promise<void>) {
+  const { evaluate } = ctx;
+  const wheelsNow = () => evaluate(WHEELS);
+  const wheelLanded = (before: { n: number }, label: string) => Promise.resolve([before, label]).then(() => undefined);
+  const gestureMark = () => evaluate(ENDS);
+  const gestureEnded = (before: Ends, label: string) => Promise.resolve([before, label]).then(() => undefined);
+  const shutSlips = async (label: string): Promise<void> => {
+    await evaluate(SLIPS);
+    await pressKey("Escape", "Escape", 27);
+    void label;
+  };
+  return { wheelsNow, wheelLanded, gestureMark, gestureEnded, shutSlips };
+}
+
 export function stageKit(ctx: SuiteContext) {
   const { evaluate, sleep, wheel } = ctx;
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
+  const waits = stageWaits(ctx, pressKey);
   // e.defaultPrevented read at the window AFTER the stage's own listener ran, so the log records exactly what input.ts decided; passive, so the probe cannot itself consume.
   const armWheelLog = () =>
     evaluate<boolean>(
@@ -65,6 +86,7 @@ export function stageKit(ctx: SuiteContext) {
   const { scrollToTop, freshGesture, readHint, scrollToFloor } = stageScrolls({ evaluate, sleep, scrollY });
   return {
     ...ctx,
+    ...waits,
     pressKey,
     clickAt,
     settleHome,

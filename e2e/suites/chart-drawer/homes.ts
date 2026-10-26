@@ -5,6 +5,11 @@ import type { TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE, READ } from "./reads.ts";
 import type { Read, Stored } from "./reads.ts";
 
+const LAY: Payload<{ w: number; box: number[] } | null> =
+  `(() => { const e = document.getElementById("pp-lay"); if (!e) return null; const b = e.getBoundingClientRect(); return { w: b.width, box: [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
+export const layPressRested = (k: Pick<TableKit, "stable" | "evaluate">, label: string) =>
+  k.evaluate(LAY).then((lay) => (label === "" ? lay : lay));
+
 export async function cd36GoldPress({
   evaluate,
   check,

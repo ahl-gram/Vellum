@@ -135,7 +135,7 @@ type Seen = {
   ghostSeen: boolean;
 };
 
-async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
+export async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
   const { evaluate, check, sleep, touchPan, clearMobile, send } = kd;
   const { earNow, camBefore, afterHandle, ghostSeen } = seen;
   const panFrom = await evaluate<{
