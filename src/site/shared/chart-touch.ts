@@ -1,19 +1,14 @@
 // The chart's touch press (Issue #778): where touch is the main pointer a finger moves the page until the reader gives it to the chart.
+import { readStored, writeStored } from "./storage.ts";
 export const CHART_TOUCH_KEY = "vellum.chart-touch.v1";
 export const TOUCH_PRIMARY = "(hover: none) and (pointer: coarse)";
 
 export function touchHeld(getStorage: () => Storage): boolean {
-  try {
-    return getStorage().getItem(CHART_TOUCH_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return readStored(getStorage, CHART_TOUCH_KEY) === "1";
 }
 
 export function holdTouch(getStorage: () => Storage, on: boolean): void {
-  try {
-    getStorage().setItem(CHART_TOUCH_KEY, on ? "1" : "0");
-  } catch {}
+  writeStored(getStorage, CHART_TOUCH_KEY, on ? "1" : "0");
 }
 
 export type TouchPress = {
