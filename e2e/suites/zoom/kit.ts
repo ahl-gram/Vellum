@@ -54,7 +54,6 @@ export function zoomKit(ctx: SuiteContext) {
     );
   const goHome = async () => {
     await evaluate(`document.getElementById("zoom-reset").click()`);
-    await sleep(40);
   };
   const enterAt = (k: number, cu: number, cv: number) =>
     evaluate<undefined>(

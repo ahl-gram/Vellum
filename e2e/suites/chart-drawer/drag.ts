@@ -90,13 +90,13 @@ export async function cd46ReducedCarry({
   carry,
 }: DragKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const reduced = await evaluate<boolean>(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
-  const target = await bandPoint();
-  const { to } = await carry(target);
-  await release(to.x, to.y);
-  const landed = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-reduced-landed");
-  const duration = await evaluate(DURATION);
-  await send("Emulation.setEmulatedMedia", { features: [] });
+  const { reduced, landed, duration } = await (async () => {
+    const matches = await evaluate<boolean>(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
+    const { to } = await carry(await bandPoint());
+    await release(to.x, to.y);
+    const rest = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-reduced-landed");
+    return { reduced: matches, landed: rest, duration: await evaluate(DURATION) };
+  })().finally(() => send("Emulation.setEmulatedMedia", { features: [] }));
   const full = await evaluate(DURATION);
   check(
     "CD46 under reduced motion a carry still files and the settle collapses to an instant place: the cutting lands, its class retires, and the settle's declared duration reads the blanket's near-zero against the 0.34s the same cutting reads once the emulation is cleared, which is the same-run control that makes the emulation a measurement (Issue #523; motion.css's blanket)",

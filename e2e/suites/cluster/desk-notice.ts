@@ -1,6 +1,6 @@
 import { DESK_FRAME } from "../../../src/site/shared/page-box.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
-import { makeSettle } from "../../support/settle.ts";
+import { makeSettle, makeStable, STILL_ONLY } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 // The desk notice (Issue #761): a phone shrinks the fixed 1024 page and sees the Notice to Travellers, a tablet at 1024 and a narrow desktop window, which lays out the same 1024 page and scrolls sideways over it (Issue #762), never do, and Continue anyway is remembered.
@@ -56,7 +56,8 @@ export function deskKit(ctx: SuiteContext) {
   return { ...ctx, settle, open, forget };
 }
 
-const readSettled = (k: DeskKit, label: string) => k.settle(READ, (d) => d.ready === "complete", label);
+const readSettled = (k: DeskKit, label: string) =>
+  makeStable(k.settle)(READ, label, { departed: STILL_ONLY.deskNotice });
 
 export async function dnPhone(k: DeskKit): Promise<void> {
   const { check, send, setMobileViewport } = k;

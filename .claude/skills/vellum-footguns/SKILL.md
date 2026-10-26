@@ -138,7 +138,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
    the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
 6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
-   (stillness at the start looks like stillness at the end), and never carries the check's own claim.
+   (still at the start looks still at the end: clause 5), and never carries the check's own claim.
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
    sample, never its first**, which is whatever was still in flight, and it throws too rather than
    handing back that last read (ruled 2026-09-13, #589). **The throw belongs inside a `step`**: wrap
