@@ -202,3 +202,20 @@ test("Z20e reads the card straight after the redraft commits", async () => {
   await z20eCardSurvives(zoomKitOver(ctx));
   assert.deepEqual(slept, []);
 });
+
+test("the inset context shot waits for the region drafting to end, not for the depth alone", async () => {
+  const { ctx } = recording((expression) =>
+    expression === SETTLED_AT ? { k: "1.3500", drafting: true, insets: 1, opacity: 1 } : {},
+  );
+  await assert.rejects(zInsetContextShot(zoomKitOver(ctx)), (err: Error) =>
+    err.message.startsWith("settle timeout Z17 the camera's settle at k=1.35: "),
+  );
+});
+
+test("Z19b does not press home once the job it waited for has already landed", async () => {
+  const { ctx } = recording((expression) => (expression === DRAFTING ? { drafting: true, redrafts: 6 } : {}));
+  const k = zoomKitOver(ctx, { rgn: () => Promise.resolve({ redrafts: 5, band: 0, committed: false }) });
+  await assert.rejects(z19bSupersession(k), (err: Error) =>
+    err.message.startsWith("settle timeout Z19b the region job in flight: "),
+  );
+});

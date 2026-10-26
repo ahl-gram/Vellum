@@ -161,33 +161,38 @@ test("P24 times out naming the wheel when it never reaches the page", async () =
   );
 });
 
-test("P30 times out naming the text tap when its click never lands", async () => {
-  const marks = [0, 5, 8, 9, 11, 16, 17, 21, 23].map((idx) => ({ idx, name: `T${idx}`, x: 10 * idx, y: 20 }));
-  const card = {
-    shown: true,
-    name: "T0",
-    pinned: true,
-    rest: true,
-    left: 100,
-    top: 50,
-    right: 300,
-    bottom: 350,
-    link: null,
-  };
-  const { ctx } = recording((expression) => (expression === TAPPED ? { clicked: false, shown: true, rest: true } : ""));
-  const k = {
-    ...ctx,
-    settle: makeSettle(ctx),
-    boot: () => Promise.resolve(marks),
-    reset: () => Promise.resolve(),
-    tap: () => Promise.resolve(),
-    atRest: () => Promise.resolve(card),
-    card: () => Promise.resolve(card),
-  } as unknown as Parameters<typeof p30Tablet>[0];
-  await assert.rejects(p30Tablet(k), (err: Error) =>
-    err.message.startsWith("settle timeout P30 the text tap on T0's card handled: "),
-  );
-});
+for (const [stuck, read] of [
+  ["its click never lands", { clicked: false, shown: true, rest: true }],
+  ["the card it keeps is still rolling", { clicked: true, shown: true, rest: false }],
+] as const) {
+  test(`P30 times out naming the text tap when ${stuck}`, async () => {
+    const marks = [0, 5, 8, 9, 11, 16, 17, 21, 23].map((idx) => ({ idx, name: `T${idx}`, x: 10 * idx, y: 20 }));
+    const card = {
+      shown: true,
+      name: "T0",
+      pinned: true,
+      rest: true,
+      left: 100,
+      top: 50,
+      right: 300,
+      bottom: 350,
+      link: null,
+    };
+    const { ctx } = recording((expression) => (expression === TAPPED ? read : ""));
+    const k = {
+      ...ctx,
+      settle: makeSettle(ctx),
+      boot: () => Promise.resolve(marks),
+      reset: () => Promise.resolve(),
+      tap: () => Promise.resolve(),
+      atRest: () => Promise.resolve(card),
+      card: () => Promise.resolve(card),
+    } as unknown as Parameters<typeof p30Tablet>[0];
+    await assert.rejects(p30Tablet(k), (err: Error) =>
+      err.message.startsWith("settle timeout P30 the text tap on T0's card handled: "),
+    );
+  });
+}
 
 const PM = {
   cap: 3,
@@ -209,14 +214,14 @@ const HIDDEN = { shown: false, pinned: false, card: null };
 const witnessedRead = (read: unknown, anims: string[]) => ({ read, anims });
 const isWitnessed = (expression: string) => expression !== CARD_ROLL && expression.includes(CARD_ROLL);
 
-test("P5b shoots the seat's card only after reading it pinned with its roll finished", async () => {
+const seatFake = (anims: string[]) => {
   let witnessed = 0;
-  const { ctx, said } = recording((expression) => {
+  return recording((expression) => {
     if (expression === CARD_ROLL) return { shown: true, pinned: false, card: BOX };
     if (isWitnessed(expression))
       return witnessedRead(
         ++witnessed <= 3 ? { shown: true, pinned: false, card: BOX } : { shown: true, pinned: true, card: BOX },
-        ["finished"],
+        anims,
       );
     if (expression.includes("+3+"))
       return {
@@ -231,6 +236,10 @@ test("P5b shoots the seat's card only after reading it pinned with its roll fini
       return { hidden: false, name: "Seat", rank: "Realm Seat", aria: "Seat, Realm Seat", tale: false };
     return {};
   });
+};
+
+test("P5b shoots the seat's card only after reading it pinned with its roll finished", async () => {
+  const { ctx, said } = seatFake(["finished"]);
   await p4Capital(ctx, PM);
   const shot = said.findIndex((s) => s.kind === "shoot");
   assert.notEqual(shot, -1, "the seat's card was never shot");
@@ -241,30 +250,43 @@ test("P5b shoots the seat's card only after reading it pinned with its roll fini
   );
 });
 
-const rollFake = (anims: string[]) =>
+const rollFake = (read: unknown, anims: string[]) =>
   recording((expression) => {
     if (expression === CARD_ROLL) return HIDDEN;
-    if (isWitnessed(expression)) return witnessedRead(HIDDEN, anims);
+    if (isWitnessed(expression)) return witnessedRead(read, anims);
     return {};
   });
+const SHOWN = { shown: true, pinned: false, card: BOX };
 
-test("the card shot waits for the card's roll to finish", async () => {
-  const { ctx } = rollFake(["running"]);
-  await assert.rejects(pCardShot(ctx, { ruinIdx: -1, cap: 3 } as Manifest), (err: Error) =>
-    err.message.startsWith("settle timeout P card shot: the card unfurled: "),
+test("P5b does not shoot the seat's card while its roll is still running", async () => {
+  const { ctx, said } = seatFake(["running"]);
+  await assert.rejects(p4Capital(ctx, PM), (err: Error) =>
+    err.message.startsWith("settle timeout P5b the seat's card unfurled: "),
   );
+  assert.equal(count(said, "explorer-place-card-seat.png"), 0);
 });
 
-test("Z6 waits for the pinned card's roll before its shot", async () => {
-  const { ctx } = rollFake(["running"]);
-  await assert.rejects(z6PinnedCard(ctx), (err: Error) =>
-    err.message.startsWith("settle timeout Z6 the pinned card unfurled: "),
-  );
-});
+for (const [name, label, run] of [
+  [
+    "the card shot",
+    "P card shot: the card unfurled",
+    (ctx: SuiteContext) => pCardShot(ctx, { ruinIdx: -1, cap: 3 } as Manifest),
+  ],
+  ["Z6", "Z6 the pinned card unfurled", (ctx: SuiteContext) => z6PinnedCard(ctx)],
+  ["Z8", "Z8 the pinned card unfurled", (ctx: SuiteContext) => z8CardConstant(ctx)],
+] as const) {
+  test(`${name} waits for the card's roll to finish, and for the card to have shown`, async () => {
+    const running = rollFake(HIDDEN, ["running"]);
+    await assert.rejects(run(running.ctx), (err: Error) => err.message.startsWith(`settle timeout ${label}: `));
+  });
 
-test("Z8 waits for the pinned card's roll before its shot", async () => {
-  const { ctx } = rollFake(["running"]);
-  await assert.rejects(z8CardConstant(ctx), (err: Error) =>
-    err.message.startsWith("settle timeout Z8 the pinned card unfurled: "),
-  );
-});
+  test(`${name} waits for the card to have shown even when its roll is finished`, async () => {
+    const finished = rollFake(HIDDEN, ["finished"]);
+    await assert.rejects(run(finished.ctx), (err: Error) => err.message.startsWith(`settle timeout ${label}: `));
+  });
+
+  test(`${name} waits for the roll to finish once the card has shown`, async () => {
+    const shown = rollFake(SHOWN, ["running"]);
+    await assert.rejects(run(shown.ctx), (err: Error) => err.message.startsWith(`settle timeout ${label}: `));
+  });
+}

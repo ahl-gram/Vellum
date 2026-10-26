@@ -32,7 +32,6 @@ export async function p30Tablet(k: Kit): Promise<void> {
     const text = { x: (c.left + c.right) / 2, y: c.bottom - 30 };
     await k.evaluate(TAPLOG);
     await k.tap(text);
-    // The next town's tap is two taps from this one as well, so it keeps the same gap.
     await k.sleep(650);
     await stable(TAPPED, `P30 the text tap on ${m.name}'s card handled`, {
       departed: (d) => d.clicked && (!d.shown || d.rest),
