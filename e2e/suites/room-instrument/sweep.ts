@@ -1,4 +1,5 @@
-import type { Facts, InstrumentKit } from "./kit.ts";
+import { makeSettle } from "../../support/settle.ts";
+import { SWEEP, type Facts, type InstrumentKit } from "./kit.ts";
 
 export async function rs8Sweeps(
   { evaluate, check, sleep, setYear, roadsDisp }: InstrumentKit,
@@ -40,9 +41,13 @@ export async function rs10Drag(
   { evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit,
   sm: Facts,
 ): Promise<void> {
-  await setYear(sm.minFounded);
+  const from = await setYear(sm.minFounded);
   await clickPlay();
-  await sleep(220);
+  await makeSettle({ evaluate, sleep })(
+    SWEEP,
+    (d) => from !== null && d.year !== null && d.year !== from,
+    "RS10 the sweep left its start",
+  );
   const rs10 = await evaluate<{ before: string; after: string; year: number | null; mid: number }>(`(()=>{
     const before=document.querySelector(".rf-play").textContent;
     const s=document.querySelector(".rf-range");const mid=${Math.floor((sm.minFounded + sm.present) / 2)};
@@ -85,9 +90,10 @@ export async function rs12Pause(
   { evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit,
   sm: Facts,
 ): Promise<void> {
-  await setYear(sm.minFounded);
+  const settle = makeSettle({ evaluate, sleep });
+  const from = await setYear(sm.minFounded);
   await clickPlay();
-  await sleep(700);
+  await settle(SWEEP, (d) => from !== null && d.year !== null && d.year !== from, "RS12 the sweep left its start");
   const frozen = await evaluate<{ year: number | null; lbl: string }>(
     `(()=>{document.querySelector(".rf-play").click();return{year:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent};})()`,
   );
@@ -96,8 +102,13 @@ export async function rs12Pause(
   await clickPlay();
   await sleep(120);
   const resumedEarly = await yearNow();
-  await sleep(700);
-  const resumed = await yearNow();
+  const resumed = (
+    await settle(
+      SWEEP,
+      (d) => d.year !== null && d.year !== frozen.year,
+      "RS12 the resumed sweep moved off the frozen year",
+    )
+  ).year;
   check(
     "RS12 the Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)",
     frozen.lbl === "Play" &&

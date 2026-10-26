@@ -131,7 +131,6 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
   await evaluate(
     `getSelection().removeAllRanges(); document.querySelector(".lf-shelf-grid figcaption").scrollIntoView({ block: "center" })`,
   );
-  await sleep(200);
   const caption = await evaluate(rectOf(".lf-shelf-grid figcaption"));
   if (caption) await dragAcross({ x: caption.x + 2, y: caption.y + caption.h / 2 }, caption.w - 4, 0);
   const controlSelection = await evaluate<string>(`getSelection().toString()`);

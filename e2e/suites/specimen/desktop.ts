@@ -205,9 +205,7 @@ export async function sb5cFooting(
   );
 }
 
-export async function sb6RestAgain({ evaluate, check, sleep, setState, read }: SpecimenKit): Promise<void> {
-  await setState("rest");
-  await sleep(700);
+export async function sb6RestAgain({ evaluate, check, read }: SpecimenKit): Promise<void> {
   const back = await read();
   const emptied = await evaluate<{ text: string; disp: string; btn: string }>(
     `(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display,btn:document.getElementById("sb-report").textContent};})()`,

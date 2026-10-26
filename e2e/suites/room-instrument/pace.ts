@@ -1,9 +1,9 @@
 import { sendKey } from "../../support/home.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
-import { makeSettle } from "../../support/settle.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
-import type { Facts, InstrumentKit } from "./kit.ts";
+import { SWEEP, type Facts, type InstrumentKit } from "./kit.ts";
 
 export async function rs29Pace(
   { evaluate, check, sleep, setYear, clickPlay }: InstrumentKit,
@@ -23,8 +23,10 @@ export async function rs29Pace(
   await clickPlay();
   await sleep(150);
   await clickPlay();
-  await sleep(80);
-  const rs29hash = await evaluate<string>(`location.hash`);
+  const settle = makeSettle({ evaluate, sleep });
+  const rs29hash = (
+    await makeStable(settle)(PARKED, "RS29 the Pause parked the sweep", { departed: (d) => !d.playing })
+  ).hash;
   check(
     "RS29 the pace group stands at the readout's right with 1x pressed and reported, a press moves the mark and reaches the engine, and the address never carries it (#493, ruled 2026-09-02)",
     rs29.role === "group" &&
@@ -47,9 +49,13 @@ export async function rs30Rate(
 ): Promise<void> {
   // Issue #526: the RATE, off the page's own frame clock. storyAt anchors the sweep to the wall clock, so years per page millisecond is a property of the engine that no runner speed can move, while two years a wall window apart can only be read to a frame of quantization at each end.
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
-  await setYear(smNow.minFounded);
+  const from = await setYear(smNow.minFounded);
   await clickPlay();
-  await sleep(200);
+  await makeSettle({ evaluate, sleep })(
+    SWEEP,
+    (d) => from !== null && d.year !== null && d.year !== from,
+    "RS30 the sweep left its start",
+  );
   await startSweepSamples();
   await sleep(PACE_LEG_MS);
   await evaluate(`document.querySelector('.rf-pace button[data-pace="4"]').click()`);
@@ -68,6 +74,9 @@ export async function rs30Rate(
     `${rs30.detail} label=${rs30lbl}`,
   );
 }
+
+const PARKED: Payload<{ playing: boolean; hash: string }> =
+  `({ playing: window.__vellumAgesState().playing, hash: location.hash })`;
 
 type Press = {
   x: number;
