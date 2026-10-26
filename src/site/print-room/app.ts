@@ -30,6 +30,7 @@ import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
+import { $ } from "../shared/by-id.ts";
 
 declare global {
   interface Window {
@@ -53,7 +54,6 @@ declare global {
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const seedInput = $<HTMLInputElement>("pr-seed");
 const styleSel = $<HTMLSelectElement>("pr-style");
 const status = $("pr-status");

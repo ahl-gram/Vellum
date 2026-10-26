@@ -28,8 +28,8 @@ import {
   sheetLine,
 } from "./folio-lines.ts";
 import { PLATE_CHART, howPlate } from "./how-plate.ts";
+import { $ } from "../../shared/by-id.ts";
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
 const warning = $("pf-warning");
 const bound = $("pf-bound");
@@ -246,7 +246,7 @@ const draft = async (): Promise<void> => {
 // The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the Issue #520 scar, a control nobody can use.
 const slide = pageSlideAway({
   frame: document.querySelector(".stage") as HTMLElement,
-  sheet: document.getElementById("sheet") as HTMLElement,
+  sheet: $("sheet"),
   gesture: $("map-viewport"),
   step: ZOOM_STEP,
 });
@@ -263,7 +263,7 @@ bindGlassKeys($("map-viewport"), zoomController);
 // Issue #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
 const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
-  sheet: document.getElementById("sheet") as HTMLElement,
+  sheet: $("sheet"),
   camera: { hold: () => zoomController.getState(), restore: (t) => zoomController.refit(t) },
   aspect: () => {
     const svg = sheetBox.querySelector("svg");

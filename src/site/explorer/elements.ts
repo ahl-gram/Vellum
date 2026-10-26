@@ -1,5 +1,5 @@
 // The Explorer's one getElementById pass, DOM-bound at module scope by design (module scripts are deferred, so the DOM is parsed first); never import this from a unit test.
-export const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+import { $ } from "../shared/by-id.ts";
 export const seedInput = $<HTMLInputElement>("seed");
 export const styleSel = $<HTMLSelectElement>("style");
 export const typeSel = $<HTMLSelectElement>("type");

@@ -35,6 +35,7 @@ import { createLivingChart } from "../shared/living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { errorText } from "../shared/error-text.ts";
+import { $ } from "../shared/by-id.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -42,7 +43,6 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
 import {
-  $,
   seedInput,
   styleSel,
   status,

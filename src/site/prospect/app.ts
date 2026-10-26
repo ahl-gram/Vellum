@@ -23,6 +23,7 @@ import { errorText } from "../shared/error-text.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
+import { $ } from "../shared/by-id.ts";
 
 declare global {
   interface Window {
@@ -42,7 +43,6 @@ declare global {
   }
 }
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pp-status");
 const warning = $("pp-warning");
 const chartLink = $<HTMLAnchorElement>("pp-chart-link");

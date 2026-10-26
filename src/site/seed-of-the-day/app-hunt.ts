@@ -14,8 +14,7 @@ import { huntDispatch, type Miss } from "./app-dispatch.ts";
 import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { World } from "../../world/types.ts";
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+import { $ } from "../shared/by-id.ts";
 
 // Restart a one-shot CSS animation by toggling its trigger class across a reflow, so it replays even when the class is already present.
 function restart(el: HTMLElement | null, cls: string): void {
