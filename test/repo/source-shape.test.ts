@@ -31,6 +31,7 @@ const ID_LOOKUP_PLANT = [
   'export const i = () => import("../by-id.ts");',
   'export const j = "../by-id.ts";',
   "export const l = () => import(`../by-id.ts`);",
+  'import { $ as m } from "../other/by-id.ts";',
 ];
 
 test("the living-chart engine looks up no element by id, however the lookup is spelled, nor imports the site's shared lookup, and a mention is not a lookup", async () => {
