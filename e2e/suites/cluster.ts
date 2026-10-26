@@ -96,6 +96,7 @@ export async function cl1Wash(ctx: SuiteContext, settleHome: Stage["settleHome"]
   );
   const worst = worstOf(read);
   const want = [-0.7, -0.9, -0.8, -0.9].map((r) => r * REM);
+  // 2026-10-26: with the panel taken away the cluster read worst 1.16 on the Mac (1.16 on CI run 40422027544), margins 3.34 and 3.34 under 4.5.
   check(
     "CL1 home's cluster stands on the kit's crisp panel, the one every zoomed room's cluster wears (chart ink 0.85 to 0.72, no blur, 0.7rem above, 0.9rem beside and 0.8rem below the cluster's box, sized by those insets alone and never a fixed box), and at landfall every line of it reads at 4.5:1 or better against the ground under it, where the same lines with the panel taken away read under 4.5:1 over the close-in chart, so the read can see the panel fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052; the soft pool it replaces, and the sizing CL3 held, were Issue #480's)",
     crisp(panel) &&

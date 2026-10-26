@@ -331,6 +331,7 @@ export async function rh33ClusterReads(k: RunningHeadKit): Promise<void> {
     grounds(k, lines),
   );
   const worst = worstOf(read);
+  // 2026-10-26: with the panel taken away the cluster read worst 1.13 on the Mac (1.13 on CI run 40422027544), margins 3.37 and 3.37 under 4.5.
   check(
     "RH33 in the Gallery at 1280x800, scrolled until its first plate lies under the head cluster, every line of the cluster reads at 4.5:1 or better against the ground under it on the kit's crisp panel, where the same lines with the panel taken away read under 4.5:1 over the plate, so the read can see the panel fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052)",
     lines.length > 0 && worst >= FLOOR_PLAIN && worstOf(bare) < FLOOR_PLAIN,

@@ -86,6 +86,7 @@ export async function ez4Strip(ctx: SuiteContext): Promise<void> {
   const r = await readStrip(ctx);
   const faults = stripFaults(r);
   const worst = worstOf(r.read);
+  // 2026-10-26: with the panel and the fade taken away the strip read worst 1.78 on the Mac (1.78 on CI run 40422027544), margins 2.72 and 2.72 under 4.5.
   ctx.check(
     "EZ4 in the Reading Room at 1280x800 on seed 42, at rest the instrument strip carries no panel and keeps its own fade, and zoomed by two presses of the Glass it stands on the kit's crisp panel (chart ink 0.85 to 0.72, no blur) drawn over that same fade, meeting the held chart folio's panel and lying over no other piece's lines, and every letter on it, its told line, its year readout and its scale among them, reads at 4.5:1 or better against the ground under it, where the same letters with the panel and the fade taken away read under 4.5:1, so the read can see them fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052, replacing the blurred pool of Issue #988's third call)",
     faults.length === 0,
