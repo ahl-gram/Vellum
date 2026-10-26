@@ -130,8 +130,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z20fStepsDown(k);
   await step("Z20g", () => z20gInkBlocks(k));
   const target21 = await z21Target(k);
-  const deep21 = await z21Hamlets(k, target21);
-  await z21bOneBandUp(k, target21, deep21);
+  await step("Z21, Z21b", async () => {
+    const deep21 = await z21Hamlets(k, target21);
+    await z21bOneBandUp(k, target21, deep21);
+  });
   await step("Z21c", () => z21cFarmsteads(k));
   const pick = await zHold(step, k, target21);
   await zLoupe(step, k, pick);
