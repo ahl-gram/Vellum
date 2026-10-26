@@ -141,7 +141,7 @@ export async function l1fScrolledPage({
       topCamBefore !== null &&
       topZoom !== null &&
       topZoom.scale > topCamBefore.scale * 1.05,
-    JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
+    JSON.stringify({ yMid, midCamBefore, backUp, topCamBefore, topZoom }),
   );
 }
 
