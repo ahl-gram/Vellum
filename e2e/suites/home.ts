@@ -76,8 +76,8 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h7aVeil(ctx);
   await step("H7c", () => h7cAdopted(ctx));
   await h7bLandfall(ctx);
-  await h8KeySkip(k);
-  await h8bHoldSkip(k);
+  await step("H8", () => h8KeySkip(k));
+  await step("H8b", () => h8bHoldSkip(k));
   await h9CeremonyStandsDown(ctx);
   await step("H10b", () => h10bInlinePredicate(ctx));
   await setNarrowViewport(390, 844);
@@ -111,6 +111,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
 async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   const { send, consoleErrors, http4xx } = ctx;
   const { settleHome } = k;
+  const step = makeStep(ctx);
   // Stations, cards, and the drift (Issue #458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (Issue #460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
   const httpBase3 = http4xx.length;
@@ -119,12 +120,12 @@ async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   const { atlasPt, visited } = await h14aFlight(k);
   await h14aCardFits(ctx, settled14, atlasPt, visited);
   await h14bEscape(k);
-  await h14dPipHover(k);
-  await h14cLegend(k);
-  await h15aDrift(ctx);
-  await h15bWheelStops(ctx);
-  await h15cRearmed(ctx);
-  await h15dFlightStops(k);
+  await step("H14d", () => h14dPipHover(k));
+  await step("H14c", () => h14cLegend(k));
+  await step("H15a", () => h15aDrift(ctx));
+  await step("H15b", () => h15bWheelStops(ctx));
+  await step("H15c", () => h15cRearmed(ctx));
+  await step("H15d", () => h15dFlightStops(k));
   await h16NoDrift(k);
   h17Clean(ctx, errBase3, httpBase3);
 }
