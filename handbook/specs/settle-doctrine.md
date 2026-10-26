@@ -17,7 +17,22 @@ headless browser actually do, so a green run can be believed.
    next. Before widening a number, ask what the check is measuring; RS30 measured wall-clock
    quantization and read 2.76 to 4.31 on unchanged code against a fixed 3.
 2. **Read the engine's own clock.** A pace is a rate over the engine's ticks, never a wall window.
-3. **A blind sleep becomes a poll to rest.** Poll a geometry or a counter until it stops moving.
+3. **A blind sleep becomes a poll to rest.** Poll a geometry or a counter until it stops moving, with
+   `makeStable` in `e2e/support/settle.ts` (Issue #785). It polls through the `makeSettle` it is
+   handed, so a tolerant settle makes a tolerant wait, and hands back the first read that equals the
+   one before it, by JSON or by the comparator it is handed. Each call names what shows the change it
+   waits for, in one of clause 5's three forms: a departure, an animation the action starts, or one
+   of the two reasons clause 5 allows in place of a departure. An animation is named by the selector of the element that CARRIES it,
+   and the wait asks for that element's animations to be listed and every one finished (the
+   environment bullet on a sleep past an animation's duration); a motion that is a transition alone
+   leaves the list when it ends, and a class retired on `animationend` empties it, so a wait on either
+   times out and is written on its departure instead. Like
+   `makeSettle` it never settles on a read of 0, `false` or an empty string, so a count is read inside
+   an object, and it refuses a read written as an `async` function, whose promise arrives as `{}`.
+   Build it in the module or kit that calls it, from that module's own settle:
+   `vellum/e2e-throw-inside-step` follows a wait built there and asks for its step, and does not
+   follow a member a hand-written type declares. The stillness predicates written by hand before it
+   stay as they are.
 4. **A readiness wait THROWS on timeout; a measurement poll judges its LAST read; a `step` catches
    the throw.** The two are different jobs and the house already writes both. A wait a check DEPENDS
    on returns nothing useful when it gives up, so returning its last read hands the check a stale
@@ -52,7 +67,27 @@ headless browser actually do, so a green run can be believed.
    it ran to its end having exercised fewer interactions, which is not the clean bill health gives.
 5. **The predicate requires the geometry to have LEFT where it began.** Stillness at the start is
    indistinguishable from stillness at the end. Record the starting rect and demand a departure
-   before demanding rest.
+   before demanding rest. `makeStable` (clause 3) takes the departure as a predicate, and in two
+   cases takes something else in its place. An animation the action itself starts, on an element
+   that carried none before it (an element the action shows, a class it adds, a fresh document),
+   departs when its list goes from empty to finished; an element that already holds a finished
+   animation, which a `both` fill keeps, is finished at the start as well, so a wait on it names its
+   departure too. And a wait may ask for stillness alone, giving a reason in place of a departure,
+   only where two things hold (Alex, Issue #785, 2026-10-25). The wait cannot itself tell that
+   anything moved: two equal reads show only that the page has stopped changing, so it guards
+   against reading mid-change and nothing more. That is enough only where the action has finished
+   before the wait starts (`carry`'s moves land before their dispatch returns; the desk notice's page
+   has loaded, or switched its media, before its read), and where the check asserts, straight after
+   the wait, the very fields that would show the change (the ghost, the drag flag and the receiving
+   band; the notice's size and text), so that a change that never arrived fails the check instead of
+   passing it, and a check that asserts an absence leans on the wait before it, `open`'s, which
+   throws if the page never loads; clause 6 is why the wait cannot depart on those fields itself.
+   Those two waits are the only ones the exception covers: their reasons are the two in
+   `STILL_ONLY` in `e2e/support/settle.ts`, the type takes no reason written anywhere else, and a
+   unit test pins the list to those two names, so a third is a visible change to that test and a
+   ruling to cite. A departure that already holds before the action is one in name only, and
+   neither the type nor the throw that refuse a missing departure can see it, so each predicate is
+   read against the state its action starts from.
 6. **The predicate never carries the check's own claim.** A settle that waits for "the drawer is
    open" cannot then be the evidence the drawer opened.
 7. **Pin the transition duration.** A settle with a generous budget can wait out a 10x regression
