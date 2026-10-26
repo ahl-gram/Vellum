@@ -1,6 +1,6 @@
 // The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, stands beside the 1024 page in a narrower window (Issue #762), and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
 import { scopedHealth } from "../support/room.ts";
-import { makeSettle } from "../support/settle.ts";
+import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { withScriptsOff } from "../support/scripts-off.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
@@ -89,26 +89,30 @@ const READ: Payload<Index> = `(() => {
   };
 })()`;
 
-type Settle = ReturnType<typeof makeSettle>;
+const LANDING: Payload<{ sheet: number[] | null; slip: number[] | null }> =
+  `(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)); }; return { sheet: r(".sheet"), slip: r("#index") }; })()`;
+
 export type DocRoomsKit = ReturnType<typeof docRoomsKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, setTouch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // IX3 is the one group here that waits on a transition, so it is the one that is stepped (Issue #534).
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = docRoomsKit({ ...ctx, settle });
 
   // The desktop arm at the sibling suites' 1280x800: the harness window is taller, and a tall viewport cannot scroll a late section up to the reading line.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  const faq = await ix1QaStands(k);
-  await ix2InksRow(k, faq);
-  await step("IX3", () => ix3Folds(k, faq));
-  await ix4FindBox(k);
+  let faq: Index | undefined;
+  await step("IX1", async () => {
+    faq = await ix1QaStands(k);
+  });
+  await step("IX2", () => ix2InksRow(k, faq!));
+  await step("IX3", () => ix3Folds(k, faq!));
+  await step("IX4", () => ix4FindBox(k));
   await setTouch(false);
   await step("NA3", () => na3Floor(k));
-  await ix6NoScript(k);
+  await step("IX6", () => ix6NoScript(k));
   await step("IX8", () => ix8Landmark(k));
 
   let sheets: Sheets | undefined;
@@ -143,6 +147,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
   const { evaluate, send, sleep, PORT } = ctx;
+  const stable = makeStable(ctx.settle);
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
   const goto = async (path: string) => {
     await send("Page.navigate", { url: "about:blank" });
@@ -154,9 +159,9 @@ export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
       if (up) break;
       await sleep(25);
     }
-    await sleep(300);
+    await stable(LANDING, `${path} landed`, { animated: ".sheet" });
   };
-  return { ...ctx, goto };
+  return { ...ctx, stable, goto };
 }
 
 async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Index> {
