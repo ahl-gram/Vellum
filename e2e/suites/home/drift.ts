@@ -1,6 +1,10 @@
+import { IDLE_DELAY_MS } from "../../../src/site/home/drift.ts";
 import { atLandfall, readXform, buttonPoint } from "../../support/home.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
+
+const DRIFT_HEADROOM_MS = 3000;
+export const DRIFT_TRIES = Math.ceil((IDLE_DELAY_MS + DRIFT_HEADROOM_MS) / 50);
 
 export async function h15aDrift({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   await sleep(9600);

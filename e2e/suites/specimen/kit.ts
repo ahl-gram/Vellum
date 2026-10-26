@@ -8,7 +8,7 @@ type Settle = ReturnType<typeof makeSettle>;
 export type SpecimenKit = ReturnType<typeof specimenKit>;
 
 export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
-  const { evaluate, send, sleep, PORT } = ctx;
+  const { evaluate, send, sleep, PORT, settle } = ctx;
   const read = () => evaluate(READ);
   const setState = (s: string) =>
     evaluate<string>(
@@ -33,6 +33,10 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
     }
     return null;
   };
+  const toState = async (s: "rest" | "leaned", label: string): Promise<Specimen> => {
+    await setState(s);
+    return settle(READ, () => true, label);
+  };
   const brightest = async (x: number, y: number) =>
     Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press sitting under the sample and a min fails on one hairline crossing it.
@@ -40,5 +44,5 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
     const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b);
     return Math.round(l[Math.floor(l.length / 2)]!);
   };
-  return { ...ctx, read, setState, goto, brightest, groundOf };
+  return { ...ctx, read, setState, goto, toState, brightest, groundOf };
 }
