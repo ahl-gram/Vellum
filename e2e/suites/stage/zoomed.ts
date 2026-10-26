@@ -14,7 +14,7 @@ export type Panel = { content: string; stops: number[][]; filter: string };
 type Piece = "cluster" | "chart folio" | "Press" | "room folio" | "strip";
 type Sub = "sub" | "coords";
 
-const PANELS: Payload<Record<Piece, Panel | null>> =
+export const PANELS: Payload<Record<Piece, Panel | null>> =
   `(() => { const rgba = ${PAGE_RGBA}; const stops = ${GRADIENT_STOPS};
   const read = (sel) => { const e = document.querySelector(sel); if (!e) return null; const cs = getComputedStyle(e, "::before"); return { content: cs.content, stops: stops(cs.backgroundImage), filter: cs.filter }; };
   return { cluster: read("header.chrome"), "chart folio": read(".corner.bl"), Press: read(".legend"), "room folio": read(".corner.tr"), strip: read(".strip") };
@@ -27,7 +27,6 @@ export const crisp = (p: Panel | null): boolean =>
   p.stops.length === 2 &&
   nearRgba(p.stops[0], tokenRgba("--chart-ink", 0.85), 1) &&
   nearRgba(p.stops[1], tokenRgba("--chart-ink", 0.72), 1);
-const pooled = (p: Panel | null): boolean => !!p && p.content === '""' && /^blur\(/.test(p.filter);
 
 // An author `!important` beats the slide's inline `translate`, so a panel's reach under the Explorer's chrome is read with the pieces home (Issue #996).
 export const HELD = "header.chrome, .corner.bl { translate: none !important; }";
@@ -101,7 +100,7 @@ type Zoomed = {
 };
 type RoomRead = Zoomed & { page: string; at: Stage | null; s: Stage | null; zoomed: boolean };
 
-async function zoomIn(ctx: SuiteContext, page: string): Promise<boolean> {
+export async function zoomIn(ctx: SuiteContext, page: string): Promise<boolean> {
   const lens = page === "/reading-room/" ? RR_LENS : LENS;
   let zoomed = false;
   for (const n of [1, 2]) {
@@ -219,8 +218,6 @@ function roomFaults(r: RoomRead, ask: Ask, floored: boolean): string[] {
     if (!crisp(r.panels[p])) say(`the ${p}'s panel is not the crisp one: ${JSON.stringify(r.panels[p])}`);
     if (!r.read.some((g) => g.piece === p)) say(`no ${p} line was read`);
   }
-  if (!floored && r.page === "/reading-room/" && !pooled(r.panels.strip))
-    say(`the strip lost its blurred pool: ${JSON.stringify(r.panels.strip)}`);
   for (const g of r.read.filter((x) => x.ratio < FLOOR_PLAIN)) say(`${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
   if (ask.mark) {
     if (!r.read.some((g) => g.t.startsWith("the section mark"))) say("no section mark line was read");
@@ -266,7 +263,7 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   }
   const faults = rows.flatMap(({ r, ask }) => roomFaults(r, ask, false));
   ctx.check(
-    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), the Reading Room's strip on its blurred pool, and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; every room's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996 and Issue #1034)",
+    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; every room's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996 and Issue #1034)",
     faults.length === 0,
     rows.map(({ r, ask }) => detail(r, ask)).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
