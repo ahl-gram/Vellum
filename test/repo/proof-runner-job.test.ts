@@ -28,6 +28,24 @@ const withTmp = async <T>(body: (tmp: string) => Promise<T>): Promise<T> => {
   }
 };
 
+const isAlive = (pid: number): boolean => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// 2026-10-26: over 35 Mac runs (budgets of 200 and 1000 ms) the budget's grandchild was already gone when `runBudgeted` returned, gone 0.02 to 0.30 ms after it; 5000 is the wait `goneWithin` in `test/e2e/launch-harness.test.ts` gives a killed stand-in, and no CI reading was taken.
+const REAP_MS = 5000;
+
+const goneWithin = async (pid: number, ms: number): Promise<boolean> => {
+  const until = performance.now() + ms;
+  while (isAlive(pid) && performance.now() < until) await new Promise((r) => setTimeout(r, 20));
+  return !isAlive(pid);
+};
+
 const fakes =
   (calls: string[], overrides: Record<string, Awaited<ReturnType<Runner>>> = {}): Runner =>
   async (cmd, args, options) => {
@@ -108,9 +126,8 @@ test("a budget kills the command's whole process group, so a chain's grandchild 
     assert.ok(Date.now() - started < 20_000, "the budget did not end the run, so close waited on the grandchild");
     const pid = Number(readFileSync(pidFile, "utf8"));
     try {
-      await new Promise((settle) => setTimeout(settle, 200));
-      assert.throws(
-        () => process.kill(pid, 0),
+      assert.ok(
+        await goneWithin(pid, REAP_MS),
         "the chain's grandchild outlived the budget, which is what a spawnSync timeout leaves behind",
       );
     } finally {
