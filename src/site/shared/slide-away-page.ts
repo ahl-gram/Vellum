@@ -16,6 +16,7 @@ import {
 } from "./slide-away.ts";
 import { rectOf, slipWidth, translateOf } from "./room-seats.ts";
 import { pageBottom, pageBox, pageX, pageY } from "./page-box.ts";
+import { prefersReduce } from "./reduced-motion.ts";
 
 export type FillRule = (sheet: Edges, room: Edges, gesture: Edges) => number;
 
@@ -60,7 +61,6 @@ function lineFoot(el: Element | null, shift: number): number | null {
 }
 
 const shiftOf = (el: Element): number => translateOf(getComputedStyle(el).translate).y;
-const prefersReduce = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function settleMs(): number {
   const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--paper-settle"));

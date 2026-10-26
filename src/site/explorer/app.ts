@@ -36,6 +36,7 @@ import { bindRoom } from "../shared/room.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { errorText } from "../shared/error-text.ts";
 import { $ } from "../shared/by-id.ts";
+import { prefersReduce } from "../shared/reduced-motion.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -84,9 +85,6 @@ let pendingCamera: Camera | null = null;
 
 let drawGen = 0;
 
-function prefersReduce(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const tokenMs = (name: string, fallback: number): number => {
   const v = parseFloat(token(name));

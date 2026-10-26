@@ -3,6 +3,7 @@ import { zoom, zoomIdentity, type D3ZoomEvent, type ZoomBehavior, type ZoomTrans
 import { select } from "d3-selection";
 // Side-effect import for the voiced glide; it patches d3-selection's prototype and was already in the bundle transitively.
 import "d3-transition";
+import { prefersReduce } from "./reduced-motion.ts";
 
 export interface ZoomState {
   x: number;
@@ -105,13 +106,13 @@ function zoomFrame(viewportEl: HTMLElement) {
 
 function zoomMotion(
   reducedMotion: ZoomControllerOptions["reducedMotion"],
-  mq: MediaQueryList | null,
+  osReduced: () => boolean,
   glideMs: number | (() => number),
 ) {
   const prefersReduced = () => {
     if (typeof reducedMotion === "function") return !!reducedMotion();
     if (typeof reducedMotion === "boolean") return reducedMotion;
-    return !!(mq && mq.matches);
+    return osReduced();
   };
   // Read live: a getter lets the page hand in a lazy /shared/motion.css token read (the stylesheet may not be applied at construction).
   const glideMsNow = () => {
@@ -412,9 +413,8 @@ export function createZoomController({
   const { viewportExtent, sel, getState } = zoomFrame(viewportEl);
 
   // Reduced motion is read LIVE (boolean, getter, or matchMedia), so an OS toggle and the e2e emulation take effect without a reload.
-  const mq =
-    typeof globalThis.matchMedia === "function" ? globalThis.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  const { prefersReduced, glideMsNow } = zoomMotion(reducedMotion, mq, glideMs);
+  const osReduced = typeof globalThis.matchMedia === "function" ? prefersReduce : () => false;
+  const { prefersReduced, glideMsNow } = zoomMotion(reducedMotion, osReduced, glideMs);
   const DBLCLICK_MS = 250;
 
   const { extentNow, setMax } = zoomExtent(scaleExtent);
