@@ -24,6 +24,7 @@ import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } 
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import { $ } from "../shared/by-id.ts";
+import { nextObjectUrl } from "../shared/object-url.ts";
 
 declare global {
   interface Window {
@@ -158,8 +159,7 @@ function draw(year: number | null, writeAddress: boolean): void {
   runJob({ kind: "prospect", seed, overrides, index: addr.index, dress, year })
     .then((res) => {
       if (myGen !== drawGen) return;
-      if (lastUrl !== null) URL.revokeObjectURL(lastUrl);
-      lastUrl = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+      lastUrl = nextObjectUrl(lastUrl, new Blob([res.svg], { type: "image/svg+xml" }));
       showPlate(furniture, res, seed, lastUrl);
       sheet.rebase();
       if (writeAddress) history.replaceState(null, "", yearHash(location.hash, res.year));

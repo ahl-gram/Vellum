@@ -15,6 +15,7 @@ import { createProjection, marginFor, type Projection } from "../../render/trans
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { World } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
+import { downloadBlob } from "../shared/object-url.ts";
 import { readStored, writeStored } from "../shared/storage.ts";
 
 // Restart a one-shot CSS animation by toggling its trigger class across a reflow, so it replays even when the class is already present.
@@ -284,12 +285,8 @@ function huntCaption(seed: number, guesses: () => number) {
 function listenDispatch(buildDispatchSvg: () => string, quarry: Readonly<Quarry>, seed: number): void {
   $("dispatch").addEventListener("click", () => {
     const blob = new Blob([buildDispatchSvg()], { type: "image/svg+xml" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
     const slug = quarry.settlement.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    a.download = `vellum-dispatch-${seed}-${slug}.svg`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    downloadBlob(blob, `vellum-dispatch-${seed}-${slug}.svg`);
   });
 }
 

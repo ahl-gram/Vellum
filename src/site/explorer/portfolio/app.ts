@@ -29,6 +29,7 @@ import {
 } from "./folio-lines.ts";
 import { PLATE_CHART, howPlate } from "./how-plate.ts";
 import { $ } from "../../shared/by-id.ts";
+import { downloadBlob, nextObjectUrl } from "../../shared/object-url.ts";
 
 const status = $("pf-status");
 const warning = $("pf-warning");
@@ -122,11 +123,7 @@ const nameOf = (sheet: Drawn): string =>
 // Issue #134's rule: the svg goes STRAIGHT to a blob download and is never injected anywhere to be downloaded.
 const takeHome = (sheet: Drawn): void => {
   if (!sheet.svg) return;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([sheet.svg], { type: "image/svg+xml" }));
-  a.download = nameOf(sheet);
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadBlob(new Blob([sheet.svg], { type: "image/svg+xml" }), nameOf(sheet));
 };
 
 const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
@@ -226,8 +223,7 @@ const draft = async (): Promise<void> => {
         sheet.svg = res.svg;
         sheet.title = named.title;
         sheet.worldTitle = named.worldTitle;
-        if (sheet.url) URL.revokeObjectURL(sheet.url);
-        sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+        sheet.url = nextObjectUrl(sheet.url, new Blob([res.svg], { type: "image/svg+xml" }));
       } catch {
         sheet.title = `Chart № ${sheet.item.seed}`;
       }

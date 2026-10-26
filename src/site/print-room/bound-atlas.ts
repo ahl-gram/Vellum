@@ -15,6 +15,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
+import { downloadBlob } from "../shared/object-url.ts";
 
 export type PosterBasis = {
   seed: number;
@@ -243,11 +244,7 @@ function downloadAtlas(): void {
   const html = atlasDocument(lastAtlas, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
   const blob = new Blob([html], { type: "text/html" });
   const filename = `vellum-atlas-${lastAtlas.seed}.html`;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadBlob(blob, filename);
   status.textContent = `The bound atlas is yours: ${filename} (${Math.max(1, Math.round(blob.size / 1048576))} MB). It opens offline in any browser.`;
   window.__vellumLastAtlasDownload = {
     filename,

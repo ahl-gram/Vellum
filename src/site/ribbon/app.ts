@@ -9,6 +9,7 @@ import { bindRibbonRoom, markLeaned, showPlate, writeFolio, writeItinerary, type
 import type { RibbonResult } from "../explorer/worker-client.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
+import { nextObjectUrl } from "../shared/object-url.ts";
 
 declare global {
   interface Window {
@@ -89,8 +90,7 @@ function draw(from: number | null, to: number | null): void {
   runJob({ kind: "ribbon", seed, overrides, from, to, dress })
     .then((res) => {
       if (myGen !== drawGen) return;
-      if (lastUrl !== null) URL.revokeObjectURL(lastUrl);
-      lastUrl = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+      lastUrl = nextObjectUrl(lastUrl, new Blob([res.svg], { type: "image/svg+xml" }));
       showPlate(furniture, res, seed, lastUrl);
       sheet.rebase();
       fillSelect(fromSel, res, "from");

@@ -31,6 +31,7 @@ import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
+import { downloadBlob } from "../shared/object-url.ts";
 
 declare global {
   interface Window {
@@ -234,14 +235,6 @@ formatSel.addEventListener("change", () => {
 });
 
 // A wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the Issue #132 epic's one hard warning).
-function downloadBlob(blob: Blob, filename: string): void {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
 function downloadSvg(svg: string, filename: string): void {
   downloadBlob(new Blob([svg], { type: "image/svg+xml" }), filename);
 }
