@@ -83,6 +83,35 @@ const PLANT: ReadonlyArray<readonly [string, boolean]> = [
     'export async function n(): Promise<void> { for (let i = 0; i < 40; i++) { const at = await evaluate<number>("x"); await ctx.wheel(0, 0, 120); if ((await evaluate<number>("x")) === at) break; await sleep(90); } }',
     PASS,
   ],
+  ['await sleep(120, "pace: a third argument", 1);', REFUSE],
+  [
+    'export async function p(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) return; while (i < 0) { await sleep(50); } } }',
+    REFUSE,
+  ],
+  [
+    'export async function q(): Promise<void> { outer: for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) break outer; await sleep(50); } }',
+    REFUSE,
+  ],
+  [
+    'export async function r(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) throw new Error("x"); await sleep(50); } }',
+    PASS,
+  ],
+  [
+    'export async function t(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) { await sleep(800); throw new Error("x"); } } }',
+    REFUSE,
+  ],
+  [
+    'export async function u(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) { await sleep(800); break; } } }',
+    REFUSE,
+  ],
+  [
+    'export async function v(): Promise<void> { for (let i = 0; i < 6; i++) { [1].forEach(async () => { if (await evaluate<boolean>("x")) return; }); await sleep(50); } }',
+    REFUSE,
+  ],
+  [
+    'export async function w(): Promise<void> { const o = { p: false }; for (let i = 0; i < 40 && !o.p; i++) { o.p = await evaluate<boolean>("x"); await sleep(50); } }',
+    PASS,
+  ],
 ];
 const REFUSED = PLANT.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOT =
