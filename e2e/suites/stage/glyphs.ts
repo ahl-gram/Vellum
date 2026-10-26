@@ -1,4 +1,4 @@
-// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts) and over a zoomed one (EZ1 and EZ2 in zoomed.ts).
+// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts) and over a zoomed one (EZ1 and EZ2 in zoomed.ts), the strip's (EZ4 in strip.ts), and home's and the Gallery's clusters (CL1, RH33).
 import type { Payload } from "../../types.ts";
 
 export type Glyph = {
@@ -14,7 +14,7 @@ const PIECES = "header.chrome, .corner, .strip, .legend";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
 const glyphsOver = (perLine: boolean, sheetOnly: boolean): Payload<Glyph[]> => `(() => {
-  const sheet = document.getElementById("sheet").getBoundingClientRect();
+  const sheet = ${sheetOnly} ? document.getElementById("sheet").getBoundingClientRect() : null;
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
   const out = [];
@@ -47,5 +47,24 @@ const glyphsOver = (perLine: boolean, sheetOnly: boolean): Payload<Glyph[]> => `
 export const GLYPHS_OVER_SHEET = glyphsOver(false, true);
 // One entry per line box, so a sampled row crosses that line's glyphs and not the gap between two lines of a wrapped node (NS1's painted read; a node's union box put the chart folio's two-line title's row between its lines).
 export const GLYPH_LINES_OVER_SHEET = glyphsOver(true, true);
-// Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`).
-export const GLYPH_LINES = glyphsOver(true, false);
+// Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`), and on home and in the Gallery, which have no #sheet (CL1 in `e2e/suites/cluster.ts`, RH33 in `e2e/suites/runninghead/gallery.ts`).
+export const GLYPH_LINES =glyphsOver(true, false);
+// Every glyph the instrument strip paints, aria-hidden ones included, since every letter on it but Play carries aria-hidden (the told line, the year readout, the scale's labels) and each is read on screen; one entry per line box (EZ4 in `e2e/suites/stage/strip.ts`).
+export const STRIP_INK: Payload<Glyph[]> = `(() => {
+  const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
+  const root = document.querySelector(".strip"), out = [];
+  if (!root) return out;
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    const el = n.parentElement;
+    if (!n.textContent.trim() || !el || el.closest("option, select, script, style") || unseen(el)) continue;
+    const rg = new Range(); rg.selectNodeContents(n);
+    const kind = el.closest(".rf-told") ? "told " : el.closest(".tick") ? "scale " : "";
+    for (const b of rg.getClientRects()) {
+      if (!(b.width > 0)) continue;
+      const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
+      out.push({ piece: "strip", t: kind + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(b.top + b.height / 2), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)), disabled: false });
+    }
+  }
+  return out;
+})()`;
