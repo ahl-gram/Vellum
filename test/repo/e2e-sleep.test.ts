@@ -124,6 +124,14 @@ const PLANT: ReadonlyArray<readonly [string, boolean]> = [
     'export async function z(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("x")) return; do { await sleep(50); } while (i < 0); } }',
     REFUSE,
   ],
+  [
+    "export async function a2(): Promise<void> { let d = false; for (let i = 0; i < 40 && !d; i++) { [1].forEach(() => { d = true; }); await sleep(50); } }",
+    REFUSE,
+  ],
+  [
+    'export async function b2(): Promise<void> { for (let i = 0; i < 40; i++) { if (await evaluate<boolean>("y")) return; if (await evaluate<boolean>("x")) { [1].forEach(() => { return; }); await sleep(50); } } }',
+    PASS,
+  ],
 ];
 const REFUSED = PLANT.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOT =
