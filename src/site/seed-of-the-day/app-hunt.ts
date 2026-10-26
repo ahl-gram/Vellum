@@ -14,8 +14,9 @@ import { huntDispatch, type Miss } from "./app-dispatch.ts";
 import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { World } from "../../world/types.ts";
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+import { $ } from "../shared/by-id.ts";
+import { downloadBlob } from "../shared/object-url.ts";
+import { readStored, writeStored } from "../shared/storage.ts";
 
 // Restart a one-shot CSS animation by toggling its trigger class across a reflow, so it replays even when the class is already present.
 function restart(el: HTMLElement | null, cls: string): void {
@@ -26,6 +27,7 @@ function restart(el: HTMLElement | null, cls: string): void {
 }
 
 const STORE_KEY = "vellum.hunt.v1";
+const huntStorage = (): Storage => localStorage;
 export const huntProjection = (world: World): Projection =>
   createProjection(world.elev.w, world.elev.h, 1500, marginFor(1500));
 
@@ -40,18 +42,14 @@ type HuntStore = { solved?: number; streak?: number };
 
 function readStore(): HuntStore {
   try {
-    return (JSON.parse(localStorage.getItem(STORE_KEY) || "{}") as HuntStore | null) || {};
+    return (JSON.parse(readStored(huntStorage, STORE_KEY) || "{}") as HuntStore | null) || {};
   } catch {
     return {};
   }
 }
 
 function writeStore(obj: HuntStore): void {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(obj));
-  } catch {
-    /* private mode or storage disabled: the hunt still plays, just no streak */
-  }
+  writeStored(huntStorage, STORE_KEY, JSON.stringify(obj));
 }
 
 // Seeds are YYYYMMDD integers, so step back one calendar day via a UTC Date.
@@ -287,12 +285,8 @@ function huntCaption(seed: number, guesses: () => number) {
 function listenDispatch(buildDispatchSvg: () => string, quarry: Readonly<Quarry>, seed: number): void {
   $("dispatch").addEventListener("click", () => {
     const blob = new Blob([buildDispatchSvg()], { type: "image/svg+xml" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
     const slug = quarry.settlement.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    a.download = `vellum-dispatch-${seed}-${slug}.svg`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    downloadBlob(blob, `vellum-dispatch-${seed}-${slug}.svg`);
   });
 }
 

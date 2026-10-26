@@ -28,8 +28,9 @@ import {
   sheetLine,
 } from "./folio-lines.ts";
 import { PLATE_CHART, howPlate } from "./how-plate.ts";
+import { $ } from "../../shared/by-id.ts";
+import { downloadBlob, nextObjectUrl } from "../../shared/object-url.ts";
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
 const warning = $("pf-warning");
 const bound = $("pf-bound");
@@ -122,11 +123,7 @@ const nameOf = (sheet: Drawn): string =>
 // Issue #134's rule: the svg goes STRAIGHT to a blob download and is never injected anywhere to be downloaded.
 const takeHome = (sheet: Drawn): void => {
   if (!sheet.svg) return;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([sheet.svg], { type: "image/svg+xml" }));
-  a.download = nameOf(sheet);
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadBlob(new Blob([sheet.svg], { type: "image/svg+xml" }), nameOf(sheet));
 };
 
 const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
@@ -226,8 +223,7 @@ const draft = async (): Promise<void> => {
         sheet.svg = res.svg;
         sheet.title = named.title;
         sheet.worldTitle = named.worldTitle;
-        if (sheet.url) URL.revokeObjectURL(sheet.url);
-        sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+        sheet.url = nextObjectUrl(sheet.url, new Blob([res.svg], { type: "image/svg+xml" }));
       } catch {
         sheet.title = `Chart № ${sheet.item.seed}`;
       }
@@ -246,7 +242,7 @@ const draft = async (): Promise<void> => {
 // The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the Issue #520 scar, a control nobody can use.
 const slide = pageSlideAway({
   frame: document.querySelector(".stage") as HTMLElement,
-  sheet: document.getElementById("sheet") as HTMLElement,
+  sheet: $("sheet"),
   gesture: $("map-viewport"),
   step: ZOOM_STEP,
 });
@@ -263,7 +259,7 @@ bindGlassKeys($("map-viewport"), zoomController);
 // Issue #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
 const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
-  sheet: document.getElementById("sheet") as HTMLElement,
+  sheet: $("sheet"),
   camera: { hold: () => zoomController.getState(), restore: (t) => zoomController.refit(t) },
   aspect: () => {
     const svg = sheetBox.querySelector("svg");

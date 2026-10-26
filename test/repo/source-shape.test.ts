@@ -27,20 +27,25 @@ const ID_LOOKUP_PLANT = [
   "// getElementById, named in a comment",
   'export const g = "do not call getElementById here";',
   'export const h = (el: Element) => el.querySelector("#a");',
+  'import { $ } from "../by-id.ts";',
+  'export const i = () => import("../by-id.ts");',
+  'export const j = "../by-id.ts";',
+  "export const l = () => import(`../by-id.ts`);",
+  'import { $ as m } from "../other/by-id.ts";',
 ];
 
-test("the living-chart engine looks up no element by id, however the lookup is spelled, and a mention is not a lookup", async () => {
+test("the living-chart engine looks up no element by id, however the lookup is spelled, nor imports the site's shared lookup, and a mention is not a lookup", async () => {
   assert.deepEqual(
     await houseReports(ID_LOOKUP_PLANT, "src/site/shared/living-chart/index.ts"),
-    at(ENGINE, [1, 2, 3, 4, 5, 6]),
+    at(ENGINE, [1, 2, 3, 4, 5, 6, 10, 11, 13]),
   );
 });
 
 test("the reading frame looks up no element by id, spelled any way the engine's rule reads", async () => {
   assert.deepEqual(
     await houseReports(ID_LOOKUP_PLANT, "src/site/shared/reading-frame/index.ts"),
-    at(FRAME_IDS, [1, 2, 3, 4, 5, 6]),
-    "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, as for the engine's rule",
+    at(FRAME_IDS, [1, 2, 3, 4, 5, 6, 10, 11, 13]),
+    "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, an import of the shared lookup spelled as an absolute path, and a lookup made inside another module the frame imports, as for the engine's rule",
   );
 });
 

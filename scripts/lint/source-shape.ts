@@ -1,6 +1,6 @@
 import type { Rule, Scope } from "eslint";
 import { isBuiltin } from "node:module";
-import { relative, resolve, sep } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
 
 type Node = Rule.Node;
 
@@ -9,6 +9,7 @@ export const repoPath = (file: string): string => relative(ROOT, file).split(sep
 export const problem = (message: string): Rule.RuleMetaData => ({ type: "problem", messages: { found: message } });
 
 const ID_LOOKUP = "getElementById";
+const LOOKUP_MODULE = "src/site/shared/by-id.ts";
 export const wholeString = (node: Node): string | null =>
   node.type === "Literal" && typeof node.value === "string"
     ? node.value
@@ -22,6 +23,15 @@ const engineNoIdLookup: Rule.RuleModule = {
   ),
   create(context) {
     const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const importsLookup = (node: Node): boolean => {
+      const text = wholeString(node);
+      return (
+        text !== null &&
+        text.startsWith(".") &&
+        isModuleSource(context, node) &&
+        repoPath(resolve(dirname(context.filename), text)) === LOOKUP_MODULE
+      );
+    };
     return {
       MemberExpression(node) {
         if (!node.computed && node.property.type === "Identifier" && node.property.name === ID_LOOKUP) found(node);
@@ -36,10 +46,10 @@ const engineNoIdLookup: Rule.RuleModule = {
           found(node);
       },
       Literal(node) {
-        if (wholeString(node) === ID_LOOKUP) found(node);
+        if (wholeString(node) === ID_LOOKUP || importsLookup(node)) found(node);
       },
       TemplateLiteral(node) {
-        if (wholeString(node) === ID_LOOKUP) found(node);
+        if (wholeString(node) === ID_LOOKUP || importsLookup(node)) found(node);
       },
     };
   },

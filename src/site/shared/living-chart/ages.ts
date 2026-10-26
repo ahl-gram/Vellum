@@ -28,6 +28,7 @@ import type { PlaceManifest } from "../../../render/place-manifest.ts";
 import type { Survey } from "../../../render/survey.ts";
 import { toldAnnal, type ToldEntry } from "./told.ts";
 import { buildAnnals, type AnnalRow } from "./annals.ts";
+import { prefersReduce } from "../reduced-motion.ts";
 
 interface AgesSession {
   pos: AgesPos;
@@ -52,10 +53,6 @@ export interface AgesDeps {
   overlay: { data(): OverlayData | null };
   chronicle: Chronicle;
   voyage: Voyage;
-}
-
-function prefersReduce(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 // eslint-disable-next-line max-lines-per-function

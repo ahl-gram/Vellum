@@ -14,6 +14,7 @@ import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { fillAboutCentre, restingBox } from "../shared/slide-away.ts";
 import { errorText } from "../shared/error-text.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { $ } from "../shared/by-id.ts";
 
 declare global {
   interface Window {
@@ -22,8 +23,6 @@ declare global {
     __vellumDispatchSvg?: () => string;
   }
 }
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 const now = new Date();
 const seed = seedForDate(now);

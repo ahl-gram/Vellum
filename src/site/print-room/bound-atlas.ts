@@ -14,6 +14,8 @@ import type { AtlasPlate } from "../../atlas/compose.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { WorldRecipe } from "../../world/types.ts";
+import { $ } from "../shared/by-id.ts";
+import { downloadBlob } from "../shared/object-url.ts";
 
 export type PosterBasis = {
   seed: number;
@@ -53,15 +55,14 @@ if (!document.getElementById("atlas-sheet-css")) {
   document.head.appendChild(style);
 }
 
-const $ = (id: string) => document.getElementById(id);
-const bindBtn = $("pr-bind") as HTMLButtonElement;
-const printBtn = $("pr-print") as HTMLButtonElement;
-const downloadBtn = $("pr-download") as HTMLButtonElement;
-const hideBtn = $("pr-hide") as HTMLButtonElement;
-const atlasDiv = $("pr-atlas") as HTMLElement;
-const status = $("pr-bound-status") as HTMLElement;
-const contents = $("pr-contents") as HTMLElement;
-const stamp = $("pr-stamp") as HTMLElement;
+const bindBtn = $<HTMLButtonElement>("pr-bind");
+const printBtn = $<HTMLButtonElement>("pr-print");
+const downloadBtn = $<HTMLButtonElement>("pr-download");
+const hideBtn = $<HTMLButtonElement>("pr-hide");
+const atlasDiv = $("pr-atlas");
+const status = $("pr-bound-status");
+const contents = $("pr-contents");
+const stamp = $("pr-stamp");
 const STAMP_UNBOUND = stamp.textContent;
 
 interface Bound {
@@ -243,11 +244,7 @@ function downloadAtlas(): void {
   const html = atlasDocument(lastAtlas, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
   const blob = new Blob([html], { type: "text/html" });
   const filename = `vellum-atlas-${lastAtlas.seed}.html`;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadBlob(blob, filename);
   status.textContent = `The bound atlas is yours: ${filename} (${Math.max(1, Math.round(blob.size / 1048576))} MB). It opens offline in any browser.`;
   window.__vellumLastAtlasDownload = {
     filename,

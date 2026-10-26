@@ -1,25 +1,19 @@
 // The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19, superseding Issue #401 ruling 3): the address decides an ARRIVAL and the device decides a RETURN. Pure and DOM-free like its sibling ./table-address.ts, whose grammar it stores verbatim so the table has one spelling everywhere; the store and the browser's navigation entry are injected the way firstArrival takes its own in ../home/ceremony.ts, which is what makes the precedence provable outside a browser.
 import { emitTable, parseTableValue, type TableItem } from "./table-address.ts";
+import { readStored, removeStored, writeStored } from "./storage.ts";
 
 export const TABLE_STORE_KEY = "vellum.table.v1";
 
 export const deviceStorage = (): Storage => localStorage;
 
 export function readStoredTable(getStorage: () => Storage): ReadonlyArray<TableItem> | null {
-  try {
-    const raw = getStorage().getItem(TABLE_STORE_KEY);
-    return raw === null ? null : parseTableValue(raw);
-  } catch {
-    return null;
-  }
+  const raw = readStored(getStorage, TABLE_STORE_KEY);
+  return raw === null ? null : parseTableValue(raw);
 }
 
 export function writeStoredTable(getStorage: () => Storage, items: ReadonlyArray<TableItem>): void {
-  try {
-    const store = getStorage();
-    if (items.length === 0) store.removeItem(TABLE_STORE_KEY);
-    else store.setItem(TABLE_STORE_KEY, emitTable(items));
-  } catch {}
+  if (items.length === 0) removeStored(getStorage, TABLE_STORE_KEY);
+  else writeStored(getStorage, TABLE_STORE_KEY, emitTable(items));
 }
 
 export function navigationType(getEntries: () => ReadonlyArray<{ readonly type?: string }>): string {

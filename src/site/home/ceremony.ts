@@ -1,4 +1,5 @@
 import { type Box, type Cam, camForCenter } from "./camera.ts";
+import { readStored, writeStored } from "../shared/storage.ts";
 
 // The clock and framing quote runCeremony in the archived mockup at design/atelier-map, the epic's visual spec (Issue #454).
 export const TARGET_FATHOMS = 42;
@@ -31,17 +32,9 @@ export function landfallView(view: Box, sheet: Box, fit: number): Cam {
 }
 
 export function firstArrival(getStorage: () => Storage): boolean {
-  try {
-    return getStorage().getItem(ARRIVED_KEY) === null;
-  } catch {
-    return true;
-  }
+  return readStored(getStorage, ARRIVED_KEY) === null;
 }
 
 export function markArrival(getStorage: () => Storage): void {
-  try {
-    getStorage().setItem(ARRIVED_KEY, "1");
-  } catch {
-    /* unwritable storage: play every arrival */
-  }
+  writeStored(getStorage, ARRIVED_KEY, "1");
 }

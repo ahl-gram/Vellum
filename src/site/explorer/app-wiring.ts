@@ -11,13 +11,13 @@ import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
 import { pageBox } from "../shared/page-box.ts";
+import { $ } from "../shared/by-id.ts";
 import type { TableItem } from "../shared/table-address.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import {
-  $,
   seedInput,
   styleSel,
   typeSel,
