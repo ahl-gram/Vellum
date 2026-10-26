@@ -140,11 +140,10 @@ export async function sv5dBothKeys({ evaluate, check, goto, waitBeat }: SurveyKi
   );
 }
 
-export async function sv6VersoMirrors({ evaluate, check, sleep, goto, waitInked }: SurveyKit): Promise<void> {
+export async function sv6VersoMirrors({ evaluate, check, goto, waitInked }: SurveyKit): Promise<void> {
   await goto("#seed=42&style=antique&survey", "survey-verso");
   await waitInked("survey-verso-ink");
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
   const sv6 = await evaluate<{ flipped: boolean; match: boolean; status: string }>(`(()=>{
       const recto=document.querySelector("#map .voyage-overlay .voyage-track");
       const back=document.querySelector("#verso .verso-track");
