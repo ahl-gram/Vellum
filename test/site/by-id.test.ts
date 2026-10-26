@@ -10,7 +10,11 @@ test("the shared id lookup hands back the element on the page, and throws naming
   g.document = { getElementById: (id: string) => (id === "pp-status" ? found : null) };
   try {
     assert.equal($("pp-status"), found, "an element on the page comes back as itself");
-    assert.throws(() => $("pp-absent"), { message: /pp-absent/ }, "a missing element throws, naming the id it asked for");
+    assert.throws(
+      () => $("pp-absent"),
+      { message: /pp-absent/ },
+      "a missing element throws, naming the id it asked for",
+    );
   } finally {
     if (had) g.document = prior;
     else delete g.document;

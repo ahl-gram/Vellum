@@ -33,8 +33,10 @@ make an unqualified rule false. Read the surface, not just the rule.
   The line is where the id comes from, not whether one appears.
   - **The guard is narrower than the rule, so hold the rule yourself.**
     `vellum/engine-no-id-lookup` (`scripts/lint/source-shape.ts`) refuses a `getElementById`
-    lookup in every `.ts` under `src/site/shared/living-chart/`, at any depth, at `npm run lint`. It does
-    not catch a document-scoped `querySelector`, or the name assembled from pieces.
+    lookup, and an import of the site's shared lookup in `src/site/shared/by-id.ts`, in every `.ts`
+    under `src/site/shared/living-chart/`, at any depth, at `npm run lint`. It does not catch a
+    document-scoped `querySelector`, the name assembled from pieces, or a lookup made inside another
+    module the engine imports.
 - **A page that mounts the engine owes the sheet and the class**: link `/shared/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
   the chart mount it hands in. A page that skips the sheet renders its overlays undressed, and one that skips the class loses the ink-in dress of the chronicle's marks, the `.living-chart g.settlement[data-ink]` rules, the only rules in the sheet that key on it. **The order
