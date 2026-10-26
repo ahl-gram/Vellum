@@ -327,7 +327,6 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   await evaluate(
     `(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`,
   );
-  await sleep(300);
   const emptied = await state();
   check(
     "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
