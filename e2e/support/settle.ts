@@ -52,10 +52,43 @@ export type StableOptions<T> = { readonly same?: (d: T, last: T) => boolean; rea
   | { readonly departed?: Departure<T>; readonly animated: string }
 );
 
+type Witnessed<T> = { read: T | null; anims: string[] | null };
+
+const finished = (anims: readonly string[] | null): boolean =>
+  anims !== null && anims.length > 0 && anims.every((s) => s === "finished");
+
+const witnessed = <T>(read: Payload<T>, carrier: string): Payload<Witnessed<NonNullable<T>>> =>
+  `(() => { const read = (${read}); const e = document.querySelector(${JSON.stringify(carrier)}); return { read: read || null, anims: e ? e.getAnimations().map((a) => a.playState) : null }; })()`;
+
+const sameJson = (d: unknown, last: unknown): boolean => JSON.stringify(d) === JSON.stringify(last);
+
+const PROMISED = /^\s*\(\s*async\b/;
+
 export function makeStable(settle: Settle) {
   return async <T>(
     read: Payload<T>,
     label: string,
     options: StableOptions<NoInfer<NonNullable<T>>>,
-  ): Promise<NoInfer<NonNullable<T>>> => settle(read, () => true, label, options.tries);
+  ): Promise<NoInfer<NonNullable<T>>> => {
+    const { same = sameJson, animated, tries } = options;
+    if (options.departed === undefined && animated === undefined)
+      throw new Error(`makeStable owes a departure, an animation or the reason it has none: ${label}`);
+    if (PROMISED.test(read)) throw new Error(`makeStable reads a value, and a promise arrives as {}: ${label}`);
+    const departed = typeof options.departed === "function" ? options.departed : () => true;
+    if (animated === undefined)
+      return settle(read, (d, last) => last !== null && same(d, last as NonNullable<T>) && departed(d), label, tries);
+    const seen = await settle(
+      witnessed(read, animated),
+      (w, last) =>
+        w.read !== null &&
+        last !== null &&
+        last.read !== null &&
+        finished(w.anims) &&
+        same(w.read, last.read) &&
+        departed(w.read),
+      label,
+      tries,
+    );
+    return seen.read as NonNullable<T>;
+  };
 }
