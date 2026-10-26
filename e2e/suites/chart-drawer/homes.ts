@@ -7,8 +7,8 @@ import type { Read, Stored } from "./reads.ts";
 
 const LAY: Payload<{ w: number; box: number[] } | null> =
   `(() => { const e = document.getElementById("pp-lay"); if (!e) return null; const b = e.getBoundingClientRect(); return { w: b.width, box: [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
-export const layPressRested = (k: Pick<TableKit, "stable" | "evaluate">, label: string) =>
-  k.evaluate(LAY).then((lay) => (label === "" ? lay : lay));
+export const layPressRested = (k: Pick<TableKit, "stable">, label: string) =>
+  k.stable(LAY, label, { departed: (d) => d.w > 0 });
 
 export async function cd36GoldPress({
   evaluate,
@@ -67,6 +67,7 @@ export async function cd37BackCached({
   check,
   sleep,
   settle,
+  stable,
   go,
   STORE,
   restedAtExplorer,
@@ -81,7 +82,7 @@ export async function cd37BackCached({
     await sleep(100);
     if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break;
   }
-  await sleep(400);
+  await layPressRested({ stable }, "CD37 the lay press shown and still on the Prospect page");
   const lay = await pressById("pp-lay");
   const filed = await settle<{ table: string | null; stored: string | null }>(
     `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table"), stored: ${STORE} }))()`,
@@ -114,6 +115,7 @@ export async function cd38BackRebuilt({
   check,
   sleep,
   settle,
+  stable,
   go,
   atExplorer,
   restedAtExplorer,
@@ -130,7 +132,7 @@ export async function cd38BackRebuilt({
     await sleep(100);
     if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break;
   }
-  await sleep(400);
+  await layPressRested({ stable }, "CD38 the lay press shown and still on the Prospect page");
   await pressById("pp-lay");
   await settle<{ table: string | null }>(
     `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table") }))()`,

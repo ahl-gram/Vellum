@@ -352,7 +352,9 @@ export async function cd62PlateReads(k: DrawerKit): Promise<void> {
   }
 }
 
-export async function cd21PortfolioGlass({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+const MAP_TRANSFORM: Payload<{ t: string }> = `({ t: document.getElementById("map").style.transform })`;
+
+export async function cd21PortfolioGlass({ evaluate, check, stable }: DrawerKit): Promise<void> {
   // CD21 (Issue #521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.
   // Both halves are the claim. d3-zoom does NOT set touch-action, so a bound controller with no `touch-action: none`
   // is still dead to a real thumb: the browser's native pan takes the gesture first (Issue #164).
@@ -362,8 +364,9 @@ export async function cd21PortfolioGlass({ evaluate, check, sleep }: SuiteContex
     document.querySelector('[data-zoom="in"]').click();
     return { zoomable: v.classList.contains("zoomable"), touch: getComputedStyle(v).touchAction, before };
   })()`);
-  await sleep(700);
-  const glassAfter = await evaluate<string>(`document.getElementById("map").style.transform`);
+  const glassAfter = (
+    await stable(MAP_TRANSFORM, "CD21 the zoom press's glide at rest", { departed: (d) => d.t !== glass.before })
+  ).t;
   check(
     "CD21 the Portfolio's Glass is bound AND reachable by a thumb: a zoom press moves the camera, and the viewport takes touch-action none, without which d3 never sees the gesture and three corner presses are decoration (#164, #521)",
     glass.zoomable && glass.touch === "none" && glassAfter !== glass.before && glassAfter !== "",

@@ -98,6 +98,8 @@ export async function na2DrawerBelowFloor(kd: DragKit): Promise<void> {
   );
 }
 
+const ZOOM_STATE: Payload<Cam> = `window.__vellumZoomState()`;
+
 // CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read.
 export async function cd48TouchHandle(kd: DragKit): Promise<void> {
   const { evaluate, sleep, touch, settle, go, setNarrowViewport } = kd;
@@ -136,7 +138,7 @@ type Seen = {
 };
 
 export async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
-  const { evaluate, check, sleep, touchPan, clearMobile, send } = kd;
+  const { evaluate, check, stable, touchPan, clearMobile, send } = kd;
   const { earNow, camBefore, afterHandle, ghostSeen } = seen;
   const panFrom = await evaluate<{
     x: number;
@@ -145,9 +147,13 @@ export async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
   } | null>(`(() => { const inset = document.querySelector("#map .region-inset"); const b = inset ? inset.getBoundingClientRect() : null; if (!b) return null;
       for (const [fx, fy] of [[0.15, 0.85], [0.3, 0.7], [0.5, 0.5], [0.2, 0.3]]) { const x = Math.round(b.x + b.width * fx), y = Math.round(b.y + b.height * fy); const h = document.elementFromPoint(x, y); if (h && !h.closest(".dog-ear") && !h.closest(".place-hit") && h.closest("#map-viewport")) return { x, y, on: h.tagName }; }
       return null; })()`);
-  if (panFrom) await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
-  await sleep(500);
-  const afterPan = await evaluate<Cam>(`window.__vellumZoomState()`);
+  if (panFrom) {
+    await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
+    await stable(ZOOM_STATE, "CD48 the pan beside the ear landed", {
+      departed: (d) => d.x !== afterHandle.cam.x || d.y !== afterHandle.cam.y,
+    });
+  }
+  const afterPan = await evaluate(ZOOM_STATE);
   await releaseChartTouch(kd);
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
