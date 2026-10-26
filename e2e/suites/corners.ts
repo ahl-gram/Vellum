@@ -5,7 +5,7 @@ import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
 import { PAGE_FLOOR as FLOOR_WIDTH } from "../../src/site/shared/page-box.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import { onFixedDay } from "../support/fixed-day.ts";
+import { withReducedMotion } from "../support/reduced-motion.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import {
   fillBetween,
@@ -352,7 +352,7 @@ async function co2Control(ctx: SuiteContext): Promise<void> {
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   try {
-    await onFixedDay(ctx, async () => {
+    await withReducedMotion(ctx, async () => {
       let swept: readonly PageResult[] = [];
       await step("CO1", async () => {
         swept = await co1Sweep(ctx);

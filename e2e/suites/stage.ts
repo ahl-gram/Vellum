@@ -1,6 +1,6 @@
 // The chart's minimum size and what stands over a floored sheet (Issue #762 pull requests A and C), its own suite since Issue #763 split it from corners to balance the CI lanes: short windows (NS1, NA4), the desk frame on a phone, held sideways and upright (EA1, EA6 to EA9, Issue #778), desk windows, folded slips and the named world (EA2, EA3, EL1, EL2), the contrast over a floored sheet (EA4) and a lifted press (EA5), and the chrome over a zoomed chart (EZ1, EZ2, EZ3) and the Explorer's slide-away (ES1 to ES10).
 import { makeStep } from "../support/step.ts";
-import { onFixedDay } from "../support/fixed-day.ts";
+import { withReducedMotion } from "../support/reduced-motion.ts";
 import type { SuiteContext } from "../types.ts";
 import { eaDesk } from "./stage/desk.ts";
 import { ea6Upright, ea7Scrolled, ea8Pinched, ea9Paper } from "./stage/frame.ts";
@@ -13,7 +13,7 @@ import { ez1Zoomed, ez2Short, ez3Thin } from "./stage/zoomed.ts";
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   try {
-    await onFixedDay(ctx, async () => {
+    await withReducedMotion(ctx, async () => {
       await step("NS1", () => ns1Soft(ctx));
       await step("NA4", () => na4Lean(ctx));
       await step("EA1", async () => {
