@@ -1,6 +1,7 @@
 // Broadside e2e (BR1-BR14, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
+import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { br9Authored, br10Terms, br11Allowlist } from "./broadside/room.ts";
 import { br12Dress } from "./broadside/dress.ts";
@@ -34,8 +35,16 @@ const legendClear = (m: Room): boolean =>
   m.lg.r <= m.gl!.l - 8 &&
   m.sh!.r <= m.gl!.l - 8 &&
   m.sh!.b <= Math.min(m.bl!.t, m.lg.t) - 8;
+const sameBox = (a: Box, b: Box): boolean => JSON.stringify(a) === JSON.stringify(b);
+const laidOutAt =
+  (w: number, h: number, from: Room) =>
+  (d: Room): boolean =>
+    d.w === w && d.h === h && !sameBox(d.sh, from.sh) && !d.moving;
+
 type Narrow = { iw: number; ih: number; sheet: Box };
 export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)}};})()`;
+// Counted on the window, after the mark's own handler has run, so a count that rose means the page has handled the tap's click.
+const COUNT_CLICKS = `(()=>{if(window.__br6Clicks===undefined){window.__br6Clicks=0;addEventListener("click",()=>{window.__br6Clicks++;});}return true;})()`;
 export const CLICKS: Payload<{ n: number }> = `({ n: window.__br6Clicks })`;
 type Tapped = { stayed: boolean; open: boolean; hasLink: boolean };
 export const TAPPED: Payload<Tapped> = `(()=>{const n=document.getElementById("note-survey");
@@ -48,7 +57,7 @@ export const MARK: Payload<Point | null> = `(()=>{const m=document.querySelector
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
-  // BR3 through BR6 and BR8 are deliberately not stepped: the reads and gestures in them return rather than throwing, and their checks already guard on it.
+  // BR3, BR4, BR5 and BR8 are deliberately not stepped: the reads and gestures in them return rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   const k = broadsideKit(ctx);
   const errBase = consoleErrors.length;
@@ -66,7 +75,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await br5Hover(k);
   await step("BR13", () => br13Tip(k));
   await step("BR14", () => br14Paper(k));
-  await br6Tap(k);
+  await step("BR6", () => br6Tap(k));
   await step("BR7", () => br7Glossary(k));
   await step("BR10", () => br10Terms(k));
   await step("BR9", () => br9Authored(k));
@@ -108,16 +117,25 @@ async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<
 }
 
 export async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
-  await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
-  const at1280 = await evaluate(LEGEND_ROOM);
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  const at1280 = await stable(LEGEND_ROOM, "BR1c the legend row at rest at 1280", {
+    departed: (d) => d.fonts === "loaded" && !d.moving,
+  });
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
-  await sleep(600);
-  const at1680 = await evaluate(LEGEND_ROOM);
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await sleep(600);
-  const back = await evaluate(LEGEND_ROOM);
-  await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(600);
+  let at1680: Room;
+  let back: Room;
+  try {
+    at1680 = await stable(LEGEND_ROOM, "BR1c the room laid out at 1680x900", {
+      departed: laidOutAt(1680, 900, at1280),
+    });
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+    back = await stable(LEGEND_ROOM, "BR1c the room laid out at 1280x800", { departed: laidOutAt(1280, 800, at1680) });
+  } finally {
+    await send("Emulation.clearDeviceMetricsOverride");
+  }
+  await stable(LEGEND_ROOM, "BR1c the room laid out again after the override", {
+    departed: (d) => d.h !== 800 && !sameBox(d.sh, back.sh) && !d.moving,
+  });
   check(
     "BR1c the legend row and the sheet clear the chart folio, the Glass and the open slip at 1280, at 1680 after a resize, and back again (#463)",
     legendClear(at1280) && legendClear(at1680) && legendClear(back),
@@ -220,14 +238,12 @@ async function br4Notes({ evaluate, send, check }: BroadsideKit): Promise<void> 
   );
 }
 
-export async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
+export async function br5Hover({ evaluate, send, check }: BroadsideKit): Promise<void> {
   const rect = await evaluate<Point>(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
-  await sleep(80);
   const overOpen = await evaluate<boolean>(`document.getElementById("note-coast-warp").matches(":popover-open")`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 4, y: 4 });
-  await sleep(80);
   const awayClosed = await evaluate<boolean>(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
   check(
     "BR5 the note shows under a real hover and hides when the pointer leaves",
@@ -236,33 +252,40 @@ export async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): 
   );
 }
 
-export async function br6Tap({
-  evaluate,
-  check,
-  sleep,
-  touch,
-  setNarrowViewport,
-  clearMobile,
-}: BroadsideKit): Promise<void> {
-  // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
-  await setNarrowViewport(1024, 700);
+// The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
+async function tapAt({ evaluate, sleep, touch }: BroadsideKit, settle: Settle): Promise<boolean> {
+  const p = await evaluate(MARK);
+  if (!p) return false;
+  const { n } = await evaluate(CLICKS);
+  await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
+  await touch("touchEnd", []);
+  await settle(CLICKS, (d) => d.n > n, "BR6 the tap's click");
+  await sleep(500); // past any pending navigation's commit
+  return true;
+}
+
+async function narrowTaps(k: BroadsideKit, before: Narrow) {
+  const { evaluate, sleep } = k;
+  const settle = makeSettle({ evaluate, sleep });
   const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
-  await sleep(120);
-  // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
-  const tapAt = async (): Promise<boolean> => {
-    const p = await evaluate(MARK);
-    if (!p) return false;
-    await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
-    await touch("touchEnd", []);
-    await sleep(500); // past the tap-dismiss window, and past any pending navigation's commit
-    return true;
-  };
-  const probe = () => evaluate(TAPPED);
-  const tapped1 = await tapAt();
-  const afterTap1 = await probe();
-  const tapped2 = await tapAt();
-  const afterTap2 = await probe();
-  await clearMobile();
+  await makeStable(settle)(NARROW, "BR6 the room laid out at 1024x700", {
+    departed: (d) => d.iw === 1024 && d.ih === 700 && !sameBox(d.sheet, before.sheet),
+  });
+  await evaluate(COUNT_CLICKS);
+  const tapped1 = await tapAt(k, settle);
+  const afterTap1 = await evaluate(TAPPED);
+  const tapped2 = await tapAt(k, settle);
+  const afterTap2 = await evaluate(TAPPED);
+  return { emulated, tapped1, tapped2, afterTap1, afterTap2 };
+}
+
+export async function br6Tap(k: BroadsideKit): Promise<void> {
+  const { evaluate, check, setNarrowViewport, clearMobile } = k;
+  // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
+  const before = await evaluate(NARROW);
+  await setNarrowViewport(1024, 700);
+  const taps = await narrowTaps(k, before).finally(() => clearMobile());
+  const { emulated, tapped1, tapped2, afterTap1, afterTap2 } = taps;
   check(
     "BR6 under hover:none, on a 1024 tablet since the narrow layout went (Issue #762), a real tap opens the note without navigating and a second tap closes it",
     emulated &&
@@ -273,7 +296,7 @@ export async function br6Tap({
       afterTap1.hasLink &&
       !afterTap2.open &&
       afterTap2.stayed,
-    JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
+    JSON.stringify(taps),
   );
 }
 
