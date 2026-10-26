@@ -30,11 +30,8 @@ export async function sb9bPrinted({ send, check, read }: SpecimenKit): Promise<v
   );
 }
 
-export async function sb9PrintIsPaper({ send, check, sleep, setState, read }: SpecimenKit): Promise<void> {
-  await setState("rest");
-  await sleep(400);
-
-  const restScreen = await read();
+export async function sb9PrintIsPaper({ send, check, read, toState }: SpecimenKit): Promise<void> {
+  const restScreen = await toState("rest", "SB9 at rest");
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printed = await read();
   check(

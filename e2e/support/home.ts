@@ -89,7 +89,7 @@ export const makeStage = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" 
 
 // Real mouse input as the primitives a drag is made of, lifted at second use (Issue #523): suite-cluster's dragAcross was the first, and the Chart Table's carry needs the press and the moves apart from the release so it can read the ghost mid-carry. The moves carry button and buttons DELIBERATELY: Chromium ignores a move whose button is none for a held drag.
 export const makeMouse = (ctx: Pick<SuiteContext, "send" | "sleep">) => {
-  const { send, sleep } = ctx;
+  const { send } = ctx;
   const press = (x: number, y: number): Promise<unknown> =>
     send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
   const moveTo = async (from: Point, to: Point, steps = 8): Promise<void> => {
@@ -108,7 +108,6 @@ export const makeMouse = (ctx: Pick<SuiteContext, "send" | "sleep">) => {
     await press(from.x, from.y);
     await moveTo(from, { x: from.x + dx, y: from.y + dy });
     await release(from.x + dx, from.y + dy);
-    await sleep(150);
   };
   return { press, moveTo, release, dragAcross };
 };

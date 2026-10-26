@@ -18,26 +18,28 @@ import {
   sb13GlassPress,
   sb14Verbs,
 } from "./specimen/desktop.ts";
+import type { Specimen } from "./specimen/reads.ts";
 import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts";
 import { sb15OutPress } from "./specimen/gestures.ts";
 import { sb16LeanedOne, sb19SlidFromRest, slidStep } from "./specimen/slid.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, sleep } = ctx;
+  const { send } = ctx;
   const settle = makeSettle(ctx);
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = specimenKit({ ...ctx, settle });
-  const { setState, read, goto } = k;
+  const { goto, toState } = k;
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  const rest = await goto();
+  let rest: Specimen | null = null;
+  await step("SB setup", async () => {
+    rest = await goto();
+  });
   await sb1Boots(k, rest);
   await step("SB4", () => sb4Folded(k, rest));
   await step("SB5", async () => {
-    await setState("leaned");
-    await sleep(900);
-    const leaned = await read();
+    const leaned = await toState("leaned", "SB5 leaned");
     sb5Leaned(k, leaned);
     sb5fCornerPanels(k, leaned);
     sb8eInsets(k, leaned);
@@ -46,6 +48,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
   await step("SB17, SB5g, SB5d, SB5e, SB18", () => slidStep(k, rest));
   await step("SB19", () => sb19SlidFromRest(k));
+  await step("SB6 setup", async () => {
+    await toState("rest", "SB6 at rest again");
+  });
   await sb6RestAgain(k);
   await step("SB10", () => sb10Route(k));
   await step("SB11", () => sb11Pieces(k));
@@ -54,12 +59,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("SB15", () => sb15OutPress(k));
   await step("SB14", () => sb14Verbs(k));
   // SB9b prints a leaned Book; the phone block that used to lean it before here went with the narrow layout (Issue #762).
-  await setState("leaned");
-  await sleep(900);
-  await sb9bPrinted(k);
-  await sb9PrintIsPaper(k);
+  await step("SB9b", async () => {
+    await toState("leaned", "SB9b leaned");
+    await sb9bPrinted(k);
+  });
+  await step("SB9, SB9c", () => sb9PrintIsPaper(k));
   await send("Emulation.clearDeviceMetricsOverride");
   await sb9dNoScript(k);
-  await goto();
+  await step("SB restore", async () => {
+    await goto();
+  });
   gate.check("SB health: the Specimen Book raised no console error and no 4xx across every state at both widths");
 }

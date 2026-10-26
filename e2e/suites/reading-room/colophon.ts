@@ -1,6 +1,10 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import type { Ages } from "./reads.ts";
+
+export const SWEEP: Payload<{ u: number | null }> =
+  `(()=>{const a=window.__vellumReadingRoomAges();return{u:a?a.u:null};})()`;
 
 export async function rr16Colophon({ evaluate, check }: SuiteContext): Promise<void> {
   const colo = await evaluate<{
@@ -87,12 +91,11 @@ export async function rr17CounterRead({
   );
 }
 
-export async function rr18Park({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+export async function rr18Park({ evaluate, check }: SuiteContext): Promise<void> {
   // Back to the present park so RR18/RR19 below read the rest this draw actually landed at.
   await evaluate(
     `(()=>{const p=document.querySelector(".rf-play");if(p.textContent==="Pause")p.click();const r=document.querySelector(".rf-range");r.value=r.max;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));return null;})()`,
   );
-  await sleep(150);
 
   const after = await evaluate<{
     ages: Ages | null;
@@ -181,8 +184,9 @@ export async function rr21Dice({ evaluate, check, sleep }: SuiteContext): Promis
 }
 
 export async function rr22MidPlay({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
+  const from = await evaluate(SWEEP);
   await evaluate(`(()=>{document.querySelector(".rf-play").click();})()`);
-  await sleep(350);
+  await makeSettle({ evaluate, sleep })(SWEEP, (d) => d.u !== null && d.u !== from.u, "RR22 the sweep under way");
   const midPlay = await evaluate<{ label: string }>(
     `(()=>{const p=document.querySelector(".rf-play");return{label:p.textContent};})()`,
   );
