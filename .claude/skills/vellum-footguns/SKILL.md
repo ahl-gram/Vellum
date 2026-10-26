@@ -229,15 +229,13 @@ This is the checklist; the reasons are not copied here.
 Scars: #401, #542, #546.
 
 A new page, sheet, suite, room, or CSS surface joins lists it does not know about, and most of them
-fail silently (an undeclared CSS variable, a suite the runner never calls, a budget nobody re-measured).
+fail silently (an undeclared CSS variable, a suite the runner never calls).
 
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/`, `.github/` and join
    every list it appears in: the runner's `SUITES` map, `MEASURED_SECONDS`, the tiers test, the
    discovery files. A sheet under `src/styles/` joins the stylesheet lint by existing (its block reads `src/styles/**/*.css`).
 2. Name in the PR body which rosters self-check and which were joined by hand;
    `handbook/specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
-3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
-   twenty-three-check one.
 
 ## Gate 5: before the push and the PR body
 

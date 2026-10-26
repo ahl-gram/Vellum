@@ -255,9 +255,8 @@ skip list, and this section sets no rule for a unit test.
   and a cut from the slowest lane saves only down to the next one. A step's cost counts whatever
   its lane: the slowest lane changes from run to run, and a cut there pays only as far as the next
   lane's time, so cuts across the lanes together reach the wall clock where one lane's alone stop
-  short. The pull request that pulls a step re-measures its suite as "`MEASURED_SECONDS` is read
-  from CI's own lane logs" in `handbook/specs/site-architecture.md` says, and moves suites only
-  where `test/e2e/lane-timings.test.ts` then reds.
+  short. The pull request that pulls a step moves suites only where `test/e2e/lane-timings.test.ts`
+  reds.
 - **One honest fix** for a slow step is one change aimed at its own seconds, planned, and read as
   above before and after: before, from main's three latest runs; after, from the pull request's
   own run and two more runs of that lane's job started by hand. Such a change makes a fixed sleep
