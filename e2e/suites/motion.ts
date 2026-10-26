@@ -1,4 +1,5 @@
 // Motion e2e (D the Issue #127 arrival ceremony, F the Issue #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
+import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 
@@ -66,10 +67,12 @@ async function d1ArrivalCeremony({ evaluate, check, waitSettled }: SuiteContext)
 }
 
 export async function d3DragQuiet({ evaluate, check, sleep, waitSettled }: SuiteContext): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  await evaluate(MARK_SHEET);
   await evaluate(
     `(()=>{const l=document.getElementById("land");l.value="300";l.dispatchEvent(new Event("input",{bubbles:true}));})()`,
   );
-  await sleep(220); // cross the ~100ms input debounce so the quiet redraw has started
+  await stable(NEW_SHEET, "D3 the quiet redraw replaced the sheet", { departed: (d) => d.fresh });
   await waitSettled("draft-drag-input");
   const d3drag = await evaluate<boolean>(`document.querySelector("#map svg").classList.contains("arriving")`);
   await evaluate(

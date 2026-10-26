@@ -1,4 +1,5 @@
 // Sheet turn e2e (T, Issue #131): a STYLE change turns the sheet and the same world lands re-dressed; a new world settles and never turns. e2e cannot SEE the 3D turn, so these assert end states plus armTurnWatch's .turning record (engaged vs instant swap).
+import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 
@@ -95,6 +96,7 @@ export async function t3InterruptTurn({
   waitTurned,
   armTurnWatch,
 }: SuiteContext): Promise<void> {
+  const settle = makeSettle({ evaluate, sleep });
   await evaluate(
     `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`,
   );
@@ -103,7 +105,7 @@ export async function t3InterruptTurn({
   await evaluate(
     `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
-  await sleep(300); // the ink turn is now mid-rotation
+  await settle(TURNING, (d) => d.turning, "T3 the ink turn under way");
   await evaluate(
     `(()=>{const s=document.getElementById("style");s.value="topographic";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
@@ -131,6 +133,7 @@ export async function t5SettleSupersedes({
   waitSettled,
   waitTurned,
 }: SuiteContext): Promise<void> {
+  const settle = makeSettle({ evaluate, sleep });
   await evaluate(
     `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`,
   );
@@ -138,7 +141,7 @@ export async function t5SettleSupersedes({
   await evaluate(
     `(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
-  await sleep(250); // the nautical turn is mid-flight
+  await settle(TURNING, (d) => d.turning, "T5 the nautical turn under way");
   await evaluate(`(()=>{document.getElementById("seed").value="7";document.getElementById("draw").click();})()`);
   await waitTurned("settle-supersedes-turn");
   await sleep(200);

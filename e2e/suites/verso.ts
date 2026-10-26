@@ -1,5 +1,7 @@
 // Verso e2e (V, Issue #116): the sheet flip to its back face and the key turn-vs-flip shared-transform races (both drive #sheet-inner's rotateY, never together); e2e cannot SEE the 3D flip, so these assert end states, class toggles, and the docket text.
+import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
+import { FLIP, flipLanded } from "../support/witness.ts";
 import type { SuiteContext } from "../types.ts";
 
 export type VersoKit = ReturnType<typeof versoKit>;
@@ -8,13 +10,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const k = versoKit(ctx);
 
-  // null, never "": V1b below is outside every step and reads this, and `docket.includes("")` is TRUE, so an empty hoist would let a skipped "V setup" pass V1b's title clause vacuously.
+  // null, never "": V1b below reads this, and `docket.includes("")` is TRUE, so an empty hoist would let a skipped "V setup" pass V1b's title clause vacuously.
   let vTitle: string | null = null;
   await step("V setup", async () => {
     vTitle = await vSetup(k);
   });
   await step("V0", () => v0TurnDisables(k));
-  await v1FlipsToVerso(k, vTitle);
+  await step("V1, V1b, V1c", () => v1FlipsToVerso(k, vTitle));
   await step("V2", () => v2RedrawWhileFlipped(k));
   await step("V3", () => v3RestyleWhileFlipped(k));
   await v4LeavesVerso(k);
@@ -73,8 +75,8 @@ export async function v1FlipsToVerso(
   { evaluate, check, shoot, sleep }: VersoKit,
   vTitle: string | null,
 ): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(80);
   const v1 = await evaluate<{
     versoed: boolean;
     flip3d: boolean;
@@ -110,15 +112,14 @@ export async function v1FlipsToVerso(
     v1.docket.includes("Laukuwelua (once Haitani)"),
     JSON.stringify({ docket: v1.docket }),
   );
-  await sleep(1300); // let the 1.2s flip land before the screenshot
+  await stable(FLIP, "V1 the flip to the verso landed", { departed: flipLanded });
   await shoot("explorer-verso.png");
 }
 
-export async function v2RedrawWhileFlipped({ evaluate, check, sleep, waitRectoAttr }: VersoKit): Promise<void> {
+export async function v2RedrawWhileFlipped({ evaluate, check, waitRectoAttr }: VersoKit): Promise<void> {
   const ghostSrcBefore = await evaluate<string>(`document.querySelector("#verso .verso-ghost").src`);
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitRectoAttr("data-vellum-seed", "100", "verso-rebuild-seed");
-  await sleep(60);
   const v2 = await evaluate<{
     versoed: boolean;
     flip3d: boolean;
@@ -171,9 +172,8 @@ async function v4LeavesVerso({ evaluate, check }: VersoKit): Promise<void> {
   check("V4 clicking Turn again leaves the verso immediately (.versoed dropped)", v4immediate === false);
 }
 
-export async function v4bFlipBack({ evaluate, check, sleep, waitFlip3dGone }: VersoKit): Promise<void> {
+export async function v4bFlipBack({ evaluate, check, waitFlip3dGone }: VersoKit): Promise<void> {
   await waitFlip3dGone("verso-flip-back");
-  await sleep(60);
   const v4 = await evaluate<{
     versoed: boolean;
     flip3d: boolean;

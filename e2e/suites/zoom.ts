@@ -103,7 +103,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("Z27", () => z27UnderPinned(ctx));
   await step("Z11", () => z11Styles(ctx));
   await step("Z12", () => z12HashWrite(ctx));
-  await z5VersoHomes(ctx);
+  await step("Z5", () => z5VersoHomes(ctx));
   await step("Z14a", () => z14aDrawHomes(ctx));
   await step("Z14b", () => z14bTurnHomes(ctx));
   await z14cArmingHomes(ctx);
