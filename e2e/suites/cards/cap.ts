@@ -11,8 +11,8 @@ export type Scrolled = { scrollTop: number; k: number; frame: number };
 export const COUNT_FRAMES: Payload<boolean> = `(()=>{const g=(window.__capGen=(window.__capGen||0)+1);window.__capFrame=0;const tick=()=>{if(window.__capGen!==g)return;window.__capFrame++;requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
 export const STOP_FRAMES = `window.__capGen = (window.__capGen || 0) + 1`;
 export const SCROLLED: Payload<Scrolled> = `(() => ({ scrollTop: +document.querySelector("#place-card .pc-inner").scrollTop.toFixed(2), k: window.__vellumZoomState().k, frame: window.__capFrame }))()`;
-// 2026-10-26, unmeasured at planning: a smooth scroll moves on the first frame it paints, so ten painted frames with nothing moved is an input that scrolled nothing, five times the two a started scroll needs to show.
-export const QUIET_FRAMES = 10;
+// 2026-10-26, Mac (headless Brave, three runs of the cards suite, identical): the first poll to see the input handled was at frame 9 for P26's wheel and frame 12 for P27's PageDown, an upper bound, so 30 leaves 2.5 times the worse; the CI reading is not taken yet.
+export const QUIET_FRAMES = 30;
 export const scrollRested = (d: Scrolled, last: Scrolled): boolean =>
   d.scrollTop === last.scrollTop && d.k === last.k && d.frame > last.frame;
 export const scrollOutcome =
