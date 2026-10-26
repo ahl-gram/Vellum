@@ -35,6 +35,13 @@ headless browser actually do, so a green run can be believed.
    `vellum/e2e-throw-inside-step` follows a wait built there and asks for its step, and does not
    follow a member a hand-written type declares. The stillness predicates written by hand before it
    stay as they are.
+   A `sleep` anywhere under `e2e/` stands inside a counted `for` loop that leaves on what it reads,
+   or names itself at the call with its reason as a string literal: `sleep(ms, "pace: why")` for a
+   gap the harness keeps between the input events of one gesture or between two of its own
+   attempts, and `sleep(ms, "window: why")` for a window a check reads an absence over or a timed
+   sample. `vellum/e2e-sleep-inside-poll` (`scripts/lint/e2e-sleep.ts`) refuses any other, in every
+   form but the blind spots its test declares, each with its direction, in
+   `test/repo/e2e-sleep.test.ts`.
 4. **A readiness wait THROWS on timeout; a measurement poll judges its LAST read; a `step` catches
    the throw.** The two are different jobs and the house already writes both. A wait a check DEPENDS
    on returns nothing useful when it gives up, so returning its last read hands the check a stale
