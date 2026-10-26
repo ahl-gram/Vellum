@@ -8,7 +8,43 @@ import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
-type Room = { lg: Box; bl: Box; sl: Box; gl: Box; sh: Box; folioText: number; w: number; h: number };
+type Room = {
+  lg: Box;
+  bl: Box;
+  sl: Box;
+  gl: Box;
+  sh: Box;
+  folioText: number;
+  w: number;
+  h: number;
+  fonts: string;
+  moving: boolean;
+};
+
+// The row's left transitions 0.32s to the seat the room writes, and the room writes it again on `document.fonts.ready` and on every resize, so a read waits for the fonts and for no animation running on the row.
+export const LEGEND_ROOM: Payload<Room> = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
+      const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
+      const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
+      const row=document.querySelector(".legend");const moving=!!row&&row.getAnimations().some((a)=>a.playState==="running");
+      return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight,fonts:document.fonts.status,moving};})()`;
+const legendClear = (m: Room): boolean =>
+  !!m.lg &&
+  m.lg.l >= m.folioText + 16 &&
+  m.lg.r <= m.sl!.l - 8 &&
+  m.lg.r <= m.gl!.l - 8 &&
+  m.sh!.r <= m.gl!.l - 8 &&
+  m.sh!.b <= Math.min(m.bl!.t, m.lg.t) - 8;
+type Narrow = { iw: number; ih: number; sheet: Box };
+export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)}};})()`;
+export const CLICKS: Payload<{ n: number }> = `({ n: window.__br6Clicks })`;
+type Tapped = { stayed: boolean; open: boolean; hasLink: boolean };
+export const TAPPED: Payload<Tapped> = `(()=>{const n=document.getElementById("note-survey");
+    return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
+      hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`;
+export const MARK: Payload<Point | null> = `(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
+      if(!m)return null;
+      m.scrollIntoView({block:"center"});const r=m.getBoundingClientRect();
+      return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -71,26 +107,15 @@ async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<
   );
 }
 
-async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
-  const legendRoom: Payload<Room> = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
-      const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
-      const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
-      return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
-  const legendClear = (m: Room): boolean =>
-    !!m.lg &&
-    m.lg.l >= m.folioText + 16 &&
-    m.lg.r <= m.sl!.l - 8 &&
-    m.lg.r <= m.gl!.l - 8 &&
-    m.sh!.r <= m.gl!.l - 8 &&
-    m.sh!.b <= Math.min(m.bl!.t, m.lg.t) - 8;
+export async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
   await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
-  const at1280 = await evaluate(legendRoom);
+  const at1280 = await evaluate(LEGEND_ROOM);
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(600);
-  const at1680 = await evaluate(legendRoom);
+  const at1680 = await evaluate(LEGEND_ROOM);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await sleep(600);
-  const back = await evaluate(legendRoom);
+  const back = await evaluate(LEGEND_ROOM);
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(600);
   check(
@@ -195,7 +220,7 @@ async function br4Notes({ evaluate, send, check }: BroadsideKit): Promise<void> 
   );
 }
 
-async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
+export async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
   const rect = await evaluate<Point>(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
@@ -211,31 +236,28 @@ async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise
   );
 }
 
-async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearMobile }: BroadsideKit): Promise<void> {
+export async function br6Tap({
+  evaluate,
+  check,
+  sleep,
+  touch,
+  setNarrowViewport,
+  clearMobile,
+}: BroadsideKit): Promise<void> {
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setNarrowViewport(1024, 700);
   const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
   await sleep(120);
   // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
   const tapAt = async (): Promise<boolean> => {
-    const p = await evaluate<Point | null>(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
-      if(!m)return null;
-      m.scrollIntoView({block:"center"});const r=m.getBoundingClientRect();
-      return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
+    const p = await evaluate(MARK);
     if (!p) return false;
     await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
     await touch("touchEnd", []);
     await sleep(500); // past the tap-dismiss window, and past any pending navigation's commit
     return true;
   };
-  const probe = () =>
-    evaluate<{
-      stayed: boolean;
-      open: boolean;
-      hasLink: boolean;
-    }>(`(()=>{const n=document.getElementById("note-survey");
-    return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
-      hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
+  const probe = () => evaluate(TAPPED);
   const tapped1 = await tapAt();
   const afterTap1 = await probe();
   const tapped2 = await tapAt();

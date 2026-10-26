@@ -1,8 +1,9 @@
 // Reading Room e2e (RR0-RR43; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import type { Payload, SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../types.ts";
 import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
+import { DESK, atDesk, sameSheet } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
@@ -22,10 +23,6 @@ import { rr39AtRest, rr43OverlayUnshadowed } from "./reading-room/dress.ts";
 import { rr40Glass, rr41ReadRefits, rr42PlateReveal } from "./reading-room/gestures.ts";
 
 type Step = ReturnType<typeof makeStep>;
-type Desk = { iw: number; ih: number; sheet: number[] | null };
-const DESK: Payload<Desk> = `(() => { const e = document.getElementById("sheet"); const b = e ? e.getBoundingClientRect() : null; return { iw: innerWidth, ih: innerHeight, sheet: b && [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
-const atDesk = (d: Desk): boolean => d.iw === 1440 && d.ih === 900;
-const sameSheet = (a: Desk, b: Desk): boolean => JSON.stringify(a.sheet) === JSON.stringify(b.sheet);
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;

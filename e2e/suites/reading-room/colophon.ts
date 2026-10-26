@@ -1,6 +1,9 @@
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import type { Ages } from "./reads.ts";
+
+export const SWEEP: Payload<{ u: number | null }> =
+  `(()=>{const a=window.__vellumReadingRoomAges();return{u:a?a.u:null};})()`;
 
 export async function rr16Colophon({ evaluate, check }: SuiteContext): Promise<void> {
   const colo = await evaluate<{

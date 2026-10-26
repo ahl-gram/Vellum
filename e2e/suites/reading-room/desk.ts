@@ -1,6 +1,9 @@
 import type { Payload, SuiteContext } from "../../types.ts";
-import { GOVERNING_BUDGET, stripRead, WIDE_WORST } from "./reads.ts";
-import type { Room, Strip } from "./reads.ts";
+import { DESK, GOVERNING_BUDGET, stripRead, WIDE_WORST } from "./reads.ts";
+import type { Desk, Room, Strip } from "./reads.ts";
+
+type Wide = Desk & { strip: Strip | null };
+export const WIDE: Payload<Wide> = `(() => ({ ...(${DESK}), strip: (${stripRead}) }))()`;
 
 export async function rr31StripStands(
   { evaluate, check, sleep }: SuiteContext,

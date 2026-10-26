@@ -4,6 +4,8 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 
+export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
+
 export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit }: RunningHeadKit): Promise<void> {
   // The harness window is tall, so this check pins its own viewport; the Gallery is the one chart room that scrolls.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
