@@ -1,14 +1,15 @@
 import { luminance, sampleRow } from "../../support/pixel.ts";
-import type { makeSettle } from "../../support/settle.ts";
+import { makeStable, type Settle } from "../../support/settle.ts";
 import type { SuiteContext } from "../../types.ts";
 import { PAGE, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
 
-type Settle = ReturnType<typeof makeSettle>;
+const moved = (a: Specimen["map"], b: Specimen["map"]): boolean => JSON.stringify(a) !== JSON.stringify(b);
 export type SpecimenKit = ReturnType<typeof specimenKit>;
 
 export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
   const { evaluate, send, sleep, PORT, settle } = ctx;
+  const stable = makeStable(settle);
   const read = () => evaluate(READ);
   const setState = (s: string) =>
     evaluate<string>(
@@ -24,18 +25,17 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
       try {
         s = await read();
       } catch {}
-      // The 800ms after boot is the landing (sheet-land 0.55s) plus the ink-in (0.5s after 0.18s): a shot before it shows the deep and the chart alone, the furniture still at opacity 0.
-      if (s && s.st && s.plateLoaded && s.sheet && s.sheet.w > 0) {
-        await sleep(800);
-        return read();
-      }
+      if (s && s.st && s.plateLoaded && s.sheet && s.sheet.w > 0)
+        return stable(READ, "the Specimen Book landed", { animated: ".legend" });
       await sleep(50);
     }
     return null;
   };
   const toState = async (s: "rest" | "leaned", label: string): Promise<Specimen> => {
+    const from = await read();
+    const unfolds = !!from.st && from.st.folded;
     await setState(s);
-    return settle(READ, () => true, label);
+    return stable(READ, label, { departed: (d) => moved(d.map, from.map) && (!unfolds || moved(d.sheet, from.sheet)) });
   };
   const brightest = async (x: number, y: number) =>
     Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
