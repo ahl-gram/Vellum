@@ -1,6 +1,6 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
-import type { SurveyKit } from "./kit.ts";
+import { restOnVerso, type SurveyKit } from "./kit.ts";
 
 export type InkSpan = {
   inkStarted: boolean;
@@ -221,7 +221,7 @@ export async function sv2mStyleInBeat({
   );
 }
 
-async function sv2oBackFace({ evaluate, sleep }: Pick<SurveyKit, "evaluate" | "sleep">) {
+async function sv2oBackFace({ evaluate }: Pick<SurveyKit, "evaluate">) {
   const sv2o = await evaluate<{
     atSwap: { back: string | null; recto: string | null; versoed: boolean } | null;
     batches: number;
@@ -237,7 +237,6 @@ async function sv2oBackFace({ evaluate, sleep }: Pick<SurveyKit, "evaluate" | "s
         versoed:document.getElementById("sheet").classList.contains("versoed"),
         status:document.getElementById("status").textContent};})()`);
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1500);
   return sv2o;
 }
 
@@ -252,7 +251,7 @@ export async function sv2oVersoDraw({
   await goto("#seed=7&style=antique&survey", "survey-flipped-base");
   await waitInked("survey-flipped-base-ink");
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
+  await restOnVerso({ evaluate, sleep }, "SV2o the leaf rests on the verso");
   const flippedTrackA = await evaluate<string | null>(`(()=>{const b=document.querySelector("#verso .verso-track");
       return b?b.getAttribute("points"):"";})()`);
   await evaluate(`(()=>{window.__flip={batches:[]};
@@ -269,7 +268,7 @@ export async function sv2oVersoDraw({
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
   await waitSettled("survey-flipped-settle");
   await waitInked("survey-flipped-ink");
-  const sv2o = await sv2oBackFace({ evaluate, sleep });
+  const sv2o = await sv2oBackFace({ evaluate });
   check(
     "SV2o a Draw taken while resting on the verso changes the visible back face whole: ghost and track from the same draw, never a bare new ghost (#174/#366)",
     !!sv2o.atSwap &&
