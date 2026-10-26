@@ -146,6 +146,7 @@ const held = (r: Refit): boolean =>
   r.cx === "0.5000" &&
   r.cy === "0.5000" &&
   r.k === "4.0000" &&
+  Math.abs(r.sk - 4) < FRAMING_EPS &&
   Math.abs(r.fx - 0.5) < FRAMING_EPS &&
   Math.abs(r.fy - 0.5) < FRAMING_EPS;
 
