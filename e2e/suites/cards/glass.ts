@@ -1,3 +1,5 @@
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { Manifest } from "./overlay.ts";
 
@@ -109,10 +111,12 @@ export async function p17RuinNote({ evaluate, check, axDescription }: SuiteConte
 }
 
 export async function pCardShot({ evaluate, shoot, sleep }: SuiteContext, pm: Manifest): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  const before = await evaluate(CARD_ROLL);
   await evaluate(
     `(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx >= 0 ? pm.ruinIdx : pm.cap}+'"]').focus();})()`,
   );
-  await sleep(500);
+  await stable(CARD_ROLL, "P card shot: the card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
   await shoot("explorer-place-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 }

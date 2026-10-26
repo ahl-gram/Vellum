@@ -95,7 +95,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = zoomKit(ctx);
   // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
-  await zGeometric(ctx, k);
+  await zGeometric(step, ctx, k);
   await step("Z22", () => z22HitAndRing(ctx));
   await step("Z24", () => z24CardSeats(ctx));
   await step("Z25", () => z25ClampFlush(ctx));
@@ -103,7 +103,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("Z27", () => z27UnderPinned(ctx));
   await step("Z11", () => z11Styles(ctx));
   await step("Z12", () => z12HashWrite(ctx));
-  await z5VersoHomes(ctx);
+  await step("Z5", () => z5VersoHomes(ctx));
   await step("Z14a", () => z14aDrawHomes(ctx));
   await step("Z14b", () => z14bTurnHomes(ctx));
   await z14cArmingHomes(ctx);
@@ -114,11 +114,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z15RegionCrop(ctx);
   await z16CacheHit(ctx);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
-  await z17Inset(k);
-  await zInsetContextShot(k);
+  await step("Z17", async () => {
+    await z17Inset(k);
+    await zInsetContextShot(k);
+  });
   await z18Pan(k);
   await z19RapidSettles(k);
-  await z19bSupersession(k);
+  await step("Z19b", () => z19bSupersession(k));
   await z20ZoomOutDrops(k);
   await z20bReducedMotion(k);
   await step("Z20c", () => z20cThrottle(k));
@@ -172,14 +174,14 @@ async function zLoupe(step: ReturnType<typeof makeStep>, k: ZoomKit, pick: Hamle
   await step("ZL7", () => zl7DarkPastSheet(k));
 }
 
-async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
+async function zGeometric(step: ReturnType<typeof makeStep>, ctx: SuiteContext, k: ZoomKit): Promise<void> {
   await z1ZoomTo(ctx);
   await z2MaxClamp(ctx);
   await zK4Shot(ctx);
   await z3MinClamp(ctx);
   await z4RoundTrip(ctx);
-  await z6PinnedCard(ctx);
-  await z8CardConstant(ctx);
+  await step("Z6", () => z6PinnedCard(ctx));
+  await step("Z8", () => z8CardConstant(ctx));
   await z8bHoverRing(k);
   await z9Keyboard(ctx);
   await z10Buttons(ctx);

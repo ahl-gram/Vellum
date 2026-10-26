@@ -1,9 +1,13 @@
 // Glass ceremony e2e (G, Issue #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
+import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import type { SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 import { g9PressFace } from "./glass-ceremony/dress.ts";
 import { g10PressDark } from "./glass-ceremony/gestures.ts";
 import { REDRAFT_TRIES } from "./zoom/kit.ts";
+
+export const HASH: Payload<{ cx: string | null; cy: string | null; k: string | null }> =
+  `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`;
 
 type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
 export type GlassKit = ReturnType<typeof glassKit>;
@@ -19,7 +23,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("G10", () => g10PressDark(k));
   await g2aGlides(k);
   await g2bCompounds(k);
-  await g2cKeys(k);
+  await step("G2c", () => g2cKeys(k));
   await g3ReducedMotion(k);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await g4InksIn(k);
@@ -148,13 +152,14 @@ async function g2bCompounds({ evaluate, check, settleK }: GlassKit): Promise<voi
   );
 }
 
-async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
+export async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(
     `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,
   );
   const g2cIn = await settleK(1.4);
-  await sleep(400); // let the settle debounce write cx/cy/k so the drop below is observable
+  await stable(HASH, "G2c the settle writes the hash at 1.4", { departed: (d) => Number(d.k) === 1.4 });
   await evaluate(
     `(()=>{const vp=document.getElementById("map-viewport");vp.dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}));})()`,
   );

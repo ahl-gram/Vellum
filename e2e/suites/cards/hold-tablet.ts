@@ -1,3 +1,4 @@
+import { makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import type { holdKit } from "./hold.ts";
 
@@ -9,7 +10,11 @@ const TAPLOG: Payload<boolean> = `(() => { window.__p30 = []; const name = (t) =
   for (const type of ["touchstart", "pointerdown", "mousedown", "click"]) document.addEventListener(type, (e) => { const p = e.touches && e.touches[0] ? e.touches[0] : e; window.__p30.push(type + "@" + Math.round(p.clientX) + "," + Math.round(p.clientY) + ">" + name(e.target) + (type === "click" ? " d" + e.detail : "")); }, { capture: true, once: true });
   return true; })()`;
 
+export const TAPPED: Payload<{ clicked: boolean; shown: boolean; rest: boolean }> =
+  `(() => { const c = document.getElementById("place-card"); const a = c && !c.hidden ? c.querySelector(".pc-inner").getAnimations() : []; return { clicked: (window.__p30 || []).some((e) => e.startsWith("click@")), shown: !!c && !c.hidden, rest: a.length > 0 && a.every((x) => x.playState === "finished") }; })()`;
+
 export async function p30Tablet(k: Kit): Promise<void> {
+  const stable = makeStable(k.settle);
   const marks = (await k.boot(true)).filter((m) => TABLET.includes(m.idx));
   const rows: string[] = [];
   let onTown = 0;
@@ -28,6 +33,9 @@ export async function p30Tablet(k: Kit): Promise<void> {
     await k.evaluate(TAPLOG);
     await k.tap(text);
     await k.sleep(650);
+    await stable(TAPPED, `P30 the text tap on ${m.name}'s card handled`, {
+      departed: (d) => d.clicked && (!d.shown || d.rest),
+    });
     const kept = await k.card();
     const events = await k.evaluate<string>(`window.__p30.join(" | ")`);
     if (/mousedown@[^|]*>hit/.test(events)) onTown++;

@@ -1,7 +1,9 @@
 // Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards; the chart takes a finger only once its touch press is pressed (Issue #778), so ZG5 to ZG7 read it off, ZG9 reads every other room off, ZG10 carries it from room to room and takes it back, ZG8 presses it for ZG2 to ZG4, ZG8c takes it back, and the suite forgets it before the next. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), and NEVER load a page in the touch block after a dispatched two-finger touch (later touches then reach no listener, a tap landing only as its click, and a pinch zooms the page whatever touch-action says; measured 2026-10-13 on main's build too, Issue #778), so every page load comes before ZG2's pinch, the touch-off pinch is the browser's own (Input.synthesizePinchGesture) and is read for its two fingers and the camera, never for the page's own zoom (linux Chrome on CI never moves visualViewport.scale under it, where Brave on macOS zooms the page to 2; measured 2026-10-13, Issue #778), and ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
 import { forgetChartTouch } from "../support/chart-touch.ts";
+import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import type { SuiteContext } from "../types.ts";
+import { countEvents } from "../support/witness.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 import {
   zg10Carried,
   zg11LoupeDrag,
@@ -16,13 +18,19 @@ import {
 
 export type GesturesKit = ReturnType<typeof gesturesKit>;
 
+const WHEELS = countEvents(["wheel"]);
+export const WHEELED: Payload<{ wheels: number; k: number; x: number; y: number }> =
+  `(()=>{const s=window.__vellumZoomState();return{wheels:${WHEELS.seen},k:s.k,x:s.x,y:s.y};})()`;
+const ENDS = countEvents(["pointerup", "pointercancel", "mouseup"]);
+export const ENDED: Payload<{ ends: number; k: number; x: number; y: number }> =
+  `(()=>{const s=window.__vellumZoomState();return{ends:${ENDS.seen},k:s.k,x:s.x,y:s.y};})()`;
+
 export async function run(ctx: SuiteContext): Promise<void> {
   const { setMobileViewport, clearMobile } = ctx;
-  // ZG1 and ZG1b are deliberately not stepped: nothing in them throws, the wheel and the state read both return.
   const step = makeStep(ctx);
   const k = gesturesKit(ctx);
 
-  await zg1WheelZooms(k);
+  await step("ZG1, ZG1b", () => zg1WheelZooms(k));
   await step("ZG1c", () => zg1cDeskHidesTouch(k));
   await setMobileViewport(1024, 768);
   await step("ZG5, ZG5b, ZG7", () => zgTouchOff(k));
@@ -60,14 +68,15 @@ function gesturesKit(ctx: SuiteContext) {
   return { ...ctx, reloadHome, vpRect, state };
 }
 
-async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, state }: GesturesKit): Promise<void> {
+export async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect }: GesturesKit): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   let r = await vpRect();
   const px = Math.round(r.W * 0.3),
     py = Math.round(r.H * 0.5);
+  await evaluate(WHEELS.arm);
   await wheel(r.L + px, r.T + py, -240);
-  await sleep(80);
-  const zg1 = await state();
+  const zg1 = await stable(WHEELED, "ZG1 the wheel handled", { departed: (d) => d.wheels > 0 });
   check(
     "ZG1 a real mouse wheel zooms in about the cursor (AC1: exact pointer-fixed transform)",
     zg1.k > 1.05 && Math.abs(zg1.x - px * (1 - zg1.k)) < 1 && Math.abs(zg1.y - py * (1 - zg1.k)) < 1,
@@ -76,9 +85,9 @@ async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, sta
   await shoot("explorer-gesture-wheel.png");
 
   r = await vpRect();
+  await evaluate(WHEELS.arm);
   await wheel(r.L + px, r.T + py, 600);
-  await sleep(80);
-  const zg1b = await state();
+  const zg1b = await stable(WHEELED, "ZG1b the wheel handled", { departed: (d) => d.wheels > 0 });
   check(
     "ZG1b a real wheel the other way zooms back out (k decreases toward the floor)",
     zg1b.k < zg1.k,
@@ -86,7 +95,7 @@ async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, sta
   );
 }
 
-async function zg2TouchGestures({
+export async function zg2TouchGestures({
   evaluate,
   check,
   shoot,
@@ -96,18 +105,18 @@ async function zg2TouchGestures({
   vpRect,
   state,
 }: GesturesKit): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await zg2aTablet(evaluate, check);
   const scrollToMap = () =>
     evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
   await scrollToMap();
-  await sleep(60);
 
   const r = await vpRect();
   const cx = Math.round(r.L + r.W * 0.5),
     cy = Math.round(r.T + r.H * 0.5);
+  await evaluate(ENDS.arm);
   await pinch(cx, cy, 70, 170);
-  await sleep(100);
-  const zg2 = await state();
+  const zg2 = await stable(ENDED, "ZG2 the pinch handled", { departed: (d) => d.ends > 0 });
   check(
     "ZG2 a real two-finger pinch zooms the map (AC1: k = start_k * spread ratio, 70->170 ≈ 2.43)",
     Math.abs(zg2.k - 170 / 70) < 0.15,
@@ -116,9 +125,9 @@ async function zg2TouchGestures({
   await shoot("explorer-gesture-pinch.png");
 
   const before = await state();
+  await evaluate(ENDS.arm);
   await touchPan(cx, cy, cx - 80, cy - 60);
-  await sleep(100);
-  const after = await state();
+  const after = await stable(ENDED, "ZG3 the drag handled", { departed: (d) => d.ends > 0 });
   check(
     "ZG3 a real one-finger drag pans by the screen delta (AC1)",
     Math.abs(after.x - before.x - -80) < 2 && Math.abs(after.y - before.y - -60) < 2 && after.k === before.k,

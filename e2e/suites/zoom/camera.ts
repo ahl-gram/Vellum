@@ -1,5 +1,7 @@
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
 import { sendKey } from "../../support/home.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import { ZERO_NUDGE, ringAtRest, ringScale } from "./reads.ts";
@@ -81,6 +83,8 @@ export async function z4RoundTrip({ evaluate, check }: SuiteContext): Promise<vo
 }
 
 export async function z6PinnedCard({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  const before = await evaluate(CARD_ROLL);
   const z6 = await evaluate<{ ok: false } | { ok: true; shown: boolean; pinned: boolean; scaled: boolean }>(
     `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-W/2,y:-H/2});const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;const hits=[...document.querySelectorAll("#map .place-hit")];let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}if(!best)return{ok:false};best.click();const card=document.getElementById("place-card");const m=document.getElementById("map");return{ok:true,shown:!card.hidden,pinned:card.classList.contains("pinned"),scaled:getComputedStyle(m).transform.startsWith("matrix(2, 0, 0, 2,")};})()`,
   );
@@ -89,12 +93,14 @@ export async function z6PinnedCard({ evaluate, check, shoot, sleep }: SuiteConte
     z6.ok && z6.shown && z6.pinned && z6.scaled,
     JSON.stringify(z6),
   );
-  await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle
+  await stable(CARD_ROLL, "Z6 the pinned card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
   await shoot("explorer-zoom-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 }
 
 export async function z8CardConstant({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  const before = await evaluate(CARD_ROLL);
   const z8 = await evaluate<
     { ok: false } | { ok: true; w1: number; w8: number; cardK1: string; cardK8: string; mapK8: string }
   >(`(()=>{
@@ -123,7 +129,7 @@ export async function z8CardConstant({ evaluate, check, shoot, sleep }: SuiteCon
     z8.ok && Math.abs(z8.w8 - z8.w1) <= 2 && z8.cardK8 === "8" && z8.cardK1 === "" && z8.mapK8 === "",
     JSON.stringify(z8),
   );
-  await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle before the shot
+  await stable(CARD_ROLL, "Z8 the pinned card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
   await shoot("explorer-zoom-card-k8.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 }

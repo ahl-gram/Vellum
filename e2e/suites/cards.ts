@@ -50,9 +50,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = cardsKit({ ...ctx, settle });
   await step("P setup", () => pSetup(ctx));
   const pm = await pManifest(ctx);
-  await pOverlayReads(ctx, pm);
+  await pOverlayReads(ctx, step, pm);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
-  await pCardShot(ctx, pm);
+  await step("P card shot", () => pCardShot(ctx, pm));
   await step("P34", () => p34ButtonLift(ctx));
   await step("P35", () => p35ProspectLift(ctx));
   const narrowCount = await evaluate<number>(
@@ -80,11 +80,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("P restore", () => pRestore(ctx));
 }
 
-async function pOverlayReads(ctx: SuiteContext, pm: Awaited<ReturnType<typeof pManifest>>): Promise<void> {
+async function pOverlayReads(
+  ctx: SuiteContext,
+  step: ReturnType<typeof makeStep>,
+  pm: Awaited<ReturnType<typeof pManifest>>,
+): Promise<void> {
   await p1Overlay(ctx, pm);
   await p2Idle(ctx);
   await p2bPressLift(ctx);
-  await p4Capital(ctx, pm);
+  await step("P4, P5, P5b, P5c", () => p4Capital(ctx, pm));
   await p6Ruin(ctx, pm);
   await p7Tooltip(ctx, pm);
   await p8TapPins(ctx, pm);

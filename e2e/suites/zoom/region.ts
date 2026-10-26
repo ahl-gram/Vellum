@@ -1,6 +1,14 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import type { Cam } from "./reads.ts";
+
+export const INSET_OPAQUE: Payload<{ insets: number; opacity: number }> =
+  `(()=>{const all=document.querySelectorAll("#map .region-inset");const last=all[all.length-1];return{insets:all.length,opacity:last?+getComputedStyle(last).opacity:-1};})()`;
+export const SETTLED_AT: Payload<{ k: string | null; drafting: boolean; insets: number; opacity: number }> =
+  `(()=>{const p=new URLSearchParams(location.hash.slice(1));const all=document.querySelectorAll("#map .region-inset");const last=all[all.length-1];return{k:p.get("k"),drafting:/^Drafting/.test(document.getElementById("caption").textContent||""),insets:all.length,opacity:last?+getComputedStyle(last).opacity:-1};})()`;
+export const DRAFTING: Payload<{ drafting: boolean; redrafts: number }> =
+  `(()=>({drafting:/^Drafting the finer survey/.test(document.getElementById("caption").textContent||""),redrafts:window.__vellumRegion().redrafts}))()`;
 
 export async function z15RegionCrop({ evaluate, check }: SuiteContext): Promise<void> {
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
@@ -68,6 +76,11 @@ export async function z16CacheHit({ evaluate, check }: SuiteContext): Promise<vo
   );
 }
 
+async function crossfadeLanded({ evaluate, sleep }: Pick<ZoomKit, "evaluate" | "sleep">, label: string): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
+  await stable(INSET_OPAQUE, label, { departed: (d) => d.insets === 1 && d.opacity === 1 });
+}
+
 export async function z17Inset({
   evaluate,
   check,
@@ -115,13 +128,16 @@ export async function z17Inset({
     `${JSON.stringify(s17)} inset=${view17.insets}(at commit ${atCommit.insets})@${view17.insetLeft}%/${view17.insetW}% stamped=${view17.stamped} world=${view17.worldMounted} ` +
       `hits=${view17.hits} camera k=${atCommit.zk} x=${atCommit.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
   );
-  await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
+  await crossfadeLanded({ evaluate, sleep }, "Z17 the inset's crossfade landed");
   await shoot("explorer-sub8-region-band1.png");
 }
 
-export async function zInsetContextShot({ shoot, sleep, enterAt }: ZoomKit): Promise<void> {
+export async function zInsetContextShot({ evaluate, shoot, sleep, enterAt }: ZoomKit): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await enterAt(1.35, 0.5, 0.5);
-  await sleep(600);
+  await stable(SETTLED_AT, "Z17 the camera's settle at k=1.35", {
+    departed: (d) => Number(d.k) === 1.35 && !d.drafting,
+  });
   await shoot("explorer-sub8-inset-context.png");
 }
 
@@ -168,10 +184,11 @@ export async function z19RapidSettles({ evaluate, check, sleep, rgn, goHome, wai
 }
 
 export async function z19bSupersession({ evaluate, check, sleep, rgn, goHome, enterAt }: ZoomKit): Promise<void> {
+  const settle = makeSettle({ evaluate, sleep });
   await goHome();
   const before19b = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
-  await sleep(350); // past the debounce: the region job is now in flight in the worker
+  await settle(DRAFTING, (d) => d.drafting && d.redrafts === before19b, "Z19b the region job in flight");
   await goHome(); // bumps regionGen mid-flight; the job's commit must be dropped
   await sleep(1200); // the worker resolved long since; assert the result went nowhere
   const after19b = await rgn();

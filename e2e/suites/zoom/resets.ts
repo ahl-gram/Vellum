@@ -1,10 +1,12 @@
-import { makeSettle } from "../../support/settle.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
+import { FLIP, flipLanded, flippedBack } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 export async function z5VersoHomes({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
+  const stable = makeStable(makeSettle({ evaluate, sleep }));
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1300); // let the 1.2s flip land
+  await stable(FLIP, "Z5 the flip to the verso landed", { departed: flipLanded });
   const z5 = await evaluate<{
     versoed: boolean;
     ghost: boolean;
@@ -23,7 +25,7 @@ export async function z5VersoHomes({ evaluate, check, shoot, sleep }: SuiteConte
   );
   await shoot("explorer-zoom-verso.png");
   await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1300);
+  await stable(FLIP, "Z5 the flip back to the recto landed", { departed: flippedBack });
 }
 
 export async function z14aDrawHomes({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
@@ -98,7 +100,6 @@ export async function z13DeepLink({
   send,
   check,
   shoot,
-  sleep,
   waitSettled,
   waitReady,
   PORT,
@@ -108,7 +109,6 @@ export async function z13DeepLink({
   await waitReady();
   await evaluate(`window.__vellumSetRedraftEnabled(false)`); // Issue #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
   await waitSettled("zoom-deeplink-load");
-  await sleep(80);
   const z13 = await evaluate<{ k: number; x: number; W: number }>(
     `(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`,
   );
@@ -146,6 +146,7 @@ const held = (r: Refit): boolean =>
   r.cx === "0.5000" &&
   r.cy === "0.5000" &&
   r.k === "4.0000" &&
+  Math.abs(r.sk - 4) < FRAMING_EPS &&
   Math.abs(r.fx - 0.5) < FRAMING_EPS &&
   Math.abs(r.fy - 0.5) < FRAMING_EPS;
 
