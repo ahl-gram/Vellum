@@ -1,4 +1,4 @@
-import { seedForDate } from "../../../src/world/seed-of-the-day.ts";
+import { FIXED_SEED } from "../../support/fixed-day.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead, stripRead } from "./reads.ts";
@@ -95,8 +95,6 @@ export async function rr7Year({
 }
 
 export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: ReadingRoomKit): Promise<void> {
-  // The seedForDate oracle is sampled BEFORE the navigation and again after settle: the page freezes its seed at load, so a fresh-per-poll oracle flakes when the run crosses 00:00Z (Issue #304's date-flake class); either sample matching is a pass.
-  const todayBefore = seedForDate(new Date());
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/` });
   let bare = null;
@@ -115,11 +113,10 @@ export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: Rea
       await sleep(50);
     }
   }
-  const todayAfter = seedForDate(new Date());
   check(
     "RR9 a bare visit opens today's seed-of-the-day",
-    !!bare && (bare.seed === todayBefore || bare.seed === todayAfter),
-    JSON.stringify({ ...bare, todayBefore, todayAfter }),
+    !!bare && bare.seed === FIXED_SEED,
+    JSON.stringify({ ...bare, fixed: FIXED_SEED }),
   );
 }
 
@@ -140,7 +137,6 @@ export async function rr10CrossLinks({ evaluate, send, check, sleep, PORT }: Sui
     !!card && card.verb === "Watch one" && card.enter === "reading-room/",
     JSON.stringify(card),
   );
-  const linkBefore = seedForDate(new Date());
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {
@@ -152,13 +148,10 @@ export async function rr10CrossLinks({ evaluate, send, check, sleep, PORT }: Sui
     if (watch) break;
     await sleep(50);
   }
-  const linkAfter = seedForDate(new Date());
   const watchSeed = watch ? Number((watch.href.match(/#seed=(\d+)$/) || [])[1]) : null;
   check(
     "RR10b the Today page cross-links the room with today's seed pinned",
-    !!watch &&
-      /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href) &&
-      (watchSeed === linkBefore || watchSeed === linkAfter),
-    JSON.stringify({ watch, linkBefore, linkAfter }),
+    !!watch && /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href) && watchSeed === FIXED_SEED,
+    JSON.stringify({ watch, fixed: FIXED_SEED }),
   );
 }

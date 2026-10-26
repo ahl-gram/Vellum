@@ -1,5 +1,6 @@
 // Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
 import { makeStep } from "../support/step.ts";
+import { FIXED_SEED } from "../support/fixed-day.ts";
 import type { SuiteContext } from "../types.ts";
 import { r16HostContract } from "./render/room.ts";
 import { r17SheetDepth } from "./render/dress.ts";
@@ -95,10 +96,7 @@ async function r2WorkerParity({ evaluate, check }: Pick<SuiteContext, "evaluate"
 
 export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
   check("R0 page loaded + initial auto-draw rendered", await waitReady());
-  const r0b = await evaluate<{ seed: string; expected: string }>(
-    `(async()=>{const {seedForDate}=await import("./engine/world/seed-of-the-day.js");return{seed:document.getElementById("seed").value,expected:String(seedForDate(new Date()))};})()`,
-    true,
-  );
+  const r0b = { seed: await evaluate<string>(`document.getElementById("seed").value`), expected: String(FIXED_SEED) };
   check("R0b bare Explorer visit lands on today's seed-of-the-day", r0b.seed === r0b.expected, JSON.stringify(r0b));
   check("R1 worker active (no silent fallback)", await evaluate<boolean>(`window.__vellumUsesWorker()===true`));
 
