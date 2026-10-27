@@ -74,14 +74,14 @@ export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
 }
 
 export const SYMBOL_EXTENT: Readonly<Record<string, readonly [number, number, number, number]>> = {
-  "gl-mtn-1": [0, 0, 0, 0],
-  "gl-mtn-2": [0, 0, 0, 0],
-  "gl-mtn-3": [0, 0, 0, 0],
-  "gl-hill-1": [0, 0, 0, 0],
-  "gl-hill-2": [0, 0, 0, 0],
-  "gl-tree-round": [0, 0, 0, 0],
-  "gl-tree-pine": [0, 0, 0, 0],
-  "gl-tree-palm": [0, 0, 0, 0],
-  "gl-marsh": [0, 0, 0, 0],
-  "gl-dune": [0, 0, 0, 0],
+  "gl-mtn-1": [-9, -13, 9, 0],
+  "gl-mtn-2": [-10, -11, 10, 0],
+  "gl-mtn-3": [-8, -12, 8, 0],
+  "gl-hill-1": [-7, -3.5, 7, 0],
+  "gl-hill-2": [-8, -4.5, 8, 0],
+  "gl-tree-round": [-3.4, -8.8, 3.4, 0],
+  "gl-tree-pine": [-3, -9.5, 3, 0],
+  "gl-tree-palm": [-5, -10.6, 5.6, 0],
+  "gl-marsh": [-6, -7, 6, 0],
+  "gl-dune": [-6, -2, 7, 0],
 };
