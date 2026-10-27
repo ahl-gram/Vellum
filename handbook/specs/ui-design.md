@@ -279,7 +279,7 @@ carries none.** **Zoomed, every corner but the Glass stands on home's crisp pane
 and the room folio, on a short window as on a tall one, so a zoomed chart room's corners read
 alike, each the same as home's legend row; the Reading Room's strip stands on the same panel there,
 drawn over its own fade and meeting the chart folio's panel, and its told line's year takes
-parchment on it (Alex, 2026-10-24 and 2026-10-26, Issue #1052 issuecomment-6427899901). Each panel
+parchment on it (Alex, 2026-10-24 and 2026-10-26, Issue #1052 issuecomment-6427899901 and issuecomment-6427927879). Each panel
 stops short of the window's edge at the room folio's margins, save the edge a
 slid piece has passed, which its panel runs off with it (Alex, 2026-10-23, Issue #996), and
 where two panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
@@ -287,7 +287,7 @@ section mark beside the Press, take parchment, without which they read under 4.5
 chart (`EZ1` in `e2e/suites/stage/zoomed.ts`). **Provisional until the post-use review:** the crisp
 panels under the cluster, the chart folio and the strip, their margins at the window's edge, where
 two panels meet, all four corners crisp on a short window, and the parchment on the folio's lines and the told
-line's year. **With no stage, and on home, every corner stands on the crisp panel at all times**
+line's year. **With no stage, and on home, every corner but the Glass stands on the crisp panel at all times**
 (Alex, 2026-10-24 and 2026-10-26, Issue #1052 issuecomment-6427899901): the Gallery's cluster,
 legend row and room folio, and home's cluster as it rides the page; neither room's cluster slides
 away. **Provisional until the post-use review:** the crisp cluster on home and in the Gallery.

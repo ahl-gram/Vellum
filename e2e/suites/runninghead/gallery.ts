@@ -33,7 +33,7 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   const plateLum = plateRow.length ? Math.round(Math.max(...plateRow.map(luminance))) : -1;
   const cornerLum = cornerRow.length ? Math.round(Math.max(...cornerRow.map(luminance))) : -1;
   check(
-    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the pool or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
+    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the cluster's panel or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
     !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
     JSON.stringify({
       y: scrolled && scrolled.y,
