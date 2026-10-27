@@ -6,6 +6,7 @@ import type { Projection } from "../transform.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { World } from "../../world/types.ts";
+import type { MarkKind } from "./glyph-clearance.ts";
 
 type Glyph = {
   x: number; // px
@@ -53,6 +54,10 @@ export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
     }
   }
   return { hill, marsh, dune };
+}
+
+export function markStandsOn(_kind: MarkKind, _rel: number, _b: number): boolean {
+  return true;
 }
 
 type Cand = { x: number; y: number; rel: number; i: number };

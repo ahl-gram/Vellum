@@ -72,3 +72,16 @@ export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
   const stroke = strokeFor(style.ink);
   return [...reliefSymbols(style.land, stroke), ...groundSymbols(style.land, stroke)];
 }
+
+export const SYMBOL_EXTENT: Readonly<Record<string, readonly [number, number, number, number]>> = {
+  "gl-mtn-1": [0, 0, 0, 0],
+  "gl-mtn-2": [0, 0, 0, 0],
+  "gl-mtn-3": [0, 0, 0, 0],
+  "gl-hill-1": [0, 0, 0, 0],
+  "gl-hill-2": [0, 0, 0, 0],
+  "gl-tree-round": [0, 0, 0, 0],
+  "gl-tree-pine": [0, 0, 0, 0],
+  "gl-tree-palm": [0, 0, 0, 0],
+  "gl-marsh": [0, 0, 0, 0],
+  "gl-dune": [0, 0, 0, 0],
+};
