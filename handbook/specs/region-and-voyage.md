@@ -163,6 +163,12 @@ about a rule, the rulebook wins.
   landmass may lose every cell inside a window, at a rate the undetailed arm also shows, so a
   guarantee written as "no landmass loses all its land in a window" is false and must not be
   asserted.
+- **A rejected bridge is cut at its narrowest neck, never sunk whole** (Alex, 2026-10-27, Issue
+  #1036). Sinking the whole patch a finer survey gained leaves the coarse cells' straight edge as
+  the coast, a wall along a world cell's edge. The cut takes the fewest gained cells that part the
+  two shores (`neckCut` in `src/terrain/bridge-cut.ts`), parting first the shore the patch touches
+  least, and digs each cut cell deep enough that the drawn coast cannot bridge it (`rejectBridges`
+  in `src/terrain/detail-guarantees.ts`); the rest of the patch stays as shore.
 - **Hold ONE chain cache across region jobs** (`src/site/explorer/region-chain-cache.ts`), the way
   the base world is held (`worldFor` in `src/site/explorer/world-cache.ts`), because the chain
   builder defaults to a fresh cache per top-level call and without one a pan costs what the first

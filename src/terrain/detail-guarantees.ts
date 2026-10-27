@@ -2,6 +2,7 @@ import { createField, fieldFrom, type Field } from "../core/grid.ts";
 import type { UvWindow } from "./heightfield.ts";
 import { labelLandmasses } from "../world/landmass.ts";
 import { labelComponents } from "../core/mask-components.ts";
+import { neckCut } from "./bridge-cut.ts";
 
 export const BRIDGE_REJECT_EPS = 1e-6;
 
@@ -121,6 +122,35 @@ function shoresTouched(gainIds: Int32Array, coarseIds: Int32Array, w: number, h:
   return touched;
 }
 
+function bridgingCells(gainIds: Int32Array, touched: ReadonlyMap<number, ReadonlySet<number>>, n: number): number[][] {
+  const byGid = new Map<number, number[]>();
+  for (let i = 0; i < n; i++) {
+    const gid = gainIds[i] as number;
+    if (gid === -1 || (touched.get(gid)?.size ?? 0) < 2) continue;
+    const list = byGid.get(gid);
+    if (list) list.push(i);
+    else byGid.set(gid, [i]);
+  }
+  return [...byGid.values()];
+}
+
+function dugValue(fine: Field, sunk: ReadonlySet<number>, i: number, seaLevel: number): number {
+  const { w, h } = fine;
+  const x = i % w;
+  const y = (i / w) | 0;
+  const above = (dx: number, dy: number): number => {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h || sunk.has(nx + ny * w)) return 0;
+    return Math.max(0, (fine.data[nx + ny * w] as number) - seaLevel);
+  };
+  const n = above(0, -1);
+  const e = above(1, 0);
+  const s = above(0, 1);
+  const west = above(-1, 0);
+  return seaLevel - Math.max(n + e, e + s, s + west, west + n) - BRIDGE_REJECT_EPS;
+}
+
 export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaLevel: number): Field {
   if (coarse.w !== fine.w || coarse.h !== fine.h) {
     throw new RangeError(`rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`);
@@ -145,11 +175,11 @@ export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaL
   }
   const gainIds = labelComponents(gained, w, h, 4);
   const touched = shoresTouched(gainIds, coarseIds, w, h);
-  const data = Float64Array.from(fine.data);
-  for (let i = 0; i < n; i++) {
-    const gid = gainIds[i] as number;
-    if (gid === -1) continue;
-    if ((touched.get(gid)?.size ?? 0) >= 2) data[i] = seaLevel - BRIDGE_REJECT_EPS;
+  const sunk = new Set<number>();
+  for (const cells of bridgingCells(gainIds, touched, n)) {
+    for (const i of neckCut(cells, coarseIds, w, h)) sunk.add(i);
   }
+  const data = Float64Array.from(fine.data);
+  for (const i of sunk) data[i] = dugValue(fine, sunk, i, seaLevel);
   return fieldFrom(w, h, data);
 }
