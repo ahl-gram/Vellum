@@ -239,7 +239,5 @@ export function glyphsLayer(ctx: RenderCtx, names: ReadonlyArray<Box>): SvgNode 
   const picked = pickGlyphSpots(proj, jrng, glyphCandidates(ctx), spread, capScale);
   const grng = jrng.fork("variants");
   const marks = glyphVariants(world, grng, picked, size);
-  return glyphUses(
-    world.region === undefined ? marks : marksClearOf(marks, names.slice(0, 0), markGround(ctx, spread)),
-  );
+  return glyphUses(world.region === undefined ? marks : marksClearOf(marks, names, markGround(ctx, spread)));
 }
