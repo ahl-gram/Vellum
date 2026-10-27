@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { createField, fieldFrom, type Field } from "../../src/core/grid.ts";
 import { marchingSquares } from "../../src/terrain/contours.ts";
 import {
-  BRIDGE_REJECT_EPS,
   floorToParent,
   gateToParentLand,
   parentCellsOnWindow,
@@ -82,7 +81,7 @@ test("the floor only ever raises, and leaves uncovered cells alone (#397)", () =
   );
 });
 
-test("rejectBridges keeps new islets and spurs, rejects bridges whole (#397)", () => {
+test("rejectBridges keeps new islets and spurs, and cuts a bridge at its neck (#397, Issue #1036)", () => {
   const coarse = fieldFromRows([
     ".........",
     ".##...##.",
@@ -104,13 +103,8 @@ test("rejectBridges keeps new islets and spurs, rejects bridges whole (#397)", (
   const out = rejectBridges(coarse, coarse, fine, SEA);
   assert.ok(out.at(3, 1) > SEA, "a spur off one shore must be kept");
   assert.ok(out.at(4, 5) > SEA, "a new islet touching no shore must be kept");
-  for (const x of [3, 4, 5]) {
-    assert.ok(out.at(x, 3) < SEA, `bridge-component cell ${x},3 must go back to sea`);
-    assert.ok(
-      Math.abs(out.at(x, 3) - (SEA - BRIDGE_REJECT_EPS)) < 1e-15,
-      `a rejected cell sits just under the waterline, got ${out.at(x, 3)}`,
-    );
-  }
+  assert.ok(out.at(3, 3) < SEA, "the neck cell beside the thinly touched shore must go back to sea");
+  assert.ok(out.at(4, 3) > SEA && out.at(5, 3) > SEA, "the rest of the bridging patch must stay as shore");
   assert.equal(landmassCount(out, SEA), 3, "two shores and the new islet, never a fused pair");
   assert.equal(landmassCount(coarse, SEA), 2);
 });
@@ -136,13 +130,12 @@ test("two diagonal spurs are two one-touch components, never one bridge (#397)",
   assert.equal(landmassCount(out, SEA), 2, "each spur joins its own shore and the shores stay apart");
 });
 
-test("rejectBridges rejects the whole bridging component, spur and neck alike (#397)", () => {
+test("rejectBridges cuts only the neck of a bridging component and keeps the rest (#397, Issue #1036)", () => {
   const coarse = fieldFromRows(["........", ".#....#.", ".#....#.", "........"]);
   const fine = fieldFromRows(["........", ".######.", ".#....#.", "........"]);
   const out = rejectBridges(coarse, coarse, fine, SEA);
-  for (const x of [2, 3, 4, 5]) {
-    assert.ok(out.at(x, 1) < SEA, `bridging component cell ${x},1 must be rejected with its neck, not trimmed`);
-  }
+  assert.ok(out.at(2, 1) < SEA, "the neck beside the first shore must be cut");
+  for (const x of [3, 4, 5]) assert.ok(out.at(x, 1) > SEA, `cell ${x},1 of the patch must stay as shore`);
   assert.equal(landmassCount(out, SEA), 2);
 });
 
@@ -157,9 +150,11 @@ test("land gained over an uncovered coarse cell is still gained land (#397)", ()
     "the uncovered cell reads as sea to labelLandmasses, so the shores start apart",
   );
   assert.equal(landmassCount(out, SEA), 2, "a bridge running through an uncovered cell must still be rejected");
-  for (const x of [1, 2, 3]) {
-    assert.ok(out.at(x, 0) < SEA, `bridge cell ${x},0 must go back to sea even where the parent surface is NaN`);
-  }
+  assert.ok(
+    out.at(1, 0) < SEA,
+    "the neck next to the first shore must go back to sea even with the parent surface NaN beside it",
+  );
+  assert.ok(out.at(2, 0) > SEA && out.at(3, 0) > SEA, "the rest of the patch must stay as shore");
 });
 
 test("rejectBridges leaves coarse land untouched and never mutates its inputs (#397)", () => {

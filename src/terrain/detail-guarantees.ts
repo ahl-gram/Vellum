@@ -2,6 +2,7 @@ import { createField, fieldFrom, type Field } from "../core/grid.ts";
 import type { UvWindow } from "./heightfield.ts";
 import { labelLandmasses } from "../world/landmass.ts";
 import { labelComponents } from "../core/mask-components.ts";
+import { neckCut } from "./bridge-cut.ts";
 
 export const BRIDGE_REJECT_EPS = 1e-6;
 
@@ -121,6 +122,22 @@ function shoresTouched(gainIds: Int32Array, coarseIds: Int32Array, w: number, h:
   return touched;
 }
 
+function bridgingCells(gainIds: Int32Array, touched: ReadonlyMap<number, ReadonlySet<number>>, n: number): number[][] {
+  const byGid = new Map<number, number[]>();
+  for (let i = 0; i < n; i++) {
+    const gid = gainIds[i] as number;
+    if (gid === -1 || (touched.get(gid)?.size ?? 0) < 2) continue;
+    const list = byGid.get(gid);
+    if (list) list.push(i);
+    else byGid.set(gid, [i]);
+  }
+  return [...byGid.values()];
+}
+
+function dugValue(_fine: Field, _sunk: ReadonlySet<number>, _i: number, seaLevel: number): number {
+  return seaLevel - BRIDGE_REJECT_EPS;
+}
+
 export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaLevel: number): Field {
   if (coarse.w !== fine.w || coarse.h !== fine.h) {
     throw new RangeError(`rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`);
@@ -145,11 +162,11 @@ export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaL
   }
   const gainIds = labelComponents(gained, w, h, 4);
   const touched = shoresTouched(gainIds, coarseIds, w, h);
-  const data = Float64Array.from(fine.data);
-  for (let i = 0; i < n; i++) {
-    const gid = gainIds[i] as number;
-    if (gid === -1) continue;
-    if ((touched.get(gid)?.size ?? 0) >= 2) data[i] = seaLevel - BRIDGE_REJECT_EPS;
+  const sunk = new Set<number>();
+  for (const cells of bridgingCells(gainIds, touched, n)) {
+    for (const i of neckCut(cells, coarseIds, w, h)) sunk.add(i);
   }
+  const data = Float64Array.from(fine.data);
+  for (const i of sunk) data[i] = dugValue(fine, sunk, i, seaLevel);
   return fieldFrom(w, h, data);
 }
