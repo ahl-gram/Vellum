@@ -2,6 +2,7 @@ import { el, type SvgNode } from "../svg.ts";
 import { textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
+import { boxMeetsRiver } from "./river-clearance.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
 import { finerMarkBox, ruinGlyph, seatHalo, settlementGlyph, type SettlementTier } from "./settlement-marks.ts";
 
@@ -134,7 +135,11 @@ function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: Settleme
     b.x + b.w <= proj.widthPx - proj.margin - 4 &&
     b.y >= proj.margin + 4 &&
     b.y + b.h <= proj.heightPx - proj.margin - 4;
-  const claimed = tries.find(({ box }) => inFrame(box) && labels.tryClaim(box));
+  const rivers = world.region === undefined ? null : { cells: world.riverCells, w: world.elev.w, h: world.elev.h };
+  const dry = (b: Box): boolean => rivers === null || !boxMeetsRiver(b, rivers, proj);
+  const claimed =
+    tries.find(({ box }) => dry(box) && inFrame(box) && labels.tryClaim(box)) ??
+    (rivers === null ? undefined : tries.find(({ box }) => inFrame(box) && labels.tryClaim(box)));
   const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
   const placed = claimed ?? forced;
   if (placed === undefined) return null;
