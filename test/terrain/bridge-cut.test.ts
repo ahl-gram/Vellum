@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fieldFrom, type Field } from "../../src/core/grid.ts";
-import { rejectBridges } from "../../src/terrain/detail-guarantees.ts";
+import { BRIDGE_REJECT_EPS, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
+import { fusingSaddles } from "../../test-support/saddle-probe.ts";
 
 function fieldFromRows(rows: ReadonlyArray<string>, land = 0.5, water = -0.5): Field {
   const h = rows.length;
@@ -39,6 +40,18 @@ test("a bridge is cut at its narrowest neck, nearest the shore it touches least,
   ] as const) {
     assert.ok(out.at(x, y) > 0, `cell ${x},${y} of the patch the cut leaves with its shore must be kept`);
   }
+  assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
+});
+
+test("the drawn coast never bridges a cut, even over shallow water (Issue #1036)", () => {
+  const coarse = fieldFromRows(["......", ".#....", "......", "....#.", "......"]);
+  const fine = fieldFromRows(["......", ".##...", "..##..", "...##.", "......"], 0.5, -0.01);
+  const out = rejectBridges(coarse, coarse, fine, 0);
+  assert.ok(
+    Math.abs(out.at(2, 1) - (-1 - BRIDGE_REJECT_EPS)) < 1e-12,
+    `a cut cell is dug as deep as its two highest banks stand, got ${out.at(2, 1)}`,
+  );
+  assert.deepEqual(fusingSaddles(out, 0).fusing, [], "the drawn coast bridged a cut across shallow water");
   assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
 });
 

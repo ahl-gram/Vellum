@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createField, fieldFrom, type Field } from "../../src/core/grid.ts";
 import { marchingSquares } from "../../src/terrain/contours.ts";
 import {
+  BRIDGE_REJECT_EPS,
   floorToParent,
   gateToParentLand,
   parentCellsOnWindow,
@@ -105,6 +106,10 @@ test("rejectBridges keeps new islets and spurs, and cuts a bridge at its neck (#
   assert.ok(out.at(4, 5) > SEA, "a new islet touching no shore must be kept");
   assert.ok(out.at(3, 3) < SEA, "the neck cell beside the thinly touched shore must go back to sea");
   assert.ok(out.at(4, 3) > SEA && out.at(5, 3) > SEA, "the rest of the bridging patch must stay as shore");
+  assert.ok(
+    Math.abs(out.at(3, 3) - (SEA - 0.5 - BRIDGE_REJECT_EPS)) < 1e-12,
+    `a cut cell is dug as deep as its two banks stand, got ${out.at(3, 3)}`,
+  );
   assert.equal(landmassCount(out, SEA), 3, "two shores and the new islet, never a fused pair");
   assert.equal(landmassCount(coarse, SEA), 2);
 });

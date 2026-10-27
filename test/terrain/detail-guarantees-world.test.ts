@@ -279,12 +279,12 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
       }
     }
   }
-  // Measured on this exact fixture 2026-08-23: 19 fusing saddles across the two 16-window sweeps, 11 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth.
-  assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 19`);
-  assert.ok(bothParent <= 16, `both-parent hairline fuses grew: ${bothParent}, measured 11`);
+  // Measured on this exact fixture 2026-10-27 after Issue #1036's neck cut: 12 fusing saddles across the two 16-window sweeps, 3 of them with both corners on parent land (19 and 11 under the whole-patch sinking); the bands leave room for single-cell float drift but trip on growth.
+  assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 12`);
+  assert.ok(bothParent <= 16, `both-parent hairline fuses grew: ${bothParent}, measured 3`);
 });
 
-test("saddle census: the two known genuine two-landmass fuses are present and pinned (#397)", () => {
+test("saddle census: the two hairline fuses the whole-patch sinking drew are gone, the cut dug under them (#397, Issue #1036)", () => {
   const known: ReadonlyArray<readonly [number, number, number, number, number]> = [
     [2, 0.75, 0.25, 93, 11],
     [15, 0.375, 0.375, 30, 25],
@@ -292,12 +292,10 @@ test("saddle census: the two known genuine two-landmass fuses are present and pi
   for (const [seed, cx, cy, sx, sy] of known) {
     const wc = caseFor(seed, cx, cy);
     const { fusing } = fusingSaddles(wc.adjusted, wc.sea);
-    const hit = fusing.find((f) => f.x === sx && f.y === sy);
-    assert.ok(hit, `seed ${seed} window ${cx},${cy}: known hairline fuse at ${sx},${sy} vanished from the census`);
-    const [p1, p2] = hit.landCorners;
-    assert.ok(
-      parentLandAt(wc, p1[0] + p1[1] * CW) && parentLandAt(wc, p2[0] + p2[1] * CW),
-      `seed ${seed}: the pinned fuse at ${sx},${sy} no longer joins two parent shores`,
+    assert.equal(
+      fusing.find((f) => f.x === sx && f.y === sy),
+      undefined,
+      `seed ${seed} window ${cx},${cy}: the drawn coast still bridges the saddle at ${sx},${sy}`,
     );
   }
 });
