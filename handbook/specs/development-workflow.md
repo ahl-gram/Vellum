@@ -193,11 +193,11 @@ worktree when it starts, and its definition carries the rename.
 scar:
 
 - **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it,
-  Alex's folded rulings included, to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
+  Alex's folded rulings included, to `handbook/plans/<bucket>/<N>/<N>-plan.md` at the repo root, `N` the issue's number and `<bucket>` that number rounded down to a multiple of 100 (`handbook/plans/1000/1012/1012-plan.md`, `handbook/plans/500/594/594-plan.md`), and commit it with the
   implementation. Every plan for an issue lives in that issue's own directory. An issue that ships
   as several pull requests archives one plan per pull request: the first is
-  `handbook/plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
-  request archives its own reviewed design beside it as `handbook/plans/<N>/<N>-<label>-plan.md`, `<label>`
+  `handbook/plans/<bucket>/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
+  request archives its own reviewed design beside it as `handbook/plans/<bucket>/<N>/<N>-<label>-plan.md`, `<label>`
   naming the row or pull request (`row8a`, `pr2`), copied as it stood after Alex's rulings
   were folded in and committed with that pull request's first commit. Each is a record
   of what was planned and is never edited afterwards. **The archive holds every plan a build was made
@@ -205,14 +205,14 @@ scar:
   finished again by a fresh `vellum-planner` after the plan came back to it (a builder's hand-back, or
   a finding about the plan's design at step 14 or 15). Its planner names it in the scratchpad by this
   rule, and the dispatcher's archive and the builder's copy keep that name: it is archived as
-  `handbook/plans/<N>/<N>-r<k>-plan.md`, or `handbook/plans/<N>/<N>-<label>-r<k>-plan.md` for a later
+  `handbook/plans/<bucket>/<N>/<N>-r<k>-plan.md`, or `handbook/plans/<bucket>/<N>/<N>-<label>-r<k>-plan.md` for a later
   pull request, `k` one more than the highest revision of that pull request's plan on its pushed
   branch, on main or in the issue's plan archive (`handbook/specs/orchestration.md`), the plan the
   pull request first committed counting as 0, so no number is used twice
-  (`handbook/plans/1048/1048-r1-plan.md` stands beside `handbook/plans/1048/1048-plan.md`); a revision
+  (`handbook/plans/1000/1048/1048-r1-plan.md` stands beside `handbook/plans/1000/1048/1048-plan.md`); a revision
   copied in after its pull request merged keeps the number its own text gives it. It is copied
   unchanged as it stood after its rulings were folded in, and committed with the first commit its
-  builder makes; only the plan file is archived, never a file it names as standing beside it. A
+  builder makes; only the plan file is archived, never a file it names as standing beside it, and `handbook/plans/700/779/779-part2h-support/` is the one folder inside an issue's directory. A
   revision finished before the pull request's pushed branch carries any plan of its own is the plan
   that build first commits, under the name of the plan it supersedes, which stays where the dispatcher
   archived it (`handbook/specs/orchestration.md`). A change at review that no planner revised is
