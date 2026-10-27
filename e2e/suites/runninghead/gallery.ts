@@ -2,6 +2,8 @@ import { GALLERY_COUNT, GALLERY_SEED } from "../../../src/cli/gallery.ts";
 import { GRADIENT_STOPS, luminance, nearRgba, PAGE_RGBA, SHADE, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
+import { GLYPH_LINES } from "../stage/glyphs.ts";
+import { FLOOR_PLAIN, grounds, withStyle, worstOf } from "../stage/stage.ts";
 import type { RunningHeadKit } from "./kit.ts";
 
 export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
@@ -31,7 +33,7 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   const plateLum = plateRow.length ? Math.round(Math.max(...plateRow.map(luminance))) : -1;
   const cornerLum = cornerRow.length ? Math.round(Math.max(...cornerRow.map(luminance))) : -1;
   check(
-    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the pool or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
+    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the cluster's panel or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
     !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
     JSON.stringify({
       y: scrolled && scrolled.y,
@@ -196,7 +198,8 @@ type Dress = {
   line: number[];
   legendLeft: number;
   half: number;
-  pool: [number[], string];
+  cluster: Panel;
+  clusterFilter: string;
   panel: Panel;
   footing: Panel;
 };
@@ -212,7 +215,7 @@ const DRESS_READ: Payload<Dress> = `(() => { ${PARTS}
   return { padTop: parseFloat(getComputedStyle(q("main")).paddingTop), bandH: parseFloat(root.getPropertyValue("--band-h")) * rem, rem,
     landing: getComputedStyle(q(".grid")).animationName, border: [img.borderTopWidth, img.borderTopStyle, rgba(img.borderTopColor)], plate: shade(img.boxShadow),
     caption: rgba(getComputedStyle(q("figcaption")).color), title: rgba(getComputedStyle(q("figcaption strong")).color), line: rgba(getComputedStyle(q("figcaption span")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
-    pool: [rgba(pool.backgroundColor), pool.filter], panel: panel(".corner.tr"), footing: panel("nav.legend") };
+    cluster: panel("header.chrome"), clusterFilter: pool.filter, panel: panel(".corner.tr"), footing: panel("nav.legend") };
 })()`;
 
 const CHART_INK = (a: number) => tokenRgba("--chart-ink", a);
@@ -236,8 +239,8 @@ const dressed = (d: Dress) =>
   nearRgba(d.title, tokenRgba("--parchment-bright")) &&
   nearRgba(d.line, tokenRgba("--parchment")) &&
   Math.abs(d.legendLeft - d.half) < 0.5 &&
-  nearRgba(d.pool[0], CHART_INK(0.92)) &&
-  d.pool[1] === "blur(16px)" &&
+  panelOf(d.cluster, d.rem, [-0.7, -0.9, -0.8, -0.9]) &&
+  d.clusterFilter === "none" &&
   panelOf(d.panel, d.rem, [-0.7, -0.9, -0.8, -0.9]) &&
   panelOf(d.footing, d.rem, [-0.5, -1.1, -0.6, -1.1]);
 
@@ -294,7 +297,7 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
     ?.split(", ")
     .map(Number);
   k.check(
-    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions and their lines in parchment and their titles parchment-bright, no ink on the deep, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
+    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions and their lines in parchment and their titles parchment-bright, no ink on the deep, the legend row centred, the cluster's, the corner's and the legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
     scroll[1] < scroll[0] &&
       dressed(screen) &&
       !!turned &&
@@ -306,5 +309,37 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
       nearRgba(paper.title, tokenRgba("--ink-dark")) &&
       nearRgba(paper.line, tokenRgba("--ink-brown")),
     JSON.stringify({ scroll, screen, lift, paper }),
+  );
+}
+
+const FIRST_PLATE_LOADED: Payload<boolean> = `(() => { const i = document.querySelector(".grid img"); return !!i && i.complete && i.naturalWidth > 0; })()`;
+const PLATE_UNDER_CLUSTER: Payload<boolean> = `(() => { const p = document.querySelector(".grid img").getBoundingClientRect(); window.scrollTo(0, scrollY + p.top - 8); return true; })()`;
+
+export async function rh33ClusterReads(k: RunningHeadKit): Promise<void> {
+  const { evaluate, send, sleep, check, visit } = k;
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await send("Page.navigate", { url: "about:blank" });
+  if (!(await visit("/gallery/"))) throw new Error("RH33: the Gallery never came up");
+  await makeSettle(k)(FIRST_PLATE_LOADED, (loaded) => loaded, "RH33 the first plate loaded");
+  await evaluate(PLATE_UNDER_CLUSTER);
+  const { y } = await makeStable(makeSettle({ evaluate, sleep }))(SCROLLED, "RH33 the Gallery's plates landed", {
+    animated: ".grid",
+  });
+  const lines = (await evaluate(GLYPH_LINES)).filter((g) => g.piece === "cluster");
+  const read = await grounds(k, lines);
+  const bare = await withStyle(k, "rh33-bare", "header.chrome::before { content: none !important; }", () =>
+    grounds(k, lines),
+  );
+  const worst = worstOf(read);
+  // 2026-10-26: with the panel taken away the cluster read worst 1.13 on the Mac (1.13 on CI run 40422027544), margins 3.37 and 3.37 under 4.5.
+  check(
+    "RH33 in the Gallery at 1280x800, scrolled until its first plate lies under the head cluster, every line of the cluster reads at 4.5:1 or better against the ground under it on the kit's crisp panel, where the same lines with the panel taken away read under 4.5:1 over the plate, so the read can see the panel fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052)",
+    lines.length > 0 && worst >= FLOOR_PLAIN && worstOf(bare) < FLOOR_PLAIN,
+    JSON.stringify({
+      scroll: y,
+      lines: lines.length,
+      worst: [worst, read.find((g) => g.ratio === worst)?.t],
+      bare: worstOf(bare),
+    }),
   );
 }

@@ -1,5 +1,6 @@
-// The head cluster (Issue #480 Landfall Sub 6b; Issue #762): on home the wash sized to the cluster and the stage's lettering opted out of selection, the desk notice, and the trail under the nav on every room; every geometry MEASURED against the rendered page, since the Issue #480 screenshots were all things source-scan tests could not see.
-import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
+// The head cluster (Issue #480 Landfall Sub 6b; Issue #762): on home the cluster on the kit's crisp panel and every line of it read and the stage's lettering opted out of selection, the desk notice, and the trail under the nav on every room; every geometry MEASURED against the rendered page, since the Issue #480 screenshots were all things source-scan tests could not see.
+import { makeStage, makeMouse, readCam, atLandfall, landed } from "../support/home.ts";
+import { GRADIENT_STOPS, PAGE_RGBA } from "../support/pixel.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnFramed, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
@@ -15,6 +16,9 @@ import {
 import type { TrailKit } from "./cluster/trail.ts";
 import { at1Press, at2Places, at3Keys, at4ScriptsOff, at5Spacing, at6Dress } from "./cluster/chart.ts";
 import { at7Rides, at8Back } from "./cluster/chart-back.ts";
+import { GLYPH_LINES } from "./stage/glyphs.ts";
+import { FLOOR_PLAIN, grounds, withStyle, worstOf } from "./stage/stage.ts";
+import { crisp } from "./stage/zoomed.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Stage = ReturnType<typeof makeStage>;
@@ -25,15 +29,14 @@ const rectOf = (sel: string): Payload<Rect | null> =>
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, clearMobile, waitReady, PORT } = ctx;
-  // CL1 and CL2 are deliberately not stepped: settleHome answers with its last read rather than throwing, and CL1 asserts that read stands at its landfall.
+  // CL2 is deliberately not stepped: its landfall loop answers with its last read rather than throwing, and CL2 asserts that read stands at its landfall.
   const step = makeStep(ctx);
   const { settleHome } = makeStage(ctx);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await cl1Wash(ctx, settleHome);
+  await step("CL1", () => cl1Wash(ctx, settleHome));
   await cl2Selection(ctx);
   const trail = trailKit(ctx);
-  await step("CL3", () => cl3Blur(ctx));
   await step("CL5", () => cl5Hand(ctx));
   await step("CL4", () => cl4Offsets(trail));
 
@@ -68,44 +71,47 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await waitReady();
 }
 
-export async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
-  const cam = await settleHome();
+const CL1_PANEL: Payload<{
+  content: string;
+  filter: string;
+  stops: number[][];
+  insets: number[];
+  size: number[];
+  insetSize: number[];
+}> = `(() => {
+  const rgba = ${PAGE_RGBA}, stops = ${GRADIENT_STOPS};
+  const c = document.querySelector("header.chrome"), r = c.getBoundingClientRect(), cs = getComputedStyle(c, "::before"), px = (v) => parseFloat(v);
+  return { content: cs.content, filter: cs.filter, stops: stops(cs.backgroundImage), insets: [px(cs.top), px(cs.right), px(cs.bottom), px(cs.left)], size: [px(cs.width), px(cs.height)], insetSize: [r.width - px(cs.left) - px(cs.right), r.height - px(cs.top) - px(cs.bottom)] };
+})()`;
 
-  const wash = await evaluate<{
-    filter: string;
-    bg: string;
-    image: string;
-    box: { left: number; top: number; right: number; bottom: number };
-    nav: { right: number; bottom: number };
-    foot: { bottom: number };
-    cluster: { right: number; bottom: number; left: number; top: number };
-  }>(`(() => {
-    const chrome = document.querySelector("header.chrome");
-    const cs = getComputedStyle(chrome, "::before");
-    const c = chrome.getBoundingClientRect();
-    const nav = document.querySelector("header.chrome nav.rooms").getBoundingClientRect();
-    const foot = document.querySelector("header.chrome .atelier-press").getBoundingClientRect();
-    const px = (v) => parseFloat(v);
-    return { filter: cs.filter, bg: cs.backgroundColor, image: cs.backgroundImage,
-      box: { left: c.left + px(cs.left), top: c.top + px(cs.top), right: c.right - px(cs.right), bottom: c.bottom - px(cs.bottom) },
-      nav: { right: nav.right, bottom: nav.bottom }, foot: { bottom: foot.bottom }, cluster: { right: c.right, bottom: c.bottom, left: c.left, top: c.top } };
-  })()`);
-  const alpha = parseFloat(
-    (wash.bg.match(/\/\s*([\d.]+)\)/) || wash.bg.match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "1",
+export async function cl1Wash(ctx: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
+  const { evaluate, check } = ctx;
+  const cam = await settleHome();
+  landed(cam, "CL1");
+  const panel = await evaluate(CL1_PANEL);
+  const lines = (await evaluate(GLYPH_LINES)).filter((g) => g.piece === "cluster");
+  const read = await grounds(ctx, lines);
+  const bare = await withStyle(ctx, "cl1-bare", "header.chrome::before { content: none !important; }", () =>
+    grounds(ctx, lines),
   );
+  const worst = worstOf(read);
+  const want = [-0.7, -0.9, -0.8, -0.9].map((r) => r * REM);
+  // 2026-10-26: with the panel taken away the cluster read worst 1.16 on the Mac (1.16 on CI run 40422027544), margins 3.34 and 3.34 under 4.5.
   check(
-    "CL1 the cluster's wash is a soft pool sized by the cluster: it ends 1.5 to 3rem past the nav's right and past the foot of the cluster's last line, the chart's press (Issue #671), blurred, at 0.8 ink or deeper, no gradient box (#480 screenshot 3; the slab measured 736x272 against a nav ending at 510x102)",
-    atLandfall(cam) &&
-      wash.image === "none" &&
-      /blur\(/.test(wash.filter) &&
-      alpha >= 0.8 &&
-      wash.box.right - wash.nav.right >= 1.5 * REM &&
-      wash.box.right - wash.nav.right <= 3 * REM &&
-      wash.box.bottom - wash.foot.bottom >= 1.5 * REM &&
-      wash.box.bottom - wash.foot.bottom <= 3 * REM &&
-      wash.box.left <= -2 * REM &&
-      wash.box.top <= -2 * REM,
-    JSON.stringify({ cam, wash, alpha }),
+    "CL1 home's cluster stands on the kit's crisp panel, the one every zoomed room's cluster wears (chart ink 0.85 to 0.72, no blur, 0.7rem above, 0.9rem beside and 0.8rem below the cluster's box, sized by those insets alone and never a fixed box), and at landfall every line of it reads at 4.5:1 or better against the ground under it, where the same lines with the panel taken away read under 4.5:1 over the close-in chart, so the read can see the panel fail (Alex, 2026-10-24 and 2026-10-26, Issue #1052; the soft pool it replaces, and the sizing CL3 held, were Issue #480's)",
+    crisp(panel) &&
+      panel.insets.every((v, i) => Math.abs(v - want[i]!) < 0.05) &&
+      panel.size.every((s, i) => Math.abs(s - panel.insetSize[i]!) < 0.5) &&
+      lines.length > 0 &&
+      worst >= FLOOR_PLAIN &&
+      worstOf(bare) < FLOOR_PLAIN,
+    JSON.stringify({
+      cam,
+      panel,
+      lines: lines.length,
+      worst: [worst, read.find((g) => g.ratio === worst)?.t],
+      bare: worstOf(bare),
+    }),
   );
 }
 
@@ -147,21 +153,6 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
     }),
   );
   await shoot("cluster-wash-1280.png");
-}
-
-const POOL: Payload<{ filter: string; size: number[]; insetSize: number[] }> = `(() => {
-  const c = document.querySelector("header.chrome"), r = c.getBoundingClientRect(), cs = getComputedStyle(c, "::before"), px = (v) => parseFloat(v);
-  return { filter: cs.filter, size: [px(cs.width), px(cs.height)], insetSize: [r.width - px(cs.left) - px(cs.right), r.height - px(cs.top) - px(cs.bottom)] };
-})()`;
-
-async function cl3Blur({ evaluate, check }: SuiteContext): Promise<void> {
-  const pool = await evaluate(POOL);
-  const px = Number(/^blur\(([\d.]+)px\)$/.exec(pool.filter)?.[1] ?? NaN);
-  check(
-    "CL3 the cluster's wash fades at a 16 to 28px blur and is sized by its insets around the cluster alone, no fixed box, so its edge never shows (#480, screenshot 3)",
-    px >= 16 && px <= 28 && pool.size.every((s, i) => Math.abs(s - pool.insetSize[i]!) < 0.5),
-    JSON.stringify(pool),
-  );
 }
 
 // The cluster rides home's page and stands fixed on a room's, so its corner is read in the document's coordinates.

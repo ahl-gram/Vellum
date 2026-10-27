@@ -1,3 +1,4 @@
+import { nearRgba, tokenRgba } from "../../support/pixel.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import {
@@ -19,9 +20,6 @@ import { SHELL_READ } from "./shell.ts";
 import type { Shells } from "./shell.ts";
 import { kitRead } from "./room.ts";
 import type { KitSample } from "./room.ts";
-
-const poolAlpha = (color: string) =>
-  Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
 
 export async function rhSweep(k: RunningHeadKit) {
   const { evaluate, shoot, visit } = k;
@@ -185,18 +183,20 @@ export function rh9ContrastPins({ check }: SuiteContext, heads: Heads, bad: Bad)
       `tagline parchment x${SHELLED.length}`,
   );
 
-  // Issue #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
-  const POOLED = ["/", "/gallery/"];
+  // Issue #464 and Issue #1052: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 with nothing behind it).
+  const PANELLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>
-    POOLED.includes(r)
+    PANELLED.includes(r)
       ? !!h.chromeWash &&
-        h.chromeWash.content !== "none" &&
-        /blur\(/.test(h.chromeWash.filter) &&
-        poolAlpha(h.chromeWash.backgroundColor) >= 0.8
+        h.chromeWash.content === '""' &&
+        h.chromeWash.filter === "none" &&
+        h.chromeWash.stops.length === 2 &&
+        nearRgba(h.chromeWash.stops[0], tokenRgba("--chart-ink", 0.85), 1) &&
+        nearRgba(h.chromeWash.stops[1], tokenRgba("--chart-ink", 0.72), 1)
       : !!h.chromeWash && h.chromeWash.content === "none",
   );
   check(
-    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, the Gallery's too since #464 (its plates scroll under the cluster), and every other room's carries none at a window where its chart fits clear of the chrome, the band or the fitted stage being its ground (#461, 2026-08-26 call; a floored chart's pool is EA4's, Issue #762)",
+    "RH9b home's chrome and the Gallery's stand on the kit's crisp panel at all times, chart ink 0.85 to 0.72 with no blur, home's riding the page and the Gallery's over its scrolling plates (Alex, 2026-10-24 and 2026-10-26, Issue #1052, replacing the blurred pools of Issue #480 and Issue #464), and every other room's carries none at a window where its chart fits clear of the chrome, the band or the fitted stage being its ground (Issue #461, the 2026-08-26 call; a floored chart's pool is EA4's, Issue #762)",
     washWrong.length === 0,
     washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") ||
       "wash on home and the Gallery alone",

@@ -80,6 +80,21 @@ body:has(.slip.folded) .corner.br.zoomery {
   );
   animation: ink-in 0.5s 0.18s ease-out both;
 }
+body:has(#map-viewport.zoomed) .strip::before {
+  content: "";
+  position: absolute;
+  inset: -0.25rem calc(var(--chrome-x) - 0.9rem) 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(from var(--chart-ink) r g b / 0.85),
+    rgb(from var(--chart-ink) r g b / 0.72)
+  );
+}
+body:has(#map-viewport.zoomed) .strip .rf-told .cr-year {
+  color: var(--parchment);
+}
 .scale-well {
   position: relative;
   flex: 1 1 8rem;

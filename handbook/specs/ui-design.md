@@ -151,7 +151,7 @@ window, whatever its shape, take none. **Provisional until the post-use review:*
 and which screens take it.
 
 **A chart room without a stage is the exception and it does scroll**, its
-content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
+content passing under the fixed chrome, which is why it backs every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
@@ -264,7 +264,10 @@ mirror defect is an absolutely positioned one. Read the chrome first, then choos
 
 **The kit is lifted at second use, never at first** (#487). A piece is written in page CSS where it is first
 needed; when a second room needs it, it moves to the shared sheet and a component in the same change,
-and the first consumer is repointed. Anything still used once stays put. **A page seats a component;
+and the first consumer is repointed. **No kit rule reaches home but the Glass's** (`L23` in
+`e2e/suites/landfall/controls.ts`): a panel home shares with the rooms is written again in home's
+own sheet, as its seed box's, its legend's and its head cluster's are. Anything still used once
+stays put. **A page seats a component;
 it does not re-dress it.** A page may give its own element inside a piece a face, and may ink a row
 under its own state, but an arm made only of kit classes may set no colour, border, shadow, font or
 tracking. `vellum/css-kit-not-redressed` refuses exactly that.
@@ -274,22 +277,26 @@ the furniture stands on a backing; at rest on a chart fitted clear of the chrome
 carries none.** **Zoomed, every corner but the Glass stands on home's crisp panel** (Alex,
 2026-10-22, Issue #988 issuecomment-6352761013): the head cluster, the chart folio, the legend row
 and the room folio, on a short window as on a tall one, so a zoomed chart room's corners read
-alike, each the same as home's legend row; the Reading Room's strip alone keeps a blurred pool
-there. Each panel stops short of the window's edge at the room folio's margins, save the edge a
+alike, each the same as home's legend row; the Reading Room's strip stands on the same panel there,
+drawn over its own fade and meeting the chart folio's panel, and its told line's year takes
+parchment on it (Alex, 2026-10-24 and 2026-10-26, Issue #1052 issuecomment-6427899901 and issuecomment-6427927879). Each panel
+stops short of the window's edge at the room folio's margins, save the edge a
 slid piece has passed, which its panel runs off with it (Alex, 2026-10-23, Issue #996), and
 where two panels meet they overlap. On it the chart folio's survey line and coordinates, and the Explorer's
 section mark beside the Press, take parchment, without which they read under 4.5:1 over a pale
 chart (`EZ1` in `e2e/suites/stage/zoomed.ts`). **Provisional until the post-use review:** the crisp
-panels under the cluster and the chart folio, their margins at the window's edge, where two panels
-meet, all four corners crisp on a short window, and the parchment on the folio's lines. With no
-stage, the legend row and the room folio take the crisp panel and the cluster a blurred pool,
-running well past the viewport edge on its edge-facing sides so the fade never lands on screen.
+panels under the cluster, the chart folio and the strip, their margins at the window's edge, where
+two panels meet, all four corners crisp on a short window, and the parchment on the folio's lines and the told
+line's year. **With no stage, and on home, every corner but the Glass stands on the crisp panel at all times**
+(Alex, 2026-10-24 and 2026-10-26, Issue #1052 issuecomment-6427899901): the Gallery's cluster,
+legend row and room folio, and home's cluster as it rides the page; neither room's cluster slides
+away. **Provisional until the post-use review:** the crisp cluster on home and in the Gallery.
 **Over a floored sheet at rest they all stand on the cluster's blurred pool instead** (Alex,
 2026-10-06, Issue #762: soft): the legend row's pool box ends inside the rise gap above the chart
 folio, so no backing box lies over another piece's lines, while its blur reaches a few pixels over
 the caption's top line, which is why every line there is read as it is painted, at 4.5:1 or better
 (`NS1` in `e2e/suites/stage/short.ts`). Over a floored sheet the strip alone takes none: its lines
-stand on its own panel, and a pool there would lie over the chart folio and the Glass. The room
+stand on its own fade, and a pool there would lie over the chart folio and the Glass. The room
 folio's pool reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
