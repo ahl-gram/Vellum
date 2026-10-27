@@ -255,7 +255,10 @@ byte-identical, and the drift guard is green.**
   golden tail if the spike moves it out of the cheap tier. The band 5-6 ceiling is respected, not fought:
   #376 measured the parent-dominated fraction compounding 50% at band 1 to 92% at band 7, and lifting
   that means local guarantee enforcement, which is a separate ratification and not this epic's to
-  take. **The Glass descends to band 5 and no further**: `LOD_BANDS` in `src/world/lod.ts` ends
+  take. **One piece of it is ratified for this epic** (Alex, 2026-10-27, Issue #1036): the bridge
+  rule cuts a fused bridge at its narrowest neck instead of sinking the whole patch a finer survey
+  gained. The floor and its nearest-cell gate stay as they are, and nothing else of local guarantee
+  enforcement is taken. **The Glass descends to band 5 and no further**: `LOD_BANDS` in `src/world/lod.ts` ends
   there, and a deeper band is a separate ratification under the ceiling above. The held sheet
   magnifies the deepest drawn sheet three times and adds no band.
 - **#401 (The Chart Table) HAS ITS SLOT, ratified 2026-09-05**, with its own board phase and its subs

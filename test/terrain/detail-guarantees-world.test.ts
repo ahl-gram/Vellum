@@ -210,7 +210,7 @@ test("the gate and the rejection each do real work on real terrain, and neither 
     );
   }
   assert.equal(gateFloored, 0, `the floor reached ${gateFloored} cells the parent's own cell charts as water`);
-  // Measured 2026-08-23 across the four pinned windows: footprint 327, waterline moved at 75, fusions 1173 ungated against 1173 gated, 55 cells rejected. The gate un-merges nothing here, which is why gateFloored is asserted directly.
+  // Measured 2026-08-23 across the four pinned windows: footprint 327, waterline moved at 75, fusions 1173 ungated against 1173 gated, 19 cells cut (55 sunk whole before Issue #1036, 2026-10-27). The gate un-merges nothing here, which is why gateFloored is asserted directly.
   assert.ok(gateFootprint >= 200, `only ${gateFootprint} cells in the gate's footprint, this guard is near-vacuous`);
   assert.ok(sunkByGate >= 40, `the gate moved the waterline at only ${sunkByGate} cells, so it is doing nothing here`);
 
