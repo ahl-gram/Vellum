@@ -65,11 +65,12 @@ function drawnCandidate(
   region: World,
   s: NamedSettlement,
   drawn: DrawnName,
-): { readonly index: number; readonly wet: boolean; readonly firstWet: boolean; readonly labels: number } {
+): { readonly index: number; readonly wet: boolean; readonly firstWet: boolean } {
   const proj = projOf(region);
   const rivers = { cells: region.riverCells, w: region.elev.w, h: region.elev.h };
   const nodes = textNodes(drawn.slice);
   const { tries } = nameSetting(region, proj, s, drawn.tier);
+  assert.equal(nodes.length, 1, `${s.name}'s name is drawn once`);
   const node = nodes[0]!;
   const index = tries.findIndex(({ at }) => at.x === node.x && at.y === node.y && at.anchor === node.anchor);
   assert.ok(index >= 0, `${s.name}'s drawn label is one of its candidates`);
@@ -77,7 +78,6 @@ function drawnCandidate(
     index,
     wet: boxMeetsRiver(tries[index]!.box, rivers, proj),
     firstWet: boxMeetsRiver(tries[0]!.box, rivers, proj),
-    labels: nodes.length,
   };
 }
 
@@ -97,7 +97,6 @@ test("a place name with no dry spot free keeps its place on its river (Mangkoa M
   const drawn = drawnGroup(sheetOf(MANGKOA_B5), "Mangkoa");
   assert.equal(drawn.tier, "mill");
   const read = drawnCandidate(MANGKOA_B5, settlementNamed(MANGKOA_B5, "Mangkoa"), drawn);
-  assert.equal(read.labels, 1, "the mill's name is drawn once");
   assert.equal(textNodes(drawn.slice)[0]!.text, "Mangkoa Mill");
   assert.equal(read.wet, true, "it came through the second pass, on its river");
 });
