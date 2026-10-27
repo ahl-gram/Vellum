@@ -284,7 +284,7 @@ skip list, and this section sets no rule for a unit test.
   6398396394). Of a step the plan counts thin, at most two claims held nowhere else on at most two
   pages or rooms, one reading under 4 seconds passes, one over 20 seconds is too slow, and one
   from 4 to 20 seconds, the spread one run on GitHub's machines read a 10-second step at on
-  2026-10-25 (`handbook/plans/1063/1063-r2-plan.md`, call C22), is near the line: two more runs of
+  2026-10-25 (`handbook/plans/1000/1063/1063-r2-plan.md`, call C22), is near the line: two more runs of
   the lane's job started by hand give the median. A step the rule finds too slow is reworked
   before the pull request merges.
 
@@ -360,7 +360,7 @@ section points there rather than restating it.
   `browser up on attempt` and `exposed no devtools target`. The same read of the failing lanes'
   logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
   it began; the probe that reproduces it against a real browser is in
-  `handbook/plans/621/621-plan.md`.
+  `handbook/plans/600/621/621-plan.md`.
 - **A visual claim in a suite is carried by a control taken in the same run.** A claim about PAINT
   goes through the one-row pixel strip, because no hit test and no computed style can see paint
   (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an EMULATED condition

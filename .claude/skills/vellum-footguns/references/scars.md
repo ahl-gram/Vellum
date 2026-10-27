@@ -273,7 +273,7 @@ on 2026-10-06; where that record is a commit on the pull request rather than its
 the row says so, and an incident the record does not show has no row.
 
 - Issue #654 row 8b, PR #720: the plan skeptic's blocking finding was a standing ruling the plan
-  rested on and the issue recorded nowhere (`handbook/plans/654/654-row8b-plan.md`); the
+  rested on and the issue recorded nowhere (`handbook/plans/600/654/654-row8b-plan.md`); the
   orchestrating session then posted it as a comment refining ruling A1. Stands behind
   `handbook/specs/orchestration.md`'s ruling on the issue before the lane is briefed.
 - Issue #673, Issue #708: a relayed ruling read "code or text this PR wrote or moved and now owns"
