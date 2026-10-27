@@ -196,6 +196,12 @@ test("the bound atlas's regional plate clears its names too (chart 15, the plate
   assertCleared(STAL_PLATE);
 });
 
+test("a name kept on its river by the second pass is cleared too (Mangkoa Mill, chart 42, band 5)", () => {
+  const read = readClearance(MANGKOA_B5);
+  assert.ok(read.witnessPlace > 0, "uncleared, marks stand on place names");
+  assert.equal(read.place, 0, "no mark meets a place name");
+});
+
 const KIND_OF_PREFIX: ReadonlyArray<readonly [string, MarkKind]> = [
   ["gl-mtn", "mtn"],
   ["gl-hill", "hill"],
