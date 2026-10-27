@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
-import { textBox, WIDTH_FACTOR } from "../geometry.ts";
+import { textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
+import type { Projection } from "../transform.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
 import { finerMarkBox, ruinGlyph, seatHalo, settlementGlyph, type SettlementTier } from "./settlement-marks.ts";
 
@@ -105,14 +106,10 @@ function settlementOrder(world: World): { ordered: OrderedSettlement[]; seatReal
   return { ordered, seatRealm };
 }
 
-function placeSettlementLabel(
-  ctx: RenderCtx,
-  s: NamedSettlement,
-  tier: SettlementTier,
-  px: number,
-  py: number,
-): SvgNode | null {
-  const { world, proj, labels } = ctx;
+export type NameTry = { readonly at: LabelCandidate; readonly box: Box };
+export type NameSetting = { readonly display: string; readonly fs: number; readonly tries: ReadonlyArray<NameTry> };
+
+export function nameSetting(world: World, proj: Projection, s: NamedSettlement, tier: SettlementTier): NameSetting {
   const k = proj.widthPx / 1500;
   const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
   const fs = sized[tier] * k;
@@ -120,22 +117,28 @@ function placeSettlementLabel(
   const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : small ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k;
   const upper = tier === "capital" || tier === "seat";
   const text = tier === "mill" ? `${s.name} Mill` : s.name;
-  const display = upper ? text.toUpperCase() : text;
   const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
   const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
-  const tries = labelCandidates(px, py, fs, gap);
-  for (const t of tries) {
-    const box = textBox(t.x, t.y, text, fs, t.anchor, wf, ls);
-    if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
-    if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
-    if (!labels.tryClaim(box)) continue;
-    return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
-  }
-  if (tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier)) {
-    const t = tries[0]!;
-    return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
-  }
-  return null;
+  const tries = labelCandidates(proj.px(s.x), proj.py(s.y), fs, gap).map((at) => ({
+    at,
+    box: textBox(at.x, at.y, text, fs, at.anchor, wf, ls),
+  }));
+  return { display: upper ? text.toUpperCase() : text, fs, tries };
+}
+
+function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: SettlementTier): SvgNode | null {
+  const { world, proj, labels } = ctx;
+  const { display, fs, tries } = nameSetting(world, proj, s, tier);
+  const inFrame = (b: Box): boolean =>
+    b.x >= proj.margin + 4 &&
+    b.x + b.w <= proj.widthPx - proj.margin - 4 &&
+    b.y >= proj.margin + 4 &&
+    b.y + b.h <= proj.heightPx - proj.margin - 4;
+  const claimed = tries.find(({ box }) => inFrame(box) && labels.tryClaim(box));
+  const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
+  const placed = claimed ?? forced;
+  if (placed === undefined) return null;
+  return labelNode(display, tier, placed.at.x, placed.at.y, placed.at.anchor, fs, !!s.ruined, ctx);
 }
 
 function settlementGroup(
@@ -157,7 +160,7 @@ function settlementGroup(
     group.push(seatHalo(px, py, tier, color, ctx));
   }
   group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
-  const label = placeSettlementLabel(ctx, s, tier, px, py);
+  const label = placeSettlementLabel(ctx, s, tier);
   if (label) group.push(label);
 
   return el(
