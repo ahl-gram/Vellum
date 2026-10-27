@@ -55,6 +55,28 @@ test("the drawn coast never bridges a cut, even over shallow water (Issue #1036)
   assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
 });
 
+test("a two-cell-wide neck is dug by its banks, never by the cell it was cut beside (Issue #1036)", () => {
+  const coarse = fieldFromRows(["..........", ".#...#....", ".#...#....", ".........."]);
+  const fine = fieldFromRows(["..........", ".#####....", ".#####....", ".........."]);
+  const out = rejectBridges(coarse, coarse, fine, 0);
+  for (const y of [1, 2]) {
+    assert.ok(
+      Math.abs(out.at(2, y) - (-0.5 - BRIDGE_REJECT_EPS)) < 1e-12,
+      `cut cell 2,${y} is dug by its one standing bank pair, a cut neighbour counting 0, got ${out.at(2, y)}`,
+    );
+  }
+  assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
+});
+
+test("the neck is found over four-connected paths only, a diagonal bypass is no bypass (Issue #1036)", () => {
+  const coarse = fieldFromRows(["..........", ".#......#.", ".#......#.", ".#......#.", ".........."]);
+  const fine = fieldFromRows(["..........", ".####..##.", ".#..#####.", ".####..##.", ".........."]);
+  const out = rejectBridges(coarse, coarse, fine, 0);
+  assert.ok(out.at(4, 2) < 0, "the choke cell beside the funnel must be the cut");
+  assert.ok(out.at(5, 2) > 0, "the cell past the choke must stay, diagonal corners of the funnel notwithstanding");
+  assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
+});
+
 test("a patch touching three shores is cut from each, and what is left keeps to one (Issue #1036)", () => {
   const coarse = fieldFromRows([".......", ".#...#.", ".......", ".......", "...#...", "......."]);
   const fine = fieldFromRows([".......", ".#####.", "...#...", "...#...", "...#...", "......."]);
