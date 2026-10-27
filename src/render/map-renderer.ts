@@ -18,6 +18,8 @@ import { settlementsLayer } from "./layers/settlements.ts";
 import { frameLayer } from "./layers/frame.ts";
 import { glyphSymbolDefs } from "./layers/glyph-symbols.ts";
 import { glyphsLayer } from "./layers/glyphs.ts";
+import { realmNameBox } from "./layers/glyph-clearance.ts";
+import type { Box } from "./geometry.ts";
 import { cartoucheLayer, planCartouche, type CartouchePlan } from "./layers/cartouche.ts";
 import { compassLayer, planCompass, rhumbLayer, type CompassPlan } from "./layers/compass.ts";
 import { planScalebar, scalebarLayer, type ScalebarPlan } from "./layers/scalebar.ts";
@@ -131,17 +133,19 @@ type LabelledLayers = {
   readonly bestiary: SvgNode | null;
   readonly seaDecor: SvgNode | null;
   readonly heraldry: SvgNode | null;
+  readonly nameBoxes: ReadonlyArray<Box>;
 };
 
 function labelledLayers(ctx: RenderCtx, plans: ChartPlans, opts: RenderOptions): LabelledLayers {
   // Evaluation order IS label priority: settlements claim before feature labels, the finer tier's names after them, then decorative art.
   const settlementsDraft = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
-  const settlements = settlementsDraft.finish();
+  const placed = settlementsDraft.finish();
   const bestiary = opts.beasts ? beastsLayer(ctx, plans.cartouche, plans.compass) : null;
   const seaDecor = seaDecorLayer(ctx, plans.cartouche, plans.compass, { serpent: bestiary === null });
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
-  return { settlements, featureLabels, bestiary, seaDecor, heraldry };
+  const nameBoxes = [...placed.nameBoxes, ...featureLabels.realmAnchors.map(realmNameBox)];
+  return { settlements: placed.node, featureLabels, bestiary, seaDecor, heraldry, nameBoxes };
 }
 
 function clipRegionLand(world: World, node: SvgNode): SvgNode {
@@ -168,7 +172,7 @@ function mapLayersFor(ctx: RenderCtx, plans: ChartPlans, labelled: LabelledLayer
     themed ? null : contoursLayer(ctx),
     themed ? null : clipRegionLandMaybe(world, realmTintsLayer(ctx)),
     clipRegionLand(world, riversLayer(ctx)),
-    themed ? null : glyphsLayer(ctx),
+    themed ? null : glyphsLayer(ctx, labelled.nameBoxes),
     roadsLayer(ctx),
     clipRegionLandMaybe(world, realmBordersLayer(ctx)),
     soundingsLayer(ctx, cartouchePlan, compassPlan),

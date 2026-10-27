@@ -1,12 +1,19 @@
 import { BIOMES } from "../../climate/biomes.ts";
 import { el, type SvgNode } from "../svg.ts";
-import { prunePoints } from "../geometry.ts";
+import { prunePoints, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { World } from "../../world/types.ts";
-import type { Mark, MarkKind } from "./glyph-clearance.ts";
+import {
+  MARK_NAME_PAD,
+  marksClearOf,
+  NUDGE_REACH,
+  type Mark,
+  type MarkGround,
+  type MarkKind,
+} from "./glyph-clearance.ts";
 
 export const GLYPH_MTN_REL = 0.5;
 export const GLYPH_HILL_REL = 0.34;
@@ -200,7 +207,26 @@ function glyphUses(glyphs: ReadonlyArray<Mark>): SvgNode {
   );
 }
 
-export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
+function markGround(ctx: RenderCtx, spread: number): MarkGround {
+  const { world, proj, elevSpan } = ctx;
+  const { w, h, data } = world.elev;
+  const k = proj.widthPx / 1500;
+  return {
+    pad: MARK_NAME_PAD * k,
+    reach: (kind) => NUDGE_REACH * MARK_SPACING[kind] * spread,
+    stands: (kind, x, y) => {
+      const gx = Math.round((x - proj.margin) / proj.scale);
+      const gy = Math.round((y - proj.margin) / proj.scale);
+      if (gx < 1 || gy < 1 || gx > w - 2 || gy > h - 2) return false;
+      const i = gx + gy * w;
+      const e = data[i] as number;
+      if (e <= world.seaLevel) return false;
+      return markStandsOn(kind, (e - world.seaLevel) / elevSpan, world.biomes[i] as number);
+    },
+  };
+}
+
+export function glyphsLayer(ctx: RenderCtx, names: ReadonlyArray<Box>): SvgNode | null {
   const { style, world, proj, rng } = ctx;
   if (!style.glyphs) return null;
 
@@ -212,5 +238,8 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
 
   const picked = pickGlyphSpots(proj, jrng, glyphCandidates(ctx), spread, capScale);
   const grng = jrng.fork("variants");
-  return glyphUses(glyphVariants(world, grng, picked, size));
+  const marks = glyphVariants(world, grng, picked, size);
+  return glyphUses(
+    world.region === undefined ? marks : marksClearOf(marks, names.slice(0, 0), markGround(ctx, spread)),
+  );
 }

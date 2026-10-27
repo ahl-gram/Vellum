@@ -127,7 +127,9 @@ export function nameSetting(world: World, proj: Projection, s: NamedSettlement, 
   return { display: upper ? text.toUpperCase() : text, fs, tries };
 }
 
-function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: SettlementTier): SvgNode | null {
+type PlacedName = { readonly node: SvgNode; readonly box: Box };
+
+function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: SettlementTier): PlacedName | null {
   const { world, proj, labels } = ctx;
   const { display, fs, tries } = nameSetting(world, proj, s, tier);
   const inFrame = (b: Box): boolean =>
@@ -143,7 +145,8 @@ function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: Settleme
   const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
   const placed = claimed ?? forced;
   if (placed === undefined) return null;
-  return labelNode(display, tier, placed.at.x, placed.at.y, placed.at.anchor, fs, !!s.ruined, ctx);
+  const { at, box } = placed;
+  return { node: labelNode(display, tier, at.x, at.y, at.anchor, fs, !!s.ruined, ctx), box };
 }
 
 function settlementGroup(
@@ -151,7 +154,7 @@ function settlementGroup(
   entry: OrderedSettlement,
   seatRealm: ReadonlyMap<number, number>,
   showHalo: boolean,
-): SvgNode {
+): { readonly node: SvgNode; readonly nameBox: Box | null } {
   const { world, proj, style } = ctx;
   const { s, i, tier } = entry;
   const px = proj.px(s.x);
@@ -166,9 +169,9 @@ function settlementGroup(
   }
   group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
   const label = placeSettlementLabel(ctx, s, tier);
-  if (label) group.push(label);
+  if (label) group.push(label.node);
 
-  return el(
+  const node = el(
     "g",
     {
       class: "settlement",
@@ -177,9 +180,12 @@ function settlementGroup(
     },
     group,
   );
+  return { node, nameBox: label?.box ?? null };
 }
 
-export type SettlementsDraft = { readonly finish: () => SvgNode };
+export type SettlementsDraft = {
+  readonly finish: () => { readonly node: SvgNode; readonly nameBoxes: ReadonlyArray<Box> };
+};
 
 export function settlementsLayer(ctx: RenderCtx): SettlementsDraft {
   const { world, style, proj } = ctx;
@@ -193,10 +199,16 @@ export function settlementsLayer(ctx: RenderCtx): SettlementsDraft {
     .map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo));
 
   return {
-    finish: () =>
-      el("g", { id: "layer-settlements" }, [
-        ...early,
-        ...finer.map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo)),
-      ]),
+    finish: () => {
+      const groups = [...early, ...finer.map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo))];
+      return {
+        node: el(
+          "g",
+          { id: "layer-settlements" },
+          groups.map((g) => g.node),
+        ),
+        nameBoxes: groups.flatMap((g) => (g.nameBox ? [g.nameBox] : [])),
+      };
+    },
   };
 }
