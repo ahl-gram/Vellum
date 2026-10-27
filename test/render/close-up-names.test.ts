@@ -12,7 +12,7 @@ import { STYLES } from "../../src/render/style.ts";
 import { nameSetting } from "../../src/render/layers/settlements.ts";
 import type { SettlementTier } from "../../src/render/layers/settlement-marks.ts";
 import { boxMeetsRiver } from "../../src/render/layers/river-clearance.ts";
-import { glyphsLayer, markStandsOn } from "../../src/render/layers/glyphs.ts";
+import { glyphDensity, glyphsLayer, markStandsOn } from "../../src/render/layers/glyphs.ts";
 import { SYMBOL_EXTENT } from "../../src/render/layers/glyph-symbols.ts";
 import type { MarkKind } from "../../src/render/layers/glyph-clearance.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
@@ -101,7 +101,13 @@ test("a place name with no dry spot free keeps its place on its river (Mangkoa M
   assert.equal(read.wet, true, "it came through the second pass, on its river");
 });
 
-type ReadMark = { readonly symbol: string; readonly x: number; readonly y: number; readonly poly: Poly };
+type ReadMark = {
+  readonly symbol: string;
+  readonly x: number;
+  readonly y: number;
+  readonly scale: number;
+  readonly poly: Poly;
+};
 
 const MARK_USE = /<use href="#([a-z0-9-]+)"[^>]*transform="translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\)"/g;
 
@@ -120,7 +126,7 @@ function marksIn(layerSvg: string): ReadMark[] {
       { x: x + x1 * scale, y: y + y1 * scale },
       { x: x + x0 * scale, y: y + y1 * scale },
     ];
-    return { symbol, x, y, poly };
+    return { symbol, x, y, scale, poly };
   });
   assert.equal(marks.length, slice.split("<use ").length - 1, "every mark of the layer is read");
   return marks;
@@ -226,5 +232,45 @@ test("every terrain mark on a close-up stands on ground of its own kind", () => 
       return !(e > region.seaLevel && markStandsOn(kind, (e - region.seaLevel) / elevSpan, region.biomes[i] as number));
     });
     assert.equal(strays.length, 0, `${strays.length} marks stand on ground not their own`);
+  }
+});
+
+const SPACING_BY_PREFIX: ReadonlyArray<readonly [string, number]> = [
+  ["gl-mtn", 15],
+  ["gl-hill", 13],
+  ["gl-tree", 12.5],
+  ["gl-marsh", 12],
+  ["gl-dune", 17],
+];
+
+const markKey = (m: ReadMark): string => `${m.symbol}|${m.x}|${m.y}|${m.scale}`;
+
+test("a slid mark moves no farther than half its kind's spacing at the sheet's spread", () => {
+  for (const region of [SEVEN_B5, STAL_PLATE]) {
+    const spread = (WIDTH / 1500) * glyphDensity(region.elev.w, region.region).zoom;
+    const uncleared = marksIn(renderSvg(glyphsLayer(witnessCtx(region), [])!));
+    const built = marksIn(sheetOf(region));
+    const left = new Map<string, number>();
+    for (const m of uncleared) left.set(markKey(m), (left.get(markKey(m)) ?? 0) + 1);
+    const slid = built.filter((m) => {
+      const n = left.get(markKey(m)) ?? 0;
+      if (n === 0) return true;
+      left.set(markKey(m), n - 1);
+      return false;
+    });
+    const origins = uncleared.filter((m) => (left.get(markKey(m)) ?? 0) > 0);
+    assert.ok(slid.length > 0, "the yield slides some marks");
+    for (const m of slid) {
+      const spacing = SPACING_BY_PREFIX.find(([prefix]) => m.symbol.startsWith(prefix))![1];
+      const nearest = Math.min(
+        ...origins
+          .filter((o) => o.symbol === m.symbol && o.scale === m.scale)
+          .map((o) => Math.abs(o.x - m.x) + Math.abs(o.y - m.y)),
+      );
+      assert.ok(
+        nearest <= 0.5 * spacing * spread + 0.3,
+        `${m.symbol} slid ${nearest} px, past half of ${spacing} x ${spread}`,
+      );
+    }
   }
 });
