@@ -134,8 +134,21 @@ function bridgingCells(gainIds: Int32Array, touched: ReadonlyMap<number, Readonl
   return [...byGid.values()];
 }
 
-function dugValue(_fine: Field, _sunk: ReadonlySet<number>, _i: number, seaLevel: number): number {
-  return seaLevel - BRIDGE_REJECT_EPS;
+function dugValue(fine: Field, sunk: ReadonlySet<number>, i: number, seaLevel: number): number {
+  const { w, h } = fine;
+  const x = i % w;
+  const y = (i / w) | 0;
+  const above = (dx: number, dy: number): number => {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h || sunk.has(nx + ny * w)) return 0;
+    return Math.max(0, (fine.data[nx + ny * w] as number) - seaLevel);
+  };
+  const n = above(0, -1);
+  const e = above(1, 0);
+  const s = above(0, 1);
+  const west = above(-1, 0);
+  return seaLevel - Math.max(n + e, e + s, s + west, west + n) - BRIDGE_REJECT_EPS;
 }
 
 export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaLevel: number): Field {
