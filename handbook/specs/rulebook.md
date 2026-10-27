@@ -306,7 +306,7 @@ comment. This is a convenience index, not their home.
   label that cannot move. Do not reorder that layer.
 - **Mixed projections:** the chart plants profile marks on a plan view, which is the period
   convention. `glyphSymbolDefs` (`src/render/layers/glyph-symbols.ts`) draws the terrain glyphs
-  standing on a baseline, and `castleGlyph` (`src/render/layers/settlements.ts`) stands a capital on
+  standing on a baseline, and `castleGlyph` (`src/render/layers/settlement-marks.ts`) stands a capital on
   its point the same way, while the plan circles beside it are centred on that point and the seat
   halo sits above it. One settlement therefore carries several different centres, and **no bounding
   box centre is the town.** Anything anchoring geometry or a DOM transform to a settlement takes the

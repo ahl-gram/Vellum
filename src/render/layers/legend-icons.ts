@@ -1,6 +1,6 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
-import { settlementGlyph, ruinGlyph, type SettlementTier } from "./settlements.ts";
+import { settlementGlyph, ruinGlyph, type SettlementTier } from "./settlement-marks.ts";
 import { isoStroke } from "./iso.ts";
 import { roadDress } from "./roads.ts";
 import type { MapStyle } from "../style.ts";

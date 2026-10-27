@@ -6,7 +6,7 @@ import { createChainCache } from "../../src/world/detail-chain.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 import { landSnapRadius, snapToLand } from "../../src/world/snap-to-land.ts";
 import { MARK_FOOTPRINT, farmsteadCandidates } from "../../src/society/farmsteads.ts";
-import { finerMarkBox } from "../../src/render/layers/settlements.ts";
+import { finerMarkBox } from "../../src/render/layers/settlement-marks.ts";
 import { marginFor } from "../../src/render/transform.ts";
 import type { Field } from "../../src/core/grid.ts";
 
