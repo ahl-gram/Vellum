@@ -1,9 +1,4 @@
-const NEIGHBOURS: ReadonlyArray<readonly [number, number]> = [
-  [1, 0],
-  [-1, 0],
-  [0, 1],
-  [0, -1],
-];
+import { NEIGHBORS_4 } from "../core/grid.ts";
 
 type FlowNet = {
   addEdge(from: number, to: number, capacity: number): void;
@@ -68,7 +63,7 @@ function shoresOf(i: number, coarseIds: Int32Array, w: number, h: number): numbe
   const x = i % w;
   const y = (i / w) | 0;
   const out: number[] = [];
-  for (const [dx, dy] of NEIGHBOURS) {
+  for (const [dx, dy] of NEIGHBORS_4) {
     const nx = x + dx;
     const ny = y + dy;
     if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
@@ -106,7 +101,7 @@ function wireCutNet(
     if (ids.some((id) => others.has(id))) net.addEdge(2 * k + 1, 2 * m + 1, inf);
     const x = (cells[k] as number) % w;
     const y = ((cells[k] as number) / w) | 0;
-    for (const [dx, dy] of NEIGHBOURS) {
+    for (const [dx, dy] of NEIGHBORS_4) {
       const nx = x + dx;
       const ny = y + dy;
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;

@@ -77,6 +77,14 @@ test("the neck is found over four-connected paths only, a diagonal bypass is no 
   assert.equal(landmassCount(out, 0), 2, "two shores, never a fused pair");
 });
 
+test("a cell cut by an earlier parting feeds no later one (Issue #1036)", () => {
+  const coarse = fieldFromRows(["#.....", ".#....", ".....#", "#...#.", "..#...", ".#.#.#"]);
+  const fine = fieldFromRows(["#.....", ".#....", ".....#", "#...##", "..#.##", ".#.###"]);
+  const out = rejectBridges(coarse, coarse, fine, 0);
+  assert.ok(out.at(4, 4) < 0, "the later parting must cut where the live cells are narrowest");
+  assert.ok(out.at(5, 4) > 0, "a cell already cut in the earlier parting must not widen the later cut");
+});
+
 test("a patch touching three shores is cut from each, and what is left keeps to one (Issue #1036)", () => {
   const coarse = fieldFromRows([".......", ".#...#.", ".......", ".......", "...#...", "......."]);
   const fine = fieldFromRows([".......", ".#####.", "...#...", "...#...", "...#...", "......."]);
