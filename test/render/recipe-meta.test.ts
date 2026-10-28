@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { ENGINE_VERSION, recipeFromSvg } from "../../src/render/recipe-meta.ts";
+import { escapeXml } from "../../src/render/svg.ts";
 import { generateRegionWorld, regionDetailLevel, windowAround, regionTitle } from "../../src/world/region.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 
@@ -308,4 +309,40 @@ test("a close-up of an outlined world carries the outline its parent needs (Issu
   });
   assert.match(svg, /data-vellum-outline="crescent"/);
   assert.equal(recipeFromSvg(svg)?.recipe.outline, "crescent");
+});
+
+test("a founded chart stamps its founding text, escaped, and the stamp redraws it byte for byte (Issue #392)", () => {
+  const tricky = `a "salt" & 'cedar' <coast> &lt; of the drowned kingdom`;
+  const world = generateWorld(defaultRecipe(7, { foundingText: tricky }));
+  const svg = renderMap(world, { style: "antique" });
+  assert.ok(svg.includes(`data-vellum-founding-text="${escapeXml(tricky)}"`), "the text is stamped on the root");
+  assert.ok(svg.includes(escapeXml(` founding=${JSON.stringify(tricky)}`)), "the metadata summary carries the text");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.deepEqual(parsed.recipe, world.recipe, "the recipe round-trips with its text");
+  assert.equal(renderMap(generateWorld(parsed.recipe), { style: parsed.style }), svg, "the stamp redraws the chart");
+});
+
+test("a chart with no founding text carries no founding stamp, and its recipe no founding key (Issue #392)", () => {
+  const world = generateWorld(defaultRecipe(7));
+  const svg = renderMap(world, { style: "antique" });
+  assert.doesNotMatch(svg, /data-vellum-founding-text/);
+  assert.doesNotMatch(svg, / founding=/);
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.equal("foundingText" in parsed.recipe, false, "an absent text must not come back as a key");
+  assert.deepEqual(parsed.recipe, world.recipe);
+});
+
+test("a close-up of a founded world carries the founding text its parent needs (Issue #392)", () => {
+  const world = generateWorld(defaultRecipe(7, { foundingText: "a drowned kingdom" }));
+  const capital = world.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const window = windowAround(world, capital, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Detail" });
+  const svg = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 0 },
+  });
+  assert.equal(recipeFromSvg(svg)?.recipe.foundingText, "a drowned kingdom");
 });
