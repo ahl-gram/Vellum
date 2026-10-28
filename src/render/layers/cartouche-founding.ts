@@ -1,4 +1,15 @@
+import { el, type SvgNode } from "../svg.ts";
+import type { MapStyle } from "../style.ts";
+import type { World } from "../../world/types.ts";
+
 export const FOUNDING_LINE_UNITS = 48;
+const FONT = 11.5;
+const PITCH = 16;
+const GAP = 22;
+const CAPITAL_SCALE = 1.7;
+const CAPITAL_RISE = 6;
+const OPEN_QUOTE = "\u{201C}";
+const CLOSE_QUOTE = "\u{201D}";
 
 const WIDE =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Extended_Pictographic}\u{3000}-\u{303F}\u{FF01}-\u{FF60}\u{FFE0}-\u{FFE6}]/u;
@@ -63,4 +74,55 @@ export function foundingLines(text: string, max: number = FOUNDING_LINE_UNITS): 
   }
   if (cur !== "") lines.push(cur);
   return lines;
+}
+
+export function engravedLines(world: World): ReadonlyArray<string> {
+  const text = world.recipe.foundingText;
+  if (text === undefined || text.trim() === "" || world.region !== undefined) return [];
+  return foundingLines(`${OPEN_QUOTE}${text}${CLOSE_QUOTE}`);
+}
+
+export function foundingRise(lineCount: number): number {
+  if (lineCount === 0) return 0;
+  return GAP + CAPITAL_RISE + (lineCount - 1) * PITCH;
+}
+
+function openingCapital(style: MapStyle, line: string, k: number): ReadonlyArray<SvgNode | string> {
+  const [quote = "", capital = "", ...rest] = clusters(line);
+  const size = (FONT * CAPITAL_SCALE * k).toFixed(1);
+  return [
+    el("tspan", { "font-family": style.fontFamilyTitle, "font-size": size }, [`${quote}${capital.toUpperCase()}`]),
+    rest.join(""),
+  ];
+}
+
+export function foundingNodes(
+  style: MapStyle,
+  lines: ReadonlyArray<string>,
+  cx: number,
+  subtitleBase: number,
+  k: number,
+): SvgNode[] {
+  if (lines.length === 0) return [];
+  const first = subtitleBase + (GAP + CAPITAL_RISE) * k;
+  return [
+    el(
+      "g",
+      { id: "cartouche-founding" },
+      lines.map((line, i) =>
+        el(
+          "text",
+          {
+            x: cx,
+            y: first + i * PITCH * k,
+            "text-anchor": "middle",
+            "font-family": style.fontFamily,
+            "font-size": (FONT * k).toFixed(1),
+            fill: style.ink,
+          },
+          i === 0 ? openingCapital(style, line, k) : [line],
+        ),
+      ),
+    ),
+  ];
 }
