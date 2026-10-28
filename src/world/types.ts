@@ -25,6 +25,7 @@ export type WorldRecipe = {
   readonly culture?: CultureId;
   readonly outline?: OutlineId;
   readonly looseness?: number;
+  readonly foundingText?: string;
 };
 
 export type NamedSettlement = Settlement & {

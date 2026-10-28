@@ -7,6 +7,7 @@ export type CartouchePlan = {
   readonly rect: Box;
   readonly corner: "tl" | "tr" | "bl" | "br";
   readonly lines: ReadonlyArray<string>;
+  readonly founding: ReadonlyArray<string>;
 };
 
 function wrapText(text: string, maxChars: number): string[] {
@@ -81,6 +82,7 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
     rect: { x: best.x, y: best.y, w: width, h: height },
     corner: best.corner,
     lines,
+    founding: [],
   };
 }
 
