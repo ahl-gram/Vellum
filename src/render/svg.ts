@@ -22,7 +22,12 @@ export function escapeXml(s: string): string {
 }
 
 export function unescapeXml(s: string): string {
-  return s;
+  return s
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
 }
 
 export function renderSvg(node: SvgNode): string {
