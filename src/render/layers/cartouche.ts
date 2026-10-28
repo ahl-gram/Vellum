@@ -2,11 +2,13 @@ import { el, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
+import { engravedLines, foundingNodes, foundingRise } from "./cartouche-founding.ts";
 
 export type CartouchePlan = {
   readonly rect: Box;
   readonly corner: "tl" | "tr" | "bl" | "br";
   readonly lines: ReadonlyArray<string>;
+  readonly founding: ReadonlyArray<string>;
 };
 
 function wrapText(text: string, maxChars: number): string[] {
@@ -56,8 +58,9 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
   const m = proj.margin;
 
   const lines = wrapText(world.title.subtitle, 58);
+  const founding = engravedLines(world);
   const width = Math.min(470 * k, (proj.widthPx - 2 * m) * 0.38);
-  const height = (72 + lines.length * 15 + 16) * k;
+  const height = (72 + lines.length * 15 + 16 + foundingRise(founding.length)) * k;
   const inset = 20 * k;
 
   const corners = [
@@ -81,6 +84,7 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
     rect: { x: best.x, y: best.y, w: width, h: height },
     corner: best.corner,
     lines,
+    founding,
   };
 }
 
@@ -143,7 +147,7 @@ function cartoucheRule(style: MapStyle, rect: Box, k: number): SvgNode[] {
 
 function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[] {
   const { style, world } = ctx;
-  const { x, y, w, h } = plan.rect;
+  const { x, y, w } = plan.rect;
   const cx = x + w / 2;
 
   const titleFs = Math.min(27 * k, (w - 56 * k) / (world.title.title.length * 0.58));
@@ -177,20 +181,26 @@ function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[
         [line],
       ),
     ),
-    el(
-      "text",
-      {
-        x: cx,
-        y: y + h - 11 * k,
-        "text-anchor": "middle",
-        "font-family": style.fontFamily,
-        "font-size": (9 * k).toFixed(1),
-        "letter-spacing": (1.8 * k).toFixed(1),
-        fill: style.inkSoft,
-      },
-      [`CHART № ${world.recipe.seed}`],
-    ),
+    ...foundingNodes(style, plan.founding, cx, y + (64 + (plan.lines.length - 1) * 15) * k, k),
+    chartNumber(style, plan.rect, world.recipe.seed, k),
   ];
+}
+
+function chartNumber(style: MapStyle, rect: Box, seed: number, k: number): SvgNode {
+  const { x, y, w, h } = rect;
+  return el(
+    "text",
+    {
+      x: x + w / 2,
+      y: y + h - 11 * k,
+      "text-anchor": "middle",
+      "font-family": style.fontFamily,
+      "font-size": (9 * k).toFixed(1),
+      "letter-spacing": (1.8 * k).toFixed(1),
+      fill: style.inkSoft,
+    },
+    [`CHART № ${seed}`],
+  );
 }
 
 export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {

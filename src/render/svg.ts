@@ -21,6 +21,15 @@ export function escapeXml(s: string): string {
     .replaceAll("'", "&apos;");
 }
 
+export function unescapeXml(s: string): string {
+  return s
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
 export function renderSvg(node: SvgNode): string {
   const attrs = Object.entries(node.attrs)
     .map(([k, v]) => ` ${k}="${typeof v === "string" ? escapeXml(v) : v}"`)

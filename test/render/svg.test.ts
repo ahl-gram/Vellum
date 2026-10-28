@@ -1,11 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { el, renderSvg, escapeXml, pathFrom } from "../../src/render/svg.ts";
+import { el, renderSvg, escapeXml, pathFrom, unescapeXml } from "../../src/render/svg.ts";
 import { createProjection } from "../../src/render/transform.ts";
 import { labelCandidates } from "../../src/render/layers/settlements.ts";
 
 test("escapeXml handles the five specials", () => {
   assert.equal(escapeXml(`<a & "b" 'c'>`), "&lt;a &amp; &quot;b&quot; &apos;c&apos;&gt;");
+});
+
+test("unescapeXml undoes escapeXml, the ampersand last (Issue #392)", () => {
+  for (const s of [`a "b" & 'c' <d>`, "&lt; is written out", "&amp;", "plain"]) {
+    assert.equal(unescapeXml(escapeXml(s)), s);
+  }
 });
 
 test("el + renderSvg nests and escapes", () => {

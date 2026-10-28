@@ -4,7 +4,7 @@ import type { ClimateBand } from "../climate/climate.ts";
 import { isCultureId } from "../society/culture-ids.ts";
 import { isOutlineId, type OutlineId } from "../world/outline-ids.ts";
 import type { StyleName } from "./style.ts";
-import { el, type SvgNode } from "./svg.ts";
+import { el, unescapeXml, type SvgNode } from "./svg.ts";
 
 /** All fields are primitive, keeping the region stamp free of XML-escaping hazards. */
 export type RegionRecipe = {
@@ -31,6 +31,7 @@ export function recipeAttrs(world: World, styleName: StyleName): Record<string, 
     ...(r.culture !== undefined ? { "data-vellum-culture": r.culture } : {}),
     ...(r.outline !== undefined ? { "data-vellum-outline": r.outline } : {}),
     ...(r.looseness !== undefined ? { "data-vellum-looseness": r.looseness } : {}),
+    ...(r.foundingText !== undefined ? { "data-vellum-founding-text": r.foundingText } : {}),
   };
 }
 
@@ -40,10 +41,11 @@ export function recipeMetadataNode(world: World, styleName: StyleName, regionRec
   const culture = r.culture !== undefined ? ` culture=${r.culture}` : "";
   const outline = r.outline !== undefined ? ` outline=${r.outline}` : "";
   const looseness = r.looseness !== undefined ? ` looseness=${r.looseness}` : "";
+  const founding = r.foundingText !== undefined ? ` founding=${JSON.stringify(r.foundingText)}` : "";
   const summary =
     `Vellum chart. Recipe: seed=${r.seed} type=${r.mapType} band=${r.band} ` +
     `land=${r.landFraction} grid=${r.gridW}x${r.gridH} style=${styleName} ` +
-    `engine=${ENGINE_VERSION}${coast}${culture}${outline}${looseness}${regionMetadataSuffix(regionRecipe)}`;
+    `engine=${ENGINE_VERSION}${coast}${culture}${outline}${looseness}${founding}${regionMetadataSuffix(regionRecipe)}`;
   return el("metadata", {}, [summary]);
 }
 
@@ -112,6 +114,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   if (culture !== null && !isCultureId(culture)) return null;
   const shape = parseShape(svg);
   if (shape === null) return null;
+  const foundingText = readAttr(svg, "data-vellum-founding-text");
   return {
     recipe: {
       seed: Number(seed),
@@ -123,6 +126,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
       ...(coastWarp !== null ? { coastWarp: Number(coastWarp) } : {}),
       ...(culture !== null ? { culture } : {}),
       ...shape,
+      ...(foundingText !== null ? { foundingText: unescapeXml(foundingText) } : {}),
     },
     style: style as StyleName,
     version,
