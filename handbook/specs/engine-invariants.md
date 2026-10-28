@@ -138,7 +138,7 @@ module they import, so keep what founding calls from elsewhere (`hashString` in 
 classification Unicode itself revises.
 
 **What a surface may read from a founding.** `sentence` is the display form: the text the cartouche
-letters, which a surface puts on the recipe as `foundingText` beside the overrides, and the text to
+letters, only when at least one word was recognised (Issue #390 ruling 8), which a surface puts on the recipe as `foundingText` beside the overrides, and the text to
 carry in a link, which founds itself again unchanged. A climate word here is a word that still sets the
 climate after the clash. `steered` lists the words that steered, each with only the meanings it kept,
 except that when the climate words name exactly one tradition between them, each climate word naming it
