@@ -24,6 +24,8 @@ back.
 view option, which changes only the drawing. Decide which when you add it, and say which in the
 pull request.
 
+**The founding text is the one recipe field the world ignores.** `foundingText` in `src/world/types.ts` carries a founded world's sentence to its cartouche and into its stamp, and `generateWorld` builds the same world with it or without it (`test/world/founding-text.test.ts`), so two charts that differ only in it draw the same land under different words.
+
 **A view option is byte-identical when off, or it is not a view option.**
 
 **No guard holds this split, and the red you do get does not name it.** `recipeFromSvg` rebuilds the
@@ -135,7 +137,8 @@ module they import, so keep what founding calls from elsewhere (`hashString` in 
 `defaultRecipe` in `src/world/generate.ts`) free of them too. What no guard can hold is a character whose
 classification Unicode itself revises.
 
-**What a surface may read from a founding.** `sentence` is the display form: the text to letter and to
+**What a surface may read from a founding.** `sentence` is the display form: the text the cartouche
+letters, which a surface puts on the recipe as `foundingText` beside the overrides, and the text to
 carry in a link, which founds itself again unchanged. A climate word here is a word that still sets the
 climate after the clash. `steered` lists the words that steered, each with only the meanings it kept,
 except that when the climate words name exactly one tradition between them, each climate word naming it
