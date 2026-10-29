@@ -7,6 +7,8 @@ import { createField } from "../../src/core/grid.ts";
 import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/generate.ts";
 import { OUTLINE_IDS, type OutlineId } from "../../src/world/outline-ids.ts";
 import type { MapType } from "../../src/terrain/heightfield.ts";
+import { MAX_ISLANDS, type IsleSize } from "../../src/terrain/lobes.ts";
+import { borderLandCells } from "../../test-support/border-land.ts";
 
 const RECIPE = {
   seed: 42,
@@ -201,13 +203,6 @@ test("a landFraction override is additive: it shifts no other recipe roll", () =
   }
 });
 
-function borderLandCells(land: Uint8Array, w: number, h: number): number {
-  let border = 0;
-  for (let x = 0; x < w; x++) border += (land[x] as number) + (land[x + (h - 1) * w] as number);
-  for (let y = 1; y < h - 1; y++) border += (land[y * w] as number) + (land[w - 1 + y * w] as number);
-  return border;
-}
-
 test("a shaped world keeps the sea on all four borders at looseness 0, 0.5 and 1 on every map type, both coast extremes and both land fraction extremes (Issue #851)", () => {
   const W = 320;
   const H = 240;
@@ -263,4 +258,49 @@ test("the terrain refuses a looseness outside [0, 1], a looseness with no outlin
     name: "RangeError",
     message: "landFraction must be in (0, 1), got 7",
   });
+});
+
+test("the terrain refuses a count out of range, on another map type or beside an outline, and a size or raggedness it cannot draw or has no count for (Issue #852)", () => {
+  const COUNTED = { ...RECIPE, mapType: "archipelago" } as const;
+  for (const bad of [0, 1, MAX_ISLANDS + 1, 2.5, NaN, Infinity]) {
+    assert.throws(() => buildHeightfield({ ...COUNTED, islands: bad }), {
+      name: "RangeError",
+      message: `islands must be a whole number in [2, ${MAX_ISLANDS}], got ${bad}`,
+    });
+  }
+  for (const mapType of ["island", "continent", "citystate"] as const) {
+    assert.throws(() => buildHeightfield({ ...RECIPE, mapType, islands: 20 }), {
+      name: "RangeError",
+      message: `a count needs the archipelago, got ${mapType}`,
+    });
+  }
+  assert.throws(() => buildHeightfield({ ...COUNTED, islands: 20, outline: "round" }), {
+    name: "RangeError",
+    message: "a count and an outline are refused together",
+  });
+  assert.throws(() => buildHeightfield({ ...COUNTED, isleSize: "varied" }), {
+    name: "RangeError",
+    message: "isleSize needs a count",
+  });
+  assert.throws(() => buildHeightfield({ ...COUNTED, raggedness: 0.5 }), {
+    name: "RangeError",
+    message: "raggedness needs a count",
+  });
+  assert.throws(() => buildHeightfield({ ...COUNTED, islands: 20, isleSize: "huge" as IsleSize }), {
+    name: "RangeError",
+    message: "unknown isleSize huge",
+  });
+  for (const bad of [-0.1, 1.5, NaN, Infinity]) {
+    assert.throws(() => buildHeightfield({ ...COUNTED, islands: 20, raggedness: bad }), {
+      name: "RangeError",
+      message: `raggedness must be a number in [0, 1], got ${bad}`,
+    });
+  }
+  assert.throws(
+    () =>
+      generateWorld(defaultRecipe(11, { gridW: 80, gridH: 60, mapType: "archipelago", islands: 20, landFraction: 7 })),
+    { name: "RangeError", message: "landFraction must be in (0, 1), got 7" },
+  );
+  assert.doesNotThrow(() => buildHeightfield({ ...COUNTED, islands: 2 }));
+  assert.doesNotThrow(() => buildHeightfield({ ...COUNTED, islands: MAX_ISLANDS }));
 });

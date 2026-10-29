@@ -3,6 +3,7 @@ import { isLooseness, MAX_DETAIL, type MapType, type UvWindow } from "../terrain
 import type { ClimateBand } from "../climate/climate.ts";
 import { isCultureId } from "../society/culture-ids.ts";
 import { isOutlineId, type OutlineId } from "../world/outline-ids.ts";
+import { isIslandCount, isIsleSize, isRaggedness } from "../terrain/lobes.ts";
 import type { StyleName } from "./style.ts";
 import { el, unescapeXml, type SvgNode } from "./svg.ts";
 
@@ -31,6 +32,9 @@ export function recipeAttrs(world: World, styleName: StyleName): Record<string, 
     ...(r.culture !== undefined ? { "data-vellum-culture": r.culture } : {}),
     ...(r.outline !== undefined ? { "data-vellum-outline": r.outline } : {}),
     ...(r.looseness !== undefined ? { "data-vellum-looseness": r.looseness } : {}),
+    ...(r.islands !== undefined ? { "data-vellum-islands": r.islands } : {}),
+    ...(r.isleSize !== undefined ? { "data-vellum-isle-size": r.isleSize } : {}),
+    ...(r.raggedness !== undefined ? { "data-vellum-raggedness": r.raggedness } : {}),
     ...(r.foundingText !== undefined ? { "data-vellum-founding-text": r.foundingText } : {}),
   };
 }
@@ -41,11 +45,14 @@ export function recipeMetadataNode(world: World, styleName: StyleName, regionRec
   const culture = r.culture !== undefined ? ` culture=${r.culture}` : "";
   const outline = r.outline !== undefined ? ` outline=${r.outline}` : "";
   const looseness = r.looseness !== undefined ? ` looseness=${r.looseness}` : "";
+  const islands = r.islands !== undefined ? ` islands=${r.islands}` : "";
+  const isleSize = r.isleSize !== undefined ? ` isleSize=${r.isleSize}` : "";
+  const raggedness = r.raggedness !== undefined ? ` raggedness=${r.raggedness}` : "";
   const founding = r.foundingText !== undefined ? ` founding=${JSON.stringify(r.foundingText)}` : "";
   const summary =
     `Vellum chart. Recipe: seed=${r.seed} type=${r.mapType} band=${r.band} ` +
     `land=${r.landFraction} grid=${r.gridW}x${r.gridH} style=${styleName} ` +
-    `engine=${ENGINE_VERSION}${coast}${culture}${outline}${looseness}${founding}${regionMetadataSuffix(regionRecipe)}`;
+    `engine=${ENGINE_VERSION}${coast}${culture}${outline}${looseness}${islands}${isleSize}${raggedness}${founding}${regionMetadataSuffix(regionRecipe)}`;
   return el("metadata", {}, [summary]);
 }
 
@@ -88,6 +95,26 @@ function parseShape(svg: string): { outline?: OutlineId; looseness?: number } | 
   return isLooseness(value) ? { outline, looseness: value } : null;
 }
 
+function parseCount(
+  svg: string,
+  mapType: string,
+  outlined: boolean,
+): Pick<WorldRecipe, "islands" | "isleSize" | "raggedness"> | null {
+  const islands = readAttr(svg, "data-vellum-islands");
+  const size = readAttr(svg, "data-vellum-isle-size");
+  const ragged = readAttr(svg, "data-vellum-raggedness");
+  if (islands === null) return size === null && ragged === null ? {} : null;
+  const count = Number(islands);
+  const raggedness = ragged === null ? 0 : Number(ragged);
+  if (!isIslandCount(count) || mapType !== "archipelago" || outlined || !isRaggedness(raggedness)) return null;
+  if (size !== null && !isIsleSize(size)) return null;
+  return {
+    islands: count,
+    ...(size !== null ? { isleSize: size } : {}),
+    ...(ragged !== null ? { raggedness } : {}),
+  };
+}
+
 export function recipeFromSvg(svg: string): ParsedRecipe | null {
   const seed = readAttr(svg, "data-vellum-seed");
   const gridW = readAttr(svg, "data-vellum-grid-w");
@@ -114,6 +141,8 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   if (culture !== null && !isCultureId(culture)) return null;
   const shape = parseShape(svg);
   if (shape === null) return null;
+  const count = parseCount(svg, mapType, shape.outline !== undefined);
+  if (count === null) return null;
   const foundingText = readAttr(svg, "data-vellum-founding-text");
   return {
     recipe: {
@@ -126,6 +155,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
       ...(coastWarp !== null ? { coastWarp: Number(coastWarp) } : {}),
       ...(culture !== null ? { culture } : {}),
       ...shape,
+      ...count,
       ...(foundingText !== null ? { foundingText: unescapeXml(foundingText) } : {}),
     },
     style: style as StyleName,

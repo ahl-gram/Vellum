@@ -6,6 +6,7 @@ import type { MapType, UvWindow } from "../terrain/heightfield.ts";
 import type { Culture, MapTitle } from "../society/names.ts";
 import type { CultureId } from "../society/culture-ids.ts";
 import type { OutlineId } from "./outline-ids.ts";
+import type { IsleSize } from "../terrain/lobes.ts";
 import type { Road } from "../society/roads.ts";
 import type { Settlement } from "../society/sites.ts";
 import type { RealmsResult } from "../society/realms.ts";
@@ -25,6 +26,9 @@ export type WorldRecipe = {
   readonly culture?: CultureId;
   readonly outline?: OutlineId;
   readonly looseness?: number;
+  readonly islands?: number;
+  readonly isleSize?: IsleSize;
+  readonly raggedness?: number;
   readonly foundingText?: string;
 };
 

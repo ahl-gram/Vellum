@@ -76,7 +76,7 @@ contradicts its own chart. A key's value is a number or a string, since `chainCa
 a string. `test/world/terrain-inputs.test.ts` holds each arm of the close-up to its chart at the
 values its fixture row gives each key, against a close-up of the same world without that key (the
 type checker refuses a key with no row and a row with no value). A row may carry another key it
-needs, as a looseness needs an outline. It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
+needs, as a looseness needs an outline and a size or a raggedness a count. It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
 or `buildChainedField` that skips `terrainInputsOf`; `scripts/region-detail/probes.ts`,
 `partition.ts` and `cost.ts` build terrain by hand today, harmlessly, because each builds from
 `defaultRecipe(seed)`.
@@ -161,6 +161,13 @@ new ID; `test/terrain/outlines.test.ts` pins each one. A looseness is world iden
 means nothing without an outline: the terrain refuses one alone. An absent outline is the dome the
 seed always drew.
 
+**A count is world identity too.** `islands`, `isleSize` and `raggedness` (`src/world/types.ts`) place a
+counted world's islands from the seed and the world's aspect alone (`placeLobes` in
+`src/terrain/lobes.ts`), so a close-up and every chain ancestor place the same islands, and
+`test/world/land-mask-pins.test.ts` pins counted worlds beside the plain ones. A count is the
+archipelago's alone: the terrain refuses one on another map type, beside an outline or out of its range,
+and a size or a raggedness without one. An absent count is the world the seed always drew.
+
 ## What a terrain change moves, and what it does not
 
 **Stability under a terrain change follows from where a value draws its randomness, not from where
@@ -198,6 +205,12 @@ carries that covenant. Do not restate it here.
 **So take a new named fork rather than appending a draw to an existing namer.** A feature on its own
 fork cannot move any other feature's draws, and that holds by construction rather than by one block
 staying last in the pipeline.
+
+**The terrain's own randomness is seeded by the seed, bare or salted, never forked from `generateWorld`'s
+rng**: the base field in `src/terrain/heightfield.ts` takes the bare seed, its other noise fields take
+salts, and the islands' placement takes `LOBE_SEED_SALT` in `src/terrain/lobes.ts`. A
+close-up and a chain ancestor rebuild the terrain from its inputs alone and hold no rng, so a stream
+they cannot rebuild would draw a close-up that contradicts its chart.
 
 **The hazard is inserting a draw mid-fork.** Every later value on that fork moves.
 `simulateHistory` in `src/society/history.ts` is the one to watch: it runs on its own fork and its
@@ -243,6 +256,12 @@ cell inside the outline is land and every cell outside is sea on the world sheet
 is still checked, and draws nothing. A close-up is held to its chart, not to the outline. The
 outline's inset from the sheet's edge, the falloff and the edge sink hold the sea margin there.
 
+**On a counted world the land fraction does not move the waterline either.** It takes the archipelago's
+usual share (`landShareOf` in `src/world/generate.ts`); the land fraction is still checked and draws
+nothing, and the coast warp draws nothing there, the islands' raggedness shaping their shores instead.
+A few islands are big enough to reach the edge, so a counted world sinks its edge deeper than another
+(`COUNTED_EDGE_SINK` in `src/terrain/heightfield.ts`), and that holds the sea margin at every count.
+
 **This deferral is ruled. Do not implement an off-edge continent as a land-fraction tweak.**
 
 **The domain-warped falloff lobes the coast and can grow offshore islets. It does not touch the
@@ -260,7 +279,9 @@ the land fraction. Other tests in that same file do vary it, for other claims, s
 tests and not the file. The strongest of them asserts the land mask is zero along all four borders,
 at a single land fraction. The border test for outlines beside them samples the looseness and the
 coast warp, and sweeps the land fraction, which draws nothing on a world with an outline, so it holds
-the land slider out of that world's waterline. The guarantee itself rests on the edge sink and the falloff, corroborated
+the land slider out of that world's waterline. The border test for counted worlds, in
+`test/terrain/lobes.test.ts`, samples the small counts where an island reaches the edge, both sizes and
+both ends of the raggedness. The guarantee itself rests on the edge sink and the falloff, corroborated
 by measurement. State it that way.
 
 **The candidate path if the deferral is ever revisited** is the regional survey, which generates an
