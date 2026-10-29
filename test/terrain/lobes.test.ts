@@ -36,6 +36,14 @@ function shoreOverLand(mask: Uint8Array, field: Pick<Field, "w" | "h">): number 
   return shore / land;
 }
 
+function borderLand(mask: Uint8Array): number {
+  const { gridW: w, gridH: h } = GRID;
+  let cells = 0;
+  for (let x = 0; x < w; x++) cells += (mask[x] as number) + (mask[(h - 1) * w + x] as number);
+  for (let y = 0; y < h; y++) cells += (mask[y * w] as number) + (mask[y * w + w - 1] as number);
+  return cells;
+}
+
 function differing(a: Field, b: Field): number {
   let cells = 0;
   for (let i = 0; i < a.data.length; i++) if (a.data[i] !== b.data[i]) cells++;
@@ -95,23 +103,15 @@ test("varied sizes never cover less of the sheet than alike ones (Issue #852)", 
 test("a counted world keeps the sea on all four borders at small counts, both sizes and both ends of the raggedness (Issue #852)", () => {
   const onBorder: string[] = [];
   // 2026-10-28, Issue #852: with today's edge sink, 209 of 3,600 small-count worlds (seeds 1 to 100, asked 2 to 20) put land on the border, seed 8 at asked 2 alike and round among them (12 cells), this test's witness; with the counted sink, none in 5,400 worlds (seeds 1 to 100, asked 2 to 100).
-  for (const seed of [1, 8, 13, 20]) {
-    for (const islands of [2, 3, 5, 8]) {
-      for (const isleSize of ["equal", "varied"] as const satisfies ReadonlyArray<IsleSize>) {
-        for (const raggedness of [0, 1]) {
-          const mask = countedMask(seed, { islands, isleSize, raggedness });
-          let cells = 0;
-          for (let x = 0; x < GRID.gridW; x++)
-            cells += (mask[x] as number) + (mask[(GRID.gridH - 1) * GRID.gridW + x] as number);
-          for (let y = 0; y < GRID.gridH; y++)
-            cells += (mask[y * GRID.gridW] as number) + (mask[y * GRID.gridW + GRID.gridW - 1] as number);
-          if (cells > 0)
-            onBorder.push(
-              `seed ${seed}, asked ${islands}, ${isleSize}, raggedness ${raggedness}: ${cells} border cells`,
-            );
-        }
-      }
-    }
+  const sizes: ReadonlyArray<IsleSize> = ["equal", "varied"];
+  const inputs = [1, 8, 13, 20].flatMap((seed) =>
+    [2, 3, 5, 8].flatMap((islands) =>
+      sizes.flatMap((isleSize) => [0, 1].map((raggedness) => ({ seed, islands, isleSize, raggedness }))),
+    ),
+  );
+  for (const { seed, ...over } of inputs) {
+    const cells = borderLand(countedMask(seed, over));
+    if (cells > 0) onBorder.push(`seed ${seed}, ${JSON.stringify(over)}: ${cells} border cells`);
   }
   assert.deepEqual(onBorder, [], "a counted world put land on its border");
 });
