@@ -58,8 +58,6 @@ export function decodeRows(png: Buffer): Rgb[][] {
   return rows;
 }
 
-export const decodeFirstRow = (png: Buffer): Rgb[] => decodeRows(png)[0]!;
-
 // The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
 export async function sampleRect(
   send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
