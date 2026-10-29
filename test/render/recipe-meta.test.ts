@@ -6,6 +6,7 @@ import { ENGINE_VERSION, recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { escapeXml } from "../../src/render/svg.ts";
 import { generateRegionWorld, regionDetailLevel, windowAround, regionTitle } from "../../src/world/region.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
+import { MAX_ISLANDS } from "../../src/terrain/lobes.ts";
 
 test("a chart embeds its full recipe", () => {
   const world = generateWorld(defaultRecipe(42));
@@ -309,6 +310,74 @@ test("a close-up of an outlined world carries the outline its parent needs (Issu
   });
   assert.match(svg, /data-vellum-outline="crescent"/);
   assert.equal(recipeFromSvg(svg)?.recipe.outline, "crescent");
+});
+
+const COUNTED = { mapType: "archipelago", islands: 20, isleSize: "varied", raggedness: 0.5 } as const;
+
+test("a counted chart stamps its count, sizes and raggedness, and the stamp redraws it byte for byte (Issue #852)", () => {
+  const world = generateWorld(defaultRecipe(7, COUNTED));
+  const svg = renderMap(world, { style: "antique" });
+  assert.match(svg, /data-vellum-islands="20"/, "the count is stamped on the root");
+  assert.match(svg, /data-vellum-isle-size="varied"/, "the sizes are stamped on the root");
+  assert.match(svg, /data-vellum-raggedness="0\.5"/, "the raggedness is stamped on the root");
+  assert.match(svg, / islands=20/, "the metadata summary carries the count");
+  assert.match(svg, / isleSize=varied/, "the metadata summary carries the sizes");
+  assert.match(svg, / raggedness=0\.5/, "the metadata summary carries the raggedness");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.deepEqual(parsed.recipe, world.recipe, "the recipe round-trips with its count, sizes and raggedness");
+  const redrawn = renderMap(generateWorld(parsed.recipe), { style: parsed.style });
+  assert.equal(redrawn, svg, "the recovered recipe redraws byte for byte, with the same islands");
+});
+
+test("a chart with no count carries no count stamp, and its recipe no count keys (Issue #852)", () => {
+  const world = generateWorld(defaultRecipe(7));
+  const svg = renderMap(world, { style: "antique" });
+  assert.doesNotMatch(svg, /data-vellum-islands/);
+  assert.doesNotMatch(svg, /data-vellum-isle-size/);
+  assert.doesNotMatch(svg, /data-vellum-raggedness/);
+  assert.doesNotMatch(svg, / islands=/);
+  assert.doesNotMatch(svg, / isleSize=/);
+  assert.doesNotMatch(svg, / raggedness=/);
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  for (const key of ["islands", "isleSize", "raggedness"]) {
+    assert.equal(key in parsed.recipe, false, `an absent ${key} must not come back as a key`);
+  }
+  assert.deepEqual(parsed.recipe, world.recipe);
+});
+
+test("a chart stamped with a count the engine cannot draw is unreadable (Issue #852)", () => {
+  const svg = renderMap(generateWorld(defaultRecipe(7, COUNTED)), { style: "antique" });
+  const swap = (attr: string, from: string, junk: ReadonlyArray<string>): ReadonlyArray<readonly [string, string]> =>
+    junk.map((j) => [`${attr}="${from}"`, `${attr}="${j}"`] as const);
+  const edits: ReadonlyArray<readonly [string, string]> = [
+    ...swap("data-vellum-islands", "20", ["1", `${MAX_ISLANDS + 1}`, "2.5", "abc", ""]),
+    ...swap("data-vellum-isle-size", "varied", ["huge", "Equal", ""]),
+    ...swap("data-vellum-raggedness", "0.5", ["-0.1", "1.5", "NaN", "abc"]),
+    ...swap("data-vellum-map-type", "archipelago", ["island"]),
+    [' data-vellum-islands="20"', ""],
+    ['data-vellum-islands="20"', 'data-vellum-islands="20" data-vellum-outline="round"'],
+  ];
+  for (const [from, to] of edits) {
+    const edited = svg.replace(from, to);
+    assert.notEqual(edited, svg, "the stamp must be there to edit");
+    assert.equal(recipeFromSvg(edited), null, `${from} replaced by ${to} must not rebuild some other world`);
+  }
+});
+
+test("a close-up of a counted world carries the count its parent needs (Issue #852)", () => {
+  const world = generateWorld(defaultRecipe(7, { mapType: "archipelago", islands: 20 }));
+  const capital = world.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const window = windowAround(world, capital, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Detail" });
+  const svg = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 0 },
+  });
+  assert.match(svg, /data-vellum-islands="20"/);
+  assert.equal(recipeFromSvg(svg)?.recipe.islands, 20);
 });
 
 test("a founded chart stamps its founding text, escaped, and the stamp redraws it byte for byte (Issue #392)", () => {
