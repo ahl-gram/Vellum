@@ -166,7 +166,7 @@ counted world's islands from the seed and the world's aspect alone (`placeLobes`
 `src/terrain/lobes.ts`), so a close-up and every chain ancestor place the same islands, and
 `test/world/land-mask-pins.test.ts` pins counted worlds beside the plain ones. A count is the
 archipelago's alone: the terrain refuses one on another map type, beside an outline or out of its range,
-and a size or a raggedness without one. An absent count is the archipelago the seed always drew.
+and a size or a raggedness without one. An absent count is the world the seed always drew.
 
 ## What a terrain change moves, and what it does not
 
@@ -206,8 +206,9 @@ carries that covenant. Do not restate it here.
 fork cannot move any other feature's draws, and that holds by construction rather than by one block
 staying last in the pipeline.
 
-**The terrain's own randomness is seeded by the seed and a salt, never forked from `generateWorld`'s
-rng**: the noise salts in `src/terrain/heightfield.ts` and `LOBE_SEED_SALT` in `src/terrain/lobes.ts`. A
+**The terrain's own randomness is seeded by the seed, bare or salted, never forked from `generateWorld`'s
+rng**: the base field in `src/terrain/heightfield.ts` takes the bare seed, its other noise fields take
+salts, and the islands' placement takes `LOBE_SEED_SALT` in `src/terrain/lobes.ts`. A
 close-up and a chain ancestor rebuild the terrain from its inputs alone and hold no rng, so a stream
 they cannot rebuild would draw a close-up that contradicts its chart.
 

@@ -8,6 +8,7 @@ import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/gener
 import { OUTLINE_IDS, type OutlineId } from "../../src/world/outline-ids.ts";
 import type { MapType } from "../../src/terrain/heightfield.ts";
 import { MAX_ISLANDS, type IsleSize } from "../../src/terrain/lobes.ts";
+import { borderLandCells } from "../../test-support/border-land.ts";
 
 const RECIPE = {
   seed: 42,
@@ -201,13 +202,6 @@ test("a landFraction override is additive: it shifts no other recipe roll", () =
     assert.equal(forced.band, base.band, "band unchanged by forcing land");
   }
 });
-
-function borderLandCells(land: Uint8Array, w: number, h: number): number {
-  let border = 0;
-  for (let x = 0; x < w; x++) border += (land[x] as number) + (land[x + (h - 1) * w] as number);
-  for (let y = 1; y < h - 1; y++) border += (land[y * w] as number) + (land[w - 1 + y * w] as number);
-  return border;
-}
 
 test("a shaped world keeps the sea on all four borders at looseness 0, 0.5 and 1 on every map type, both coast extremes and both land fraction extremes (Issue #851)", () => {
   const W = 320;

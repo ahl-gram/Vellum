@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { Field } from "../../src/core/grid.ts";
+import { quantile, type Field } from "../../src/core/grid.ts";
+import { borderLandCells } from "../../test-support/border-land.ts";
 import { buildHeightfield, type TerrainParams } from "../../src/terrain/heightfield.ts";
 import { placeLobes, type IsleSize, type Lobe } from "../../src/terrain/lobes.ts";
 import { landMask, pickSeaLevel } from "../../src/terrain/sealevel.ts";
@@ -36,24 +37,11 @@ function shoreOverLand(mask: Uint8Array, field: Pick<Field, "w" | "h">): number 
   return shore / land;
 }
 
-function borderLand(mask: Uint8Array): number {
-  const { gridW: w, gridH: h } = GRID;
-  let cells = 0;
-  for (let x = 0; x < w; x++) cells += (mask[x] as number) + (mask[(h - 1) * w + x] as number);
-  for (let y = 0; y < h; y++) cells += (mask[y * w] as number) + (mask[y * w + w - 1] as number);
-  return cells;
-}
-
 function differing(a: Field, b: Field): number {
   let cells = 0;
   for (let i = 0; i < a.data.length; i++) if (a.data[i] !== b.data[i]) cells++;
   return cells;
 }
-
-const median = (values: ReadonlyArray<number>): number => {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)] as number;
-};
 
 test("the coast slider draws nothing on a counted world, and the islands' own raggedness does (Issue #852)", () => {
   const counted = { seed: 1, ...GRID, islands: 20 } as const;
@@ -69,7 +57,7 @@ test("the raggedness roughens a counted island's shore (Issue #852)", () => {
     const ratios = [1, 2, 3, 4, 5].map((seed) =>
       shoreOverLand(countedMask(seed, { islands: 20, raggedness }), { w: GRID.gridW, h: GRID.gridH }),
     );
-    return median(ratios);
+    return quantile(ratios, 0.5);
   });
   assert.ok(
     (medians[0] as number) < (medians[1] as number) && (medians[1] as number) < (medians[2] as number),
@@ -110,7 +98,7 @@ test("a counted world keeps the sea on all four borders at small counts, both si
     ),
   );
   for (const { seed, ...over } of inputs) {
-    const cells = borderLand(countedMask(seed, over));
+    const cells = borderLandCells(countedMask(seed, over), GRID.gridW, GRID.gridH);
     if (cells > 0) onBorder.push(`seed ${seed}, ${JSON.stringify(over)}: ${cells} border cells`);
   }
   assert.deepEqual(onBorder, [], "a counted world put land on its border");
