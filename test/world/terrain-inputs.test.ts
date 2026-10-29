@@ -20,6 +20,9 @@ const OFF_DEFAULT: Readonly<Record<TerrainInputKey, readonly [TerrainInputs, ...
   coastWarp: [{ coastWarp: 0.1 }, { coastWarp: 0.9 }],
   outline: [{ outline: "crescent" }],
   looseness: [{ outline: "round", looseness: 0.5 }],
+  islands: [{ islands: 20 }],
+  isleSize: [{ islands: 20, isleSize: "varied" }],
+  raggedness: [{ islands: 20, raggedness: 1 }],
 };
 
 function without(inputs: TerrainInputs, key: TerrainInputKey): TerrainInputs {
@@ -52,7 +55,7 @@ function disagreement(chart: World, close: World, window: UvWindow): number {
   return cells / (gridW * gridH);
 }
 
-test("a close-up agrees with its own chart for every terrain input off its default, on the bare arm and the detailed arm (Issue #453, Issue #850, Issue #851)", () => {
+test("a close-up agrees with its own chart for every terrain input off its default, on the bare arm and the detailed arm (Issue #453, Issue #850, Issue #851, Issue #852)", () => {
   const charts = TERRAIN_INPUT_KEYS.flatMap((key) =>
     OFF_DEFAULT[key].map((inputs) => ({
       key,

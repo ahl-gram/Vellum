@@ -3,6 +3,7 @@ import { lerp, smoothstep } from "../core/math.ts";
 import { fbm2, ridged2, warped2, OCTAVE_OFFSETS } from "../noise/fbm.ts";
 import { isOutlineId, type OutlineId } from "../world/outline-ids.ts";
 import { outlineSegments, signedDistance, type OutlineSegments } from "./outline-distance.ts";
+import type { IsleSize } from "./lobes.ts";
 
 export type MapType = "island" | "archipelago" | "continent" | "citystate";
 
@@ -25,6 +26,9 @@ export type TerrainParams = {
   readonly coastWarp?: number;
   readonly outline?: OutlineId;
   readonly looseness?: number;
+  readonly islands?: number;
+  readonly isleSize?: IsleSize;
+  readonly raggedness?: number;
   /** Extra fBm octaves for a finer survey window, keyed off the window size by the caller; default 0, the world chart's density (Issue #396). */
   readonly detail?: number;
   readonly window?: UvWindow;
