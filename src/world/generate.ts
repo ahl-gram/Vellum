@@ -84,6 +84,10 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
 }
 
 export function landShareOf(recipe: WorldRecipe): number {
+  if (recipe.islands !== undefined) {
+    checkLandFraction(recipe.landFraction);
+    return LAND_FRACTION[recipe.mapType];
+  }
   if (recipe.outline === undefined) return recipe.landFraction;
   checkLandFraction(recipe.landFraction);
   const own = outlineCoverage(recipe.outline, recipe.gridW, recipe.gridH);

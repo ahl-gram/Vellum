@@ -3,7 +3,16 @@ import { lerp, smoothstep } from "../core/math.ts";
 import { fbm2, ridged2, warped2, OCTAVE_OFFSETS } from "../noise/fbm.ts";
 import { isOutlineId, type OutlineId } from "../world/outline-ids.ts";
 import { outlineSegments, signedDistance, type OutlineSegments } from "./outline-distance.ts";
-import type { IsleSize } from "./lobes.ts";
+import {
+  isIslandCount,
+  isIsleSize,
+  isRaggedness,
+  MAX_ISLANDS,
+  MIN_ISLANDS,
+  placeLobes,
+  type IsleSize,
+  type Lobe,
+} from "./lobes.ts";
 
 export type MapType = "island" | "archipelago" | "continent" | "citystate";
 
@@ -108,7 +117,10 @@ type TerrainSettings = {
   readonly aspect: number;
   readonly outline: OutlineSegments | undefined;
   readonly looseness: number;
+  readonly counted: Counted | undefined;
 };
+
+type Counted = { readonly lobes: ReadonlyArray<Lobe>; readonly meanR: number; readonly raggedness: number };
 
 export function isLooseness(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value <= 1;
@@ -123,6 +135,25 @@ function outlineOf(params: TerrainParams, aspect: number): { outline: OutlineSeg
   }
   if (!isOutlineId(params.outline)) throw new RangeError(`unknown outline ${String(params.outline)}`);
   return { outline: outlineSegments(params.outline, aspect), looseness };
+}
+
+function countedOf(params: TerrainParams, aspect: number): Counted | undefined {
+  const { islands, isleSize, raggedness } = params;
+  if (islands === undefined) {
+    if (isleSize !== undefined) throw new RangeError("isleSize needs a count");
+    if (raggedness !== undefined) throw new RangeError("raggedness needs a count");
+    return undefined;
+  }
+  if (!isIslandCount(islands)) {
+    throw new RangeError(`islands must be a whole number in [${MIN_ISLANDS}, ${MAX_ISLANDS}], got ${islands}`);
+  }
+  if (params.mapType !== "archipelago") throw new RangeError(`a count needs the archipelago, got ${params.mapType}`);
+  if (params.outline !== undefined) throw new RangeError("a count and an outline are refused together");
+  if (isleSize !== undefined && !isIsleSize(isleSize)) throw new RangeError(`unknown isleSize ${String(isleSize)}`);
+  const ragged = raggedness ?? 0;
+  if (!isRaggedness(ragged)) throw new RangeError(`raggedness must be a number in [0, 1], got ${ragged}`);
+  const lobes = placeLobes(params.seed, islands, isleSize ?? "equal", aspect);
+  return { lobes, meanR: lobes.reduce((t, l) => t + l.r, 0) / lobes.length, raggedness: ragged };
 }
 
 function terrainSettings(params: TerrainParams): TerrainSettings {
@@ -150,22 +181,27 @@ function terrainSettings(params: TerrainParams): TerrainSettings {
     detail,
     aspect,
     ...outlineOf(params, aspect),
+    counted: countedOf(params, aspect),
   };
 }
 
 type Warp = readonly [number, number];
 
-function coastWarpAt(u: number, v: number, s: TerrainSettings): Warp {
+function warpAt(u: number, v: number, s: TerrainSettings, scale: number): Warp {
   const { seed, detail, aspect } = s;
-  const wx = fbm2(u * COAST_WARP_SCALE * aspect, v * COAST_WARP_SCALE, (seed ^ COAST_SEED_SALT_X) >>> 0, {
+  const wx = fbm2(u * scale * aspect, v * scale, (seed ^ COAST_SEED_SALT_X) >>> 0, {
     octaves: COAST_WARP_OCTAVES + detail,
     normOctaves: COAST_WARP_OCTAVES,
   });
-  const wy = fbm2(u * COAST_WARP_SCALE * aspect + 41.7, v * COAST_WARP_SCALE + 17.3, (seed ^ COAST_SEED_SALT_Y) >>> 0, {
+  const wy = fbm2(u * scale * aspect + 41.7, v * scale + 17.3, (seed ^ COAST_SEED_SALT_Y) >>> 0, {
     octaves: COAST_WARP_OCTAVES + detail,
     normOctaves: COAST_WARP_OCTAVES,
   });
   return [wx, wy];
+}
+
+function coastWarpAt(u: number, v: number, s: TerrainSettings): Warp {
+  return warpAt(u, v, s, COAST_WARP_SCALE);
 }
 
 function domeDistance(u: number, v: number, coastWarp: number, warp: Warp | null): number {
@@ -206,9 +242,33 @@ function shapedElevation(e: number, u: number, v: number, s: TerrainSettings, ou
   return e * lerp(keep, 1, falloff) - (1 - falloff) * sink;
 }
 
-function edgeSink(u: number, v: number): number {
+const RAGGED_SCALE = 1;
+const RAGGED_AMP = 1.2;
+const SUNK_KEEP = 0.2;
+const SUNK_DEPTH = 0.4;
+
+function lobeDistance(u: number, v: number, s: TerrainSettings, c: Counted): number {
+  const warp = c.raggedness > 0 ? warpAt(u, v, s, RAGGED_SCALE / c.meanR) : null;
+  const ax = warp === null ? 0 : c.raggedness * RAGGED_AMP * warp[0];
+  const ay = warp === null ? 0 : c.raggedness * RAGGED_AMP * warp[1];
+  let d = Infinity;
+  for (const l of c.lobes) d = Math.min(d, Math.hypot(((u - l.cx) * s.aspect) / l.r + ax, (v - l.cy) / l.r + ay));
+  return d;
+}
+
+function countedElevation(e: number, u: number, v: number, s: TerrainSettings, c: Counted): number {
+  const { falloffStart, falloffEnd } = s.shape;
+  const falloff = 1 - smoothstep(falloffStart, falloffEnd, lobeDistance(u, v, s, c));
+  return e * lerp(SUNK_KEEP, 1, falloff) - (1 - falloff) * SUNK_DEPTH;
+}
+
+const EDGE_SINK = 0.8;
+// 2026-10-29, Issue #852: over seeds 1 to 100 (asked 2 to 100, both sizes, raggedness 0, 0.5 and 1; 5,400 worlds) every border cell of a counted world stood at least 0.409 under its waterline at 1.6, where today's 0.8 put land on the border of 209 of 3,600 small-count worlds.
+const COUNTED_EDGE_SINK = 1.6;
+
+function edgeSink(u: number, v: number, depth: number): number {
   const edge = Math.min(u, 1 - u, v, 1 - v);
-  return (1 - smoothstep(0, 0.05, edge)) * 0.8;
+  return (1 - smoothstep(0, 0.05, edge)) * depth;
 }
 
 function elevationAt(u: number, v: number, s: TerrainSettings): number {
@@ -227,13 +287,14 @@ function elevationAt(u: number, v: number, s: TerrainSettings): number {
   const ridgeMask = smoothstep(0.52, 0.78, e01);
   let e = e01 + ridgedWeight * ridge * ridgeMask;
 
-  if (s.outline !== undefined) return shapedElevation(e, u, v, s, s.outline) - edgeSink(u, v);
+  if (s.outline !== undefined) return shapedElevation(e, u, v, s, s.outline) - edgeSink(u, v, EDGE_SINK);
+  if (s.counted !== undefined) return countedElevation(e, u, v, s, s.counted) - edgeSink(u, v, COUNTED_EDGE_SINK);
 
   const d = coastDistance(u, v, s);
   const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
   e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
 
-  e -= edgeSink(u, v);
+  e -= edgeSink(u, v, EDGE_SINK);
 
   return e;
 }
