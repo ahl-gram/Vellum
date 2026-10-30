@@ -3,7 +3,13 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
 import type { World } from "../../src/world/types.ts";
-import type { RenderCtx } from "../../src/render/context.ts";
+import { createRng } from "../../src/core/rng.ts";
+import { minMax } from "../../src/core/grid.ts";
+import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
+import { boxesOverlap, type Box } from "../../src/render/geometry.ts";
+import { createProjection, marginFor } from "../../src/render/transform.ts";
+import { nameSetting, settlementsLayer } from "../../src/render/layers/settlements.ts";
+import { glyphPoly, polysOverlap, textNodes } from "../../test-support/label-geometry.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -136,4 +142,47 @@ test("growth rises with the survey's depth, stops at the Glass's deepest band, a
     assert.equal(markLadder(tier, world56), 1, `a world sheet draws the ${tier} on no ladder`);
     assert.equal(markScale(tier, world56), 1, `a world sheet draws the ${tier} ungrown`);
   }
+});
+
+function layerCtx(region: World): RenderCtx {
+  const { max } = minMax(region.elev);
+  return {
+    world: region,
+    style: STYLES.antique,
+    proj: createProjection(region.elev.w, region.elev.h, 1500, marginFor(1500)),
+    coastRings: [],
+    elevSpan: Math.max(1e-9, max - region.seaLevel),
+    rng: createRng(region.recipe.seed).fork("render"),
+    realmTint: [],
+    labels: createLabelArena(),
+  };
+}
+
+const extentBox = (e: Extent): Box => ({ x: e.x0, y: e.y0, w: e.x1 - e.x0, h: e.y1 - e.y0 });
+
+test("on a close-up a name is never set on its own mark (Issue #1104)", () => {
+  const ctx = layerCtx(DEEP);
+  const capital = DEEP.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital, "the close-up holds a capital");
+  const { tries } = nameSetting(DEEP, ctx.proj, capital, "capital");
+  ctx.labels.claim(tries[0]!.box);
+  ctx.labels.claim(tries[1]!.box);
+  const svg = renderSvg(settlementsLayer(ctx).finish().node);
+
+  const at = svg.indexOf('data-tier="capital"');
+  assert.notEqual(at, -1, "the capital is drawn");
+  const textAt = svg.indexOf("<text", at);
+  assert.notEqual(textAt, -1, "the capital is named");
+  const castle = markExtent(svg.slice(at, textAt));
+  assert.ok(boxesOverlap(tries[2]!.box, extentBox(castle)), "the north spot lies on the castle, so the hazard is live");
+
+  const names = textNodes(svg.slice(textAt, svg.indexOf("</g>", textAt)));
+  assert.equal(names.length, 1, "the capital's name is drawn once");
+  const castlePoly = [
+    { x: castle.x0, y: castle.y0 },
+    { x: castle.x1, y: castle.y0 },
+    { x: castle.x1, y: castle.y1 },
+    { x: castle.x0, y: castle.y1 },
+  ];
+  assert.equal(polysOverlap(glyphPoly(names[0]!), castlePoly), false, "the name stands off its own castle");
 });
