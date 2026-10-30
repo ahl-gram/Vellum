@@ -6,8 +6,14 @@ import type { World } from "../../src/world/types.ts";
 import type { RenderCtx } from "../../src/render/context.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
-import { markScale, settlementGlyph, type SettlementTier } from "../../src/render/layers/settlement-marks.ts";
-import { largerSide, markExtent } from "../../test-support/mark-extent.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
+import {
+  markGrowth,
+  markScale,
+  settlementGlyph,
+  type SettlementTier,
+} from "../../src/render/layers/settlement-marks.ts";
+import { largerSide, markExtent, type Extent } from "../../test-support/mark-extent.ts";
 
 const world56 = generateWorld(defaultRecipe(56));
 const AELEGWEI_B5 = { u0: 191 / 256, v0: 183 / 256, u1: 191 / 256 + 1 / 32, v1: 183 / 256 + 1 / 32 };
@@ -49,6 +55,69 @@ test("on a close-up the marks keep the ruled order at every depth, in every dres
           `${where}: ${bigger} ${size(bigger).toFixed(2)} is not over ${smaller} ${size(smaller).toFixed(2)}`,
         );
       }
+    }
+  }
+});
+
+const DEEP = generateRegionWorld(world56, { ...spec, detail: true });
+
+const sheetOf = (w: World): string => renderMap(w, { style: "antique", widthPx: 1500, legend: true });
+
+function sheetMark(svg: string, tier: SettlementTier, nth = 0): Extent {
+  let at = -1;
+  for (let i = 0; i <= nth; i++) {
+    at = svg.indexOf(`data-tier="${tier}"`, at + 1);
+    assert.notEqual(at, -1, `the sheet draws a ${tier} (number ${nth})`);
+  }
+  const stops = ["<text", '<g class="settlement"', '<g id="layer-'].map((s) => svg.indexOf(s, at));
+  const end = Math.min(...stops.filter((n) => n !== -1));
+  return markExtent(svg.slice(at, end));
+}
+
+function keyCapital(svg: string): Extent {
+  const legend = svg.indexOf('<g id="layer-legend"');
+  assert.notEqual(legend, -1, "the sheet draws a key");
+  const at = svg.indexOf('<g class="settlement-capital">', legend);
+  assert.notEqual(at, -1, "the key has a capital row");
+  return markExtent(svg.slice(at, svg.indexOf("</g></g>", at)));
+}
+
+const sideOf = (e: Extent): readonly [number, number] => [e.x1 - e.x0, e.y1 - e.y0];
+
+test("a detailed close-up draws its marks larger by its depth's growth, its key keeps the ladder, and the order holds on the drawn sheet (Issue #1104)", () => {
+  assert.equal(DEEP.region!.detail, 5, "the detailed close-up carries the Glass's deepest band");
+  assert.equal(BARE.region!.detail, 0, "a bare survey carries level 0");
+  for (const w of [DEEP, BARE])
+    assert.ok(
+      w.settlements.some((s) => s.kind === "capital"),
+      "it holds a capital",
+    );
+  const deep = sheetOf(DEEP);
+  const bare = sheetOf(BARE);
+
+  const growth = largerSide(sheetMark(deep, "capital")) / largerSide(sheetMark(bare, "capital"));
+  assert.ok(markGrowth(DEEP) > 1, "a detailed band-5 survey grows its marks");
+  assert.ok(
+    Math.abs(growth / markGrowth(DEEP) - 1) < 1e-6,
+    `the drawn capital grows ${growth}, the growth is ${markGrowth(DEEP)}`,
+  );
+
+  const [kdw, kdh] = sideOf(keyCapital(deep));
+  const [kbw, kbh] = sideOf(keyCapital(bare));
+  assert.ok(Math.abs(kdw - kbw) < 1e-6 && Math.abs(kdh - kbh) < 1e-6, "the key's capital does not grow with depth");
+  const sheetBare = sideOf(sheetMark(bare, "capital"));
+  assert.ok(Math.abs(kbw - sheetBare[0]) < 1e-6 && Math.abs(kbh - sheetBare[1]) < 1e-6, "the key draws the ladder");
+
+  const capital = largerSide(sheetMark(deep, "capital"));
+  const village = largerSide(sheetMark(deep, "village"));
+  const hamlet = largerSide(sheetMark(deep, "hamlet"));
+  assert.ok(capital > village && village > hamlet, `drawn capital ${capital} > village ${village} > hamlet ${hamlet}`);
+  for (const tier of ["farmstead", "mill"] as const) {
+    const count = deep.split(`data-tier="${tier}"`).length - 1;
+    assert.ok(count > 0, `the sheet draws a ${tier}`);
+    for (let n = 0; n < count; n++) {
+      const side = largerSide(sheetMark(deep, tier, n));
+      assert.ok(side < village, `a drawn ${tier} (${side}) stays under the village (${village})`);
     }
   }
 });
