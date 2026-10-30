@@ -1,11 +1,13 @@
 import { el, type SvgNode } from "../svg.ts";
-import { textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
+import { boxesOverlap, textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 import { boxMeetsRiver } from "./river-clearance.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
 import {
   finerMarkBox,
+  markBox,
+  markGrowthGap,
   markScale,
   ruinGlyph,
   seatHalo,
@@ -122,7 +124,9 @@ export function nameSetting(world: World, proj: Projection, s: NamedSettlement, 
   const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
   const fs = sized[tier] * k;
   const small = tier === "hamlet" || FINER_TIER.has(tier);
-  const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : small ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k;
+  const gap =
+    (tier === "capital" ? 11 : tier === "seat" ? 8 : small ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k +
+    (s.ruined ? 0 : markGrowthGap(tier, world)) * k;
   const upper = tier === "capital" || tier === "seat";
   const text = tier === "mill" ? `${s.name} Mill` : s.name;
   const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
@@ -146,9 +150,14 @@ function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: Settleme
     b.y + b.h <= proj.heightPx - proj.margin - 4;
   const rivers = world.region === undefined ? null : { cells: world.riverCells, w: world.elev.w, h: world.elev.h };
   const dry = (b: Box): boolean => rivers === null || !boxMeetsRiver(b, rivers, proj);
+  const own =
+    world.region === undefined || s.ruined
+      ? null
+      : markBox(tier, proj.px(s.x), proj.py(s.y), (proj.widthPx / 1500) * markScale(tier, world), ctx.style.name);
+  const off = (b: Box): boolean => own === null || !boxesOverlap(b, own);
   const claimed =
-    tries.find(({ box }) => dry(box) && inFrame(box) && labels.tryClaim(box)) ??
-    (rivers === null ? undefined : tries.find(({ box }) => inFrame(box) && labels.tryClaim(box)));
+    tries.find(({ box }) => off(box) && dry(box) && inFrame(box) && labels.tryClaim(box)) ??
+    (rivers === null ? undefined : tries.find(({ box }) => off(box) && inFrame(box) && labels.tryClaim(box)));
   const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
   const placed = claimed ?? forced;
   if (placed === undefined) return null;
@@ -200,7 +209,8 @@ export function settlementsLayer(ctx: RenderCtx): SettlementsDraft {
   const showHalo = style.politicalTints && world.realms.seats.length > 1 && world.region === undefined;
   const k = proj.widthPx / 1500;
   const finer = ordered.filter((e) => FINER_TIER.has(e.tier));
-  for (const e of finer) ctx.labels.claim(finerMarkBox(e.tier, proj.px(e.s.x), proj.py(e.s.y), k));
+  for (const e of finer)
+    ctx.labels.claim(finerMarkBox(e.tier, proj.px(e.s.x), proj.py(e.s.y), k * markScale(e.tier, world)));
   const early = ordered
     .filter((e) => !FINER_TIER.has(e.tier))
     .map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo));

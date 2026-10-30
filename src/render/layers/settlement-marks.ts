@@ -2,6 +2,7 @@ import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
+import type { StyleName } from "../style.ts";
 
 export type SettlementTier = NamedSettlement["kind"] | "seat";
 
@@ -37,6 +38,34 @@ export function markGrowth(world: World): number {
 
 export function markScale(tier: SettlementTier, world: World): number {
   return markLadder(tier, world) * markGrowth(world);
+}
+
+const MARK_HALF_WIDTH: Readonly<Record<SettlementTier, number>> = {
+  capital: 5.5 * CAPITAL_GLYPH_SCALE,
+  seat: 5.5 * SEAT_GLYPH_SCALE,
+  town: 3.4,
+  village: 2.3,
+  hamlet: 1.5,
+  farmstead: 2.4 * HOUSE_SCALE,
+  mill: WHEEL_RADIUS,
+};
+
+/** How far a name stands farther off a mark that grew past today's, at k = 1. */
+export function markGrowthGap(tier: SettlementTier, world: World): number {
+  return Math.max(0, markScale(tier, world) - 1) * MARK_HALF_WIDTH[tier];
+}
+
+/** The box a mark is drawn in at k (the caller's k carries the scale), strokes not counted. */
+export function markBox(tier: SettlementTier, px: number, py: number, k: number, styleName: StyleName): Box {
+  if (tier === "capital" || tier === "seat") {
+    const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
+    return styleName === "antique" || styleName === "ink"
+      ? { x: px - 5.5 * ks, y: py - 8 * ks, w: 11 * ks, h: 8 * ks }
+      : { x: px - 6.5 * ks, y: py - 6.5 * ks, w: 13 * ks, h: 13 * ks };
+  }
+  if (tier === "farmstead" || tier === "mill") return finerMarkBox(tier, px, py, k);
+  const r = MARK_HALF_WIDTH[tier] * k;
+  return { x: px - r, y: py - r, w: 2 * r, h: 2 * r };
 }
 
 /** Reused by the legend so the map mark and its key row match. */
