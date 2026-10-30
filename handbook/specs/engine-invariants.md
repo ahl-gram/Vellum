@@ -156,10 +156,15 @@ or realms (`test/world/culture-pin.test.ts`). A culture ID is world identity: a 
 and a written link names it, so an ID in `CULTURE_IDS` (`src/society/culture-ids.ts`) is never renamed.
 
 **An outline is world identity in the same way.** An ID in `OUTLINE_IDS` (`src/world/outline-ids.ts`)
-is never renamed and its rings in `src/terrain/outlines.ts` never change, so a corrected outline is a
-new ID; `test/terrain/outlines.test.ts` pins each one. A looseness is world identity beside it, and
-means nothing without an outline: the terrain refuses one alone. An absent outline is the dome the
-seed always drew.
+is never renamed and its rings in `src/terrain/outlines.ts` never change, and neither are a real
+place's: its ID in `PLACE_ID_LIST` (`src/world/outline-place-ids.ts`) and its rings in
+`src/terrain/outline-places.json`. A corrected outline is a new ID; `test/terrain/outlines.test.ts`
+pins each form and `test/terrain/outline-places.test.ts` pins the places together. A place's rings
+reach the terrain only through the source a host installs (`setPlaceSource` in
+`src/terrain/outline-store.ts`), and the terrain refuses a place whose rings are not loaded, by name,
+rather than drawing anything in its place. A looseness is world identity beside it, and means nothing
+without an outline: the terrain refuses one alone. An absent outline is the dome the seed always
+drew.
 
 **A count is world identity too.** `islands`, `isleSize` and `raggedness` (`src/world/types.ts`) place a
 counted world's islands from the seed and the world's aspect alone (`placeLobes` in

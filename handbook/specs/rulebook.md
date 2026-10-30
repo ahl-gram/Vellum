@@ -136,7 +136,13 @@ at #260 (the clean, which deletes the build-output folder whole, removes any loc
 `face-italic.ts`, the plate face's outline tables (Issue #754). `npm run plate-face` is their single
 writer, from the woff2 files in `design/kit/plate-fonts/`, and `test/prospect/plate-face.test.ts`
 regenerates them and refuses any drift, so a change to those faces, the glyph sets or the simplifier
-owes the script and moves the prospect plate pins.
+owes the script and moves the prospect plate pins. `src/terrain/outline-places.json`,
+`src/world/outline-place-ids.ts` and `src/world/outline-place-names.json` are the outline roster's
+real places (Issue #853): `npm run outlines -- build` is their single writer, from the extracts in
+`design/kit/outlines/`, and `test/terrain/outline-places.test.ts` rebuilds them and refuses any drift,
+so a change to the extracts, the writer or its constants owes the build and moves the roster's pin.
+`npm run outlines -- extract` writes those extracts from Natural Earth's downloads, which are not
+committed, and only ever appends.
 
 **The golden checksum is `1792806240`** (seed 42 realm labels), pinned by
 `test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
