@@ -460,6 +460,13 @@ section points there rather than restating it.
 - **An element's `textContent` holds only its last write.** A check that something was written
   exactly once counts the writes with a `MutationObserver`, since a burst that ends on the right text
   reads the same as a single write.
+- **A transform reads to six significant digits, through `getComputedStyle` and the inline `style`
+  alike, so two reads of a camera still easing in can read the same.** At home's station depth that
+  is 0.01 px, and the station flight's last printed step can land after two equal reads 50 ms apart
+  (measured 2026-10-30 on the local harness browser: a wait on the printed matrix handed over before
+  it in 2 of 36 flights, Issue #1124). A wait for a tween to land counts the page's writes, as the
+  bullet above counts them, and asks for a frame between its two reads, as `h15dFlightStops` in
+  `e2e/suites/home/drift.ts` does.
 - **A helper that scrolls before it reads cannot see a scrolled page.** `buttonPoint` in
   `e2e/support/home.ts` scrolls the stage into view before it reads a point, un-scrolling the page as
   it does, so a check about anything at its scrolled position reads raw viewport rects instead, as
