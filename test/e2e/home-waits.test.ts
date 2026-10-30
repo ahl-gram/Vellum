@@ -214,8 +214,9 @@ test("H15d hands over once the page has stopped writing the camera, not when its
     stage(false, H15D_MID, 10, 10),
     stage(true, H15D_TAIL, 13, 13),
     stage(true, H15D_TAIL, 16, 16),
-    stage(true, H15D_END, 18, 19),
-    stage(true, H15D_END, 18, 22),
+    stage(true, H15D_TAIL, 18, 19),
+    stage(true, H15D_END, 19, 22),
+    stage(true, H15D_END, 19, 25),
   ]);
   await h15dFlightStops(homeKit(w.ctx));
   assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
