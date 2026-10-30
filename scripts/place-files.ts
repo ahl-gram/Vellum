@@ -15,6 +15,10 @@ export async function writePlaceFiles(root: string, table: string = PLACE_TABLE)
   return ids.length;
 }
 
+export const PLACE_NAMES = fileURLToPath(new URL("../src/world/outline-place-names.json", import.meta.url));
+
+export async function writePlaceNames(_root: string, _names: string = PLACE_NAMES): Promise<void> {}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = resolve(process.argv[2] ?? GENERATED);
   writePlaceFiles(root).catch((err: unknown) => {

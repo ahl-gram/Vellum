@@ -5,6 +5,8 @@ import type { RenderJob } from "./worker-client.ts";
 export const PLACE_FOLDER = "outlines";
 export const placeFile = (id: PlaceId): string => `${PLACE_FOLDER}/${id}.txt`;
 export const placeUrl = (id: PlaceId): string => `/${placeFile(id)}`;
+export const NAMES_FILE = "";
+export const namesUrl = "";
 
 export interface Fetched {
   readonly ok: boolean;
