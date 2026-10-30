@@ -1,4 +1,5 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 
 export async function prlLink({ evaluate, send, check, sleep, PORT }: SuiteContext) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&legend=1` });
@@ -183,5 +184,74 @@ export async function prwCount(ctx: SuiteContext): Promise<void> {
       seen.raggedness === "0.4" &&
       seen.hash === COUNT_HASH,
     JSON.stringify(seen),
+  );
+}
+
+const DRAFTING = "Drafting…";
+const FLOOD = "150";
+const ISLAND_HASH = "#seed=1&style=antique&type=island&legend=1&arms=0&beasts=0";
+
+type Moved = { started: boolean; before: string | null };
+type Resolved = { status: string; dis: boolean; map: boolean };
+type Redrawn = {
+  status: string;
+  fresh: boolean;
+  land: string | null;
+  outline: string | null;
+  islands: string | null;
+  mapType: string | null;
+  hash: string;
+};
+
+const MOVE_LAND: Payload<Moved> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");const before=svg?svg.getAttribute("data-vellum-land-fraction"):null;if(svg)svg.setAttribute("data-prw-old","");const l=document.getElementById("land");l.value="${FLOOD}";l.dispatchEvent(new Event("change",{bubbles:true}));return{before,started:document.getElementById("status").textContent==="${DRAFTING}"};})()`;
+const PICK_ISLAND: Payload<Moved> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");if(svg)svg.setAttribute("data-prw-old","");const t=document.getElementById("type");t.value="island";t.dispatchEvent(new Event("change",{bubbles:true}));return{before:null,started:document.getElementById("status").textContent==="${DRAFTING}"};})()`;
+const RESOLVED: Payload<Resolved> = `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map > svg[data-vellum-style]")})`;
+const REDRAWN: Payload<Redrawn> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]"),at=(n)=>svg?svg.getAttribute("data-vellum-"+n):null;return{status:document.getElementById("status").textContent,fresh:!!svg&&!svg.hasAttribute("data-prw-old"),land:at("land-fraction"),outline:at("outline"),islands:at("islands"),mapType:at("map-type"),hash:location.hash.replace(/&table=[^&]*/,"")};})()`;
+
+// Waits for the draw to end either way, never on waitSettled, so a draw the engine refuses reds the check on its own status line instead of timing the wait out.
+async function redrawAfter(
+  ctx: SuiteContext,
+  move: Payload<Moved>,
+  label: string,
+): Promise<{ moved: Moved; after: Redrawn }> {
+  const settle = makeSettle({ evaluate: ctx.evaluate, sleep: ctx.sleep });
+  const moved = await ctx.evaluate(move);
+  await settle(RESOLVED, (d) => d.status !== DRAFTING && !d.dis && d.map, label);
+  return { moved, after: await ctx.evaluate(REDRAWN) };
+}
+
+export async function prwPlaceLand(ctx: SuiteContext): Promise<void> {
+  const seen = await explorerAt(ctx, PLACE_HASH);
+  const { moved, after } = await redrawAfter(ctx, MOVE_LAND, "PRW7 the land move's draw");
+  ctx.check(
+    "PRW7 sea level moved on a shaped world stays out of its link and its draw",
+    !!seen &&
+      seen.outline === PLACE &&
+      moved.started &&
+      moved.before !== null &&
+      moved.before !== String(Number(FLOOD) / 1000) &&
+      after.status === "" &&
+      after.fresh &&
+      after.outline === PLACE &&
+      after.land === moved.before &&
+      after.hash === PLACE_HASH,
+    JSON.stringify({ moved, after }),
+  );
+}
+
+export async function prwCountType(ctx: SuiteContext): Promise<void> {
+  const seen = await explorerAt(ctx, COUNT_HASH);
+  const { moved, after } = await redrawAfter(ctx, PICK_ISLAND, "PRW8 the type change's draw");
+  ctx.check(
+    "PRW8 a counted world turned to an island drops its count from the link and the draw",
+    !!seen &&
+      seen.islands === "20" &&
+      moved.started &&
+      after.status === "" &&
+      after.fresh &&
+      after.islands === null &&
+      after.mapType === "island" &&
+      after.hash === ISLAND_HASH,
+    JSON.stringify({ moved, after }),
   );
 }
