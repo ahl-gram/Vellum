@@ -12,27 +12,29 @@ Everything here is the round as it ran. Nothing is edited to match the site or t
 - `mock/`: the spike that drew the round, as it ran: the Node resolve hook (`hooks.ts`) that swaps three engine modules for copies differing only by a per-tier multiplier (`marks-variant.ts`, `settlements-variant.ts`, `legend-icons-variant.ts`), the ladders (`ladder.ts`), the places (`places.ts`), the page writers (`build.ts`, `sheets.ts`, `specimen.ts`), the Explorer frame script (`explorer-frames.ts`) and `control-proof.ts`. It ran from the designer's tree and wrote to the main checkout's `out/1104/`, so its paths name that layout, and replaying it as committed would write over that folder.
 - `sweep-windows.ts` and `measure/`: the scripts that chose the places and measured the round (`seat-spacing.ts`, `pair-windows.ts`, `covered-marks.ts`, `gap-rule.ts`, `explorer-scale.ts`) and their outputs: `explorer-scale-*` (the premise measurement at 1024 by 768, 1280 by 800 and 1728 by 1117, open and folded), `control-proof-*.json` (the copies draw today's marks byte for byte at multiplier 1), `build-facts.json` (the sizes and the digests), `covered-marks.txt`, `gap-rule.txt` and the seat-spacing tables.
 
+One rename, kept in the open: the delivery's `sheets/` folder is `pages/` here, as in the earlier archives. `notes.md` (its "The code, as it ran" section), `mock/build.ts` (`SHEETS`) and `mock/explorer-frames.ts` still say `sheets/`, so those names dangle in the archive.
+
 What the archive leaves out, on purpose:
 
-- **`svg/`:** the 69 engine SVGs, one per direction, place, band and dress, about 26 MB. The kept contact sheets are the stills the sitting ruled from, and the engine plus the round's code under `mock/` regenerate the SVGs.
+- **`svg/`:** the 75 engine SVGs, one per direction, place, band and dress, about 26 MB. The kept contact sheets are the stills the sitting ruled from, and the engine plus the round's code under `mock/` regenerate the SVGs.
 - **The probe shots in `measure/`:** the 52 `explorer-<size>-k<zoom>.png` and `atlas-*.png` captures, about 48 MB. Their numbers are in the `explorer-scale-*-result.json` files and in `notes.md`.
 - **The sitting's page:** the delivery's generated `index.html` linked `svg/` and `stills/`, so it would not resolve here. This README replaces it.
 
 ## The rulings, as ruled
 
-Issue #1104 comment 6527643605, in the menu's own words:
+Issue #1104 comment 6527643605. Each is the option Alex chose, labelled as the menu worded it, followed by the comment's gloss:
 
-1. **Sizes:** ladder B, "the great made greater". Capitals and seats half as big again (capital 9.7 px on screen at the deepest zoom, 1280 by 800, three times a town). Towns and villages as today. Farmsteads and mills tiny, 1.7 px, below the village.
-2. **Depth:** marks grow with depth, about a quarter bigger with each band, about 3.2 times by the deepest. The rate is the designer's stand-in and is not ruled.
-3. **Which sheets:** close-ups only. No regeneration; the committed charts and the golden do not move. It still reaches the atlas's two regional plates, which are close-ups.
-4. **The key:** it keeps the ladder's world-sheet sizes under grow.
+1. **Sizes:** "B: great made greater (Recommended)". Capitals and seats half as big again (capital 9.7 px on screen at the deepest zoom, 1280 by 800, three times a town). Towns and villages as today. Farmsteads and mills tiny, 1.7 px, below the village.
+2. **Depth:** "Grow with depth (Recommended)". Each band draws the marks about a quarter bigger than the band above, about 3.2 times by the deepest; the pop at each landing softens. The rate is the designer's stand-in and is not ruled.
+3. **Which sheets:** "Close-ups only (Recommended)". No regeneration; the committed charts do not move. It still reaches the atlas's two regional plates, which are close-ups. Every sheet is left as a possible later issue.
+4. **The key:** "Key keeps ladder sizes (Recommended)". The key keeps the ladder's world-sheet sizes under grow, so it is tidy, at the cost of a key mark smaller than the same mark on a deep close-up.
 
 These are feel rulings, provisional until Alex has used the result live.
 
 ## What the round found that corrects the issue text
 
 - **A change to every sheet is not a re-roll.** The issue's third item says it would move the golden `1792806240`. `test/world/golden-seed42.test.ts` hashes `w.realms.labels` only, so it does not. Every sheet would still mean regenerating the committed charts, in their own pull request (comment 6527643605 records the correction).
-- **The Explorer already holds a mark's size per band.** At each band's own depth the close-up fills exactly the box the world sheet fills at rest, so a mark stands on screen at its world-sheet size at every band (`measure/explorer-scale-*`). Between bands it grows with the camera, 1.5 times at 3 and at 24 times, and at each landing it drops to about 0.81 times, the pop growth softens. The sheet stands 537, 703 and 1114 px wide at 1024 by 768, 1280 by 800 and 1728 by 1117; the issue's "about 832 px" matches none.
+- **The Explorer already holds a mark's size per band.** At each band's own depth the close-up fills exactly the box the world sheet fills at rest, so a mark stands on screen at its world-sheet size at every band (`measure/explorer-scale-*`). Between bands it grows with the camera, 1.5 times at 3 and at 24 times, and when the next band lands it drops to about 0.81 times; that pop is what growth with depth softens. The sheet stands 537, 703 and 1114 px wide at 1024 by 768, 1280 by 800 and 1728 by 1117; the issue's "about 832 px" matches none.
 
 ## What the stills show that was NOT ruled
 
