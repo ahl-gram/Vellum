@@ -2,7 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildRoster } from "../../scripts/outlines/build.ts";
-import { PLACE_IDS, PLACE_NAMES, PLACE_TABLE, readKit } from "../../scripts/outlines/kit.ts";
+import {
+  KIT_README,
+  PLACE_IDS,
+  PLACE_NAMES,
+  PLACE_TABLE,
+  readKit,
+  readKitFiles,
+  readmeText,
+} from "../../scripts/outlines/kit.ts";
 import { decodeRings } from "../../src/terrain/outline-codec.ts";
 
 const ID = /^ne-[1-9][0-9]*$/;
@@ -23,12 +31,13 @@ function rosterChecksum(places: Readonly<Record<string, string>>): number {
   return h;
 }
 
-test("the committed place table, ID list and name index are exactly what npm run outlines builds from the kit's extracts (Issue #853)", () => {
+test("the committed place table, ID list, name index and the kit's README are exactly what npm run outlines builds from the kit's extracts (Issue #853)", () => {
   const roster = buildRoster(readKit());
   for (const [path, built] of [
     [PLACE_TABLE, roster.table],
     [PLACE_IDS, roster.idsModule],
     [PLACE_NAMES, roster.names],
+    [KIT_README, readmeText(readKitFiles())],
   ] as const)
     assert.equal(readFileSync(path, "utf8"), built, `${path} is stale or hand-edited: run npm run outlines -- build`);
 });
@@ -39,6 +48,25 @@ test("every one of the 5,646 places carries Natural Earth's serial number as its
   for (const id of ids) assert.match(id, ID);
   assert.equal(new Set(ids).size, 5646);
   assert.deepEqual(Object.keys(table()), [...ids].sort());
+});
+
+test("every place in the kit is counted to the extract run that added it, and every run names its file's size and checksum (Issue #853)", () => {
+  for (const [kind, kit] of readKitFiles()) {
+    assert.ok(kit.runs.length > 0, `${kind}.json records no run`);
+    assert.equal(
+      kit.runs.reduce((n, r) => n + r.added, 0),
+      kit.places.length,
+      `${kind}.json: its runs added ${kit.runs.map((r) => r.added).join(" + ")} places, and it holds ${kit.places.length}`,
+    );
+    for (const r of kit.runs) {
+      assert.match(r.sha256, /^[0-9a-f]{64}$/, `${kind}.json: a run without a checksum`);
+      assert.ok(
+        Number.isInteger(r.bytes) && r.bytes > 0 && r.added > 0,
+        `${kind}.json: a run of ${r.bytes} bytes adding ${r.added}`,
+      );
+      assert.match(r.extracted, /^\d{4}-\d{2}-\d{2}$/, `${kind}.json: a run on ${r.extracted}`);
+    }
+  }
 });
 
 test("the place roster is append-only: its count and a checksum over every ID and its rings are pinned (Issue #853)", () => {
