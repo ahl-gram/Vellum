@@ -29,7 +29,9 @@ middle has hurt the project before.
 4. **Build to the ruled stills**, under the fidelity rule below.
 5. **Live use.**
 6. **The post-use re-review**, scheduled into the epic as its own sub, which ratifies, amends or
-   reverses each provisional ruling.
+   reverses each provisional ruling. Its sitting is a short list of URLs to try, five to seven, each
+   saying specifically what to look for, rather than the full docket of every deferred item (Alex,
+   2026-10-27, Issue #955's sitting: "it's way too much work").
 
 **Feel decisions are provisional. Contract decisions are not.** Architecture, the address grammar,
 determinism and sequencing are ratified once and guarded immediately. Which surface owns a
