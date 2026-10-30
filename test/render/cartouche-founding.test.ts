@@ -144,6 +144,12 @@ test("the opening capital holds the widest emoji Unicode names whole, and a wide
   assert.deepEqual(capitalOf(CHAIN), [OPEN + TREE + ZWJ, (TREE + ZWJ).repeat(22)]);
 });
 
+test("a hard break inside a word never parts a Hangul syllable written as conjoining jamo (Issue #1107)", () => {
+  const syllable = "\u{1100}\u{1161}\u{11A8}";
+  assert.equal(widthUnits("x".repeat(45) + syllable), 51, "the syllable would run past the line if it stayed");
+  assert.deepEqual(foundingLines("x".repeat(45) + syllable), ["x".repeat(45), syllable]);
+});
+
 test("a mark the sentence opens with rides the opening quotation mark, and its first letter is still the capital (Issue #1107)", () => {
   assert.deepEqual(capitalOf("\u{303}a drowned kingdom"), [`${OPEN}\u{303}A`, ` drowned kingdom${CLOSE}`]);
 });
