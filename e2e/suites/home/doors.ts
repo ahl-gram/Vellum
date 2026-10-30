@@ -1,5 +1,6 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
+import { makeSettle } from "../../support/settle.ts";
 import { doorShown } from "./reads.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;
@@ -100,25 +101,44 @@ export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doo
   await shoot("home-failed-bundle-doors.png");
 }
 
+// The doors' reveal delay (Issue #470, ratified 2026-08-24); H13g pins its declaration.
+const REVEAL_MS = 10_000;
+const PAST_REVEAL_MS = 2 * REVEAL_MS;
+const FAST = 10;
+type PageClock = { t: number; start: number | null };
+const PAGE_CLOCK: Payload<PageClock> = `(() => { const a = document.getElementById("lf-card-explorer")?.getAnimations()[0]; return { t: Number(document.timeline.currentTime), start: a && a.startTime !== null ? Number(a.startTime) : null }; })()`;
+
+async function pastTheReveal(
+  { evaluate, send, sleep }: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
+  label: string,
+): Promise<PageClock> {
+  await send("Animation.enable");
+  try {
+    // The rate is the document's own: sent before a navigation it reads 1 on the new page (measured 2026-10-29, handbook/plans/1000/1068/1068-plan.md), so it is sent after.
+    await send("Animation.setPlaybackRate", { playbackRate: FAST });
+    return await makeSettle({ evaluate, sleep, tolerant: true })(PAGE_CLOCK, (d) => d.t >= PAST_REVEAL_MS, label);
+  } finally {
+    await send("Animation.setPlaybackRate", { playbackRate: 1 });
+    await send("Animation.disable");
+  }
+}
+
 export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
-  await evaluate(`sessionStorage.clear()`);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let prmDoors = false;
-  for (let i = 0; i < 90; i++) {
-    try {
-      prmDoors = await evaluate(doorShown);
-    } catch {}
-    if (prmDoors === true) break;
-    await sleep(150);
+  try {
+    await evaluate(`sessionStorage.clear()`);
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    const clock = await pastTheReveal({ evaluate, send, sleep }, "h13d-past-the-reveal");
+    const prmDoors = await evaluate(doorShown);
+    check(
+      "H13d reduced motion keeps its doors on a dead bundle: the reveal is a timer, not motion the prm blanket may still",
+      prmDoors === true,
+      JSON.stringify({ prmDoors, ...clock }),
+    );
+  } finally {
+    await send("Network.setBlockedURLs", { urls: [] });
   }
-  await send("Network.setBlockedURLs", { urls: [] });
-  check(
-    "H13d reduced motion keeps its doors on a dead bundle: the reveal is a timer, not motion the prm blanket may still",
-    prmDoors === true,
-    `doors shown=${prmDoors}`,
-  );
 }
 
 export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
@@ -169,22 +189,16 @@ export async function h13fNoScriptRead(ctx: SuiteContext) {
   const { evaluate, send, sleep, PORT } = ctx;
   // The round-2 blocker's live proof: script execution OFF plus reduced motion is the one visitor class where the noscript stand-down must out-cascade the prm exemption (both !important, specificity tied, document order decides).
   return withScriptsOff(send, async () => {
-    let nojs = null;
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-    for (let i = 0; i < 90; i++) {
-      try {
-        nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
-          const nav = document.querySelector(".lf-noscript-rooms");
-          const how = document.getElementById("lf-card-how");
-          if (nav === null || how === null) return null;
-          return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
-        })()`);
-      } catch {}
-      if (nojs !== null && nojs.door) break;
-      await sleep(150);
-    }
-    return { nojs, shelf: await shelfWithoutScripts(ctx) };
+    const clock = await pastTheReveal({ evaluate, send, sleep }, "h13f-past-the-reveal");
+    const nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
+      const nav = document.querySelector(".lf-noscript-rooms");
+      const how = document.getElementById("lf-card-how");
+      if (nav === null || how === null) return null;
+      return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
+    })()`);
+    return { nojs, shelf: await shelfWithoutScripts(ctx), clock };
   });
 }
 
@@ -265,10 +279,10 @@ export async function h13gDoorFrame({ evaluate, check }: SuiteContext, base: Doo
   );
 }
 
-export function h13fNoScript({ check }: SuiteContext, nojs: NoJs["nojs"]): void {
+export function h13fNoScript({ check }: SuiteContext, nojs: NoJs["nojs"], clock: NoJs["clock"]): void {
   check(
     "H13f script-off plus reduced motion keeps the noscript doors alone past the 10s mark: the plain nav and the how prose stand, and no slip ever doubles them",
     nojs !== null && nojs.navShown && nojs.howShown && !nojs.door,
-    JSON.stringify(nojs),
+    JSON.stringify({ nojs, clock }),
   );
 }

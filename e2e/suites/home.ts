@@ -102,10 +102,12 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await step("H13d", () => h13dPrmDoors(ctx));
   await h13ePrmNoFlash(ctx);
-  const { nojs, shelf } = await h13fNoScriptRead(ctx);
+  await step("H13f, H13h", async () => {
+    const { nojs, shelf, clock } = await h13fNoScriptRead(ctx);
+    h13fNoScript(ctx, nojs, clock);
+    h13hShelf(ctx, shelf);
+  });
   await send("Emulation.setEmulatedMedia", { features: [] });
-  h13fNoScript(ctx, nojs);
-  h13hShelf(ctx, shelf);
 }
 
 async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
