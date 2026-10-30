@@ -1,6 +1,6 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
-import { settlementGlyph, ruinGlyph, type SettlementTier } from "./settlement-marks.ts";
+import { markLadder, settlementGlyph, ruinGlyph, type SettlementTier } from "./settlement-marks.ts";
 import { isoStroke } from "./iso.ts";
 import { roadDress } from "./roads.ts";
 import type { MapStyle } from "../style.ts";
@@ -75,6 +75,7 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
         cx,
         cy + (icon.tier === "capital" || icon.tier === "seat" ? 3 * k : icon.tier === "farmstead" ? 4 * k : 0),
         ctx,
+        markLadder(icon.tier, ctx.world),
       );
     case "ruin":
       return ruinGlyph(cx, cy + 3 * k, ctx);

@@ -4,7 +4,14 @@ import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 import { boxMeetsRiver } from "./river-clearance.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
-import { finerMarkBox, ruinGlyph, seatHalo, settlementGlyph, type SettlementTier } from "./settlement-marks.ts";
+import {
+  finerMarkBox,
+  markScale,
+  ruinGlyph,
+  seatHalo,
+  settlementGlyph,
+  type SettlementTier,
+} from "./settlement-marks.ts";
 
 const FINER_TIER: ReadonlySet<SettlementTier> = new Set<SettlementTier>(["farmstead", "mill"]);
 
@@ -167,7 +174,7 @@ function settlementGroup(
     const color = style.realmTints[ctx.realmTint[realmId] as number] as string;
     group.push(seatHalo(px, py, tier, color, ctx));
   }
-  group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
+  group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx, markScale(tier, world)));
   const label = placeSettlementLabel(ctx, s, tier);
   if (label) group.push(label.node);
 

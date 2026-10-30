@@ -1,7 +1,7 @@
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
-import type { NamedSettlement } from "../../world/types.ts";
+import type { NamedSettlement, World } from "../../world/types.ts";
 
 export type SettlementTier = NamedSettlement["kind"] | "seat";
 
@@ -12,10 +12,22 @@ const SPOKE_WIDTH = 1.2;
 const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
 
+export function markLadder(tier: SettlementTier, world: World): number {
+  return world.region === undefined || tier === "town" ? 1 : 1;
+}
+
+export function markGrowth(world: World): number {
+  return world.region === undefined ? 1 : 1;
+}
+
+export function markScale(tier: SettlementTier, world: World): number {
+  return markLadder(tier, world) * markGrowth(world);
+}
+
 /** Reused by the legend so the map mark and its key row match. */
-export function settlementGlyph(tier: SettlementTier, px: number, py: number, ctx: RenderCtx): SvgNode {
+export function settlementGlyph(tier: SettlementTier, px: number, py: number, ctx: RenderCtx, scale: number): SvgNode {
   const { style } = ctx;
-  const k = ctx.proj.widthPx / 1500;
+  const k = (ctx.proj.widthPx / 1500) * scale;
   if (tier === "capital" || tier === "seat") {
     const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
     const mark =
