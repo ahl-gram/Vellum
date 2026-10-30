@@ -1,0 +1,9 @@
+seed 83: 0 lattice windows hold both Maulaipanui and Ruhau
+84 Leal capital Liomiomere town u0=132/256 v0=165/256 {"capital":1,"town":1,"hamlet":1,"farmstead":10}
+84 Leal capital Liomiomere town u0=132/256 v0=166/256 {"capital":1,"town":1,"hamlet":1,"farmstead":8,"mill":1}
+84 Leal capital Liomiomere town u0=132/256 v0=167/256 {"capital":1,"town":1,"hamlet":1,"farmstead":7,"mill":1}
+84 Leal capital Liomiomere town u0=132/256 v0=168/256 {"capital":1,"town":1,"hamlet":1,"farmstead":7,"mill":1}
+84 Leal capital Liomiomere town u0=132/256 v0=169/256 {"capital":1,"town":1,"hamlet":1,"farmstead":7,"mill":1}
+84 Leal capital Liomiomere town u0=132/256 v0=170/256 {"capital":1,"town":1,"farmstead":7,"mill":1}
+84 Leal capital Liomiomere town u0=132/256 v0=171/256 {"capital":1,"town":1,"farmstead":5,"mill":1}
+seed 84: 7 lattice windows hold both Leal and Liomiomere

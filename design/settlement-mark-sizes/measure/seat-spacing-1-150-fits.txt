@@ -1,0 +1,2 @@
+fits: seed 83 Maulaipanui (184,159) and Ruhau (192,152)
+fits: seed 84 Leal (165,161) and Liomiomere (174,160)

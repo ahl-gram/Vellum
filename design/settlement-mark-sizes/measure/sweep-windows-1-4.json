@@ -1,0 +1,282 @@
+[
+ {
+  "seed": 1,
+  "anchor": 0,
+  "anchorName": "Chua",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.62109375,
+   "v0": 0.48828125,
+   "u1": 0.65234375,
+   "v1": 0.51953125
+  },
+  "title": "The Environs of Chua",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 2,
+   "farmstead": 9,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 3,
+  "tiers": "capital+hamlet+farmstead"
+ },
+ {
+  "seed": 1,
+  "anchor": 0,
+  "anchorName": "Chua",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.62109375,
+   "v0": 0.4921875,
+   "u1": 0.65234375,
+   "v1": 0.5234375
+  },
+  "title": "The Environs of Chua",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 1,
+   "farmstead": 9,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 3,
+  "tiers": "capital+hamlet+farmstead"
+ },
+ {
+  "seed": 2,
+  "anchor": 0,
+  "anchorName": "Vunsvyov",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.47265625,
+   "v0": 0.60546875,
+   "u1": 0.50390625,
+   "v1": 0.63671875
+  },
+  "title": "The Environs of Vunsvyov",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 2,
+   "farmstead": 7,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 3,
+  "tiers": "capital+hamlet+farmstead"
+ },
+ {
+  "seed": 2,
+  "anchor": 0,
+  "anchorName": "Vunsvyov",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.47265625,
+   "v0": 0.609375,
+   "u1": 0.50390625,
+   "v1": 0.640625
+  },
+  "title": "The Environs of Vunsvyov",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 2,
+   "farmstead": 6,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 3,
+  "tiers": "capital+hamlet+farmstead"
+ },
+ {
+  "seed": 3,
+  "anchor": 0,
+  "anchorName": "Zaa",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.25390625,
+   "v0": 0.30859375,
+   "u1": 0.28515625,
+   "v1": 0.33984375
+  },
+  "title": "The Environs of Zaa",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 3,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 2,
+  "tiers": "capital+farmstead"
+ },
+ {
+  "seed": 3,
+  "anchor": 0,
+  "anchorName": "Zaa",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.25390625,
+   "v0": 0.3125,
+   "u1": 0.28515625,
+   "v1": 0.34375
+  },
+  "title": "The Environs of Zaa",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 3,
+   "mill": 0,
+   "ruined": 0
+  },
+  "distinct": 2,
+  "tiers": "capital+farmstead"
+ },
+ {
+  "seed": 4,
+  "anchor": 0,
+  "anchorName": "Koang",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.3125,
+   "v0": 0.71875,
+   "u1": 0.34375,
+   "v1": 0.75
+  },
+  "title": "The Environs of Koang",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 2,
+   "farmstead": 15,
+   "mill": 1,
+   "ruined": 0
+  },
+  "distinct": 4,
+  "tiers": "capital+hamlet+farmstead+mill"
+ },
+ {
+  "seed": 4,
+  "anchor": 0,
+  "anchorName": "Koang",
+  "anchorTier": "capital",
+  "window": {
+   "u0": 0.3125,
+   "v0": 0.72265625,
+   "u1": 0.34375,
+   "v1": 0.75390625
+  },
+  "title": "The Environs of Koang",
+  "world": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 0,
+   "farmstead": 0,
+   "mill": 0,
+   "ruined": 0
+  },
+  "region": {
+   "capital": 1,
+   "seat": 0,
+   "town": 0,
+   "village": 0,
+   "hamlet": 1,
+   "farmstead": 13,
+   "mill": 1,
+   "ruined": 0
+  },
+  "distinct": 4,
+  "tiers": "capital+hamlet+farmstead+mill"
+ }
+]

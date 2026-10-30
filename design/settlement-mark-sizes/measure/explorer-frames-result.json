@@ -1,0 +1,540 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-untouched.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "untouched",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": null,
+   "same": null
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-untouched-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "untouched",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": null,
+   "same": null
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-today.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "today",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-today-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "today",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-a.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "a",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-a-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "a",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-b.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "b",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-b-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "b",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-c.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "c",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-c-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "c",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-a-grow.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "a-grow",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-a-grow-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "a-grow",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-b-grow.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "b-grow",
+   "held": false,
+   "camK": 32,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/explorer-aelegwei-b-grow-held.png",
+  "url": "http://127.0.0.1:50484/explorer/#seed=56&style=antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": {
+   "dir": "b-grow",
+   "held": true,
+   "camK": 96,
+   "region": {
+    "band": 5,
+    "window": {
+     "u0": 0.74609375,
+     "v0": 0.71484375,
+     "u1": 0.77734375,
+     "v1": 0.74609375
+    },
+    "committed": true,
+    "title": "The Environs of Aelegwei",
+    "redrafts": 1
+   },
+   "drawn": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "swapped": {
+    "names": "Aelegwei|Aeleiril|Brielorae|Lalas|Lerilloremere|Weilasmere|Fene|Elaemere|Loreelei|Aelae",
+    "groups": 746,
+    "viewBox": "0 0 1500 1157.9310344827586"
+   },
+   "same": true
+  },
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

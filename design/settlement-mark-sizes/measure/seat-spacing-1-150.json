@@ -1,0 +1,21 @@
+{
+ "seeds": "1..150",
+ "band5Window": {
+  "widthCells": 9.97,
+  "heightCells": 7.47,
+  "diagonalCells": 12.46
+ },
+ "nearestCapitalOrSeatPair": {
+  "cells": 22.8,
+  "where": "seed 52: Drargzyak and Kru"
+ },
+ "nearestCapitalOrSeatToTown": {
+  "cells": 9.06,
+  "where": "seed 51: Yare and Teizeyama"
+ },
+ "nearestCapitalOrSeatToVillage": {
+  "cells": 6,
+  "where": "seed 29: Thrugvik and Braukka"
+ },
+ "capitalOrSeatTownPairsWithinOneWindowsSpan": 2
+}

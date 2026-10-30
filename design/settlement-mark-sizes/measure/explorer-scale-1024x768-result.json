@@ -1,0 +1,122 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k1.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":1,\"hold\":null,\"camK\":1,\"band\":0,\"window\":{\"u0\":0,\"v0\":0,\"u1\":1,\"v1\":1},\"title\":null,\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":null,\"insetViewBox\":null,\"inset\":{\"capital\":null,\"seat\":null,\"town\":null,\"village\":null,\"hamlet\":null,\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k2.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":2,\"hold\":null,\"camK\":2,\"band\":1,\"window\":{\"u0\":0.49,\"v0\":0.25,\"u1\":0.99,\"v1\":0.75},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[536.594,414.219],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":{\"n\":2,\"box\":[3.345,2.433]},\"town\":{\"n\":4,\"box\":[2.433,2.432]},\"village\":{\"n\":5,\"box\":[1.646,1.646]},\"hamlet\":null,\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k3.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":3,\"hold\":null,\"camK\":3,\"band\":1,\"window\":{\"u0\":0.49,\"v0\":0.25,\"u1\":0.99,\"v1\":0.75},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[804.891,621.328],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":{\"n\":2,\"box\":[5.017,3.649]},\"town\":{\"n\":4,\"box\":[3.649,3.649]},\"village\":{\"n\":5,\"box\":[2.468,2.468]},\"hamlet\":null,\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k4.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":4,\"hold\":null,\"camK\":4,\"band\":2,\"window\":{\"u0\":0.6875,\"v0\":0.40625,\"u1\":0.9375,\"v1\":0.65625},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[536.563,414.188],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":2,\"box\":[2.432,2.432]},\"village\":{\"n\":3,\"box\":[1.645,1.645]},\"hamlet\":null,\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k8.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":8,\"hold\":null,\"camK\":8,\"band\":3,\"window\":{\"u0\":0.75,\"v0\":0.46875,\"u1\":0.875,\"v1\":0.59375},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[536.5,414.125],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[2.432,2.432]},\"village\":{\"n\":1,\"box\":[1.645,1.645]},\"hamlet\":{\"n\":14,\"box\":[1.073,1.073]},\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k16.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":16,\"hold\":null,\"camK\":16,\"band\":4,\"window\":{\"u0\":0.7734375,\"v0\":0.4921875,\"u1\":0.8359375,\"v1\":0.5546875},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[536.5,414],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[2.431,2.431]},\"village\":{\"n\":1,\"box\":[1.645,1.645]},\"hamlet\":{\"n\":2,\"box\":[1.073,1.073]},\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k24.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":24,\"hold\":null,\"camK\":24,\"band\":4,\"window\":{\"u0\":0.7734375,\"v0\":0.4921875,\"u1\":0.8359375,\"v1\":0.5546875},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[804.75,621],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[3.647,3.646]},\"village\":{\"n\":1,\"box\":[2.467,2.467]},\"hamlet\":{\"n\":2,\"box\":[1.609,1.609]},\"farmstead\":null,\"mill\":null}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k26.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":26,\"hold\":null,\"camK\":26,\"band\":5,\"window\":{\"u0\":0.7890625,\"v0\":0.5078125,\"u1\":0.8203125,\"v1\":0.5390625},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[435.906,336.375],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[1.976,1.975]},\"village\":{\"n\":1,\"box\":[1.336,1.336]},\"hamlet\":{\"n\":1,\"box\":[0.871,0.871]},\"farmstead\":{\"n\":13,\"box\":[2.51,2.51]},\"mill\":{\"n\":2,\"box\":[2.267,2.268]}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k32.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":32,\"hold\":null,\"camK\":32,\"band\":5,\"window\":{\"u0\":0.7890625,\"v0\":0.5078125,\"u1\":0.8203125,\"v1\":0.5390625},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[536.5,414],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[2.432,2.431]},\"village\":{\"n\":1,\"box\":[1.645,1.645]},\"hamlet\":{\"n\":1,\"box\":[1.072,1.072]},\"farmstead\":{\"n\":13,\"box\":[3.089,3.089]},\"mill\":{\"n\":2,\"box\":[2.79,2.791]}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/explorer-1024x768-k96-held.png",
+  "url": "http://127.0.0.1:51357/explorer/#seed=75&style=antique",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"k\":32,\"hold\":96,\"camK\":96,\"band\":5,\"window\":{\"u0\":0.7890625,\"v0\":0.5078125,\"u1\":0.8203125,\"v1\":0.5390625},\"title\":\"The Environs of Fiela\",\"viewport\":[537,414],\"rest\":{\"sheet\":[536.594,414.219],\"capital\":{\"n\":2,\"box\":[4.919,3.577]},\"seat\":{\"n\":4,\"box\":[3.345,2.433]},\"town\":{\"n\":6,\"box\":[2.433,2.432]},\"village\":{\"n\":14,\"box\":[1.646,1.646]}},\"insetSvg\":[1609.5,1242],\"insetViewBox\":\"0 0 1500 1157.9310344827586\",\"inset\":{\"capital\":null,\"seat\":null,\"town\":{\"n\":1,\"box\":[7.293,7.293]},\"village\":{\"n\":1,\"box\":[4.93,4.934]},\"hamlet\":{\"n\":1,\"box\":[3.215,3.219]},\"farmstead\":{\"n\":13,\"box\":[9.266,9.268]},\"mill\":{\"n\":2,\"box\":[8.367,8.367]}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
