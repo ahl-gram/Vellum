@@ -21,10 +21,7 @@ const MAP_TYPE_WORDS: readonly string[] = ["island", "archipelago", "continent",
 function read(query: string): ShapeOverrides | null {
   const p = new URLSearchParams(query);
   const type = p.get("type");
-  return readShapeKeys(
-    (k: ShapeKey) => p.get(k),
-    MAP_TYPE_WORDS.includes(type ?? "") ? (type as MapType) : null,
-  );
+  return readShapeKeys((k: ShapeKey) => p.get(k), MAP_TYPE_WORDS.includes(type ?? "") ? (type as MapType) : null);
 }
 
 test("readShapeKeys reads a shaped world: a form, a real place, and a looseness in hundredths", () => {
@@ -130,6 +127,9 @@ test("a land fraction draws nothing on a shaped or counted world, and a coast wa
     "coast on a loosened shape",
   );
   const counted = { mapType: "archipelago", islands: 20 } as const;
-  assert.ok(same(world(1, { ...counted, landFraction: 0.1 }), world(1, { ...counted, landFraction: 0.7 })), "land counted");
+  assert.ok(
+    same(world(1, { ...counted, landFraction: 0.1 }), world(1, { ...counted, landFraction: 0.7 })),
+    "land counted",
+  );
   assert.ok(same(world(1, { ...counted, coastWarp: 0 }), world(1, { ...counted, coastWarp: 1 })), "coast counted");
 });
