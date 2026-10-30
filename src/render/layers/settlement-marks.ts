@@ -13,6 +13,7 @@ const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
 const FINER_MARK_SPAN = 3.6;
 const MARK_GROWTH_DOUBLING = 3;
+const MARK_GROWTH_DEEPEST = 5;
 
 const REGION_MARK_LADDER: Readonly<Record<SettlementTier, number>> = {
   capital: 1.5,
@@ -29,7 +30,9 @@ export function markLadder(tier: SettlementTier, world: World): number {
 }
 
 export function markGrowth(world: World): number {
-  return world.region === undefined ? 1 : 2 ** (world.region.detail / MARK_GROWTH_DOUBLING);
+  return world.region === undefined
+    ? 1
+    : 2 ** (Math.min(world.region.detail, MARK_GROWTH_DEEPEST) / MARK_GROWTH_DOUBLING);
 }
 
 export function markScale(tier: SettlementTier, world: World): number {
