@@ -11,9 +11,20 @@ const WHEEL_RADIUS = 3.9;
 const SPOKE_WIDTH = 1.2;
 const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
+const FINER_MARK_SPAN = 3.6;
+
+const REGION_MARK_LADDER: Readonly<Record<SettlementTier, number>> = {
+  capital: 1.5,
+  seat: 1.5,
+  town: 1,
+  village: 1,
+  hamlet: 1,
+  farmstead: FINER_MARK_SPAN / (4.8 * HOUSE_SCALE),
+  mill: FINER_MARK_SPAN / (2 * WHEEL_RADIUS),
+};
 
 export function markLadder(tier: SettlementTier, world: World): number {
-  return world.region === undefined || tier === "town" ? 1 : 1;
+  return world.region === undefined ? 1 : REGION_MARK_LADDER[tier];
 }
 
 export function markGrowth(world: World): number {
