@@ -333,7 +333,7 @@ precisely, because a token that falls outside it looks identical at the point of
   carry Node's types; and `src/site/explorer/worker-client.ts`, page code, sits in the worker pass
   through a type-only import, so a DOM use there reds falsely until `WorkerRequest` and
   `WorkerResponse` move to a module of their own.
-- **`astro:generate` is clean, fonts, bundle, showcases, discovery, in that order**, and several suites pin
+- **`astro:generate` is clean, fonts, places, bundle, showcases, discovery, in that order**, and several suites pin
   its exact command string. A reordered or added step reds all of them at once: that is the pin
   working, not a break, but budget the edits.
 - **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
@@ -341,6 +341,15 @@ precisely, because a token that falls outside it looks identical at the point of
   added or changed in the kit and never in the build-output folder. Nothing under test reads `generated/fonts/`:
   `test/site/astro-scaffold.test.ts` deletes the build-output folder while other files run, so a reader
   there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
+- **A real place's outline is served one file to a place, never bundled.** `scripts/place-files.ts`
+  writes each place's rings from `src/terrain/outline-places.json` to `generated/outlines/`, one
+  file each, and the one reader is `runJob` in `src/site/explorer/worker-client.ts`: before it sends
+  a job that draws a place it loads that place (`createPlaceLoader` in
+  `src/site/explorer/place-fetch.ts`), hands the text to the worker with the job and admits it into
+  the page for the inline path (`admitPlace` in `src/site/explorer/place-source.ts`). The address is
+  root-absolute (`placeUrl` there), because every surface at every depth fetches through that
+  function. A plain job sent while a place is still being fetched waits its turn (`createPlaceGate`
+  in `src/site/explorer/place-gate.ts`), so the worker stays first in first out.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
   fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole
