@@ -49,6 +49,15 @@ Every item is a stand-in the designer picked to make the picture (`notes.md`, "F
 - **The size the Chart Table drawer and the Portfolio display a gathered survey at**, UNVERIFIABLE.
 - **The mill footprint under growth:** a grown mill's wheel outgrows the land block it is placed on (`MARK_FOOTPRINT` in `src/society/farmsteads.ts`, held by `test/society/farmsteads-ground.test.ts`), so the footprint must grow, which moves some mills and farmsteads on close-ups.
 
+## What the plate reader found on the mock pages
+
+The plate reader ran on the original pages on 2026-10-30 (its claim, from a probe of all ten pages at their shot widths and at a narrower one; it viewed two of the ten pages by eye). It found no overflow at the shot width, no 4xx or console error, the house faces loaded for every caption, no overlapping box and every row labelled with its direction, today first on the six per-chart sheets. The stills are the round as it ran and are not edited, so these stand as reading notes:
+
+- **The second crop of every row on `sheet-fiela.png` and `sheet-vyrna.png` shows the plate's edge**, not open country: a 22 px strip of crop background at the top of Fiela's and a 60 px strip at the right of Vyrna's.
+- **Vyrna's key and cartouche crowd the marks** in the Grykzvo crop, and the held crop cuts the cartouche subtitle mid-line. The page's crops name three places (Vyrna, Relbungrad, Grykzvo) for one chart, 127.
+- **Ladder C has no grown-with-depth row on any sheet**, so C cannot be judged under growth from these stills. `sheet-world.png` has no A row, and `sheet-descent.png` has held and grown rows for A and B only.
+- **The pages are made to be read at their shot width**; narrower, all but the world sheet scroll sideways and only the plates' crop windows clip.
+
 ## Known and not caused by the round
 
 - Marks under the cartouche or the key on close-ups (chart 56's village Aeleiril and two farmsteads, chart 84's town Liomiomere) are the case `handbook/errata/engine.md` records and Alex ruled on 2026-10-23, "leave them faded under the panel".
