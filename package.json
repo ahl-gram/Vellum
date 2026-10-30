@@ -13,6 +13,7 @@
     "og": "node scripts/build-og.ts",
     "icons": "node scripts/build-icons.ts",
     "plate-face": "node scripts/plate-face.ts",
+    "outlines": "node scripts/outlines/main.ts",
     "charts:regen": "node scripts/regen-hero-charts.ts",
     "delivery": "node scripts/delivery/main.ts",
     "proof": "node scripts/proof-runner/main.ts",
