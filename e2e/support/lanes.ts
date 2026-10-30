@@ -25,7 +25,6 @@ export const E2E_LANES: readonly E2eLane[] = [
       "fallback",
       "hunt",
       "print-room",
-      "room-address",
     ],
     port: DEFAULT_E2E_PORT,
     dport: DEFAULT_E2E_DPORT,
@@ -48,13 +47,13 @@ export const E2E_LANES: readonly E2eLane[] = [
   },
   {
     name: "C",
-    suites: ["home", "room-instrument", "cluster", "specimen", "corners"],
+    suites: ["home", "survey", "room-instrument", "cluster", "specimen", "corners"],
     port: DEFAULT_E2E_PORT + 2,
     dport: DEFAULT_E2E_DPORT + 2,
   },
   {
     name: "D",
-    suites: ["landfall", "survey", "chart-drawer", "document-rooms", "region-detail", "slide-away"],
+    suites: ["landfall", "room-address", "chart-drawer", "document-rooms", "region-detail", "slide-away"],
     port: DEFAULT_E2E_PORT + 3,
     dport: DEFAULT_E2E_DPORT + 3,
   },
