@@ -7,8 +7,10 @@ import type { RenderCtx } from "../../src/render/context.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { MAX_DETAIL } from "../../src/terrain/heightfield.ts";
 import {
   markGrowth,
+  markLadder,
   markScale,
   settlementGlyph,
   type SettlementTier,
@@ -119,5 +121,19 @@ test("a detailed close-up draws its marks larger by its depth's growth, its key 
       const side = largerSide(sheetMark(deep, tier, n));
       assert.ok(side < village, `a drawn ${tier} (${side}) stays under the village (${village})`);
     }
+  }
+});
+
+const TIERS: ReadonlyArray<SettlementTier> = ["capital", "seat", "town", "village", "hamlet", "farmstead", "mill"];
+
+test("growth rises with the survey's depth, stops at the Glass's deepest band, and never reaches a world sheet (Issue #1104)", () => {
+  assert.equal(markGrowth(atDepth(0)), 1, "a bare survey draws the ladder alone");
+  for (let n = 0; n < 5; n++) {
+    assert.ok(markGrowth(atDepth(n + 1)) > markGrowth(atDepth(n)), `level ${n + 1} grows past level ${n}`);
+  }
+  assert.equal(markGrowth(atDepth(MAX_DETAIL)), markGrowth(atDepth(5)), "growth stops at the deepest band");
+  for (const tier of TIERS) {
+    assert.equal(markLadder(tier, world56), 1, `a world sheet draws the ${tier} on no ladder`);
+    assert.equal(markScale(tier, world56), 1, `a world sheet draws the ${tier} ungrown`);
   }
 });
