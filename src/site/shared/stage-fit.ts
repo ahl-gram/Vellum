@@ -29,6 +29,7 @@ export interface StageFit {
 
 /** The mockup's clear beside an open slip: its own 2rem inset plus a 1.5rem breath. */
 export const SLIP_CLEARANCE = 56;
+export const SLIP_BREATH = 24;
 
 export const CHROME_GAP = 14;
 

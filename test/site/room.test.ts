@@ -3,18 +3,18 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DESK_FRAME } from "../../src/site/shared/page-box.ts";
-import { GLASS_GAP_REM, pressRowStacks, rowSheds, translateOf } from "../../src/site/shared/room-seats.ts";
+import { GLASS_BREATH_REM, pressRowStacks, rowSheds, translateOf } from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
 import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
 
-test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
+test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + --slip-right + 1.4rem)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "src/styles/shared/atelier.css"), "utf8");
   const m = css.match(
-    /\.corner\.br\.zoomery\s*\{[^}]*right:\s*calc\(var\(--slip-w\)\s*\+\s*([\d.]+)rem\s*\+\s*([\d.]+)rem\)/,
+    /\.corner\.br\.zoomery\s*\{[^}]*right:\s*calc\(var\(--slip-w\)\s*\+\s*var\(--slip-right\)\s*\+\s*([\d.]+)rem\)/,
   );
-  assert.ok(m, "atelier.css seats the Glass at --slip-w plus two rem terms");
-  assert.equal(Number(m[1]) + Number(m[2]), GLASS_GAP_REM, "room-seats.ts's GLASS_GAP_REM drifted from the sheet");
+  assert.ok(m, "atelier.css seats the Glass at --slip-w, the slip's inset and one rem term");
+  assert.equal(Number(m[1]), GLASS_BREATH_REM, "room-seats.ts's GLASS_BREATH_REM drifted from the sheet");
 });
 
 class WrappingLegend extends El {
