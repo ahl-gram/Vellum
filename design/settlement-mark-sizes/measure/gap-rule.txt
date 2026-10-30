@@ -1,0 +1,8 @@
+gap never shrinks (the round's rule) | aelegwei | nameless: today: Aeleiril | a: Aeleiril | b: Aeleiril | c: Aeleiril
+gap never shrinks (the round's rule) | leal | nameless: today: none | a: none | b: none | c: none
+gap never shrinks (the round's rule) | fiela | nameless: today: Gweloradell | a: Gweloradell | b: Gweloradell | c: Gweloradell
+gap never shrinks (the round's rule) | vyrna | nameless: today: none | a: none | b: none | c: none
+gap shrinks too | aelegwei | nameless: today: Aeleiril | a: Aeleiril, Loreelei | b: Aeleiril, Loreelei | c: Aeleiril, Loreelei
+gap shrinks too | leal | nameless: today: none | a: none | b: none | c: none
+gap shrinks too | fiela | nameless: today: Gweloradell | a: Gweloradell | b: Gweloradell | c: Gweloradell
+gap shrinks too | vyrna | nameless: today: none | a: none | b: none | c: none

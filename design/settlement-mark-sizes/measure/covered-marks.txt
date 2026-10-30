@@ -1,0 +1,8 @@
+chart 56 aelegwei layer-cartouche box 942,88 470x118: Aeleiril (village) at 1158,179
+chart 56 aelegwei layer-legend box 1226,782 190x292: Loreelei (farmstead) at 1231,962; Aelae (farmstead) at 1385,953
+chart 84 leal layer-cartouche box 88,952 470x118: none
+chart 84 leal layer-legend box 1226,820 190x254: Liomiomere (town) at 1257,889
+chart 75 fiela layer-cartouche box 942,952 470x118: none
+chart 75 fiela layer-legend box 1226,84 190x292: Gweloradell (farmstead) at 1368,209
+chart 127 vyrna layer-cartouche box 88,952 470x118: none
+chart 127 vyrna layer-legend box 1226,782 190x292: none

@@ -1,0 +1,26 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/atlas-1280.png",
+  "url": "http://127.0.0.1:50707/atlas/index.html",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "[{\"w\":1001.21875,\"h\":773.390625,\"nat\":0}]",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/measure/atlas-1728.png",
+  "url": "http://127.0.0.1:50707/atlas/index.html",
+  "viewport": {
+   "innerWidth": 1728,
+   "innerHeight": 1117,
+   "clientWidth": 1728
+  },
+  "probe": "[{\"w\":990,\"h\":764.734375,\"nat\":0}]",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

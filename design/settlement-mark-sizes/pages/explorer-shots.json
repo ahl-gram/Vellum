@@ -1,0 +1,12 @@
+[
+ {
+  "url": "/out/1104/sheets/explorer.html",
+  "width": 1400,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-explorer.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ }
+]

@@ -1,0 +1,2 @@
+swept seeds 1..150 in 49.9 s
+EXIT=0

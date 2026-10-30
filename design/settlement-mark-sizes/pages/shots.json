@@ -1,0 +1,92 @@
+[
+ {
+  "url": "/out/1104/sheets/aelegwei.html",
+  "width": 2060,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-aelegwei.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/leal.html",
+  "width": 2060,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-leal.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/fiela.html",
+  "width": 2060,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-fiela.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/vyrna.html",
+  "width": 2060,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-vyrna.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/descent.html",
+  "width": 1960,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-descent.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/key.html",
+  "width": 2400,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-key.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/atlas.html",
+  "width": 1560,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-atlas.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/world.html",
+  "width": 1560,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-world.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ },
+ {
+  "url": "/out/1104/sheets/specimen.html",
+  "width": 2800,
+  "height": 900,
+  "mobile": false,
+  "full": true,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1104/stills/sheet-specimen.png",
+  "waitMs": 2500,
+  "probe": "String(document.documentElement.scrollWidth)"
+ }
+]
