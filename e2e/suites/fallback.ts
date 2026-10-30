@@ -1,6 +1,7 @@
 // Inline-fallback e2e (B): the worker bundle is served 404 (faithfully simulating file://, a 404, or a CSP block) and the page must degrade to the inline engine; no working-tree mutation, restored in finally.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { PLACE_DRAWN, PLACE_PATH } from "./render/place.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, serverState } = ctx;
@@ -34,6 +35,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     );
     await step("B2b", () => b2bBackupOrder(ctx));
     await step("B3", () => b3InlineAtlas(ctx));
+    await step("B4", () => b4InlinePlace(ctx));
   } finally {
     serverState.blockWorker = false;
     try {
@@ -88,5 +90,15 @@ async function b3InlineAtlas({ evaluate, check, waitSettled }: SuiteContext): Pr
     "B3 fallback: inline atlas job composes a full atlas (hero + plates + the lettered prospect + gazetteer)",
     fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0 && fb.prospects === 1 && fb.lettered,
     JSON.stringify(fb),
+  );
+}
+
+async function b4InlinePlace({ evaluate, check }: SuiteContext): Promise<void> {
+  const inline = (await evaluate<boolean>(`window.__vellumUsesWorker()===false`)) === true;
+  const d = await evaluate(PLACE_DRAWN, true);
+  check(
+    "B4 fallback: a real place draws inline, from the outline the page fetched",
+    inline && d.ok && d.stamped && d.fetched.length === 1 && d.fetched[0] === PLACE_PATH,
+    JSON.stringify({ inline, ...d }),
   );
 }

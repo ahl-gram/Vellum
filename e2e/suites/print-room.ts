@@ -2,7 +2,7 @@
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { printRoomKit, type PrintRoomKit } from "./print-room/kit.ts";
-import { prlLink, prwWarp } from "./print-room/link.ts";
+import { prlLink, prwCount, prwPlace, prwWarp } from "./print-room/link.ts";
 import { pr0Boots, pr37LegendClear, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";
 import { pr10PlatesEnable, pr12GrandPoster, pr16Desk, pr28ChartPlate, pr17Png } from "./print-room/plates.ts";
 import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download, pr25Hide } from "./print-room/atlas.ts";
@@ -69,6 +69,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr8Fallback(ctx);
   // PRW/PRW2 (Issue #137) run after every check on the shared page: they navigate away from it.
   await prwWarp(ctx);
+  await step("PRW3, PRW4", () => prwPlace(ctx));
+  await step("PRW5", () => prwCount(ctx));
   await step("PR40", () => pr40RunnerLayout(ctx));
   // PR36 runs last so prlLink's start, print-room's NEEDS_PREDECESSOR entry and the PR #701 row's reasoning stay true; it leaves a scripts-off page, which the next suite's own navigation replaces.
   await step("PR36", () => pr36Authored(ctx));

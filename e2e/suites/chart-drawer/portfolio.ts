@@ -373,3 +373,28 @@ export async function cd21PortfolioGlass({ evaluate, check, stable }: DrawerKit)
     JSON.stringify({ ...glass, after: glassAfter }),
   );
 }
+
+const PLACED_SHEET: Payload<{ items: number; drawn: number; stage: boolean; outlines: string[] } | null> =
+  `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null;
+  return s ? { items: s.items, drawn: s.drawn, stage: !!document.querySelector("#pf-sheet svg"),
+    outlines: performance.getEntriesByType("resource").map((e) => new URL(e.name).pathname).filter((p) => p.includes("/outlines/")) } : null; })()`;
+
+export async function cd64PlaceSheet(k: DrawerKit): Promise<void> {
+  const { evaluate, send, check, sleep, PORT, forget } = k;
+  await forget();
+  await send("Page.navigate", { url: "about:blank" });
+  const sheet =
+    "k-s.seed-42.type-island.outline-ne-1159315211.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-17.ly-13";
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${sheet}` });
+  const read = await makeSettle({ evaluate, sleep, tolerant: true })(
+    PLACED_SHEET,
+    (d) => d.items === 1 && d.drawn === 1 && d.stage,
+    "cd64-place-sheet",
+    DRAWN,
+  );
+  check(
+    "CD64 the Portfolio, a page one level down, drafts a place's sheet from the site's root",
+    read.outlines.length === 1 && read.outlines[0] === "/outlines/ne-1159315211.txt",
+    JSON.stringify(read),
+  );
+}

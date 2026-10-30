@@ -5,7 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { pb13Dress } from "./prospect/dress.ts";
 import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
 import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
-import { pb12Markup, pb16ScriptsOff, pb17Boot, pb18TableHomes } from "./prospect/room.ts";
+import { pb12Markup, pb16ScriptsOff, pb17Boot, pb18TableHomes, pb19PlaceLink } from "./prospect/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -35,6 +35,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("PB16", () => pb16ScriptsOff(k));
   await step("PB17", () => pb17Boot(k));
   await step("PB18", () => pb18TableHomes(k));
+  await step("PB19", () => pb19PlaceLink(k));
   pb10NoErrors(ctx, errBase, httpBase);
 }
 

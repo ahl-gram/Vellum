@@ -6,7 +6,7 @@ import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
 import { DESK, atDesk, sameSheet } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
-import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
+import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks, rr44PlaceLink } from "./reading-room/addresses.ts";
 import {
   rr16Colophon,
   rr17CounterRead,
@@ -54,6 +54,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr25TearDown(k);
   await rr10CrossLinks(ctx);
   await rr11bScrubHandles(k, ctx);
+  await step("RR44", () => rr44PlaceLink(k));
   rr12Clean(ctx, rrErrBase, rrHttpBase);
   await rr14Fallback(ctx);
 }

@@ -38,6 +38,7 @@ import {
   cd49bPrintRoomAddress,
   cd49PrintRoomRoad,
   cd50ScriptsOffHome,
+  cd64PlaceSheet,
 } from "./chart-drawer/portfolio.ts";
 import { cd48TouchHandle, na2DrawerBelowFloor } from "./chart-drawer/floor.ts";
 import {
@@ -145,6 +146,7 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await step("CD55", () => cd55WhereAuthored(kd));
   await step("CD56", () => cd56WorkerBlocked(kd));
+  await step("CD64", () => cd64PlaceSheet(kd));
   await step("CD48", () => cd48TouchHandle(kd));
   await kd.evaluate(forgetChartTouch);
   await step("NA2", () => na2DrawerBelowFloor(kd));
