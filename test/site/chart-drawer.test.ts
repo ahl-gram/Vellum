@@ -427,10 +427,11 @@ test("CT13 a rung-5 sheet carried in the address redraws its own band-5 window (
 test("surveyItemFrom carries the shape the sheet was drawn with (Issue #854)", () => {
   const from = (overrides: Partial<WorldRecipe>) =>
     surveyItemFrom({ seed: 42, overrides, render: { style: "antique" }, band: 2, seat: { lx: 3, ly: 4 } })?.overrides;
-  assert.deepEqual(from({ mapType: "archipelago", islands: 12, isleSize: "varied" }), {
+  assert.deepEqual(from({ mapType: "archipelago", islands: 12, isleSize: "varied", raggedness: 0.4 }), {
     mapType: "archipelago",
     islands: 12,
     isleSize: "varied",
+    raggedness: 0.4,
   });
   const texas = placeId("ne-1159315211");
   assert.deepEqual(from({ outline: texas, looseness: 0.5 }), { outline: texas, looseness: 0.5 });

@@ -4,6 +4,7 @@ import {
   SHAPE_KEYS,
   coastDraws,
   drawnShape,
+  shapeOf,
   landDraws,
   readShapeKeys,
   shapePairs,
@@ -132,4 +133,13 @@ test("a land fraction draws nothing on a shaped or counted world, and a coast wa
     "land counted",
   );
   assert.ok(same(world(1, { ...counted, coastWarp: 0 }), world(1, { ...counted, coastWarp: 1 })), "coast counted");
+  assert.ok(
+    !same(world(1, { ...counted, raggedness: 0 }), world(1, { ...counted, raggedness: 1 })),
+    "raggedness draws",
+  );
+});
+
+test("shapeOf keeps the five shape fields of a bag and nothing else (Issue #854)", () => {
+  const all = { outline: TEXAS, looseness: 0.5, islands: 12, isleSize: "varied", raggedness: 0.4 } as const;
+  assert.deepEqual(shapeOf({ ...all, mapType: "island", coastWarp: 0.3 } as ShapeOverrides), all);
 });
