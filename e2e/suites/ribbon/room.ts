@@ -1,6 +1,19 @@
 // The Wayfarer's Ribbon as the browser built it (Issue #779 part 2g): the markup on seed 42's scroll, and the Prospect road standing down until the scroll resolves.
 import type { Payload } from "../../types.ts";
 import type { RibbonKit } from "./kit.ts";
+import { FETCHED_PLACES, PLACE_PATH } from "../render/place.ts";
+
+export async function rb17PlaceLink(k: RibbonKit): Promise<void> {
+  const { evaluate, check, goto, opened } = k;
+  await goto("#seed=42&style=antique&type=island&outline=ne-1159315211");
+  const st = await opened("a real place's scroll");
+  const fetched = await evaluate(FETCHED_PLACES);
+  check(
+    "RB17 a place's link reaches the Ribbon, which surveys that place",
+    st.status === "" && st.blob && fetched.length === 1 && fetched[0] === PLACE_PATH,
+    JSON.stringify({ status: st.status, blob: st.blob, fetched }),
+  );
+}
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;

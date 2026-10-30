@@ -20,6 +20,7 @@ test("parseProspectAddress reads the Explorer's world keys plus i and year", () 
     band: "polar",
     land: 0.35,
     coast: 0.55,
+    shape: {},
     index: 3,
     year: 814,
   });
@@ -34,6 +35,7 @@ test("parseProspectAddress: absent keys are null and never default to zero (pres
     band: null,
     land: null,
     coast: null,
+    shape: {},
     index: null,
     year: null,
   });
@@ -163,4 +165,11 @@ test("parseProspectAddress reads land and coast by the seed's grammar, so an emp
   }
   const padded = parseProspectAddress("#land=0350&coast=055");
   assert.deepEqual([padded.land, padded.coast], [0.35, 0.55]);
+});
+
+test("the Prospect address reads the shape keys", () => {
+  assert.deepEqual(parseProspectAddress("#seed=42&type=archipelago&islands=12&isleSize=varied").shape, {
+    islands: 12,
+    isleSize: "varied",
+  });
 });

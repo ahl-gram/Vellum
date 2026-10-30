@@ -8,6 +8,7 @@ import { ribbonResultFor } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
 import { regionChainCache } from "./region-chain-cache.ts";
+import { admitPlace } from "./place-source.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
 // The root tsconfig lib is DOM, so `self` types as Window in that pass (tsconfig.worker.json types it as the worker scope); cast once to the minimal worker-global surface both accept.
@@ -117,6 +118,7 @@ function answer(msg: WorkerRequest): Promise<void> | undefined {
 let answering: Promise<void> = Promise.resolve();
 ctx.onmessage = (e) => {
   const msg = e.data;
+  if (msg.place) admitPlace(msg.place);
   answering = answering
     .then(() => answer(msg))
     .catch((err: unknown) => {

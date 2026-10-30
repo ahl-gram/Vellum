@@ -4,6 +4,7 @@ import { FIXED_SEED } from "../support/fixed-day.ts";
 import type { SuiteContext } from "../types.ts";
 import { r16HostContract } from "./render/room.ts";
 import { r17SheetDepth } from "./render/dress.ts";
+import { r18RealPlace } from "./render/place.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
@@ -52,6 +53,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await r14Region(ctx);
   await step("R17", () => r17SheetDepth(ctx));
+  await step("R18", () => r18RealPlace(ctx));
 }
 
 async function r2WorkerParity({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {

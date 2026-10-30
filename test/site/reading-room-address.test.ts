@@ -14,6 +14,7 @@ const NONE = {
   beasts: null,
   land: null,
   coast: null,
+  shape: {},
   table: null,
   live: null,
 };
@@ -33,6 +34,7 @@ test("parseReadingRoomAddress reads every key the Reading Room carries", () => {
     beasts: true,
     land: 0.35,
     coast: 0.55,
+    shape: {},
     table: "k-p.seed-42.style-ink.i-3.year-814",
     live: { kind: "year", year: 814 },
   });
@@ -92,4 +94,11 @@ test("parseReadingRoomAddress reads the live key by the Explorer's grammar", () 
   assert.deepEqual(parseReadingRoomAddress("#survey").live, { kind: "survey" });
   assert.deepEqual(parseReadingRoomAddress("#seed=42&year=814").live, { kind: "year", year: 814 });
   assert.equal(parseReadingRoomAddress("#year=1e3").live, null);
+});
+
+test("the Reading Room address reads the shape keys", () => {
+  assert.deepEqual(parseReadingRoomAddress("#seed=42&type=archipelago&islands=12&isleSize=varied").shape, {
+    islands: 12,
+    isleSize: "varied",
+  });
 });

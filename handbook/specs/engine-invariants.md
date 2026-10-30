@@ -160,9 +160,11 @@ is never renamed and its rings in `src/terrain/outlines.ts` never change, and th
 real place: its ID in `PLACE_ID_LIST` (`src/world/outline-place-ids.ts`) is never renamed and its
 rings in `src/terrain/outline-places.json` never change. A corrected outline is a new ID;
 `test/terrain/outlines.test.ts` pins each form and `test/terrain/outline-places.test.ts` pins the
-places together. A place's rings reach the terrain only through the source a host installs (`setPlaceSource` in
-`src/terrain/outline-store.ts`), and the terrain refuses a place whose rings are not loaded, by name,
-rather than drawing anything in its place. A looseness is world identity beside it, and means nothing
+places together. A place's rings reach the terrain only through the source a host installs
+(`setPlaceSource` in `src/terrain/outline-store.ts`; the site's host is `admitPlace` in
+`src/site/explorer/place-source.ts`, installed once in the page and once in the worker), and the
+terrain refuses a place whose rings are not loaded, by name, rather than drawing anything in its
+place. A looseness is world identity beside it, and means nothing
 without an outline: the terrain refuses one alone. An absent outline is the dome the seed always
 drew.
 

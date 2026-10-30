@@ -10,6 +10,7 @@ import {
   type ProspectItem,
   type TableOverrides,
 } from "../shared/table-address.ts";
+import { shapeOf } from "../shared/shape-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { prospectTitle } from "../prospect/note-lines.ts";
@@ -147,6 +148,7 @@ export function surveyItemFrom(c: {
       ...(o.band ? { band: o.band } : {}),
       ...(typeof o.landFraction === "number" ? { landFraction: o.landFraction } : {}),
       ...(typeof o.coastWarp === "number" ? { coastWarp: o.coastWarp } : {}),
+      ...shapeOf(o),
     },
     style: c.render.style,
     legend: c.render.legend !== false,

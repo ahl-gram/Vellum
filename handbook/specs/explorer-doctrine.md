@@ -284,6 +284,11 @@ make an unqualified rule false. Read the surface, not just the rule.
   (`DEEPEST_K` in `src/world/lod.ts`), and a shared link's camera is read under that same bound
   (`addressCamera` in `src/site/explorer/camera.ts`), so a link written at the bottom reads back at
   the bottom.
+  **A shape field is spelt one way in every address.** A shape default is spelt by leaving its key out (a
+  looseness or a raggedness of 0, sizes alike), a land or a coast the world's shape draws nothing from
+  is left out too (`gateLand` in `src/site/shared/address-grammar.ts`), and a shape or a count the
+  engine refuses is read as absent in a link and drops the sheet on the Chart Table (`readShapeKeys`
+  in `src/site/shared/shape-address.ts`), so one shaped world takes one link and one sheet.
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
   address decides an ARRIVAL and the device decides a RETURN (Issue #634, 2026-09-19, superseding Issue #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all

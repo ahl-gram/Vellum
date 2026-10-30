@@ -16,9 +16,12 @@ import {
   STYLE_NAMES,
   THEME_NAMES,
   coastFromAddress,
+  gateLand,
   landFromAddress,
   oneOf,
+  overridesOfLand,
 } from "./address-grammar.ts";
+import { readShapeKeys, shapePairs, type ShapeOverrides } from "./shape-address.ts";
 import { seedFromHash } from "../explorer/address.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -35,7 +38,7 @@ const FIELDS = ".";
 const PAIR = "-";
 
 /** The Explorer's own override set (`app.ts`), presence-gated: an absent land is the world's natural waterline, not a default. */
-export interface TableOverrides {
+export interface TableOverrides extends ShapeOverrides {
   readonly mapType?: MapType;
   readonly band?: ClimateBand;
   readonly landFraction?: number;
@@ -121,14 +124,15 @@ function readWorld(fields: Map<string, string>): TableWorld | null {
   const band = allowed(fields.get("band"), CLIMATE_BANDS);
   const landFraction = landField(fields.get("land"));
   const coastWarp = coastField(fields.get("coast"));
+  const shape = readShapeKeys((k) => fields.get(k), mapType);
   if (seed == null || mapType === null || band === null || landFraction === null || coastWarp === null) return null;
+  if (shape === null) return null;
   return {
     seed,
     overrides: {
       ...(mapType !== undefined ? { mapType } : {}),
       ...(band !== undefined ? { band } : {}),
-      ...(landFraction !== undefined ? { landFraction } : {}),
-      ...(coastWarp !== undefined ? { coastWarp } : {}),
+      ...overridesOfLand(gateLand({ land: landFraction ?? null, coast: coastWarp ?? null, shape })),
     },
   };
 }
@@ -196,6 +200,7 @@ const worldFields = (overrides: TableOverrides): string[] => [
   ...(overrides.band !== undefined ? [`band${PAIR}${overrides.band}`] : []),
   ...(overrides.landFraction !== undefined ? [`land${PAIR}${Math.round(overrides.landFraction * 1000)}`] : []),
   ...(overrides.coastWarp !== undefined ? [`coast${PAIR}${Math.round(overrides.coastWarp * 100)}`] : []),
+  ...shapePairs(overrides).map(([key, value]) => `${key}${PAIR}${value}`),
 ];
 
 const dressFields = (item: TableItem): string[] =>

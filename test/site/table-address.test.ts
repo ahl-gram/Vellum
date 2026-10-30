@@ -25,7 +25,7 @@ import {
   type LodBand,
 } from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
-import { SURVEY, PROSPECT, survey, prospect, hashOf } from "../../test-support/table-address-fixtures.ts";
+import { SURVEY, PROSPECT, survey, prospect, hashOf, TEXAS } from "../../test-support/table-address-fixtures.ts";
 import { NOT_A_SEED } from "../../test-support/hash-grammar-fixtures.ts";
 
 test("the key is the ruled one and the cap is the ruled six (#518's sitting, #401 ruling 5)", () => {
@@ -96,7 +96,7 @@ test("six full items stay a workable link: the encoded length is pinned so a lat
   const wide: SurveyItem = {
     ...survey,
     seed: 4294967295,
-    overrides: { mapType: "archipelago", band: "temperate", landFraction: 0.7, coastWarp: 1 },
+    overrides: { mapType: "archipelago", band: "temperate", coastWarp: 1, outline: TEXAS, looseness: 1 },
     style: "topographic",
     theme: "vegetation",
     rung: 3,
@@ -106,7 +106,8 @@ test("six full items stay a workable link: the encoded length is pinned so a lat
   const params = new URLSearchParams();
   params.set(TABLE_KEY, emitTable(Array<SurveyItem>(TABLE_CAP).fill(wide)));
   const encoded = finalizeHash(params);
-  assert.ok(encoded.length <= 950, `six of the widest items encode to ${encoded.length} characters, over the 950 pin`);
+  // 2026-10-30, Issue #854: the widest sheet is a shaped archipelago (outline, looseness, coast), six of them 1,067 characters; the pin keeps the 45 characters of headroom 950 kept over the old widest, 905.
+  assert.ok(encoded.length <= 1112, `six of the widest items encode to ${encoded.length}, over the 1112 pin`);
 });
 
 test("the cap refuses the seventh sheet in both directions; the wording belongs to the hosts", () => {

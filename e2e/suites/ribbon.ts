@@ -5,7 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { rb12Dress } from "./ribbon/dress.ts";
 import { rb13RowHover, rb14Glass, rb15Paper } from "./ribbon/gestures.ts";
 import { ribbonKit, type Ribbon, type RibbonKit, type Row } from "./ribbon/kit.ts";
-import { rb11Markup, rb16RoadStandsDown } from "./ribbon/room.ts";
+import { rb11Markup, rb16RoadStandsDown, rb17PlaceLink } from "./ribbon/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -30,6 +30,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RB15", () => rb15Paper(k));
   await step("RB16", () => rb16RoadStandsDown(k));
   await step("RB8", () => rb8InkDress(k));
+  await step("RB17", () => rb17PlaceLink(k));
   rb9NoErrors(ctx, errBase, httpBase);
 }
 

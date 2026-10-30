@@ -5,6 +5,7 @@ import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload } from "../../types.ts";
 import { axName, STORE, type ProspectKit } from "./kit.ts";
+import { FETCHED_PLACES, PLACE_PATH } from "../render/place.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;
@@ -246,6 +247,18 @@ export async function pb17Boot(k: ProspectKit): Promise<void> {
   } finally {
     await send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
   }
+}
+
+export async function pb19PlaceLink(k: ProspectKit): Promise<void> {
+  const { evaluate, check, goto, opened } = k;
+  await goto("#seed=42&style=antique&type=island&outline=ne-1159315211&i=1");
+  const st = await opened("a real place's plate");
+  const fetched = await evaluate(FETCHED_PLACES);
+  check(
+    "PB19 a place's link reaches the Prospect, which engraves from that place",
+    st.status === "" && st.blob && fetched.length === 1 && fetched[0] === PLACE_PATH,
+    JSON.stringify({ status: st.status, blob: st.blob, fetched }),
+  );
 }
 
 const S = (seat: string) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`;

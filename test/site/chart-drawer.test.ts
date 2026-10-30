@@ -32,6 +32,8 @@ import {
 } from "../../src/site/shared/table-address.ts";
 
 import { LOD_BANDS, lodWindowFor } from "../../src/world/lod.ts";
+import { placeId } from "../../src/world/outline-ids.ts";
+import type { WorldRecipe } from "../../src/world/types.ts";
 import { hashOf } from "../../test-support/table-address-fixtures.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -420,4 +422,17 @@ test("CT13 a rung-5 sheet carried in the address redraws its own band-5 window (
   const job = thumbJobFor(item) as RegionJob;
   assert.equal(job.band, 5);
   assert.deepEqual(job.window, lodWindowFor(131 / 256, 105 / 256, 1 / 32));
+});
+
+test("surveyItemFrom carries the shape the sheet was drawn with (Issue #854)", () => {
+  const from = (overrides: Partial<WorldRecipe>) =>
+    surveyItemFrom({ seed: 42, overrides, render: { style: "antique" }, band: 2, seat: { lx: 3, ly: 4 } })?.overrides;
+  assert.deepEqual(from({ mapType: "archipelago", islands: 12, isleSize: "varied", raggedness: 0.4 }), {
+    mapType: "archipelago",
+    islands: 12,
+    isleSize: "varied",
+    raggedness: 0.4,
+  });
+  const texas = placeId("ne-1159315211");
+  assert.deepEqual(from({ outline: texas, looseness: 0.5 }), { outline: texas, looseness: 0.5 });
 });

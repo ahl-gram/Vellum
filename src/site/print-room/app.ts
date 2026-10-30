@@ -22,9 +22,16 @@ import {
   writeFolio,
   type RoomFurniture,
 } from "./seats.ts";
-import { TABLE_KEY } from "../shared/table-address.ts";
+import { TABLE_KEY, type TableOverrides } from "../shared/table-address.ts";
 import { parsePrintRoomAddress } from "./address.ts";
-import { STYLE_NAMES, oneOf } from "../shared/address-grammar.ts";
+import {
+  NO_LAND_KEYS,
+  STYLE_NAMES,
+  emitLandKeys,
+  oneOf,
+  overridesOfLand,
+  type LandKeys,
+} from "../shared/address-grammar.ts";
 import { errorText } from "../shared/error-text.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -91,10 +98,9 @@ const carried: {
   legend: boolean;
   arms: boolean;
   beasts: boolean;
-  land: number | null;
-  coast: number | null;
+  keys: LandKeys;
   table: string | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null, table: null };
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, keys: NO_LAND_KEYS, table: null };
 
 let drawGen = 0;
 // True from a draw's synchronous start until its own settle: pairs with `ordering` so the order surface stays closed for the whole round-trip.
@@ -128,8 +134,7 @@ function applyHash(): void {
   if (a.legend !== null) carried.legend = a.legend;
   if (a.arms !== null) carried.arms = a.arms;
   if (a.beasts !== null) carried.beasts = a.beasts;
-  if (a.land !== null) carried.land = a.land;
-  if (a.coast !== null) carried.coast = a.coast;
+  carried.keys = a;
   carried.table = a.table;
 }
 
@@ -143,8 +148,7 @@ function writeHash(seed: number, style: string): void {
   p.set("legend", carried.legend ? "1" : "0");
   p.set("arms", carried.arms ? "1" : "0");
   p.set("beasts", carried.beasts ? "1" : "0");
-  if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
-  if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  emitLandKeys(p, carried.keys);
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   history.replaceState(null, "", "#" + p.toString());
   road.href = "../explorer/#" + p.toString();
@@ -188,11 +192,11 @@ function draw(): void {
   clearBoundAtlas();
   refreshOrderControls();
   posterStatus.textContent = ""; // a new proof clears any stale poster-order status
-  const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
-  if (carried.type) overrides.mapType = carried.type;
-  if (carried.band) overrides.band = carried.band;
-  if (carried.land != null) overrides.landFraction = carried.land;
-  if (carried.coast != null) overrides.coastWarp = carried.coast;
+  const overrides: TableOverrides = {
+    ...(carried.type ? { mapType: carried.type } : {}),
+    ...(carried.band ? { band: carried.band } : {}),
+    ...overridesOfLand(carried.keys),
+  };
   runJob({
     kind: "draw",
     seed,
