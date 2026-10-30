@@ -10,7 +10,7 @@ import type { SuiteContext } from "../../e2e/types.ts";
 
 type Sent = { method: string; params: Record<string, unknown> };
 
-const world = (answer: (expression: string, sent: readonly Sent[]) => unknown) => {
+const world = (answer: (expression: string, sent: readonly Sent[], slept: readonly number[]) => unknown) => {
   const sent: Sent[] = [];
   const asked: string[] = [];
   const slept: number[] = [];
@@ -18,7 +18,7 @@ const world = (answer: (expression: string, sent: readonly Sent[]) => unknown) =
   const ctx = {
     evaluate: (expression: string) => {
       asked.push(expression);
-      return Promise.resolve(answer(expression, sent));
+      return Promise.resolve(answer(expression, sent, slept));
     },
     send: (method: string, params: Record<string, unknown> = {}) => {
       sent.push({ method, params });
@@ -181,23 +181,69 @@ test("H15b times out when the drift keeps moving after the wheel", async () => {
   );
 });
 
-test("H15d takes its first stillness sample only once the station flight has landed", async () => {
-  const frames = [
-    { open: false, xform: matrix(1) },
-    { open: false, xform: matrix(2) },
-    { open: false, xform: matrix(2) },
-    { open: true, xform: matrix(3) },
-    { open: true, xform: matrix(4) },
-  ];
-  let n = 0;
-  const frame = () => frames[n++] ?? { open: true, xform: matrix(5) };
-  const w = world((e, sent) => {
+type Stage = { open: boolean; printed: string; writes: number; frame: number };
+const stage = (open: boolean, printed: string, writes: number, frame: number): Stage => ({
+  open,
+  printed,
+  writes,
+  frame,
+});
+const H15D_MID = "matrix(2.00288, 0, 0, 2.00288, -1160.2, -1159.6)";
+const H15D_TAIL = "matrix(2.00288, 0, 0, 2.00288, -1148.6, -1159.6)";
+const H15D_END = "matrix(2.00288, 0, 0, 2.00288, -1148.59, -1159.6)";
+
+const landingPage = (stages: readonly Stage[]) => {
+  let at = -1;
+  const now = (): Stage => stages[Math.max(at, 0)]!;
+  return world((e, sent, slept) => {
     if (e.includes(`data-station="reading-room"`) && e.includes("scrollIntoView")) return { x: 400, y: 300 };
+    if (e.includes("MutationObserver")) return true;
     if (!sent.some((s) => s.params["type"] === "mousePressed")) return null;
-    if (e === readXform) return frame().xform;
-    if (e.includes("lf-card-reading-room")) return frame();
-    return null;
+    if (e === readXform) return slept.includes(900) ? stages[stages.length - 1]!.printed : now().printed;
+    if (!e.includes("lf-card-reading-room")) return null;
+    at = Math.min(at + 1, stages.length - 1);
+    const s = now();
+    return e.includes(readXform)
+      ? { open: s.open, xform: s.printed }
+      : { open: s.open, writes: s.writes, frame: s.frame };
   });
+};
+
+test("H15d hands over once the page has stopped writing the camera, not when its printed matrix first repeats", async () => {
+  const w = landingPage([
+    stage(false, H15D_MID, 10, 10),
+    stage(true, H15D_TAIL, 13, 13),
+    stage(true, H15D_TAIL, 16, 16),
+    stage(true, H15D_TAIL, 18, 19),
+    stage(true, H15D_END, 19, 22),
+    stage(true, H15D_END, 19, 25),
+  ]);
+  await h15dFlightStops(homeKit(w.ctx));
+  assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
+});
+
+test("H15d hands over only once a frame has run between its two reads", async () => {
+  const w = landingPage([
+    stage(false, H15D_MID, 10, 10),
+    stage(true, H15D_TAIL, 13, 13),
+    stage(true, H15D_TAIL, 13, 13),
+    stage(true, H15D_END, 15, 16),
+    stage(true, H15D_END, 15, 19),
+  ]);
+  await h15dFlightStops(homeKit(w.ctx));
+  assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
+});
+
+test("H15d takes its first stillness sample only once the station flight has landed", async () => {
+  const w = landingPage([
+    stage(false, matrix(1), 3, 3),
+    stage(false, matrix(2), 6, 6),
+    stage(false, matrix(2), 6, 9),
+    stage(true, matrix(3), 9, 12),
+    stage(true, matrix(4), 12, 15),
+    stage(true, matrix(5), 14, 18),
+    stage(true, matrix(5), 14, 21),
+  ]);
   await h15dFlightStops(homeKit(w.ctx));
   assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
 });
