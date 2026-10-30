@@ -155,9 +155,9 @@ function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: Settleme
       ? null
       : markBox(tier, proj.px(s.x), proj.py(s.y), (proj.widthPx / 1500) * markScale(tier, world), ctx.style.name);
   const off = (b: Box): boolean => own === null || !boxesOverlap(b, own);
-  const claimed =
-    tries.find(({ box }) => off(box) && dry(box) && inFrame(box) && labels.tryClaim(box)) ??
-    (rivers === null ? undefined : tries.find(({ box }) => off(box) && inFrame(box) && labels.tryClaim(box)));
+  const take = (fits: (b: Box) => boolean): NameTry | undefined =>
+    tries.find(({ box }) => off(box) && fits(box) && labels.tryClaim(box));
+  const claimed = take((b) => dry(b) && inFrame(b)) ?? (rivers === null ? undefined : take(inFrame));
   const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
   const placed = claimed ?? forced;
   if (placed === undefined) return null;

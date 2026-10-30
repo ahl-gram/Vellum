@@ -15,6 +15,8 @@ import { STYLES, type StyleName } from "../../src/render/style.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { MAX_DETAIL } from "../../src/terrain/heightfield.ts";
 import {
+  finerMarkBox,
+  markBox,
   markGrowth,
   markLadder,
   markScale,
@@ -185,4 +187,43 @@ test("on a close-up a name is never set on its own mark (Issue #1104)", () => {
     { x: castle.x0, y: castle.y1 },
   ];
   assert.equal(polysOverlap(glyphPoly(names[0]!), castlePoly), false, "the name stands off its own castle");
+});
+
+test("markExtent reads lines, curves and circles, and refuses an empty fragment (Issue #1104)", () => {
+  const e = markExtent('<path d="M0 0Q5 -9 10 0L10 4Z"/><circle cx="20" cy="2" r="3"/>');
+  assert.deepEqual(e, { x0: 0, y0: -9, x1: 23, y1: 5 });
+  assert.throws(() => markExtent('<text x="1">none</text>'));
+});
+
+test("the box a name must clear is the box the mark is drawn in, for every tier in every dress (Issue #1104)", () => {
+  const deep = atDepth(5);
+  for (const dress of DRESSES) {
+    for (const tier of TIERS) {
+      const scale = markScale(tier, deep);
+      const drawn = markExtent(renderSvg(settlementGlyph(tier, 100, 100, glyphCtx(deep, dress), scale)));
+      const box = markBox(tier, 100, 100, scale, dress);
+      const where = `${dress} ${tier}`;
+      for (const [got, want] of [
+        [box.x, drawn.x0],
+        [box.y, drawn.y0],
+        [box.x + box.w, drawn.x1],
+        [box.y + box.h, drawn.y1],
+      ] as const) {
+        assert.ok(Math.abs(got - want) < 0.02, `${where}: the box edge ${got} is not the drawn edge ${want}`);
+      }
+    }
+  }
+});
+
+test("a farmstead's or mill's room is claimed at the size its mark is drawn (Issue #1104)", () => {
+  const ctx = layerCtx(DEEP);
+  settlementsLayer(ctx);
+  const k = ctx.proj.widthPx / 1500;
+  const finer = DEEP.settlements.filter((s) => s.kind === "farmstead" || s.kind === "mill");
+  assert.ok(finer.length > 0, "the close-up holds a farmstead or a mill");
+  for (const s of finer) {
+    const box = finerMarkBox(s.kind, ctx.proj.px(s.x), ctx.proj.py(s.y), k * markScale(s.kind, DEEP));
+    const corner = { x: box.x + 0.05, y: box.y + 0.05, w: 0.1, h: 0.1 };
+    assert.equal(ctx.labels.tryClaim(corner, 0), false, `${s.name}: the corner of its drawn mark is already claimed`);
+  }
 });
