@@ -3,7 +3,21 @@ import type { PlaceText } from "./place-source.ts";
 
 export type PlaceGate = <T>(place: PlaceId | null, send: (text: PlaceText | null) => Promise<T>) => Promise<T>;
 
+/** Keeps the worker first in first out while a place is being fetched: a job sent behind a pending place waits its turn, and with nothing pending a job goes at once. */
 export function createPlaceGate(load: (id: PlaceId) => Promise<PlaceText>): PlaceGate {
-  void load;
-  return (_place, send) => send(null);
+  let tail: Promise<unknown> | null = null;
+  return (place, send) => {
+    if (place === null && tail === null) return send(null);
+    const fetched = (tail ?? Promise.resolve()).then(() => (place === null ? null : load(place)));
+    const sent = fetched.then(send);
+    const mine = fetched.then(
+      () => undefined,
+      () => undefined,
+    );
+    tail = mine;
+    void mine.then(() => {
+      if (tail === mine) tail = null;
+    });
+    return sent;
+  };
 }

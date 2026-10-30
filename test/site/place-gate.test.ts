@@ -24,9 +24,9 @@ function rig() {
     return d.promise;
   });
   const record: string[] = [];
-  const sender = (name: string) => async (text: PlaceText | null) => {
+  const sender = (name: string) => (text: PlaceText | null) => {
     record.push(name + (text === null ? "" : `:${text.id}`));
-    return name;
+    return Promise.resolve(name);
   };
   return { gate, loads, record, sender };
 }
@@ -65,6 +65,7 @@ test("a failed fetch rejects its own job and the next still goes (Issue #854)", 
   const a = gate(A, sender("A"));
   const aOutcome = assert.rejects(a, /could not be fetched/);
   const b = gate(null, sender("B"));
+  await drain();
   loads.get(A)?.reject(new Error("the outline of x could not be fetched"));
   await aOutcome;
   await b;
@@ -74,6 +75,7 @@ test("a failed fetch rejects its own job and the next still goes (Issue #854)", 
 test("once every place has arrived the gate is clear again (Issue #854)", async () => {
   const { gate, loads, record, sender } = rig();
   const a = gate(A, sender("A"));
+  await drain();
   loads.get(A)?.resolve({ id: A, text: "t" });
   await a;
   await drain();

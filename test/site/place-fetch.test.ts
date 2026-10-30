@@ -40,17 +40,18 @@ test("placeOfJob names a real place and nothing else (Issue #854)", () => {
   assert.equal(placeOfJob(tour), null);
 });
 
-function fakeFetcher(answers: ReadonlyArray<Fetched | Error>) {
+function fakeFetcher(answers: ReadonlyArray<Fetched | "offline">) {
   const urls: string[] = [];
-  const fetcher = async (url: string): Promise<Fetched> => {
-    const answer = answers[Math.min(urls.length, answers.length - 1)] as Fetched | Error;
+  const fetcher = (url: string): Promise<Fetched> => {
+    const answer = answers[Math.min(urls.length, answers.length - 1)];
     urls.push(url);
-    if (answer instanceof Error) throw answer;
-    return answer;
+    return answer === undefined || answer === "offline"
+      ? Promise.reject(new Error("offline"))
+      : Promise.resolve(answer);
   };
   return { fetcher, urls };
 }
-const body = (text: string): Fetched => ({ ok: true, status: 200, text: async () => text });
+const body = (text: string): Fetched => ({ ok: true, status: 200, text: () => Promise.resolve(text) });
 
 test("the loader fetches a place once, admits it into this realm, and hands its text on (Issue #854)", async () => {
   const { fetcher, urls } = fakeFetcher([body("m0 0z")]);
@@ -64,7 +65,7 @@ test("the loader fetches a place once, admits it into this realm, and hands its 
 });
 
 test("a failed fetch rejects with the place in the reason, and the next load tries again (Issue #854)", async () => {
-  const { fetcher, urls } = fakeFetcher([{ ok: false, status: 404, text: async () => "" }, body("m0 0z")]);
+  const { fetcher, urls } = fakeFetcher([{ ok: false, status: 404, text: () => Promise.resolve("") }, body("m0 0z")]);
   const load = createPlaceLoader(fetcher, () => {});
   await assert.rejects(load(TEXAS), /^Error: the outline of ne-1159315211 could not be fetched \(404\)/);
   assert.deepEqual(await load(TEXAS), { id: TEXAS, text: "m0 0z" });
@@ -72,7 +73,7 @@ test("a failed fetch rejects with the place in the reason, and the next load tri
 });
 
 test("a fetcher that throws rejects the same way (Issue #854)", async () => {
-  const { fetcher } = fakeFetcher([new Error("offline")]);
+  const { fetcher } = fakeFetcher(["offline"]);
   const load = createPlaceLoader(fetcher, () => {});
   await assert.rejects(load(TEXAS), /^Error: the outline of ne-1159315211 could not be fetched/);
 });

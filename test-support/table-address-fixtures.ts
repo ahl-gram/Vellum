@@ -1,3 +1,4 @@
+import { placeId } from "../src/world/outline-ids.ts";
 import { TABLE_KEY, type SurveyItem, type ProspectItem } from "../src/site/shared/table-address.ts";
 
 // The two canonical items every round-trip test is built from: one survey wearing every field the grammar has, one prospect wearing every field of its own.
@@ -29,3 +30,6 @@ export const prospect: ProspectItem = {
 };
 
 export const hashOf = (value: string): string => `#seed=42&style=antique&${TABLE_KEY}=${value}`;
+
+/** A real place, Texas, for a sheet that states an outline. */
+export const TEXAS = placeId("ne-1159315211");

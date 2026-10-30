@@ -1,3 +1,4 @@
+import { setPlaceSource } from "../../terrain/outline-store.ts";
 import type { PlaceId } from "../../world/outline-ids.ts";
 
 export interface PlaceText {
@@ -5,6 +6,14 @@ export interface PlaceText {
   readonly text: string;
 }
 
+const held = new Map<PlaceId, string>();
+let installed = false;
+
+/** Adds a place's rings to this realm's store, installing the store as the place source the first time. */
 export function admitPlace(place: PlaceText): void {
-  void place;
+  if (!installed) {
+    setPlaceSource((id) => held.get(id));
+    installed = true;
+  }
+  held.set(place.id, place.text);
 }
