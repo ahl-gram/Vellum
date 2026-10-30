@@ -12,6 +12,7 @@ test("parseRibbonAddress reads the Explorer's world keys plus a and b", () => {
     band: "polar",
     land: 0.35,
     coast: 0.55,
+    shape: {},
     from: 3,
     to: 9,
   });
@@ -25,6 +26,7 @@ test("parseRibbonAddress: absent keys are null and never default to zero (presen
     band: null,
     land: null,
     coast: null,
+    shape: {},
     from: null,
     to: null,
   });
@@ -116,4 +118,11 @@ test("parseRibbonAddress reads land and coast by the seed's grammar, so an empty
   }
   const padded = parseRibbonAddress("#land=0350&coast=055");
   assert.deepEqual([padded.land, padded.coast], [0.35, 0.55]);
+});
+
+test("the Ribbon address reads the shape keys", () => {
+  assert.deepEqual(parseRibbonAddress("#seed=42&type=archipelago&islands=12&isleSize=varied").shape, {
+    islands: 12,
+    isleSize: "varied",
+  });
 });

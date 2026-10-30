@@ -14,6 +14,7 @@ const NONE = {
   beasts: null,
   land: null,
   coast: null,
+  shape: {},
   table: null,
 };
 
@@ -32,6 +33,7 @@ test("parsePrintRoomAddress reads every key the Print Room carries", () => {
     beasts: true,
     land: 0.35,
     coast: 0.55,
+    shape: {},
     table: "k-p.seed-42.style-ink.i-3.year-814",
   });
 });
@@ -84,4 +86,11 @@ test("parsePrintRoomAddress reads land and coast by the seed's grammar, so an em
   }
   const padded = parsePrintRoomAddress("#land=0350&coast=055");
   assert.deepEqual([padded.land, padded.coast], [0.35, 0.55]);
+});
+
+test("the Print Room address reads the shape keys", () => {
+  assert.deepEqual(parsePrintRoomAddress("#seed=42&type=archipelago&islands=12&isleSize=varied").shape, {
+    islands: 12,
+    isleSize: "varied",
+  });
 });

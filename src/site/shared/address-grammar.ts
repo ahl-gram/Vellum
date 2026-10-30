@@ -3,6 +3,7 @@ import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { seedFromHash } from "../explorer/address.ts";
+import { coastDraws, landDraws, readShapeKeys, shapePairs, type ShapeOverrides } from "./shape-address.ts";
 
 const STYLE_KEYS: Readonly<Record<StyleName, true>> = { antique: true, topographic: true, ink: true, nautical: true };
 const TYPE_KEYS: Readonly<Record<MapType, true>> = {
@@ -36,6 +37,33 @@ export interface WorldKeys {
   readonly band: ClimateBand | null;
   readonly land: number | null;
   readonly coast: number | null;
+  readonly shape: ShapeOverrides;
+}
+
+export type LandKeys = Pick<WorldKeys, "land" | "coast" | "shape">;
+export type LandOverrides = { readonly landFraction?: number; readonly coastWarp?: number } & ShapeOverrides;
+export const NO_LAND_KEYS: LandKeys = { land: null, coast: null, shape: {} };
+
+/** Leaves out a land or coast the shape draws nothing from. */
+export const gateLand = (keys: LandKeys): LandKeys => ({
+  land: landDraws(keys.shape) ? keys.land : null,
+  coast: coastDraws(keys.shape) ? keys.coast : null,
+  shape: keys.shape,
+});
+
+/** Writes land, coast and the shape keys in that order, each only where present. */
+export function emitLandKeys(params: URLSearchParams, keys: LandKeys): void {
+  if (keys.land !== null) params.set("land", String(Math.round(keys.land * 1000)));
+  if (keys.coast !== null) params.set("coast", String(Math.round(keys.coast * 100)));
+  for (const [key, value] of shapePairs(keys.shape)) params.set(key, value);
+}
+
+export function overridesOfLand(keys: LandKeys): LandOverrides {
+  return {
+    ...(keys.land !== null ? { landFraction: keys.land } : {}),
+    ...(keys.coast !== null ? { coastWarp: keys.coast } : {}),
+    ...keys.shape,
+  };
 }
 
 export interface DressKeys {
@@ -60,13 +88,14 @@ export const coastFromAddress = (raw: string | null): number | null => scaled(ra
 const flag = (raw: string | null): boolean | null => (raw === null ? null : raw === "1");
 
 export function readWorldKeys(p: URLSearchParams): WorldKeys {
+  const type = oneOf(p.get("type"), MAP_TYPES);
+  const shape = readShapeKeys((k) => p.get(k), type) ?? {};
   return {
     seed: seedFromHash(p.get("seed")),
     style: oneOf(p.get("style"), STYLE_NAMES),
-    type: oneOf(p.get("type"), MAP_TYPES),
+    type,
     band: oneOf(p.get("band"), CLIMATE_BANDS),
-    land: landFromAddress(p.get("land")),
-    coast: coastFromAddress(p.get("coast")),
+    ...gateLand({ land: landFromAddress(p.get("land")), coast: coastFromAddress(p.get("coast")), shape }),
   };
 }
 
