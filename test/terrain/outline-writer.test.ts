@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildPlace } from "../../scripts/outlines/build.ts";
 import { refuseRepeats, serialId } from "../../scripts/outlines/ids.ts";
+import { appended, readmeText, type KitFile } from "../../scripts/outlines/kit.ts";
 import { boxOf, gap2 } from "../../scripts/outlines/plane.ts";
 import { projectPlace } from "../../scripts/outlines/project.ts";
 
@@ -74,4 +75,42 @@ test("a place's ID is ne- and Natural Earth's serial number, and two places shar
     name: "RangeError",
     message: "two places share the ID round",
   });
+});
+
+test("a later extract records its own run beside every earlier one, so each place keeps the file it came from (Issue #853)", () => {
+  const place = (id: string) => ({ id, name: id, country: "", parts: "m0 0l1 0 0 1z" });
+  const first = appended(
+    { file: "ne_10m_lakes.geojson", runs: [], places: [] },
+    { source: "https://example.org/v1", sha256: "a1", bytes: 10, extracted: "2026-10-29" },
+    [place("ne-1"), place("ne-2")],
+  );
+  const second = appended(
+    first,
+    { source: "https://example.org/v2", sha256: "b2", bytes: 20, extracted: "2027-01-02" },
+    [place("ne-3")],
+  );
+  assert.deepEqual(
+    second.runs.map((r) => [r.sha256, r.added]),
+    [
+      ["a1", 2],
+      ["b2", 1],
+    ],
+  );
+  assert.deepEqual(
+    second.places.map((p) => p.id),
+    ["ne-1", "ne-2", "ne-3"],
+  );
+  const none: KitFile = appended(
+    second,
+    { source: "https://example.org/v3", sha256: "c3", bytes: 30, extracted: "2027-02-03" },
+    [],
+  );
+  assert.equal(none, second);
+  const page = readmeText([["lake", second]]);
+  assert.ok(
+    page.includes("| `lake.json` | https://example.org/v1/ne_10m_lakes.geojson |"),
+    "the first run keeps its file",
+  );
+  assert.ok(page.includes("| 10 | `a1` | 2026-10-29 | 2 |"), "the first run keeps its size, checksum, day and count");
+  assert.ok(page.includes("| 20 | `b2` | 2027-01-02 | 1 |"), "the second run has its own row");
 });
