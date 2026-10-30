@@ -21,12 +21,12 @@ function makeWorld(seed: number) {
   }
   const climate = computeClimate(elev, sea, seed, { riverCells, windDir: 0.9 });
   const biomes = classifyBiomes(elev, sea, climate);
-  return { elev, sea, flow, riverCells, biomes };
+  return { elev, sea, riverCells, biomes };
 }
 
 test("settlements land on land, never on snow or alpine", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(42);
-  const sites = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(42));
+  const { elev, sea, riverCells, biomes } = makeWorld(42);
+  const sites = placeSettlements(elev, sea, riverCells, biomes, createRng(42));
   assert.ok(sites.length >= 5, `too few settlements: ${sites.length}`);
   for (const s of sites) {
     const i = s.x + s.y * elev.w;
@@ -37,8 +37,8 @@ test("settlements land on land, never on snow or alpine", () => {
 });
 
 test("exactly one capital, with water access", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(42);
-  const sites = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(42));
+  const { elev, sea, riverCells, biomes } = makeWorld(42);
+  const sites = placeSettlements(elev, sea, riverCells, biomes, createRng(42));
   const capitals = sites.filter((s) => s.kind === "capital");
   assert.equal(capitals.length, 1);
   const cap = capitals[0]!;
@@ -46,8 +46,8 @@ test("exactly one capital, with water access", () => {
 });
 
 test("harbor flag matches the actual neighborhood", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(42);
-  const sites = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(42));
+  const { elev, sea, riverCells, biomes } = makeWorld(42);
+  const sites = placeSettlements(elev, sea, riverCells, biomes, createRng(42));
   for (const s of sites) {
     let coastal = false;
     for (const [dx, dy] of NEIGHBORS_8) {
@@ -61,8 +61,8 @@ test("harbor flag matches the actual neighborhood", () => {
 });
 
 test("settlements keep their distance from each other", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(7);
-  const sites = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(7));
+  const { elev, sea, riverCells, biomes } = makeWorld(7);
+  const sites = placeSettlements(elev, sea, riverCells, biomes, createRng(7));
   for (let i = 0; i < sites.length; i++) {
     for (let j = i + 1; j < sites.length; j++) {
       const d = Math.hypot(sites[i]!.x - sites[j]!.x, sites[i]!.y - sites[j]!.y);
@@ -72,15 +72,15 @@ test("settlements keep their distance from each other", () => {
 });
 
 test("placement is deterministic", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(9);
-  const a = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(9));
-  const b = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(9));
+  const { elev, sea, riverCells, biomes } = makeWorld(9);
+  const a = placeSettlements(elev, sea, riverCells, biomes, createRng(9));
+  const b = placeSettlements(elev, sea, riverCells, biomes, createRng(9));
   assert.deepEqual(a, b);
 });
 
 test("rank counts respect their caps", () => {
-  const { elev, sea, flow, riverCells, biomes } = makeWorld(11);
-  const sites = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(11), {
+  const { elev, sea, riverCells, biomes } = makeWorld(11);
+  const sites = placeSettlements(elev, sea, riverCells, biomes, createRng(11), {
     maxTowns: 3,
     maxVillages: 4,
   });

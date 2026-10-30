@@ -22,7 +22,7 @@ function makeWorld(seed: number) {
   }
   const climate = computeClimate(elev, sea, seed, { riverCells, windDir: 0.9 });
   const biomes = classifyBiomes(elev, sea, climate);
-  const settlements = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(seed));
+  const settlements = placeSettlements(elev, sea, riverCells, biomes, createRng(seed));
   const realms = partitionRealms(elev, sea, riverCells, settlements);
   return { elev, sea, riverCells, biomes, settlements, realms };
 }

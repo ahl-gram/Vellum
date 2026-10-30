@@ -127,21 +127,18 @@
 
 /* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2c` in `e2e/suites/cards/overlay.ts`; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
-.actions a,
-.action-link {
+.actions a {
   transition:
     transform var(--paper-quick) var(--ease-paper),
     box-shadow var(--paper-quick) var(--ease-paper);
 }
 button:not(.lf-station):not(.place-hit):hover,
-.actions a:hover,
-.action-link:hover {
+.actions a:hover {
   transform: translateY(var(--raise));
   box-shadow: var(--raise-shadow);
 }
 button:not(.lf-station):not(.place-hit):active,
-.actions a:active,
-.action-link:active {
+.actions a:active {
   transform: translateY(var(--press));
   box-shadow: var(--press-shadow);
 }
