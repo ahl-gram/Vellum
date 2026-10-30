@@ -1,23 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildHeightfield, type MapType } from "../../src/terrain/heightfield.ts";
-import { outlineCoverage, outlineSegments, signedDistance } from "../../src/terrain/outline-distance.ts";
+import { outlineCoverage } from "../../src/terrain/outline-distance.ts";
 import { landMask, pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/generate.ts";
 import { OUTLINE_IDS, type OutlineId } from "../../src/world/outline-ids.ts";
+import { insideMask } from "../../test-support/outline-mask.ts";
 
 const W = 320;
 const H = 240;
 const MAP_TYPES: MapType[] = ["island", "archipelago", "continent", "citystate"];
-
-function insideMask(id: OutlineId): Uint8Array {
-  const segs = outlineSegments(id, (W - 1) / (H - 1));
-  const mask = new Uint8Array(W * H);
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) mask[x + y * W] = signedDistance(segs, x / (W - 1), y / (H - 1)) < 0 ? 1 : 0;
-  }
-  return mask;
-}
 
 function landOf(seed: number, mapType: MapType, id: OutlineId, looseness?: number): Uint8Array {
   const looser = looseness === undefined ? {} : { looseness };
@@ -34,7 +26,7 @@ function differing(a: Uint8Array, b: Uint8Array): number[] {
 
 test("at looseness 0 the land is exactly the outline on the world sheet, for every outline and every map type (Issue #851)", () => {
   for (const id of OUTLINE_IDS) {
-    const inside = insideMask(id);
+    const inside = insideMask(id, W, H);
     const count = inside.reduce((a, b) => a + b, 0);
     assert.ok(count > 0 && count < W * H, `${id}: the outline covers ${count} cells, so the comparison is degenerate`);
     for (const mapType of MAP_TYPES) {
@@ -73,7 +65,7 @@ function median(values: number[]): number {
 
 test("the land strays from the outline more as the looseness grows, and a soft edge stays near the shape (Issue #851)", () => {
   for (const id of OUTLINE_IDS) {
-    const inside = insideMask(id);
+    const inside = insideMask(id, W, H);
     const medians = [0, 0.25, 0.5].map((looseness) => {
       const shares = [1, 2, 3, 4, 5].map((seed) => strayShare(landOf(seed, "island", id, looseness), inside));
       if (looseness === 0.25) {
