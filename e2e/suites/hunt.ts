@@ -24,6 +24,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   await onDay(ctx, HUNT_DAY, () => huntSuite(ctx));
   await onDay(ctx, FORMER_DAY, () => step("H5c", () => h5cFormerName(huntKit(ctx))));
+  // OUTSIDE every step, since `makeStep` swallows a throw from inside one: H5c's live solve writes the harness's own FIXED_SEED into this key, and every later suite that opens the page in this browser would otherwise get it back already solved.
+  await ctx.evaluate(`localStorage.removeItem("vellum.hunt.v1")`);
 }
 
 async function huntSuite(ctx: SuiteContext): Promise<void> {
