@@ -50,12 +50,10 @@ const MARK_HALF_WIDTH: Readonly<Record<SettlementTier, number>> = {
   mill: WHEEL_RADIUS,
 };
 
-/** How far a name stands farther off a mark that grew past today's, at k = 1. */
 export function markGrowthGap(tier: SettlementTier, world: World): number {
   return Math.max(0, markScale(tier, world) - 1) * MARK_HALF_WIDTH[tier];
 }
 
-/** The box a mark is drawn in at k (the caller's k carries the scale), strokes not counted. */
 export function markBox(tier: SettlementTier, px: number, py: number, k: number, styleName: StyleName): Box {
   if (tier === "capital" || tier === "seat") {
     const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
@@ -68,7 +66,6 @@ export function markBox(tier: SettlementTier, px: number, py: number, k: number,
   return { x: px - r, y: py - r, w: 2 * r, h: 2 * r };
 }
 
-/** Reused by the legend so the map mark and its key row match. */
 export function settlementGlyph(tier: SettlementTier, px: number, py: number, ctx: RenderCtx, scale: number): SvgNode {
   const { style } = ctx;
   const k = (ctx.proj.widthPx / 1500) * scale;

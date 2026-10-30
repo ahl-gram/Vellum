@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
-import type { World } from "../../src/world/types.ts";
+import type { NamedSettlement, World } from "../../src/world/types.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { minMax } from "../../src/core/grid.ts";
 import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
@@ -162,32 +162,46 @@ function layerCtx(region: World): RenderCtx {
 
 const extentBox = (e: Extent): Box => ({ x: e.x0, y: e.y0, w: e.x1 - e.x0, h: e.y1 - e.y0 });
 
-test("on a close-up a name is never set on its own mark (Issue #1104)", () => {
-  const ctx = layerCtx(DEEP);
-  const capital = DEEP.settlements.find((s) => s.kind === "capital");
-  assert.ok(capital, "the close-up holds a capital");
-  const { tries } = nameSetting(DEEP, ctx.proj, capital, "capital");
-  ctx.labels.claim(tries[0]!.box);
-  ctx.labels.claim(tries[1]!.box);
-  const svg = renderSvg(settlementsLayer(ctx).finish().node);
+function seatedDeep(): { readonly world: World; readonly seat: NamedSettlement } {
+  const at = DEEP.settlements.findIndex((s) => s.kind === "capital");
+  assert.notEqual(at, -1, "the close-up holds a capital");
+  const seat = { ...DEEP.settlements[at]!, kind: "town" as const };
+  const settlements = DEEP.settlements.map((s, i) => (i === at ? seat : s));
+  return { world: { ...DEEP, settlements, realms: { ...DEEP.realms, seats: [at] } }, seat };
+}
 
-  const at = svg.indexOf('data-tier="capital"');
-  assert.notEqual(at, -1, "the capital is drawn");
-  const textAt = svg.indexOf("<text", at);
-  assert.notEqual(textAt, -1, "the capital is named");
-  const castle = markExtent(svg.slice(at, textAt));
-  assert.ok(boxesOverlap(tries[2]!.box, extentBox(castle)), "the north spot lies on the castle, so the hazard is live");
+for (const tier of ["capital", "seat"] as const) {
+  test(`on a close-up a ${tier}'s name is never set on its own mark (Issue #1104)`, () => {
+    const { world, seat } =
+      tier === "seat" ? seatedDeep() : { world: DEEP, seat: DEEP.settlements.find((s) => s.kind === "capital") };
+    assert.ok(seat, "the close-up holds the settlement");
+    const ctx = layerCtx(world);
+    const { tries } = nameSetting(world, ctx.proj, seat, tier);
+    ctx.labels.claim(tries[0]!.box);
+    ctx.labels.claim(tries[1]!.box);
+    const svg = renderSvg(settlementsLayer(ctx).finish().node);
 
-  const names = textNodes(svg.slice(textAt, svg.indexOf("</g>", textAt)));
-  assert.equal(names.length, 1, "the capital's name is drawn once");
-  const castlePoly = [
-    { x: castle.x0, y: castle.y0 },
-    { x: castle.x1, y: castle.y0 },
-    { x: castle.x1, y: castle.y1 },
-    { x: castle.x0, y: castle.y1 },
-  ];
-  assert.equal(polysOverlap(glyphPoly(names[0]!), castlePoly), false, "the name stands off its own castle");
-});
+    const at = svg.indexOf(`data-tier="${tier}"`);
+    assert.notEqual(at, -1, `the ${tier} is drawn`);
+    const textAt = svg.indexOf("<text", at);
+    assert.notEqual(textAt, -1, `the ${tier} is named`);
+    const castle = markExtent(svg.slice(at, textAt));
+    assert.ok(
+      boxesOverlap(tries[2]!.box, extentBox(castle)),
+      "the north spot lies on the castle, so the hazard is live",
+    );
+
+    const names = textNodes(svg.slice(textAt, svg.indexOf("</g>", textAt)));
+    assert.equal(names.length, 1, "the name is drawn once");
+    const castlePoly = [
+      { x: castle.x0, y: castle.y0 },
+      { x: castle.x1, y: castle.y0 },
+      { x: castle.x1, y: castle.y1 },
+      { x: castle.x0, y: castle.y1 },
+    ];
+    assert.equal(polysOverlap(glyphPoly(names[0]!), castlePoly), false, "the name stands off its own castle");
+  });
+}
 
 test("markExtent reads lines, curves and circles, and refuses an empty fragment (Issue #1104)", () => {
   const e = markExtent('<path d="M0 0Q5 -9 10 0L10 4Z"/><circle cx="20" cy="2" r="3"/>');
