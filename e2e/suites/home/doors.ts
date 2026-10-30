@@ -101,7 +101,6 @@ export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doo
   await shoot("home-failed-bundle-doors.png");
 }
 
-// The doors' reveal delay (Issue #470, ratified 2026-08-24); H13g pins its declaration.
 const REVEAL_MS = 10_000;
 const PAST_REVEAL_MS = 2 * REVEAL_MS;
 const FAST = 10;
