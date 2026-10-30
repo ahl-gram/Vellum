@@ -23,7 +23,9 @@ import {
   settlementGlyph,
   type SettlementTier,
 } from "../../src/render/layers/settlement-marks.ts";
-import { largerSide, markExtent, type Extent } from "../../test-support/mark-extent.ts";
+import { inkExtent, type Extent } from "../../test-support/dress-svg.ts";
+
+const largerSide = (e: Extent): number => Math.max(e.x1 - e.x0, e.y1 - e.y0);
 
 const world56 = generateWorld(defaultRecipe(56));
 const AELEGWEI_B5 = { u0: 191 / 256, v0: 183 / 256, u1: 191 / 256 + 1 / 32, v1: 183 / 256 + 1 / 32 };
@@ -41,7 +43,7 @@ const glyphCtx = (world: World, name: StyleName): RenderCtx =>
   ({ world, style: STYLES[name], proj: { widthPx: 1500 } }) as unknown as RenderCtx;
 
 const sizeOf = (tier: SettlementTier, world: World, name: StyleName): number =>
-  largerSide(markExtent(renderSvg(settlementGlyph(tier, 100, 100, glyphCtx(world, name), markScale(tier, world)))));
+  largerSide(inkExtent(renderSvg(settlementGlyph(tier, 100, 100, glyphCtx(world, name), markScale(tier, world)))));
 
 const DRESSES: ReadonlyArray<StyleName> = ["antique", "topographic", "ink", "nautical"];
 
@@ -81,7 +83,7 @@ function sheetMark(svg: string, tier: SettlementTier, nth = 0): Extent {
   }
   const stops = ["<text", '<g class="settlement"', '<g id="layer-'].map((s) => svg.indexOf(s, at));
   const end = Math.min(...stops.filter((n) => n !== -1));
-  return markExtent(svg.slice(at, end));
+  return inkExtent(svg.slice(at, end));
 }
 
 function keyCapital(svg: string): Extent {
@@ -89,7 +91,7 @@ function keyCapital(svg: string): Extent {
   assert.notEqual(legend, -1, "the sheet draws a key");
   const at = svg.indexOf('<g class="settlement-capital">', legend);
   assert.notEqual(at, -1, "the key has a capital row");
-  return markExtent(svg.slice(at, svg.indexOf("</g></g>", at)));
+  return inkExtent(svg.slice(at, svg.indexOf("</g></g>", at)));
 }
 
 const sideOf = (e: Extent): readonly [number, number] => [e.x1 - e.x0, e.y1 - e.y0];
@@ -185,7 +187,7 @@ for (const tier of ["capital", "seat"] as const) {
     assert.notEqual(at, -1, `the ${tier} is drawn`);
     const textAt = svg.indexOf("<text", at);
     assert.notEqual(textAt, -1, `the ${tier} is named`);
-    const castle = markExtent(svg.slice(at, textAt));
+    const castle = inkExtent(svg.slice(at, textAt));
     assert.ok(
       boxesOverlap(tries[2]!.box, extentBox(castle)),
       "the north spot lies on the castle, so the hazard is live",
@@ -203,10 +205,10 @@ for (const tier of ["capital", "seat"] as const) {
   });
 }
 
-test("markExtent reads lines, curves and circles, and refuses an empty fragment (Issue #1104)", () => {
-  const e = markExtent('<path d="M0 0Q5 -9 10 0L10 4Z"/><circle cx="20" cy="2" r="3"/>');
+test("inkExtent reads lines, curves and circles, and refuses an empty fragment (Issue #1104)", () => {
+  const e = inkExtent('<path d="M0 0Q5 -9 10 0L10 4Z"/><circle cx="20" cy="2" r="3"/>');
   assert.deepEqual(e, { x0: 0, y0: -9, x1: 23, y1: 5 });
-  assert.throws(() => markExtent('<text x="1">none</text>'));
+  assert.throws(() => inkExtent('<text x="1">none</text>'));
 });
 
 test("the box a name must clear is the box the mark is drawn in, for every tier in every dress (Issue #1104)", () => {
@@ -214,7 +216,7 @@ test("the box a name must clear is the box the mark is drawn in, for every tier 
   for (const dress of DRESSES) {
     for (const tier of TIERS) {
       const scale = markScale(tier, deep);
-      const drawn = markExtent(renderSvg(settlementGlyph(tier, 100, 100, glyphCtx(deep, dress), scale)));
+      const drawn = inkExtent(renderSvg(settlementGlyph(tier, 100, 100, glyphCtx(deep, dress), scale)));
       const box = markBox(tier, 100, 100, scale, dress);
       const where = `${dress} ${tier}`;
       for (const [got, want] of [
