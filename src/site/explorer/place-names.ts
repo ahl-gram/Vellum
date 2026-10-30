@@ -1,10 +1,10 @@
-import type { Fetcher } from "./place-fetch.ts";
+import { namesUrl, type Fetcher } from "./place-fetch.ts";
 import type { NameRow } from "./place-match.ts";
 
-export function createNameLoader(fetcher: Fetcher, url: string = "/outlines/names.json"): () => Promise<ReadonlyArray<NameRow>> {
+export function createNameLoader(fetcher: Fetcher): () => Promise<ReadonlyArray<NameRow>> {
   let held: Promise<ReadonlyArray<NameRow>> | null = null;
   const fetchOnce = async (): Promise<ReadonlyArray<NameRow>> => {
-    const response = await fetcher(url).catch(() => {
+    const response = await fetcher(namesUrl).catch(() => {
       throw new Error("the gazetteer could not be fetched");
     });
     if (!response.ok) throw new Error(`the gazetteer could not be fetched (${response.status})`);

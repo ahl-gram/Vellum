@@ -6,14 +6,15 @@ export const LAND_ROWS = ["place", "looseness", "islands", "sizes", "land", "coa
 export type LandRow = (typeof LAND_ROWS)[number];
 export type RowState = "live" | "held" | "hidden";
 
-export const HELD_NOTES: Readonly<Record<"plain" | "exact" | "loose" | "counted" | "archExact" | "archLoose", string>> = {
-  plain: "the looseness waits for a place to loosen",
-  exact: "the outline holds the sea level and the coast; loosen it to free the coast",
-  loose: "the outline holds the sea level",
-  counted: "the count holds the sea level, and the looseness waits for a place",
-  archExact: "the outline holds the count, the sea level and the coast; clear the place to free the islands",
-  archLoose: "the outline holds the count and the sea level; clear the place to free the islands",
-};
+export const HELD_NOTES: Readonly<Record<"plain" | "exact" | "loose" | "counted" | "archExact" | "archLoose", string>> =
+  {
+    plain: "the looseness waits for a place to loosen",
+    exact: "the outline holds the sea level and the coast; loosen it to free the coast",
+    loose: "the outline holds the sea level",
+    counted: "the count holds the sea level, and the looseness waits for a place",
+    archExact: "the outline holds the count, the sea level and the coast; clear the place to free the islands",
+    archLoose: "the outline holds the count and the sea level; clear the place to free the islands",
+  };
 
 export interface LandSeat {
   readonly rows: Readonly<Record<LandRow, RowState>>;
@@ -59,7 +60,8 @@ export const looseWord = (looseness: number): string =>
 export const islandsWord = (slider: number): string =>
   slider === ISLANDS_SEEDS_CHOICE ? "seed's choice" : `about ${slider}`;
 
-export const raggedWord = (raggedness: number): string => (raggedness === 0 ? "round" : `ragged ${raggedness.toFixed(2)}`);
+export const raggedWord = (raggedness: number): string =>
+  raggedness === 0 ? "round" : `ragged ${raggedness.toFixed(2)}`;
 
 export type ShapeEdit =
   | { readonly kind: "place"; readonly id: OutlineId | null }
