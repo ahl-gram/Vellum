@@ -41,7 +41,7 @@ export function readKit(): Array<readonly [Kind, readonly KitPlace[]]> {
 
 export function appended(kit: KitFile, run: Omit<Run, "added">, fresh: readonly KitPlace[]): KitFile {
   if (fresh.length === 0) return kit;
-  return { file: kit.file, runs: [{ ...run, added: fresh.length }], places: [...kit.places, ...fresh] };
+  return { file: kit.file, runs: [...kit.runs, { ...run, added: fresh.length }], places: [...kit.places, ...fresh] };
 }
 
 export function kitText(kit: KitFile): string {
