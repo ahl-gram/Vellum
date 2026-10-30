@@ -73,7 +73,7 @@ function offPress(item: TableItem, seat: number, titleOf: ItemText, take: (seat:
   return off;
 }
 
-function recount(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: ReadonlyArray<TableItem>): void {
+function recount(drawerEls: ChartDrawerEls, items: ReadonlyArray<TableItem>): void {
   drawerEls.count.textContent = countLine(items);
   drawerEls.road.disabled = items.length === 0;
   drawerEls.tab.textContent = tabLine(items);
@@ -161,7 +161,7 @@ function drawerCuttings(
   let landing: string | null = null;
 
   const render = (): void => {
-    recount(drawerEls, deps, items);
+    recount(drawerEls, items);
     rows.clear();
     drawerEls.cuttings.replaceChildren(
       ...items.map((item, seat) => {

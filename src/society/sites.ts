@@ -1,7 +1,6 @@
 import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import type { Rng } from "../core/rng.ts";
 import { BIOMES } from "../climate/biomes.ts";
-import type { FlowResult } from "../hydrology/flow.ts";
 import { slopeField } from "../terrain/slope.ts";
 import { clamp } from "../core/math.ts";
 
@@ -162,7 +161,6 @@ function pickSettlements(candidates: ReadonlyArray<Candidate>, maxTowns: number,
 export function placeSettlements(
   elev: Field,
   seaLevel: number,
-  flow: FlowResult,
   riverCells: Uint8Array,
   biomes: Uint8Array,
   rng: Rng,
