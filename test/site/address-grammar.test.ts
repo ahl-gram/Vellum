@@ -40,9 +40,7 @@ test("readWorldKeys reads seed, land and coast by the seed's grammar: nothing bu
 });
 
 test("readWorldKeys carries the shape keys, and leaves out a land and a coast that draw nothing beside them", () => {
-  const shaped = readWorldKeys(
-    new URLSearchParams("seed=42&type=island&outline=round&looseness=50&land=350&coast=55"),
-  );
+  const shaped = readWorldKeys(new URLSearchParams("seed=42&type=island&outline=round&looseness=50&land=350&coast=55"));
   assert.deepEqual([shaped.shape, shaped.land, shaped.coast], [{ outline: "round", looseness: 0.5 }, null, 0.55]);
   const counted = readWorldKeys(new URLSearchParams("type=archipelago&islands=12&land=350&coast=55"));
   assert.deepEqual([counted.land, counted.coast], [null, null]);

@@ -51,7 +51,8 @@ export function readShapeKeys(
   const islands = islandsN === undefined ? undefined : islandsN !== null && isIslandCount(islandsN) ? islandsN : null;
   const isleSize = sizeRaw === undefined ? undefined : isIsleSize(sizeRaw) ? sizeRaw : null;
 
-  if ([outline, looseness, raggedness, islands, isleSize].includes(null as never)) return null;
+  if (outline === null || looseness === null || raggedness === null || islands === null || isleSize === null)
+    return null;
   if (looseness !== undefined && outline === undefined) return null;
   if ((isleSize !== undefined || raggedness !== undefined) && islands === undefined) return null;
   if (islands !== undefined && (outline !== undefined || type !== "archipelago")) return null;
