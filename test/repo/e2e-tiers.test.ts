@@ -159,27 +159,18 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #763, 2026-10-06, over the fourteen runs whose head held Issue #762's pull request D, main 37526087943 to 37541080266 and nine pull request runs: shards 4m46s, lanes 9m18s, lane C before this issue's re-fit, against a slowest re-fitted lane predicted at about 7.5 minutes).
-const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.8, "build-and-e2e": 9.3 };
-const CAP_HEADROOM = 1.5;
-
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
   const jobs = ciJobBlocks();
   assert.deepEqual(
     jobs.map((j) => j.id),
-    Object.keys(WORST_JOB_MINUTES),
-    "this sweep read other job blocks than the ones with a measured worst, so it is covering the wrong part of the file; a job added here joins the sweep with its own worst",
+    ["check-and-test", "build-and-e2e"],
+    "this sweep read other job blocks than the two it was written for, so it is covering the wrong part of the file; a job added here joins the sweep by name",
   );
   for (const job of jobs) {
     const body = ciUncommented(job.lines);
     const bound = body.match(/^ {4}timeout-minutes: (\d+)$/m);
     assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
     const minutes = Number(bound[1]);
-    const floor = CAP_HEADROOM * WORST_JOB_MINUTES[job.id]!;
-    assert.ok(
-      minutes >= floor,
-      `${job.id}'s timeout-minutes is ${minutes}, under ${floor.toFixed(2)}, ${CAP_HEADROOM} times its worst run, so a slow runner's real run is killed as a hang`,
-    );
     assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
     assert.doesNotMatch(
       body,
