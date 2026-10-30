@@ -37,4 +37,5 @@ export const SOURCE_READS: Readonly<Record<string, readonly SourceRead[]>> = {
   "test/site/shell-css-ground.test.ts": [kept("src/styles/shared/shell.css")],
   "test/site/shell-css.test.ts": [data("src/styles/shared/shell.css"), kept("src/styles/shared/shell.css")],
   "test/site/tip-affordance.test.ts": [witness("src/**")],
+  "test/terrain/outline-places.test.ts": [data("src/world/outline-place-ids.ts")],
 };

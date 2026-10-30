@@ -156,10 +156,15 @@ or realms (`test/world/culture-pin.test.ts`). A culture ID is world identity: a 
 and a written link names it, so an ID in `CULTURE_IDS` (`src/society/culture-ids.ts`) is never renamed.
 
 **An outline is world identity in the same way.** An ID in `OUTLINE_IDS` (`src/world/outline-ids.ts`)
-is never renamed and its rings in `src/terrain/outlines.ts` never change, so a corrected outline is a
-new ID; `test/terrain/outlines.test.ts` pins each one. A looseness is world identity beside it, and
-means nothing without an outline: the terrain refuses one alone. An absent outline is the dome the
-seed always drew.
+is never renamed and its rings in `src/terrain/outlines.ts` never change, and the same holds for a
+real place: its ID in `PLACE_ID_LIST` (`src/world/outline-place-ids.ts`) is never renamed and its
+rings in `src/terrain/outline-places.json` never change. A corrected outline is a new ID;
+`test/terrain/outlines.test.ts` pins each form and `test/terrain/outline-places.test.ts` pins the
+places together. A place's rings reach the terrain only through the source a host installs (`setPlaceSource` in
+`src/terrain/outline-store.ts`), and the terrain refuses a place whose rings are not loaded, by name,
+rather than drawing anything in its place. A looseness is world identity beside it, and means nothing
+without an outline: the terrain refuses one alone. An absent outline is the dome the seed always
+drew.
 
 **A count is world identity too.** `islands`, `isleSize` and `raggedness` (`src/world/types.ts`) place a
 counted world's islands from the seed and the world's aspect alone (`placeLobes` in
@@ -254,7 +259,10 @@ outline's own share of the sheet while the edge softens, then the map type's usu
 looseness reaches today's island (`landShareOf` in `src/world/generate.ts`), so at looseness 0 every
 cell inside the outline is land and every cell outside is sea on the world sheet. The land fraction
 is still checked, and draws nothing. A close-up is held to its chart, not to the outline. The
-outline's inset from the sheet's edge, the falloff and the edge sink hold the sea margin there.
+outline's inset from the sheet's edge, the falloff and the edge sink hold the sea margin there. Past
+the soft end the waterline falls toward the map type's share, furthest for a thin place, so a world
+with an outline sinks its edge deeper as it loosens, to the counted world's depth at full looseness
+(`LOOSE_EDGE_SINK` in `src/terrain/heightfield.ts`).
 
 **On a counted world the land fraction does not move the waterline either.** It takes the archipelago's
 usual share (`landShareOf` in `src/world/generate.ts`); the land fraction is still checked and draws
@@ -279,7 +287,9 @@ the land fraction. Other tests in that same file do vary it, for other claims, s
 tests and not the file. The strongest of them asserts the land mask is zero along all four borders,
 at a single land fraction. The border test for outlines beside them samples the looseness and the
 coast warp, and sweeps the land fraction, which draws nothing on a world with an outline, so it holds
-the land slider out of that world's waterline. The border test for counted worlds, in
+the land slider out of that world's waterline. The border test for real places, in
+`test/world/place-world.test.ts`, samples the charts a sweep of the whole roster found nearest the
+border, each at its own seed. The border test for counted worlds, in
 `test/terrain/lobes.test.ts`, samples the small counts where an island reaches the edge, both sizes and
 both ends of the raggedness. The guarantee itself rests on the edge sink and the falloff, corroborated
 by measurement. State it that way.

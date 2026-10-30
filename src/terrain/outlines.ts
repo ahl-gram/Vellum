@@ -1,6 +1,6 @@
-import type { OutlineId } from "../world/outline-ids.ts";
+import type { FormId } from "../world/outline-ids.ts";
 
-export const OUTLINE_RINGS: Readonly<Record<OutlineId, ReadonlyArray<ReadonlyArray<number>>>> = {
+export const OUTLINE_RINGS: Readonly<Record<FormId, ReadonlyArray<ReadonlyArray<number>>>> = {
   round: [
     [
       830, 500, 829, 478, 828, 457, 826, 435, 823, 414, 820, 393, 815, 372, 810, 352, 805, 332, 798, 312, 791, 293, 783,

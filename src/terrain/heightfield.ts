@@ -265,10 +265,16 @@ function countedElevation(e: number, u: number, v: number, s: TerrainSettings, c
 const EDGE_SINK = 0.8;
 // 2026-10-29, Issue #852: over seeds 1 to 100 (asked 2 to 100, both sizes, raggedness 0, 0.5 and 1; 5,400 worlds) every border cell of a counted world stood at least 0.409 under its waterline at 1.6, where today's 0.8 put land on the border of 209 of 3,600 small-count worlds.
 const COUNTED_EDGE_SINK = 1.6;
+// 2026-10-30, Issue #853: past the soft end a shaped world's waterline falls toward the map type's share, and over every place at seeds 1 to 6 and the 567 nearest at seeds 1 to 100 an edge sink of 0.8 there put land on the border of 13 places (0.057 over the waterline at worst); deepened to this with the loosening, every border cell stood at least 0.089 under it.
+const LOOSE_EDGE_SINK = 1.6;
 
 function edgeSink(u: number, v: number, depth: number): number {
   const edge = Math.min(u, 1 - u, v, 1 - v);
   return (1 - smoothstep(0, 0.05, edge)) * depth;
+}
+
+function shapedEdgeSink(s: TerrainSettings): number {
+  return lerp(EDGE_SINK, LOOSE_EDGE_SINK, looseningOf(s.looseness));
 }
 
 function elevationAt(u: number, v: number, s: TerrainSettings): number {
@@ -287,7 +293,7 @@ function elevationAt(u: number, v: number, s: TerrainSettings): number {
   const ridgeMask = smoothstep(0.52, 0.78, e01);
   let e = e01 + ridgedWeight * ridge * ridgeMask;
 
-  if (s.outline !== undefined) return shapedElevation(e, u, v, s, s.outline) - edgeSink(u, v, EDGE_SINK);
+  if (s.outline !== undefined) return shapedElevation(e, u, v, s, s.outline) - edgeSink(u, v, shapedEdgeSink(s));
   if (s.counted !== undefined) return countedElevation(e, u, v, s, s.counted) - edgeSink(u, v, COUNTED_EDGE_SINK);
 
   const d = coastDistance(u, v, s);

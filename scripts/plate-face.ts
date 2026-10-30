@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as fontkit from "fontkit";
 import { GRID, UNITS_PER_EM, type FaceName } from "../src/prospect/letter/face.ts";
+import { simplify } from "./simplify.ts";
 
 export const PLATE_FONTS = fileURLToPath(new URL("../design/kit/plate-fonts", import.meta.url));
 export const FACE_DIR = fileURLToPath(new URL("../src/prospect/letter", import.meta.url));
@@ -61,42 +62,6 @@ function flatten(cmds: readonly Cmd[]): P[][] {
   }
   if (cur.length > 0) out.push(cur);
   return out;
-}
-
-/** Squared distance from p to the segment ab: squares only, so a regeneration on any platform yields the same vertices. */
-export function segmentDistance2(p: P, a: P, b: P): number {
-  const dx = b[0] - a[0],
-    dy = b[1] - a[1];
-  const l2 = dx * dx + dy * dy;
-  const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2));
-  const ex = p[0] - a[0] - t * dx,
-    ey = p[1] - a[1] - t * dy;
-  return ex * ex + ey * ey;
-}
-
-export function simplify(pts: readonly P[], tolerance: number): P[] {
-  if (pts.length < 3) return [...pts];
-  const keep = new Uint8Array(pts.length);
-  keep[0] = 1;
-  keep[pts.length - 1] = 1;
-  const stack: Array<readonly [number, number]> = [[0, pts.length - 1]];
-  for (let top = stack.pop(); top !== undefined; top = stack.pop()) {
-    const [a, b] = top;
-    let best = -1,
-      bd = 0;
-    for (let i = a + 1; i < b; i++) {
-      const d = segmentDistance2(pts[i]!, pts[a]!, pts[b]!);
-      if (d > bd) {
-        bd = d;
-        best = i;
-      }
-    }
-    if (best >= 0 && bd > tolerance * tolerance) {
-      keep[best] = 1;
-      stack.push([a, best], [best, b]);
-    }
-  }
-  return pts.filter((_, i) => keep[i] === 1);
 }
 
 function encode(contours: readonly P[][]): string {
