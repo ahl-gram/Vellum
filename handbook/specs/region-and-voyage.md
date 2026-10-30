@@ -87,7 +87,7 @@ about a rule, the rulebook wins.
   towns' places in the world and from the hamlets' spots by world-space tests alone, so a mark's
   existence, its world-space spot, its name and its founding year never depend on the window. Each is
   placed on the nearest cell within the snap's reach whose ground under its whole mark is land, a
-  block of whole cells round it (`snapToStandingLand` in `src/world/snap-to-land.ts` with
+  block of whole cells round it that holds its mark at the largest size a close-up draws it (`snapToStandingLand` in `src/world/snap-to-land.ts` with
   `MARK_FOOTPRINT` in `src/society/farmsteads.ts`), so its mark stands on land cells; one with no such
   cell is not placed. A harbour town seated on the close-up's shore is drawn away from its place in
   the world, so a farm may be drawn nearer to it than the spacing. A farmstead within reach of a
@@ -115,7 +115,7 @@ about a rule, the rulebook wins.
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
   before.
-- **On a close-up, terrain marks give way to place and realm names, and a place name steps off its river.** Both act on every region sheet, the bound atlas's regional plates included, and on no world sheet, so the committed charts and the golden stand still; the rules themselves are `handbook/specs/chart-dress.md`'s.
+- **On a close-up, terrain marks give way to place and realm names, a place name steps off its river, and a settlement's mark takes its tier's size and its survey's depth.** All three act on every region sheet, the bound atlas's regional plates included, and on no world sheet, so the committed charts and the golden stand still; the rules themselves are `handbook/specs/chart-dress.md`'s.
 - **A region's coast closes against the window rect, and only the TRUE shore may round.** A plain
   smoothing pass rounds the frame's right-angle corners inward and carves real land over the ocean
   painted behind it; `chaikinSmoothPinned` in `src/terrain/polyline.ts` pins the window-frame
@@ -136,7 +136,9 @@ about a rule, the rulebook wins.
 - **The detail level is a function of the WINDOW, not of the band index the job carries.** They
   coincide at every real band, which is exactly why a guard has to use a fixture where they diverge
   (`regionDetailLevel` in `src/world/region.ts`, over `detailForWindow` in
-  `src/world/detail-chain.ts`).
+  `src/world/detail-chain.ts`). A region world carries its own level as `detail` (`regionCarry` in
+  `src/world/region.ts`), so whatever draws it reads the depth from the world, never from a band index
+  or a render option.
 - **A window off the band lattice gets none of a band-parameterized guard's coverage.** The bound
   atlas's regional plate window is not one of the band sizes, so a guard written in bands never
   reaches it.
