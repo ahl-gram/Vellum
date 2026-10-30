@@ -322,7 +322,7 @@ section points there rather than restating it.
   `FIXED_SEED` or from the page's own clock, never from the Node process's, which runs on the real
   date; and a suite that tests date logic on a day of its own wraps itself in `onDay`, whose clock
   wins over the harness's whichever of the two the browser runs first, as the hunt suite does with
-  the day its checks need. The clock does not reach a Web Worker, another browser target, or a read
+  each day its checks need. The clock does not reach a Web Worker, another browser target, or a read
   of the time that bypasses the global `Date` (`Intl.DateTimeFormat`'s `format()` with no date); no
   page reads the date in any of them, and each errs toward a check that depends on the date again
   without the run saying so. So does a Node read of the date used only to build an address, while
