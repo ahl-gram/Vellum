@@ -66,16 +66,53 @@ const tagline = "every seed is a world, draw one";
           <option value="tropical">tropical</option>
           <option value="polar">polar</option>
         </select></span>
-        <span class="l-label"><label for="land">sea level</label></span>
-        <span class="land-end land-end-min">more sea</span>
-        <input id="land" type="range" min="100" max="700" step="2">
-        <span class="land-end land-end-max">more land</span>
-        <span id="land-readout" class="land-readout"></span>
-        <span class="l-label"><label for="coast">coast</label><a class="fn" href="/glossary/#coast-warp" data-note="note-coast-warp" aria-describedby="note-coast-warp" aria-label="note on the coast warp">&Dagger;</a></span>
-        <span class="land-end land-end-min">calm</span>
-        <input id="coast" type="range" min="0" max="100" step="5">
-        <span class="land-end land-end-max">lobed</span>
-        <span id="coast-readout" class="land-readout"></span>
+        <div class="l-row" data-row="place">
+          <span class="l-label"><label for="place">shape</label><a class="fn" href="/glossary/#shape" data-note="note-shape" aria-describedby="note-shape" aria-label="note on the shape">&para;</a></span>
+          <span class="l-ctl"><input id="place" class="control place-box" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place-options" autocomplete="off" spellcheck="false" placeholder="seed's choice"></span>
+        </div>
+        <div class="l-row" data-row="looseness">
+          <span class="l-label"><label for="looseness">looseness</label></span>
+          <span class="land-end land-end-min">exact</span>
+          <input id="looseness" type="range" min="0" max="100" step="1" value="0">
+          <span class="land-end land-end-max">loose</span>
+          <span id="looseness-readout" class="land-readout"></span>
+        </div>
+        <div class="l-row" data-row="islands" hidden>
+          <span class="l-label"><label for="islands">islands</label><a class="fn" href="/glossary/#islands" data-note="note-islands" aria-describedby="note-islands" aria-label="note on the islands">&Vert;</a></span>
+          <span class="land-end land-end-min">few</span>
+          <input id="islands" type="range" min="1" max="100" step="1" value="1">
+          <span class="land-end land-end-max">many</span>
+          <span id="islands-readout" class="land-readout"></span>
+        </div>
+        <div class="l-row" data-row="sizes" hidden>
+          <span class="l-label"><span class="l-word" id="sizes-label">sizes</span></span>
+          <span class="l-ctl seals" role="radiogroup" aria-labelledby="sizes-label">
+            <label class="check seal">alike <input id="isle-equal" type="radio" name="isle-size" value="equal" checked></label>
+            <label class="check seal">of every size <input id="isle-varied" type="radio" name="isle-size" value="varied"></label>
+          </span>
+        </div>
+        <div class="l-row" data-row="land">
+          <span class="l-label"><label for="land">sea level</label></span>
+          <span class="land-end land-end-min">more sea</span>
+          <input id="land" type="range" min="100" max="700" step="2">
+          <span class="land-end land-end-max">more land</span>
+          <span id="land-readout" class="land-readout"></span>
+        </div>
+        <div class="l-row" data-row="coast">
+          <span class="l-label"><label for="coast">coast</label><a class="fn" href="/glossary/#coast-warp" data-note="note-coast-warp" aria-describedby="note-coast-warp" aria-label="note on the coast warp">&Dagger;</a></span>
+          <span class="land-end land-end-min">calm</span>
+          <input id="coast" type="range" min="0" max="100" step="5">
+          <span class="land-end land-end-max">lobed</span>
+          <span id="coast-readout" class="land-readout"></span>
+        </div>
+        <div class="l-row" data-row="ragged" hidden>
+          <span class="l-label"><label for="ragged">coast</label></span>
+          <span class="land-end land-end-min">round</span>
+          <input id="ragged" type="range" min="0" max="100" step="1" value="0">
+          <span class="land-end land-end-max">ragged</span>
+          <span id="ragged-readout" class="land-readout"></span>
+        </div>
+        <div class="held" id="land-held" role="group" aria-label="held" hidden><p class="held-note" id="land-held-note"></p></div>
       </div>
     </div>
     <div class="panel" role="group" aria-labelledby="grp-hand">
@@ -97,8 +134,7 @@ const tagline = "every seed is a world, draw one";
           <option value="moisture">rainfall</option>
           <option value="population">population</option>
         </select></span>
-        <span class="l-label"></span>
-        <span class="l-ctl seals">
+        <span class="l-ctl seals hand-seals">
           <label class="check seal">legend <input id="legend" type="checkbox" checked></label>
           <label class="check seal">arms <input id="arms" type="checkbox"></label>
           <label class="check seal">beasts <input id="beasts" type="checkbox"></label>
@@ -111,6 +147,16 @@ const tagline = "every seed is a world, draw one";
       <strong class="fn-head">of the seed's choice</strong>
       <span>Left alone, each world decides its own shape and weather from its seed. Pick a value to overrule it.</span>
       <a href="/glossary/#seeds-choice">read more in the glossary</a>
+    </div>
+    <div class="fn-note" id="note-shape" role="tooltip" popover="auto">
+      <strong class="fn-head">of the shape</strong>
+      <span>Any real country, state, province or lake can lend a world its outline. Left to the seed, the land takes its own shape; picked, the land is drawn inside the place's outline, north up, nearly edge to edge.</span>
+      <a href="/glossary/#shape">read more in the glossary</a>
+    </div>
+    <div class="fn-note" id="note-islands" role="tooltip" popover="auto">
+      <strong class="fn-head">of the islands</strong>
+      <span>On an archipelago, about how many islands the sea holds; a few may touch or sink, so the count is never exact. Left to the seed, the seed decides.</span>
+      <a href="/glossary/#islands">read more in the glossary</a>
     </div>
     <div class="fn-note" id="note-coast-warp" role="tooltip" popover="auto">
       <strong class="fn-head">of the coast warp</strong>
@@ -127,6 +173,7 @@ const tagline = "every seed is a world, draw one";
       <span>Every chart has two faces: the recto carries the map, the verso its docket, the surveyor's attribution, and the office stamp. Turn the sheet to read the back.</span>
       <a href="/glossary/#verso">read more in the glossary</a>
     </div>
+    <div class="place-list" id="place-list" popover="manual"><ul class="pl-options" id="place-options" role="listbox" aria-label="places in the gazetteer"></ul><p class="pl-foot" id="place-foot" hidden></p></div>
   </div>
 </Slip>
 
