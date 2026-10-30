@@ -1,5 +1,4 @@
 import { FIXED_SEED } from "../../support/fixed-day.ts";
-import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead, stripRead } from "./reads.ts";
@@ -9,21 +8,16 @@ const PLACED: Payload<{ stamp: string | null; hash: string }> =
   return { stamp: s ? s.getAttribute("data-vellum-outline") : null, hash: location.hash }; })()`;
 
 export async function rr44PlaceLink(k: ReadingRoomKit): Promise<void> {
-  const { send, check, boot, PORT } = k;
+  const { evaluate, send, check, boot, settled, PORT } = k;
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", {
     url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&type=island&outline=ne-1159315211`,
   });
-  check("RR44a the place's address boots", await boot());
-  const placed = await makeSettle(k)(
-    PLACED,
-    (p) => p.stamp === "ne-1159315211" && /(^|[#&])outline=ne-1159315211(&|$)/.test(p.hash),
-    "reading-room-place",
-    300,
-  );
+  check("RR44a the place's address boots and settles", (await boot()) && (await settled()));
+  const placed = await evaluate(PLACED);
   check(
     "RR44 a place's link opens it in the Reading Room and the room's own address keeps it",
-    placed.stamp === "ne-1159315211",
+    placed.stamp === "ne-1159315211" && /(^|[#&])outline=ne-1159315211(&|$)/.test(placed.hash),
     JSON.stringify(placed),
   );
 }

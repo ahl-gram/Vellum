@@ -4,6 +4,7 @@ import { errorText } from "../shared/error-text.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
 import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "./address.ts";
+import { overridesOfLand } from "../shared/address-grammar.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindRibbonRoom, markLeaned, showPlate, writeFolio, writeItinerary, type RoomFurniture } from "./seats.ts";
 import type { RibbonResult } from "../explorer/worker-client.ts";
@@ -56,8 +57,7 @@ const dress = plateDressFor(addr.style ?? "antique");
 const overrides: Partial<WorldRecipe> = {
   ...(addr.type ? { mapType: addr.type } : {}),
   ...(addr.band ? { band: addr.band } : {}),
-  ...(addr.land != null ? { landFraction: addr.land } : {}),
-  ...(addr.coast != null ? { coastWarp: addr.coast } : {}),
+  ...overridesOfLand(addr),
 };
 
 chartLink.href = chartTarget(location.hash);

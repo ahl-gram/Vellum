@@ -1,6 +1,8 @@
 import { runJob } from "./worker-client.ts";
-import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts";
-import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
+import { updateLandReadout, syncAutoSlider } from "./sea-level.ts";
+import { updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
+import { landKeysNow } from "./hash-sync.ts";
+import { overridesOfLand, type LandOverrides } from "../shared/address-grammar.ts";
 import { makeDogEar, surveyItemFrom } from "./chart-drawer.ts";
 import type { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
@@ -28,6 +30,7 @@ import {
   beastsChk,
   landSlider,
   coastSlider,
+  hashControls,
   status,
   mapDiv,
   mapViewport,
@@ -141,19 +144,17 @@ export function pageGlass({
   return glass;
 }
 
-export type DrawOverrides = { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number };
+export type DrawOverrides = { mapType?: MapType; band?: ClimateBand } & LandOverrides;
 
 export function draftOverrides(seed: number, touched: TouchedGates): DrawOverrides {
-  const overrides: DrawOverrides = {};
-  if (typeSel.value) overrides.mapType = typeSel.value as MapType;
-  if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
-  if (touched.land) overrides.landFraction = sliderToLand(landSlider.value);
-  else syncAutoSlider(seed, overrides);
+  const chosen: { mapType?: MapType; band?: ClimateBand } = {};
+  if (typeSel.value) chosen.mapType = typeSel.value as MapType;
+  if (bandSel.value) chosen.band = bandSel.value as ClimateBand;
+  if (!touched.land) syncAutoSlider(seed, chosen);
   updateLandReadout();
-  if (touched.coast) overrides.coastWarp = sliderToCoast(coastSlider.value);
-  else parkCoastDefault();
+  if (!touched.coast) parkCoastDefault();
   updateCoastReadout();
-  return overrides;
+  return { ...chosen, ...overridesOfLand(landKeysNow(hashControls, touched.land, touched.coast)) };
 }
 
 export function draftDress(): {

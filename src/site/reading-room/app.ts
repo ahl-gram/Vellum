@@ -10,7 +10,8 @@ import { storyBeats, type StoryBeat } from "./beats.ts";
 import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import { TABLE_KEY } from "../shared/table-address.ts";
+import { TABLE_KEY, type TableOverrides } from "../shared/table-address.ts";
+import { NO_LAND_KEYS, emitLandKeys, overridesOfLand, type LandKeys } from "../shared/address-grammar.ts";
 import { errorText } from "../shared/error-text.ts";
 import { emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { parseReadingRoomAddress } from "./address.ts";
@@ -81,10 +82,9 @@ const carried: {
   legend: boolean;
   arms: boolean;
   beasts: boolean;
-  land: number | null;
-  coast: number | null;
+  keys: LandKeys;
   table: string | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null, table: null };
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, keys: NO_LAND_KEYS, table: null };
 
 function applyHash(): void {
   const a = parseReadingRoomAddress(location.hash);
@@ -96,8 +96,7 @@ function applyHash(): void {
   if (a.legend !== null) carried.legend = a.legend;
   if (a.arms !== null) carried.arms = a.arms;
   if (a.beasts !== null) carried.beasts = a.beasts;
-  if (a.land !== null) carried.land = a.land;
-  if (a.coast !== null) carried.coast = a.coast;
+  carried.keys = a;
   carried.table = a.table;
   pendingLive = a.live;
 }
@@ -109,8 +108,7 @@ function prospectHrefFor(forSeed: number, b: PlateSpec): string {
   p.set("style", style);
   if (carried.type) p.set("type", carried.type);
   if (carried.band) p.set("band", carried.band);
-  if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
-  if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  emitLandKeys(p, carried.keys);
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   p.set("i", String(b.index));
   p.set("year", String(b.year));
@@ -128,8 +126,7 @@ function syncHash(): void {
   p.set("legend", carried.legend ? "1" : "0");
   p.set("arms", carried.arms ? "1" : "0");
   p.set("beasts", carried.beasts ? "1" : "0");
-  if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
-  if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  emitLandKeys(p, carried.keys);
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   const a = lc.agesState();
   // ages is unconditionally true: the room's instrument is always armed, the page equivalent of the Explorer's ticked checkbox.
@@ -193,12 +190,11 @@ frame.root.addEventListener("animationend", retireArrival);
 frame.root.addEventListener("animationcancel", retireArrival);
 
 // The carried recipe as the engine's override bag: only the keys a link actually pinned, so an unpinned dial stays the world's own.
-function recipeOverrides(): { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } {
+function recipeOverrides(): TableOverrides {
   return {
     ...(carried.type ? { mapType: carried.type } : {}),
     ...(carried.band ? { band: carried.band } : {}),
-    ...(carried.land != null ? { landFraction: carried.land } : {}),
-    ...(carried.coast != null ? { coastWarp: carried.coast } : {}),
+    ...overridesOfLand(carried.keys),
   };
 }
 

@@ -2,7 +2,9 @@
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
 import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
-import { coastFromAddress, landFromAddress } from "../shared/address-grammar.ts";
+import { emitLandKeys, gateLand, readWorldKeys, type LandKeys } from "../shared/address-grammar.ts";
+import { drawnShape } from "../shared/shape-address.ts";
+import { chooseShape, shapeChoice } from "./shape-choice.ts";
 import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
 import { addressCamera, type Camera } from "./camera.ts";
 import { DEEPEST_K } from "../../world/lod.ts";
@@ -20,22 +22,29 @@ export interface Controls {
   coastSlider: HTMLInputElement;
 }
 
-function landFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
-  const { landSlider } = controls;
-  const land = landFromAddress(params.get("land"));
+function landFromHash(land: number | null, controls: Readonly<Controls>): boolean {
   if (land === null) return false;
+  const { landSlider } = controls;
   landSlider.value = String(landToSlider(land));
   updateLandReadout();
   return true;
 }
 
-function coastFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
-  const { coastSlider } = controls;
-  const coast = coastFromAddress(params.get("coast"));
+function coastFromHash(coast: number | null, controls: Readonly<Controls>): boolean {
   if (coast === null) return false;
+  const { coastSlider } = controls;
   coastSlider.value = String(coastToSlider(coast));
   updateCoastReadout();
   return true;
+}
+
+/** The land, coast and shape keys the page writes now: a gate that is untouched stays out, and so does anything the shape draws nothing from. */
+export function landKeysNow(controls: Readonly<Controls>, landTouched: boolean, coastTouched: boolean): LandKeys {
+  return gateLand({
+    land: landTouched ? sliderToLand(controls.landSlider.value) : null,
+    coast: coastTouched ? sliderToCoast(controls.coastSlider.value) : null,
+    shape: drawnShape(shapeChoice(), controls.typeSel.value),
+  });
 }
 
 /** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the Issue #165 camera if carried (restored by the conductor after the first chart lands), and the Issue #192 live address; absent params mean home, still, disarmed. */
@@ -66,8 +75,10 @@ export function readHash(controls: Controls): {
   if (arms !== null) armsChk.checked = arms === "1";
   const beasts = params.get("beasts");
   if (beasts !== null) beastsChk.checked = beasts === "1";
-  const landTouched = landFromHash(params, controls);
-  const coastTouched = coastFromHash(params, controls);
+  const { land, coast, shape } = readWorldKeys(params);
+  chooseShape(shape);
+  const landTouched = landFromHash(land, controls);
+  const coastTouched = coastFromHash(coast, controls);
   const camera = addressCamera(params, DEEPEST_K);
   return { land: landTouched, coast: coastTouched, camera, live: parseLive(params), table: parseTable(location.hash) };
 }
@@ -81,8 +92,7 @@ export function writeHash(
   live?: Live | null,
   table?: ReadonlyArray<TableItem> | null,
 ): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } =
-    controls;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk } = controls;
   const params = new URLSearchParams();
   params.set("seed", seedInput.value);
   params.set("style", styleSel.value);
@@ -92,8 +102,7 @@ export function writeHash(
   params.set("legend", legendChk.checked ? "1" : "0");
   params.set("arms", armsChk.checked ? "1" : "0");
   params.set("beasts", beastsChk.checked ? "1" : "0");
-  if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
-  if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
+  emitLandKeys(params, landKeysNow(controls, landTouched, coastTouched));
   emitLive(params, live);
   if (camera && camera.k !== 1) {
     params.set("cx", camera.cx.toFixed(4));

@@ -21,6 +21,7 @@ import {
 } from "../shared/table-store.ts";
 import { errorText } from "../shared/error-text.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
+import { overridesOfLand } from "../shared/address-grammar.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import { $ } from "../shared/by-id.ts";
@@ -79,8 +80,7 @@ const dress = plateDressFor(addr.style ?? "antique");
 const overrides: TableOverrides = {
   ...(addr.type ? { mapType: addr.type } : {}),
   ...(addr.band ? { band: addr.band } : {}),
-  ...(addr.land != null ? { landFraction: addr.land } : {}),
-  ...(addr.coast != null ? { coastWarp: addr.coast } : {}),
+  ...overridesOfLand(addr),
 };
 
 let last: ReturnType<NonNullable<Window["__vellumProspectState"]>> = null;

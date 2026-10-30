@@ -9,6 +9,9 @@ import { ribbonResultFor, type RibbonPlateData } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
 import { regionChainCache } from "./region-chain-cache.ts";
+import { createPlaceGate } from "./place-gate.ts";
+import { createPlaceLoader, placeOfJob } from "./place-fetch.ts";
+import type { PlaceText } from "./place-source.ts";
 import type { Site } from "../../render/voyage-route.ts";
 import type { AtlasDocumentData } from "../../atlas/document.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -112,13 +115,15 @@ export interface TourResult {
 
 export type JobResult = DrawResult | RegionResult | AtlasResult | ProspectResult | RibbonResult | TourResult;
 
+type Envelope = { readonly id: number; readonly place?: PlaceText };
+
 export type WorkerRequest =
-  | (DrawJob & { readonly id: number })
-  | (RegionJob & { readonly id: number })
-  | (AtlasJob & { readonly id: number })
-  | (ProspectJob & { readonly id: number })
-  | (RibbonJob & { readonly id: number })
-  | (TourJob & { readonly id: number });
+  | (DrawJob & Envelope)
+  | (RegionJob & Envelope)
+  | (AtlasJob & Envelope)
+  | (ProspectJob & Envelope)
+  | (RibbonJob & Envelope)
+  | (TourJob & Envelope);
 
 // The optional never-set fields keep the plain `d.id == null` and `e.data.ready` guards below narrowing under strict TS.
 export type WorkerResponse =
@@ -209,6 +214,8 @@ export function runInline(msg: RenderJob): JobResult | Promise<JobResult> {
   return { ok: true, ...ribbonResultFor(world, msg) };
 }
 
+const throughPlace = createPlaceGate(createPlaceLoader((url) => fetch(url)));
+
 export function runJob(msg: DrawJob): Promise<DrawResult>;
 export function runJob(msg: RegionJob): Promise<RegionResult>;
 export function runJob(msg: AtlasJob): Promise<AtlasResult>;
@@ -219,11 +226,15 @@ export function runJob(msg: TourJob): Promise<TourResult>;
 export function runJob(msg: RegionJob | ProspectJob): Promise<RegionResult | ProspectResult>;
 export function runJob(msg: RenderJob): Promise<JobResult>;
 export function runJob(msg: RenderJob): Promise<JobResult> {
+  return throughPlace(placeOfJob(msg), (place) => send(msg, place));
+}
+
+function send(msg: RenderJob, place: PlaceText | null): Promise<JobResult> {
   if (worker) {
     const id = ++reqId;
     return new Promise((resolve, reject) => {
       pending.set(id, { resolve, reject });
-      worker!.postMessage({ ...msg, id });
+      worker!.postMessage({ ...msg, id, ...(place === null ? {} : { place }) });
     });
   }
   // No worker: defer a macrotask so the status line paints before the main thread blocks on the inline render.
