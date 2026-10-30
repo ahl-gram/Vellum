@@ -336,7 +336,6 @@ function forestLabelNodes(ctx: RenderCtx): SvgNode[] {
 }
 
 export function featureLabelsLayer(ctx: RenderCtx): {
-  defs: SvgNode[];
   node: SvgNode;
   realmAnchors: RealmAnchor[];
 } {
@@ -383,7 +382,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
   ];
 
   return {
-    defs: [],
     node: el("g", { id: "layer-feature-labels" }, nodes),
     realmAnchors: placedRealms.map((p) => p.anchor),
   };

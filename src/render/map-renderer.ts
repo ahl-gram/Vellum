@@ -195,7 +195,7 @@ function furnitureFor(ctx: RenderCtx, plans: ChartPlans): Array<SvgNode | null> 
   ];
 }
 
-function chartDefs(ctx: RenderCtx, featureDefs: ReadonlyArray<SvgNode>): SvgNode {
+function chartDefs(ctx: RenderCtx): SvgNode {
   const { world, style, proj, coastRings } = ctx;
   const margin = proj.margin;
   return el("defs", {}, [
@@ -218,7 +218,6 @@ function chartDefs(ctx: RenderCtx, featureDefs: ReadonlyArray<SvgNode>): SvgNode
         ]
       : []),
     ...(style.glyphs ? glyphSymbolDefs(style) : []),
-    ...featureDefs,
     ...textureDefs(ctx),
   ]);
 }
@@ -288,7 +287,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const labelled = labelledLayers(ctx, plans, opts);
   const mapLayers = mapLayersFor(ctx, plans, labelled);
   const furniture = furnitureFor(ctx, plans);
-  const defs = chartDefs(ctx, labelled.featureLabels.defs);
+  const defs = chartDefs(ctx);
 
   return renderSvg(chartRoot(ctx, opts, { description, defs, mapLayers, furniture }));
 }
