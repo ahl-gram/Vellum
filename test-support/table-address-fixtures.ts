@@ -31,5 +31,4 @@ export const prospect: ProspectItem = {
 
 export const hashOf = (value: string): string => `#seed=42&style=antique&${TABLE_KEY}=${value}`;
 
-/** A real place, Texas, for a sheet that states an outline. */
 export const TEXAS = placeId("ne-1159315211");

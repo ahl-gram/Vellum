@@ -388,13 +388,13 @@ export async function cd64PlaceSheet(k: DrawerKit): Promise<void> {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${sheet}` });
   const read = await makeSettle({ evaluate, sleep, tolerant: true })(
     PLACED_SHEET,
-    (d) => d.items === 1 && d.drawn === 1 && d.stage,
+    (d) => d.items === 1 && (d.drawn === 1 || d.outlines.some((p) => p !== "/outlines/ne-1159315211.txt")),
     "cd64-place-sheet",
     DRAWN,
   );
   check(
     "CD64 the Portfolio, a page one level down, drafts a place's sheet from the site's root",
-    read.outlines.length === 1 && read.outlines[0] === "/outlines/ne-1159315211.txt",
+    read.drawn === 1 && read.stage && read.outlines.length === 1 && read.outlines[0] === "/outlines/ne-1159315211.txt",
     JSON.stringify(read),
   );
 }

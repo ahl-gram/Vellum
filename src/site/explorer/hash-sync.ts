@@ -38,7 +38,6 @@ function coastFromHash(coast: number | null, controls: Readonly<Controls>): bool
   return true;
 }
 
-/** The land, coast and shape keys the page writes now: a gate that is untouched stays out, and so does anything the shape draws nothing from. */
 export function landKeysNow(controls: Readonly<Controls>, landTouched: boolean, coastTouched: boolean): LandKeys {
   return gateLand({
     land: landTouched ? sliderToLand(controls.landSlider.value) : null,

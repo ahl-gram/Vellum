@@ -18,7 +18,6 @@ const hundredths = (raw: string): number | null => {
   return n === null ? null : Math.min(1, n / 100);
 };
 
-/** The shape fields a bag states, with the engine's defaults and the fields its other fields make idle left out. */
 function spelt(shape: ShapeOverrides): ShapeOverrides {
   const counted = shape.islands !== undefined;
   return {
@@ -32,7 +31,6 @@ function spelt(shape: ShapeOverrides): ShapeOverrides {
   };
 }
 
-/** The shape a link or sheet states, spelt one way; {} when it states none, null when it states one the engine refuses. */
 export function readShapeKeys(
   get: (key: ShapeKey) => string | null | undefined,
   type: MapType | null | undefined,
@@ -66,7 +64,6 @@ export function readShapeKeys(
   });
 }
 
-/** The keys and values to write, in SHAPE_KEYS order, only for fields present. */
 export function shapePairs(shape: ShapeOverrides): ReadonlyArray<readonly [ShapeKey, string]> {
   const pairs: Array<readonly [ShapeKey, string]> = [];
   if (shape.outline !== undefined) pairs.push(["outline", shape.outline]);
@@ -77,7 +74,6 @@ export function shapePairs(shape: ShapeOverrides): ReadonlyArray<readonly [Shape
   return pairs;
 }
 
-/** The shape fields of a bag, and nothing else. */
 export function shapeOf(bag: ShapeOverrides): ShapeOverrides {
   return {
     ...(bag.outline !== undefined ? { outline: bag.outline } : {}),
@@ -88,7 +84,6 @@ export function shapeOf(bag: ShapeOverrides): ShapeOverrides {
   };
 }
 
-/** What the world draws from a held choice under the type menu's value: defaults left out, the count dropped off the archipelago. */
 export function drawnShape(choice: ShapeOverrides, type: string): ShapeOverrides {
   const own = spelt(choice);
   if (own.islands === undefined || (type === "archipelago" && own.outline === undefined)) return own;

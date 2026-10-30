@@ -44,14 +44,12 @@ export type LandKeys = Pick<WorldKeys, "land" | "coast" | "shape">;
 export type LandOverrides = { readonly landFraction?: number; readonly coastWarp?: number } & ShapeOverrides;
 export const NO_LAND_KEYS: LandKeys = { land: null, coast: null, shape: {} };
 
-/** Leaves out a land or coast the shape draws nothing from. */
 export const gateLand = (keys: LandKeys): LandKeys => ({
   land: landDraws(keys.shape) ? keys.land : null,
   coast: coastDraws(keys.shape) ? keys.coast : null,
   shape: keys.shape,
 });
 
-/** Writes land, coast and the shape keys in that order, each only where present. */
 export function emitLandKeys(params: URLSearchParams, keys: LandKeys): void {
   if (keys.land !== null) params.set("land", String(Math.round(keys.land * 1000)));
   if (keys.coast !== null) params.set("coast", String(Math.round(keys.coast * 100)));

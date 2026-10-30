@@ -9,7 +9,6 @@ export interface PlaceText {
 const held = new Map<PlaceId, string>();
 let installed = false;
 
-/** Adds a place's rings to this realm's store, installing the store as the place source the first time. */
 export function admitPlace(place: PlaceText): void {
   if (!installed) {
     setPlaceSource((id) => held.get(id));

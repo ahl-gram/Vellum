@@ -13,7 +13,6 @@ export interface Fetched {
 }
 export type Fetcher = (url: string) => Promise<Fetched>;
 
-/** Loads a place once per realm, admits it, and hands its text on; a failure is forgotten so the next load tries again. */
 export function createPlaceLoader(
   fetcher: Fetcher,
   admit: (place: PlaceText) => void = admitPlace,
@@ -38,7 +37,6 @@ export function createPlaceLoader(
   };
 }
 
-/** The real place a job draws, or null for a form, no outline, or a job with no world. */
 export function placeOfJob(job: RenderJob): PlaceId | null {
   if (job.kind === "tour") return null;
   const outline = job.overrides?.outline;

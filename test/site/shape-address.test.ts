@@ -13,6 +13,7 @@ import {
 } from "../../src/site/shared/shape-address.ts";
 import type { MapType } from "../../src/terrain/heightfield.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { TERRAIN_INPUT_KEYS } from "../../src/world/terrain-inputs.ts";
 import { placeId } from "../../src/world/outline-ids.ts";
 
 const TEXAS = placeId("ne-1159315211");
@@ -142,4 +143,8 @@ test("a land fraction draws nothing on a shaped or counted world, and a coast wa
 test("shapeOf keeps the five shape fields of a bag and nothing else (Issue #854)", () => {
   const all = { outline: TEXAS, looseness: 0.5, islands: 12, isleSize: "varied", raggedness: 0.4 } as const;
   assert.deepEqual(shapeOf({ ...all, mapType: "island", coastWarp: 0.3 } as ShapeOverrides), all);
+});
+
+test("the shape keys are the engine's terrain inputs but the coast warp, which the coast key carries (Issue #854)", () => {
+  assert.deepEqual([...SHAPE_KEYS, "coastWarp"].sort(), [...TERRAIN_INPUT_KEYS].sort());
 });

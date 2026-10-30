@@ -11,7 +11,7 @@ export type Drawn = { ok: true; same: boolean; stamped: boolean; fetched: string
 
 export const PLACE_DRAWN: Payload<Drawn> = `(async () => { performance.clearResourceTimings(); const m = ${PLACE_JOB};
   try { const j = await window.__vellumRunJob(m); const i = window.__vellumRunInline(m);
-    const fetched = performance.getEntriesByType("resource").map((e) => new URL(e.name).pathname).filter((p) => p.startsWith("/outlines/"));
+    const fetched = ${FETCHED_PLACES};
     return { ok: true, same: j.svg === i.svg, stamped: j.svg.includes('data-vellum-outline="ne-1159315211"') && j.svg.includes('data-vellum-looseness="0.5"'), fetched };
   } catch (err) { return { ok: false, error: String(err && err.message || err) }; } })()`;
 

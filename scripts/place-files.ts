@@ -7,7 +7,6 @@ import type { PlaceId } from "../src/world/outline-ids.ts";
 
 export const PLACE_TABLE = fileURLToPath(new URL("../src/terrain/outline-places.json", import.meta.url));
 
-/** Writes each place's rings, as the table stores them, to <root>/outlines/<id>.txt; returns how many. */
 export async function writePlaceFiles(root: string, table: string = PLACE_TABLE): Promise<number> {
   const places = JSON.parse(await readFile(table, "utf8")) as Record<string, string>;
   const ids = Object.keys(places);
