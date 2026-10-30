@@ -20,8 +20,13 @@ const BREATH: Payload<{ xform: string | null; clampHeld: boolean }> = `({ xform:
   return m.a >= fit * 0.65 - 1e-6 && m.a <= 7 + 1e-6 && cx >= -1 && cx <= r.width + 1 && cy >= -1 && cy <= r.height + 1;
 })() })`;
 
-const FLIGHT: Payload<{ open: boolean; xform: string | null }> =
-  `(() => { const card = document.getElementById("lf-card-reading-room"); const cs = card ? getComputedStyle(card) : null; return { open: !!card && !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95, xform: ${readXform} }; })()`;
+type Landing = { open: boolean; writes: number; frame: number };
+
+const FRAMES: Payload<boolean> = `(() => { const s = document.getElementById("lf-sheet"); if (s && window.__h15d === undefined) { const h = (window.__h15d = { frame: 0, writes: 0 }); const tick = () => { h.frame++; requestAnimationFrame(tick); }; requestAnimationFrame(tick); new MutationObserver((records) => { h.writes += records.length; }).observe(s, { attributes: true, attributeFilter: ["style"] }); } return window.__h15d !== undefined; })()`;
+
+const FLIGHT: Payload<Landing> = `(() => { const card = document.getElementById("lf-card-reading-room"); const cs = card ? getComputedStyle(card) : null; const h = window.__h15d; return { open: !!card && !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95, writes: h.writes, frame: h.frame }; })()`;
+
+const stoppedWriting = (d: Landing, last: Landing): boolean => d.writes === last.writes && d.frame > last.frame;
 
 async function breathes({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">, label: string) {
   const settle = makeSettle({ evaluate, sleep });
@@ -82,10 +87,13 @@ export async function h15cRearmed({ evaluate, check, sleep }: SuiteContext): Pro
 export async function h15dFlightStops({ evaluate, check, sleep, pressKey, clickAt }: HomeKit): Promise<void> {
   // The Reading Room station, not the Explorer: H14c framed it at 0.4 of the stage and the wheel zoomed at center, so it is the one icon this history provably keeps inside the 800-tall stage clip.
   const flightPt = await evaluate(buttonPoint('.lf-station[data-station="reading-room"]'));
+  let landing: Landing | null = null;
   if (flightPt !== null) {
+    await evaluate(FRAMES);
     await clickAt(Math.round(flightPt.x), Math.round(flightPt.y));
-    await makeStable(makeSettle({ evaluate, sleep }))(FLIGHT, "H15d the station flight landed", {
+    landing = await makeStable(makeSettle({ evaluate, sleep }))(FLIGHT, "H15d the station flight landed", {
       departed: (d) => d.open,
+      same: stoppedWriting,
     });
   }
   const flight1 = await evaluate(readXform);
@@ -94,7 +102,7 @@ export async function h15dFlightStops({ evaluate, check, sleep, pressKey, clickA
   check(
     "H15d this sub's own station flight stops the drift too: after the flight settles the transform holds still",
     flightPt !== null && flight1 !== null && flight1 === flight2,
-    JSON.stringify({ flightPt, flight1, flight2 }),
+    JSON.stringify({ flightPt, landing, flight1, flight2 }),
   );
   await pressKey("Escape", "Escape", 27);
 }
