@@ -6,7 +6,8 @@ import { createChainCache } from "../../src/world/detail-chain.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 import { landSnapRadius, snapToLand } from "../../src/world/snap-to-land.ts";
 import { MARK_FOOTPRINT, farmsteadCandidates } from "../../src/society/farmsteads.ts";
-import { finerMarkBox } from "../../src/render/layers/settlement-marks.ts";
+import { finerMarkBox, markScale } from "../../src/render/layers/settlement-marks.ts";
+import { MAX_DETAIL } from "../../src/terrain/heightfield.ts";
 import { marginFor } from "../../src/render/transform.ts";
 import type { Field } from "../../src/core/grid.ts";
 
@@ -60,8 +61,10 @@ test("every farmstead and mill stands on ground that is land under its whole mar
 
 test("the footprint a farmstead or mill is snapped to covers its mark (Issue #952)", () => {
   const cell = (1500 - 2 * marginFor(1500)) / 319;
+  const deepest = { ...RADIN, region: { ...RADIN.region!, detail: MAX_DETAIL } };
   for (const tier of ["farmstead", "mill"] as const) {
-    const box = finerMarkBox(tier, 0, 0, 1);
+    assert.ok(markScale(tier, deepest) > 1, `${tier}: the box is the largest a close-up draws, past today's`);
+    const box = finerMarkBox(tier, 0, 0, markScale(tier, deepest));
     assert.ok(MARK_FOOTPRINT.up >= -box.y / cell, `${tier}: the cells above`);
     assert.ok(MARK_FOOTPRINT.side >= box.w / 2 / cell, `${tier}: the cells beside`);
     assert.ok(MARK_FOOTPRINT.down >= (box.y + box.h) / cell, `${tier}: the cells below`);
