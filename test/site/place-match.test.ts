@@ -88,7 +88,13 @@ test("the marked letters are the query's own, in the name as written (Issue #854
     marks("georgia").filter(([n]) => n === "South Georgia and the Islands"),
     [["South Georgia and the Islands", [6, 13]]],
   );
-  assert.deepEqual(marks("lara")[0], ["Călărași", [3, 7]]);
+  assert.deepEqual(
+    marks("lara").filter(([n]) => n === "Călărași"),
+    [
+      ["Călărași", [2, 6]],
+      ["Călărași", [2, 6]],
+    ],
+  );
 });
 
 test("an empty query lists nothing; the words are the ruled ones (Issue #854)", () => {
