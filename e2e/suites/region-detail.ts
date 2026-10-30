@@ -21,7 +21,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const deepest = ladder[ladder.length - 1]!;
   await rd2CoastGains(k, deepest);
   await step("RD3, RD4", () => rd3SameBytes(ctx, k, ladder, deepest));
-  await step("RD5", () => rd5SharedLink(ctx, k));
+  await step("RD5", () => rd5SharedLink(ctx, k, deepest));
   await step("RD restore", () => rdRestore(k));
 }
 
@@ -191,20 +191,22 @@ async function rd3SameBytes(
 async function rd5SharedLink(
   ctx: SuiteContext,
   { check, shoot, waitReady, waitSettled, LINK, waitInset, insetDigest }: RegionKit,
+  deepest: Ladder[number],
 ): Promise<void> {
-  const linked = [];
-  for (let visit = 0; visit < 2; visit++) {
-    await ctx.send("Page.navigate", { url: "about:blank" });
-    await ctx.send("Page.navigate", { url: LINK });
-    await waitReady();
-    await waitSettled(`region-detail-link-${visit}`);
-    await waitInset();
-    linked.push(await insetDigest());
-  }
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: LINK });
+  await waitReady();
+  await waitSettled("region-detail-link");
+  await waitInset();
+  const linked = await insetDigest();
   check(
-    "RD5 a shared link at the bottom, k 32, round-trips to a byte-identical band-5 draw across a cold reload (#400 AC2, Issue #954)",
-    linked[0] !== null && linked[1] !== null && linked[0]!.digest === linked[1]!.digest && linked[0]!.detail === "5",
-    JSON.stringify(linked),
+    "RD5 a shared link at the bottom, k 32, boots cold to the byte-identical band-5 draw the descent committed (#400 AC2, Issue #954)",
+    linked !== null &&
+      deepest.digest !== undefined &&
+      linked.digest === deepest.digest &&
+      linked.detail === "5" &&
+      deepest.detail === "5",
+    JSON.stringify({ linked, deepest: { digest: deepest.digest, detail: deepest.detail } }),
   );
   await shoot("explorer-region-detail-shared-link.png");
 }
