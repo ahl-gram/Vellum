@@ -24,7 +24,7 @@
   text-align: center;
 }
 
-/* The archivist head: the standing label over a section; the print room's CHART No keeps its own 0.3em. */
+/* The print room's CHART No keeps its own 0.3em. */
 .archivist-head {
   font-size: 0.82rem;
   letter-spacing: 0.18em;

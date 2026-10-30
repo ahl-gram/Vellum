@@ -137,10 +137,11 @@ type Ground = {
 };
 
 function siteStage(ground: Ground, rng: Rng, citystate: boolean): Settlement[] {
-  const { elev, seaLevel, riverCells, biomes } = ground;
+  const { elev, seaLevel, flow, riverCells, biomes } = ground;
   return placeSettlements(
     elev,
     seaLevel,
+    flow,
     riverCells,
     biomes,
     rng.fork("sites"),
