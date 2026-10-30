@@ -1,16 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
-import { decodeRings } from "../../src/terrain/outline-codec.ts";
-import { outlineSegments, signedDistance } from "../../src/terrain/outline-distance.ts";
 import { setPlaceSource } from "../../src/terrain/outline-store.ts";
 import { buildHeightfield, type MapType } from "../../src/terrain/heightfield.ts";
 import { landMask, pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/generate.ts";
-import { placeId, type OutlineId } from "../../src/world/outline-ids.ts";
-import { PLACE_TABLE, useCommittedPlaces } from "../../test-support/outline-places.ts";
+import { placeId } from "../../src/world/outline-ids.ts";
+import { borderLandCells } from "../../test-support/border-land.ts";
+import { insideMask } from "../../test-support/outline-mask.ts";
+import { useCommittedPlaces } from "../../test-support/outline-places.ts";
 
 const W = 320;
 const H = 240;
@@ -39,7 +38,7 @@ test("at looseness 0 a real place is exactly its outline on the world sheet, cel
   useCommittedPlaces();
   for (const [name, count] of Object.entries(INSIDE)) {
     const id = placeId(name);
-    const inside = insideMask(id);
+    const inside = insideMask(id, W, H);
     assert.equal(
       inside.reduce((a, b) => a + b, 0),
       count,
@@ -59,75 +58,40 @@ test("at looseness 0 a real place is exactly its outline on the world sheet, cel
   }
 });
 
-function insideMask(id: OutlineId): Uint8Array {
-  const segs = outlineSegments(id, (W - 1) / (H - 1));
-  const inside = new Uint8Array(W * H);
-  for (let y = 0; y < H; y++)
-    for (let x = 0; x < W; x++) inside[x + y * W] = signedDistance(segs, x / (W - 1), y / (H - 1)) < 0 ? 1 : 0;
-  return inside;
-}
+// 2026-10-30, Issue #853: every place at seeds 1 to 6 (every map type, coast and looseness), then the 567 nearest past the soft end and the 303 nearest before it at seeds 1 to 100 (coast 0.55 to 1), found these charts nearest the border: Wyoming and Colorado at the soft end, 0.053 under the waterline, and Baker Island past it, 0.123 under at looseness 0.7; with the edge sink left at 0.8 past the soft end, Baker Island put land on it from looseness 0.74 and Canandaigua Lake at 1, the witnesses.
+const NEAREST = [
+  ["ne-1159315351", 48],
+  ["ne-1159315343", 34],
+  ["ne-1159316561", 48],
+  ["ne-1159107347", 2],
+] as const;
 
-function borderLand(land: Uint8Array): number {
-  let border = 0;
-  for (let x = 0; x < W; x++) border += land[x]! + land[x + (H - 1) * W]!;
-  for (let y = 1; y < H - 1; y++) border += land[y * W]! + land[W - 1 + y * W]!;
-  return border;
-}
-
-function shareOfSheet(text: string): number {
-  let total = 0;
-  for (const ring of decodeRings(text)) {
-    let twice = 0;
-    for (let i = 0; i < ring.length; i += 2) {
-      const j = (i + 2) % ring.length;
-      twice += ring[i]! * ring[j + 1]! - ring[j]! * ring[i + 1]!;
-    }
-    total += Math.abs(twice) / 2;
-  }
-  return total / 1e6;
-}
-
-test("the three places that fill the sheet most keep the sea on all four borders at every map type, looseness, coast and land fraction (Issue #853)", () => {
+test("the charts that come nearest the sheet's edge keep the sea on all four borders at every map type and land fraction, from the soft end to full looseness, at the coast slider's top (Issue #853)", () => {
   useCommittedPlaces();
-  const table = JSON.parse(readFileSync(PLACE_TABLE, "utf8")) as Record<string, string>;
-  const ranked = Object.entries(table)
-    .map(([id, text]) => ({ id, share: shareOfSheet(text) }))
-    .sort((a, b) => b.share - a.share || (a.id < b.id ? -1 : 1));
-  const top = ranked.slice(0, 3).map((r) => r.id);
-  assert.deepEqual(top, ["ne-1159315343", "ne-1159315351", "ne-1159310489"]);
-  // 2026-10-29, Issue #853: seeds 1 to 3 over these three left every border sea (360 cases); the falloff spreads furthest past the inset where an outline runs along the box, so the places that fill it most are the sample.
-  const seed = 2;
+  const coastWarp = 1;
   const types: MapType[] = ["island", "archipelago", "continent", "citystate"];
-  const settings = [
-    [0, 1],
-    [0.5, 0],
-    [0.5, 1],
-    [1, 0],
-    [1, 1],
-  ] as const;
-  const cases = top.flatMap((name) =>
+  const cases = NEAREST.flatMap(([name, seed]) =>
     types.flatMap((mapType) =>
-      settings.flatMap(([looseness, coastWarp]) =>
-        [0.1, 0.7].map((landFraction) => ({ name, mapType, looseness, coastWarp, landFraction })),
+      [2 / 3, 0.7, 0.75, 1].flatMap((looseness) =>
+        [0.1, 0.7].map((landFraction) => ({ name, seed, mapType, looseness, landFraction })),
       ),
     ),
   );
   let elev: ReturnType<typeof buildHeightfield> | null = null;
   let held = "";
-  for (const { name, mapType, looseness, coastWarp, landFraction } of cases) {
+  for (const { name, seed, mapType, looseness, landFraction } of cases) {
     const outline = placeId(name);
-    const extra = looseness > 0 ? { looseness } : {};
-    const key = `${name}|${mapType}|${looseness}|${coastWarp}`;
+    const key = `${name}|${seed}|${mapType}|${looseness}`;
     if (key !== held) {
-      elev = buildHeightfield({ seed, gridW: W, gridH: H, mapType, outline, coastWarp, ...extra });
+      elev = buildHeightfield({ seed, gridW: W, gridH: H, mapType, outline, coastWarp, looseness });
       held = key;
     }
-    const recipe = defaultRecipe(seed, { mapType, outline, coastWarp, landFraction, ...extra });
-    const border = borderLand(landMask(elev!, pickSeaLevel(elev!, landShareOf(recipe))));
+    const recipe = defaultRecipe(seed, { mapType, outline, coastWarp, landFraction, looseness });
+    const border = borderLandCells(landMask(elev!, pickSeaLevel(elev!, landShareOf(recipe))), W, H);
     assert.equal(
       border,
       0,
-      `${name} ${mapType} looseness ${looseness} coast ${coastWarp} land ${landFraction}: ${border} border land cells`,
+      `${name} seed ${seed} ${mapType} looseness ${looseness} coast ${coastWarp} land ${landFraction}: ${border} border land cells`,
     );
   }
 });
