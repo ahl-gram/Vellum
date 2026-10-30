@@ -71,8 +71,10 @@ export type ShapeEdit =
   | { readonly kind: "raggedness"; readonly slider: number };
 
 function put(choice: ShapeOverrides, key: keyof ShapeOverrides, value: unknown): ShapeOverrides {
-  const { [key]: _dropped, ...rest } = choice;
-  return (value === undefined ? rest : { ...rest, [key]: value }) as ShapeOverrides;
+  const next: Record<string, unknown> = { ...choice };
+  if (value === undefined) delete next[key];
+  else next[key] = value;
+  return next;
 }
 
 export function nextChoice(choice: ShapeOverrides, edit: ShapeEdit): ShapeOverrides {

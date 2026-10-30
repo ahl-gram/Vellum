@@ -87,7 +87,7 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
     const slipRect = slip !== null ? rectOf(slip) : null;
     const slipOpen = slip !== null && !slip.classList.contains("folded");
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
-    const slipReach = slipOpen && slip !== null ? slipW + slipInset(slip) : 0;
+    const slipReach = slipOpen ? slipW + slipInset(slip) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipReach);
     if (legend !== null)
       placeLegendRow(legend, {

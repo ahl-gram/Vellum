@@ -1,3 +1,4 @@
+import { sendKey } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
@@ -188,10 +189,9 @@ export async function prwCount(ctx: SuiteContext): Promise<void> {
 }
 
 const DRAFTING = "Drafting…";
-const FLOOD = "150";
 const ISLAND_HASH = "#seed=1&style=antique&type=island&legend=1&arms=0&beasts=0";
 
-type Moved = { started: boolean; before: string | null };
+type Moved = { started: boolean };
 type Resolved = { status: string; dis: boolean; map: boolean };
 type Redrawn = {
   status: string;
@@ -203,45 +203,51 @@ type Redrawn = {
   hash: string;
 };
 
-const MOVE_LAND: Payload<Moved> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");const before=svg?svg.getAttribute("data-vellum-land-fraction"):null;if(svg)svg.setAttribute("data-prw-old","");const l=document.getElementById("land");l.value="${FLOOD}";l.dispatchEvent(new Event("change",{bubbles:true}));return{before,started:document.getElementById("status").textContent==="${DRAFTING}"};})()`;
-const PICK_ISLAND: Payload<Moved> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");if(svg)svg.setAttribute("data-prw-old","");const t=document.getElementById("type");t.value="island";t.dispatchEvent(new Event("change",{bubbles:true}));return{before:null,started:document.getElementById("status").textContent==="${DRAFTING}"};})()`;
+const PICK_ISLAND: Payload<Moved> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");if(svg)svg.setAttribute("data-prw-old","");const t=document.getElementById("type");t.value="island";t.dispatchEvent(new Event("change",{bubbles:true}));return{started:document.getElementById("status").textContent==="${DRAFTING}"};})()`;
 const RESOLVED: Payload<Resolved> = `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map > svg[data-vellum-style]")})`;
 const REDRAWN: Payload<Redrawn> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]"),at=(n)=>svg?svg.getAttribute("data-vellum-"+n):null;return{status:document.getElementById("status").textContent,fresh:!!svg&&!svg.hasAttribute("data-prw-old"),land:at("land-fraction"),outline:at("outline"),islands:at("islands"),mapType:at("map-type"),hash:location.hash.replace(/&table=[^&]*/,"")};})()`;
 
 // Waits for the draw to end either way, never on waitSettled, so a draw the engine refuses reds the check on its own status line instead of timing the wait out.
-async function redrawAfter(
-  ctx: SuiteContext,
-  move: Payload<Moved>,
-  label: string,
-): Promise<{ moved: Moved; after: Redrawn }> {
+async function drawEnded(ctx: SuiteContext, label: string): Promise<Redrawn> {
   const settle = makeSettle({ evaluate: ctx.evaluate, sleep: ctx.sleep });
-  const moved = await ctx.evaluate(move);
   await settle(RESOLVED, (d) => d.status !== DRAFTING && !d.dis && d.map, label);
-  return { moved, after: await ctx.evaluate(REDRAWN) };
+  return ctx.evaluate(REDRAWN);
 }
 
+const MARK_OLD_AND_FOCUS: Payload<boolean> = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]");if(svg)svg.setAttribute("data-prw-old","");document.getElementById("place").focus();return true;})()`;
+const FIRST_ROW: Payload<string | null> =
+  `(()=>{const n=document.querySelector("#place-options > li .pl-name");return n?n.textContent:null;})()`;
+const OWN_FRACTION: Payload<string | null> =
+  `(()=>{const svg=window.__vellumRunInline({kind:"draw",seed:42,overrides:{outline:"${PLACE}"},render:{style:"antique",widthPx:1500,legend:true}}).svg;const m=svg.match(/data-vellum-land-fraction="([^"]*)"/);return m?m[1]:null;})()`;
+
 export async function prwPlaceLand(ctx: SuiteContext): Promise<void> {
-  const seen = await explorerAt(ctx, PLACE_HASH);
-  const { moved, after } = await redrawAfter(ctx, MOVE_LAND, "PRW7 the land move's draw");
+  const { evaluate, send, sleep } = ctx;
+  const settle = makeSettle({ evaluate, sleep });
+  await explorerAt(ctx, "#seed=42&style=antique&legend=1&arms=0&beasts=0&land=150");
+  const before = await evaluate(REDRAWN);
+  await evaluate(MARK_OLD_AND_FOCUS);
+  await send("Input.insertText", { text: "Texas" });
+  await settle(FIRST_ROW, (name) => name === "Texas", "PRW7 the list for Texas");
+  await sendKey(send, "Enter", "Enter", 13);
+  const after = await drawEnded(ctx, "PRW7 the pick's draw");
+  const own = await evaluate(OWN_FRACTION);
   ctx.check(
-    "PRW7 sea level moved on a shaped world stays out of its link and its draw",
-    !!seen &&
-      seen.outline === PLACE &&
-      moved.started &&
-      moved.before !== null &&
-      moved.before !== String(Number(FLOOD) / 1000) &&
-      after.status === "" &&
+    "PRW7 a sea level set on a plain world stays out of the link and the draw once a place is picked",
+    before.land === "0.15" &&
+      own !== "0.15" &&
       after.fresh &&
+      after.status === "" &&
       after.outline === PLACE &&
-      after.land === moved.before &&
-      after.hash === PLACE_HASH,
-    JSON.stringify({ moved, after }),
+      after.land === own &&
+      after.hash === `#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=${PLACE}`,
+    JSON.stringify({ before, own, after }),
   );
 }
 
 export async function prwCountType(ctx: SuiteContext): Promise<void> {
   const seen = await explorerAt(ctx, COUNT_HASH);
-  const { moved, after } = await redrawAfter(ctx, PICK_ISLAND, "PRW8 the type change's draw");
+  const moved = await ctx.evaluate(PICK_ISLAND);
+  const after = await drawEnded(ctx, "PRW8 the type change's draw");
   ctx.check(
     "PRW8 a counted world turned to an island drops its count from the link and the draw",
     !!seen &&
