@@ -83,7 +83,7 @@ function pathPoints(d: string): Array<readonly [number, number]> {
   return out;
 }
 
-/** The box every path vertex, curve control point and rect corner in an untransformed fragment reaches: an upper bound on its ink less the stroke, since a curve lies inside its control hull. */
+/** The box every path vertex, curve control point, rect corner and circle edge in an untransformed fragment reaches: an upper bound on its ink less the stroke, since a curve lies inside its control hull; a fragment with no point throws, so an empty slice cannot pass as a small mark. */
 export function inkExtent(svg: string): Extent {
   const pts: Array<readonly [number, number]> = [];
   for (const m of svg.matchAll(/<rect\b[^>]*>/g)) {
@@ -92,7 +92,13 @@ export function inkExtent(svg: string): Extent {
     const y = Number(a.y ?? 0);
     pts.push([x, y], [x + Number(a.width ?? 0), y + Number(a.height ?? 0)]);
   }
+  for (const m of svg.matchAll(/<circle\b[^>]*>/g)) {
+    const a = attrsOf(m[0]);
+    const [cx, cy, r] = [Number(a.cx), Number(a.cy), Number(a.r)];
+    pts.push([cx - r, cy - r], [cx + r, cy + r]);
+  }
   for (const m of svg.matchAll(/<path\b[^>]*\bd="([^"]*)"/g)) pts.push(...pathPoints(m[1] ?? ""));
+  if (pts.length === 0) throw new Error("inkExtent: the fragment holds no point");
   const xs = pts.map((p) => p[0]);
   const ys = pts.map((p) => p[1]);
   return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };

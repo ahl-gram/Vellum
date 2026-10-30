@@ -227,11 +227,13 @@ function regionCarry(
   g: RegionGrid,
   land: Pick<RegionLand, "elev" | "seaLevel">,
   labels: Int16Array,
+  detail: number,
 ): NonNullable<World["region"]> {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
   return {
     window,
+    detail,
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
     seaGate: regionSeaGate(world, window, { gridW, gridH }, land),
@@ -298,7 +300,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: regionCarry(g, { elev, seaLevel }, roadLabels),
+    region: regionCarry(g, { elev, seaLevel }, roadLabels, regionDetailLevel(spec)),
   };
 }
 

@@ -12,6 +12,7 @@ import {
 import { hamletCandidates, worldNameSet } from "../../src/society/hamlets.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { REGION_FONT_SIZE } from "../../src/render/layers/settlements.ts";
+import { finerMarkBox, markScale } from "../../src/render/layers/settlement-marks.ts";
 import { textBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
@@ -227,18 +228,21 @@ test("farmstead and mill marks draw their own glyphs and are labelled like hamle
     const nums = (g.body.match(/<path d="([^"]*)"/)?.[1] ?? "").match(/-?\d+(\.\d+)?/g)?.map(Number) ?? [];
     const xs = nums.filter((_, i) => i % 2 === 0);
     const ys = nums.filter((_, i) => i % 2 === 1);
-    const side = 4.8 * 1.8;
-    assert.ok(Math.abs(Math.max(...xs) - Math.min(...xs) - side) < 0.05, "the house is 8.64 wide at the sheet's size");
-    assert.ok(Math.abs(Math.max(...ys) - Math.min(...ys) - side) < 0.05, "and 8.64 tall");
+    const side = 4.8 * 1.8 * markScale("farmstead", WITNESS);
+    assert.ok(Math.abs(Math.max(...xs) - Math.min(...xs) - side) < 0.05, "the house is as wide as its mark is drawn");
+    assert.ok(Math.abs(Math.max(...ys) - Math.min(...ys) - side) < 0.05, "and as tall");
   }
   for (const g of mills) {
-    assert.ok(
-      g.body.includes("<circle") && /<circle[^>]* r="3\.9"/.test(g.body),
-      "a mill's wheel is a circle of radius 3.9",
-    );
+    const wheel = Number(g.body.match(/<circle[^>]* r="([\d.]+)"/)?.[1]);
+    assert.ok(g.body.includes("<circle"), "a mill's wheel is a circle");
+    assert.ok(Math.abs(wheel - 3.9 * markScale("mill", WITNESS)) < 0.01, "of the radius its mark is drawn at");
     const spokes = g.body.match(/<path d="([^"]*)"/)?.[1] ?? "";
     assert.equal(spokes.split("M").length - 1, 2, "with two spokes, a cross");
-    assert.ok(/<path d="[^"]*"[^>]*stroke-width="1\.2"/.test(g.body), "drawn at 1.2");
+    const spokeWidth = Number(g.body.match(/<path d="[^"]*"[^>]*stroke-width="([\d.]+)"/)?.[1]);
+    assert.ok(
+      Math.abs(spokeWidth - 1.2 * markScale("mill", WITNESS)) < 0.01,
+      "drawn at the width its mark is drawn at",
+    );
   }
   const sizes = farms.map((g) => g.body.match(/<text[^>]*font-size="([\d.]+)"/)?.[1]).filter((v) => v !== undefined);
   assert.ok(sizes.length >= 1, "a farmstead is labelled");
@@ -286,11 +290,6 @@ test("a farmstead's name gives way to every feature name (Issue #952, M7)", () =
   assert.deepEqual(words, textsOf(layerOf(bare, "layer-feature-labels")), "the tier costs no feature word");
 });
 
-const MARK_BOX: Record<string, (px: number, py: number) => Box> = {
-  farmstead: (px, py) => ({ x: px - 4.32, y: py - 8.64, w: 8.64, h: 8.64 }),
-  mill: (px, py) => ({ x: px - 3.9, y: py - 3.9, w: 7.8, h: 7.8 }),
-};
-
 const overlap = (a: Box, b: Box): boolean => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 function upright(tag: string, text: string): Box | null {
@@ -324,7 +323,7 @@ function wordsOverMarks(region: World, svg: string): string[] {
   const covered: string[] = [];
   region.settlements.forEach((s, i) => {
     if (!isTier(s)) return;
-    const mark = MARK_BOX[s.kind]!(proj.px(s.x), proj.py(s.y));
+    const mark = finerMarkBox(s.kind, proj.px(s.x), proj.py(s.y), markScale(s.kind, region));
     const others = groups.filter((g) => attr(g.open, "data-idx") !== String(i)).flatMap((g) => wordBoxes(g.body));
     if ([...others, ...featureWords].some((word) => overlap(mark, word))) covered.push(s.name);
   });

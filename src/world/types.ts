@@ -84,6 +84,7 @@ export type World = {
     readonly window: UvWindow;
     readonly worldGridW: number;
     readonly worldGridH?: number;
+    readonly detail: number;
     /** 1 = genuine border-connected sea, 0 = land or an inland lake; a cropped region's own seaMask floods lakes as sea, so sea furniture reads THIS, not oceanDist. */
     readonly seaGate?: Uint8Array;
     /** Issue #423 the realm carry: the parent's grown realm outlines mapped into this window's grid coordinates, drawn by the realm layers in place of label-derived geometry. */

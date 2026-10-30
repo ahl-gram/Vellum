@@ -19,7 +19,7 @@ export const FARMSTEAD_SPACING_WORLD_CELLS = 0.45;
 export const MILL_REACH_WORLD_CELLS = 0.18;
 export const FARMSTEAD_MAX_WINDOW_UV = 1 / 32;
 
-export const MARK_FOOTPRINT: Footprint = { up: 3, down: 1, side: 2 };
+export const MARK_FOOTPRINT: Footprint = { up: 3, down: 2, side: 2 };
 
 const JITTER = 0.7;
 
