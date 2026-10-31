@@ -144,3 +144,16 @@ test("the opening quotation mark and the first letter are set together as a larg
     );
   }
 });
+
+test("a founded world whose founding text opens on a flag engraves the whole flag in its capital, in each style (Issue #1107)", () => {
+  const flag = "\u{1F1FA}\u{1F1F8}";
+  const world: World = { ...founded, recipe: { ...founded.recipe, foundingText: `${flag} ${f.sentence}` } };
+  for (const style of Object.values(STYLES)) {
+    const group = foundingGroup(layerFor(world, style));
+    assert.ok(group, `${style.name}: the founding group must be found`);
+    const first = lineNodes(group)[0] as SvgNode;
+    const capital = first.children[0];
+    assert.ok(capital !== undefined && typeof capital !== "string" && capital.tag === "tspan", style.name);
+    assert.deepEqual(capital.children, [`\u{201C}${flag}`], style.name);
+  }
+});
