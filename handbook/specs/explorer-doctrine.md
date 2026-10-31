@@ -140,7 +140,10 @@ make an unqualified rule false. Read the surface, not just the rule.
   viewport change and the camera is clamped against that box, so re-seating the same translate and
   scale against a new box walks the framing and settles on a different region. `bindRoom` in
   `src/site/shared/room.ts` takes `camera: { hold, restore }` for exactly this, and the Explorer's
-  restore recomputes the transform from the held uv camera against the current gesture box.
+  restore recomputes the transform from the held uv camera against the current gesture box. Every
+  other chart room takes that pair from `framingCamera` in `src/site/shared/camera.ts`, through
+  `bindZoomRoom` in `src/site/shared/zoom-room.ts`, or directly on the Daily Hunt, whose controller
+  is its own.
 - **A refit re-seats the camera WITHOUT re-entering the zoom pipeline**: no zoom event, no settle, no
   address write, no redraft. A glide in flight is stopped and restarted toward its pending target,
   because the tween rewrites the stored transform every frame and would discard the refit. A refit

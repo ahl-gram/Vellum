@@ -1,11 +1,8 @@
 // The Wayfarer's Ribbon's chart-room seats: the scroll as the sheet's one face, the Glass on it, the fit at the scroll's own aspect, the folio's lines and the itinerary on the slip, each row leaning the Glass on its stretch. app.ts stays the conductor.
-import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
-import { ZOOM_STEP } from "../shared/zoom-keys.ts";
-import { pageSlideAway } from "../shared/slide-away-page.ts";
-import { bindRoom, type Room } from "../shared/room.ts";
+import type { Room } from "../shared/room.ts";
+import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { contentsRow, type RowPart } from "../shared/contents-row.ts";
-import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
+import { gestureBox, transformFromCamera } from "../shared/camera.ts";
 import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
 import { rowText } from "./row-text.ts";
 import type { RibbonPlateData, RibbonRow } from "../explorer/ribbon-job.ts";
@@ -34,42 +31,18 @@ export interface Sheet {
 }
 
 export function bindRibbonRoom(roomEls: RoomFurniture): Sheet {
-  const slide = pageSlideAway({
+  const { zoom, room } = bindZoomRoom({
     frame: roomEls.stage,
     sheet: roomEls.sheet,
-    gesture: roomEls.viewport,
-    step: ZOOM_STEP,
-  });
-  const zoom = createZoomController({
-    viewportEl: roomEls.viewport,
-    targetEl: roomEls.map,
-    scaleExtent: [1, 8],
-    glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
-    onApply: (s) => slide.follow(s.k),
-  });
-  zoom.attach();
-  bindGlassKeys(roomEls.viewport, zoom);
-  const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({
-    frame: roomEls.stage,
-    sheet: roomEls.sheet,
+    viewport: roomEls.viewport,
+    target: roomEls.map,
     aspect: () => RIBBON_W / RIBBON_H,
-    camera: {
-      hold: () => {
-        const { W, H } = box();
-        return cameraFromTransform(zoom.getState(), W, H);
-      },
-      restore: (cam) => {
-        const { W, H } = box();
-        zoom.refit(transformFromCamera(cam, W, H));
-      },
-    },
   });
   return {
     room,
     rebase: () => zoom.rebase(),
     lean: (nx, ny) => {
-      const { W, H } = box();
+      const { W, H } = gestureBox(roomEls.viewport);
       zoom.zoomTo(transformFromCamera({ cx: nx, cy: ny, k: LEAN_K }, W, H));
     },
   };

@@ -3,26 +3,33 @@ import type { ImportDeclaration, ImportSpecifier, Program } from "estree";
 import { repoPath } from "./source-shape.ts";
 
 export type SharedBinding = readonly [name: string, from: string];
-const SEATS: readonly SharedBinding[] = [
-  ["bindRoom", "../shared/room.ts"],
-  ["createZoomController", "../shared/zoom-controller.ts"],
-  ["bindGlassKeys", "../shared/glass-keys.ts"],
-];
+const ZOOM_ROOM: SharedBinding = ["bindZoomRoom", "../shared/zoom-room.ts"];
 const ANNOUNCER: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
 const ITEM: SharedBinding = ["prospectItemFrom", "../shared/table-address.ts"];
 
 export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>> = {
-  "src/site/print-room/seats.ts": SEATS,
-  "src/site/prospect/seats.ts": SEATS,
-  "src/site/ribbon/seats.ts": SEATS,
-  "src/site/reading-room/seats.ts": SEATS,
-  "src/site/seed-of-the-day/app.ts": [["createZoomController", "../shared/zoom-controller.ts"]],
+  "src/site/shared/zoom-room.ts": [
+    ["bindRoom", "./room.ts"],
+    ["createZoomController", "./zoom-controller.ts"],
+    ["bindGlassKeys", "./glass-keys.ts"],
+    ["framingCamera", "./camera.ts"],
+  ],
+  "src/site/print-room/seats.ts": [ZOOM_ROOM],
+  "src/site/prospect/seats.ts": [ZOOM_ROOM],
+  "src/site/ribbon/seats.ts": [ZOOM_ROOM],
+  "src/site/reading-room/seats.ts": [ZOOM_ROOM],
+  "src/site/specimen/app.ts": [ZOOM_ROOM],
+  "src/site/seed-of-the-day/app.ts": [
+    ["createZoomController", "../shared/zoom-controller.ts"],
+    ["framingCamera", "../shared/camera.ts"],
+  ],
   "src/site/explorer/app.ts": [["bindRoom", "../shared/room.ts"], ANNOUNCER, STORE, ["filingAt", "./chart-drawer.ts"]],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
     ["usesWorker", "../worker-client.ts"],
     ["deviceStorage", "../../shared/table-store.ts"],
+    ["bindZoomRoom", "../../shared/zoom-room.ts"],
   ],
   "src/site/prospect/app.ts": [ITEM],
   "src/site/explorer/chart-drawer.ts": [ITEM],
