@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { PLACE_TABLE, writePlaceFiles } from "../../scripts/place-files.ts";
-import { placeFile } from "../../src/site/explorer/place-fetch.ts";
+import { PLACE_NAMES, PLACE_TABLE, writePlaceFiles, writePlaceNames } from "../../scripts/place-files.ts";
+import { NAMES_FILE, placeFile } from "../../src/site/explorer/place-fetch.ts";
 import { PLACE_ID_LIST } from "../../src/world/outline-place-ids.ts";
 import { placeId } from "../../src/world/outline-ids.ts";
 
@@ -34,5 +34,12 @@ test("a table's places are written and nothing else (Issue #854)", async () => {
     const root = join(dir, "root");
     assert.equal(await writePlaceFiles(root, small), 2);
     assert.deepEqual(readdirSync(join(root, "outlines")).sort(), ["ne-1.txt", "ne-2.txt"]);
+  });
+});
+
+test("the name index is served beside the places, byte for byte (Issue #854)", async () => {
+  await inTemp(async (dir) => {
+    await writePlaceNames(dir);
+    assert.deepEqual(readFileSync(join(dir, NAMES_FILE)), readFileSync(PLACE_NAMES));
   });
 });

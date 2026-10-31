@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  NAMES_FILE,
   createPlaceLoader,
+  namesUrl,
   placeFile,
   placeOfJob,
   placeUrl,
@@ -76,4 +78,9 @@ test("a fetcher that throws rejects the same way (Issue #854)", async () => {
   const { fetcher } = fakeFetcher(["offline"]);
   const load = createPlaceLoader(fetcher, () => {});
   await assert.rejects(load(TEXAS), /^Error: the outline of ne-1159315211 could not be fetched/);
+});
+
+test("the name index is served at the site root under outlines/ (Issue #854)", () => {
+  assert.equal(NAMES_FILE, "outlines/names.json");
+  assert.equal(namesUrl, "/outlines/names.json");
 });

@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { arrive } from "../../e2e/suites/cluster/chart.ts";
 import { dnTablet, type DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import type { TrailKit } from "../../e2e/suites/cluster/trail.ts";
 import { docRoomsKit } from "../../e2e/suites/document-rooms.ts";
 import { atTheDesk } from "../../e2e/suites/reading-room.ts";
 import type { ReadingRoomKit } from "../../e2e/suites/reading-room/kit.ts";
@@ -192,4 +194,45 @@ test("atTheDesk fails RR29's step by the wait's own label when the room never la
   const rr29 = failed.find((f) => f.name === "RR29");
   assert.ok(rr29, "RR29's step did not fail");
   assert.match(rr29.message, /^settle timeout the room laid out again after the 1440x900 override: /);
+});
+
+const BOOT_FIT = [0, 199.359375, 568.59375, 419.875] as const;
+const PLATE_FIT = [7.859375, 163.203125, 552.875, 408.28125] as const;
+const prospect =
+  (plateAt: number) =>
+  (clock: number): FakeFrame => ({
+    nodes: {
+      "header.chrome": { anims: ["finished"] },
+      "#sheet": { rect: clock < plateAt ? BOOT_FIT : PLATE_FIT },
+      ...(clock < plateAt ? { "#pp-plate[hidden]": {} } : {}),
+    },
+  });
+const atRest = (page: FakePage): TrailKit => {
+  const { ctx } = ctxOn(page.evaluate);
+  return { ...ctx, settle: makeSettle(ctx), goto: () => Promise.resolve() };
+};
+
+test("AT's rest hands the Prospect over only once its plate is shown and the fit the plate's refit leaves holds still", async () => {
+  const page = fakePage(prospect(4));
+  await assert.doesNotReject(arrive(atRest(page), "/prospect/", [1024, 768]));
+  assert.equal(
+    page.said.length,
+    5,
+    "AT's rest handed the Prospect over before its plate was shown and its refit held still",
+  );
+});
+
+test("AT's rest times out naming the Prospect when its plate never shows", async () => {
+  const page = fakePage(prospect(Infinity));
+  await assert.rejects(
+    arrive(atRest(page), "/prospect/", [1024, 768]),
+    (err: Error) =>
+      err.message.startsWith("settle timeout AT rest /prospect/: ") && err.message.includes('"drawn":false'),
+  );
+});
+
+test("AT's rest hands a page with no plate over on its second still read", async () => {
+  const page = fakePage(() => ({ nodes: { "header.chrome": { anims: ["finished"] } } }));
+  await assert.doesNotReject(arrive(atRest(page), "/faq/", [1024, 768]));
+  assert.equal(page.said.length, 2);
 });

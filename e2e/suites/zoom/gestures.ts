@@ -71,7 +71,7 @@ async function pinAndFind(
     await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
     if (!(await ctx.evaluate(HIT_AT(a)))) continue;
     const card = await pinCard(ctx, a);
-    const b = card && marks.find((m) => m.idx !== a.idx && inside(m, card.rect, 14) && !inside(m, card.acts, 14));
+    const b = card && marks.find((m) => m.idx !== a.idx && inside(m, card.rect, 14) && !inside(m, card.acts, -14));
     if (!b) continue;
     return {
       a,

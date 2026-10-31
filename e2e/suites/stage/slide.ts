@@ -1,6 +1,7 @@
 // The Explorer's slide-away, the follow and the seats (Issue #996): the head cluster and the chart folio stay home through the Glass's first press, follow the zoom by the log of depth to their thin lines at the depth the chart fills the screen, stand home or away at that depth alone under reduced motion, follow a fold, and leave every seat where it stands with them home.
 import type { SuiteContext } from "../../types.ts";
 import { rest, size } from "./stage.ts";
+import { fillPressOf, pressDepths } from "../slide-away/kit.ts";
 import type { Pieces } from "./slide-kit.ts";
 import {
   fillOf,
@@ -17,8 +18,8 @@ import {
   travelsOf,
 } from "./slide-kit.ts";
 
+// 2026-10-30: the fill against the first press's 1.4, this machine's layout 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over); the runner's 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over), CI run 41153518333.
 const FIRST_PRESS = 1.4;
-const FILL_RANGE: Record<string, [number, number]> = { "1280x800": [1.5, 1.56], "1024x768": [1.9, 1.959] };
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
   const faults: string[] = [];
@@ -27,13 +28,13 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
   const home = await ctx.evaluate(PIECES_READ);
   const fill = fillOf(home);
   const { up, down } = travelsOf(home);
-  const [lo, hi] = FILL_RANGE[`${w}x${h}`]!;
-  if (!(fill >= lo && fill <= hi)) say(`the fill depth ${fill.toFixed(4)} lies outside ${lo} to ${hi}`);
+  const n = fillPressOf(fill);
+  if (!(fill > FIRST_PRESS)) say(`the fill depth ${fill.toFixed(4)} does not pass the first press, so nothing follows`);
   if (home.head.ty !== 0 || home.folio.ty !== 0) say(`a piece is away at rest: ${home.head.ty}, ${home.folio.ty}`);
   await press(ctx, 1);
   const one = await ctx.evaluate(PIECES_READ);
   if (one.head.ty !== 0 || one.folio.ty !== 0) say(`the first press moved a piece: ${one.head.ty}, ${one.folio.ty}`);
-  const from = Math.min(FIRST_PRESS, fill);
+  const from = n === 1 ? fill : pressDepths(n - 1);
   const mid = await poseAt(ctx, Math.sqrt(from * fill));
   if (!near(mid.head.ty, up / 2, 1) || !near(mid.folio.ty, down / 2, 1))
     say(
@@ -58,7 +59,7 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
     say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {
     faults,
-    detail: `${w}x${h} fill ${fill.toFixed(4)}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}`,
+    detail: `${w}x${h} fill ${fill.toFixed(4)} at press ${n}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}`,
   };
 }
 
@@ -66,7 +67,7 @@ export async function es1Follow(ctx: SuiteContext): Promise<void> {
   const rows = await motionOn(ctx, async () => [await es1At(ctx, 1280, 800), await es1At(ctx, 1024, 768)]);
   const faults = rows.flatMap((r) => r.faults);
   ctx.check(
-    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through the Glass's first press and then follow the zoom by the log of depth, half way at the geometric mean of the first press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7)",
+    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through every press before the press that fills and then follow the zoom by the log of depth, half way at the geometric mean of that press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7; Issue #1034)",
     faults.length === 0,
     rows.map((r) => r.detail).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),

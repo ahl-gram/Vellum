@@ -2,6 +2,7 @@
 
 :root {
   --slip-w: 22rem;
+  --slip-right: 2rem;
   --desk-frame-h: 768px;
 }
 
@@ -298,7 +299,7 @@ body.chart-room .stage .status a {
   transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 .corner.br.zoomery {
-  right: calc(var(--slip-w) + 2rem + 1.4rem);
+  right: calc(var(--slip-w) + var(--slip-right) + 1.4rem);
 }
 body:has(.slip.folded) .corner.br.zoomery {
   right: var(--chrome-x);
@@ -338,7 +339,7 @@ body:has(.slip.folded) .corner.br.zoomery {
 
 .legend {
   position: fixed;
-  left: calc((100% - var(--slip-w) - 2rem) / 2);
+  left: calc((100% - var(--slip-w) - var(--slip-right)) / 2);
   bottom: var(--chrome-y);
   transform: translateX(-50%);
   z-index: 10;
@@ -430,7 +431,7 @@ body:has(.slip.folded) .legend {
 .slip {
   position: fixed;
   z-index: 20;
-  right: 2rem;
+  right: var(--slip-right);
   top: 9rem;
   width: var(--slip-w);
   max-height: calc(100vh - 11rem);
@@ -449,7 +450,7 @@ body:has(.slip.folded) .legend {
     visibility 0s;
 }
 .slip.folded {
-  transform: translateX(calc(100% + 2.6rem));
+  transform: translateX(calc(100% + var(--slip-right) + 0.6rem));
   opacity: 0;
   visibility: hidden;
   transition:

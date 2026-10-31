@@ -10,6 +10,7 @@ export interface StageInput {
   readonly above: readonly number[];
   /** Tops of the chrome below it. */
   readonly below: readonly number[];
+  /** How far the open slip reaches in from the right edge: its width plus its inset; 0 when folded. */
   readonly beside: number;
   readonly right?: readonly number[];
   readonly gap: number;
@@ -27,8 +28,8 @@ export interface StageFit {
   readonly under: boolean;
 }
 
-/** The mockup's clear beside an open slip: its own 2rem inset plus a 1.5rem breath. */
-export const SLIP_CLEARANCE = 56;
+/** The mockup's breath beside an open slip, 1.5rem; the slip's own inset rides in its reach. */
+export const SLIP_BREATH = 24;
 
 export const CHROME_GAP = 14;
 
@@ -38,7 +39,7 @@ export function fitStage(input: StageInput): StageFit {
   const floor = Math.min(view.h, ...input.below);
   const bottom = view.h - floor + gap;
   const right = Math.max(
-    input.beside > 0 ? input.beside + SLIP_CLEARANCE : 0,
+    input.beside > 0 ? input.beside + SLIP_BREATH : 0,
     ...(input.right ?? []).map((left) => view.w - left + gap),
   );
   const free = { w: Math.max(0, view.w - right), h: Math.max(0, view.h - top - bottom) };

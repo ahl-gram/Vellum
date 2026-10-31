@@ -54,17 +54,21 @@ export function slipWidth(r: DOMRect | null): number {
   return parseFloat(rootStyle.getPropertyValue("--slip-w")) * parseFloat(rootStyle.fontSize) || 0;
 }
 
-// atelier.css seats the Glass beside an open slip at right: --slip-w + 2rem + 1.4rem; computed here rather than read, because the Glass's right transitions with the fold and a rect read at the settle timer was 12px short (e2e Z13c).
-export const GLASS_GAP_REM = 3.4;
+// atelier.css seats the Glass beside an open slip at right: --slip-w + --slip-right + 1.4rem; computed here rather than read, because the Glass's right transitions with the fold and a rect read at the settle timer was 12px short (e2e Z13c).
+export const GLASS_BREATH_REM = 1.4;
 
-export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipW: number): number | null {
+export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipReach: number): number | null {
   if (glass === null) return null;
   if (!slipOpen) {
     const r = rectOf(glass);
     return r === null ? null : pageLeft(r);
   }
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  return pageBox().w - slipW - GLASS_GAP_REM * rem - glass.offsetWidth;
+  return pageBox().w - slipReach - GLASS_BREATH_REM * rem - glass.offsetWidth;
+}
+
+export function slipInset(slip: HTMLElement): number {
+  return parseFloat(getComputedStyle(slip).right) || 0;
 }
 
 export interface LegendRoom {
