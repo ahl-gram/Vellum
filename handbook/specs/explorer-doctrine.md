@@ -237,13 +237,16 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The Explorer's Glass is wired by ID and never queries `[data-zoom]`**: the conductor looks the
   presses up and hands them to `createGlass` as dependencies, through `pageGlass` in
   `src/site/explorer/app-wiring.ts`, so the ids live in `src/site/explorer/app.ts`. The other chart
-  rooms bind `[data-zoom]` through `bindGlassKeys` in
-  `src/site/shared/glass-keys.ts`. One component wearing `data-zoom` everywhere is inert on the
-  Explorer, and the failure is silent. `vellum/explorer-no-glass-keys` (`scripts/lint/import-bounds.ts`)
-  refuses a `glass-keys` import and any `[data-zoom]` string under `src/site/explorer/` and
-  `src/site/home/`, sparing only the folders `ROOMS_UNDER_THE_EXPLORER` names, the pages seated under
-  the Explorer that bind the kit's keys on purpose (the Portfolio); a selector assembled from pieces
-  passes it.
+  rooms bind `[data-zoom]` through `bindGlassKeys` in `src/site/shared/glass-keys.ts`, every room
+  but the Daily Hunt by way of `bindZoomRoom` in `src/site/shared/zoom-room.ts`. One component
+  wearing `data-zoom` everywhere is inert on the Explorer, and the failure is silent. **The keys
+  are one binding everywhere**: `bindZoomKeys` in `src/site/shared/zoom-keys.ts` binds the
+  focusable viewport alone and queries nothing in the document, so the Explorer takes it with its
+  voiced home and `bindGlassKeys` with the plain glide home. `vellum/explorer-no-glass-keys`
+  (`scripts/lint/import-bounds.ts`) refuses a `glass-keys` or `zoom-room` import and any
+  `[data-zoom]` string under `src/site/explorer/` and `src/site/home/`, sparing only the folders
+  `ROOMS_UNDER_THE_EXPLORER` names, the pages seated under the Explorer that bind the kit's keys
+  on purpose (the Portfolio); a selector assembled from pieces passes it.
 - **`touch-action: none` is required for touch drag and pinch**, because the zoom behaviour does not
   set it, and it is gated to the class the controller adds only while attached and taking touch.
 - **Where touch is the main pointer a finger moves the page until the reader gives it to the chart**
