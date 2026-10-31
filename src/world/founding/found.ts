@@ -11,6 +11,7 @@ import {
   SMALL_WORDS,
   type Steer,
 } from "./lexicon.ts";
+import { BAND_WORDS } from "./lexicon-shapes.ts";
 import { countAt } from "./counts.ts";
 import { longestEntryAt } from "./listed.ts";
 import { displayForm, foundingWords, type Refusal } from "./normalize.ts";
@@ -48,7 +49,10 @@ function segmentAt(words: ReadonlyArray<string>, at: number): Segment | "unloade
   const hit = shape ?? countAt(words, at);
   if (hit !== null) return phrased(words, at, hit.taken, hit.steers);
   const entry = longestEntryAt(words, at);
-  if (entry === undefined) return { words: [words[at] ?? ""] };
+  const word = words[at] ?? "";
+  const band = entry === undefined ? BAND_WORDS.get(word) : undefined;
+  if (band !== undefined) return { words: [word], phrase: word, own: [{ subject: "islands", value: band }] };
+  if (entry === undefined) return { words: [word] };
   return { words: words.slice(at, at + entry.phrase.split(" ").length), phrase: entry.phrase, own: entry.steers };
 }
 
@@ -74,20 +78,36 @@ function contestedSubjects(segments: ReadonlyArray<Segment>): Set<Steer["subject
 
 type Settled = { readonly steered: Kept[]; readonly contested: Recognised[]; readonly loose: string[] };
 
+const COUNT_PARTS: ReadonlySet<Steer["subject"]> = new Set(["islands", "isleSize"]);
+
+function refuse(lists: ReadonlyArray<ReadonlyArray<Steer>>): ReadonlyArray<ReadonlyArray<Steer>> {
+  const all = lists.flat();
+  const shaped = all.some((s) => s.subject === "outline");
+  const counted =
+    !shaped &&
+    all.some((s) => s.subject === "islands") &&
+    all.some((s) => s.subject === "mapType" && s.value === "archipelago");
+  const dropped = (s: Steer): boolean =>
+    (!counted && COUNT_PARTS.has(s.subject)) ||
+    ((counted || shaped) && s.subject === "land") ||
+    (shaped && s.subject === "coast");
+  return lists.map((list) => list.filter((s) => !dropped(s)));
+}
+
 function settle(segments: ReadonlyArray<Segment>): Settled {
   const cancelled = contestedSubjects(segments);
+  const surviving = refuse(segments.map((s) => (s.own ?? []).filter((steer) => !cancelled.has(steer.subject))));
   const steered: Kept[] = [];
   const contested: Recognised[] = [];
   const loose: string[] = [];
-  for (const { words, phrase, own } of segments) {
-    const surviving = (own ?? []).filter((s) => !cancelled.has(s.subject));
-    if (phrase !== undefined && own !== undefined && surviving.length > 0)
-      steered.push({ phrase, own, steers: surviving });
+  segments.forEach(({ words, phrase, own }, i) => {
+    const kept = surviving[i] ?? [];
+    if (phrase !== undefined && own !== undefined && kept.length > 0) steered.push({ phrase, own, steers: kept });
     else {
       if (phrase !== undefined) contested.push({ phrase, steers: own ?? [] });
       loose.push(...words);
     }
-  }
+  });
   return { steered, contested, loose };
 }
 

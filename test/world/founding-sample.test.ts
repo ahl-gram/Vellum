@@ -70,6 +70,17 @@ const landDirection = (row: Row): keyof typeof LAND_FACTOR | undefined => {
   return strengths.find(([, factor]) => Math.round(own * factor * 1000) / 1000 === share)?.[0];
 };
 
+test("the kept sample reaches a shape and an island count", () => {
+  assert.ok(
+    SAMPLE.some((r) => r.overrides.outline !== undefined),
+    "some kept row founds an outline",
+  );
+  assert.ok(
+    SAMPLE.some((r) => r.overrides.islands !== undefined),
+    "some kept row founds an island count",
+  );
+});
+
 test("the kept sample reaches every map type, climate, coast, land direction and naming tradition", () => {
   const values = (pick: (row: Row) => unknown): string[] =>
     [...new Set(SAMPLE.map(pick).filter((v) => v !== undefined))].map(String).sort();
