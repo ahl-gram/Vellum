@@ -111,18 +111,34 @@ then `generateWorld` like every other, the seed FIRST.
 
 **A published founding version never changes.** `FOUNDING_VERSION` in `src/world/founding/lexicon.ts`
 covers the whole procedure: the cleanup in `src/world/founding/normalize.ts`, the small words, the clash
-rule, the strengths, the climate traditions and the word list. Until the written-world link goes public
-(Issue #393), version 1 may still change, and the pins in `test/world/founding-covenant.test.ts` and
-`test/world/founding-sample.test.ts` move with it. Once it is public, version 1 is locked: a change is a
-new version added beside it, and every old version stays foundable, so an old sentence keeps its world.
+rule, the strengths, the climate traditions, the word list, the number rule (`countAt` in
+`src/world/founding/counts.ts`), the band words read anywhere (`scan` in `src/world/founding/found.ts`),
+the shape phrases (`shapeAt` in `src/world/founding/shapes.ts`) and the place names they read. Until the
+written-world link goes public (Issue #393), version 1 may still change, and the pins in
+`test/world/founding-covenant.test.ts`, `test/world/founding-count-covenant.test.ts`,
+`test/world/founding-shape-covenant.test.ts` and `test/world/founding-sample.test.ts` move with it. Once it
+is public, version 1 is locked: a change is a new version added beside it, and every old version stays
+foundable, so an old sentence keeps its world. The place names come from the gazetteer the host installs,
+so the name index `src/world/outline-place-names.json` is part of version 1 with them: once the link is
+public, renaming, adding or removing a place changes what an old sentence founds, and is version 2's.
 
 **The constants and the rules in plain words live with the code, as data a page can render**: the
-exports of `src/world/founding/lexicon.ts`, `FOUNDING_RULES` among them. Do not copy a number or a word
-from them into a spec or into a page's prose.
+exports of `src/world/founding/lexicon.ts` and `src/world/founding/lexicon-shapes.ts`, `FOUNDING_RULES`
+among them. Do not copy a number or a word from them into a spec or into a page's prose.
 
 **A refusal is a value, never a throw.** `foundWorld` returns `{ ok: false, reason }` for an empty
 sentence, one over the cap, one holding a control character or a character the platform does not know,
-and a version this build does not have. A surface shows the reason; it does not catch.
+a version this build does not have, and a sentence asking for a real place's outline while no gazetteer
+is installed (`places-not-loaded`; `setFoundingGazetteer` in `src/world/founding/shapes.ts`). A surface
+shows the reason; it does not catch. `places-not-loaded` is the one reason a surface never shows: the
+host installs the name index the shape box fetches and founds the sentence again.
+
+**A founding never asks the terrain for what it refuses.** After the clash, a count with no archipelago
+left steering, or beside a shape, is dropped with its sizes and the shape stays; beside a count or a
+shape a land word is dropped, and beside a shape a coast word, since neither draws there; beside a count
+a coast word sets the islands' raggedness and no coast warp (`refuse` and `overridesFor` in
+`src/world/founding/found.ts`). `test/world/founding-drawable.test.ts` founds every listed phrase beside
+a count, a band word and a shaped count and builds each through the terrain.
 
 **Founding agrees across platforms or refuses.** The cleanup reads the platform's own Unicode knowledge,
 and a character the platform does not know is refused rather than read, so two platforms that disagree
@@ -145,7 +161,10 @@ except that when the climate words name exactly one tradition between them, each
 lists it too; `contested` lists the recognised words that lost every meaning to a clash and so count
 toward the chart number, a tradition word among them even when its tradition is the world's by way of a
 climate word. A recognised word is in exactly one of the two, and an empty `steered` means nothing
-steered. The founded `culture` comes from a tradition word that survives the clash; else from the one
+steered. A count or a shape is one recognised phrase in `steered`: the number with every word to its
+island word, or the shape words with the name; a band word standing elsewhere is a recognised word of
+its own. A count that gives way to a shape stays in `steered` with what it kept, and `contested` does not
+show the count it lost. The founded `culture` comes from a tradition word that survives the clash; else from the one
 tradition the climate words name; else, when they name none or several, from `CLIMATE_TRADITION` for
 the climate; and with no word left setting the climate, from the chart number.
 
