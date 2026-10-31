@@ -6,7 +6,7 @@ import { emitLandKeys, gateLand, readWorldKeys, type LandKeys } from "../shared/
 import { drawnShape } from "../shared/shape-address.ts";
 import { chooseShape, shapeChoice } from "./shape-choice.ts";
 import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
-import { addressCamera, type Camera } from "./camera.ts";
+import { addressCamera, type Camera } from "../shared/camera.ts";
 import { DEEPEST_K } from "../../world/lod.ts";
 
 export interface Controls {

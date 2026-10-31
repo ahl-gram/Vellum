@@ -121,7 +121,7 @@ make an unqualified rule false. Read the surface, not just the rule.
 ## The camera, the gesture and the fit
 
 - **The camera is a uv CENTRE and a scale, never a raw pixel translate.** `cameraFromTransform` and
-  `transformFromCamera` in `src/site/explorer/camera.ts` are the bridge, and storing the centre as a
+  `transformFromCamera` in `src/site/shared/camera.ts` are the bridge, and storing the centre as a
   fraction of the sheet is what lets one shared link restore the same framing on any viewport.
 - **Clamp the scale BEFORE computing the anchor**, or the sheet lurches and walks at the limits.
   Both cameras do it: `zoomTarget` in `src/site/home/camera.ts` passes the clamped scale into the
@@ -140,7 +140,10 @@ make an unqualified rule false. Read the surface, not just the rule.
   viewport change and the camera is clamped against that box, so re-seating the same translate and
   scale against a new box walks the framing and settles on a different region. `bindRoom` in
   `src/site/shared/room.ts` takes `camera: { hold, restore }` for exactly this, and the Explorer's
-  restore recomputes the transform from the held uv camera against the current gesture box.
+  restore recomputes the transform from the held uv camera against the current gesture box. Every
+  other chart room takes that pair from `framingCamera` in `src/site/shared/camera.ts`, through
+  `bindZoomRoom` in `src/site/shared/zoom-room.ts`, or directly on the Daily Hunt, whose controller
+  is its own.
 - **A refit re-seats the camera WITHOUT re-entering the zoom pipeline**: no zoom event, no settle, no
   address write, no redraft. A glide in flight is stopped and restarted toward its pending target,
   because the tween rewrites the stored transform every frame and would discard the refit. A refit
@@ -234,13 +237,16 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The Explorer's Glass is wired by ID and never queries `[data-zoom]`**: the conductor looks the
   presses up and hands them to `createGlass` as dependencies, through `pageGlass` in
   `src/site/explorer/app-wiring.ts`, so the ids live in `src/site/explorer/app.ts`. The other chart
-  rooms bind `[data-zoom]` through `bindGlassKeys` in
-  `src/site/shared/glass-keys.ts`. One component wearing `data-zoom` everywhere is inert on the
-  Explorer, and the failure is silent. `vellum/explorer-no-glass-keys` (`scripts/lint/import-bounds.ts`)
-  refuses a `glass-keys` import and any `[data-zoom]` string under `src/site/explorer/` and
-  `src/site/home/`, sparing only the folders `ROOMS_UNDER_THE_EXPLORER` names, the pages seated under
-  the Explorer that bind the kit's keys on purpose (the Portfolio); a selector assembled from pieces
-  passes it.
+  rooms bind `[data-zoom]` through `bindGlassKeys` in `src/site/shared/glass-keys.ts`, every room
+  but the Daily Hunt by way of `bindZoomRoom` in `src/site/shared/zoom-room.ts`. One component
+  wearing `data-zoom` everywhere is inert on the Explorer, and the failure is silent. **The keys
+  are one binding everywhere**: `bindZoomKeys` in `src/site/shared/zoom-keys.ts` binds the
+  focusable viewport alone and queries nothing in the document, so the Explorer takes it with its
+  voiced home and `bindGlassKeys` with the plain glide home. `vellum/explorer-no-glass-keys`
+  (`scripts/lint/import-bounds.ts`) refuses a `glass-keys` or `zoom-room` import and any
+  `[data-zoom]` string under `src/site/explorer/` and `src/site/home/`, sparing only the folders
+  `ROOMS_UNDER_THE_EXPLORER` names, the pages seated under the Explorer that bind the kit's keys
+  on purpose (the Portfolio); a selector assembled from pieces passes it.
 - **`touch-action: none` is required for touch drag and pinch**, because the zoom behaviour does not
   set it, and it is gated to the class the controller adds only while attached and taking touch.
 - **Where touch is the main pointer a finger moves the page until the reader gives it to the chart**
@@ -282,7 +288,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
   (`cameraForAddress` in `src/site/explorer/glass.ts`). `GLASS_MAX` is the deepest band's k
   (`DEEPEST_K` in `src/world/lod.ts`), and a shared link's camera is read under that same bound
-  (`addressCamera` in `src/site/explorer/camera.ts`), so a link written at the bottom reads back at
+  (`addressCamera` in `src/site/shared/camera.ts`), so a link written at the bottom reads back at
   the bottom.
   **A shape field is spelt one way in every address.** A shape default is spelt by leaving its key out (a
   looseness or a raggedness of 0, sizes alike), a land or a coast the world's shape draws nothing from

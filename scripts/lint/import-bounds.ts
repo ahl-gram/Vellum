@@ -115,9 +115,9 @@ const foundingLocaleClockFree = hostFree(FOUNDING_GLOBALS, {
 
 export const ROOMS_UNDER_THE_EXPLORER: readonly string[] = ["src/site/explorer/portfolio/"];
 const glassBan = sourceBan(
-  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
+  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts, nor zoom-room.ts that binds it, nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
   (text) => text.includes("glass-keys"),
-  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys\b/.test(text),
+  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)(?:glass-keys|zoom-room)\b/.test(text),
 );
 const explorerNoGlassKeys: Rule.RuleModule = {
   meta: glassBan.meta,
@@ -162,6 +162,12 @@ const CONSTRUCTORS = new Set(["URL", "Worker", "SharedWorker"]);
 const HOOKS = new Set(["onSettle", "onApply"]);
 const FACTORY = "createZoomController";
 const isZoom = (text: unknown): boolean => typeof text === "string" && /zoom-controller/.test(text);
+const isRoomZoom = (text: unknown): boolean => typeof text === "string" && /zoom-room/.test(text);
+
+const sourceOf = (st: Node): unknown =>
+  st.type === "ImportDeclaration" || st.type === "ExportNamedDeclaration" || st.type === "ExportAllDeclaration"
+    ? (st.source as { value?: unknown } | null)?.value
+    : undefined;
 
 const literals = (args: readonly Node[]): string[] => {
   const [first] = args;
@@ -224,8 +230,12 @@ function controllerRefusals(context: Rule.RuleContext, program: Node): Node[] {
   const factories: Scope.Variable[] = [];
   const spaces: Scope.Variable[] = [];
   for (const st of (program as unknown as { body: Node[] }).body) {
+    if (isRoomZoom(sourceOf(st))) {
+      refused.push(st);
+      continue;
+    }
     const exported = st.type === "ExportNamedDeclaration" || st.type === "ExportAllDeclaration";
-    if (exported && isZoom((st.source as { value?: unknown } | null)?.value)) refused.push(st);
+    if (exported && isZoom(sourceOf(st))) refused.push(st);
     if (st.type !== "ImportDeclaration" || !isZoom(st.source.value)) continue;
     for (const spec of st.specifiers as Node[]) {
       const declared = context.sourceCode.getDeclaredVariables(spec);
@@ -258,15 +268,16 @@ const huntFixedWorld: Rule.RuleModule = {
     messages: {
       finer:
         "the Hunt stays a fixed world: no module of it names a finer survey, a region or a worker as a module source (Issue #161)",
-      hook: "the Hunt's zoom controller is geometric only: it is built with an options literal written out, carrying no onSettle or onApply, and reached only as a call this rule can read (Issue #161)",
+      hook: "the Hunt's zoom controller is geometric only: it is built with an options literal written out, carrying no onSettle or onApply, and reached only as a call this rule can read, never through zoom-room.ts, whose controller follows the slide-away (Issue #161)",
     },
   },
   create(context) {
     const held = (node: Node): void => {
       const text = literalText(node);
       const seat: Node | null = node.parent;
-      if (text !== null && HELD.test(text) && FINER.test(text) && !SOURCE_SEATS.has(seat?.type ?? ""))
-        context.report({ node, messageId: "finer" });
+      if (text === null || !HELD.test(text) || SOURCE_SEATS.has(seat?.type ?? "")) return;
+      if (FINER.test(text)) context.report({ node, messageId: "finer" });
+      else if (isRoomZoom(text)) context.report({ node, messageId: "hook" });
     };
     const finer = (node: Node): void => {
       if (finerSources(node).some((text) => FINER.test(text))) context.report({ node, messageId: "finer" });
@@ -277,7 +288,8 @@ const huntFixedWorld: Rule.RuleModule = {
       ExportNamedDeclaration: finer,
       ImportExpression: (node) => {
         finer(node);
-        if (isZoom(literalText(node.source as Node))) context.report({ node, messageId: "hook" });
+        const source = literalText(node.source as Node);
+        if (isZoom(source) || isRoomZoom(source)) context.report({ node, messageId: "hook" });
       },
       NewExpression: finer,
       CallExpression: finer,

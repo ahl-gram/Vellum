@@ -42,7 +42,7 @@ import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
-import type { Camera } from "./camera.ts";
+import type { Camera } from "../shared/camera.ts";
 import {
   seedInput,
   styleSel,

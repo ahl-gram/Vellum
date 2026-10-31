@@ -9,13 +9,14 @@ import { SHARED_BINDINGS, type SharedBinding } from "../../scripts/lint/shared-b
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/shared-binding-imported";
-const SEATS = "src/site/prospect/seats.ts";
+const SEATS = "src/site/shared/zoom-room.ts";
 
-const ROOM = 'import { bindRoom } from "../shared/room.ts";';
-const ZOOM = 'import { createZoomController } from "../shared/zoom-controller.ts";';
-const GLASS = 'import { bindGlassKeys } from "../shared/glass-keys.ts";';
-const USE_TWO = "export const two = [bindRoom, createZoomController];";
-const GLASS_KEYS: SharedBinding = ["bindGlassKeys", "../shared/glass-keys.ts"];
+const ROOM = 'import { bindRoom } from "./room.ts";';
+const ZOOM = 'import { createZoomController } from "./zoom-controller.ts";';
+const GLASS = 'import { bindGlassKeys } from "./glass-keys.ts";';
+const FRAMING = 'import { framingCamera } from "./camera.ts";';
+const USE_REST = "export const rest = [bindRoom, createZoomController, framingCamera];";
+const GLASS_KEYS: SharedBinding = ["bindGlassKeys", "./glass-keys.ts"];
 
 const reported = async (lines: readonly string[], path: string): Promise<Array<[string, string]>> => {
   const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
@@ -37,24 +38,26 @@ const BLIND_SPOT =
 
 const PLANTS: ReadonlyArray<readonly [string, readonly string[], Array<[string, string]>]> = [
   [
-    "(a) all three taken by their imported names (one renamed) and used",
+    "(a) all four taken by their imported names (one renamed) and used",
     [
       ROOM,
-      'import { createZoomController as makeZoom } from "../shared/zoom-controller.ts";',
+      'import { createZoomController as makeZoom } from "./zoom-controller.ts";',
       GLASS,
-      "export const a = [bindRoom, makeZoom, bindGlassKeys];",
+      FRAMING,
+      "export const a = [bindRoom, makeZoom, bindGlassKeys, framingCamera];",
     ],
     [],
   ],
-  ["(b) the import and the use deleted", [ROOM, ZOOM, USE_TWO], [[...GLASS_KEYS]]],
-  ["(c) imported, never used", [ROOM, ZOOM, GLASS, USE_TWO], [[...GLASS_KEYS]]],
+  ["(b) the import and the use deleted", [ROOM, ZOOM, FRAMING, USE_REST], [[...GLASS_KEYS]]],
+  ["(c) imported, never used", [ROOM, ZOOM, GLASS, FRAMING, USE_REST], [[...GLASS_KEYS]]],
   [
     "(d) imported as a type, used as a type",
     [
       ROOM,
       ZOOM,
-      'import type { bindGlassKeys } from "../shared/glass-keys.ts";',
-      USE_TWO,
+      FRAMING,
+      'import type { bindGlassKeys } from "./glass-keys.ts";',
+      USE_REST,
       "export type B = typeof bindGlassKeys;",
     ],
     [[...GLASS_KEYS]],
@@ -64,25 +67,40 @@ const PLANTS: ReadonlyArray<readonly [string, readonly string[], Array<[string, 
     [
       ROOM,
       ZOOM,
-      'import { type bindGlassKeys } from "../shared/glass-keys.ts";',
-      USE_TWO,
+      FRAMING,
+      'import { type bindGlassKeys } from "./glass-keys.ts";',
+      USE_REST,
       "export type B = typeof bindGlassKeys;",
     ],
     [[...GLASS_KEYS]],
   ],
   [
     "(f) imported from another specifier and used",
-    [ROOM, ZOOM, 'import { bindGlassKeys } from "./glass-keys.ts";', USE_TWO, "export const f = bindGlassKeys;"],
+    [
+      ROOM,
+      ZOOM,
+      FRAMING,
+      'import { bindGlassKeys } from "../shared/glass-keys.ts";',
+      USE_REST,
+      "export const f = bindGlassKeys;",
+    ],
     [[...GLASS_KEYS]],
   ],
   [
     "(g) a local function of the same name, used",
-    [ROOM, ZOOM, USE_TWO, "function bindGlassKeys(): void {}", "export const g = bindGlassKeys;"],
+    [ROOM, ZOOM, FRAMING, USE_REST, "function bindGlassKeys(): void {}", "export const g = bindGlassKeys;"],
     [[...GLASS_KEYS]],
   ],
   [
     "(h) a namespace import, used through its member",
-    [ROOM, ZOOM, 'import * as glass from "../shared/glass-keys.ts";', USE_TWO, "export const h = glass.bindGlassKeys;"],
+    [
+      ROOM,
+      ZOOM,
+      FRAMING,
+      'import * as glass from "./glass-keys.ts";',
+      USE_REST,
+      "export const h = glass.bindGlassKeys;",
+    ],
     [[...GLASS_KEYS]],
   ],
 ];
@@ -99,7 +117,7 @@ test("a room module takes each shared binding its roster entry names, by its own
 test("a file the roster does not name is not read", async () => {
   assert.deepEqual(await reported([""], "src/site/shared/room.ts"), [], "an empty module is read");
   assert.deepEqual(
-    await reported([ROOM, ZOOM, USE_TWO], "src/site/shared/room.ts"),
+    await reported([ROOM, ZOOM, USE_REST], "src/site/shared/room.ts"),
     [],
     "a file off the roster is read",
   );
@@ -107,29 +125,41 @@ test("a file the roster does not name is not read", async () => {
 
 const ROOM_BINDING: SharedBinding = ["bindRoom", "../shared/room.ts"];
 const ZOOM_BINDING: SharedBinding = ["createZoomController", "../shared/zoom-controller.ts"];
+const ZOOM_ROOM: SharedBinding = ["bindZoomRoom", "../shared/zoom-room.ts"];
 const ANNOUNCE: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
 const ITEM: SharedBinding = ["prospectItemFrom", "../shared/table-address.ts"];
-const SEAT_BINDINGS = [ROOM_BINDING, ZOOM_BINDING, GLASS_KEYS];
 
 const ROSTER: Record<string, readonly SharedBinding[]> = {
-  "src/site/print-room/seats.ts": SEAT_BINDINGS,
-  "src/site/prospect/seats.ts": SEAT_BINDINGS,
-  "src/site/ribbon/seats.ts": SEAT_BINDINGS,
-  "src/site/reading-room/seats.ts": SEAT_BINDINGS,
-  "src/site/seed-of-the-day/app.ts": [ZOOM_BINDING],
+  "src/site/shared/zoom-room.ts": [
+    ["bindRoom", "./room.ts"],
+    ["createZoomController", "./zoom-controller.ts"],
+    GLASS_KEYS,
+    ["framingCamera", "./camera.ts"],
+  ],
+  "src/site/print-room/seats.ts": [ZOOM_ROOM],
+  "src/site/prospect/seats.ts": [ZOOM_ROOM],
+  "src/site/ribbon/seats.ts": [ZOOM_ROOM],
+  "src/site/reading-room/seats.ts": [ZOOM_ROOM],
+  "src/site/specimen/app.ts": [ZOOM_ROOM],
+  "src/site/seed-of-the-day/app.ts": [ZOOM_BINDING, ["framingCamera", "../shared/camera.ts"]],
   "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
     ["usesWorker", "../worker-client.ts"],
     ["deviceStorage", "../../shared/table-store.ts"],
+    ["bindZoomRoom", "../../shared/zoom-room.ts"],
   ],
   "src/site/prospect/app.ts": [ITEM],
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };
 
-test("the roster is exactly the import pins the close of Issue #779 moved here, and every file and module it names exists", () => {
-  assert.deepEqual(SHARED_BINDINGS, ROSTER, "the roster is not the 22 imports the deleted pins held");
+test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, and every file and module it names exists", () => {
+  assert.deepEqual(
+    SHARED_BINDINGS,
+    ROSTER,
+    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them",
+  );
   for (const [file, bindings] of Object.entries(SHARED_BINDINGS)) {
     assert.ok(existsSync(join(ROOT, file)), `${file} does not exist`);
     for (const [name, from] of bindings)

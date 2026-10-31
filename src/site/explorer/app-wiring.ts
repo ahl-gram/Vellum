@@ -6,7 +6,8 @@ import { overridesOfLand, type LandOverrides } from "../shared/address-grammar.t
 import { makeDogEar, surveyItemFrom } from "./chart-drawer.ts";
 import type { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
-import { createGlass, ZOOM_STEP, type Glass } from "./glass.ts";
+import { createGlass, type Glass } from "./glass.ts";
+import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageLoupe } from "./loupe-page.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import type { Motion } from "./world-motion.ts";

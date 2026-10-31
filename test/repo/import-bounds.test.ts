@@ -163,12 +163,17 @@ const HUNT_PLANT = [
   'export const r = new SharedWorker("./region-worker.ts");',
   'const spec = "../explorer/lod-controller.ts"; export const s = () => import(spec);',
   "const held = `../explorer/region-detail.ts`; export const t = () => import(held);",
+  'import { bindZoomRoom } from "../shared/zoom-room.ts";',
+  'export const u = () => import("../shared/zoom-room.ts");',
+  'export { bindZoomRoom as w } from "../shared/zoom-room.ts";',
+  'const room = "../shared/zoom-room.ts"; export const v = () => import(room);',
+  'export const x = "the zoom-room, named in prose";',
 ];
 
-test("the Hunt stays a fixed world: no module source naming a finer survey, a region or a worker, and its zoom controller takes no redraft hook in any form this rule cannot read (Issue #161)", async () => {
+test("the Hunt stays a fixed world: no module source naming a finer survey, a region or a worker, and its zoom controller takes no redraft hook in any form this rule cannot read, nor reaches zoom-room.ts, whose controller carries one (Issue #161)", async () => {
   assert.deepEqual(
     await reports(HUNT_PLANT, "src/site/seed-of-the-day/app.ts", ["vellum/hunt-fixed-world"]),
-    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27],
+    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces, and a module whose name hides what it imports (the import closure, a handbook/errata/guards.md row)",
   );
   assert.deepEqual(
@@ -182,6 +187,8 @@ const GLASS_KEYS_PLANT = [
   'import { bindGlassKeys } from "../../shared/glass-keys.ts";',
   'export const z = (root: ParentNode) => root.querySelectorAll("[data-zoom]");',
   "export const y = bindGlassKeys;",
+  'import { bindZoomRoom } from "../../shared/zoom-room.ts";',
+  "export const w = bindZoomRoom;",
 ];
 
 test("the glass-keys ban spares the Portfolio's own folder under the Explorer and no other, so the Explorer's own modules at any depth stay inside it (Issue #767)", () => {
@@ -207,7 +214,7 @@ test("the glass-keys ban spares the Portfolio's own folder under the Explorer an
     "src/site/explorer/portfolio-zz/app.ts",
     "src/site/explorer/nested/src/site/explorer/portfolio/app.ts",
   ])
-    assert.deepEqual(rulesAt(path), [1, 2], `${path} stays under the ban`);
+    assert.deepEqual(rulesAt(path), [1, 2, 4], `${path} stays under the ban`);
   assert.deepEqual(
     ROOMS_UNDER_THE_EXPLORER,
     ["src/site/explorer/portfolio/"],

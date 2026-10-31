@@ -1,9 +1,6 @@
 // The Print Room's chart-room seats: the Glass on the sheet, the fit with the turned plate's own aspect, the folio's lines and the sheet's two faces (the proof, a bound plate turned onto it). app.ts stays the conductor.
-import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
-import { pageSlideAway } from "../shared/slide-away-page.ts";
-import { bindRoom, type Room } from "../shared/room.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import type { Room } from "../shared/room.ts";
+import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { PAGE_MEASURE_WIDTH, pageAspect } from "./matter-markup.ts";
 
 export interface RoomFurniture {
@@ -43,36 +40,12 @@ function bindPageScale(roomEls: RoomFurniture): void {
 
 export function bindPrintRoom(roomEls: RoomFurniture, aspect: () => number | null): Sheet {
   bindPageScale(roomEls);
-  const slide = pageSlideAway({
+  const { zoom, room } = bindZoomRoom({
     frame: roomEls.stage,
     sheet: roomEls.sheet,
-    gesture: roomEls.viewport,
-    step: ZOOM_STEP,
-  });
-  const zoom = createZoomController({
-    viewportEl: roomEls.viewport,
-    targetEl: roomEls.map,
-    scaleExtent: [1, 8],
-    glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
-    onApply: (s) => slide.follow(s.k),
-  });
-  zoom.attach();
-  bindGlassKeys(roomEls.viewport, zoom);
-  const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({
-    frame: roomEls.stage,
-    sheet: roomEls.sheet,
+    viewport: roomEls.viewport,
+    target: roomEls.map,
     aspect,
-    camera: {
-      hold: () => {
-        const { W, H } = box();
-        return cameraFromTransform(zoom.getState(), W, H);
-      },
-      restore: (cam) => {
-        const { W, H } = box();
-        zoom.refit(transformFromCamera(cam, W, H));
-      },
-    },
   });
   return { room, rebase: () => zoom.rebase() };
 }

@@ -1,10 +1,7 @@
 // The Prospect's chart-room seats: the plate as the sheet's one face, the Glass on it, the fit at the plate's own aspect, the folio's lines and the engraver's note on the slip. app.ts stays the conductor.
-import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
-import { pageSlideAway } from "../shared/slide-away-page.ts";
-import { bindRoom, type Room } from "../shared/room.ts";
+import type { Room } from "../shared/room.ts";
+import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { contentsRow } from "../shared/contents-row.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
 import { eraLine, prospectTitle, subLine, whereLine } from "./note-lines.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";
@@ -32,36 +29,12 @@ export interface Sheet {
 }
 
 export function bindProspectRoom(roomEls: RoomFurniture): Sheet {
-  const slide = pageSlideAway({
+  const { zoom, room } = bindZoomRoom({
     frame: roomEls.stage,
     sheet: roomEls.sheet,
-    gesture: roomEls.viewport,
-    step: ZOOM_STEP,
-  });
-  const zoom = createZoomController({
-    viewportEl: roomEls.viewport,
-    targetEl: roomEls.map,
-    scaleExtent: [1, 8],
-    glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
-    onApply: (s) => slide.follow(s.k),
-  });
-  zoom.attach();
-  bindGlassKeys(roomEls.viewport, zoom);
-  const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({
-    frame: roomEls.stage,
-    sheet: roomEls.sheet,
+    viewport: roomEls.viewport,
+    target: roomEls.map,
     aspect: () => PLATE_W / PLATE_H,
-    camera: {
-      hold: () => {
-        const { W, H } = box();
-        return cameraFromTransform(zoom.getState(), W, H);
-      },
-      restore: (cam) => {
-        const { W, H } = box();
-        zoom.refit(transformFromCamera(cam, W, H));
-      },
-    },
   });
   return { room, rebase: () => zoom.rebase() };
 }
