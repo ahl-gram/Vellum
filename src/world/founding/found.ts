@@ -2,17 +2,11 @@ import { hashString } from "../../core/rng.ts";
 import type { CultureId } from "../../society/culture-ids.ts";
 import { defaultRecipe } from "../generate.ts";
 import type { WorldRecipe } from "../types.ts";
-import {
-  CLIMATE_TRADITION,
-  COAST_WARP,
-  FOUNDING_VERSION,
-  LAND_FACTOR,
-  LEXICON,
-  SMALL_WORDS,
-  type LexiconEntry,
-  type Steer,
-} from "./lexicon.ts";
+import { CLIMATE_TRADITION, COAST_WARP, FOUNDING_VERSION, LAND_FACTOR, SMALL_WORDS, type Steer } from "./lexicon.ts";
+import { countAt } from "./counts.ts";
+import { longestEntryAt } from "./listed.ts";
 import { displayForm, foundingWords, type Refusal } from "./normalize.ts";
+import { shapeAt } from "./shapes.ts";
 
 export type FoundingOverrides = Partial<
   Pick<
@@ -32,51 +26,57 @@ export type Founding = {
   readonly residual: string;
 };
 
-type Segment = { readonly words: ReadonlyArray<string>; readonly entry?: LexiconEntry };
+type Segment = { readonly words: ReadonlyArray<string>; readonly phrase?: string; readonly own?: ReadonlyArray<Steer> };
+type Kept = { readonly phrase: string; readonly own: ReadonlyArray<Steer>; readonly steers: ReadonlyArray<Steer> };
 
-const BY_PHRASE = new Map(LEXICON.map((entry) => [entry.phrase, entry]));
-const LONGEST = Math.max(...LEXICON.map((entry) => entry.phrase.split(" ").length));
+const phrased = (words: ReadonlyArray<string>, at: number, taken: number, own: ReadonlyArray<Steer>): Segment => {
+  const used = words.slice(at, at + taken);
+  return { words: used, phrase: used.join(" "), own };
+};
 
-function longestEntryAt(words: ReadonlyArray<string>, at: number): LexiconEntry | undefined {
-  for (let span = Math.min(LONGEST, words.length - at); span > 0; span--) {
-    const entry = BY_PHRASE.get(words.slice(at, at + span).join(" "));
-    if (entry !== undefined) return entry;
-  }
-  return undefined;
+function segmentAt(words: ReadonlyArray<string>, at: number): Segment | "unloaded" {
+  const shape = shapeAt(words, at);
+  if (shape === "unloaded") return shape;
+  const hit = shape ?? countAt(words, at);
+  if (hit !== null) return phrased(words, at, hit.taken, hit.steers);
+  const entry = longestEntryAt(words, at);
+  if (entry === undefined) return { words: [words[at] ?? ""] };
+  return { words: words.slice(at, at + entry.phrase.split(" ").length), phrase: entry.phrase, own: entry.steers };
 }
 
-function scan(words: ReadonlyArray<string>): Segment[] {
+function scan(words: ReadonlyArray<string>): Segment[] | "unloaded" {
   const segments: Segment[] = [];
   let at = 0;
   while (at < words.length) {
-    const entry = longestEntryAt(words, at);
-    const taken = entry === undefined ? 1 : entry.phrase.split(" ").length;
-    segments.push({ words: words.slice(at, at + taken), ...(entry !== undefined ? { entry } : {}) });
-    at += taken;
+    const segment = segmentAt(words, at);
+    if (segment === "unloaded") return segment;
+    segments.push(segment);
+    at += segment.words.length;
   }
   return segments;
 }
 
 function contestedSubjects(segments: ReadonlyArray<Segment>): Set<Steer["subject"]> {
   const values = new Map<Steer["subject"], Set<Steer["value"]>>();
-  for (const steer of segments.flatMap((s) => s.entry?.steers ?? [])) {
+  for (const steer of segments.flatMap((s) => s.own ?? [])) {
     values.set(steer.subject, (values.get(steer.subject) ?? new Set()).add(steer.value));
   }
   return new Set([...values].filter(([, seen]) => seen.size > 1).map(([subject]) => subject));
 }
 
-type Settled = { readonly steered: Recognised[]; readonly contested: Recognised[]; readonly loose: string[] };
+type Settled = { readonly steered: Kept[]; readonly contested: Recognised[]; readonly loose: string[] };
 
 function settle(segments: ReadonlyArray<Segment>): Settled {
   const cancelled = contestedSubjects(segments);
-  const steered: Recognised[] = [];
+  const steered: Kept[] = [];
   const contested: Recognised[] = [];
   const loose: string[] = [];
-  for (const { words, entry } of segments) {
-    const surviving = entry?.steers.filter((s) => !cancelled.has(s.subject)) ?? [];
-    if (entry !== undefined && surviving.length > 0) steered.push({ phrase: entry.phrase, steers: surviving });
+  for (const { words, phrase, own } of segments) {
+    const surviving = (own ?? []).filter((s) => !cancelled.has(s.subject));
+    if (phrase !== undefined && own !== undefined && surviving.length > 0)
+      steered.push({ phrase, own, steers: surviving });
     else {
-      if (entry !== undefined) contested.push({ phrase: entry.phrase, steers: entry.steers });
+      if (phrase !== undefined) contested.push({ phrase, steers: own ?? [] });
       loose.push(...words);
     }
   }
@@ -88,19 +88,16 @@ const tongueOf = (steers: ReadonlyArray<Steer>): CultureId | undefined => {
   return undefined;
 };
 
-const ownSteers = (recognised: Recognised): ReadonlyArray<Steer> => BY_PHRASE.get(recognised.phrase)?.steers ?? [];
-
-function creditClimateTongue(steered: ReadonlyArray<Recognised>): ReadonlyArray<Recognised> {
+function creditClimateTongue(steered: ReadonlyArray<Kept>): ReadonlyArray<Recognised> {
   const climate = steered.filter((r) => r.steers.some((s) => s.subject === "band"));
-  const named = new Set(climate.map((r) => tongueOf(ownSteers(r))).filter((tongue) => tongue !== undefined));
-  if (named.size !== 1) return steered;
+  const named = new Set(climate.map((r) => tongueOf(r.own)).filter((tongue) => tongue !== undefined));
   return steered.map((r) =>
-    climate.includes(r) && tongueOf(ownSteers(r)) !== undefined
+    named.size === 1 && climate.includes(r) && tongueOf(r.own) !== undefined
       ? {
           phrase: r.phrase,
-          steers: ownSteers(r).filter((s) => s.subject === "culture" || r.steers.some((k) => k.subject === s.subject)),
+          steers: r.own.filter((s) => s.subject === "culture" || r.steers.some((k) => k.subject === s.subject)),
         }
-      : r,
+      : { phrase: r.phrase, steers: r.steers },
   );
 }
 
@@ -160,7 +157,9 @@ export function foundWorld(sentence: string, version: number = FOUNDING_VERSION)
   if (version !== FOUNDING_VERSION) return { ok: false, reason: "unknown-version" };
   const display = displayForm(sentence);
   if (!display.ok) return display;
-  const settled = settle(scan(foundingWords(display.sentence)));
+  const segments = scan(foundingWords(display.sentence));
+  if (segments === "unloaded") return { ok: false, reason: "places-not-loaded" };
+  const settled = settle(segments);
   const steered = creditClimateTongue(settled.steered);
   const residual = settled.loose.filter((word) => !SMALL_WORDS.has(word)).join(" ");
   const seed = hashString(residual);
