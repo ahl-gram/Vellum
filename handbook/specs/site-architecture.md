@@ -343,13 +343,17 @@ precisely, because a token that falls outside it looks identical at the point of
   there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
 - **A real place's outline is served one file to a place, never bundled.** `scripts/place-files.ts`
   writes each place's rings from `src/terrain/outline-places.json` to `generated/outlines/`, one
-  file each, and the one reader is `runJob` in `src/site/explorer/worker-client.ts`: before it sends
+  file each, and the one loader is `loadPlace` in `src/site/explorer/worker-client.ts`, which `runJob`
+  and the Explorer's place picker share: before `runJob` sends
   a job that draws a place it loads that place (`createPlaceLoader` in
   `src/site/explorer/place-fetch.ts`), hands the text to the worker with the job and admits it into
   the page for the inline path (`admitPlace` in `src/site/explorer/place-source.ts`). The address is
   root-absolute (`placeUrl` there), because every surface at every depth fetches through that
   function. A plain job sent while a place is still being fetched waits its turn (`createPlaceGate`
-  in `src/site/explorer/place-gate.ts`), so the worker stays first in first out.
+  in `src/site/explorer/place-gate.ts`), so the worker stays first in first out. The name index the
+  place picker searches is served beside the places as one file (`writePlaceNames` in
+  `scripts/place-files.ts`, at `namesUrl` in `src/site/explorer/place-fetch.ts`), fetched the first
+  time the picker needs a name, never bundled and never sent to the worker.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
   fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole

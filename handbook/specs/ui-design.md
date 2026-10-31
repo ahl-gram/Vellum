@@ -216,6 +216,21 @@ that would come within the gap of the head cluster's foot sheds its note and eve
 holds no control** (Alex, 2026-10-06, Issue #762: lean), decided on the row as it stands unshed, so
 the shed never undoes itself. **Provisional until the post-use review:** where the risen row stands.
 
+**On the Explorer the slip stands inboard of the Drawer tab**: its inset is a token only the Explorer's
+sheet changes (`--slip-right` in `src/styles/explorer/index.css`), and the room's fit and the Glass
+read the inset off the slip itself (`slipInset` in `src/site/shared/room-seats.ts`), so the open slip
+and its painted ring clear the tab at every window (BR15 in `e2e/suites/broadside/tab.ts`). The Glass,
+the legend row and the chart stand that much further from the right, so the Explorer's legend row
+takes tighter presses, which keep it on one line from 1280 up (BR2 in `e2e/suites/broadside.ts`).
+**The Broadside's Land panel keeps every row and sets aside what the world on screen cannot use**:
+such a row stays on the panel inside a held box, the cream ground behind a dashed rule, under a note
+saying what holds it, and it refuses a press rather than being disabled (`seatOf` in
+`src/site/explorer/land-rows.ts`). **Provisional until the post-use review** (Alex, 2026-10-30,
+Issue #854 comments 6533770339 and 6536644793): the layout and its tightenings, the held box and its
+notes, the shape box and its list, each place's outline in it, the groove, the inset, the tighter
+presses and the follow and the risen row they bring at 1024 by 768 and about 1100 px wide, and every
+word on the new rows.
+
 **The head cluster says where the reader is standing, on every page with a seat in the route tree.**
 Exactly one element on the page carries the current-page mark (`aria-current`): the nav's segment
 when the page is on its top line, the trail's last segment when it is not. The mark is brightened
