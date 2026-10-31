@@ -92,13 +92,16 @@ const GLASS_PLANT = [
   'export { j } from "../shared/glass-keys.ts";',
   'const GQ = "../shared/glass-keys.ts?v=1"; export const k = () => import(GQ);',
   'const GJ = "../shared/glass-keys.js"; export const l = () => import(GJ);',
+  'import { bindZoomRoom } from "../shared/zoom-room.ts";',
+  'const ZR = "../shared/zoom-room.ts"; export const m = () => import(ZR);',
+  'export const n = "a room binds zoom-room in prose";',
 ];
 
-test("neither the Explorer nor home imports the kit's glass-keys, by a path to it in a module source or held in any string, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
+test("neither the Explorer nor home imports the kit's glass-keys, or the zoom-room that binds it, by a path to either in a module source or held in any string, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
   for (const path of ["src/site/explorer/app.ts", "src/site/home/app.ts"]) {
     assert.deepEqual(
       await houseReports(GLASS_PLANT, path),
-      at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12, 13, 14]),
+      at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16]),
       `${path}: BLIND SPOTS, declared, each erring toward passing: a path or selector assembled at run time from pieces none of which carries glass-keys or [data-zoom], and the kit reached through another module outside this rule's scope`,
     );
   }
