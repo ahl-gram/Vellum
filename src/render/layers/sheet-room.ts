@@ -1,4 +1,4 @@
-import type { Box } from "../geometry.ts";
+import { boxesOverlap, type Box } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 
 export const SHEET_INSET = 4;
@@ -22,6 +22,5 @@ export function slideInsideSheet(b: Box, proj: Projection): { readonly dx: numbe
 }
 
 export function clearOfFurniture(b: Box, furniture: ReadonlyArray<Box>): boolean {
-  void [b, furniture];
-  return true;
+  return furniture.every((f) => !boxesOverlap(b, f, FURNITURE_PAD));
 }

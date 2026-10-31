@@ -2,7 +2,7 @@ import type { Box, Pt } from "../geometry.ts";
 import { spacedTextBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 import { interiorProbes } from "./label-probes.ts";
-import { slideInsideSheet } from "./sheet-room.ts";
+import { clearOfFurniture, slideInsideSheet } from "./sheet-room.ts";
 
 const CLAIM_PAD = 4;
 
@@ -57,7 +57,7 @@ function placeOnCloseUp(
     spots.find((p) => room.dry(boxAt(p)) && arena.tryClaim(boxAt(p), CLAIM_PAD)) ??
     spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
   if (claimed) return { x: claimed.x, y: claimed.y, claimed: true };
-  const forced = slid(centroid);
+  const forced = spots.find((p) => clearOfFurniture(boxAt(p), room.furniture)) ?? slid(centroid);
   arena.claim(boxAt(forced));
   return { x: forced.x, y: forced.y, claimed: false };
 }

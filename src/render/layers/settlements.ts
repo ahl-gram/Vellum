@@ -147,8 +147,8 @@ export function forcedSpot(
   tries: ReadonlyArray<NameTry>,
   whole: (b: Box) => boolean,
 ): NameTry | undefined {
-  void [closeUp, whole];
-  return tier === "village" || tier === "hamlet" || FINER_TIER.has(tier) ? undefined : tries[0];
+  if (tier === "village" || tier === "hamlet" || FINER_TIER.has(tier)) return undefined;
+  return closeUp ? (tries.find(({ box }) => whole(box)) ?? tries[0]) : tries[0];
 }
 
 function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: SettlementTier): PlacedName | null {
