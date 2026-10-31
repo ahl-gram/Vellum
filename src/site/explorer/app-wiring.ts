@@ -11,6 +11,8 @@ import { pageLoupe } from "./loupe-page.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
+import { refreshLand, wireShapeControls } from "./shape-controls.ts";
+import { wirePlacePicker } from "./place-picker.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
 import { pageBox } from "../shared/page-box.ts";
 import { $ } from "../shared/by-id.ts";
@@ -154,6 +156,7 @@ export function draftOverrides(seed: number, touched: TouchedGates): DrawOverrid
   updateLandReadout();
   if (!touched.coast) parkCoastDefault();
   updateCoastReadout();
+  refreshLand();
   return { ...chosen, ...overridesOfLand(landKeysNow(hashControls, touched.land, touched.coast)) };
 }
 
@@ -195,4 +198,6 @@ export function wirePageControls(
     onDocKeydown: lc.onDocKeydown,
     onDocClick: lc.onDocClick,
   });
+  wireShapeControls(draw);
+  wirePlacePicker(draw);
 }

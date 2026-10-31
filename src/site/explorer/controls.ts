@@ -1,6 +1,7 @@
 // The Explorer's control-row wiring: the listeners that funnel a control into draw(); the `touched` gates are shared BY REFERENCE with the conductor (set here, read by draw()/syncHash).
 import { updateLandReadout } from "./sea-level.ts";
 import { updateCoastReadout } from "./coast-warp.ts";
+import { refuses } from "./land-seat.ts";
 
 export interface TouchedGates {
   land: boolean;
@@ -34,10 +35,12 @@ function wireCoast(deps: Readonly<ControlsDeps>): void {
   const { coastSlider, touched, draw } = deps;
   // Issue #137: unlike sea-level (which re-levels the SAME terrain and can afford quiet mid-drag redraws), every coastWarp value is a different ~0.6s world, so the readout updates live but the redraw waits for release.
   coastSlider.addEventListener("input", () => {
+    if (refuses(coastSlider)) return;
     touched.coast = true;
     updateCoastReadout();
   });
   coastSlider.addEventListener("change", () => {
+    if (refuses(coastSlider)) return;
     touched.coast = true;
     draw();
   });
@@ -73,6 +76,7 @@ export function wireControls(deps: ControlsDeps): void {
     draw();
   });
   landSlider.addEventListener("input", () => {
+    if (refuses(landSlider)) return;
     touched.land = true;
     updateLandReadout();
     clearTimeout(landDebounce);
@@ -80,6 +84,7 @@ export function wireControls(deps: ControlsDeps): void {
     landDebounce = setTimeout(() => draw({ quiet: true }), 100);
   });
   landSlider.addEventListener("change", () => {
+    if (refuses(landSlider)) return;
     touched.land = true;
     clearTimeout(landDebounce);
     draw();

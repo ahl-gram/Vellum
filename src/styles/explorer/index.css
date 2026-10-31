@@ -1,7 +1,8 @@
 /* The Explorer: a chart room. The furniture is atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
-/* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem. */
+/* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem; the slip stands inboard of the Drawer tab, by the tab, the 0.6rem the folded Glass keeps from it (chart-drawer.css) and the slip's 9px painted ring (its 3px outline at a 6px offset, atelier.css). */
 :root {
   --slip-w: 24rem;
+  --slip-right: calc(var(--chart-drawer-tab-w) + 0.6rem + 9px);
 }
 
 body.chart-room .stage {
@@ -251,6 +252,10 @@ body.chart-room .stage {
 }
 #map svg.arriving #layer-waterlines {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
+.legend-row .legend-btn {
+  padding-inline: 0.5rem;
 }
 
 /* The block margins take back the block padding that gives the focus ring a box around the glyph, and the inline ones the narrower padding, so the glyph and its neighbours stay where they were (Issue #988). */

@@ -54,7 +54,10 @@ const mouse = (k: ZoomKit, x: number, y: number) => k.send("Input.dispatchMouseE
 const WITNESSES = (glyphOf: string, keyOf: string): string =>
   `(()=>{const m=document.getElementById("map").getBoundingClientRect();const k=window.__vellumZoomState().k;const out=[];` +
   `for(const h of document.querySelectorAll("#map .place-hit")){const name=(h.getAttribute("aria-label")||"").split(",")[0];` +
-  `const g=${glyphOf};if(!g||!g.querySelector("circle:not(.seat-halo)"))continue;const r=h.getBoundingClientRect();` +
+  `const g=${glyphOf};const c=g?g.querySelector("circle:not(.seat-halo)"):null;if(!c)continue;` +
+  `const cr=c.getBoundingClientRect(),px=(cr.left+cr.right)/2,py=(cr.top+cr.bottom)/2;` +
+  `if([...c.ownerSVGElement.querySelectorAll("#layer-legend,#layer-cartouche,#layer-compass,#layer-scalebar,#layer-heraldry > *")].some((L)=>{const q=L.getBoundingClientRect();return px>=q.left&&px<=q.right&&py>=q.top&&py<=q.bottom;}))continue;` +
+  `const r=h.getBoundingClientRect();` +
   `const X=(r.left+r.width/2-m.left)/k,Y=(r.top+r.height/2-m.top)/k;` +
   `const e=${DEPTH}*Math.max(Math.abs(X-Math.round(X)),Math.abs(Y-Math.round(Y)));` +
   `out.push({label:h.getAttribute("aria-label"),key:${keyOf},cu:X/(m.width/k),cv:Y/(m.height/k),e});}` +

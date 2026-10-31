@@ -214,7 +214,8 @@ export function runInline(msg: RenderJob): JobResult | Promise<JobResult> {
   return { ok: true, ...ribbonResultFor(world, msg) };
 }
 
-const throughPlace = createPlaceGate(createPlaceLoader((url) => fetch(url)));
+export const loadPlace = createPlaceLoader((url) => fetch(url));
+const throughPlace = createPlaceGate(loadPlace);
 
 export function runJob(msg: DrawJob): Promise<DrawResult>;
 export function runJob(msg: RegionJob): Promise<RegionResult>;

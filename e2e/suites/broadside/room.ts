@@ -63,26 +63,43 @@ const slipFaults = (s: Slip): string[] =>
   faults([
     s.id === "broadside" || "the slip is #broadside",
     same(s.panels, ["grp-land", "grp-hand"]) || "The Land and The Hand ride the slip",
-    same(s.land, ["type", "band", "land", "coast"]) || "The Land's controls in order",
+    same(s.land, [
+      "type",
+      "band",
+      "place",
+      "looseness",
+      "islands",
+      "isle-equal",
+      "isle-varied",
+      "land",
+      "coast",
+      "ragged",
+    ]) || "The Land's controls in order",
     same(s.hand, ["style", "theme", "legend", "arms", "beasts", "ages"]) || "The Hand's controls in order",
     same(s.seals, [
+      ["check seal", "alike", "isle-equal", "radio"],
+      ["check seal", "of every size", "isle-varied", "radio"],
       ["check seal", "legend", "legend", "checkbox"],
       ["check seal", "arms", "arms", "checkbox"],
       ["check seal", "beasts", "beasts", "checkbox"],
       ["check seal", "survey", "ages", "checkbox"],
-    ]) || "the four seals, each wrapping its checkbox",
+    ]) || "the six seals, each wrapping its input",
     same(s.marks, [
       ["/glossary/#seeds-choice", "note-seeds-choice", null],
+      ["/glossary/#shape", "note-shape", null],
+      ["/glossary/#islands", "note-islands", null],
       ["/glossary/#coast-warp", "note-coast-warp", null],
       ["/glossary/#survey", "note-survey", null],
       ["/glossary/#verso", "note-verso", null],
-    ]) || "the four marks, no title among them",
+    ]) || "the six marks, no title among them",
     same(s.notes, [
       ["note-seeds-choice", "of the seed's choice", "/glossary/#seeds-choice"],
+      ["note-shape", "of the shape", "/glossary/#shape"],
+      ["note-islands", "of the islands", "/glossary/#islands"],
       ["note-coast-warp", "of the coast warp", "/glossary/#coast-warp"],
       ["note-survey", "of the survey", "/glossary/#survey"],
       ["note-verso", "of the verso", "/glossary/#verso"],
-    ]) || "the four notes, each head and its link",
+    ]) || "the six notes, each head and its link",
   ]);
 
 type Legend = {
@@ -189,13 +206,14 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
     });
     const wrong = faults([
       ...cornerFaults(read.corner),
-      same(read.groups, ["The seed", "grp-land", "grp-hand", "grp-press", "Camera"]) || "the groups in reading order",
+      same(read.groups, ["The seed", "grp-land", "held", "grp-hand", "grp-press", "Camera"]) ||
+        "the groups in reading order",
       ...slipFaults(read.slip),
       ...legendFaults(read.legend),
       ...stageFaults(read.stage),
     ]);
     check(
-      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip carrying The Land and The Hand with their controls and four seals, four footnote marks and their notes going to the glossary with no title, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
+      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip carrying The Land and The Hand with their controls and six seals, six footnote marks and their notes going to the glossary with no title, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
       wrong.length === 0,
       JSON.stringify({ wrong, read }),
     );
@@ -210,18 +228,22 @@ const TERMS: Payload<{ h: string | null; terms: Terms }> =
   `(() => { const text = ${TEXT}, h = document.getElementById("drafting-table");
   let next = null; if (h) { let e = h.nextElementSibling; while (e && e.tagName !== "H2") e = e.nextElementSibling; next = e; }
   const after = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-  return { h: h ? text(h) : null, terms: ["coast-warp", "seeds-choice", "survey"].map((id) => { const t = document.getElementById(id);
+  return { h: h ? text(h) : null, terms: ["coast-warp", "islands", "looseness", "seeds-choice", "shape", "sizes", "survey"].map((id) => { const t = document.getElementById(id);
     return t ? [text(t), t.tagName + "." + t.className, after(h, t) && (!next || after(t, next))] : [null, null, null]; }) };
 })()`;
 
 export async function br10Terms({ evaluate, check }: BroadsideKit): Promise<void> {
   const read = await evaluate(TERMS);
   check(
-    "BR10 the Glossary's drafting-table section names the Explorer's control terms: Coast warp, Seed's choice and Survey, each a term entry under that heading",
+    "BR10 the Glossary's drafting-table section names the Explorer's control terms: Coast warp, Islands, Looseness, Seed's choice, Shape, Sizes and Survey, each a term entry under that heading",
     read.h === "At the drafting table" &&
       same(read.terms, [
         ["Coast warp", "P.term", true],
+        ["Islands", "P.term", true],
+        ["Looseness", "P.term", true],
         ["Seed's choice", "P.term", true],
+        ["Shape", "P.term", true],
+        ["Sizes", "P.term", true],
         ["Survey", "P.term", true],
       ]),
     JSON.stringify(read),

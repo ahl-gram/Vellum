@@ -1,13 +1,20 @@
 /* The Broadside: the Explorer's control sheet on the slip; the voice is house.css's, the slip's dress atelier.css's, only the ledger's geometry and its own dressings live here. */
 
 .broadside .panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.7rem;
+  align-items: baseline;
   padding: 0.35rem 0 0.55rem;
   min-width: 0;
 }
 .broadside .panel + .panel {
   border-top: 1px solid var(--line-tan);
-  margin-top: 0.5rem;
-  padding-top: 0.9rem;
+  margin-top: 0.3rem;
+  padding-top: 0.6rem;
+}
+.broadside .panel > .ledger {
+  grid-column: 1 / -1;
 }
 .broadside .panel-head {
   margin: 0;
@@ -17,15 +24,22 @@
   font-style: italic;
   font-size: 0.85rem;
   color: var(--ink-brown);
-  margin: 0.1rem 0 0.55rem;
+  margin: 0 0 0.4rem;
 }
 
 /* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `e2e/suites/broadside.ts`). */
 .broadside .ledger {
   display: grid;
   grid-template-columns: auto auto 1fr auto auto;
-  gap: 0.5rem 0.6rem;
+  gap: 0.3rem 0.6rem;
   align-items: center;
+}
+.broadside .l-row {
+  display: contents;
+}
+.broadside .l-row[hidden],
+.broadside .held[hidden] {
+  display: none;
 }
 .broadside .l-label {
   grid-column: 1;
@@ -50,29 +64,131 @@
   min-width: 0;
 }
 /* Columns pinned explicitly: auto-placement would re-deal the row when the endpoint words drop out at 560px. */
-.broadside .ledger > .land-end-min {
+.broadside .ledger .land-end-min {
   grid-column: 2;
   justify-self: end;
 }
-.broadside .ledger > input[type="range"] {
+.broadside .ledger input[type="range"] {
   grid-column: 3;
   width: 100%;
   min-width: 4rem;
-  accent-color: var(--ink-dark);
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
   margin: 0;
 }
-.broadside .ledger > .land-end-max {
+.broadside .ledger input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--ink-faded);
+  background: linear-gradient(
+    to right,
+    var(--ink-dark) calc(7px + (100% - 14px) * var(--f, 0)),
+    var(--control-cream) 0
+  );
+}
+.broadside .ledger input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ink-dark);
+}
+.broadside .ledger input[type="range"]::-moz-range-track {
+  height: 6px;
+  box-sizing: border-box;
+  border-radius: 3px;
+  border: 1px solid var(--ink-faded);
+  background: var(--control-cream);
+}
+.broadside .ledger input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ink-dark);
+}
+.broadside .ledger input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ink-dark);
+}
+.broadside .ledger input#islands.untouched::-webkit-slider-thumb {
+  background: var(--ink-faded);
+}
+.broadside .ledger input#islands.untouched::-moz-range-thumb {
+  background: var(--ink-faded);
+}
+.broadside .ledger .land-end-max {
   grid-column: 4;
 }
-.broadside .ledger > .land-readout {
+.broadside .ledger .land-readout {
   grid-column: 5;
 }
 .land-end {
   font-size: 0.72rem;
   font-style: italic;
-  color: var(--ink-faded);
+  color: var(--ink-brown);
   white-space: nowrap;
 }
+.broadside .l-word {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-brown);
+}
+.broadside .l-ctl > :is(select, input.place-box) {
+  padding-block: 0.22rem;
+}
+.broadside .l-ctl > input.place-box {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-family: inherit;
+  text-overflow: ellipsis;
+}
+.broadside input.place-box::placeholder {
+  color: var(--ink-brown);
+  font-style: italic;
+  opacity: 1;
+}
+.broadside input.place-box::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.broadside .l-ctl.hand-seals {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+.broadside .held {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  gap: inherit;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: var(--control-cream);
+  border: 1px dashed var(--line-tan);
+  border-radius: 4px;
+}
+.broadside .held-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0 0.6rem;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: var(--ink-brown);
+}
+#broadside .slip-head {
+  padding-top: 0.95rem;
+  padding-bottom: 0.55rem;
+}
+
 /* Reserved readout width: "34% land" and "warp 0.55" must never push their neighbours as they change length. */
 .land-readout {
   font-style: italic;
@@ -97,7 +213,7 @@
   letter-spacing: 0.05em;
   border: 1.5px solid var(--ink-brown);
   border-radius: 4px;
-  padding: 0.28rem 0.6rem;
+  padding: 0.16rem 0.6rem;
   background: var(--control-cream);
   color: var(--ink-brown);
 }
@@ -181,3 +297,83 @@ a.fn:hover {
   font-size: 0.78rem;
   color: var(--ink-brown);
 } /* >= 12px rendered: the back-matter link must stay legible */
+
+/* The shape box's list: a top-layer popover seated by place-list.ts from viewport rects; transitions are off because under reduced motion the blanket in motion.css would run the seat's writes as a transition and its height read would find the old box (cascade-traps.md). */
+.place-list {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0.25rem 0;
+  box-sizing: border-box;
+  overflow: visible;
+  transition-property: none;
+  background: var(--parchment-panel);
+  border: 1px solid var(--line-tan);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.28);
+  color: var(--ink-dark);
+}
+.place-list .pl-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition-property: none;
+}
+.place-list .pl-options > li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.place-list .pl-options > li[aria-selected="true"] {
+  background: var(--parchment-bright);
+}
+.place-list .pl-text {
+  min-width: 0;
+}
+.place-list .pl-name {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+.place-list .pl-name mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--ink-faded);
+  text-underline-offset: 2px;
+}
+.place-list .pl-sub {
+  display: block;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  color: var(--ink-brown);
+}
+.place-list .pl-sil {
+  flex: none;
+  width: 2.1rem;
+  height: 1.575rem;
+  background: var(--control-cream);
+  border: 1px solid var(--line-faint);
+}
+.place-list .pl-sil path {
+  fill: var(--ink-brown);
+  stroke: none;
+}
+.place-list .pl-foot {
+  margin: 0;
+  padding: 0.3rem 0.7rem 0.2rem;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--ink-brown);
+  border-top: 1px solid var(--line-faint);
+}
+.place-list .pl-foot.none {
+  border-top: 0;
+}

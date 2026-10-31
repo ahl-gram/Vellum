@@ -2,7 +2,7 @@
 import { CHROME_GAP, fitStage, holdsSheet } from "./stage-fit.ts";
 import { bindSlip, type SlipFold } from "./slip.ts";
 import { DESK_FRAME, deskFrameDue, pageBottom, pageBox, pageTop } from "./page-box.ts";
-import { glassLeft, placeLegendRow, placeSlip, rectOf, slipWidth } from "./room-seats.ts";
+import { glassLeft, placeLegendRow, placeSlip, rectOf, slipInset, slipWidth } from "./room-seats.ts";
 
 const FALLBACK_ASPECT = 1500 / 1157.931;
 
@@ -32,18 +32,18 @@ interface FitParts {
   readonly frame: HTMLElement;
   readonly sheet: HTMLElement;
   readonly aspect: number;
-  readonly slipW: number;
+  readonly slipReach: number;
   readonly glassL: number | null;
 }
 
-function fitRoom({ frame, sheet: sheetEl, aspect, slipW, glassL }: FitParts): boolean {
+function fitRoom({ frame, sheet: sheetEl, aspect, slipReach, glassL }: FitParts): boolean {
   const fit = fitStage({
     view: pageBox(),
     aspect,
     above: bottoms([q("header.chrome"), q(".corner.tr")]),
     below: tops([q(".corner.bl"), q(".legend"), q(".strip")]),
-    beside: slipW,
-    right: slipW > 0 && glassL !== null ? [glassL] : [],
+    beside: slipReach,
+    right: slipReach > 0 && glassL !== null ? [glassL] : [],
     gap: CHROME_GAP,
   });
   if (!holdsSheet(fit)) return false;
@@ -87,7 +87,8 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
     const slipRect = slip !== null ? rectOf(slip) : null;
     const slipOpen = slip !== null && !slip.classList.contains("folded");
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
-    const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
+    const slipReach = slipOpen ? slipW + slipInset(slip) : 0;
+    const glassL = glassLeft(q(".corner.br"), slipOpen, slipReach);
     if (legend !== null)
       placeLegendRow(legend, {
         folio: q(".corner.bl"),
@@ -95,7 +96,7 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
         glass: glassL,
         slip: slipOpen ? slipRect : null,
       });
-    if (fitRoom({ frame, sheet, aspect: aspect(), slipW, glassL })) camera.restore(held);
+    if (fitRoom({ frame, sheet, aspect: aspect(), slipReach, glassL })) camera.restore(held);
   };
 
   let broadside: SlipFold | null = null;
