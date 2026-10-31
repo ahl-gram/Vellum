@@ -16,6 +16,8 @@ export type RealmLabelPlacement = {
   readonly claimed: boolean;
 };
 
+export type CloseUpRoom = { readonly furniture: ReadonlyArray<Box>; readonly dry: (b: Box) => boolean };
+
 type Args = {
   readonly blob: ReadonlyArray<number>;
   readonly gridW: number;
@@ -26,13 +28,22 @@ type Args = {
   readonly fs: number;
   readonly ls: number;
   readonly arena: RealmLabelArena;
+  readonly closeUp: CloseUpRoom | null;
 };
 
 function withinChart(box: Box, proj: Projection): boolean {
   return box.x >= proj.margin && box.x + box.w <= proj.widthPx - proj.margin;
 }
 
-export function placeRealmLabel({
+export function placeRealmLabel(args: Args): RealmLabelPlacement {
+  return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args);
+}
+
+function placeOnCloseUp(args: Args): RealmLabelPlacement {
+  return placeOnWorldSheet(args);
+}
+
+function placeOnWorldSheet({
   blob,
   gridW,
   proj,

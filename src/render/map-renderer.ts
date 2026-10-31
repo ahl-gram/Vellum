@@ -22,9 +22,11 @@ import { realmNameBox } from "./layers/glyph-clearance.ts";
 import type { Box } from "./geometry.ts";
 import { cartoucheLayer, planCartouche, type CartouchePlan } from "./layers/cartouche.ts";
 import { compassLayer, planCompass, rhumbLayer, type CompassPlan } from "./layers/compass.ts";
-import { planScalebar, scalebarLayer, type ScalebarPlan } from "./layers/scalebar.ts";
+import { planScalebar, scalebarBacking, scalebarLayer, type ScalebarPlan } from "./layers/scalebar.ts";
 import { legendLayer, planLegend, type LegendPlan } from "./layers/legend.ts";
 import { featureLabelsLayer } from "./layers/feature-labels.ts";
+import type { CloseUpRoom } from "./layers/realm-label-placement.ts";
+import { boxMeetsRiver } from "./layers/river-clearance.ts";
 import { heraldryLayer } from "./layers/heraldry.ts";
 import { seaDecorLayer } from "./layers/sea-decor.ts";
 import { beastsLayer } from "./layers/beasts.ts";
@@ -127,6 +129,21 @@ function planFurniture(ctx: RenderCtx, opts: RenderOptions): ChartPlans {
   return { cartouche: cartouchePlan, scalebar: scalebarPlan, legend: legendPlan, compass: compassPlan };
 }
 
+function closeUpRoom(ctx: RenderCtx, plans: ChartPlans): CloseUpRoom | null {
+  const { world, proj } = ctx;
+  if (world.region === undefined) return null;
+  const rivers = { cells: world.riverCells, w: world.elev.w, h: world.elev.h };
+  return {
+    furniture: [
+      plans.cartouche.rect,
+      scalebarBacking(plans.scalebar.box, proj.widthPx / 1500),
+      ...(plans.legend ? [plans.legend.box] : []),
+      ...(plans.compass ? [plans.compass.box] : []),
+    ],
+    dry: (b) => !boxMeetsRiver(b, rivers, proj),
+  };
+}
+
 type LabelledLayers = {
   readonly settlements: SvgNode;
   readonly featureLabels: ReturnType<typeof featureLabelsLayer>;
@@ -139,7 +156,7 @@ type LabelledLayers = {
 function labelledLayers(ctx: RenderCtx, plans: ChartPlans, opts: RenderOptions): LabelledLayers {
   // Evaluation order IS label priority: settlements claim before feature labels, the finer tier's names after them, then decorative art.
   const settlementsDraft = settlementsLayer(ctx);
-  const featureLabels = featureLabelsLayer(ctx);
+  const featureLabels = featureLabelsLayer(ctx, closeUpRoom(ctx, plans));
   const placed = settlementsDraft.finish();
   const bestiary = opts.beasts ? beastsLayer(ctx, plans.cartouche, plans.compass) : null;
   const seaDecor = seaDecorLayer(ctx, plans.cartouche, plans.compass, { serpent: bestiary === null });
