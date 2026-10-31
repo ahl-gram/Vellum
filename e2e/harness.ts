@@ -6,7 +6,7 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
+import type { BrowserProcess, CdpMessage, Clip, Payload, HarnessContext, StartOptions, TouchPoint } from "./types.ts";
 import { debugPortConflictMessage } from "./support/ports.ts";
 import { launchWithRetry } from "./support/launch.ts";
 import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
@@ -361,7 +361,7 @@ export async function start({
   http4xx,
   skippedGroups,
   skippedChecks,
-}: StartOptions): Promise<SuiteContext> {
+}: StartOptions): Promise<HarnessContext> {
   await openSession({ browser, SITE, OUT, PORT, DPORT, PAGE, runnerLayout, consoleErrors, http4xx });
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });

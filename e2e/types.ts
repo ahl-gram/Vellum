@@ -1,5 +1,7 @@
 import type { ChildProcessByStdio } from "node:child_process";
 import type { Readable } from "node:stream";
+import type { E2eSuiteStep } from "./support/skips.ts";
+import type { SuiteTagged } from "./support/suites.ts";
 
 declare const shape: unique symbol;
 
@@ -26,10 +28,10 @@ export type StartOptions = {
   consoleErrors: string[];
   http4xx: string[];
   skippedGroups: string[];
-  skippedChecks: string[];
+  skippedChecks: E2eSuiteStep[];
 };
 
-export type SuiteContext = {
+export type HarnessContext = {
   evaluate: Evaluate;
   send: Send;
   check: Check;
@@ -54,9 +56,11 @@ export type SuiteContext = {
   consoleErrors: string[];
   http4xx: string[];
   skippedGroups: string[];
-  skippedChecks: string[];
+  skippedChecks: E2eSuiteStep[];
   PORT: number;
 };
+
+export type SuiteContext = SuiteTagged<HarnessContext>;
 
 export type BrowserProcess = ChildProcessByStdio<null, Readable, Readable>;
 

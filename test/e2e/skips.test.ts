@@ -4,9 +4,13 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ciJob } from "../../test-support/ci-job.ts";
 import { laneCheckTally, laneLineIsSkip } from "../../e2e/support/lanes.ts";
-import { closedSkips, unmetSkips } from "../../e2e/support/skips.ts";
+import { runE2e } from "../../e2e/support/runner.ts";
+import type { Accumulators } from "../../e2e/support/runner.ts";
+import { closedSkips, metSkips, unmetSkips } from "../../e2e/support/skips.ts";
 import type { E2eSkip } from "../../e2e/support/skips.ts";
+import { makeStep } from "../../e2e/support/step.ts";
 import { runOutcome } from "../../e2e/support/suites.ts";
+import type { E2eSuiteName, SuiteTagged } from "../../e2e/support/suites.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -47,7 +51,36 @@ test("unmetSkips names a listed step its suite never met, and spares a suite tha
     [unmet],
     "a suite that ran whole and never met its listed step must be named, and a suite that was not selected or stopped early must not",
   );
-  assert.deepEqual(unmetSkips([unmet], timings, ["RR42"]), [], "a step the suite met was named as unmet");
+  assert.deepEqual(
+    unmetSkips([unmet], timings, [{ suite: "reading-room", step: "RR42" }]),
+    [],
+    "a step the suite met was named as unmet",
+  );
+});
+
+test("unmetSkips names an entry its suite never met though another suite met a step of the same name", () => {
+  const homeH5: E2eSkip = { suite: "home", step: "H5", issue: 1 };
+  const landfallH5: E2eSkip = { suite: "landfall", step: "H5", issue: 2 };
+  const timings = [
+    { name: "home", ms: 1 },
+    { name: "landfall", ms: 1 },
+  ] as const;
+  assert.deepEqual(
+    unmetSkips([homeH5, landfallH5], timings, [{ suite: "home", step: "H5" }]),
+    [landfallH5],
+    "home's skip of H5 was counted as landfall's, so landfall's leftover entry went unreported",
+  );
+});
+
+test("metSkips names only the entries whose own suite skipped the step, though another entry names a step of the same name", () => {
+  const homeH5: E2eSkip = { suite: "home", step: "H5", issue: 1 };
+  const landfallH5: E2eSkip = { suite: "landfall", step: "H5", issue: 2 };
+  assert.deepEqual(
+    metSkips([homeH5, landfallH5], [{ suite: "home", step: "H5" }]),
+    [homeH5],
+    "an entry was reported as skipped on purpose because another suite skipped a step of the same name",
+  );
+  assert.deepEqual(metSkips([homeH5], []), [], "an entry nothing skipped was reported as skipped");
 });
 
 test("closedSkips refuses a closed or missing issue and passes an open one", async () => {
@@ -63,6 +96,72 @@ test("closedSkips refuses a closed or missing issue and passes an open one", asy
   assert.deepEqual(got, [closed, missing], "an entry whose issue is not open was let through");
   assert.deepEqual(asked, [1, 2, 3], "an entry's issue was never asked about");
   assert.deepEqual(await closedSkips([], () => Promise.reject(new Error("an empty list asked GitHub"))), []);
+});
+
+const H5_LIST = [
+  { suite: "home", step: "H5", issue: 1 },
+  { suite: "landfall", step: "H5", issue: 2 },
+] as const;
+
+const runnerCtx = (accumulators: Accumulators) => ({
+  check: (name: string, ok: unknown): void => {
+    accumulators.results.push({ name, ok: Boolean(ok) });
+  },
+  alive: () => Promise.resolve(true),
+  clearMobile: () => Promise.resolve(),
+});
+type RunnerCtx = ReturnType<typeof runnerCtx>;
+
+async function runH5(): Promise<{ code: number; ran: E2eSuiteName[]; failed: string[]; last: string }> {
+  const accumulators: Accumulators = {
+    results: [],
+    consoleErrors: [],
+    http4xx: [],
+    skippedGroups: [],
+    skippedChecks: [],
+  };
+  const ran: E2eSuiteName[] = [];
+  const h5 = (c: SuiteTagged<RunnerCtx>): Promise<void> =>
+    makeStep({ ...c, skips: H5_LIST, skippedChecks: accumulators.skippedChecks })("H5", () => {
+      ran.push(c.suite);
+      c.check(`H5 ran in ${c.suite}`, true);
+      return Promise.resolve();
+    });
+  const landfall = (c: SuiteTagged<RunnerCtx>): Promise<void> => {
+    c.check("landfall ran", true);
+    return Promise.resolve();
+  };
+  const out: string[] = [];
+  const code = await runE2e({
+    env: { VELLUM_E2E_SUITES: "hunt,home,landfall" },
+    isTTY: false,
+    findBrowser: () => "/fake/browser",
+    start: () => Promise.resolve(runnerCtx(accumulators)),
+    cleanup: () => {},
+    suites: { hunt: h5, home: h5, landfall },
+    skips: H5_LIST,
+    accumulators,
+    out: (line) => out.push(line),
+    err: () => {},
+  });
+  const failed = accumulators.results.filter((r) => !r.ok).map((r) => r.name);
+  return { code, ran, failed, last: out.at(-1) ?? "" };
+}
+
+test("an entry pulls only its own suite's step: a step of the same name in another suite still runs, and an entry whose suite never met it still reds the run (Issue #1135)", async () => {
+  const { code, ran, failed, last } = await runH5();
+  assert.deepEqual(ran, ["hunt"], "home's entry pulled hunt's step of the same name, or home's own step still ran");
+  assert.deepEqual(
+    failed,
+    ["H5 is listed as skipped for Issue #2, but landfall ran to its end with no step by that name"],
+    "landfall's entry, whose suite has no H5, was spared because home skipped a step of that name",
+  );
+  assert.match(
+    last,
+    /^\nSOME FAILED, and 1 check skipped on purpose \(H5, Issue #1\) {2}\(2\/3\)$/,
+    "the outcome line counted an entry whose own suite skipped nothing",
+  );
+  assert.equal(code, 1);
 });
 
 test("ci.yml's check-and-test job runs the open-issue script last, as a real step with the job's token, and the script exists", () => {

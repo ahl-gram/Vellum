@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { E2E_SKIPS } from "../../e2e/support/skips.ts";
+import type { E2eSuiteStep } from "../../e2e/support/skips.ts";
 import { makeStep } from "../../e2e/support/step.ts";
 
 type Recorded = readonly [string, boolean, string];
@@ -17,7 +18,7 @@ const recorder = () => {
 
 test("a wait that gives up inside a step fails THAT check by name with the payload the wait died on, and the next step still runs", async () => {
   const { results, check } = recorder();
-  const step = makeStep({ check, alive: () => true });
+  const step = makeStep({ check, suite: "cluster", alive: () => true });
   const ran: string[] = [];
   await step("CL5", () => {
     ran.push("CL5");
@@ -52,7 +53,7 @@ test("a wait that gives up inside a step fails THAT check by name with the paylo
 
 test("a step whose browser is GONE rethrows instead of recording a red, so the suite's own containment can still call it infrastructure", async () => {
   const { results, check } = recorder();
-  const step = makeStep({ check, alive: () => Promise.resolve(false) });
+  const step = makeStep({ check, suite: "cluster", alive: () => Promise.resolve(false) });
   await assert.rejects(
     async () => {
       await step("CD4", () => Promise.reject(new Error("eval exception: the socket closed")));
@@ -65,7 +66,7 @@ test("a step whose browser is GONE rethrows instead of recording a red, so the s
 
 test("a step that runs to its end records nothing of its own, so the checks inside it are the only account of it", async () => {
   const { results, check } = recorder();
-  const step = makeStep({ check, alive: () => true });
+  const step = makeStep({ check, suite: "cluster", alive: () => true });
   await step("DR2", () => {
     check("DR2 the drawer slides home", true, "checked=true");
     return Promise.resolve();
@@ -76,7 +77,7 @@ test("a step that runs to its end records nothing of its own, so the checks insi
 test("a step that skips its group NAMES that group where the run can see it, and a clean step names nothing", async () => {
   const { results, check } = recorder();
   const skippedGroups: string[] = [];
-  const step = makeStep({ check, alive: () => true, skippedGroups });
+  const step = makeStep({ check, suite: "cluster", alive: () => true, skippedGroups });
   await step("CL5", () => Promise.reject(new Error("settle timeout afterEscape: {}")));
   await step("CL8", () => {
     check("CL8 the next check in the suite", true);
@@ -96,7 +97,7 @@ test("a step that skips its group NAMES that group where the run can see it, and
 
 test("a step built WITHOUT a sink still contains its group, so a caller that predates the sink cannot crash inside the catch", async () => {
   const { results, check } = recorder();
-  const step = makeStep({ check, alive: () => true });
+  const step = makeStep({ check, suite: "cluster", alive: () => true });
   await step("DR4", () => Promise.reject(new Error("settle timeout open: {}")));
   assert.deepEqual(
     results.map((r) => r[1]),
@@ -109,8 +110,8 @@ const RR42_SKIP = [{ suite: "reading-room", step: "RR42", issue: 869 }] as const
 
 test("a listed step does not run its body, checks nothing, and records its name", async () => {
   const { results, check } = recorder();
-  const skippedChecks: string[] = [];
-  const step = makeStep({ check, alive: () => true, skips: RR42_SKIP, skippedChecks });
+  const skippedChecks: E2eSuiteStep[] = [];
+  const step = makeStep({ check, suite: "reading-room", alive: () => true, skips: RR42_SKIP, skippedChecks });
   let ran = false;
   await step("RR42", () => {
     ran = true;
@@ -119,13 +120,17 @@ test("a listed step does not run its body, checks nothing, and records its name"
   });
   assert.equal(ran, false, "a step on the skip list ran its body, so the flaky check is still in the run");
   assert.deepEqual(results, [], "a skipped step recorded a check, so it counts as a pass or a fail");
-  assert.deepEqual(skippedChecks, ["RR42"], "the skipped step is not named where the runner can report it");
+  assert.deepEqual(
+    skippedChecks,
+    [{ suite: "reading-room", step: "RR42" }],
+    "the skipped step is not named where the runner can report it",
+  );
 });
 
 test("a step not on the list still runs", async () => {
   const { results, check } = recorder();
-  const skippedChecks: string[] = [];
-  const step = makeStep({ check, alive: () => true, skips: RR42_SKIP, skippedChecks });
+  const skippedChecks: E2eSuiteStep[] = [];
+  const step = makeStep({ check, suite: "reading-room", alive: () => true, skips: RR42_SKIP, skippedChecks });
   let ran = false;
   await step("RR40", () => {
     ran = true;
@@ -139,24 +144,49 @@ test("a step not on the list still runs", async () => {
 
 test("a step whose name is only part of a listed step's name, or holds one, still runs", async () => {
   const { check } = recorder();
-  const skippedChecks: string[] = [];
+  const skippedChecks: E2eSuiteStep[] = [];
   const list = [
     { suite: "reading-room", step: "RR42", issue: 869 },
     { suite: "chart-drawer", step: "CD25, CD26, CD30", issue: 716 },
   ] as const;
-  const step = makeStep({ check, alive: () => true, skips: list, skippedChecks });
+  const tried = [
+    ["reading-room", ["RR4", "RR421"]],
+    ["chart-drawer", ["CD26", "CD25, CD26, CD30, CD31"]],
+  ] as const;
   const ran: string[] = [];
-  for (const name of ["RR4", "RR421", "CD26", "CD25, CD26, CD30, CD31"])
-    await step(name, () => {
-      ran.push(name);
-      return Promise.resolve();
-    });
+  for (const [suite, names] of tried) {
+    const step = makeStep({ check, suite, alive: () => true, skips: list, skippedChecks });
+    for (const name of names)
+      await step(name, () => {
+        ran.push(name);
+        return Promise.resolve();
+      });
+  }
   assert.deepEqual(
     ran,
     ["RR4", "RR421", "CD26", "CD25, CD26, CD30, CD31"],
     "a step was skipped on a partial name match",
   );
   assert.deepEqual(skippedChecks, []);
+});
+
+test("a step built for one suite runs a step of the same name that the list names only for another suite, and a step built for that suite skips it (Issue #1135)", async () => {
+  const list = [{ suite: "home", step: "H5", issue: 1 }] as const;
+  const { results, check } = recorder();
+  const skippedChecks: E2eSuiteStep[] = [];
+  const ran: string[] = [];
+  for (const suite of ["hunt", "home"] as const)
+    await makeStep({ check, suite, alive: () => true, skips: list, skippedChecks })("H5", () => {
+      ran.push(suite);
+      return Promise.resolve();
+    });
+  assert.deepEqual(ran, ["hunt"], "home's entry pulled hunt's step of the same name, or home's own step still ran");
+  assert.deepEqual(
+    skippedChecks,
+    [{ suite: "home", step: "H5" }],
+    "the skip was recorded without its suite, or for the wrong one",
+  );
+  assert.deepEqual(results, []);
 });
 
 test("a step built with no list skips the first entry of the real list", async (t) => {
@@ -166,14 +196,14 @@ test("a step built with no list skips the first entry of the real list", async (
     return;
   }
   const { results, check } = recorder();
-  const skippedChecks: string[] = [];
-  const step = makeStep({ check, alive: () => true, skippedChecks });
+  const skippedChecks: E2eSuiteStep[] = [];
+  const step = makeStep({ check, suite: first.suite, alive: () => true, skippedChecks });
   let ran = false;
   await step(first.step, () => {
     ran = true;
     return Promise.resolve();
   });
   assert.equal(ran, false, "production builds a step with no list, and the real list was not the default");
-  assert.deepEqual(skippedChecks, [first.step]);
+  assert.deepEqual(skippedChecks, [{ suite: first.suite, step: first.step }]);
   assert.deepEqual(results, []);
 });
