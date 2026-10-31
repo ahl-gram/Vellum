@@ -1,6 +1,7 @@
 import { MAX_SENTENCE_CODE_POINTS } from "./lexicon.ts";
 
-export type RefusalReason = "empty" | "too-long" | "control-character" | "unknown-character" | "unknown-version";
+export type RefusalReason =
+  "empty" | "too-long" | "control-character" | "unknown-character" | "unknown-version" | "places-not-loaded";
 export type Refusal = { readonly ok: false; readonly reason: RefusalReason };
 export type Displayed = { readonly ok: true; readonly sentence: string };
 
