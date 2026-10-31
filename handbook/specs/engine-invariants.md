@@ -140,6 +140,16 @@ a coast word sets the islands' raggedness and no coast warp (`refuse` and `overr
 `src/world/founding/found.ts`). `test/world/founding-drawable.test.ts` founds every listed phrase beside
 a count, a band word and a shaped count and builds each through the terrain.
 
+**A place's name counts only where English names a place.** After a shape phrase, the founding reads a
+gazetteer name straight after the phrase, or after the one article English puts before a country, a
+nation within one or a lake, and only for those kinds, whether the article is the sentence's or the
+name's own; it never reads one after the other articles, and never a name made only of direction words
+(`shapeAt`, `placeAt` and `setFoundingGazetteer` in `src/world/founding/shapes.ts`, the words and kinds
+in `src/world/founding/lexicon-shapes.ts`). The gazetteer holds every province of the map data, many of
+them named by an everyday word, and the founding folds every capital away, so a rule over the words
+around the name is what tells them apart: never a list of the everyday names, and never a capital
+letter. `test/world/founding-shape-covenant.test.ts` pins the names that found no outline.
+
 **Founding agrees across platforms or refuses.** The cleanup reads the platform's own Unicode knowledge,
 and a character the platform does not know is refused rather than read, so two platforms that disagree
 about a newly assigned character refuse it on one and found it on the other, and never found two worlds.
