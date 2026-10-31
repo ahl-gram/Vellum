@@ -4,7 +4,14 @@ import { hashString } from "../../src/core/rng.ts";
 import { committedGazetteer, useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 import { foundWorld } from "../../src/world/founding/found.ts";
 import { FOUNDING_VERSION } from "../../src/world/founding/lexicon.ts";
-import { PLACE_PREFERENCES, SHAPE_FORMS, SHAPE_TRIGGERS } from "../../src/world/founding/lexicon-shapes.ts";
+import {
+  DIRECTION_WORDS,
+  KINDS_AFTER_THE,
+  PLACE_ARTICLE,
+  PLACE_PREFERENCES,
+  SHAPE_FORMS,
+  SHAPE_TRIGGERS,
+} from "../../src/world/founding/lexicon-shapes.ts";
 import { foundingWords } from "../../src/world/founding/normalize.ts";
 import { placeKey } from "../../src/world/founding/shapes.ts";
 
@@ -99,6 +106,41 @@ const SHAPE_SHEET: ReadonlyArray<Row> = [
     ["crescent shaped", "island"],
     [],
   ],
+  ["the shape of the coast changes with the tides", 3714943204, "shape coast changes tides", {}, [], []],
+  ["a kingdom in the shape of a mountain", 1323617895, "kingdom in shape mountain", {}, [], []],
+  ["an island shaped like a plateau", 1525959595, "shaped like plateau", { mapType: "island" }, ["island"], []],
+  [
+    "a continent the shape of the northern coast",
+    898802494,
+    "shape northern coast",
+    { mapType: "continent" },
+    ["continent"],
+    [],
+  ],
+  ["an island shaped like a turkey", 1771816965, "shaped like turkey", { mapType: "island" }, ["island"], []],
+  [
+    "a continent shaped like south america",
+    1707494512,
+    "shaped like south america",
+    { mapType: "continent" },
+    ["continent"],
+    [],
+  ],
+  ["shaped like the yukon", 2185077823, "shaped like yukon", {}, [], []],
+  ["shaped like yukon", 2166136261, "", { outline: "ne-1159309667" }, ["shaped like yukon"], []],
+  ["shaped like northern ireland", 2166136261, "", { outline: "ne-1159320745" }, ["shaped like northern ireland"], []],
+  ["in the shape of the valley", 1795820626, "in shape valley", {}, [], []],
+  ["shaped like the bahamas", 2166136261, "", { outline: "ne-1159320415" }, ["shaped like the bahamas"], []],
+  [
+    "an island shaped like the azores",
+    2166136261,
+    "",
+    { mapType: "island", outline: "ne-1159321189" },
+    ["island", "shaped like the azores"],
+    [],
+  ],
+  ["shaped like the dead sea", 2166136261, "", { outline: "ne-1159126747" }, ["shaped like the dead sea"], []],
+  ["shaped like the vatican city", 230981954, "city", { outline: "ne-1159321407" }, ["shaped like the vatican"], []],
 ];
 
 for (const [sentence, seed, residual, overrides, steered, contested] of SHAPE_SHEET) {
@@ -161,12 +203,71 @@ test("every trigger before every form, with and without an article, draws that f
   }
 });
 
+const SHAPELESS: ReadonlyArray<string> = [
+  "central",
+  "centre",
+  "east",
+  "eastern",
+  "far north",
+  "north",
+  "north east",
+  "north eastern",
+  "north west",
+  "northeastern",
+  "northern",
+  "northwest",
+  "northwestern",
+  "south",
+  "south east",
+  "southern",
+  "southwest",
+  "the farrington",
+  "the quarter",
+  "the valley",
+  "upper east",
+  "upper west",
+  "west",
+  "western",
+];
+const TWENTY: ReadonlyArray<string> = [
+  "north",
+  "south",
+  "east",
+  "west",
+  "northern",
+  "southern",
+  "eastern",
+  "western",
+  "northeast",
+  "northwest",
+  "southeast",
+  "southwest",
+  "northeastern",
+  "northwestern",
+  "southeastern",
+  "southwestern",
+  "central",
+  "centre",
+  "far",
+  "upper",
+];
+
+test("a place's name follows only the shape words or the, after the only a country, a nation within one or a lake, and the tables hold no other words", () => {
+  assert.equal(PLACE_ARTICLE, "the");
+  assert.deepEqual([...KINDS_AFTER_THE], ["country", "unit", "lake"]);
+  assert.deepEqual([...DIRECTION_WORDS], TWENTY);
+});
+
 test("every place name, after a shape phrase, founds what version 1 founds", () => {
   const rows = committedGazetteer();
   const founds = rows.map(([, name]) => foundWorld(`shaped like ${name}`));
-  assert.equal(hashString(JSON.stringify(founds)), 2072831757, LOCK);
+  assert.equal(hashString(JSON.stringify(founds)), 3158117445, LOCK);
   const shapeless = rows.filter((_, i) => !(founds[i]?.ok === true && founds[i].overrides.outline !== undefined));
-  assert.deepEqual(shapeless, [], "every one of the place names founds some outline");
+  assert.deepEqual(
+    [...new Set(shapeless.map(([, name]) => placeKey(foundingWords(name))))].sort(),
+    SHAPELESS,
+    "only a name made only of direction words, and a province whose name begins with the, founds no outline",
+  );
 });
 
 test("every preferred place is a place of that name that shares it with another", () => {

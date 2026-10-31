@@ -7,6 +7,7 @@ import { CLIMATE_TRADITION, LAND_FACTOR, LEXICON, SMALL_WORDS } from "../../src/
 import {
   BAND_WORDS,
   BETWEEN_WORDS,
+  DIRECTION_WORDS,
   ISLAND_WORDS,
   NUMBER_WORDS,
   SCALE_WORDS,
@@ -79,7 +80,14 @@ test("every land strength on every map type stays inside the land range the CLI 
 test("every word of the count and shape tables is already in the form the cleanup gives, and none is a listed phrase", () => {
   const listed = new Set(LEXICON.map((entry) => entry.phrase));
   const counting = [NUMBER_WORDS, SCALE_WORDS, BAND_WORDS, BETWEEN_WORDS].flatMap((table) => [...table.keys()]);
-  const words = [...counting, ...SHAPE_FORMS.keys(), ...SHAPE_TRIGGERS, ...SHAPE_ARTICLES, ...ISLAND_WORDS];
+  const words = [
+    ...counting,
+    ...SHAPE_FORMS.keys(),
+    ...SHAPE_TRIGGERS,
+    ...SHAPE_ARTICLES,
+    ...ISLAND_WORDS,
+    ...DIRECTION_WORDS,
+  ];
   for (const word of words) assert.equal(foundingWords(word).join(" "), word, word);
   for (const word of counting) assert.ok(!listed.has(word), `${word} is a listed phrase`);
 });

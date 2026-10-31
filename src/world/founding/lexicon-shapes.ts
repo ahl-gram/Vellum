@@ -85,6 +85,31 @@ export const SHAPE_FORMS: ReadonlyMap<string, FormId> = new Map<string, FormId>(
   ["circle", "round"],
 ]);
 
+export const PLACE_ARTICLE = "the";
+export const KINDS_AFTER_THE: ReadonlySet<string> = new Set(["country", "unit", "lake"]);
+export const DIRECTION_WORDS: ReadonlySet<string> = new Set([
+  "north",
+  "south",
+  "east",
+  "west",
+  "northern",
+  "southern",
+  "eastern",
+  "western",
+  "northeast",
+  "northwest",
+  "southeast",
+  "southwest",
+  "northeastern",
+  "northwestern",
+  "southeastern",
+  "southwestern",
+  "central",
+  "centre",
+  "far",
+  "upper",
+]);
+
 export const PLACE_KINDS: ReadonlyArray<string> = ["country", "unit", "state", "lake"];
 export const PLACE_PREFERENCES: ReadonlyArray<readonly [key: string, id: string]> = [
   ["florida", "ne-1159315207"],
