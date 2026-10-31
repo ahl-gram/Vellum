@@ -209,7 +209,7 @@ const prospect =
   });
 const atRest = (page: FakePage): TrailKit => {
   const { ctx } = ctxOn(page.evaluate);
-  return { ...ctx, settle: makeSettle(ctx), goto: () => Promise.resolve() } as unknown as TrailKit;
+  return { ...ctx, settle: makeSettle(ctx), goto: () => Promise.resolve() };
 };
 
 test("AT's rest hands the Prospect over only once its plate is shown and the fit the plate's refit leaves holds still", async () => {
