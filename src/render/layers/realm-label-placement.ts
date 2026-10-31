@@ -2,6 +2,7 @@ import type { Box, Pt } from "../geometry.ts";
 import { spacedTextBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 import { interiorProbes } from "./label-probes.ts";
+import { clearOfFurniture, slideInsideSheet } from "./sheet-room.ts";
 
 const CLAIM_PAD = 4;
 
@@ -16,6 +17,8 @@ export type RealmLabelPlacement = {
   readonly claimed: boolean;
 };
 
+export type CloseUpRoom = { readonly furniture: ReadonlyArray<Box>; readonly dry: (b: Box) => boolean };
+
 type Args = {
   readonly blob: ReadonlyArray<number>;
   readonly gridW: number;
@@ -26,13 +29,40 @@ type Args = {
   readonly fs: number;
   readonly ls: number;
   readonly arena: RealmLabelArena;
+  readonly closeUp: CloseUpRoom | null;
 };
 
 function withinChart(box: Box, proj: Projection): boolean {
   return box.x >= proj.margin && box.x + box.w <= proj.widthPx - proj.margin;
 }
 
-export function placeRealmLabel({
+export function placeRealmLabel(args: Args): RealmLabelPlacement {
+  return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args, args.closeUp);
+}
+
+function placeOnCloseUp(
+  { blob, gridW, proj, centroid, yCandidates, name, fs, ls, arena }: Args,
+  room: CloseUpRoom,
+): RealmLabelPlacement {
+  const boxAt = (p: Pt): Box => spacedTextBox(p.x, p.y, name, fs, ls, WIDTH_FACTOR.caps);
+  const slid = (p: Pt): Pt => {
+    const { dx, dy } = slideInsideSheet(boxAt(p), proj);
+    return { x: p.x + dx, y: p.y + dy };
+  };
+  const spots = [
+    ...yCandidates.map((y) => slid({ x: centroid.x, y })),
+    ...interiorProbes(blob, gridW, proj, centroid).map(slid),
+  ];
+  const claimed =
+    spots.find((p) => room.dry(boxAt(p)) && arena.tryClaim(boxAt(p), CLAIM_PAD)) ??
+    spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
+  if (claimed) return { x: claimed.x, y: claimed.y, claimed: true };
+  const forced = spots.find((p) => clearOfFurniture(boxAt(p), room.furniture)) ?? slid(centroid);
+  arena.claim(boxAt(forced));
+  return { x: forced.x, y: forced.y, claimed: false };
+}
+
+function placeOnWorldSheet({
   blob,
   gridW,
   proj,

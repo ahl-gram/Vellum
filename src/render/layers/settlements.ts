@@ -3,6 +3,7 @@ import { boxesOverlap, textBox, WIDTH_FACTOR, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 import { boxMeetsRiver } from "./river-clearance.ts";
+import { insideSheet } from "./sheet-room.ts";
 import type { NamedSettlement, World } from "../../world/types.ts";
 import {
   finerMarkBox,
@@ -140,14 +141,20 @@ export function nameSetting(world: World, proj: Projection, s: NamedSettlement, 
 
 type PlacedName = { readonly node: SvgNode; readonly box: Box };
 
+export function forcedSpot(
+  closeUp: boolean,
+  tier: SettlementTier,
+  tries: ReadonlyArray<NameTry>,
+  whole: (b: Box) => boolean,
+): NameTry | undefined {
+  if (tier === "village" || tier === "hamlet" || FINER_TIER.has(tier)) return undefined;
+  return closeUp ? (tries.find(({ box }) => whole(box)) ?? tries[0]) : tries[0];
+}
+
 function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: SettlementTier): PlacedName | null {
   const { world, proj, labels } = ctx;
   const { display, fs, tries } = nameSetting(world, proj, s, tier);
-  const inFrame = (b: Box): boolean =>
-    b.x >= proj.margin + 4 &&
-    b.x + b.w <= proj.widthPx - proj.margin - 4 &&
-    b.y >= proj.margin + 4 &&
-    b.y + b.h <= proj.heightPx - proj.margin - 4;
+  const inFrame = (b: Box): boolean => insideSheet(b, proj);
   const rivers = world.region === undefined ? null : { cells: world.riverCells, w: world.elev.w, h: world.elev.h };
   const dry = (b: Box): boolean => rivers === null || !boxMeetsRiver(b, rivers, proj);
   const own =
@@ -158,7 +165,7 @@ function placeSettlementLabel(ctx: RenderCtx, s: NamedSettlement, tier: Settleme
   const take = (fits: (b: Box) => boolean): NameTry | undefined =>
     tries.find(({ box }) => off(box) && fits(box) && labels.tryClaim(box));
   const claimed = take((b) => dry(b) && inFrame(b)) ?? (rivers === null ? undefined : take(inFrame));
-  const forced = tier !== "village" && tier !== "hamlet" && !FINER_TIER.has(tier) ? tries[0] : undefined;
+  const forced = forcedSpot(world.region !== undefined, tier, tries, (b) => off(b) && inFrame(b));
   const placed = claimed ?? forced;
   if (placed === undefined) return null;
   const { at, box } = placed;

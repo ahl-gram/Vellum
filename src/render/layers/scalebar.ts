@@ -90,6 +90,10 @@ function scalebarLabel(style: MapStyle, bar: Bar, lx: number, value: number): Sv
   );
 }
 
+export function scalebarBacking(box: Box, k: number): Box {
+  return { x: box.x - 8 * k, y: box.y - 4 * k, w: box.w + 16 * k, h: box.h + 8 * k };
+}
+
 export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const { style, proj, world } = ctx;
   const k = proj.widthPx / 1500;
@@ -108,12 +112,13 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const cells = scalebarCells(style, bar);
   const label = (lx: number, value: number): SvgNode => scalebarLabel(style, bar, lx, value);
 
+  const paper = scalebarBacking(plan.box, k);
   return el("g", { id: "layer-scalebar" }, [
     el("rect", {
-      x: plan.box.x - 8 * k,
-      y: plan.box.y - 4 * k,
-      width: plan.box.w + 16 * k,
-      height: plan.box.h + 8 * k,
+      x: paper.x,
+      y: paper.y,
+      width: paper.w,
+      height: paper.h,
       fill: style.paper,
       "fill-opacity": 0.72,
       rx: 3 * k,

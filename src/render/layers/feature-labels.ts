@@ -17,7 +17,7 @@ import { interiorProbes } from "./label-probes.ts";
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
 import { reachPlacements } from "./river-label-placement.ts";
-import { placeRealmLabel } from "./realm-label-placement.ts";
+import { placeRealmLabel, type CloseUpRoom } from "./realm-label-placement.ts";
 import type { World } from "../../world/types.ts";
 
 const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
@@ -196,7 +196,14 @@ function rangeLabelNodes(ctx: RenderCtx): SvgNode[] {
 
 type PlacedRealm = { readonly name: string; readonly x: number; readonly y: number; readonly anchor: RealmAnchor };
 
-function placeRealmName(ctx: RenderCtx, name: string, realm: number, fs: number, ls: number): PlacedRealm | null {
+function placeRealmName(
+  ctx: RenderCtx,
+  name: string,
+  realm: number,
+  fs: number,
+  ls: number,
+  closeUp: CloseUpRoom | null,
+): PlacedRealm | null {
   const { world, proj, labels } = ctx;
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
@@ -217,6 +224,7 @@ function placeRealmName(ctx: RenderCtx, name: string, realm: number, fs: number,
     fs,
     ls,
     arena: labels,
+    closeUp,
   });
   const labelW = name.length * (fs * WIDTH_FACTOR.caps + ls);
   const anchor = { realm, cx: placedX, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs };
@@ -335,7 +343,10 @@ function forestLabelNodes(ctx: RenderCtx): SvgNode[] {
   ];
 }
 
-export function featureLabelsLayer(ctx: RenderCtx): {
+export function featureLabelsLayer(
+  ctx: RenderCtx,
+  closeUp: CloseUpRoom | null,
+): {
   node: SvgNode;
   realmAnchors: RealmAnchor[];
 } {
@@ -349,7 +360,7 @@ export function featureLabelsLayer(ctx: RenderCtx): {
   const fs = 16.5 * k;
   const ls = 4 * k;
   const placedRealms = world.names.realms
-    .map((name, realm) => placeRealmName(ctx, name, realm, fs, ls))
+    .map((name, realm) => placeRealmName(ctx, name, realm, fs, ls, closeUp))
     .filter((p): p is PlacedRealm => p !== null);
 
   const nodes: SvgNode[] = [

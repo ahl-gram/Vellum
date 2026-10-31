@@ -309,8 +309,8 @@ comment. This is a convenience index, not their home.
   `waitSettled` both key on it. The back face's own rules (the ghost and its overlay from one draw,
   the overlay static and never live, one ghost object URL minted and revoked per redraw) are
   `handbook/specs/explorer-doctrine.md`'s, under the overlay lifecycle.
-- **Realm labels (#145):** `realm-label-placement.ts` stage 1 stays first and unchanged, or the
-  golden-free property dies. The dead `blob.length < 60` gate was removed after measuring that 0 of
+- **Realm labels (#145):** `realm-label-placement.ts` stage 1 stays first and unchanged on a world sheet (`placeOnWorldSheet`), or the
+  golden-free property dies; a close-up slides each of its spots inside the sheet and takes a dry one first (Issue #1105). The dead `blob.length < 60` gate was removed after measuring that 0 of
   173 realms hit it, which is what lets "always named" survive #113.
 - **Label order (#175):** the range name claims its box BEFORE the realm names, first refusal to the
   label that cannot move. Do not reorder that layer.
