@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { addressCamera, cameraFromTransform, transformFromCamera } from "../../src/site/shared/camera.ts";
+import {
+  addressCamera,
+  cameraFromTransform,
+  framingCamera,
+  gestureBox,
+  transformFromCamera,
+} from "../../src/site/shared/camera.ts";
 import { DEEPEST_K } from "../../src/world/lod.ts";
 
 // The camera <-> transform bridge a shared link stores as cx/cy/k; the centre is in uv (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is the e2e suite-zoom's.
@@ -67,4 +73,30 @@ test("a link missing a key, or carrying one that is not a number, carries no cam
   assert.equal(at("cy=0.5&k=2"), null);
   assert.equal(at("cx=0.5&cy=x&k=2"), null);
   assert.equal(at(""), null);
+});
+
+test("FC1 a room's camera holds the framing across a refit, never the raw transform: the centre held in one gesture box is re-seated in the next, and a hold before the first layout is the sheet at rest (Issue #1010)", () => {
+  const seated: { x: number; y: number; k: number }[] = [];
+  const zoom = {
+    getState: () => ({ x: -100, y: -50, k: 2 }),
+    refit: (t: { x: number; y: number; k: number }) => void seated.push(t),
+  };
+  const box = { clientWidth: 1000, clientHeight: 800 };
+  const cam = framingCamera(zoom, box);
+  const held = cam.hold();
+  box.clientWidth = 1200;
+  box.clientHeight = 900;
+  cam.restore(held);
+  assert.deepEqual(seated, [{ x: -120, y: -56.25, k: 2 }]);
+
+  const atRest = framingCamera(
+    { getState: () => ({ x: 0, y: 0, k: 1 }), refit: () => {} },
+    { clientWidth: 0, clientHeight: 0 },
+  );
+  assert.deepEqual(atRest.hold(), { cx: 0.5, cy: 0.5, k: 1 });
+});
+
+test("FC2 the gesture box reads a box not yet laid out as one pixel square, so a camera taken before the first layout is finite (Issue #1010)", () => {
+  assert.deepEqual(gestureBox({ clientWidth: 0, clientHeight: 0 }), { W: 1, H: 1 });
+  assert.deepEqual(gestureBox({ clientWidth: 1200, clientHeight: 900 }), { W: 1200, H: 900 });
 });
