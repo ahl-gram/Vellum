@@ -170,7 +170,7 @@ export async function runSelected<C extends object>(
     const started = now();
     let stoppedEarly = false;
     try {
-      await run({ ...ctx, suite: E2E_SUITE_ORDER[0] });
+      await run({ ...ctx, suite: name });
       streak = [];
     } catch (err) {
       // No handler is the old contract, and a browser that no longer answers is infrastructure: both leave by the same door they always did, so HARNESS ERROR keeps meaning what a reader has learned it means.
