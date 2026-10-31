@@ -261,7 +261,7 @@ test("a group a suite skipped reaches the report, and the health checkpoint does
 test("runE2e reds a listed step no suite met, and reports a met one in its outcome line", async (t) => {
   noExit(t);
   const { io, out, accumulators } = rig({ VELLUM_E2E_SUITES: "render" }, (name, acc) => {
-    if (name === "render") acc.skippedChecks.push("R9");
+    if (name === "render") acc.skippedChecks.push({ suite: "render", step: "R9" });
   });
   const skips = [
     { suite: "render", step: "R9", issue: 11 },

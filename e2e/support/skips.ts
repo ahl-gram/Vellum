@@ -1,8 +1,11 @@
 import type { E2eSuiteName, E2eSuiteTiming } from "./suites.ts";
 
-export interface E2eSkip {
+export interface E2eSuiteStep {
   readonly suite: E2eSuiteName;
   readonly step: string;
+}
+
+export interface E2eSkip extends E2eSuiteStep {
   readonly issue: number;
 }
 
@@ -16,8 +19,8 @@ export const E2E_SKIPS: readonly E2eSkip[] = [
   { suite: "chart-drawer", step: "CD61", issue: 944 },
 ];
 
-export function skipFor(skips: readonly E2eSkip[], step: string): E2eSkip | undefined {
-  return skips.find((s) => s.step === step);
+export function skipFor(skips: readonly E2eSkip[], suite: E2eSuiteName, step: string): E2eSkip | undefined {
+  return skips.find((s) => s.suite === suite && s.step === step);
 }
 
 export function skipLabel(skip: E2eSkip): string {
@@ -27,9 +30,17 @@ export function skipLabel(skip: E2eSkip): string {
 export function unmetSkips(
   skips: readonly E2eSkip[],
   timings: readonly E2eSuiteTiming[],
-  met: readonly string[],
+  met: readonly E2eSuiteStep[],
 ): readonly E2eSkip[] {
-  return skips.filter((s) => timings.some((t) => t.name === s.suite && !t.aborted) && !met.includes(s.step));
+  return skips.filter(
+    (s) =>
+      timings.some((t) => t.name === s.suite && !t.aborted) &&
+      !met.some((m) => m.suite === s.suite && m.step === s.step),
+  );
+}
+
+export function metSkips(skips: readonly E2eSkip[], met: readonly E2eSuiteStep[]): readonly E2eSkip[] {
+  return skips.filter((s) => met.some((m) => m.suite === s.suite && m.step === s.step));
 }
 
 export async function closedSkips(
