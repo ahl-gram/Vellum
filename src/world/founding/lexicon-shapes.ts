@@ -1,8 +1,14 @@
 import { MAX_ISLANDS, type IsleSize } from "../../terrain/lobes.ts";
 import type { FormId } from "../outline-ids.ts";
-import type { LexiconEntry } from "./lexicon.ts";
+import type { LexiconEntry, Steer } from "./lexicon.ts";
 
-export const SHAPE_WORDS: ReadonlyArray<LexiconEntry> = [];
+const outline = (value: FormId): Steer => ({ subject: "outline", value });
+
+export const SHAPE_WORDS: ReadonlyArray<LexiconEntry> = [
+  { phrase: "crescent", steers: [outline("crescent")] },
+  { phrase: "crescent shaped", steers: [outline("crescent")] },
+  { phrase: "round island", steers: [outline("round"), { subject: "mapType", value: "island" }] },
+];
 
 export const NUMBER_WORDS: ReadonlyMap<string, number> = new Map([
   ["one", 1],

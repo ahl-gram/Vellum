@@ -2,7 +2,15 @@ import { hashString } from "../../core/rng.ts";
 import type { CultureId } from "../../society/culture-ids.ts";
 import { defaultRecipe } from "../generate.ts";
 import type { WorldRecipe } from "../types.ts";
-import { CLIMATE_TRADITION, COAST_WARP, FOUNDING_VERSION, LAND_FACTOR, SMALL_WORDS, type Steer } from "./lexicon.ts";
+import {
+  CLIMATE_TRADITION,
+  COAST_WARP,
+  FOUNDING_VERSION,
+  LAND_FACTOR,
+  SHORE_RAGGEDNESS,
+  SMALL_WORDS,
+  type Steer,
+} from "./lexicon.ts";
 import { countAt } from "./counts.ts";
 import { longestEntryAt } from "./listed.ts";
 import { displayForm, foundingWords, type Refusal } from "./normalize.ts";
@@ -137,14 +145,20 @@ function choose(steered: ReadonlyArray<Recognised>): Choice {
 }
 
 function overridesFor(seed: number, steered: ReadonlyArray<Recognised>): FoundingOverrides {
-  const { mapType, band, land, coast, culture: named } = choose(steered);
+  const { mapType, band, land, coast, culture: named, outline, islands, isleSize } = choose(steered);
   const culture = named ?? (band !== undefined ? CLIMATE_TRADITION[band] : undefined);
   return {
     ...(mapType !== undefined ? { mapType } : {}),
     ...(band !== undefined ? { band } : {}),
     ...(land !== undefined ? { landFraction: landShare(seed, mapType, LAND_FACTOR[land]) } : {}),
-    ...(coast !== undefined ? { coastWarp: COAST_WARP[coast] } : {}),
+    ...(coast !== undefined && islands === undefined ? { coastWarp: COAST_WARP[coast] } : {}),
     ...(culture !== undefined ? { culture } : {}),
+    ...(outline !== undefined ? { outline } : {}),
+    ...(islands !== undefined ? { islands } : {}),
+    ...(isleSize === "varied" ? { isleSize } : {}),
+    ...(islands !== undefined && coast !== undefined && SHORE_RAGGEDNESS[coast] !== 0
+      ? { raggedness: SHORE_RAGGEDNESS[coast] }
+      : {}),
   };
 }
 
