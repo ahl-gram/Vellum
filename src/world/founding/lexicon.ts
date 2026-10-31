@@ -7,7 +7,9 @@ import { PEOPLE_WORDS } from "./lexicon-peoples.ts";
 import {
   BAND_WORDS,
   BETWEEN_WORDS,
+  DIRECTION_WORDS,
   ISLAND_WORDS,
+  PLACE_ARTICLE,
   PLACE_PREFERENCES,
   SHAPE_FORMS,
   SHAPE_TRIGGERS,
@@ -306,5 +308,6 @@ export const FOUNDING_RULES: ReadonlyArray<string> = [
   `A number right before a word for islands (${quoted(ISLAND_WORDS)}) sets about how many islands an archipelago has, written in figures or in words up to "thousand"; ${quoted(BAND_WORDS.keys())} set it there or anywhere else in a sentence that makes an archipelago. A number above ${MAX_ISLANDS} reads as ${MAX_ISLANDS}, and one below ${MIN_ISLANDS} sets nothing.`,
   `Between that number and the word for islands may stand only words for the islands' size and shape (${quoted(BETWEEN_WORDS.keys())}) and words for the coast.`,
   `${quoted(SHAPE_TRIGGERS)}, followed by the name of a real place on the map or by ${quoted(SHAPE_FORMS.keys())}, draws the land exactly in that shape; a place's name on its own draws no shape. Where places share a name, a country comes before its parts and they before a lake, then the first on the map's own list, and ${quoted(PLACE_PREFERENCES.map(([key]) => key))} are settled by hand.`,
+  `A real place's name counts only straight after those words, or after "${PLACE_ARTICLE}" when it names a country, a nation or territory within one, or a lake; a name that itself begins with "${PLACE_ARTICLE}" counts only when it names one of those too, and a name made only of ${quoted(DIRECTION_WORDS)} never counts. So "a turkey", "the coast" and "south america" draw no shape.`,
   "A count needs the archipelago: beside a word for another kind of land, or beside a shape, it sets nothing. Beside a count or a shape, words for more or less land set nothing; beside a shape, words for the coast set nothing, and beside a count they set how ragged each island's shore is.",
 ];
