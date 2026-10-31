@@ -33,19 +33,21 @@ export function addressCamera(params: URLSearchParams, ceiling: number): Camera 
 }
 
 export function gestureBox(viewport: Pick<HTMLElement, "clientWidth" | "clientHeight">): { W: number; H: number } {
-  return { W: viewport.clientWidth, H: viewport.clientHeight };
+  return { W: viewport.clientWidth || 1, H: viewport.clientHeight || 1 };
 }
 
 export function framingCamera(
   zoom: Pick<ZoomController, "getState" | "refit">,
   viewport: Pick<HTMLElement, "clientWidth" | "clientHeight">,
 ): RoomCamera<Camera> {
-  void viewport;
   return {
     hold: () => {
-      const s = zoom.getState();
-      return { cx: s.x, cy: s.y, k: s.k };
+      const { W, H } = gestureBox(viewport);
+      return cameraFromTransform(zoom.getState(), W, H);
     },
-    restore: (c) => zoom.refit({ x: c.cx, y: c.cy, k: c.k }),
+    restore: (held) => {
+      const { W, H } = gestureBox(viewport);
+      zoom.refit(transformFromCamera(held, W, H));
+    },
   };
 }
