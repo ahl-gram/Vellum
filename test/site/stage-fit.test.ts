@@ -33,7 +33,12 @@ test("the reserves are the chrome's own edges plus the gap: the lowest bottom ab
 
 test("an open slip takes its reach, its width and its inset, plus the mockup's breath from the right", () => {
   const fit = fitStage({ ...base, above: [100], below: [700], beside: 352 + 32 });
-  assert.equal(fit.reserve.right, 352 + 32 + SLIP_BREATH);
+  assert.equal(
+    fit.reserve.right,
+    352 + 32 + 24,
+    "the mockup's 1.5rem breath, written out so the constant cannot drift unseen",
+  );
+  assert.equal(SLIP_BREATH, 24);
   assert.ok(fit.sheet.w <= 1280 - 352 - 32 - SLIP_BREATH, "the sheet stays clear of the slip");
 });
 

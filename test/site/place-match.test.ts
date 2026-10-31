@@ -105,3 +105,14 @@ test("an empty query lists nothing; the words are the ruled ones (Issue #854)", 
   assert.equal(nameOf(rows, placeId("ne-1159315211")), "Texas");
   assert.equal(nameOf(rows, "ne-0" as never), null);
 });
+
+test("a name starting with the letters ranks before one with a word starting with them, and that before one holding them mid-word (Issue #854)", () => {
+  const row = (id: string, name: string): NameRow => [id as never, name, "state", "Nowhere"];
+  const twins = ["ne-d", "ne-e", "ne-f"].map((id) => row(id, "Zeta"));
+  const rows = [row("ne-a", "Malbork"), row("ne-b", "Port Alba"), row("ne-c", "Albany"), ...twins];
+  assert.deepEqual(
+    createMatcher(rows)("alb").hits.map((h) => h.name),
+    ["Albany", "Port Alba", "Malbork"],
+    "alphabet alone would put Malbork before Port Alba",
+  );
+});
