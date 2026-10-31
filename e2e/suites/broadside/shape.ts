@@ -89,6 +89,12 @@ export async function br16To19(k: BroadsideKit): Promise<void> {
 
     await br18Refuses(k);
     await br19Picks(k);
+    const archFaults = await pressesRefused(k, ["islands", "isle-equal"]);
+    check(
+      "BR18b the held islands slider and size radio refuse the reader's press (a place on the archipelago)",
+      archFaults.length === 0,
+      archFaults.join("; "),
+    );
 
     const onArch = await settle(SEAT, (d) => at(ON_ARCH, "Texas")(d), "BR17 the place-on-the-archipelago seat");
     const archFit = await fits("BR16 the slip with a place on the archipelago at rest");
@@ -122,6 +128,33 @@ async function br18Refuses({ evaluate, send, sleep, check }: BroadsideKit): Prom
     JSON.stringify({ before, after, later }),
   );
 }
+
+const HELD_VALUE = (id: string): Payload<string> =>
+  `(()=>{const e=document.getElementById("${id}");return e.type==="radio"?document.getElementById("isle-equal").checked+","+document.getElementById("isle-varied").checked:e.value;})()`;
+
+// Every held control a press can reach, one key each: the sea level and coast, the looseness, the islands and a size radio (BR18 holds the class, not the one slider).
+async function pressesRefused({ evaluate, send, sleep }: BroadsideKit, ids: string[]): Promise<string[]> {
+  const faults: string[] = [];
+  for (const id of ids) {
+    await evaluate(`document.getElementById("${id}").focus()`);
+    const before = await evaluate(HELD_VALUE(id));
+    await sendKey(send, "ArrowRight", "ArrowRight", 39);
+    const after = await evaluate(HELD_VALUE(id));
+    const status = await evaluate<string>(`document.getElementById("status").textContent`);
+    await sleep(300, "window: a wrongful draw would have started in it");
+    const later = await evaluate<string>(`document.getElementById("status").textContent`);
+    if (after !== before || status === DRAFTING || later === DRAFTING)
+      faults.push(`#${id}: ${before} to ${after}, status "${status}" then "${later}"`);
+  }
+  return faults;
+}
+
+const PRESSES: Record<string, string[]> = {
+  exact: ["land", "coast"],
+  loose: ["land"],
+  archipelago: ["looseness"],
+  plain: ["looseness"],
+};
 
 async function br19Picks(k: BroadsideKit): Promise<void> {
   const { evaluate, send, sleep, check } = k;
@@ -225,11 +258,18 @@ export async function br17Holds(k: BroadsideKit): Promise<void> {
   const { evaluate, sleep, check, goto, EXP } = k;
   const settle = makeSettle({ evaluate, sleep });
   const seen: Array<{ name: string; ok: boolean; seat: Seat }> = [];
+  const refusals: string[] = [];
   for (const c of CASES) {
     await goto(EXP + c.hash, "broadside-" + c.name);
     const seat = await settle(SEAT, at(c.want, c.place), `BR17 the ${c.name} seat`);
     seen.push({ name: c.name, ok: seat.note === c.note && c.ok(seat), seat });
+    refusals.push(...(await pressesRefused(k, PRESSES[c.name] ?? [])).map((f) => `${c.name} ${f}`));
   }
+  check(
+    "BR18b every held slider refuses the reader's press: the sea level, the coast and the looseness keep their values and draw nothing",
+    refusals.length === 0,
+    refusals.join("; "),
+  );
   check(
     "BR17 the Land panel holds what the world on screen cannot use and shows the rest, each held row reading held under its note",
     seen.every((s) => s.ok),
@@ -238,8 +278,9 @@ export async function br17Holds(k: BroadsideKit): Promise<void> {
 }
 
 type Twins = { witness: number; rows: number; subs: string[]; foot: string; scrolls: boolean };
-export async function br20Twins({ evaluate, send, sleep, check }: BroadsideKit): Promise<void> {
+export async function br20Twins({ evaluate, send, sleep, check, goto, EXP }: BroadsideKit): Promise<void> {
   const settle = makeSettle({ evaluate, sleep });
+  await goto(EXP + "#seed=42&style=antique", "broadside-twins");
   await evaluate(`(()=>{document.getElementById("place").focus();return true;})()`);
   await send("Input.insertText", { text: "valmiera" });
   const list = await settle(
