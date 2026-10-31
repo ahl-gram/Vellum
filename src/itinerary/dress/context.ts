@@ -1,7 +1,7 @@
 import type { MapStyle } from "../../render/style.ts";
 import type { DressContext } from "../../prospect/dress/context.ts";
 
-export const RIBBON_DRESSES = ["antique", "ink"] as const;
+const RIBBON_DRESSES = ["antique", "ink"] as const;
 export type RibbonDress = (typeof RIBBON_DRESSES)[number];
 
 /** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged. */

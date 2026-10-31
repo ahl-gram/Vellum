@@ -24,7 +24,7 @@ export const rectOf = (el: Element | null): DOMRect | null => {
 };
 
 // A wrapped line reads as the box, so a short survey line leaves the legend more room than the box's max-width would.
-export function textRight(el: Element | null): number | null {
+function textRight(el: Element | null): number | null {
   if (el === null) return null;
   const range = document.createRange();
   let right: number | null = null;

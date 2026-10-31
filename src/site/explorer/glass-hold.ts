@@ -1,5 +1,5 @@
 // The hold (Issue #751): one press with two moments; while it is lit the Glass drafts no finer survey and takes nothing away.
-export const HELD_MARK = "held";
+const HELD_MARK = "held";
 const SEPARATOR = " · ";
 
 export function markCaption(text: string, held: boolean): string {

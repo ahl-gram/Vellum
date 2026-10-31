@@ -4,7 +4,7 @@ export type Box = { readonly w: number; readonly h: number };
 export const SHEET: Box = { w: 1500, h: 1157.931 };
 export const MAX_SCALE = 7;
 export const MIN_FIT_FACTOR = 0.65;
-export const CLOSE_IN_FACTOR = 1.55;
+const CLOSE_IN_FACTOR = 1.55;
 const FIT_MARGIN = 0.92;
 
 export function fitScale(view: Box, sheet: Box): number {

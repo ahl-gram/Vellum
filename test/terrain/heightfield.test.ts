@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildHeightfield } from "../../src/terrain/heightfield.ts";
+import { buildHeightfield, defaultCoastWarp } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel, landMask, landFractionOf } from "../../src/terrain/sealevel.ts";
 import { slopeField } from "../../src/terrain/slope.ts";
 import { createField } from "../../src/core/grid.ts";
@@ -303,4 +303,15 @@ test("the terrain refuses a count out of range, on another map type or beside an
   );
   assert.doesNotThrow(() => buildHeightfield({ ...COUNTED, islands: 2 }));
   assert.doesNotThrow(() => buildHeightfield({ ...COUNTED, islands: MAX_ISLANDS }));
+});
+
+test("defaultCoastWarp is the coast warp each map type draws with when the recipe names none (Issue #1020)", () => {
+  for (const mapType of MAP_TYPES) {
+    const recipe = { ...RECIPE, mapType };
+    assert.deepEqual(
+      buildHeightfield({ ...recipe, coastWarp: defaultCoastWarp(mapType) }).data,
+      buildHeightfield(recipe).data,
+      `${mapType}: naming the default coast warp draws a different field from naming none`,
+    );
+  }
 });

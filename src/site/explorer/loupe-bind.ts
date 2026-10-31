@@ -1,7 +1,7 @@
 // The loupe's hands (Issue #751): its press, its held key, the pointer it follows and, where touch is the main pointer, the finger that drags it by its grip while the chart is in hand.
 import type { Loupe } from "./loupe.ts";
 
-export const LOUPE_KEY = "l";
+const LOUPE_KEY = "l";
 
 export interface KeyLike {
   readonly key: string;

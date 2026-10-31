@@ -14,7 +14,7 @@ export const FOREGROUND_SAMPLES = 33;
 export const BACKDROP_OFFSET = 12;
 export const FOREGROUND_OFFSET = 2;
 export const GRADIENT_RADIUS = 3;
-export const SEA_SEARCH_RADIUS = 2;
+const SEA_SEARCH_RADIUS = 2;
 
 export function sampleBilinear(f: Field, x: number, y: number): number {
   const cx = clamp(x, 0, f.w - 1);

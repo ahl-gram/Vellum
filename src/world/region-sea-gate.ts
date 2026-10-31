@@ -21,7 +21,7 @@ const FLOOD_ORDER = [
   [0, -1],
 ] as const;
 
-export function coastalParentCells(
+function coastalParentCells(
   worldSea: Uint8Array,
   parentLand: Uint8Array,
   parentW: number,

@@ -6,7 +6,7 @@ export type XYS = { readonly x: number; readonly y: number; readonly s: number }
 
 export const PLATE_W = 520;
 export const PLATE_H = 384;
-export const PLATE_MARGIN = 23;
+const PLATE_MARGIN = 23;
 export const VIEW_X0 = PLATE_MARGIN;
 export const VIEW_X1 = PLATE_W - PLATE_MARGIN;
 export const BASE_GROUND = 232;
@@ -15,7 +15,7 @@ export const SHORE_DROP = 6;
 export const WATER_BOTTOM = 276;
 export const BACK_ROW_RAISE = 8;
 export const WALLED_KEEP_RAISE = 4;
-export const MOUND_HALF_SPAN = 200;
+const MOUND_HALF_SPAN = 200;
 export const MOUND_MAX_RISE = 56;
 export const RIDGE_SCALE = 140;
 export const RIDGE_MIN_RISE = 0.02;

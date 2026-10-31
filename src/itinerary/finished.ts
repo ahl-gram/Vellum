@@ -9,7 +9,7 @@ import { renderRibbon } from "./dress/plate.ts";
 
 export { RIBBON_H, RIBBON_W };
 
-export function ribbonAria(input: RibbonInput): string {
+function ribbonAria(input: RibbonInput): string {
   return (
     `An itinerary strip chart of the road from ${input.fromName} to ${input.toName}, ` +
     `${Math.round(input.totalLeagues)} leagues, drawn as a scroll in the manner of an old road atlas.`

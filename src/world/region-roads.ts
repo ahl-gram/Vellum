@@ -8,7 +8,7 @@ import { cheapestPath, corridorRadius, courseDistance } from "./river-route.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
-export const ROAD_CENTRE_PULL = 1;
+const ROAD_CENTRE_PULL = 1;
 
 export type RoadGround = {
   readonly elev: Field;

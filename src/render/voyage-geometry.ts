@@ -3,8 +3,8 @@ import type { LegMode } from "./voyage-route.ts";
 import type { WaterSpan } from "./voyage-water.ts";
 
 /** PACE_EXP: 1 is constant speed, 0 is equal-time per leg; PACE_MS_PER_UNIT is the linear pace knob that reaches the screen; MAX_SWEEP_MS is a safety valve that has never bitten, tune the pace rather than raise it. */
-export const PACE_EXP = 0.55;
-export const PACE_MS_PER_UNIT = 34;
+const PACE_EXP = 0.55;
+const PACE_MS_PER_UNIT = 34;
 export const MIN_LEG_MS = 300;
 export const MAX_SWEEP_MS = 26000;
 

@@ -14,11 +14,11 @@ import {
 } from "./geometry.ts";
 
 /** 0.28 sits just above the coastal shelf most harbors occupy, so ports stay flat while hill and mountain seats rise. */
-export const MOUND_REL_START = 0.28;
-export const MOUND_REL_FULL = 0.78;
-export const MOUND_MIN_RISE = 8;
+const MOUND_REL_START = 0.28;
+const MOUND_REL_FULL = 0.78;
+const MOUND_MIN_RISE = 8;
 
-export function moundRise(siteRel: number): number {
+function moundRise(siteRel: number): number {
   const t = Math.min(1, Math.max(0, (siteRel - MOUND_REL_START) / (MOUND_REL_FULL - MOUND_REL_START)));
   const rise = MOUND_MAX_RISE * t;
   return rise < MOUND_MIN_RISE ? 0 : rise;

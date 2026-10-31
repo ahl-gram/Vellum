@@ -72,7 +72,7 @@ export function markStandsOn(kind: MarkKind, rel: number, b: number): boolean {
   return kind === "tree" ? bearsTree(rel, b) : reliefKind(rel, b) === kind;
 }
 
-export const MARK_SPACING: Readonly<Record<MarkKind, number>> = { mtn: 15, hill: 13, tree: 12.5, marsh: 12, dune: 17 };
+const MARK_SPACING: Readonly<Record<MarkKind, number>> = { mtn: 15, hill: 13, tree: 12.5, marsh: 12, dune: 17 };
 
 type Cand = { x: number; y: number; rel: number; i: number };
 
@@ -84,7 +84,7 @@ type GlyphCands = {
   readonly dune: Cand[];
 };
 
-export const GLYPH_DENSITY_WINDOW = 0.125;
+const GLYPH_DENSITY_WINDOW = 0.125;
 
 export function glyphDensity(
   gridW: number,

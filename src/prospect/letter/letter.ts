@@ -48,7 +48,7 @@ function glyphOf(face: FaceTable, key: string): Glyph {
   return g;
 }
 
-export function glyphKeys(face: FaceTable, text: string): string[] {
+function glyphKeys(face: FaceTable, text: string): string[] {
   const out: string[] = [];
   let i = 0;
   while (i < text.length) {
