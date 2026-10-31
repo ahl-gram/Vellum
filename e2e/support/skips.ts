@@ -20,7 +20,7 @@ export const E2E_SKIPS: readonly E2eSkip[] = [
 ];
 
 export function skipFor(skips: readonly E2eSkip[], suite: E2eSuiteName, step: string): E2eSkip | undefined {
-  return skips.find((s) => s.step === step);
+  return skips.find((s) => s.suite === suite && s.step === step);
 }
 
 export function skipLabel(skip: E2eSkip): string {
