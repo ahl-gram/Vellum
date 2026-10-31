@@ -47,7 +47,15 @@ export function fakePage(
     };
     const [innerWidth, innerHeight] = now.inner ?? [1280, 800];
     const context = {
-      document: { readyState: "complete", querySelector: node, getElementById: (id: string) => node(`#${id}`) },
+      document: {
+        readyState: "complete",
+        querySelector: node,
+        querySelectorAll: (selector: string) => {
+          const found = node(selector);
+          return found === null ? [] : [found];
+        },
+        getElementById: (id: string) => node(`#${id}`),
+      },
       getComputedStyle: () => ({ display: "block" }),
       innerWidth,
       innerHeight,
