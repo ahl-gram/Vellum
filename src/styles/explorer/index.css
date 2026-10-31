@@ -254,6 +254,10 @@ body.chart-room .stage {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
+.legend-row .legend-btn {
+  padding-inline: 0.5rem;
+}
+
 /* The block margins take back the block padding that gives the focus ring a box around the glyph, and the inline ones the narrower padding, so the glyph and its neighbours stay where they were (Issue #988). */
 .legend-row a.fn {
   color: var(--line-tan);
