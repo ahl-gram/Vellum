@@ -155,7 +155,7 @@ export function draftOverrides(seed: number, touched: TouchedGates): DrawOverrid
   if (bandSel.value) chosen.band = bandSel.value as ClimateBand;
   if (!touched.land) syncAutoSlider(seed, chosen);
   updateLandReadout();
-  if (!touched.coast) parkCoastDefault();
+  if (!touched.coast) parkCoastDefault(seed, chosen);
   updateCoastReadout();
   refreshLand();
   return { ...chosen, ...overridesOfLand(landKeysNow(hashControls, touched.land, touched.coast)) };

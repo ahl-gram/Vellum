@@ -99,7 +99,7 @@ const SHAPES: Record<MapType, Shape> = {
 };
 
 export function defaultCoastWarp(mapType: MapType): number {
-  return SHAPES[mapType].warpStrength;
+  return SHAPES[mapType].coastWarp;
 }
 
 const RIDGE_SEED_SALT = 0x7fe9b2c5;
