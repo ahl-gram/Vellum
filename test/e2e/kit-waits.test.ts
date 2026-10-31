@@ -215,14 +215,19 @@ const atRest = (page: FakePage): TrailKit => {
 test("AT's rest hands the Prospect over only once its plate is shown and the fit the plate's refit leaves holds still", async () => {
   const page = fakePage(prospect(4));
   await assert.doesNotReject(arrive(atRest(page), "/prospect/", [1024, 768]));
-  assert.equal(page.said.length, 5, "AT's rest handed the Prospect over before its plate was shown and its refit held still");
+  assert.equal(
+    page.said.length,
+    5,
+    "AT's rest handed the Prospect over before its plate was shown and its refit held still",
+  );
 });
 
 test("AT's rest times out naming the Prospect when its plate never shows", async () => {
   const page = fakePage(prospect(Infinity));
   await assert.rejects(
     arrive(atRest(page), "/prospect/", [1024, 768]),
-    (err: Error) => err.message.startsWith("settle timeout AT rest /prospect/: ") && err.message.includes('"drawn":false'),
+    (err: Error) =>
+      err.message.startsWith("settle timeout AT rest /prospect/: ") && err.message.includes('"drawn":false'),
   );
 });
 
