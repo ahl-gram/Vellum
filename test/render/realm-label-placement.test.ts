@@ -253,16 +253,24 @@ test("on a close-up with every spot under the furniture the name keeps its centr
 test("on a close-up a heartland spot that hangs past the sheet is slid inside and tried before the name is forced", () => {
   const blob = rectBlob(0, 10, 3, 18);
   const c = centroidOfBlob(blob);
-  const arena = stubbornArena(5);
   const ladder = [c.y, c.y - 26, c.y + 26, c.y - 52, c.y + 52];
-  for (const pt of interiorProbes(blob, GRID_W, proj, c)) {
+  const rungYs = ladder.map((y) => boxOf({ x: 0, y }).y);
+  const arena = openArena();
+  arena.tryClaim = (box) => !rungYs.some((y) => Math.abs(box.y - y) < 1e-9);
+  const probes = interiorProbes(blob, GRID_W, proj, c);
+  for (const pt of probes) {
     assert.ok(boxOf(pt).x < lo, "precondition: no heartland spot fits unslid");
   }
+  assert.ok(
+    probes.some((pt) => !rungYs.includes(boxOf(pt).y)),
+    "precondition: a heartland spot stands off every rung",
+  );
 
   const p = placeRealmLabel({ ...base, blob, centroid: c, yCandidates: ladder, arena, closeUp: room() });
 
   assert.equal(p.claimed, true);
-  assert.ok(boxOf(p).x >= lo - 1e-9, `box at ${boxOf(p).x}, inset edge ${lo}`);
+  assert.ok(!rungYs.includes(boxOf(p).y), "it is a heartland spot, not a rung");
+  assert.ok(Math.abs(boxOf(p).x - lo) < 1e-9, `box at ${boxOf(p).x}, slid to the inset edge ${lo}`);
   assert.equal(arena.forced.length, 0);
 });
 
