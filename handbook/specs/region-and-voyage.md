@@ -115,7 +115,7 @@ about a rule, the rulebook wins.
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
   before.
-- **On a close-up, terrain marks give way to place and realm names, a place name steps off its river, and a settlement's mark takes its tier's size and its survey's depth.** All three act on every region sheet, the bound atlas's regional plates included, and on no world sheet, so the committed charts and the golden stand still; the rules themselves are `handbook/specs/chart-dress.md`'s.
+- **On a close-up, terrain marks give way to place and realm names, a place or realm name steps off its river, a settlement's mark takes its tier's size and its survey's depth, and every name stays whole on the sheet.** All four act on every region sheet, the bound atlas's regional plates included, and on no world sheet, so the committed charts and the golden stand still; the rules themselves are `handbook/specs/chart-dress.md`'s.
 - **A region's coast closes against the window rect, and only the TRUE shore may round.** A plain
   smoothing pass rounds the frame's right-angle corners inward and carves real land over the ocean
   painted behind it; `chaikinSmoothPinned` in `src/terrain/polyline.ts` pins the window-frame
