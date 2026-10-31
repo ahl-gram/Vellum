@@ -1,13 +1,30 @@
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { CultureId } from "../../society/culture-ids.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
+import { MAX_ISLANDS, MIN_ISLANDS, type IsleSize } from "../../terrain/lobes.ts";
+import type { OutlineId } from "../outline-ids.ts";
 import { PEOPLE_WORDS } from "./lexicon-peoples.ts";
+import {
+  BAND_WORDS,
+  BETWEEN_WORDS,
+  DIRECTION_WORDS,
+  ISLAND_WORDS,
+  PLACE_ARTICLE,
+  PLACE_PREFERENCES,
+  SHAPE_FORMS,
+  SHAPE_TRIGGERS,
+  SHAPE_WORDS,
+} from "./lexicon-shapes.ts";
 
 export const FOUNDING_VERSION = 1;
 export const MAX_SENTENCE_CODE_POINTS = 120;
 export const SMALL_WORDS: ReadonlySet<string> = new Set(["a", "an", "the", "of", "and", "with", "where"]);
 export const LAND_FACTOR = { less: 0.55, more: 1.4 } as const;
 export const COAST_WARP = { ragged: 0.95, smooth: 0.1 } as const;
+export const SHORE_RAGGEDNESS: Readonly<Record<keyof typeof COAST_WARP, number>> = {
+  ragged: COAST_WARP.ragged,
+  smooth: 0,
+};
 export const CLIMATE_TRADITION: Readonly<Record<ClimateBand, CultureId>> = {
   polar: "norden",
   tropical: "oromi",
@@ -19,7 +36,10 @@ export type Steer =
   | { readonly subject: "band"; readonly value: ClimateBand }
   | { readonly subject: "land"; readonly value: keyof typeof LAND_FACTOR }
   | { readonly subject: "coast"; readonly value: keyof typeof COAST_WARP }
-  | { readonly subject: "culture"; readonly value: CultureId };
+  | { readonly subject: "culture"; readonly value: CultureId }
+  | { readonly subject: "outline"; readonly value: OutlineId }
+  | { readonly subject: "islands"; readonly value: number }
+  | { readonly subject: "isleSize"; readonly value: IsleSize };
 
 export type LexiconEntry = { readonly phrase: string; readonly steers: ReadonlyArray<Steer> };
 
@@ -272,9 +292,11 @@ export const LEXICON: ReadonlyArray<LexiconEntry> = [
   ...group([type("continent"), land("more")], ["supercontinent", "supercontinents"]),
   ...group([type("archipelago"), band("tropical")], ["cays", "coral isles", "coral islands", "spice islands"]),
   ...PEOPLE_WORDS,
+  ...SHAPE_WORDS,
 ];
 
 const smallWords = [...SMALL_WORDS].join(", ");
+const quoted = (words: Iterable<string>): string => [...words].map((w) => `"${w}"`).join(", ");
 
 export const FOUNDING_RULES: ReadonlyArray<string> = [
   `A sentence is at most ${MAX_SENTENCE_CODE_POINTS} characters; an empty one, one holding a control character, or one holding a character this browser does not know is refused.`,
@@ -283,4 +305,9 @@ export const FOUNDING_RULES: ReadonlyArray<string> = [
   "Two words that disagree about the same thing both stop steering it; a word left steering nothing counts toward the chart number instead.",
   "A world whose words name no tongue, or two that disagree, takes the tongue named by the words still setting its climate, when they name just one; when they name none, or two that differ, it takes the tongue its climate always gives; with no word left setting its climate, the chart number chooses.",
   `Every other word except ${smallWords} makes the chart number, in the order it was written.`,
+  `A number right before a word for islands (${quoted(ISLAND_WORDS)}) sets about how many islands an archipelago has, written in figures or in words up to "thousand"; ${quoted(BAND_WORDS.keys())} set it there or anywhere else in a sentence that makes an archipelago. A number above ${MAX_ISLANDS} reads as ${MAX_ISLANDS}, and one below ${MIN_ISLANDS} sets nothing.`,
+  `Between that number and the word for islands may stand only words for the islands' size and shape (${quoted(BETWEEN_WORDS.keys())}) and words for the coast.`,
+  `${quoted(SHAPE_TRIGGERS)}, followed by the name of a real place on the map or by ${quoted(SHAPE_FORMS.keys())}, draws the land exactly in that shape; a place's name on its own draws no shape. Where places share a name, a country comes before its parts and they before a lake, then the first on the map's own list, and ${quoted(PLACE_PREFERENCES.map(([key]) => key))} are settled by hand.`,
+  `A real place's name counts only straight after those words, or after "${PLACE_ARTICLE}" when it names a country, a nation or territory within one, or a lake; a name that itself begins with "${PLACE_ARTICLE}" counts only when it names one of those too, and a name made only of ${quoted(DIRECTION_WORDS)} never counts. So "a turkey", "the coast" and "south america" draw no shape.`,
+  "A count needs the archipelago: beside a word for another kind of land, or beside a shape, it sets nothing. Beside a count or a shape, words for more or less land set nothing; beside a shape, words for the coast set nothing, and beside a count they set how ragged each island's shore is.",
 ];

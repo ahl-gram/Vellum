@@ -1,18 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { maskChecksum } from "../../test-support/mask-checksum.ts";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { landMask, pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe, generateWorld, landShareOf } from "../../src/world/generate.ts";
 import type { WorldRecipe } from "../../src/world/types.ts";
-
-function checksum(mask: Uint8Array): number {
-  let h = 0x811c9dc5;
-  for (const v of mask) {
-    h ^= v;
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h;
-}
 
 // Measured at 46b36993 (Issue #851), before the outline joined the terrain; a mask flips only where a cell ties the sea level within float drift, the exposure the golden already accepts.
 const PINS: ReadonlyArray<readonly [number, number]> = [
@@ -31,7 +23,7 @@ test("a world with no outline keeps its land, seed by seed (Issue #851)", () => 
   for (const [seed, expected] of PINS) {
     const w = generateWorld(defaultRecipe(seed));
     assert.equal(
-      checksum(landMask(w.elev, w.seaLevel)),
+      maskChecksum(landMask(w.elev, w.seaLevel)),
       expected,
       `seed ${seed} (${w.recipe.mapType}): the land of a world with no outline moved`,
     );
@@ -56,7 +48,7 @@ test("a counted world keeps its land, seed by seed, and the sitting's ragged sti
     const recipe = defaultRecipe(1, { mapType: "archipelago", ...over });
     const elev = buildHeightfield({ seed: 1, gridW: 320, gridH: 240, mapType: "archipelago", ...over });
     assert.equal(
-      checksum(landMask(elev, pickSeaLevel(elev, landShareOf(recipe)))),
+      maskChecksum(landMask(elev, pickSeaLevel(elev, landShareOf(recipe)))),
       expected,
       `${JSON.stringify(over)}: the land of a counted world moved`,
     );
