@@ -11,7 +11,7 @@ const results: StartOptions["results"] = [];
 const consoleErrors: string[] = [];
 const http4xx: string[] = [];
 const skippedGroups: string[] = [];
-const skippedChecks: string[] = [];
+const skippedChecks: StartOptions["skippedChecks"] = [];
 
 process.exit(
   await runE2eFromProcess(

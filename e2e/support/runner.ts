@@ -4,7 +4,7 @@ import type { StartOptions, SuiteContext } from "../types.ts";
 import { browserlessAction } from "./browser-policy.ts";
 import { e2eOutSubdir, resolveE2ePorts } from "./ports.ts";
 import { runnerLayoutRequested } from "./runner-layout.ts";
-import { E2E_SKIPS, unmetSkips } from "./skips.ts";
+import { E2E_SKIPS, metSkips, unmetSkips } from "./skips.ts";
 import type { E2eSkip } from "./skips.ts";
 import {
   E2E_SUITE_ORDER,
@@ -16,7 +16,14 @@ import {
   suitesCertifiedByHealth,
   suitesNotWhole,
 } from "./suites.ts";
-import type { E2eCheckResult, E2eRunHooks, E2eSuiteName, E2eSuiteRunners, E2eSuiteTiming } from "./suites.ts";
+import type {
+  E2eCheckResult,
+  E2eRunHooks,
+  E2eSuiteName,
+  E2eSuiteRunners,
+  E2eSuiteTiming,
+  SuiteTagged,
+} from "./suites.ts";
 
 export type Accumulators = Pick<
   StartOptions,
@@ -29,7 +36,7 @@ export interface RunnerDeps<C extends RunnerContext> {
   readonly findBrowser: () => string | null;
   readonly start: (options: StartOptions) => Promise<C>;
   readonly cleanup: () => void;
-  readonly suites: E2eSuiteRunners<C>;
+  readonly suites: E2eSuiteRunners<SuiteTagged<C>>;
   readonly skips?: readonly E2eSkip[];
 }
 
@@ -171,10 +178,7 @@ export async function runE2e<C extends RunnerContext>(io: RunnerIo<C>): Promise<
       );
     }
     for (const line of reportLines(timings, selected, tier)) io.out(line);
-    const outcome = runOutcome(
-      io.accumulators.results,
-      skips.filter((s) => skippedChecks.includes(s.step)),
-    );
+    const outcome = runOutcome(io.accumulators.results, metSkips(skips, skippedChecks));
     io.out(`\n${outcome.line}`);
     io.cleanup();
     return outcome.ok ? 0 : 1;

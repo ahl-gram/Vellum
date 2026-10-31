@@ -11,6 +11,8 @@ import {
   suitesCertifiedByHealth,
   suitesNotWhole,
 } from "../../e2e/support/suites.ts";
+import type { SuiteTagged } from "../../e2e/support/suites.ts";
+import type { E2eSuiteStep } from "../../e2e/support/skips.ts";
 
 // Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched nothing would report ALL PASS (0/0) and exit 0.
 
@@ -118,24 +120,30 @@ test("runSelected runs the selected suites, in the order given, and nothing else
   })();
 });
 
-test("runSelected hands every suite the same ctx, and refuses a name the runner cannot run", async () => {
-  const ctx = { marker: 42 };
-  const seen: unknown[] = [];
-  await runSelected(
+test("runSelected hands each suite the runner's context with that suite's own name, sharing its sinks, and refuses a name the runner cannot run", async () => {
+  const results: { name: string; ok: boolean }[] = [];
+  const skippedChecks: E2eSuiteStep[] = [];
+  const ctx = { marker: 42, results, skippedChecks };
+  const seen: SuiteTagged<typeof ctx>[] = [];
+  const keep = (c: SuiteTagged<typeof ctx>): Promise<void> => {
+    seen.push(c);
+    return Promise.resolve();
+  };
+  await runSelected(["render", "health"], { render: keep, health: keep }, ctx);
+  assert.deepEqual(
+    seen.map((c) => c.suite),
     ["render", "health"],
-    {
-      render: (c) => {
-        seen.push(c);
-        return Promise.resolve();
-      },
-      health: (c) => {
-        seen.push(c);
-        return Promise.resolve();
-      },
-    },
-    ctx,
+    "a suite was handed another suite's name, or none",
   );
-  assert.deepEqual(seen, [ctx, ctx]);
+  assert.deepEqual(
+    seen.map((c) => c.marker),
+    [42, 42],
+    "a suite was not handed the runner's context",
+  );
+  assert.ok(
+    seen.every((c) => c.results === results && c.skippedChecks === skippedChecks),
+    "a suite was handed a copy of a sink, so what it records never reaches the runner's tally",
+  );
   await assert.rejects(() => runSelected(["render"], {}, {}), /no suite named render/);
 });
 

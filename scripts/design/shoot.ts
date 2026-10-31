@@ -6,7 +6,7 @@ import { findBrowser, NO_BROWSER } from "../../src/cli/raster.ts";
 import { cleanup, start } from "../../e2e/harness.ts";
 import { dropExpectedCancellations } from "../../e2e/support/console.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
-import type { SuiteContext } from "../../e2e/types.ts";
+import type { HarnessContext } from "../../e2e/types.ts";
 
 /** The shared camera for design work: one browser per call, every shot at a TRUE layout viewport set through device metrics, captured once. */
 
@@ -164,7 +164,7 @@ export function assertPageServed(shot: Shot, href: string, responses: readonly s
 
 export const withoutFavicon = (responses: readonly string[]): string[] => responses.filter((u) => !/favicon/i.test(u));
 
-async function committed(ctx: SuiteContext, href: string): Promise<void> {
+async function committed(ctx: HarnessContext, href: string): Promise<void> {
   const settle = makeSettle(ctx);
   await settle<{ href: string; ready: string; fonts: string }>(
     `({ href: location.href, ready: document.readyState, fonts: document.fonts ? document.fonts.status : "loaded" })`,
@@ -174,7 +174,7 @@ async function committed(ctx: SuiteContext, href: string): Promise<void> {
   );
 }
 
-async function takeShot(ctx: SuiteContext, shot: Shot, port: number): Promise<ShotResult> {
+async function takeShot(ctx: HarnessContext, shot: Shot, port: number): Promise<ShotResult> {
   const errBase = ctx.consoleErrors.length,
     httpBase = ctx.http4xx.length;
   const url = servedUrl(shot.url, port);

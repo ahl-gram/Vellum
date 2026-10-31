@@ -24,7 +24,9 @@ const realRun = async () => {
   try {
     check("IX9 the survey sheet frames the page", false, "border 0px");
     check("IX10 the index stands beside the broadside", true);
-    await makeStep({ check })("L13", () => Promise.reject(new Error('settle timeout l13-marks: {"n":0}')));
+    await makeStep({ check, suite: "landfall" })("L13", () =>
+      Promise.reject(new Error('settle timeout l13-marks: {"n":0}')),
+    );
     const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
     const ctx = { check, alive: () => Promise.resolve(true), clearMobile: () => Promise.resolve() };
     const hooks = runnerHooks(ctx, accumulators, (...parts) => err.push(format(...parts)), 50);
@@ -87,7 +89,7 @@ const stoppedSteps = async (names: readonly string[]) => {
   console.error = (...parts: unknown[]) => err.push(format(...parts));
   try {
     for (const name of names)
-      await makeStep({ check })(name, () => Promise.reject(new Error(`settle timeout ${name}`)));
+      await makeStep({ check, suite: "landfall" })(name, () => Promise.reject(new Error(`settle timeout ${name}`)));
   } finally {
     console.error = saved;
   }

@@ -132,6 +132,8 @@ export interface E2eOutcome {
 
 export type E2eSuiteRunners<C = unknown> = Readonly<Record<string, (ctx: C) => Promise<unknown>>>;
 
+export type SuiteTagged<C> = C & { readonly suite: E2eSuiteName };
+
 export interface E2eSuiteTiming {
   readonly name: E2eSuiteName;
   readonly ms: number;
@@ -151,9 +153,9 @@ const ABORTED_STREAK_LIMIT = 3;
 
 export const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
-export async function runSelected<C>(
+export async function runSelected<C extends object>(
   names: readonly E2eSuiteName[],
-  suites: E2eSuiteRunners<C>,
+  suites: E2eSuiteRunners<SuiteTagged<C>>,
   ctx: C,
   hooks: E2eRunHooks = {},
 ): Promise<readonly E2eSuiteTiming[]> {
@@ -168,7 +170,7 @@ export async function runSelected<C>(
     const started = now();
     let stoppedEarly = false;
     try {
-      await run(ctx);
+      await run({ ...ctx, suite: name });
       streak = [];
     } catch (err) {
       // No handler is the old contract, and a browser that no longer answers is infrastructure: both leave by the same door they always did, so HARNESS ERROR keeps meaning what a reader has learned it means.
