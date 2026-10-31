@@ -387,6 +387,52 @@ test("every built head links /shared/shell.css last of its stylesheets, the plac
   }
 });
 
+const stylesheetsOf = (html: string): string[] =>
+  [...html.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*>/g)].map((m) => /\bhref="([^"]+)"/.exec(m[0])?.[1] ?? "");
+
+// A stage whose sheet stands in it, ahead of the gesture box; Today's sheet stands inside its transform target, behind it.
+const sheetStandsInStage = (html: string): boolean => {
+  const at = html.indexOf('<div class="stage">');
+  const sheet = html.indexOf('id="sheet"', at);
+  const viewport = html.indexOf('id="map-viewport"', at);
+  return at !== -1 && sheet !== -1 && viewport !== -1 && sheet < viewport;
+};
+
+const SHARED_ROOM_SHEETS: ReadonlyArray<readonly [string, (p: PageSpec) => boolean, readonly string[]]> = [
+  [
+    "/shared/chart-stage.css",
+    (p) => sheetStandsInStage(page(p.route)),
+    [
+      "explorer/index.html",
+      "print-room/index.html",
+      "explorer/portfolio/index.html",
+      "reading-room/index.html",
+      "prospect/index.html",
+      "ribbon/index.html",
+      "specimen/index.html",
+    ],
+  ],
+  ["/shared/document-room.css", (p) => p.pageScript !== undefined, ["faq/index.html", "glossary/index.html"]],
+];
+
+test("the chart rooms whose sheet stands in their stage link /shared/chart-stage.css, and the document rooms /shared/document-room.css, each the shared sheet just before the page's own, no other page links either, and the build serves both (Issue #1013)", () => {
+  for (const [href, wears, roster] of SHARED_ROOM_SHEETS) {
+    const wearers = PAGES.filter(wears).map((p) => p.route);
+    assert.deepEqual(wearers, roster, `${href} is worn by exactly the pages that stand the dress's element`);
+    for (const p of PAGES) {
+      const links = stylesheetsOf(page(p.route));
+      const own = links.indexOf("index.css");
+      assert.notEqual(own, -1, `${p.route} links its own sheet`);
+      if (wearers.includes(p.route)) {
+        assert.equal(links[own - 1], href, `${p.route} links ${href} as the shared sheet just before its own`);
+      } else {
+        assert.ok(!links.includes(href), `${p.route} links no ${href}`);
+      }
+    }
+    assert.ok(existsSync(join(outDir, href)), `the build serves ${href}`);
+  }
+});
+
 test("no head member arrives beyond the canonical set (nothing injected, nothing invented)", () => {
   const expectedMeta = new Set([
     "charset",

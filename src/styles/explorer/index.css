@@ -1,51 +1,20 @@
-/* The Explorer: a chart room. The furniture is atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
+/* The Explorer: a chart room. The furniture is atelier.css's and its stage chart-stage.css's; this sheet keeps the sheet's inner leaf, the hold's glyph, the region inset, the turn and the verso. */
 /* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem; the slip stands inboard of the Drawer tab, by the tab, the 0.6rem the folded Glass keeps from it (chart-drawer.css) and the slip's 9px painted ring (its 3px outline at a 6px offset, atelier.css). */
 :root {
   --slip-w: 24rem;
   --slip-right: calc(var(--chart-drawer-tab-w) + 0.6rem + 9px);
 }
 
-body.chart-room .stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0;
-}
-#sheet {
-  position: relative;
-  flex: none;
-  width: 0;
-  height: 0;
-  box-shadow: var(--stage-shadow);
-}
 .sheet-inner {
   position: relative;
   width: 100%;
   height: 100%;
-}
-/* The Glass's gesture box is the sheet, so d3's extent, the camera's cx and cy and the region survey's window all read sheet fractions; transform-origin 0 0 matches d3-zoom's screen-space math, and the stage clips the magnified sheet. */
-#map-viewport {
-  position: absolute;
-  inset: 0;
-  cursor: grab;
-}
-#map-viewport:focus-visible {
-  outline: 2px solid var(--parchment-bright);
-  outline-offset: -3px;
-}
-/* d3-zoom does not set touch-action; without none the browser's native pan and pinch preempt the gesture. */
-#map-viewport.zoomable {
-  touch-action: none;
 }
 .zoomery .zoom-btn.hold-btn {
   font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
   font-size: 1.15rem;
 }
 #map {
-  position: absolute;
-  inset: 0;
-  transform-origin: 0 0;
   container-type: size;
 }
 /* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */
