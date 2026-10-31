@@ -171,7 +171,10 @@ test("a step whose name is only part of a listed step's name, or holds one, stil
 });
 
 test("a step built for one suite runs a step of the same name that the list names only for another suite, and a step built for that suite skips it (Issue #1135)", async () => {
-  const list = [{ suite: "home", step: "H5", issue: 1 }] as const;
+  const list = [
+    { suite: "hunt", step: "H4", issue: 3 },
+    { suite: "home", step: "H5", issue: 1 },
+  ] as const;
   const { results, check } = recorder();
   const skippedChecks: E2eSuiteStep[] = [];
   const ran: string[] = [];
