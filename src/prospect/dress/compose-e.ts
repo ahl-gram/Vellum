@@ -43,7 +43,7 @@ export type FurnitureBoxes = Readonly<Record<"towns" | "cartouche" | "medals" | 
 export type EngravedE = { readonly node: SvgNode; readonly picture: Picture; readonly furniture: FurnitureBoxes };
 
 /** Grid space: x east, y south; the view points from the viewer into the picture (the round's cardinal words). */
-export function cardinalsFor(view: ProspectView): Cardinals {
+function cardinalsFor(view: ProspectView): Cardinals {
   const word = (dx: number, dy: number): string =>
     Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? "Oriens" : "Occidens") : dy > 0 ? "Meridies" : "Septentrio";
   const right = viewRight(view);

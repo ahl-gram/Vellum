@@ -57,7 +57,7 @@ export type EngravedProspect = {
   readonly key: ReadonlyArray<PlateKeyEntry>;
 };
 
-export function engraveProspect(
+function engraveProspect(
   input: ProspectInput,
   style: MapStyle,
   year: number,

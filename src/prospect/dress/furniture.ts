@@ -10,10 +10,10 @@ import type { Box } from "./rise.ts";
 import { wreath } from "./furniture-wreath.ts";
 
 const CX = PLATE_W / 2;
-export const FRAME_OUTER = 10;
-export const FRAME_INNER = FRAME_OUTER + 4;
+const FRAME_OUTER = 10;
+const FRAME_INNER = FRAME_OUTER + 4;
 export const INNER: Box = { x0: FRAME_INNER, x1: PLATE_W - FRAME_INNER, y0: FRAME_INNER, y1: PLATE_H - FRAME_INNER };
-export const BOTTOM_LINE = PLATE_H - 17.5;
+const BOTTOM_LINE = PLATE_H - 17.5;
 const TOP_LINE = FRAME_INNER + 7;
 
 export type Inked = { readonly nodes: SvgNode[]; readonly boxes: ReadonlyArray<Box> };
@@ -31,7 +31,7 @@ function lettered(letters: Lettering, specs: ReadonlyArray<RunSpec>): Inked {
 /** The rightmost reach of a strapwork curl beyond the tablet, as a fraction of the curl: the quadratic's extreme. */
 const CURL_REACH = 1.26;
 
-export function strapwork(e: Engraver, cx: number, cy: number, w: number, h: number, tinted: boolean): Inked {
+function strapwork(e: Engraver, cx: number, cy: number, w: number, h: number, tinted: boolean): Inked {
   const x0 = cx - w / 2,
     x1 = cx + w / 2,
     y0 = cy - h / 2,
@@ -109,7 +109,7 @@ export function banderole(e: Engraver, letters: Lettering, text: string, cy: num
   };
 }
 
-export const ROUNDEL_Y = 60;
+const ROUNDEL_Y = 60;
 const ROUNDEL_R = 22;
 
 export function wreathedArms(e: Engraver, arms: Arms, suffix: string): Inked {

@@ -31,9 +31,9 @@ export type LetterPlacement = {
 export const FAVICON_SIZE = 32;
 export const TOUCH_ICON_SIZE = 180;
 export const MARK_NAME = "Vellum, the Punchcutter's Mark";
-export const TILE_FILL = SITE_PALETTE["--chart-ink"];
-export const TILE_KEYLINE = SITE_PALETTE["--line-tan"];
-export const LETTER_FILL = SITE_PALETTE["--parchment"];
+const TILE_FILL = SITE_PALETTE["--chart-ink"];
+const TILE_KEYLINE = SITE_PALETTE["--line-tan"];
+const LETTER_FILL = SITE_PALETTE["--parchment"];
 
 export const PUNCHCUTTER_TILE: TileGeometry = {
   keyline: 1.5,

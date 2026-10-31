@@ -8,7 +8,7 @@ import { defaultRecipe, generateWorld } from "../world/generate.ts";
 
 export const GALLERY_SEED = 100;
 export const GALLERY_COUNT = 12;
-export const GALLERY_PLATE_WIDTH = 900;
+const GALLERY_PLATE_WIDTH = 900;
 
 const SEED_STRIDE = 7919; // a prime walk through seed space
 
@@ -23,7 +23,7 @@ export interface GalleryCard {
   readonly height: number;
 }
 
-export function gallerySeeds(startSeed: number, count: number): readonly number[] {
+function gallerySeeds(startSeed: number, count: number): readonly number[] {
   return Array.from({ length: count }, (_, i) => (startSeed + i * SEED_STRIDE) >>> 0);
 }
 

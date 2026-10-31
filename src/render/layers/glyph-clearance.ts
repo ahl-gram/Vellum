@@ -22,7 +22,7 @@ export const MARK_NAME_PAD = 2;
 export const NUDGE_REACH = 0.5;
 const NUDGE_OVERSHOOT = 0.1;
 
-export function markBox(m: Pick<Mark, "x" | "y" | "symbol" | "scale">): Box {
+function markBox(m: Pick<Mark, "x" | "y" | "symbol" | "scale">): Box {
   const [x0, y0, x1, y1] = SYMBOL_EXTENT[m.symbol]!;
   return { x: m.x + x0 * m.scale, y: m.y + y0 * m.scale, w: (x1 - x0) * m.scale, h: (y1 - y0) * m.scale };
 }

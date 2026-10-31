@@ -20,7 +20,7 @@ export function mouthReachCells(gridW: number, window: UvWindow, worldGridW: num
 }
 
 /** Areal density ratio: flow accumulation scales linearly with it, so the world river threshold multiplies by it with exponent 1. */
-export function regionDensityRatio(
+function regionDensityRatio(
   worldGridW: number,
   worldGridH: number,
   window: UvWindow,

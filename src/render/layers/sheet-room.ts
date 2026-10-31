@@ -2,7 +2,7 @@ import { boxesOverlap, type Box } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 
 export const SHEET_INSET = 4;
-export const FURNITURE_PAD = 2;
+const FURNITURE_PAD = 2;
 
 export function insideSheet(b: Box, proj: Projection): boolean {
   return (

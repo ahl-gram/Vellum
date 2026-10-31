@@ -1,5 +1,5 @@
 /** Lives in one place only: renderMap, buildPlaceManifest, and the Explorer's sheet-fraction conversion must agree on this margin exactly. */
-export const MARGIN_FRACTION = 0.045;
+const MARGIN_FRACTION = 0.045;
 
 export function marginFor(widthPx: number): number {
   return Math.round(widthPx * MARGIN_FRACTION);

@@ -11,8 +11,8 @@ export interface Insets {
   readonly bottom: string;
   readonly left: string;
 }
-export const HEAD_CLEAR = 3;
-export const FOOT_CLEAR = 2;
+const HEAD_CLEAR = 3;
+const FOOT_CLEAR = 2;
 export function fillDepth(sheet: Edges, room: Edges): number {
   const cx = (sheet.left + sheet.right) / 2;
   const cy = (sheet.top + sheet.bottom) / 2;

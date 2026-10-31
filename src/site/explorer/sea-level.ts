@@ -7,7 +7,7 @@ import { $ } from "../shared/by-id.ts";
 const landSlider = $<HTMLInputElement>("land");
 const landReadout = $("land-readout");
 
-export const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
+const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
 export const sliderToLand = (v: string | number): number => clampLand(Number(v) / 1000);
 export const landToSlider = (f: number): number => Math.round(clampLand(f) * 1000);
 

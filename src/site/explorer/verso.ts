@@ -89,7 +89,7 @@ function buildStamp(): SVGElement {
 let ghostUrl = "";
 
 /** Fill the verso back face. The ghost <img> carries the chart's height, so the sheet turns over at exactly the recto's size; all text lands via textContent and the stamp is DOM-built, so nothing is injected as markup. */
-export function renderVerso(
+function renderVerso(
   versoEl: HTMLElement,
   { svg, docket, surveyor }: { svg: string; docket: string; surveyor: string },
 ): void {

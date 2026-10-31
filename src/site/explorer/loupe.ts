@@ -4,7 +4,7 @@ import type { ZoomState } from "../shared/zoom-controller.ts";
 import type { SheetRect } from "../../world/lod.ts";
 
 export const LOUPE_DIAMETER = 240;
-export const LOUPE_POWER = 2;
+const LOUPE_POWER = 2;
 
 export interface SvgUrls {
   readonly create: (svg: string) => string;

@@ -5,7 +5,7 @@ import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { TourJob, TourResult } from "./worker-client.ts";
 
 /** Roughly 10x the slowest matrix measured on CI (2.1s), so it can only fire on a worker that has stopped answering, never on a slow one. */
-export const TOUR_TIMEOUT_MS = 20000;
+const TOUR_TIMEOUT_MS = 20000;
 
 export interface TourOrderDeps {
   runJob: (job: TourJob) => Promise<TourResult>;

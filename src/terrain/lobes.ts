@@ -1,6 +1,6 @@
 import { createRng, type Rng } from "../core/rng.ts";
 
-export const ISLE_SIZES = ["equal", "varied"] as const;
+const ISLE_SIZES = ["equal", "varied"] as const;
 
 export type IsleSize = (typeof ISLE_SIZES)[number];
 

@@ -25,7 +25,7 @@ export type RoutedLeg = VoyageLeg & {
 export const RDP_EPSILON = 0.75;
 
 /** Sail when the road is this many times the sea route. Bounded above: past ~1.5 the leanest genuine inland handoff falls into the INLAND_STUB_CELLS gap (voyage-water.ts) and stubs too short to narrate start firing the handoff prose. */
-export const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
+const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
 
 /** Max embark stub for a coastal shortcut, in grid cells. */
 export const COAST_EMBARK_MAX = 3;

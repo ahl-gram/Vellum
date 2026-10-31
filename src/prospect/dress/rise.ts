@@ -46,7 +46,7 @@ export const RISE_TOP: ReadonlyArray<Pt> = [
   { x: VIEW_X1, y: 258 },
 ];
 export const RISE_BOTTOM = 358;
-export const SKY_TOP = 92;
+const SKY_TOP = 92;
 const CLOUD_AVOID = [{ x0: 150, x1: 370 }];
 const BIRD_TOP = 96;
 

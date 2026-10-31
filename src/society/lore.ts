@@ -15,7 +15,7 @@ export const AROMATIC_GOODS: Record<string, readonly string[]> = {
   ordai: ["fermented mare's milk", "steppe thyme", "roast mutton", "felt smoke", "wild garlic"],
 };
 
-export const CARGO_GOODS: Record<string, readonly string[]> = {
+const CARGO_GOODS: Record<string, readonly string[]> = {
   thalassic: ["salt cod", "pearl-shell", "amber", "dyed sailcloth", "olive oil"],
   norden: ["whale oil", "iron blooms", "pine tar", "sealskin", "smoked herring"],
   veshari: ["saffron", "indigo", "dates", "rose attar", "glazed tiles"],
@@ -90,7 +90,7 @@ export const CAPITAL_NOTES = [
   "Banners of every vassal hang in its council hall.",
 ];
 
-export const CAPITAL_DETAILS = [
+const CAPITAL_DETAILS = [
   "Caravans arrive heavy with %c and leave heavier with tax.",
   "Its markets set the price that lesser towns must follow.",
   "Guildhalls crowd the square below the citadel.",
@@ -112,7 +112,7 @@ const REALM_MOODS = [
   "swears fealty with one hand on its sword",
 ];
 
-export const RUIN_NOTES = [
+const RUIN_NOTES = [
   "Founded in the year %y, it was given up long ago; only wind moves in its lanes.",
   "A dead place now, its people gone these many years; the chronicle marks it a ruin.",
   "Nothing remains but stones and gulls; it was abandoned after the troubles.",

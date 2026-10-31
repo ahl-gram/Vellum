@@ -8,7 +8,7 @@ import { rowText } from "./row-text.ts";
 import type { RibbonPlateData, RibbonRow } from "../explorer/ribbon-job.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
 
-export const LEAN_K = 2.6;
+const LEAN_K = 2.6;
 
 export interface RoomFurniture {
   readonly stage: HTMLElement;

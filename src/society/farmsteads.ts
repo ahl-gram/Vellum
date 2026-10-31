@@ -13,8 +13,8 @@ import {
   type HamletGround,
 } from "./hamlets.ts";
 
-export const FARMSTEAD_LATTICE_WORLD_CELLS = 1;
-export const FARMSTEAD_DENSITY = 0.11;
+const FARMSTEAD_LATTICE_WORLD_CELLS = 1;
+const FARMSTEAD_DENSITY = 0.11;
 export const FARMSTEAD_SPACING_WORLD_CELLS = 0.45;
 export const MILL_REACH_WORLD_CELLS = 0.18;
 export const FARMSTEAD_MAX_WINDOW_UV = 1 / 32;

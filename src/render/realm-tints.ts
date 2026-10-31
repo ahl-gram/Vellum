@@ -3,7 +3,7 @@ import { washConflictMatrix } from "./cvd.ts";
 
 export type Centroid = { readonly x: number; readonly y: number };
 
-export const BASE_TINTS = 5;
+const BASE_TINTS = 5;
 
 export function realmCentroids(labels: Int16Array, w: number, h: number, count: number): Centroid[] {
   const sx = new Float64Array(count);

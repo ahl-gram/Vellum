@@ -7,8 +7,8 @@ import { densifyCourse, type GridPoint, type RiverRun } from "./river-runs.ts";
 
 // The Issue #950 round's stand-ins, kept as Alex ruled from them: `VALLEY_K` in `design/farther-interior/mock/reroute.ts`, `CORRIDOR_WORLD_CELLS` in `design/farther-interior/mock/corridor.ts`.
 export const CORRIDOR_WORLD_CELLS = 1;
-export const VALLEY_K = 6;
-export const CENTRE_PULL = 1;
+const VALLEY_K = 6;
+const CENTRE_PULL = 1;
 
 export function corridorRadius(window: UvWindow, gridW: number, worldGridW: number): number {
   return Math.max(2, (CORRIDOR_WORLD_CELLS * (gridW - 1)) / ((window.u1 - window.u0) * (worldGridW - 1)));

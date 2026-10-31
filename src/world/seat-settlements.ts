@@ -4,8 +4,8 @@ import { cellsPerWorldCell } from "./region-parent.ts";
 import { CORRIDOR_WORLD_CELLS } from "./river-route.ts";
 import type { Cell } from "./snap-to-land.ts";
 
-export const HARBOUR_REACH_WORLD_CELLS = 1.5 * Math.SQRT2;
-export const RIVER_REACH_WORLD_CELLS = Math.SQRT2 + CORRIDOR_WORLD_CELLS;
+const HARBOUR_REACH_WORLD_CELLS = 1.5 * Math.SQRT2;
+const RIVER_REACH_WORLD_CELLS = Math.SQRT2 + CORRIDOR_WORLD_CELLS;
 export type SeatReach = { readonly harbour: number; readonly river: number };
 type SeatLand = { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array };
 

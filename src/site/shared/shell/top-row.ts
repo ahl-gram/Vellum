@@ -1,5 +1,5 @@
 // The top of every page (Issue #762 pull requests B and D): the head cluster and the right-hand corner share one row, measured off their own boxes, and a corner wider than the kit's gives way toward the kit's width, never below it, wherever it would run under the cluster.
-export const TOLERANCE = 0.5;
+const TOLERANCE = 0.5;
 
 export interface Span {
   readonly left: number;

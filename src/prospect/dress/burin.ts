@@ -19,7 +19,7 @@ export const pt = (p: Pt): string => `${r1(p.x)} ${r1(p.y)}`;
 export const poly = (pts: ReadonlyArray<Pt>, closed = true): string => `M${pts.map(pt).join("L")}${closed ? "Z" : ""}`;
 
 /** A width rounded to the thousandth, so a product such as 1.2 * 0.85 writes 1.02, not its float. */
-export const width = (w: number): number => Math.round(w * 1000) / 1000;
+const width = (w: number): number => Math.round(w * 1000) / 1000;
 
 export function stroke(e: Engraver, w: number): Record<string, string | number> {
   return { stroke: e.ink, "stroke-width": width(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
@@ -137,7 +137,7 @@ export function skyLines(
   ];
 }
 
-export function cloudBank(e: Engraver, c: Cloud, rng: Rng): SvgNode {
+function cloudBank(e: Engraver, c: Cloud, rng: Rng): SvgNode {
   const parts: string[] = [];
   const lobes = Math.max(3, Math.round(c.w / 22));
   const lw = c.w / lobes;
@@ -244,7 +244,7 @@ export function hillTone(e: Engraver, outline: ReadonlyArray<Pt>, horizon: numbe
   ];
 }
 
-export function inside(pts: ReadonlyArray<Pt>, x: number, y: number): boolean {
+function inside(pts: ReadonlyArray<Pt>, x: number, y: number): boolean {
   let c = false;
   for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
     const a = pts[i]!,

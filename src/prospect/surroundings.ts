@@ -40,7 +40,7 @@ const ROAD_TOWNS = 2;
 
 type Site = World["settlements"][number];
 
-export function townsReachedFirst(world: World, index: number): Set<number> {
+function townsReachedFirst(world: World, index: number): Set<number> {
   const w = world.elev.w;
   const next = new Map<number, number[]>();
   const link = (a: number, b: number): void => {
