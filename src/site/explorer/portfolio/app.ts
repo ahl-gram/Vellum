@@ -1,7 +1,8 @@
 // The Portfolio (Issue #521 Sub 3 of Issue #401). The table rides in this page's address, and since Issue #634 falls back to the device when the address names no folio; either way the page reads it ONCE at load and never rewrites it. One job per gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../worker-client.ts";
 import { bindRoom } from "../../shared/room.ts";
-import { bindGlassKeys, ZOOM_STEP } from "../../shared/glass-keys.ts";
+import { bindGlassKeys } from "../../shared/glass-keys.ts";
+import { ZOOM_STEP } from "../../shared/zoom-keys.ts";
 import { pageSlideAway } from "../../shared/slide-away-page.ts";
 import { makeAnnouncer } from "../../shared/announce.ts";
 import { createZoomController } from "../../shared/zoom-controller.ts";

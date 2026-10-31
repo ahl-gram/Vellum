@@ -15,7 +15,39 @@ export function bindZoomKeys(
   zoom: Pick<ZoomController, "glideBy" | "panBy">,
   home: () => void,
 ): void {
-  void zoom;
-  void home;
-  viewport.addEventListener("keydown", (e) => e.preventDefault());
+  // Scoped to the focusable viewport, not document, so the arrows never hijack page scroll; preventDefault only for keys we consume, so Escape still bubbles to the card dismiss; the pan arrows stay instant on purpose (the accessible pan baseline).
+  viewport.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const W = viewport.clientWidth;
+    const H = viewport.clientHeight;
+    switch (e.key) {
+      case "+":
+      case "=":
+        zoom.glideBy(ZOOM_STEP);
+        break;
+      case "-":
+      case "_":
+        zoom.glideBy(1 / ZOOM_STEP);
+        break;
+      // ArrowRight reveals what lies to the right, so the content slides left and the screen translate decreases; the sign lives here and the controller stays direction-agnostic.
+      case "ArrowLeft":
+        zoom.panBy(W * PAN_FRACTION, 0);
+        break;
+      case "ArrowRight":
+        zoom.panBy(-W * PAN_FRACTION, 0);
+        break;
+      case "ArrowUp":
+        zoom.panBy(0, H * PAN_FRACTION);
+        break;
+      case "ArrowDown":
+        zoom.panBy(0, -H * PAN_FRACTION);
+        break;
+      case "0":
+        home();
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  });
 }

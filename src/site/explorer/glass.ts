@@ -2,14 +2,12 @@
 import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";
 import { createZoomController, type ZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
+import { bindZoomKeys, glideMs, ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { createHold, type Hold } from "./glass-hold.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
 import { DEEPEST_K } from "../../world/lod.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
-// Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
-export const ZOOM_STEP = 1.4;
-const PAN_FRACTION = 0.15;
 const GLASS_MAX = DEEPEST_K;
 const HOLD_STRETCH = 3;
 const HELD_MAX = HOLD_STRETCH * GLASS_MAX;
@@ -37,12 +35,6 @@ interface GlassDeps {
 }
 
 type LodController = ReturnType<typeof createLodController>;
-
-// Issue #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.
-function glideMs(): number {
-  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
-  return Number.isFinite(v) ? v : 300;
-}
 
 function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
   // Issue #164/Issue #331: publish k onto the card and the .place-overlay, both LEAF siblings of the chart svg, never the mount: a per-frame non-transform style write on an svg ancestor re-rasterizes the baked labels and they visibly jiggle.
@@ -132,44 +124,7 @@ function glassCamera(
   return { cameraNow, cameraForAddress, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced };
 }
 
-function glassKeys(mapViewport: HTMLElement, zoomController: ZoomController, goHomeVoiced: () => void): void {
-  // Scoped to the focusable viewport, not document, so the arrows never hijack page scroll; preventDefault only for keys we consume, so Escape still bubbles to the card dismiss; the pan arrows stay instant on purpose (the accessible pan baseline).
-  mapViewport.addEventListener("keydown", (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
-    const W = mapViewport.clientWidth;
-    const H = mapViewport.clientHeight;
-    switch (e.key) {
-      case "+":
-      case "=":
-        zoomController.glideBy(ZOOM_STEP);
-        break;
-      case "-":
-      case "_":
-        zoomController.glideBy(1 / ZOOM_STEP);
-        break;
-      // ArrowRight reveals what lies to the right, so the content slides left and the screen translate decreases; the sign lives here and the controller stays direction-agnostic.
-      case "ArrowLeft":
-        zoomController.panBy(W * PAN_FRACTION, 0);
-        break;
-      case "ArrowRight":
-        zoomController.panBy(-W * PAN_FRACTION, 0);
-        break;
-      case "ArrowUp":
-        zoomController.panBy(0, H * PAN_FRACTION);
-        break;
-      case "ArrowDown":
-        zoomController.panBy(0, -H * PAN_FRACTION);
-        break;
-      case "0":
-        goHomeVoiced();
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
-  });
-}
-
+// Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
 function glassPresses(buttons: GlassDeps["buttons"], zoomController: ZoomController, goHomeVoiced: () => void): void {
   buttons.zoomIn.addEventListener("click", () => zoomController.glideBy(ZOOM_STEP));
   buttons.zoomOut.addEventListener("click", () => zoomController.glideBy(1 / ZOOM_STEP));
@@ -238,7 +193,7 @@ export function createGlass(deps: GlassDeps) {
     setCardZoom,
     hold,
   );
-  glassKeys(mapViewport, zoomController, goHomeVoiced);
+  bindZoomKeys(mapViewport, zoomController, goHomeVoiced);
   glassPresses(buttons, zoomController, goHomeVoiced);
 
   return {

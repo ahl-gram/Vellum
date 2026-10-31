@@ -17,7 +17,7 @@
   --redraft-dry-wait: 260ms;
   --redraft-dry-wait-village: 500ms;
   --redraft-dry-wait-hamlet: 740ms;
-  --glide: 300ms; /* the zoom glide, read per glide by `glideMs` in `src/site/explorer/glass.ts` and the rooms' seats, bypassed under reduced motion */
+  --glide: 300ms; /* the zoom glide, read per glide by `glideMs` in `src/site/shared/zoom-keys.ts` for the Explorer and every chart room, bypassed under reduced motion */
 
   --ease-paper: cubic-bezier(
     0.22,

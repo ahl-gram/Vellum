@@ -1,6 +1,7 @@
 // The Print Room's chart-room seats: the Glass on the sheet, the fit with the turned plate's own aspect, the folio's lines and the sheet's two faces (the proof, a bound plate turned onto it). app.ts stays the conductor.
 import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys, ZOOM_STEP } from "../shared/glass-keys.ts";
+import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
