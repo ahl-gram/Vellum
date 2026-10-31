@@ -235,7 +235,7 @@ function controllerRefusals(context: Rule.RuleContext, program: Node): Node[] {
       continue;
     }
     const exported = st.type === "ExportNamedDeclaration" || st.type === "ExportAllDeclaration";
-    if (exported && isZoom((st.source as { value?: unknown } | null)?.value)) refused.push(st);
+    if (exported && isZoom(sourceOf(st))) refused.push(st);
     if (st.type !== "ImportDeclaration" || !isZoom(st.source.value)) continue;
     for (const spec of st.specifiers as Node[]) {
       const declared = context.sourceCode.getDeclaredVariables(spec);
