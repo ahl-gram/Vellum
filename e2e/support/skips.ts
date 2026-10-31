@@ -33,12 +33,14 @@ export function unmetSkips(
   met: readonly E2eSuiteStep[],
 ): readonly E2eSkip[] {
   return skips.filter(
-    (s) => timings.some((t) => t.name === s.suite && !t.aborted) && !met.some((m) => m.step === s.step),
+    (s) =>
+      timings.some((t) => t.name === s.suite && !t.aborted) &&
+      !met.some((m) => m.suite === s.suite && m.step === s.step),
   );
 }
 
 export function metSkips(skips: readonly E2eSkip[], met: readonly E2eSuiteStep[]): readonly E2eSkip[] {
-  return skips.filter((s) => met.some((m) => m.step === s.step));
+  return skips.filter((s) => met.some((m) => m.suite === s.suite && m.step === s.step));
 }
 
 export async function closedSkips(
