@@ -18,7 +18,7 @@ import {
   travelsOf,
 } from "./slide-kit.ts";
 
-// 2026-10-30: the fill against the first press's 1.4, this machine's layout 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over).
+// 2026-10-30: the fill against the first press's 1.4, this machine's layout 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over); the runner's 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over), CI run 41153518333.
 const FIRST_PRESS = 1.4;
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
