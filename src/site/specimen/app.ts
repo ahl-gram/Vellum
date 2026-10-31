@@ -6,7 +6,7 @@ import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { fillPress } from "../shared/slide-away.ts";
 import { FOLD_SETTLE_MS } from "../shared/slip.ts";
 import { bindRoom } from "../shared/room.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
 import { $ } from "../shared/by-id.ts";
 
 declare global {

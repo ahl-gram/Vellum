@@ -121,7 +121,7 @@ make an unqualified rule false. Read the surface, not just the rule.
 ## The camera, the gesture and the fit
 
 - **The camera is a uv CENTRE and a scale, never a raw pixel translate.** `cameraFromTransform` and
-  `transformFromCamera` in `src/site/explorer/camera.ts` are the bridge, and storing the centre as a
+  `transformFromCamera` in `src/site/shared/camera.ts` are the bridge, and storing the centre as a
   fraction of the sheet is what lets one shared link restore the same framing on any viewport.
 - **Clamp the scale BEFORE computing the anchor**, or the sheet lurches and walks at the limits.
   Both cameras do it: `zoomTarget` in `src/site/home/camera.ts` passes the clamped scale into the
@@ -282,7 +282,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   a link copied while the sheet is held opens unheld at the same centre, no deeper than `GLASS_MAX`
   (`cameraForAddress` in `src/site/explorer/glass.ts`). `GLASS_MAX` is the deepest band's k
   (`DEEPEST_K` in `src/world/lod.ts`), and a shared link's camera is read under that same bound
-  (`addressCamera` in `src/site/explorer/camera.ts`), so a link written at the bottom reads back at
+  (`addressCamera` in `src/site/shared/camera.ts`), so a link written at the bottom reads back at
   the bottom.
   **A shape field is spelt one way in every address.** A shape default is spelt by leaving its key out (a
   looseness or a raggedness of 0, sizes alike), a land or a coast the world's shape draws nothing from

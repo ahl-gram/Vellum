@@ -4,7 +4,7 @@ import { createZoomController, type ZoomController, type ZoomState } from "../sh
 import { createLodController } from "./lod-controller.ts";
 import { bindZoomKeys, glideMs, ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { createHold, type Hold } from "./glass-hold.ts";
-import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
+import { cameraFromTransform, transformFromCamera, type Camera } from "../shared/camera.ts";
 import { DEEPEST_K } from "../../world/lod.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 

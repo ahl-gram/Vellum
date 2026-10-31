@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { addressCamera, cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
+import { addressCamera, cameraFromTransform, transformFromCamera } from "../../src/site/shared/camera.ts";
 import { DEEPEST_K } from "../../src/world/lod.ts";
 
 // The camera <-> transform bridge a shared link stores as cx/cy/k; the centre is in uv (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is the e2e suite-zoom's.

@@ -14,7 +14,7 @@ import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { fillAboutCentre, restingBox } from "../shared/slide-away.ts";
 import { errorText } from "../shared/error-text.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
 import { $ } from "../shared/by-id.ts";
 
 declare global {

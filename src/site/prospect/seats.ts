@@ -5,7 +5,7 @@ import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { contentsRow } from "../shared/contents-row.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
 import { eraLine, prospectTitle, subLine, whereLine } from "./note-lines.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";

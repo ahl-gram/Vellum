@@ -5,7 +5,7 @@ import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { contentsRow, type RowPart } from "../shared/contents-row.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
 import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
 import { rowText } from "./row-text.ts";
 import type { RibbonPlateData, RibbonRow } from "../explorer/ribbon-job.ts";

@@ -4,7 +4,7 @@ import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageSlideAway } from "../shared/slide-away-page.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
-import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { cameraFromTransform, transformFromCamera } from "../shared/camera.ts";
 import { PAGE_MEASURE_WIDTH, pageAspect } from "./matter-markup.ts";
 
 export interface RoomFurniture {
