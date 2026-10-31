@@ -1,13 +1,20 @@
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { CultureId } from "../../society/culture-ids.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
+import type { IsleSize } from "../../terrain/lobes.ts";
+import type { OutlineId } from "../outline-ids.ts";
 import { PEOPLE_WORDS } from "./lexicon-peoples.ts";
+import { SHAPE_WORDS } from "./lexicon-shapes.ts";
 
 export const FOUNDING_VERSION = 1;
 export const MAX_SENTENCE_CODE_POINTS = 120;
 export const SMALL_WORDS: ReadonlySet<string> = new Set(["a", "an", "the", "of", "and", "with", "where"]);
 export const LAND_FACTOR = { less: 0.55, more: 1.4 } as const;
 export const COAST_WARP = { ragged: 0.95, smooth: 0.1 } as const;
+export const SHORE_RAGGEDNESS: Readonly<Record<keyof typeof COAST_WARP, number>> = {
+  ragged: COAST_WARP.ragged,
+  smooth: 0,
+};
 export const CLIMATE_TRADITION: Readonly<Record<ClimateBand, CultureId>> = {
   polar: "norden",
   tropical: "oromi",
@@ -19,7 +26,10 @@ export type Steer =
   | { readonly subject: "band"; readonly value: ClimateBand }
   | { readonly subject: "land"; readonly value: keyof typeof LAND_FACTOR }
   | { readonly subject: "coast"; readonly value: keyof typeof COAST_WARP }
-  | { readonly subject: "culture"; readonly value: CultureId };
+  | { readonly subject: "culture"; readonly value: CultureId }
+  | { readonly subject: "outline"; readonly value: OutlineId }
+  | { readonly subject: "islands"; readonly value: number }
+  | { readonly subject: "isleSize"; readonly value: IsleSize };
 
 export type LexiconEntry = { readonly phrase: string; readonly steers: ReadonlyArray<Steer> };
 
@@ -272,6 +282,7 @@ export const LEXICON: ReadonlyArray<LexiconEntry> = [
   ...group([type("continent"), land("more")], ["supercontinent", "supercontinents"]),
   ...group([type("archipelago"), band("tropical")], ["cays", "coral isles", "coral islands", "spice islands"]),
   ...PEOPLE_WORDS,
+  ...SHAPE_WORDS,
 ];
 
 const smallWords = [...SMALL_WORDS].join(", ");

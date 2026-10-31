@@ -15,7 +15,10 @@ import {
 import { displayForm, foundingWords, type Refusal } from "./normalize.ts";
 
 export type FoundingOverrides = Partial<
-  Pick<WorldRecipe, "mapType" | "band" | "landFraction" | "coastWarp" | "culture">
+  Pick<
+    WorldRecipe,
+    "mapType" | "band" | "landFraction" | "coastWarp" | "culture" | "outline" | "islands" | "isleSize" | "raggedness"
+  >
 >;
 export type Recognised = { readonly phrase: string; readonly steers: ReadonlyArray<Steer> };
 export type Founding = {
@@ -55,7 +58,7 @@ function scan(words: ReadonlyArray<string>): Segment[] {
 }
 
 function contestedSubjects(segments: ReadonlyArray<Segment>): Set<Steer["subject"]> {
-  const values = new Map<Steer["subject"], Set<string>>();
+  const values = new Map<Steer["subject"], Set<Steer["value"]>>();
   for (const steer of segments.flatMap((s) => s.entry?.steers ?? [])) {
     values.set(steer.subject, (values.get(steer.subject) ?? new Set()).add(steer.value));
   }
@@ -121,6 +124,15 @@ function choose(steered: ReadonlyArray<Recognised>): Choice {
         break;
       case "culture":
         choice.culture = steer.value;
+        break;
+      case "outline":
+        choice.outline = steer.value;
+        break;
+      case "islands":
+        choice.islands = steer.value;
+        break;
+      case "isleSize":
+        choice.isleSize = steer.value;
         break;
     }
   }
