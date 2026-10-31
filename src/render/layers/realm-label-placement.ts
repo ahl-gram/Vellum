@@ -37,10 +37,13 @@ function withinChart(box: Box, proj: Projection): boolean {
 }
 
 export function placeRealmLabel(args: Args): RealmLabelPlacement {
-  return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args);
+  return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args, args.closeUp);
 }
 
-function placeOnCloseUp({ blob, gridW, proj, centroid, yCandidates, name, fs, ls, arena }: Args): RealmLabelPlacement {
+function placeOnCloseUp(
+  { blob, gridW, proj, centroid, yCandidates, name, fs, ls, arena }: Args,
+  room: CloseUpRoom,
+): RealmLabelPlacement {
   const boxAt = (p: Pt): Box => spacedTextBox(p.x, p.y, name, fs, ls, WIDTH_FACTOR.caps);
   const slid = (p: Pt): Pt => {
     const { dx, dy } = slideInsideSheet(boxAt(p), proj);
@@ -50,7 +53,9 @@ function placeOnCloseUp({ blob, gridW, proj, centroid, yCandidates, name, fs, ls
     ...yCandidates.map((y) => slid({ x: centroid.x, y })),
     ...interiorProbes(blob, gridW, proj, centroid).map(slid),
   ];
-  const claimed = spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
+  const claimed =
+    spots.find((p) => room.dry(boxAt(p)) && arena.tryClaim(boxAt(p), CLAIM_PAD)) ??
+    spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
   if (claimed) return { x: claimed.x, y: claimed.y, claimed: true };
   const forced = slid(centroid);
   arena.claim(boxAt(forced));
