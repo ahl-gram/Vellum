@@ -14,8 +14,11 @@ export function insideSheet(b: Box, proj: Projection): boolean {
 }
 
 export function slideInsideSheet(b: Box, proj: Projection): { readonly dx: number; readonly dy: number } {
-  void [b, proj];
-  return { dx: 0, dy: 0 };
+  const lo = proj.margin + SHEET_INSET;
+  return {
+    dx: Math.max(0, lo - b.x) - Math.max(0, b.x + b.w - (proj.widthPx - lo)),
+    dy: Math.max(0, lo - b.y) - Math.max(0, b.y + b.h - (proj.heightPx - lo)),
+  };
 }
 
 export function clearOfFurniture(b: Box, furniture: ReadonlyArray<Box>): boolean {

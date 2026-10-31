@@ -2,6 +2,7 @@ import type { Box, Pt } from "../geometry.ts";
 import { spacedTextBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 import { interiorProbes } from "./label-probes.ts";
+import { slideInsideSheet } from "./sheet-room.ts";
 
 const CLAIM_PAD = 4;
 
@@ -39,8 +40,21 @@ export function placeRealmLabel(args: Args): RealmLabelPlacement {
   return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args);
 }
 
-function placeOnCloseUp(args: Args): RealmLabelPlacement {
-  return placeOnWorldSheet(args);
+function placeOnCloseUp({ blob, gridW, proj, centroid, yCandidates, name, fs, ls, arena }: Args): RealmLabelPlacement {
+  const boxAt = (p: Pt): Box => spacedTextBox(p.x, p.y, name, fs, ls, WIDTH_FACTOR.caps);
+  const slid = (p: Pt): Pt => {
+    const { dx, dy } = slideInsideSheet(boxAt(p), proj);
+    return { x: p.x + dx, y: p.y + dy };
+  };
+  const spots = [
+    ...yCandidates.map((y) => slid({ x: centroid.x, y })),
+    ...interiorProbes(blob, gridW, proj, centroid).map(slid),
+  ];
+  const claimed = spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
+  if (claimed) return { x: claimed.x, y: claimed.y, claimed: true };
+  const forced = slid(centroid);
+  arena.claim(boxAt(forced));
+  return { x: forced.x, y: forced.y, claimed: false };
 }
 
 function placeOnWorldSheet({
