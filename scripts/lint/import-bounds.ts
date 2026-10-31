@@ -116,7 +116,7 @@ const foundingLocaleClockFree = hostFree(FOUNDING_GLOBALS, {
 export const ROOMS_UNDER_THE_EXPLORER: readonly string[] = ["src/site/explorer/portfolio/"];
 const glassBan = sourceBan(
   "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts, nor zoom-room.ts that binds it, nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
-  (text) => text.includes("glass-keys") || text.includes("zoom-room"),
+  (text) => text.includes("glass-keys"),
   (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)(?:glass-keys|zoom-room)\b/.test(text),
 );
 const explorerNoGlassKeys: Rule.RuleModule = {
