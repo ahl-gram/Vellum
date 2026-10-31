@@ -41,7 +41,7 @@ export async function br15TabClear({ goto, send, evaluate, sleep, check, EXP }: 
   try {
     for (const h of [900, 768]) {
       await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: h, deviceScaleFactor: 1, mobile: false });
-      await goto(EXP + "#seed=42&style=antique", `broadside-tab-${h}`);
+      await goto(EXP + "#seed=1&style=antique&type=archipelago&islands=20", `broadside-tab-${h}`);
       reads[h] = await stable(TAB_ROOM, `BR15 the room at 1024x${h}`, {
         departed: (d) => d.w === 1024 && d.h === h && d.fonts === "loaded" && !d.moving && d.sheet !== null,
       });
