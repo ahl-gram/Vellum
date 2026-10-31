@@ -1,47 +1,9 @@
 /* The Reading Room: a chart room. The furniture is atelier.css's, the frame's dress reading-frame.css's and the engine's living-chart.css's; this sheet seats the chart in the stage, the instrument on the bottom strip and the journal in the slip. */
 
-.stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0;
-}
-#sheet {
-  position: relative;
-  flex: none;
-  width: 0;
-  height: 0;
-  box-shadow: var(--stage-shadow);
-}
-#map-viewport {
-  position: absolute;
-  inset: 0;
-  cursor: grab;
-}
-#map-viewport:focus-visible {
-  outline: 2px solid var(--parchment-bright);
-  outline-offset: -3px;
-}
-#map-viewport.zoomable {
-  touch-action: none;
-}
 #map-viewport .rf-chart {
   position: absolute;
   inset: 0;
   transform-origin: 0 0;
-}
-.stage .warning {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 2.8rem);
-  transform: translateX(-50%);
-  max-width: 30rem;
-  z-index: 2;
-  margin: 0;
-}
-.stage .warning[hidden] {
-  display: none;
 }
 
 /* Without these mount-scoped rules the arrival ceremony never plays and the inline stroke-dasharray `startArrival` in `src/site/explorer/draw-ceremony.ts` writes is never cleaned off the live coastline. */

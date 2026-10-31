@@ -1,0 +1,47 @@
+/* The stage a chart room's sheet stands in: the sheet centred in what the chrome leaves (`fitRoom` in `src/site/shared/room.ts` measures the reserves), the Glass's gesture box, the transform target and the render-worker warning's seat, on screen; linked last of a page's shared sheets, so the page's own sheet keeps the last word and stands its stage down for paper. */
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0;
+}
+#sheet {
+  position: relative;
+  flex: none;
+  width: 0;
+  height: 0;
+  box-shadow: var(--stage-shadow);
+}
+#map-viewport {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+}
+#map-viewport:focus-visible {
+  outline: 2px solid var(--parchment-bright);
+  outline-offset: -3px;
+}
+/* d3-zoom does not set touch-action; without none the browser's native pan and pinch preempt the gesture. */
+#map-viewport.zoomable {
+  touch-action: none;
+}
+/* transform-origin 0 0 matches d3-zoom's screen-space math. */
+#map {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+.stage .warning {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 2.8rem);
+  transform: translateX(-50%);
+  max-width: 30rem;
+  z-index: 2;
+  margin: 0;
+}
+.stage .warning[hidden] {
+  display: none;
+}
