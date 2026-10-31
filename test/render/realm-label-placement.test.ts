@@ -10,7 +10,7 @@ import {
 import { interiorProbes } from "../../src/render/layers/label-probes.ts";
 import { SHEET_INSET } from "../../src/render/layers/sheet-room.ts";
 
-// Stage 1 is the historical five-candidate vertical ladder and must win whenever it can (so the committed charts do not move); stage 2 searches the realm's heartland; stage 3 forces the label in and claims its box.
+// On a world sheet stage 1, the historical five-candidate vertical ladder, must win whenever it can (so the committed charts do not move); stage 2 searches the realm's heartland; stage 3 forces the label in and claims its box. A close-up slides every spot inside the sheet, prefers a dry one and forces onto the first spot clear of the furniture.
 const GRID_W = 40;
 const GRID_H = 30;
 const proj = createProjection(GRID_W, GRID_H, 1500, 68);

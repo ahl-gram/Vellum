@@ -110,7 +110,7 @@ test("on a close-up a realm name stays whole inside the map", () => {
   }
 });
 
-test("on a close-up a forced place name stays whole inside the map, under the key with its mark where it must", () => {
+test("on a close-up a forced place name stays whole inside the map", () => {
   const witnesses: ReadonlyArray<readonly [string, number, UvWindow, string, "capital" | "town"]> = [
     ["chart 2, band 4", 2, win(0.4375, 0.578125, 1 / 16), "Vunsvyov", "capital"],
     ["chart 4, band 1", 4, win(0.01, 0.3125, 1 / 2), "Maimaiwapua", "town"],
