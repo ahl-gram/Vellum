@@ -20,7 +20,7 @@ import {
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
 import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl7Degenerate } from "./corners/floor.ts";
-import { fl6Paper } from "./corners/floor-paper.ts";
+import { fl6Paper, fl8ChartOnPaper } from "./corners/floor-paper.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = [
@@ -370,6 +370,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       await step("FL5", () => fl5KeyboardDrawer(ctx));
       await step("FL6", () => fl6Paper(ctx));
       await step("FL7", () => fl7Degenerate(ctx));
+      await step("FL8", () => fl8ChartOnPaper(ctx));
     });
   } finally {
     await ctx.clearMobile().catch(() => undefined);
