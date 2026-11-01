@@ -68,6 +68,8 @@ async function draw(f: Founding, plate: boolean, onDrawn: () => void = () => {})
     $("folio-sub").textContent = res.subtitle;
     $("folio-coords").textContent = `Chart № ${f.seed} · ${MAP_WORDS[res.mapType]}, ${res.band}`;
     $("wr-plate-verb").textContent = plate ? "Lift" : "Lay on";
+    $<HTMLAnchorElement>("wr-explorer").href =
+      "../explorer/" + writtenHash(f.sentence, f.version) + (plate ? "&theme=vegetation" : "");
     $("status").textContent = "";
     room.layout();
     onDrawn();

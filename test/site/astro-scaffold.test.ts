@@ -982,6 +982,7 @@ const ROADS: Record<string, ReadonlyArray<Road>> = {
     { road: "reading-room", href: "../reading-room/" },
   ],
   "gallery/index.html": [{ gold: true, href: "/explorer/" }],
+  "writing-room/index.html": [{ id: "wr-explorer", gold: true, href: "../explorer/" }],
   "specimen/index.html": [{ href: "/explorer/" }, { gold: true, href: "/gallery/" }],
 };
 const roadOpening = (r: Road): string =>

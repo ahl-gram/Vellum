@@ -291,3 +291,36 @@ export async function wr13Names(k: WritingKit): Promise<void> {
     `prospect ${JSON.stringify(plate)} against ${names[String(plate.index)]}; ribbon ${JSON.stringify(ribbon)} against ${names[String(ribbon.from)]} and ${names[String(ribbon.to)]}`,
   );
 }
+
+const CLIMATE = "Upon the frozen roof of the world the herdsmen of Vael keep their reindeer and their grudges.";
+const ROAD_HREF = `document.getElementById("wr-explorer").getAttribute("href")`;
+
+export async function wr8Road(k: WritingKit): Promise<void> {
+  const { until } = carryKit(k);
+  const c = founded(CLIMATE);
+  await k.goto(writtenHash(FLAGSHIP, 1));
+  const flagship = await k.evaluate<string | null>(ROAD_HREF);
+  const opened = await k.goto(writtenHash(CLIMATE, 1));
+  const onPlate = await k.evaluate<string | null>(ROAD_HREF);
+  await k.pressAt("#wr-plate");
+  await k.settledAfter(opened.n, "the plate lifted");
+  const lifted = await k.evaluate<string | null>(ROAD_HREF);
+  await k.goto(writtenHash(CLIMATE, 1));
+  await k.pressAt("#wr-explorer");
+  await until(`location.pathname === "/explorer/" && ${EXPLORER_SETTLED}`, "the Explorer after the road is pressed");
+  const arrived = await k.evaluate<Chart & { theme: string; field: boolean }>(
+    `(() => { const c = ${chartRead(EXPLORER_CHART)}; return { ...c, theme: document.getElementById("theme").value, field: !!document.querySelector("#map svg #layer-field") }; })()`,
+  );
+  k.check(
+    "WR8 the Writing Room's road to the Explorer carries the written world, the vegetation plate with it while it is laid on, and pressing it opens the Explorer on that world",
+    flagship === "../explorer/" + writtenHash(FLAGSHIP, 1) &&
+      onPlate === "../explorer/" + writtenHash(CLIMATE, 1) + "&theme=vegetation" &&
+      lifted === "../explorer/" + writtenHash(CLIMATE, 1) &&
+      arrived.seed === String(c.seed) &&
+      arrived.culture === c.overrides.culture &&
+      arrived.text === CLIMATE &&
+      arrived.theme === "vegetation" &&
+      arrived.field,
+    `${flagship} | ${onPlate} | ${lifted}; the Explorer ${JSON.stringify(arrived)}`,
+  );
+}

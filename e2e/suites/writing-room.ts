@@ -11,7 +11,15 @@ import {
   wr6Written,
   wr7FailedDraw,
 } from "./writing-room/checks.ts";
-import { wr10Hold, wr11PrintRoom, wr12ReadingRoom, wr13Names, wr14Road, wr9Explorer } from "./writing-room/carry.ts";
+import {
+  wr10Hold,
+  wr8Road,
+  wr11PrintRoom,
+  wr12ReadingRoom,
+  wr13Names,
+  wr14Road,
+  wr9Explorer,
+} from "./writing-room/carry.ts";
 import { writingKit } from "./writing-room/kit.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -31,6 +39,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("WR5", () => wr5Lettering(k));
   await step("WR6", () => wr6Written(k));
   await step("WR7", () => wr7FailedDraw(k));
+  await step("WR8", () => wr8Road(k));
   await step("WR9", () => wr9Explorer(k));
   await step("WR10", () => wr10Hold(k));
   await step("WR11", () => wr11PrintRoom(k));
