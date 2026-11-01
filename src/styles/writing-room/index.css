@@ -73,3 +73,26 @@
   font-style: italic;
   color: var(--ink-brown);
 }
+
+@media print {
+  .stage {
+    position: static;
+    padding: 0 !important;
+    display: block;
+  }
+  #sheet {
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none;
+  }
+  #map-viewport {
+    position: static;
+  }
+  #map {
+    position: static;
+    transform: none !important;
+  }
+  #map svg {
+    height: auto;
+  }
+}
