@@ -18,6 +18,7 @@ export type Settlement = {
 export type SiteOptions = {
   maxTowns?: number;
   maxVillages?: number;
+  slope?: Field;
 };
 
 export const BIOME_APPEAL: Partial<Record<number, number>> = {
@@ -166,7 +167,7 @@ export function placeSettlements(
   rng: Rng,
   opts: SiteOptions = {},
 ): Settlement[] {
-  const slope = slopeField(elev);
+  const slope = opts.slope ?? slopeField(elev);
   const jitter = rng.fork("site-jitter");
 
   const { candidates, landCells } = siteCandidates({ elev, seaLevel, riverCells, biomes, slope }, jitter);
