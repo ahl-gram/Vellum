@@ -58,7 +58,7 @@
   margin: 0.18rem 0 0.1rem;
   white-space: nowrap;
 }
-/* Outside the heading so its name stays "The Broadside"; raised to where the round drew it inside the title (16.03 px under the title's top against the mock's 16.14, Issue #1159). */
+/* Raised to where the round drew it inside the title (16.03 px under the title's top against the mock's 16.14, Issue #1159). */
 #broadside .slip-head > a.fn {
   font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
   font-size: calc(var(--slip-w) * 0.05);

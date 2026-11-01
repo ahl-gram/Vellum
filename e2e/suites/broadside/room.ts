@@ -3,6 +3,7 @@ import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
+import { axName } from "../prospect/kit.ts";
 import { parseTableValue } from "../../../src/site/shared/table-address.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
@@ -40,6 +41,7 @@ const GROUPS: Payload<(string | null)[]> =
 
 type Slip = {
   id: string | null;
+  name: string | null;
   panels: (string | null)[] | null;
   land: (string | null)[] | null;
   strand: (string | null)[] | null;
@@ -49,7 +51,8 @@ type Slip = {
   notes: unknown[];
   imprint: string | null;
 };
-const SLIP: Payload<Slip> = `(() => { const text = ${TEXT}, slip = document.querySelector("aside.slip#broadside");
+const SLIP: Payload<Omit<Slip, "name">> =
+  `(() => { const text = ${TEXT}, slip = document.querySelector("aside.slip#broadside");
   const panels = slip ? [...slip.querySelectorAll(".slip-body > .broadside > .panel[role=group]")] : [];
   const ids = (p) => p ? [...p.querySelectorAll("input, select, button")].map((e) => e.id) : null;
   return { id: slip && slip.id, panels: panels.map((p) => p.getAttribute("aria-labelledby")),
@@ -65,6 +68,7 @@ const SLIP: Payload<Slip> = `(() => { const text = ${TEXT}, slip = document.quer
 const slipFaults = (s: Slip): string[] =>
   faults([
     s.id === "broadside" || "the slip is #broadside",
+    s.name === "The Broadside" || "the slip named by its title alone, the title's mark outside the heading",
     same(s.panels, ["grp-land", "grp-strand", "grp-hand"]) || "The Land, The Strand and The Hand ride the slip",
     same(s.land, ["type", "band", "place", "islands", "isle-equal", "isle-varied"]) || "The Land's controls in order",
     same(s.strand, ["land", "coast", "ragged", "looseness"]) || "The Strand's controls in order",
@@ -195,7 +199,7 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
       return {
         corner: await evaluate(CORNER),
         groups: await evaluate(GROUPS),
-        slip: await evaluate(SLIP),
+        slip: { ...(await evaluate(SLIP)), name: await axName({ send }, "aside.slip#broadside") },
         legend: await evaluate(LEGEND),
         stage: await evaluate(STAGE),
       };
@@ -209,7 +213,7 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
       ...stageFaults(read.stage),
     ]);
     check(
-      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip carrying The Land, The Strand and The Hand with their controls and six seals, seven footnote marks and their notes going to the glossary with no title, its printer's line, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
+      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip, named by its title alone, carrying The Land, The Strand and The Hand with their controls and six seals, seven footnote marks and their notes going to the glossary with no title, its printer's line, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
       wrong.length === 0,
       JSON.stringify({ wrong, read }),
     );
