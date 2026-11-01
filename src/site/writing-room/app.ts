@@ -62,7 +62,7 @@ async function draw(f: Founding, plate: boolean): Promise<boolean> {
       render: { style: "antique", legend: true, ...(plate ? { theme: "vegetation" as const } : {}) },
     });
     if (mine !== turn) return false;
-    $("map").innerHTML = res.svg;
+    $("wr-chart").innerHTML = res.svg;
     $("folio-title").textContent = res.title;
     $("folio-sub").textContent = res.subtitle;
     $("folio-coords").textContent = `Chart № ${f.seed} · ${MAP_WORDS[res.mapType]}, ${res.band}`;
