@@ -13,16 +13,22 @@ const show = (r: Read): string =>
   JSON.stringify({ n: r.n, seed: r.svgSeed, culture: r.culture, text: r.text, hash: r.hash });
 
 export async function wr1Link(k: WritingKit): Promise<void> {
-  const f = foundWorld(FLAGSHIP);
-  if (!f.ok) throw new Error("the flagship sentence did not found in Node");
-  const first = await k.goto(writtenHash(FLAGSHIP, 1));
-  const again = await k.reload();
-  const agrees = (r: Read): boolean =>
-    r.svgSeed === String(f.seed) && r.culture === f.overrides.culture && r.text === f.sentence;
+  const reads: string[] = [];
+  let ok = true;
+  for (const sentence of [FLAGSHIP, CLIMATE]) {
+    const f = foundWorld(sentence);
+    if (!f.ok) throw new Error(`${sentence} did not found in Node`);
+    const first = await k.goto(writtenHash(sentence, 1));
+    const again = await k.reload();
+    const agrees = (r: Read): boolean =>
+      r.svgSeed === String(f.seed) && r.culture === f.overrides.culture && r.text === f.sentence;
+    ok &&= agrees(first) && agrees(again);
+    reads.push(`${show(first)} then ${show(again)}`);
+  }
   k.check(
-    "WR1 a written link founds its world, and the same world again after a reload: the chart's seed, naming tongue and lettered sentence are those Node's founding gives",
-    agrees(first) && agrees(again),
-    `${show(first)} then ${show(again)}`,
+    "WR1 a written link founds its world, and the same world again after a reload, the bare visit's own sentence and one that is not: the chart's seed, naming tongue and lettered sentence are those Node's founding gives",
+    ok,
+    reads.join(" | "),
   );
 }
 
