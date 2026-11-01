@@ -131,7 +131,7 @@ sentence, one over the cap, one holding a control character or a character the p
 a version this build does not have, and a sentence asking for a real place's outline while no gazetteer
 is installed (`places-not-loaded`; `setFoundingGazetteer` in `src/world/founding/shapes.ts`). A surface
 shows the reason; it does not catch. `places-not-loaded` is the one reason a surface never shows: the
-host installs the name index the shape box fetches and founds the sentence again. The Writing Room checks the fetched index against `NAMES_CHECKSUM` (`src/site/shared/founding-names.ts`) before it installs it, and refuses the sentence when the index cannot be read or does not match, so a stale or foreign list never founds a world.
+host installs the name index the shape box fetches and founds the sentence again. Every page that founds a sentence checks the fetched index against `NAMES_CHECKSUM` (`src/site/shared/founding-names.ts`) before it installs it, and refuses the sentence when the index cannot be read or does not match, so a stale or foreign list never founds a world.
 
 **A founding never asks the terrain for what it refuses.** After the clash, a count with no archipelago
 left steering, or beside a shape, is dropped with its sizes and the shape stays; beside a count or a

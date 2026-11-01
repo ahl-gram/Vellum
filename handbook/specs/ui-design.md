@@ -225,13 +225,13 @@ takes tighter presses, which keep it on one line from 1280 up (BR2 in `e2e/suite
 **The Broadside's Land panel keeps every row and sets aside what the world on screen cannot use**:
 such a row stays on the panel inside a held box, the cream ground behind a dashed rule, under a note
 saying what holds it, and it refuses a press rather than being disabled (`seatOf` in
-`src/site/explorer/land-rows.ts`). At 1024 by 768 it does not scroll in its tallest seat, a place picked
+`src/site/explorer/land-rows.ts`). A written world holds every row the panel shows, the type and the climate among them, under the sentence's own note, whose closing words are the road back to the Writing Room, until a new chart number lets it go (Alex, 2026-11-01, Issue #393 comment 6559676010). At 1024 by 768 it does not scroll in its tallest seat, a place picked
 over a held count and loosened to the end, where the looseness readout's last words take two lines; the
 slip body's foot (`#broadside .slip-body`'s bottom padding) is tightened to make that room (`BR16` in `e2e/suites/broadside/shape.ts`).
 **Provisional until the post-use review** (Alex, 2026-10-30,
 Issue #854 comments 6533770339 and 6536644793; the foot, Alex, 2026-11-01, Issue #1140 comment
 6551936310): the layout and its tightenings, the tightened foot, the held box and its
-notes, the shape box and its list, each place's outline in it, the groove, the inset, the tighter
+notes, the written world's hold, its note and its road, the shape box and its list, each place's outline in it, the groove, the inset, the tighter
 presses and the follow and the risen row they bring at 1024 by 768 and about 1100 px wide, and every
 word on the new rows.
 
