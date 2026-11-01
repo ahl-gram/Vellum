@@ -11,7 +11,7 @@ import type { RibbonResult } from "../explorer/worker-client.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
-import { foundAddress, pageFounder } from "../shared/written-world.ts";
+import { foundAddress, pageFounder, writtenParams } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
@@ -53,6 +53,8 @@ const sheet = bindRibbonRoom(furniture);
 
 const addr = parseRibbonAddress(location.hash);
 const written = await foundAddress(location.hash, pageFounder());
+if (written !== null)
+  history.replaceState(null, "", "#" + writtenParams(new URLSearchParams(location.hash.slice(1)), written).toString());
 // A bare visit lands on today's seed-of-the-day (UTC), the same default world as every other surface.
 const seed = (written?.seed ?? addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");

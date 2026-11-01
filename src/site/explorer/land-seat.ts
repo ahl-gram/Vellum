@@ -83,6 +83,12 @@ export function fillTracks(): void {
   for (const input of document.querySelectorAll<HTMLInputElement>('.broadside input[type="range"]')) fillTrack(input);
 }
 
+export function holdValue(input: Held): void {
+  const row = input.closest(".l-row");
+  if (row === null || row.closest(".held") === null) return;
+  for (const each of inputsOf(row)) if (keepsValue(each)) each.dataset["held"] = each.value;
+}
+
 export function refuses(input: Held): boolean {
   const row = input.closest(".l-row");
   if (row === null || row.closest(".held") === null) return false;

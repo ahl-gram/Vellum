@@ -26,7 +26,7 @@ import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
-import { foundAddress, pageFounder } from "../shared/written-world.ts";
+import { foundAddress, pageFounder, writtenParams } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
@@ -75,6 +75,8 @@ const sheet = bindProspectRoom(furniture);
 
 const addr = parseProspectAddress(location.hash);
 const written = await foundAddress(location.hash, pageFounder());
+if (written !== null)
+  history.replaceState(null, "", "#" + writtenParams(new URLSearchParams(location.hash.slice(1)), written).toString());
 // A bare visit lands on today's seed-of-the-day (UTC) and its capital, the same default world as every other surface.
 const seed = (written?.seed ?? addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
