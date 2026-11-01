@@ -18,15 +18,14 @@ const WORD = /[\p{L}\p{N}][\p{L}\p{M}\p{N}]*/gu;
 
 const refuse = (reason: RefusalReason): Refusal => ({ ok: false, reason });
 
+export function displayText(input: string): string {
+  return input.replace(INVISIBLE, "").replace(ZERO_WIDTH_SPACE, " ").normalize("NFC").replace(/\s+/gu, " ").trim();
+}
+
 export function displayForm(input: string): Displayed | Refusal {
   if (CONTROL.test(input)) return refuse("control-character");
   if (UNKNOWN.test(input)) return refuse("unknown-character");
-  const sentence = input
-    .replace(INVISIBLE, "")
-    .replace(ZERO_WIDTH_SPACE, " ")
-    .normalize("NFC")
-    .replace(/\s+/gu, " ")
-    .trim();
+  const sentence = displayText(input);
   if (sentence === "") return refuse("empty");
   if (Array.from(sentence).length > MAX_SENTENCE_CODE_POINTS) return refuse("too-long");
   return { ok: true, sentence };

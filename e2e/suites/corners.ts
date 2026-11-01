@@ -36,6 +36,7 @@ const PAGE_FLOOR = [
   "/ribbon/",
   "/seed-of-the-day/",
   "/specimen/",
+  "/writing-room/",
 ];
 const YIELD_TOP = 1040;
 const YIELD_MID = 1032;

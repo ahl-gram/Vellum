@@ -221,6 +221,7 @@ test("a page that runs a live chart app is framed by its head box, home and the 
     "/prospect/": "head",
     "/ribbon/": "head",
     "/seed-of-the-day/": "head",
+    "/writing-room/": "head",
     "/specimen/": "view",
   };
   for (const [route, mode] of Object.entries(archive))

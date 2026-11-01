@@ -34,6 +34,7 @@ export const E2E_SUITE_ORDER = [
   "document-rooms",
   "region-detail",
   "specimen",
+  "writing-room",
   "corners",
   "stage",
   "slide-away",
@@ -55,6 +56,7 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "home",
   "reading-room",
   "specimen",
+  "writing-room",
 ];
 
 export type E2eTier = "full" | "smoke" | "custom";

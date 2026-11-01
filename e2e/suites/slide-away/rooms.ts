@@ -1,4 +1,4 @@
-// The slide-away in the seven other zoom rooms, the follow and the lines left (Issue #1034): SW1 and SW4 visit each room at 1280x800, SW2 and SW3 are the windows where the chart fills only at the Glass's third or fourth press.
+// The slide-away in the eight other zoom rooms, the follow and the lines left (Issue #1034): SW1 and SW4 visit each room at 1280x800, SW2 and SW3 are the windows where the chart fills only at the Glass's third or fourth press.
 import { makeSettle } from "../../support/settle.ts";
 import type { SuiteContext } from "../../types.ts";
 import { GLYPH_LINES } from "../stage/glyphs.ts";
@@ -100,7 +100,7 @@ export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
         ]),
   ];
   ctx.check(
-    "SW1 in each of the seven other zoom rooms at 1280x800, the Print Room, the Portfolio, the Prospect, the Reading Room, the Ribbon, the Seed of the Day and the Specimen Book, the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, on the Prospect its second line kept under the trail, the folio's title 2 px above the foot and its other lines below it, on the Reading Room under the strip (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996)",
+    "SW1 in each of the eight other zoom rooms at 1280x800, the Print Room, the Portfolio, the Prospect, the Reading Room, the Ribbon, the Seed of the Day, the Specimen Book and the Writing Room, the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, on the Prospect its second line kept under the trail, the folio's title 2 px above the foot and its other lines below it, on the Reading Room under the strip (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996)",
     f1.length === 0,
     one.map((r) => r.detail).join("; ") + (f1.length ? `; ${f1.length} faults: ${f1.slice(0, 6).join("; ")}` : ""),
   );

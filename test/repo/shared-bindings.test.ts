@@ -142,6 +142,7 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/ribbon/seats.ts": [ZOOM_ROOM],
   "src/site/reading-room/seats.ts": [ZOOM_ROOM],
   "src/site/specimen/app.ts": [ZOOM_ROOM],
+  "src/site/writing-room/app.ts": [ZOOM_ROOM],
   "src/site/seed-of-the-day/app.ts": [ZOOM_BINDING, ["framingCamera", "../shared/camera.ts"]],
   "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
   "src/site/explorer/portfolio/app.ts": [

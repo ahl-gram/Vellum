@@ -160,6 +160,7 @@ const PILLS: Record<string, string> = {
   "/prospect/": "P#pp-status",
   "/ribbon/": "P#rb-status",
   "/specimen/": "P#sb-status",
+  "/writing-room/": "P#status",
   [PORTFOLIO]: "P#pf-status",
 };
 
@@ -194,6 +195,7 @@ export const CHART_ROOMS = [
   "/prospect/",
   "/ribbon/",
   "/specimen/",
+  "/writing-room/",
   PORTFOLIO,
 ];
 export const STAGED: Record<string, string> = {
@@ -201,6 +203,7 @@ export const STAGED: Record<string, string> = {
   "/prospect/": "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
   "/ribbon/": "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
   "/specimen/": "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
+  "/writing-room/": "The founded chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
   [PORTFOLIO]: "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
 };
 export type RoadWant = readonly [id: string, gold: boolean, path: string, road: string | null, verb: string];

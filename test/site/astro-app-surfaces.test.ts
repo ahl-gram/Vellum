@@ -71,6 +71,7 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
       ["/seed-of-the-day/", "app.bundle.js"],
       ["/prospect/", "app.bundle.js"],
       ["/ribbon/", "app.bundle.js"],
+      ["/writing-room/", "app.bundle.js"],
       ["/", "app.bundle.js"],
     ] as const) {
       const res = await fetch(at(path));

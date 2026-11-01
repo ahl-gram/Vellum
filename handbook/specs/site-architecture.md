@@ -353,7 +353,8 @@ precisely, because a token that falls outside it looks identical at the point of
   in `src/site/explorer/place-gate.ts`), so the worker stays first in first out. The name index the
   place picker searches is served beside the places as one file (`writePlaceNames` in
   `scripts/place-files.ts`, at `namesUrl` in `src/site/explorer/place-fetch.ts`), fetched the first
-  time the picker needs a name, never bundled and never sent to the worker.
+  time the picker needs a name, or the first time the Writing Room founds a sentence asking for a real
+  place's shape, never bundled and never sent to the worker.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
   fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole

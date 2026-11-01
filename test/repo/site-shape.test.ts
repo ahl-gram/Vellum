@@ -59,6 +59,7 @@ test("no chart room moves the reading position: no scroll call and no scroll wri
     "src/site/print-room/app.ts",
     "src/site/prospect/app.ts",
     "src/site/ribbon/app.ts",
+    "src/site/writing-room/app.ts",
   ])
     assert.deepEqual(
       await reports(SCROLL_PLANT, room, rule),
