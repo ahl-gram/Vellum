@@ -1,0 +1,75 @@
+/* The Writing Room (Issue #393): the sentence's line and the founding's account in the slip. The furniture is atelier.css's; this sheet seats the founded chart and dresses the room's own text. */
+
+#map svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.wr-line {
+  box-sizing: border-box;
+  width: 100%;
+  resize: none;
+  padding: 0.45rem 0.55rem;
+  font-family: var(--font-body, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--ink-dark);
+  background: var(--parchment-bright);
+  border: 1px solid var(--line-tan);
+  border-radius: 2px;
+}
+.wr-line:focus-visible {
+  outline: 2px solid var(--ink-dark);
+  outline-offset: 1px;
+}
+.wr-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+}
+.wr-count {
+  font-size: 0.85rem;
+  color: var(--ink-brown);
+}
+.wr-refusal {
+  min-height: 0;
+  margin: 0.5rem 0 0;
+  color: var(--iron-red);
+  font-style: italic;
+}
+.wr-refusal:empty {
+  display: none;
+}
+.wr-head {
+  margin: 0.9rem 0 0.25rem;
+  font-family: var(--font-display, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-brown);
+}
+.wr-account ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-dark);
+  line-height: 1.45;
+}
+.wr-account li {
+  margin: 0.18rem 0;
+}
+.wr-word {
+  font-weight: 600;
+  color: var(--ink-dark);
+}
+.wr-contested li {
+  color: var(--ink-brown);
+}
+.wr-quiet,
+.wr-residual {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  color: var(--ink-brown);
+}

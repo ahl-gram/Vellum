@@ -119,6 +119,23 @@ const PAGES: readonly PageSpec[] = [
     chartRoom: true,
   },
   {
+    route: "writing-room/index.html",
+    dir: "/writing-room/",
+    current: "Writing Room",
+    trail: [
+      ["Vellum", "/"],
+      ["The Writing Room", "/writing-room/"],
+    ],
+    room: "The Writing Room",
+    title: "The Writing Room · Vellum",
+    ogTitle: "The Writing Room · Vellum",
+    description:
+      "Write a sentence and Vellum founds a world from it, in your browser. The same sentence founds the same world, forever.",
+    tagline: "every sentence is a world, write one",
+    scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+  },
+  {
     route: "print-room/index.html",
     dir: "/print-room/",
     current: "Print Room",
@@ -404,6 +421,7 @@ const SHARED_ROOM_SHEETS: ReadonlyArray<readonly [string, (p: PageSpec) => boole
     (p) => sheetStandsInStage(page(p.route)),
     [
       "explorer/index.html",
+      "writing-room/index.html",
       "print-room/index.html",
       "explorer/portfolio/index.html",
       "reading-room/index.html",
@@ -478,8 +496,8 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
 test("the canonical nav renders the typed items flat, root-absolute, one aria-current span (#461 ruling 1)", () => {
   assert.deepEqual(
     NAV_ITEMS.map((i) => i.label),
-    ["Today", "Explorer", "Reading Room", "Print Room", "Gallery", "Q & A", "Glossary"],
-    "the Running Head six (#268) plus the Reading Room (#221), seated beside the Explorer it watches",
+    ["Today", "Explorer", "Writing Room", "Reading Room", "Print Room", "Gallery", "Q & A", "Glossary"],
+    "the Running Head six (#268) plus the Reading Room (#221), seated beside the Explorer it watches, and the Writing Room (Issue #393), seated after the Explorer",
   );
   for (const item of NAV_ITEMS) {
     assert.match(item.href, /^\/([a-z0-9-]+\/)*$/, `${item.label} href must be root-absolute directory form`);
@@ -935,6 +953,7 @@ const STAGES: ReadonlyArray<readonly [string, string]> = [
   ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["specimen/index.html", "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["writing-room/index.html", "The founded chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   [
     "explorer/portfolio/index.html",
     "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
@@ -1064,6 +1083,7 @@ const LEGENDS: Record<string, Legend> = {
   "seed-of-the-day/index.html": { label: "Today's roads out" },
   "gallery/index.html": { label: "The road out" },
   "specimen/index.html": { label: "The roads out" },
+  "writing-room/index.html": { label: "The Press" },
 };
 const tight = (s: string) => decode(s.replace(/>\s+</g, "><")).trim();
 const literal = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1104,6 +1124,7 @@ const NOTICES: Record<string, Notices> = {
   "ribbon/index.html": { pill: "rb-status", warning: "rb-warning", noscript: true },
   "reading-room/index.html": { warning: "rr-warning" },
   "specimen/index.html": { pill: "sb-status", noscript: true },
+  "writing-room/index.html": { pill: "status", opens: "Founding the world&hellip;", noscript: true },
 };
 const noticesShape = (n: Notices): RegExp =>
   new RegExp(
@@ -1260,6 +1281,7 @@ test("every internal link and embed on the rendered pages resolves in the built 
     "/prospect/app.bundle.js",
     "/ribbon/app.bundle.js",
     "/specimen/app.bundle.js",
+    "/writing-room/app.bundle.js",
     "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));

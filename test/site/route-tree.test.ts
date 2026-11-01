@@ -31,6 +31,14 @@ const TRAILS: Record<string, Want> = {
     current: false,
     also: [],
   },
+  "/writing-room/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Writing Room", "/writing-room/"],
+    ],
+    current: false,
+    also: [],
+  },
   "/reading-room/": {
     crumbs: [
       ["Vellum", "/"],

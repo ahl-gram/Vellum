@@ -14,7 +14,7 @@ export type Account = {
 
 export const QUIET_LINE = "None of these words steered the world; its chart number alone drew it.";
 
-const MAP_WORDS = {
+export const MAP_WORDS = {
   island: "an island",
   archipelago: "an archipelago",
   continent: "a continent",

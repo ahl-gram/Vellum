@@ -22,6 +22,7 @@ export const CHART_ROOM_FLOOR = [
   "/ribbon/",
   "/seed-of-the-day/",
   "/specimen/",
+  "/writing-room/",
 ];
 export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };

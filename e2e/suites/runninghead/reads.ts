@@ -14,6 +14,7 @@ export const SHELLED = [
   "/prospect/",
   "/ribbon/",
   "/specimen/",
+  "/writing-room/",
 ];
 
 // MEASURED split: /, /explorer/, /gallery/ leave body leading normal, every other page sets 1.6; RH6 needs PROSE and APP to differ in body leading or it proves nothing.
@@ -51,6 +52,7 @@ export const FOLIO = [
   "/ribbon/",
   "/gallery/",
   "/specimen/",
+  "/writing-room/",
 ];
 export const CHART = [
   "/seed-of-the-day/",
@@ -61,6 +63,7 @@ export const CHART = [
   "/ribbon/",
   "/gallery/",
   "/specimen/",
+  "/writing-room/",
 ];
 const FOLIO_HEAD = {
   ...ROOM_HEAD,

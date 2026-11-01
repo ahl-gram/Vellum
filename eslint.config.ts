@@ -213,7 +213,7 @@ export default defineConfig(
   },
   {
     name: "the house's rules on the chart rooms' modules",
-    files: site("src/site/reading-room/**", "src/site/shared/reading-frame/**", "src/site/print-room/**", "src/site/prospect/**", "src/site/ribbon/**"),
+    files: site("src/site/reading-room/**", "src/site/shared/reading-frame/**", "src/site/print-room/**", "src/site/prospect/**", "src/site/ribbon/**", "src/site/writing-room/**"),
     plugins: { vellum },
     rules: { "vellum/room-no-scroll": "error" },
   },

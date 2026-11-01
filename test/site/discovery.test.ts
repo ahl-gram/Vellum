@@ -35,7 +35,7 @@ test("the route set is NAV_ITEMS plus the five routes the nav omits: home, the a
   assert.equal(
     DISCOVERY_ROUTES.length,
     NAV_ITEMS.length + 5,
-    "seven nav items plus home, the atlas, the prospect, the ribbon, and the Portfolio",
+    "eight nav items plus home, the atlas, the prospect, the ribbon, and the Portfolio",
   );
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "no route may be listed twice");
   for (const route of DISCOVERY_ROUTES) {

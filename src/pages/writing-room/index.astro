@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import ChartStage from "../../layouts/ChartStage.astro";
+import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import Slip from "../../layouts/Slip.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
+
+// The Writing Room (Issue #393): a visitor writes a founding sentence and the page founds a world from it in the browser; the chart is the shared worker's, the account in the slip is the founding's own.
+const room = "The Writing Room";
+const tagline = "every sentence is a world, write one";
+---
+
+<BaseLayout
+  room={room}
+  description="Write a sentence and Vellum founds a world from it, in your browser. The same sentence founds the same world, forever."
+  path="/writing-room/"
+  chartRoom
+  extraCss={["/shared/slide-away.css", "/shared/chart-stage.css"]}
+>
+<Fog />
+<ChartStage label="The founded chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
+  <StageNotices slot="after" pillId="status">
+    <Fragment slot="pill">Founding the world&hellip;</Fragment>
+    <Fragment slot="noscript">A world is founded from its sentence in your browser, so this room needs
+    JavaScript. You can still <a href="../explorer/">draw any seed in the Explorer</a>.</Fragment>
+  </StageNotices>
+</ChartStage>
+<Vignettes />
+
+<RoomFolio room={room} tagline={tagline}>
+  <p class="gloss">the same sentence founds the same world, forever</p>
+</RoomFolio>
+
+<Slip id="founding" verb="Write one" title="The Founding" where="the sentence, and what each word did" fold="Fold the founding away">
+  <form id="wr-form" class="wr-form" aria-label="The founding sentence">
+    <textarea id="wr-line" class="wr-line" rows="3" spellcheck="false" aria-label="the founding sentence"></textarea>
+    <div class="wr-actions"><span class="wr-count" id="wr-count"></span><button class="primary" type="submit">Found</button></div>
+  </form>
+  <p class="wr-refusal" id="wr-refusal" role="status" aria-live="polite"></p>
+  <div class="wr-account" id="wr-account"></div>
+  <p class="note" slot="foot">Words on the founding list steer the world; every other word makes its chart number. Nothing leaves your browser.</p>
+</Slip>
+
+<ChartFolio lines={[["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"]]} />
+
+<LegendRow label="The Press">
+  <Fragment slot="head">The Press &middot; what the sheet can do next</Fragment>
+  <button id="wr-plate" class="legend-btn" type="button"><span class="verb" id="wr-plate-verb">Lay on</span><span class="room">The Vegetation Plate</span></button>
+</LegendRow>
+
+<Glass />
+
+<script type="module" src="./app.bundle.js" is:inline></script>
+</BaseLayout>

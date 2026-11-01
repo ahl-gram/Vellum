@@ -14,6 +14,7 @@ const PILL_ROOMS = [
   "/reading-room/",
   "/seed-of-the-day/",
   "/specimen/",
+  "/writing-room/",
   PORTFOLIO,
 ];
 

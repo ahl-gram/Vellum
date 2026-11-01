@@ -1,4 +1,4 @@
-// The slide-away checks' shared reads and gestures in the seven other zoom rooms (Issue #1034): which rooms, what the head cluster and the chart folio stand at, the Glass's presses and the arithmetic written again, and a stillness that waits for nothing but rest.
+// The slide-away checks' shared reads and gestures in the eight other zoom rooms (Issue #1034): which rooms, what the head cluster and the chart folio stand at, the Glass's presses and the arithmetic written again, and a stillness that waits for nothing but rest.
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
@@ -23,6 +23,7 @@ export const ROOMS: readonly Room[] = [
   { id: "Ribbon", path: "/ribbon/#seed=42", lens: LENS, fill: "sheet" },
   { id: "Seed of the Day", path: "/seed-of-the-day/", lens: LENS, fill: "gesture" },
   { id: "Specimen Book", path: "/specimen/", lens: LENS, fill: "sheet" },
+  { id: "Writing Room", path: "/writing-room/", lens: LENS, fill: "sheet" },
 ];
 
 type Box4 = [number, number, number, number];

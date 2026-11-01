@@ -102,8 +102,9 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const held: string[] = [];
   let untouched = true;
   for (const [page, widths] of [
-    ["/print-room/", [1280, 1024, 1023, 960, 901]],
+    ["/print-room/", [1280]],
     ["/specimen/", [1023, 960, 901]],
+    ["/explorer/", [1024, 1023, 960, 901]],
   ] as const) {
     for (const w of widths) {
       const r = await open(ctx, page, w);
@@ -114,7 +115,7 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const off = await withScriptsOff(ctx.send, () => open(ctx, "/ribbon/", 1024));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way and the nav keeps one line: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    "CO5 the corner gives way and the nav keeps one line: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; the Specimen Book's corner, the Print Room's at 1280 and the Explorer's below it are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
     reduced.ok && moving.ok && lined && lays && untouched && scriptsOff,
     [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(
       " | ",
