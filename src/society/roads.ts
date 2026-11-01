@@ -1,7 +1,7 @@
 import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { createMinHeap } from "../core/heap.ts";
 import { slopeField } from "../terrain/slope.ts";
-import { labelLandmasses } from "../world/landmass.ts";
+import { labelLandmasses, type LandmassLabels } from "../world/landmass.ts";
 import type { RealmsResult } from "./realms.ts";
 import type { Settlement } from "./sites.ts";
 
@@ -10,6 +10,11 @@ export type RoadPoint = { readonly x: number; readonly y: number };
 export type Road = {
   readonly points: ReadonlyArray<RoadPoint>;
   readonly rank: "trunk" | "lane";
+};
+
+type RoadOptions = {
+  slope?: Field;
+  landmasses?: LandmassLabels;
 };
 
 export const SLOPE_PENALTY = 12;
@@ -38,19 +43,20 @@ export function buildRoads(
   riverCells: Uint8Array,
   settlements: ReadonlyArray<Settlement>,
   realms: RealmsResult,
+  opts: RoadOptions = {},
 ): Road[] {
   const { w, h, data } = elev;
   const { labels, seats } = realms;
   if (seats.length === 0) return [];
 
-  const slope = slopeField(elev);
+  const slope = opts.slope ?? slopeField(elev);
   const terrainCost = (i: number): number =>
     1 + (slope.data[i] as number) * SLOPE_PENALTY + (riverCells[i] === 1 ? RIVER_CROSSING : 0);
   const wiring: Wiring = { w, h, n: w * h, data, seaLevel, terrainCost, roads: [] };
 
   const budgets = realmBudgets(labels, seats.length, wiring.n);
   if (budgets === null) return [];
-  const { ids: lmIds } = labelLandmasses(elev, seaLevel);
+  const { ids: lmIds } = opts.landmasses ?? labelLandmasses(elev, seaLevel);
   const webs = weaveRealmWebs(wiring, settlements, labels, seats, lmIds, budgets);
   layRoyalTrunks(wiring, webs);
   return wiring.roads;
