@@ -140,7 +140,6 @@
   letter-spacing: 0.05em;
   color: var(--ink-brown);
 }
-/* 0.19rem keeps the 16px dropdowns in the 31px box the 15.2px ones had, so the Land slip's height at 1024 by 768 is unchanged (Issue #1140). */
 .broadside .l-ctl > select {
   font-size: 1rem;
   padding-block: 0.19rem;

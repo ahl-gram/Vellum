@@ -89,15 +89,19 @@ export async function br12Dress(k: BroadsideKit): Promise<void> {
 
 // 2026-11-01: ui-design.md's floor for a field or a select the reader types into, ruled to cover the slip (Issue #1140 comment 6551936310).
 const FIELD_FLOOR_PX = 16;
-type Field = { id: string; px: number; shown: boolean };
+// 2026-11-01: the dropdown boxes were 31.03 px at 15.2 px type and are 31.06 px at 16 px (Mac, 1280 by 800); the ruling keeps them the same height, and 0.22rem of padding reads 32.0 px, so 31.5 sits between with 0.44 px of headroom (Issue #1140).
+const DROPDOWN_MAX_PX = 31.5;
+const NAMED = ["type", "band", "style", "theme", "place"];
+type Field = { id: string; tag: string; px: number; h: number; shown: boolean };
 const FIELDS: Payload<Field[]> =
-  `["type","band","style","theme","place"].map((id)=>{const e=document.getElementById(id);return{id,px:e?parseFloat(getComputedStyle(e).fontSize):0,shown:!!e&&e.getClientRects().length>0};})`;
+  `[...document.querySelectorAll("#broadside select, #broadside input:not([type=range],[type=checkbox],[type=radio],[type=hidden])")].map((e)=>{const r=e.getBoundingClientRect();return{id:e.id,tag:e.tagName,px:parseFloat(getComputedStyle(e).fontSize),h:r.height,shown:r.width>0};})`;
 
 export async function br21Fields({ evaluate, check }: BroadsideKit): Promise<void> {
   const fields = await evaluate(FIELDS);
   check(
-    "BR21 every field the reader types into on the Broadside, the four dropdowns and the shape box, is set at 16 px or more (Issue #1140)",
-    fields.length === 5 && fields.every((f) => f.shown && f.px >= FIELD_FLOOR_PX),
+    "BR21 every field the reader types into on the Broadside (the four dropdowns, the shape box and any added) is set at 16 px or more, and a dropdown's box stays within 31.5 px tall (Issue #1140)",
+    NAMED.every((id) => fields.some((f) => f.id === id && f.shown)) &&
+      fields.every((f) => f.px >= FIELD_FLOOR_PX && (f.tag !== "SELECT" || f.h <= DROPDOWN_MAX_PX)),
     JSON.stringify(fields),
   );
 }
