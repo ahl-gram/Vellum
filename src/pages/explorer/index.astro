@@ -84,7 +84,7 @@ const tagline = "every seed is a world, draw one";
         <div class="l-row" data-row="islands" hidden>
           <span class="l-label"><label for="islands">islands</label><a class="fn" href="/glossary/#islands" data-note="note-islands" aria-describedby="note-islands" aria-label="note on the islands">&Vert;</a></span>
           <span class="land-end land-end-min">few</span>
-          <input id="islands" type="range" min="1" max="100" step="1" value="1">
+          <input id="islands" type="range" step="1" value="1">
           <span class="land-end land-end-max">many</span>
           <span id="islands-readout" class="land-readout"></span>
         </div>
@@ -98,14 +98,14 @@ const tagline = "every seed is a world, draw one";
         <div class="l-row" data-row="land">
           <span class="l-label"><label for="land">sea level</label></span>
           <span class="land-end land-end-min">more sea</span>
-          <input id="land" type="range" min="100" max="700" step="2">
+          <input id="land" type="range" step="2">
           <span class="land-end land-end-max">more land</span>
           <span id="land-readout" class="land-readout"></span>
         </div>
         <div class="l-row" data-row="coast">
           <span class="l-label"><label for="coast">coast</label><a class="fn" href="/glossary/#coast-warp" data-note="note-coast-warp" aria-describedby="note-coast-warp" aria-label="note on the coast warp">&Dagger;</a></span>
           <span class="land-end land-end-min">calm</span>
-          <input id="coast" type="range" min="0" max="100" step="5">
+          <input id="coast" type="range" step="5">
           <span class="land-end land-end-max">lobed</span>
           <span id="coast-readout" class="land-readout"></span>
         </div>
