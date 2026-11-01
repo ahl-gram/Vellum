@@ -17,15 +17,29 @@ const unread: RoomRefusal = { ok: false, reason: "names-unread" };
 export const lettered = (f: Founding): boolean => f.steered.length + f.contested.length > 0;
 
 export function opensOnPlate(f: Founding): boolean {
-  void f;
-  return false;
+  return (
+    f.steered.some((r) => r.steers.some((s) => s.subject === "band")) &&
+    f.steered.every((r) => r.steers.every((s) => s.subject === "band" || s.subject === "culture"))
+  );
 }
 
 export function recipeOverrides(f: Founding): Partial<WorldRecipe> {
-  return f.overrides;
+  return { ...f.overrides, ...(lettered(f) ? { foundingText: f.sentence } : {}) };
 }
 
 export function createFounder(names: NameSource): Founder {
-  void [names, installNames, unread];
-  return { found: (s, v) => Promise.resolve(foundWorld(s, v) as never), installed: () => null };
+  let rows: ReadonlyArray<GazetteerRow> | null = null;
+  async function found(sentence: string, version: number): Promise<Founding | RoomRefusal> {
+    const first = foundWorld(sentence, version);
+    if (first.ok) return first;
+    if (first.reason !== "places-not-loaded") return { ok: false, reason: first.reason };
+    if (rows !== null) return unread;
+    const fetched = await names().catch(() => null);
+    if (fetched === null || !installNames(fetched)) return unread;
+    rows = fetched;
+    const again = foundWorld(sentence, version);
+    if (again.ok) return again;
+    return { ok: false, reason: again.reason === "places-not-loaded" ? "names-unread" : again.reason };
+  }
+  return { found, installed: () => rows };
 }

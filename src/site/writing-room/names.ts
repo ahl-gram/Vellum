@@ -5,7 +5,7 @@ import { setFoundingGazetteer, type GazetteerRow } from "../../world/founding/sh
 export const NAMES_CHECKSUM = 2151669449;
 
 export function installNames(rows: ReadonlyArray<GazetteerRow>): boolean {
-  void [hashString, NAMES_CHECKSUM];
+  if (hashString(JSON.stringify(rows)) !== NAMES_CHECKSUM) return false;
   setFoundingGazetteer(rows);
   return true;
 }

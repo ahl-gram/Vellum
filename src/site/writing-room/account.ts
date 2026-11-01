@@ -61,8 +61,16 @@ function steerWords(steer: Steer, placeName: (id: OutlineId) => string): string 
 }
 
 export function accountOf(f: Founding, placeName: (id: OutlineId) => string): Account {
-  void [steerWords, placeName];
-  return { steered: [], contested: [], quiet: true, seed: f.seed, residual: f.residual };
+  return {
+    steered: f.steered.map((r) => ({
+      phrase: r.phrase,
+      set: r.steers.map((s) => steerWords(s, placeName)).join(" and "),
+    })),
+    contested: f.contested.map((r) => r.phrase),
+    quiet: f.steered.length === 0,
+    seed: f.seed,
+    residual: f.residual,
+  };
 }
 
 export function chartNumberLine(account: Account): string {
