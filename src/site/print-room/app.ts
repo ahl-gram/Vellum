@@ -39,6 +39,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
 import { downloadBlob } from "../shared/object-url.ts";
+import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
@@ -102,6 +103,7 @@ const carried: {
   table: string | null;
 } = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, keys: NO_LAND_KEYS, table: null };
 
+let written: WrittenWorld | null = null;
 let drawGen = 0;
 // True from a draw's synchronous start until its own settle: pairs with `ordering` so the order surface stays closed for the whole round-trip.
 let drawing = false;
@@ -150,9 +152,10 @@ function writeHash(seed: number, style: string): void {
   p.set("beasts", carried.beasts ? "1" : "0");
   emitLandKeys(p, carried.keys);
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
-  history.replaceState(null, "", "#" + p.toString());
-  road.href = "../explorer/#" + p.toString();
-  if (folioRoad) folioRoad.href = "../explorer/portfolio/#" + p.toString();
+  const q = writtenParams(p, heldFor(written, seed));
+  history.replaceState(null, "", "#" + q.toString());
+  road.href = "../explorer/#" + q.toString();
+  if (folioRoad) folioRoad.href = "../explorer/portfolio/#" + q.toString();
 }
 
 function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: PosterBasis["overrides"]): void {
@@ -161,6 +164,7 @@ function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: P
   showProof(furniture);
   sheet.rebase();
   startArrival(preview.querySelector("svg"));
+  written = heldFor(written, seed);
   writeHash(seed, style);
   status.textContent = "";
   writeFolio(furniture, res, seed);
@@ -192,11 +196,15 @@ function draw(): void {
   clearBoundAtlas();
   refreshOrderControls();
   posterStatus.textContent = ""; // a new proof clears any stale poster-order status
-  const overrides: TableOverrides = {
-    ...(carried.type ? { mapType: carried.type } : {}),
-    ...(carried.band ? { band: carried.band } : {}),
-    ...overridesOfLand(carried.keys),
-  };
+  const held = heldFor(written, seed);
+  const overrides: TableOverrides =
+    held !== null
+      ? held.overrides
+      : {
+          ...(carried.type ? { mapType: carried.type } : {}),
+          ...(carried.band ? { band: carried.band } : {}),
+          ...overridesOfLand(carried.keys),
+        };
   runJob({
     kind: "draw",
     seed,
@@ -376,7 +384,9 @@ window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
 window.__vellumClampPosterWidth = clampPosterWidth; // e2e: the tab-killing-width guard
 if (!usesWorker()) warning.hidden = false; // inline fallback: large plates will pause the tab
 
+written = await foundAddress(location.hash, pageFounder());
 applyHash();
+if (written !== null) seedInput.value = String(written.seed);
 // A bare visit lands on today's seed-of-the-day (UTC), the same default world as the Explorer and the Today page.
 if (!seedInput.value) seedInput.value = String(seedForDate(new Date()));
 draw();

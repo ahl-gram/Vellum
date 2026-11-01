@@ -14,6 +14,7 @@ import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import { refreshLand, wireShapeControls } from "./shape-controls.ts";
 import { wirePlacePicker } from "./place-picker.ts";
+import { writtenFor } from "./written-hold.ts";
 import type { LivingChart } from "../shared/living-chart/index.ts";
 import { pageBox } from "../shared/page-box.ts";
 import { $ } from "../shared/by-id.ts";
@@ -150,6 +151,7 @@ export function pageGlass({
 export type DrawOverrides = { mapType?: MapType; band?: ClimateBand } & LandOverrides;
 
 export function draftOverrides(seed: number, touched: TouchedGates): DrawOverrides {
+  const written = writtenFor(seed);
   const chosen: { mapType?: MapType; band?: ClimateBand } = {};
   if (typeSel.value) chosen.mapType = typeSel.value as MapType;
   if (bandSel.value) chosen.band = bandSel.value as ClimateBand;
@@ -158,6 +160,7 @@ export function draftOverrides(seed: number, touched: TouchedGates): DrawOverrid
   if (!touched.coast) parkCoastDefault(seed, chosen);
   updateCoastReadout();
   refreshLand();
+  if (written !== null) return written.overrides;
   return { ...chosen, ...overridesOfLand(landKeysNow(hashControls, touched.land, touched.coast)) };
 }
 

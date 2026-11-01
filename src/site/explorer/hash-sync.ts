@@ -5,7 +5,11 @@ import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./ad
 import { emitLandKeys, gateLand, readWorldKeys, type LandKeys } from "../shared/address-grammar.ts";
 import { drawnShape } from "../shared/shape-address.ts";
 import { chooseShape, shapeChoice } from "./shape-choice.ts";
-import { parseTable, emitTableKey, type TableItem } from "../shared/table-address.ts";
+import { TABLE_KEY, emitTableKey, parseTableValue, type TableItem } from "../shared/table-address.ts";
+import { createFounder } from "../shared/founding.ts";
+import { foundAddress, heldFor, identityParams, writtenParams } from "../shared/written-world.ts";
+import { placeNames } from "./place-picker.ts";
+import { holdWritten, writtenNow } from "./written-hold.ts";
 import { addressCamera, type Camera } from "../shared/camera.ts";
 import { DEEPEST_K } from "../../world/lod.ts";
 
@@ -46,16 +50,17 @@ export function landKeysNow(controls: Readonly<Controls>, landTouched: boolean, 
   });
 }
 
-/** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the Issue #165 camera if carried (restored by the conductor after the first chart lands), and the Issue #192 live address; absent params mean home, still, disarmed. */
-export function readHash(controls: Controls): {
+export interface Arrival {
   land: boolean;
   coast: boolean;
   camera: Camera | null;
   live: Live | null;
   table: ReadonlyArray<TableItem> | null;
-} {
+}
+
+/** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the Issue #165 camera if carried (restored by the conductor after the first chart lands), and the Issue #192 live address; absent params mean home, still, disarmed. */
+function readHash(controls: Controls, params: URLSearchParams): Arrival {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk } = controls;
-  const params = new URLSearchParams(location.hash.slice(1));
   const seed = seedFromHash(params.get("seed"));
   if (seed !== null) seedInput.value = String(seed);
   const style = params.get("style");
@@ -79,7 +84,23 @@ export function readHash(controls: Controls): {
   const landTouched = landFromHash(land, controls);
   const coastTouched = coastFromHash(coast, controls);
   const camera = addressCamera(params, DEEPEST_K);
-  return { land: landTouched, coast: coastTouched, camera, live: parseLive(params), table: parseTable(location.hash) };
+  const tableRaw = params.get(TABLE_KEY);
+  return {
+    land: landTouched,
+    coast: coastTouched,
+    camera,
+    live: parseLive(params),
+    table: tableRaw === null ? null : parseTableValue(tableRaw),
+  };
+}
+
+/** A link carrying a founding sentence is founded again here and seats the controls from its settings; any other link reads as it always did. */
+export async function readAddress(controls: Controls): Promise<Arrival> {
+  const written = await foundAddress(location.hash, createFounder(placeNames));
+  holdWritten(written);
+  const hashed = new URLSearchParams(location.hash.slice(1));
+  const params = written === null ? hashed : identityParams(hashed, written.seed, written.overrides);
+  return readHash(controls, params);
 }
 
 /** Mirror the control values into location.hash via replaceState (no history push). land=/coast= are written only once their gates are touched; the camera is quantized to 4dp and written only when NOT home, and the live key emits only when an instrument is armed, so a plain chart links byte-identical to today's. */
@@ -109,5 +130,9 @@ export function writeHash(
     params.set("k", camera.k.toFixed(4));
   }
   emitTableKey(params, table);
-  history.replaceState(null, "", "#" + finalizeHash(params));
+  history.replaceState(
+    null,
+    "",
+    "#" + finalizeHash(writtenParams(params, heldFor(writtenNow(), Number(seedInput.value) >>> 0))),
+  );
 }

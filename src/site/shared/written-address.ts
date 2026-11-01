@@ -1,5 +1,5 @@
-const FOUND_KEY = "found";
-const VERSION_KEY = "v";
+export const FOUND_KEY = "found";
+export const VERSION_KEY = "v";
 const UNVERSIONED = 1;
 
 export type Written = { readonly sentence: string; readonly version: number };

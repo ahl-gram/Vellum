@@ -295,6 +295,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   is left out too (`gateLand` in `src/site/shared/address-grammar.ts`), and a shape or a count the
   engine refuses is read as absent in a link and drops the sheet on the Chart Table (`readShapeKeys`
   in `src/site/shared/shape-address.ts`), so one shaped world takes one link and one sheet.
+  **A written world is spelt by its sentence alone, in every room.** A link carrying `found` and `v` is founded again wherever it lands (`foundAddress` in `src/site/shared/written-world.ts`), and a link that also carries an identity key (`seed`, `type`, `band`, `land`, `coast` or a shape key) draws the sentence's world; every room that founds the sentence writes none of those keys beside it, in its own address or in any road it lays, whatever the link it arrived on carried (`writtenParams` in `src/site/shared/written-world.ts`); a sentence the founding refuses reads as absent; and a room lets the written world go only at a new chart number (`heldFor` in `src/site/shared/written-world.ts`). A sheet filed on the Chart Table from a written world carries its naming tongue and never its sentence (`tableOverridesOf` in `src/site/shared/table-address.ts`).
 - **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
   address decides an ARRIVAL and the device decides a RETURN (Issue #634, 2026-09-19, superseding Issue #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all

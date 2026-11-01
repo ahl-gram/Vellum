@@ -1,7 +1,7 @@
 import type { Founding } from "../../world/founding/found.ts";
 import { MAX_SENTENCE_CODE_POINTS, type Steer } from "../../world/founding/lexicon.ts";
 import type { OutlineId } from "../../world/outline-ids.ts";
-import type { RoomReason } from "./founding.ts";
+import type { RoomReason } from "../shared/founding.ts";
 
 export type AccountLine = { readonly phrase: string; readonly set: string };
 export type Account = {

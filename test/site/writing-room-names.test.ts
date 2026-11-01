@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { hashString } from "../../src/core/rng.ts";
 import { foundWorld } from "../../src/world/founding/found.ts";
 import { setFoundingGazetteer } from "../../src/world/founding/shapes.ts";
-import { NAMES_CHECKSUM, installNames } from "../../src/site/writing-room/names.ts";
+import { NAMES_CHECKSUM, installNames } from "../../src/site/shared/founding-names.ts";
 import { committedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
 test("the room installs only the name index version 1 was pinned with", () => {

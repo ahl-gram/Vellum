@@ -7,6 +7,7 @@ import { createMatcher, nameOf, type NameRow, type PlaceHit, type PlaceList } fr
 import { createNameLoader } from "./place-names.ts";
 import { chooseShape, shapeChoice } from "./shape-choice.ts";
 import { loadPlace } from "./worker-client.ts";
+import { holdValue, refuses } from "./land-seat.ts";
 
 const box = $<HTMLInputElement>("place");
 const panel = $("place-list");
@@ -15,14 +16,14 @@ const foot = $("place-foot");
 const ledger = box.closest<HTMLElement>(".ledger") as HTMLElement;
 const slipBody = document.querySelector("#broadside .slip-body");
 
-const names = createNameLoader((url) => fetch(url));
+export const placeNames = createNameLoader((url) => fetch(url));
 let built: { rows: ReadonlyArray<NameRow>; match: (query: string) => PlaceList } | null = null;
 let hits: ReadonlyArray<PlaceHit> = [];
 let lit = 0;
 let edited = false;
 
 const ready = (): Promise<NonNullable<typeof built>> =>
-  names().then((rows) => {
+  placeNames().then((rows) => {
     if (built === null || built.rows !== rows) built = { rows, match: createMatcher(rows) };
     return built;
   });
@@ -46,7 +47,9 @@ function writeBack(id: OutlineId | undefined): void {
     return;
   }
   const settle = (value: string): void => {
-    if (shapeChoice().outline === id) box.value = value;
+    if (shapeChoice().outline !== id) return;
+    box.value = value;
+    holdValue(box);
   };
   ready().then(
     ({ rows }) => {
@@ -92,6 +95,7 @@ function clear(): void {
 }
 
 function onInput(): void {
+  if (refuses(box)) return;
   edited = true;
   if (box.value.trim() === "") {
     closeList();
@@ -115,6 +119,7 @@ function onKeydown(e: KeyboardEvent): void {
     e.preventDefault();
   } else if (e.key === "Enter") {
     e.preventDefault();
+    if (refuses(box)) return;
     const hit = hits[lit];
     if (isOpen() && hit !== undefined) pick(hit);
     else if (box.value.trim() === "" && shapeChoice().outline !== undefined) clear();

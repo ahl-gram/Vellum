@@ -227,6 +227,7 @@ export const KIT_ROADS: Record<string, ReadonlyArray<RoadWant>> = {
     ["", false, "/reading-room/", "reading-room", ""],
   ],
   "/gallery/": [["", true, "/explorer/", null, ""]],
+  "/writing-room/": [["wr-explorer", true, "/explorer/", null, ""]],
   "/specimen/": [
     ["", false, "/explorer/", null, ""],
     ["", true, "/gallery/", null, ""],

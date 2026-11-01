@@ -66,11 +66,16 @@ export function wireControls(deps: ControlsDeps): void {
       draw();
     }
   });
-  for (const sel of [bandSel, themeSel, legendChk, armsChk, beastsChk]) {
+  for (const sel of [themeSel, legendChk, armsChk, beastsChk]) {
     sel.addEventListener("change", draw as unknown as EventListener);
   }
+  bandSel.addEventListener("change", () => {
+    if (refuses(bandSel)) return;
+    draw();
+  });
   styleSel.addEventListener("change", () => draw({ turn: true }));
   typeSel.addEventListener("change", () => {
+    if (refuses(typeSel)) return;
     touched.land = false;
     touched.coast = false;
     draw();

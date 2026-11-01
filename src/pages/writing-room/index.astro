@@ -9,6 +9,7 @@ import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import Slip from "../../layouts/Slip.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 
 // The Writing Room (Issue #393): a visitor writes a founding sentence and the page founds a world from it in the browser; the chart is the shared worker's, the account in the slip is the founding's own.
 const room = "The Writing Room";
@@ -52,6 +53,7 @@ const tagline = "every sentence is a world, write one";
 <LegendRow label="The Press">
   <Fragment slot="head">The Press &middot; what the sheet can do next</Fragment>
   <button id="wr-plate" class="legend-btn" type="button"><span class="verb" id="wr-plate-verb">Lay on</span><span class="room">The Vegetation Plate</span></button>
+  <LegendButton id="wr-explorer" gold href="../explorer/" verb="Explore it in" room="The Explorer" />
 </LegendRow>
 
 <Glass />

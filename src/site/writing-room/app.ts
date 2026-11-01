@@ -10,8 +10,8 @@ import { $ } from "../shared/by-id.ts";
 import { errorText } from "../shared/error-text.ts";
 import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { accountOf, MAP_WORDS, refusalWords } from "./account.ts";
-import { readWritten, writtenHash } from "./address.ts";
-import { createFounder, lettered, opensOnPlate, recipeOverrides, type RoomReason } from "./founding.ts";
+import { readWritten, writtenHash } from "../shared/written-address.ts";
+import { createFounder, lettered, opensOnPlate, recipeOverrides, type RoomReason } from "../shared/founding.ts";
 import { renderAccount } from "./view.ts";
 
 type RoomState = {
@@ -68,6 +68,8 @@ async function draw(f: Founding, plate: boolean, onDrawn: () => void = () => {})
     $("folio-sub").textContent = res.subtitle;
     $("folio-coords").textContent = `Chart № ${f.seed} · ${MAP_WORDS[res.mapType]}, ${res.band}`;
     $("wr-plate-verb").textContent = plate ? "Lift" : "Lay on";
+    $<HTMLAnchorElement>("wr-explorer").href =
+      "../explorer/" + writtenHash(f.sentence, f.version) + (plate ? "&theme=vegetation" : "");
     $("status").textContent = "";
     room.layout();
     onDrawn();

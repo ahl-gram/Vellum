@@ -26,6 +26,7 @@ import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
+import { foundAddress, pageFounder, writtenParams } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
@@ -73,15 +74,21 @@ const furniture: RoomFurniture = {
 const sheet = bindProspectRoom(furniture);
 
 const addr = parseProspectAddress(location.hash);
+const written = await foundAddress(location.hash, pageFounder());
+if (written !== null)
+  history.replaceState(null, "", "#" + writtenParams(new URLSearchParams(location.hash.slice(1)), written).toString());
 // A bare visit lands on today's seed-of-the-day (UTC) and its capital, the same default world as every other surface.
-const seed = (addr.seed ?? seedForDate(new Date())) >>> 0;
+const seed = (written?.seed ?? addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
 // ONE object for the job and for the filed item: two copies of this literal is how the page and the card come to spell one plate two ways, which is what the one builder, `prospectItemFrom` in `src/site/shared/table-address.ts`, exists to prevent and what a divergent INPUT to it would defeat.
-const overrides: TableOverrides = {
-  ...(addr.type ? { mapType: addr.type } : {}),
-  ...(addr.band ? { band: addr.band } : {}),
-  ...overridesOfLand(addr),
-};
+const overrides: TableOverrides =
+  written !== null
+    ? written.overrides
+    : {
+        ...(addr.type ? { mapType: addr.type } : {}),
+        ...(addr.band ? { band: addr.band } : {}),
+        ...overridesOfLand(addr),
+      };
 
 let last: ReturnType<NonNullable<Window["__vellumProspectState"]>> = null;
 let lastUrl: string | null = null;

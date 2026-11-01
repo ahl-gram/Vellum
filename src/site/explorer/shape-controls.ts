@@ -15,6 +15,7 @@ import {
 import { fillTrack, fillTracks, refuses, seatLand } from "./land-seat.ts";
 import { showPlace } from "./place-picker.ts";
 import { chooseShape, shapeChoice } from "./shape-choice.ts";
+import { writtenNow } from "./written-hold.ts";
 
 const looseness = $<HTMLInputElement>("looseness");
 const islands = $<HTMLInputElement>("islands");
@@ -85,6 +86,6 @@ export function refreshLand(): void {
   islands.classList.toggle("untouched", choice.islands === undefined);
   for (const slider of SLIDERS) say(slider);
   showPlace(choice.outline);
-  seatLand(seatOf(typeSel.value, choice));
+  seatLand(seatOf(typeSel.value, choice, writtenNow()));
   fillTracks();
 }

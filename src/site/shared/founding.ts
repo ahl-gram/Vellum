@@ -2,7 +2,7 @@ import { foundWorld, type Founding } from "../../world/founding/found.ts";
 import type { RefusalReason } from "../../world/founding/normalize.ts";
 import type { GazetteerRow } from "../../world/founding/shapes.ts";
 import type { WorldRecipe } from "../../world/types.ts";
-import { installNames } from "./names.ts";
+import { installNames } from "./founding-names.ts";
 
 export type RoomReason = Exclude<RefusalReason, "places-not-loaded"> | "names-unread";
 export type RoomRefusal = { readonly ok: false; readonly reason: RoomReason };

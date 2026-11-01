@@ -3,7 +3,7 @@ import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "./wo
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
 import { startArrival } from "./draw-ceremony.ts";
-import { readHash, writeHash } from "./hash-sync.ts";
+import { readAddress, writeHash } from "./hash-sync.ts";
 import { emitTable, parseTable, type TableItem } from "../shared/table-address.ts";
 import {
   deviceStorage as store,
@@ -429,7 +429,7 @@ if (fwd) {
   });
 
   seedInput.value = String(seedForDate(new Date()));
-  const hashed = readHash(hashControls);
+  const hashed = await readAddress(hashControls);
   if (hashed.land) touched.land = true;
   if (hashed.coast) touched.coast = true;
   pendingCamera = hashed.camera;

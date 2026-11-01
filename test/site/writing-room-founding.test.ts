@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
 import { setFoundingGazetteer } from "../../src/world/founding/shapes.ts";
-import { createFounder, opensOnPlate, recipeOverrides } from "../../src/site/writing-room/founding.ts";
+import { createFounder, opensOnPlate, recipeOverrides } from "../../src/site/shared/founding.ts";
 import { committedGazetteer, useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
 const FLAGSHIP = "a cold archipelago of black pines, iron harbors, and a drowned kingdom";

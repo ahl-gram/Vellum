@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { foundWorld } from "../../src/world/founding/found.ts";
-import { readWritten, writtenHash } from "../../src/site/writing-room/address.ts";
+import { readWritten, writtenHash } from "../../src/site/shared/written-address.ts";
 import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
 const KEPT = JSON.parse(
