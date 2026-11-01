@@ -2,7 +2,15 @@
 import { scopedHealth } from "../support/room.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { wr1Link, wr2Shape, wr3Refusal, wr4Plate, wr5Lettering } from "./writing-room/checks.ts";
+import {
+  wr1Link,
+  wr2Shape,
+  wr3Refusal,
+  wr4Plate,
+  wr5Lettering,
+  wr6Written,
+  wr7FailedDraw,
+} from "./writing-room/checks.ts";
 import { writingKit } from "./writing-room/kit.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -20,6 +28,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("WR3", () => wr3Refusal(k));
   await step("WR4", () => wr4Plate(k));
   await step("WR5", () => wr5Lettering(k));
+  await step("WR6", () => wr6Written(k));
+  await step("WR7", () => wr7FailedDraw(k));
   await ctx.send("Emulation.clearDeviceMetricsOverride");
   gate.check("WR0 the Writing Room logged no console error and fetched nothing that answered 4xx");
 }

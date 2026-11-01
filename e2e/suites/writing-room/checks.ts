@@ -89,3 +89,42 @@ export async function wr5Lettering(k: WritingKit): Promise<void> {
     `no word: text ${none.text} quiet ${none.quiet}; all cancel: text ${cancelled.text} quiet ${cancelled.quiet}; flagship quiet ${flagship.quiet}`,
   );
 }
+
+export async function wr6Written(k: WritingKit): Promise<void> {
+  const f = foundWorld(CLIMATE);
+  if (!f.ok) throw new Error("the climate sentence did not found in Node");
+  const link = writtenHash(CLIMATE, 1);
+  const before = await k.goto(writtenHash(FLAGSHIP, 1));
+  await k.setLine(CLIMATE);
+  await k.pressAt("#wr-form button[type=submit]");
+  const pressed = await k.settledAfter(before.n, "the founding of a written sentence");
+  const fresh = await k.goto(pressed.hash);
+  k.check(
+    "WR6 a sentence founded in the room writes its own link, and that link opened fresh founds the same world",
+    pressed.hash === link && pressed.svgSeed === String(f.seed) && fresh.svgSeed === String(f.seed),
+    `pressed ${show(pressed)} then fresh ${show(fresh)} want ${link}`,
+  );
+}
+
+export async function wr7FailedDraw(k: WritingKit): Promise<void> {
+  const link = writtenHash(FLAGSHIP, 1);
+  const before = await k.goto(link);
+  await k.blockUrls([`*/outlines/${TEXAS_ID}.txt*`]);
+  try {
+    await k.setLine(TEXAS);
+    await k.pressAt("#wr-form button[type=submit]");
+    await k.statusStarts("The ink would not take");
+  } finally {
+    await k.blockUrls([]);
+  }
+  const after = await k.read();
+  k.check(
+    "WR7 a draw that fails leaves the last world, its account and its link standing, and says so",
+    after.account === before.account &&
+      after.account !== "" &&
+      after.svgSeed === before.svgSeed &&
+      after.hash === link &&
+      after.status.startsWith("The ink would not take"),
+    `${show(after)} status "${after.status}" account kept ${after.account === before.account}`,
+  );
+}

@@ -1,3 +1,4 @@
+import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 export type Read = {
@@ -15,6 +16,7 @@ export type Read = {
   readonly quiet: boolean;
   readonly verb: string;
   readonly status: string;
+  readonly account: string;
   readonly hash: string;
 };
 
@@ -35,12 +37,12 @@ export const READ: Payload<Read> = `(() => {
     quiet: !!document.querySelector(".wr-quiet"),
     verb: document.getElementById("wr-plate-verb").textContent,
     status: document.getElementById("status").textContent,
+    account: document.getElementById("wr-account").textContent,
     hash: location.hash,
   };
 })()`;
 
 const POLLS = 200;
-const POLL_MS = 50;
 
 async function press({ evaluate, send }: Pick<SuiteContext, "evaluate" | "send">, selector: string): Promise<void> {
   const at = await evaluate<{ x: number; y: number; hit: boolean }>(
@@ -71,15 +73,10 @@ export function writingKit(ctx: SuiteContext) {
   const { evaluate, send, sleep, PORT } = ctx;
   const read = () => evaluate(READ);
 
-  const waitFor = async (label: string, until: () => Promise<boolean>): Promise<void> => {
-    for (let i = 0; i < POLLS; i++) {
-      if (await until().catch(() => false)) return;
-      await sleep(POLL_MS, "pace: a poll of the room's own settled count");
-    }
-    throw new Error(`the Writing Room never reached ${label}`);
+  const settle = makeSettle({ evaluate, sleep, tolerant: true });
+  const settledAtLeast = async (n: number, label: string): Promise<void> => {
+    await settle(HOOK, (d) => d >= n, `the Writing Room's settled count to reach ${n}: ${label}`, POLLS);
   };
-  const settledAtLeast = async (n: number, label: string): Promise<void> =>
-    waitFor(label, async () => ((await evaluate(HOOK)) ?? 0) >= n);
   const settledAfter = async (n0: number, label: string): Promise<Read> => {
     await settledAtLeast(n0 + 1, label);
     return read();
@@ -89,7 +86,7 @@ export function writingKit(ctx: SuiteContext) {
   const goto = async (hash: string): Promise<Read> => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/writing-room/${hash}` });
-    await waitFor("a complete document", async () => (await evaluate<string>(`document.readyState`)) === "complete");
+    await settle(`document.readyState`, (d) => d === "complete", `a complete document at ${hash}`, POLLS);
     await settledAtLeast(1, `its first founding at ${hash}`);
     return read();
   };
@@ -98,13 +95,20 @@ export function writingKit(ctx: SuiteContext) {
   const reload = async (): Promise<Read> => {
     await evaluate(`window.__wrBeforeReload = true`);
     await send("Page.reload");
-    await waitFor(
-      "a reloaded document",
-      async () => (await evaluate<boolean>(`window.__wrBeforeReload === undefined`)) === true,
-    );
+    await settle(`window.__wrBeforeReload === undefined`, (d) => d === true, "a reloaded document", POLLS);
     await settledAtLeast(1, "its first founding after the reload");
     return read();
   };
+
+  const statusStarts = async (prefix: string): Promise<void> => {
+    await settle<string>(
+      `document.getElementById("status").textContent`,
+      (d) => d.startsWith(prefix),
+      `the status line to start "${prefix}"`,
+      POLLS,
+    );
+  };
+  const blockUrls = (urls: string[]) => send("Network.setBlockedURLs", { urls });
 
   const pressAt = (selector: string) => press(ctx, selector);
 
@@ -113,5 +117,5 @@ export function writingKit(ctx: SuiteContext) {
       `(() => { document.getElementById("wr-line").value = ${JSON.stringify(value)}; return true; })()`,
     );
 
-  return { ...ctx, read, goto, reload, settledAfter, pressAt, setLine };
+  return { ...ctx, read, goto, reload, settledAfter, pressAt, setLine, statusStarts, blockUrls };
 }

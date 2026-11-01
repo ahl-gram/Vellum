@@ -43,6 +43,7 @@ let held: Held | null = null;
 let refusal: RoomReason | null = null;
 let settled = 0;
 let turn = 0;
+let asked = 0;
 
 const lengthOf = (input: string): number => Array.from(displayText(input)).length;
 
@@ -51,7 +52,7 @@ function placeName(id: OutlineId): string {
   return nameOf((founder.installed() ?? []) as ReadonlyArray<NameRow>, id) ?? id;
 }
 
-async function draw(f: Founding, plate: boolean): Promise<boolean> {
+async function draw(f: Founding, plate: boolean, onDrawn: () => void = () => {}): Promise<boolean> {
   const mine = ++turn;
   $("status").textContent = "Founding the world…";
   try {
@@ -69,6 +70,7 @@ async function draw(f: Founding, plate: boolean): Promise<boolean> {
     $("wr-plate-verb").textContent = plate ? "Lift" : "Lay on";
     $("status").textContent = "";
     room.layout();
+    onDrawn();
     held = { founding: f, plate };
     settled++;
     return true;
@@ -79,7 +81,9 @@ async function draw(f: Founding, plate: boolean): Promise<boolean> {
 }
 
 async function attempt(input: string, version: number, write: boolean): Promise<void> {
+  const ticket = ++asked;
   const result = await founder.found(input, version);
+  if (ticket !== asked) return;
   if (!result.ok) {
     refusal = result.reason;
     $("wr-refusal").textContent = refusalWords(result.reason, lengthOf(input));
@@ -87,10 +91,11 @@ async function attempt(input: string, version: number, write: boolean): Promise<
     settled++;
     return;
   }
-  refusal = null;
-  $("wr-refusal").textContent = "";
-  renderAccount($("wr-account"), accountOf(result, placeName));
-  const drawn = await draw(result, opensOnPlate(result));
+  const drawn = await draw(result, opensOnPlate(result), () => {
+    refusal = null;
+    $("wr-refusal").textContent = "";
+    renderAccount($("wr-account"), accountOf(result, placeName));
+  });
   if (drawn && write) history.replaceState(null, "", writtenHash(result.sentence, result.version));
 }
 
