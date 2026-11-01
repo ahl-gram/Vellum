@@ -23,8 +23,7 @@ import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
-import { foundAddress, heldFor, pageFounder, type WrittenWorld } from "../shared/written-world.ts";
-import { writtenParams } from "../shared/written-address.ts";
+import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } from "../shared/written-world.ts";
 
 // The ages hook is typed as the engine's own ReturnType, so tsc breaks this file if the hook ever grows, loses a member, or silently narrows again.
 declare global {

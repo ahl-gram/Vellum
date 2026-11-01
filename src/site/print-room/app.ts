@@ -39,8 +39,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
 import { downloadBlob } from "../shared/object-url.ts";
-import { foundAddress, heldFor, pageFounder, type WrittenWorld } from "../shared/written-world.ts";
-import { writtenParams } from "../shared/written-address.ts";
+import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
