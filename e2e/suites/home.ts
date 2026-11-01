@@ -101,7 +101,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   // Reduced motion crosses the doors both ways (Issue #470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await step("H13d", () => h13dPrmDoors(ctx));
-  await h13ePrmNoFlash(ctx);
+  await step("H13e", () => h13ePrmNoFlash(ctx));
   await step("H13f, H13h", async () => {
     const { nojs, shelf, clock } = await h13fNoScriptRead(ctx);
     h13fNoScript(ctx, nojs, clock);
