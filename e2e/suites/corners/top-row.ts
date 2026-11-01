@@ -1,4 +1,4 @@
-// The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width wherever it would run under the nav, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
+// The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width wherever it would run under the nav, a page that widens again lays out from its sheets, the Specimen Book's corner and the Explorer's are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
@@ -112,12 +112,12 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
       held.push(fmt(page, w, r));
     }
   }
-  const off = await withScriptsOff(ctx.send, () => open(ctx, "/ribbon/", 1024));
+  const off = await withScriptsOff(ctx.send, () => open(ctx, "/ribbon/", 1280));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way and the nav keeps one line: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; the Specimen Book's corner, the Print Room's at 1280 and the Explorer's below it are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    "CO5 the corner gives way and the nav keeps one line: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; the Specimen Book's corner, the Print Room's at 1280 and the Explorer's below it are never written; and with scripts off the Ribbon's corner stands at its cap, unwritten and clear, at 1280, where with the eighth nav item it no longer clears at 1024 (Issue #762; Issue #393 ruling 13)",
     reduced.ok && moving.ok && lined && lays && untouched && scriptsOff,
-    [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(
+    [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1280, off)}`].join(
       " | ",
     ),
   );

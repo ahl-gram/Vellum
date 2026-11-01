@@ -70,7 +70,7 @@ export async function fl8ChartOnPaper(ctx: SuiteContext): Promise<void> {
     rows.push(`${room} screen ${JSON.stringify(screen)} paper ${JSON.stringify(paper)}`);
   }
   ctx.check(
-    "FL8 on paper every chart room's chart lies within the paper's width, each drawn on screen first and read at Letter's 816 in print emulation: the Explorer, the Print Room, the Prospect, the Reading Room, the Ribbon, Today and the Specimen Book (Issue #1013)",
+    "FL8 on paper every chart room's chart lies within the paper's width, each drawn on screen first and read at Letter's 816 in print emulation: the Explorer, the Print Room, the Prospect, the Reading Room, the Ribbon, Today, the Specimen Book and the Writing Room (Issue #1013)",
     faults.length === 0,
     `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
   );

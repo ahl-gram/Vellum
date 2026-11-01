@@ -163,7 +163,7 @@ async function ns1Sweep(ctx: SuiteContext) {
       discounted.push(
         ...reads.filter((g) => g.seen !== null).map((g) => `${at} ${g.piece} "${g.t}" ${g.ratio.toFixed(2)} ${g.seen}`),
       );
-      if (page === "/ribbon/") ribbonNav ||= reads.some((g) => g.piece === "cluster" && g.t.startsWith("Glossary"));
+      if (page === "/ribbon/") ribbonNav ||= reads.some((g) => g.piece === "cluster" && g.t.startsWith("Q & A"));
       rows.push(`${at} ${reads.length} lines, worst ${Math.min(...reads.map((g) => g.ratio)).toFixed(2)}`);
     }
   }
@@ -174,9 +174,9 @@ export async function ns1Soft(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const { faults, rows, ribbonNav, discounted } = await ns1Sweep(ctx);
   ctx.check(
-    "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and the Specimen's disabled press's reads 4.5:1 or better, discounted by however much another piece's pool painted over it dims it, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
+    "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and the Specimen's disabled press's reads 4.5:1 or better, discounted by however much another piece's pool painted over it dims it, in every chart room and the Print Room's named world, the Ribbon's \"Q & A\", the nav line over its sheet nearest its corner, among them (Alex, 2026-10-06, Issue #762: soft)",
     faults.length === 0 && ribbonNav,
-    `${rows.join(" | ")}; the Ribbon's Glossary read ${ribbonNav}${faults.length ? `; ${faults.length} faults: ${faults.join("; ")}` : ""}; discounted, every line a pool above its piece reaches: ${discounted.join("; ") || "none"}`,
+    `${rows.join(" | ")}; the Ribbon's Q & A read ${ribbonNav}${faults.length ? `; ${faults.length} faults: ${faults.join("; ")}` : ""}; discounted, every line a pool above its piece reaches: ${discounted.join("; ") || "none"}`,
   );
 }
 
