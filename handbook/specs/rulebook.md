@@ -419,9 +419,9 @@ checks against.
   `handbook/specs/site-architecture.md` writes both kinds out. **The nav is a flat top line over a
   tree**, both modeled once as typed data: `NAV_ITEMS` stays flat and is all the nav renders, and a
   room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads and `test/site/atelier-chart.test.ts` holds the chart of the atelier to. Revisit the top
-  line only on a named trigger: a ninth surface scheduled for it, or the nav no longer fitting
-  beside the room's corner on its one line at 1024, at the browser's default text size (Alex,
-  2026-10-07, Issue #764). The eighth, the Writing Room, joined the flat line after the Explorer (Alex,
+  line only on a named trigger: the nav no longer fitting beside the room's corner on its one line at
+  1024, at the browser's default text size (Alex, 2026-10-07, Issue #764), or a ninth surface scheduled
+  for it, which replaced Issue #764's eighth (Alex, 2026-11-01, Issue #393 comment 6558742855 ruling 3). The eighth, the Writing Room, joined the flat line after the Explorer (Alex,
   2026-10-31, Issue #393 comment 6550522707 ruling 2): the nav keeps its one line at 1024, the Print Room's
   and the Ribbon's corners giving way to it by script, and with scripts off those two corners run under
   its last item at 1024, a cost accepted and recorded in `handbook/errata/site.md` (Alex, 2026-11-01,
