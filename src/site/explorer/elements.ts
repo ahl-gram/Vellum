@@ -25,6 +25,7 @@ export const cuttings = $("cuttings");
 export const tableRoad = $<HTMLButtonElement>("table-road");
 export const folioTitle = $("folio-title");
 export const folioSub = $("folio-sub");
+export const imprintNo = $("imprint-no");
 export const stageEl = document.querySelector<HTMLElement>(".stage") as HTMLElement;
 export const versoEl = $("verso");
 export const versoBtn = $<HTMLButtonElement>("verso-turn");

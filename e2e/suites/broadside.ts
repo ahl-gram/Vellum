@@ -1,10 +1,10 @@
-// Broadside e2e (BR1-BR21, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
+// Broadside e2e (BR1-BR23, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { br9Authored, br10Terms, br11Allowlist } from "./broadside/room.ts";
-import { br12Dress, br21Fields } from "./broadside/dress.ts";
+import { br12Dress, br21Fields, br22Bill, br23Imprint } from "./broadside/dress.ts";
 import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
@@ -85,6 +85,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("BR16 to BR19", () => br16To19(k));
   await step("BR17", () => br17Holds(k));
   await step("BR20", () => br20Twins(k));
+  await step("BR22", () => br22Bill(k));
+  await step("BR23", () => br23Imprint(k));
   br8Clean(ctx, errBase, httpBase);
 }
 
@@ -93,19 +95,20 @@ async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<
   const br1 = await evaluate<{ wrong: string[]; heads: (string | null)[] }>(`(()=>{
       const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
         return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
-      const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
+      const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-strand",coast:"grp-strand",
         style:"grp-hand",theme:"grp-hand",legend:"grp-hand",arms:"grp-hand",ages:"grp-hand",
         "verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
       const wrong=Object.entries(want).filter(([id,g])=>groupOf(id)!==g).map(([id])=>id+":"+groupOf(id));
-      const heads=["grp-land","grp-hand","grp-press"].map((id)=>(document.getElementById(id)||{}).textContent);
+      const heads=["grp-land","grp-strand","grp-hand","grp-press"].map((id)=>(document.getElementById(id)||{}).textContent);
       return{wrong,heads};
     })()`);
   check(
-    "BR1 every control sits in its wiring-truth group: the seed row in the folio, Land and Hand on the slip, the Press as the legend row",
+    "BR1 every control sits in its wiring-truth group: the seed row in the folio, the Land, the Strand and the Hand on the slip, the Press as the legend row",
     br1.wrong.length === 0 &&
       br1.heads[0] === "The Land" &&
-      br1.heads[1] === "The Hand" &&
-      /^The Press\b/.test(br1.heads[2] || ""),
+      br1.heads[1] === "The Strand" &&
+      br1.heads[2] === "The Hand" &&
+      /^The Press\b/.test(br1.heads[3] || ""),
     JSON.stringify(br1),
   );
 
@@ -156,9 +159,11 @@ async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Pro
     j: { shown: boolean; top: number };
     o: { shown: boolean; top: number };
     cls: boolean;
+    tops: number[];
   }>(`(()=>{
       const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
-      return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn")};
+      const tops=[...document.querySelectorAll(".legend .legend-row > .legend-btn")].filter((b)=>b.getClientRects().length>0).map((b)=>Math.round(b.getBoundingClientRect().top));
+      return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn"),tops};
     })()`);
   await evaluate(
     `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
@@ -175,9 +180,11 @@ async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Pro
   );
   const br2 = { before, during, after, sameRow: before.j.top === before.o.top };
   check(
-    "BR2 the journal button is the print link's steady gold peer: same row, standing through tick and untick",
+    "BR2 the Press keeps one row on seed 42 at the harness's window, every press on it, and the journal button is the print link's steady gold peer: same row, standing through tick and untick",
     br2.before.cls &&
       br2.sameRow &&
+      br2.before.tops.length === 3 &&
+      new Set(br2.before.tops).size === 1 &&
       br2.before.j.shown &&
       br2.during.shown &&
       br2.after.shown &&
@@ -309,7 +316,7 @@ export async function br6Tap(k: BroadsideKit): Promise<void> {
 async function br7Glossary({ evaluate, check, gotoPlain, PORT }: BroadsideKit): Promise<void> {
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
   const br7 = await evaluate<{ missing: string[]; head: string | null; indexed: boolean }>(`(()=>{
-      const ids=["seeds-choice","shape","islands","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
+      const ids=["broadside","seeds-choice","shape","islands","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
       const section=document.getElementById("drafting-table");
       const indexed=!!document.querySelector('#index .index a.sec[href="#drafting-table"]');
       return{missing:ids.filter(([,ok])=>!ok).map(([id])=>id),

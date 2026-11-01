@@ -88,7 +88,10 @@ async function markRing(ctx: SuiteContext): Promise<{ mark: Ring; control: Ring 
     code: "ShiftLeft",
     windowsVirtualKeyCode: 16,
   });
-  return { mark: await ringOf(ctx, ".legend .legend-row a.fn"), control: await ringOf(ctx, ".slip a.fn") };
+  return {
+    mark: await ringOf(ctx, ".legend .legend-row a.fn"),
+    control: await ringOf(ctx, '.slip a.fn[data-note="note-seeds-choice"]'),
+  };
 }
 
 type Zoomed = {
@@ -229,13 +232,6 @@ function roomFaults(r: RoomRead, ask: Ask, floored: boolean): string[] {
         say(
           `the ${p} reads ${worstOf(r.bare, p).toFixed(2)} with the panels taken away, so the read cannot see them fail`,
         );
-  for (const k of ask.lineTan) {
-    const w = worstOf(r.lineTan[k] ?? [], "chart folio");
-    if (!(w < FLOOR_PLAIN))
-      say(
-        `the chart folio reads ${w.toFixed(2)} with its ${k} line in line-tan, so the read cannot see the parchment fail`,
-      );
-  }
   return faults;
 }
 
@@ -251,19 +247,25 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   const rows: { r: RoomRead; ask: Ask }[] = [];
   for (const page of CHART_ROOM_FLOOR) {
     const explorer = page === "/explorer/";
+    // 2026-11-01: zoomed by two presses at 1024x768 the survey line in line-tan reads 3.26 in the Reading Room, 3.94 in the Prospect and the Ribbon, 3.98 in the Portfolio, 4.01 in the Writing Room and 4.03 in the Specimen Book, and the coordinates 3.92 in the Ribbon, 3.94 in the Specimen Book and 4.05 in the Writing Room, on the Mac harness browser; the Explorer's folio reads 5.48 over the deep since its sheet grew a twelfth wider; on the CI runner (run 41353331462, lane B) the survey line reads 3.26 (1.24 under the 4.5 floor) in the Reading Room, 3.94 (0.56) in the Prospect and the Ribbon, 3.98 (0.52) in the Portfolio, 4.02 (0.48) in the Writing Room and 4.03 (0.47) in the Specimen Book, the coordinates 3.92 (0.58) in the Ribbon, 3.98 (0.52) in the Specimen Book and 4.05 (0.45) in the Writing Room, and the Explorer's folio 5.50 in both lines (Issue #1159).
     const ask: Ask = {
       pieces: ["cluster", "chart folio"],
       mark: explorer,
       bare: explorer || page === "/reading-room/",
-      lineTan: explorer ? ["sub", "coords"] : page === "/reading-room/" ? ["sub"] : [],
+      lineTan: page === "/reading-room/" || page === "/print-room/" ? ["sub"] : ["sub", "coords"],
       held: true,
       onScreen: false,
     };
     rows.push({ r: await readRoom(ctx, page, 1024, 768, ask), ask });
   }
   const faults = rows.flatMap(({ r, ask }) => roomFaults(r, ask, false));
+  for (const k of ["sub", "coords"] as const)
+    if (!rows.some(({ r, ask }) => ask.lineTan.includes(k) && worstOf(r.lineTan[k] ?? [], "chart folio") < FLOOR_PLAIN))
+      faults.push(
+        `no chart room's folio reads under 4.5:1 with its ${k} line in line-tan, so the read cannot see the parchment fail`,
+      );
   ctx.check(
-    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 on the Explorer with its survey line in line-tan and again with its coordinates in line-tan, and in the Reading Room with its survey line in line-tan, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; every room's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996 and Issue #1034)",
+    "EZ1 zoomed by two presses of the Glass at 1024x768, in every chart room the head cluster and the chart folio stand on the legend row's crisp panel (chart ink 0.85 to 0.72, no blur), and every line of the cluster and the chart folio, the Explorer's section mark beside the Press among them, reads at 4.5:1 or better against the ground under it; in the same run the cluster and the chart folio read under 4.5:1 with the panels taken away on the Explorer and in the Reading Room, and the chart folio reads under 4.5:1 with its survey line in line-tan in some chart room, and again with its coordinates in line-tan in some room, so the read can see each fail; and on the Explorer the section mark's keyboard focus ring is parchment-bright while a note mark on the Broadside's paper keeps the house's ink-dark, read in the same run, and that ring encloses the mark's glyph and stands a pixel clear of the neighbouring chip's border (Alex, 2026-10-22, Issue #988; every room's cluster and chart folio are read held home, as a resting mouse, keyboard focus or a link that opens zoomed holds them, whichever side of its fill depth two presses land, Issue #996 and Issue #1034)",
     faults.length === 0,
     rows.map(({ r, ask }) => detail(r, ask)).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),

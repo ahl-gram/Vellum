@@ -1,13 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  GROUP_OF,
   HELD_NOTES,
+  LAND_ROWS,
   islandsWord,
   looseWord,
   nextChoice,
   raggedWord,
   seatOf,
   slidersOf,
+  type Group,
   type LandRow,
   type RowState,
 } from "../../src/site/explorer/land-rows.ts";
@@ -31,35 +34,35 @@ test("the five ruled B states seat as the stills drew them (Issue #854)", () => 
     plain.rows,
     rows(["type", "band", "place", "land", "coast"], ["looseness"], ["islands", "sizes", "ragged"]),
   );
-  assert.equal(plain.note, HELD_NOTES.plain);
+  assert.deepEqual(plain.notes, { land: "", strand: HELD_NOTES.plain });
 
   const exact = seatOf("island", { outline: TX });
   assert.deepEqual(
     exact.rows,
     rows(["type", "band", "place", "looseness"], ["land", "coast"], ["islands", "sizes", "ragged"]),
   );
-  assert.equal(exact.note, HELD_NOTES.exact);
+  assert.deepEqual(exact.notes, { land: "", strand: HELD_NOTES.exact });
 
   const loose = seatOf("island", { outline: TX, looseness: 0.75 });
   assert.deepEqual(
     loose.rows,
     rows(["type", "band", "place", "looseness", "coast"], ["land"], ["islands", "sizes", "ragged"]),
   );
-  assert.equal(loose.note, HELD_NOTES.loose);
+  assert.deepEqual(loose.notes, { land: "", strand: HELD_NOTES.loose });
 
   const counted = seatOf("archipelago", { islands: 20 });
   assert.deepEqual(
     counted.rows,
     rows(["type", "band", "place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]),
   );
-  assert.equal(counted.note, HELD_NOTES.counted);
+  assert.deepEqual(counted.notes, { land: "", strand: HELD_NOTES.counted });
 
   const onArch = seatOf("archipelago", { outline: TX, islands: 20 });
   assert.deepEqual(
     onArch.rows,
     rows(["type", "band", "place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]),
   );
-  assert.equal(onArch.note, HELD_NOTES.archExact);
+  assert.deepEqual(onArch.notes, { land: HELD_NOTES.count, strand: HELD_NOTES.exact });
 });
 
 test("the states no still drew follow from the same table (Issue #854)", () => {
@@ -68,21 +71,22 @@ test("the states no still drew follow from the same table (Issue #854)", () => {
     archPlain.rows,
     rows(["type", "band", "place", "islands", "land", "coast"], ["looseness"], ["sizes", "ragged"]),
   );
-  assert.equal(archPlain.note, HELD_NOTES.plain);
+  assert.deepEqual(archPlain.notes, { land: "", strand: HELD_NOTES.plain });
 
   const archLoose = seatOf("archipelago", { outline: TX, looseness: 0.5, islands: 20 });
   assert.deepEqual(
     archLoose.rows,
     rows(["type", "band", "place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]),
   );
-  assert.equal(archLoose.note, HELD_NOTES.archLoose);
+  assert.deepEqual(archLoose.notes, { land: HELD_NOTES.count, strand: HELD_NOTES.loose });
 
   assert.deepEqual(seatOf("island", { islands: 20 }), seatOf("island", {}));
   assert.deepEqual(seatOf("", { outline: TX }), seatOf("island", { outline: TX }));
   assert.deepEqual(seatOf("continent", { outline: TX }), seatOf("island", { outline: TX }));
 });
 
-test("every state holds a row, so the held box always shows (Issue #854)", () => {
+test("each group's box shows exactly when the group holds a row, and its note with it, but a written world's note stands once, under the Strand (Issue #1159)", () => {
+  const w = { sentence: FLAGSHIP, version: 1 };
   const states = [
     seatOf("", {}),
     seatOf("island", { outline: TX }),
@@ -94,8 +98,21 @@ test("every state holds a row, so the held box always shows (Issue #854)", () =>
     seatOf("island", { islands: 20 }),
     seatOf("", { outline: TX }),
     seatOf("continent", { outline: TX }),
+    seatOf("archipelago", {}, w),
+    seatOf("archipelago", { islands: 20 }, w),
   ];
-  for (const s of states) assert.ok(Object.values(s.rows).includes("held"), JSON.stringify(s.rows));
+  for (const s of states) {
+    const holds = (g: Group): boolean => LAND_ROWS.some((r) => GROUP_OF[r] === g && s.rows[r] === "held");
+    const detail = JSON.stringify(s);
+    if (s.road === undefined) {
+      assert.equal(s.notes.land !== "", holds("land"), detail);
+      assert.equal(s.notes.strand !== "", holds("strand"), detail);
+    } else {
+      assert.ok(holds("land") && holds("strand"), detail);
+      assert.equal(s.notes.land, "", detail);
+      assert.notEqual(s.notes.strand, "", detail);
+    }
+  }
 });
 
 test("the readouts say the ruled words at their switch points (Issue #854)", () => {
@@ -148,7 +165,7 @@ test("a written world holds every row it shows, the type and the climate among t
     plain.rows,
     rows([], ["type", "band", "place", "looseness", "islands", "land", "coast"], ["sizes", "ragged"]),
   );
-  assert.equal(plain.note, HELD_NOTES.written);
+  assert.deepEqual(plain.notes, { land: "", strand: HELD_NOTES.written });
   assert.equal(plain.road, road);
   const counted = seatOf("archipelago", { islands: 100 }, w);
   assert.deepEqual(

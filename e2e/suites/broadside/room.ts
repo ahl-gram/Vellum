@@ -3,6 +3,7 @@ import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
+import { axName } from "../prospect/kit.ts";
 import { parseTableValue } from "../../../src/site/shared/table-address.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
@@ -40,41 +41,37 @@ const GROUPS: Payload<(string | null)[]> =
 
 type Slip = {
   id: string | null;
+  name: string | null;
   panels: (string | null)[] | null;
   land: (string | null)[] | null;
+  strand: (string | null)[] | null;
   hand: (string | null)[] | null;
   seals: unknown[];
   marks: unknown[];
   notes: unknown[];
+  imprint: string | null;
 };
-const SLIP: Payload<Slip> = `(() => { const text = ${TEXT}, slip = document.querySelector("aside.slip#broadside");
+const SLIP: Payload<Omit<Slip, "name">> =
+  `(() => { const text = ${TEXT}, slip = document.querySelector("aside.slip#broadside");
   const panels = slip ? [...slip.querySelectorAll(".slip-body > .broadside > .panel[role=group]")] : [];
   const ids = (p) => p ? [...p.querySelectorAll("input, select, button")].map((e) => e.id) : null;
   return { id: slip && slip.id, panels: panels.map((p) => p.getAttribute("aria-labelledby")),
-    land: ids(panels[0]), hand: ids(panels[1]),
+    land: ids(panels[0]), strand: ids(panels[1]), hand: ids(panels[2]),
     seals: slip ? [...slip.querySelectorAll(".seals > label")].map((l) => { const i = l.querySelector("input");
       return [l.className, l.childNodes[0].textContent.trim(), i ? i.id : null, i ? i.getAttribute("type") : null]; }) : [],
     marks: [...document.querySelectorAll("a.fn")].map((a) => [a.getAttribute("href"), a.getAttribute("data-note"), a.getAttribute("title")]),
     notes: [...document.querySelectorAll(".fn-note")].map((n) => { const a = n.querySelector("a");
-      return [n.id, text(n.querySelector(".fn-head")), a ? a.getAttribute("href") : null]; }) };
+      return [n.id, text(n.querySelector(".fn-head")), a ? a.getAttribute("href") : null]; }),
+    imprint: text(slip && slip.querySelector(".imprint")) };
 })()`;
 
 const slipFaults = (s: Slip): string[] =>
   faults([
     s.id === "broadside" || "the slip is #broadside",
-    same(s.panels, ["grp-land", "grp-hand"]) || "The Land and The Hand ride the slip",
-    same(s.land, [
-      "type",
-      "band",
-      "place",
-      "looseness",
-      "islands",
-      "isle-equal",
-      "isle-varied",
-      "land",
-      "coast",
-      "ragged",
-    ]) || "The Land's controls in order",
+    s.name === "The Broadside" || "the slip named by its title alone, the title's mark outside the heading",
+    same(s.panels, ["grp-land", "grp-strand", "grp-hand"]) || "The Land, The Strand and The Hand ride the slip",
+    same(s.land, ["type", "band", "place", "islands", "isle-equal", "isle-varied"]) || "The Land's controls in order",
+    same(s.strand, ["land", "coast", "ragged", "looseness"]) || "The Strand's controls in order",
     same(s.hand, ["style", "theme", "legend", "arms", "beasts", "ages"]) || "The Hand's controls in order",
     same(s.seals, [
       ["check seal", "alike", "isle-equal", "radio"],
@@ -85,21 +82,24 @@ const slipFaults = (s: Slip): string[] =>
       ["check seal", "survey", "ages", "checkbox"],
     ]) || "the six seals, each wrapping its input",
     same(s.marks, [
+      ["/glossary/#broadside", "note-broadside", null],
       ["/glossary/#seeds-choice", "note-seeds-choice", null],
       ["/glossary/#shape", "note-shape", null],
       ["/glossary/#islands", "note-islands", null],
       ["/glossary/#coast-warp", "note-coast-warp", null],
       ["/glossary/#survey", "note-survey", null],
       ["/glossary/#verso", "note-verso", null],
-    ]) || "the six marks, no title among them",
+    ]) || "the seven marks, the title's first",
     same(s.notes, [
+      ["note-broadside", "of the broadside", "/glossary/#broadside"],
       ["note-seeds-choice", "of the seed's choice", "/glossary/#seeds-choice"],
       ["note-shape", "of the shape", "/glossary/#shape"],
       ["note-islands", "of the islands", "/glossary/#islands"],
       ["note-coast-warp", "of the coast warp", "/glossary/#coast-warp"],
       ["note-survey", "of the survey", "/glossary/#survey"],
       ["note-verso", "of the verso", "/glossary/#verso"],
-    ]) || "the six notes, each head and its link",
+    ]) || "the seven notes, each head and its link",
+    s.imprint === "Printed at the atelier, for Chart №" || "the printer's line",
   ]);
 
 type Legend = {
@@ -199,21 +199,21 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
       return {
         corner: await evaluate(CORNER),
         groups: await evaluate(GROUPS),
-        slip: await evaluate(SLIP),
+        slip: { ...(await evaluate(SLIP)), name: await axName({ send }, "aside.slip#broadside") },
         legend: await evaluate(LEGEND),
         stage: await evaluate(STAGE),
       };
     });
     const wrong = faults([
       ...cornerFaults(read.corner),
-      same(read.groups, ["The seed", "grp-land", "held", "grp-hand", "grp-press", "Camera"]) ||
+      same(read.groups, ["The seed", "grp-land", "held", "grp-strand", "held", "grp-hand", "grp-press", "Camera"]) ||
         "the groups in reading order",
       ...slipFaults(read.slip),
       ...legendFaults(read.legend),
       ...stageFaults(read.stage),
     ]);
     check(
-      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip carrying The Land and The Hand with their controls and six seals, six footnote marks and their notes going to the glossary with no title, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
+      "BR9 the Explorer as authored: the folio's one h1 and tagline with the seed row its one control group (the seed, the dice, Draw the primary), the groups in reading order, the Broadside slip, named by its title alone, carrying The Land, The Strand and The Hand with their controls and six seals, seven footnote marks and their notes going to the glossary with no title, its printer's line, the Press as the legend row (Turn the sheet first, then the two gold roads at their authored hrefs, verbs and rooms) with no retired action link, the stage's leaf holding the empty gesture box and the hidden verso, the Glass outside it, the status pill a live status, and the chart folio's three empty lines",
       wrong.length === 0,
       JSON.stringify({ wrong, read }),
     );
@@ -228,16 +228,17 @@ const TERMS: Payload<{ h: string | null; terms: Terms }> =
   `(() => { const text = ${TEXT}, h = document.getElementById("drafting-table");
   let next = null; if (h) { let e = h.nextElementSibling; while (e && e.tagName !== "H2") e = e.nextElementSibling; next = e; }
   const after = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-  return { h: h ? text(h) : null, terms: ["coast-warp", "islands", "looseness", "seeds-choice", "shape", "sizes", "survey"].map((id) => { const t = document.getElementById(id);
+  return { h: h ? text(h) : null, terms: ["broadside", "coast-warp", "islands", "looseness", "seeds-choice", "shape", "sizes", "survey"].map((id) => { const t = document.getElementById(id);
     return t ? [text(t), t.tagName + "." + t.className, after(h, t) && (!next || after(t, next))] : [null, null, null]; }) };
 })()`;
 
 export async function br10Terms({ evaluate, check }: BroadsideKit): Promise<void> {
   const read = await evaluate(TERMS);
   check(
-    "BR10 the Glossary's drafting-table section names the Explorer's control terms: Coast warp, Islands, Looseness, Seed's choice, Shape, Sizes and Survey, each a term entry under that heading",
+    "BR10 the Glossary's drafting-table section names the Explorer's control terms: Broadside, Coast warp, Islands, Looseness, Seed's choice, Shape, Sizes and Survey, each a term entry under that heading",
     read.h === "At the drafting table" &&
       same(read.terms, [
+        ["Broadside", "P.term", true],
         ["Coast warp", "P.term", true],
         ["Islands", "P.term", true],
         ["Looseness", "P.term", true],

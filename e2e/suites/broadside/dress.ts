@@ -1,10 +1,11 @@
 // The Explorer at rest as dressed (Issue #779 part 2h): the stage's reserves, the sheet's depth, the fitted chart, the folio's written lines and the legend's seat.
-import { PAGE_RGBA, SHADE } from "../../support/pixel.ts";
+import { nearRgba, PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { clearMetrics } from "../print-room/kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
+import { sendKey } from "../../support/home.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -23,6 +24,7 @@ type Dress = {
   lines: Box[];
   legend: Box;
   moving: boolean;
+  imprint: string | null;
 };
 const DRESS: Payload<Dress> = `(() => { const rgba = ${PAGE_RGBA}, shade = ${SHADE}, id = (s) => document.getElementById(s), cs = (e) => getComputedStyle(e);
   const stage = document.querySelector(".stage"), st = cs(stage), legend = document.querySelector(".legend"), range = document.createRange();
@@ -41,7 +43,7 @@ const DRESS: Payload<Dress> = `(() => { const rgba = ${PAGE_RGBA}, shade = ${SHA
     want: [run.title + " · Chart № 42", y ? "surveyed " + y[0] : run.subtitle],
     lines: [...document.querySelectorAll(".corner.bl.folio > p")].filter((e) => e.textContent.trim() !== "").map((e) => { range.selectNodeContents(e); return { l: range.getBoundingClientRect().left, t: range.getBoundingClientRect().top, r: range.getBoundingClientRect().right, b: range.getBoundingClientRect().bottom }; }),
     legend: { l: legend.getBoundingClientRect().left, t: legend.getBoundingClientRect().top, r: legend.getBoundingClientRect().right, b: legend.getBoundingClientRect().bottom },
-    moving: !legend.getAnimations().every((a) => a.playState === "finished") };
+    moving: !legend.getAnimations().every((a) => a.playState === "finished"), imprint: (id("imprint-no") || {}).textContent ?? null };
 })()`;
 
 const meets = (a: Box, b: Box): boolean => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
@@ -63,6 +65,7 @@ const dressFaults = (d: Dress): string[] =>
       "the folio's title and survey lines written from the drawn world",
     (d.lines.length >= 2 && d.lines.every((l) => !meets(l, d.legend))) ||
       "the legend clear of the folio's written lines",
+    d.imprint === "42" || "the printer's line naming the drawn chart",
   ].filter((f): f is string => f !== true);
 
 export async function br12Dress(k: BroadsideKit): Promise<void> {
@@ -81,7 +84,7 @@ export async function br12Dress(k: BroadsideKit): Promise<void> {
     ...(reseatKept(seat) ? [] : ["a fresh refit leaves a planted seat or moves the legend"]),
   ];
   check(
-    "BR12 the Explorer at rest as dressed: the stage's padding equal to the reserves the fit wrote, the sheet at the stage depth (the token's), the gesture box zoomable with touch-action none, the transform target pivoting top left, the chart filling its fitted box, the folio's title and survey lines written from the drawn world, and the legend seated clear of the written folio where a fresh refit leaves it",
+    "BR12 the Explorer at rest as dressed: the stage's padding equal to the reserves the fit wrote, the sheet at the stage depth (the token's), the gesture box zoomable with touch-action none, the transform target pivoting top left, the chart filling its fitted box, the folio's title and survey lines written from the drawn world, and the legend seated clear of the written folio where a fresh refit leaves it, the printer's line naming the drawn chart's number",
     wrong.length === 0,
     JSON.stringify({ wrong, d, seat }),
   );
@@ -103,5 +106,86 @@ export async function br21Fields({ evaluate, check }: BroadsideKit): Promise<voi
     NAMED.every((id) => fields.some((f) => f.id === id && f.shown)) &&
       fields.every((f) => f.px >= FIELD_FLOOR_PX && (f.tag !== "SELECT" || f.h <= DROPDOWN_MAX_PX)),
     JSON.stringify(fields),
+  );
+}
+
+// The bill's arms on the classes every slip wears, each read compared with the Broadside's own in the same run; an arm's other declarations leaking alone pass, and the Portfolio's slip stands for every room's, since only a shared sheet reaches them (Issue #1159).
+const HEAD_ARMS: readonly (readonly [arm: string, selector: string, pseudo: string | null, property: string])[] = [
+  ["head text-align", ".slip-head", null, "text-align"],
+  ["head padding-top", ".slip-head", null, "padding-top"],
+  ["verb display", ".slip-head .card-verb", null, "display"],
+  ["verb ::before", ".slip-head .card-verb", "::before", "content"],
+  ["verb ::after", ".slip-head .card-verb", "::after", "content"],
+  ["title display", ".slip-head .card-title", null, "display"],
+  ["title white-space", ".slip-head .card-title", null, "white-space"],
+  ["where display", ".slip-head .card-where", null, "display"],
+  ["where border-bottom-width", ".slip-head .card-where", null, "border-bottom-width"],
+  ["where ::before", ".slip-head .card-where", "::before", "content"],
+  ["where ::after", ".slip-head .card-where", "::after", "content"],
+  ["fold top", ".slip-head .slip-fold", null, "top"],
+  ["fold right", ".slip-head .slip-fold", null, "right"],
+];
+
+type Bill = {
+  width: string;
+  style: string;
+  colour: number[];
+  before: string;
+  after: string;
+  tacksInert: boolean;
+  head: (string | null)[];
+};
+const BILL: Payload<Bill | null> = `(() => { const rgba = ${PAGE_RGBA}, s = document.querySelector("#BILLID"); if (!s) return null;
+  const c = getComputedStyle(s); return { width: c.borderTopWidth, style: c.borderTopStyle, colour: rgba(c.borderTopColor), before: getComputedStyle(s, "::before").content, after: getComputedStyle(s, "::after").content, tacksInert: ["::before", "::after"].every((p) => getComputedStyle(s, p).pointerEvents === "none"), head: ${JSON.stringify(HEAD_ARMS)}.map(([, sel, pseudo, prop]) => { const e = s.querySelector(sel); return e ? getComputedStyle(e, pseudo).getPropertyValue(prop) : null; }) }; })()`;
+const billOf = (id: string): Payload<Bill | null> => BILL.replace("BILLID", id);
+const inkBorder = (b: Bill | null): boolean => !!b && b.width === "2px" && nearRgba(b.colour, tokenRgba("--chart-ink"));
+
+export async function br22Bill(k: BroadsideKit): Promise<void> {
+  const { evaluate, check, goto, gotoPlain, EXP, PORT } = k;
+  await goto(EXP + "#seed=42&style=antique", "broadside-bill");
+  const broadside = await evaluate(billOf("broadside"));
+  await gotoPlain(`http://127.0.0.1:${PORT}/explorer/portfolio/`, "broadside-bill-portfolio");
+  const portfolio = await evaluate(billOf("portfolio"));
+  const worn = HEAD_ARMS.filter((_, i) => {
+    const b = broadside?.head[i];
+    const p = portfolio?.head[i];
+    return !b || !p || b === p;
+  }).map(([arm]) => arm);
+  check(
+    "BR22 the posted bill is the Broadside's alone: the Explorer's slip wears its printed border, its two tacks and every arm of its proclamation head, and the Portfolio's slip, a room under the Explorer whose slip stands for every room's, wears none of them (Issue #1159)",
+    inkBorder(broadside) &&
+      broadside?.style === "solid" &&
+      broadside.before === '""' &&
+      broadside.after === '""' &&
+      broadside.tacksInert &&
+      portfolio?.before === "none" &&
+      portfolio.after === "none" &&
+      !inkBorder(portfolio) &&
+      worn.length === 0,
+    JSON.stringify({ worn, broadside, portfolio }),
+  );
+}
+
+type Printed = { folio: string | null; imprint: string | null; status: string | null };
+const PRINTED: Payload<Printed> = `(() => { const t = (id) => (document.getElementById(id) || {}).textContent ?? null; return { folio: t("folio-title"), imprint: t("imprint-no"), status: t("status") }; })()`;
+const SECOND = "7";
+
+export async function br23Imprint(k: BroadsideKit): Promise<void> {
+  const { evaluate, send, sleep, check, goto, EXP } = k;
+  await goto(EXP + "#seed=42&style=antique", "broadside-imprint");
+  const before = await evaluate(PRINTED);
+  await evaluate(
+    `(()=>{const i=document.getElementById("seed");i.value=${JSON.stringify(SECOND)};i.focus();return true;})()`,
+  );
+  await sendKey(send, "Enter", "Enter", 13);
+  const after = await makeSettle({ evaluate, sleep })(
+    PRINTED,
+    (d) => !!d.folio && d.folio.endsWith(`Chart № ${SECOND}`) && d.status === "",
+    "broadside-imprint-redrawn",
+  );
+  check(
+    "BR23 the printer's line follows the chart on screen: drawn anew in place, from seed 42 to the seed 7 set in the seed field and entered, it reads 7 as the folio's title does (Issue #1159)",
+    before.imprint === "42" && !!before.folio && before.folio.endsWith("Chart № 42") && after.imprint === SECOND,
+    JSON.stringify({ before, after }),
   );
 }

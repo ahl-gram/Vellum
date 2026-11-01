@@ -221,18 +221,13 @@ sheet changes (`--slip-right` in `src/styles/explorer/index.css`), and the room'
 read the inset off the slip itself (`slipInset` in `src/site/shared/room-seats.ts`), so the open slip
 and its painted ring clear the tab at every window (BR15 in `e2e/suites/broadside/tab.ts`). The Glass,
 the legend row and the chart stand that much further from the right, so the Explorer's legend row
-takes tighter presses, which keep it on one line from 1280 up (BR2 in `e2e/suites/broadside.ts`).
-**The Broadside's Land panel keeps every row and sets aside what the world on screen cannot use**:
-such a row stays on the panel inside a held box, the cream ground behind a dashed rule, under a note
-saying what holds it, and it refuses a press rather than being disabled (`seatOf` in
-`src/site/explorer/land-rows.ts`). A written world holds every row the panel shows, the type and the climate among them, under the sentence's own note, whose closing words are the road back to the Writing Room, until a new chart number lets it go (Alex, 2026-11-01, Issue #393 comment 6559676010). At 1024 by 768 it does not scroll in its tallest seat, a place picked
-over a held count and loosened to the end, where the looseness readout's last words take two lines; the
-slip body's foot (`#broadside .slip-body`'s bottom padding) is tightened to make that room (`BR16` in `e2e/suites/broadside/shape.ts`).
+takes tighter presses, which keep it on one line from 1280 up on seed 42 (BR2 in `e2e/suites/broadside.ts`); a world whose caption is longer may take two lines at 1280, as seed 29's did before the bill (Issue #1159 comment 6559571937).
+**The Broadside is dressed as a posted bill** (Alex, 2026-11-01, Issue #1159 comments 6558722588, 6559571937 and 6560214826): a twelfth wider than its ledger first took (`--slip-w` in `src/styles/explorer/index.css`), a dark printed border and two brass tacks, the proclamation head (the verb on a heavy rule, the title across the sheet, the where line on the closing rule) with a mark on the title, standing outside the heading so the slip is named "The Broadside" alone (`BR9` in `e2e/suites/broadside/room.ts`), whose note says why it is a broadside, three groups, the Land, the Strand and the Hand, whose heads stand on rules of their own in dark ink, and a printer's line at the foot naming the chart on screen, a chart drawn anew in place included (`BR12` and `BR23` in `e2e/suites/broadside/dress.ts`). Its dress is `src/styles/explorer/broadside-bill.css`, which the Explorer alone links, every rule scoped to `#broadside`, and no sheet another room links carries any of it: the Portfolio's slip, which stands for every room's, wears neither its border, its tacks nor any arm of its head (`BR22` in `e2e/suites/broadside/dress.ts`). **The Land and the Strand keep every row and set aside what the world on screen cannot use**: such a row stays in its group inside that group's held box, the cream ground behind a dashed rule, under a note saying what holds it, and it refuses a press rather than being disabled (`seatOf` in `src/site/explorer/land-rows.ts`); a written world holds every row both groups show, the type and the climate among them, under the sentence's own note, whose closing words are the road back to the Writing Room, standing once, under the Strand's box, until a new chart number lets it go (Alex, 2026-11-01, Issue #393 comment 6559676010; its seat, Issue #1159). At 1024 by 768 the panel does not scroll in its tallest seats, a place picked over a held count and loosened to the end, and a written counted archipelago; the slip body's foot (`#broadside .slip-body`'s bottom padding) is tightened to make that room (`BR16` in `e2e/suites/broadside/shape.ts`).
 **Provisional until the post-use review** (Alex, 2026-10-30,
 Issue #854 comments 6533770339 and 6536644793; the foot, Alex, 2026-11-01, Issue #1140 comment
-6551936310): the layout and its tightenings, the tightened foot, the held box and its
+6551936310; the bill, Alex, 2026-11-01, Issue #1159): the layout and its tightenings, the tightened foot, the held box and its
 notes, the written world's hold, its note and its road, the shape box and its list, each place's outline in it, the groove, the inset, the tighter
-presses and the follow and the risen row they bring at 1024 by 768 and about 1100 px wide, and every
+presses, the bill's width, border, tacks, head, mark, note and printer's line, the Strand and its gloss, and the heads on rules and the follow and the risen row they bring at 1024 by 768 and about 1100 px wide, and every
 word on the new rows.
 
 **The head cluster says where the reader is standing, on every page with a seat in the route tree.**
@@ -361,7 +356,7 @@ line wear different faces and different inks, and the pair is one component. A p
 sheet itself rather than going anywhere wears the same dress as a button.
 
 **A slip introduces itself the same way**: a verb, a title, and a "where" line that says what is
-inside. "Make one / The Broadside / the land, and the hand that dresses it". "Watch one / The
+inside. "Make one / The Broadside / the land, the strand, and the hand that dresses it". "Watch one / The
 Journal / the survey sails first, and the history follows".
 
 **Instruments are named for what they are, not for what they do.** The camera's group is called

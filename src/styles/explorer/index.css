@@ -1,7 +1,7 @@
 /* The Explorer: a chart room. The furniture is atelier.css's and its stage chart-stage.css's; this sheet keeps the sheet's inner leaf, the hold's glyph, the region inset, the turn and the verso. */
-/* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem; the slip stands inboard of the Drawer tab, by the tab, the 0.6rem the folded Glass keeps from it (chart-drawer.css) and the slip's 9px painted ring (its 3px outline at a 6px offset, atelier.css). */
+/* The Broadside is a posted bill a twelfth wider than the 24rem its ledger first took (Issue #1159), a deviation from the kit's 22rem; the slip stands inboard of the Drawer tab, by the tab, the 0.6rem the folded Glass keeps from it (chart-drawer.css) and the slip's 9px painted ring (its 3px outline at a 6px offset, atelier.css). */
 :root {
-  --slip-w: 24rem;
+  --slip-w: 26rem;
   --slip-right: calc(var(--chart-drawer-tab-w) + 0.6rem + 9px);
 }
 
@@ -223,16 +223,20 @@
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
+/* Tightened under the twelfth-wider bill so seed 42's Press keeps one line from 1280 up: 5 px to spare at 1280 on this Mac, 7 px with the runner's layout staged (2026-11-01, Issue #1159). */
+.legend-row {
+  gap: 0.4rem;
+}
 .legend-row .legend-btn {
-  padding-inline: 0.5rem;
+  padding-inline: 0.3rem;
 }
 
-/* The block margins take back the block padding that gives the focus ring a box around the glyph, and the inline ones the narrower padding, so the glyph and its neighbours stay where they were (Issue #988). */
+/* The block margins take back the block padding that gives the focus ring a box around the glyph, and the inline ones the narrower padding, so the glyph and its neighbours stay where they were (Issue #988). The inline start takes back the row's 0.4rem gap less 0.15rem, so the glyph stands where it stood beside the kit's 0.6rem gap (Issue #1159). */
 .legend-row a.fn {
   color: var(--line-tan);
   align-self: flex-start;
   padding: 0.55em 0.05em;
-  margin: -0.55em 0.1em -0.55em calc(-0.45rem + 0.1em);
+  margin: -0.55em 0.1em -0.55em calc(-0.25rem + 0.1em);
 }
 .legend-row a.fn:hover {
   color: var(--parchment-bright);

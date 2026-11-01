@@ -168,7 +168,7 @@ async function openDrawer(k: TrailKit): Promise<void> {
   );
 }
 
-// Wiring only: AT1 proves the press, so this opens the fold by its property. Blind spots, both toward passing: two hit points a link, an 8px grid, so a cover narrower than 8px that misses every point passes.
+// Wiring only: AT1 proves the press, so this opens the fold by its property. Blind spots, all toward passing: two hit points a link, an 8px grid, so a cover narrower than 8px that misses every point passes, and the order the room stands in under the panel is read only where a piece of it reaches the panel, here the Broadside at 1024 by 768, 25 px under its right edge (Issue #1159).
 export async function at2Places(k: TrailKit): Promise<void> {
   const rows: string[] = [];
   let ok = true;

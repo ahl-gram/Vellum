@@ -9,9 +9,9 @@
   min-width: 0;
 }
 .broadside .panel + .panel {
-  border-top: 1px solid var(--line-tan);
-  margin-top: 0.3rem;
-  padding-top: 0.6rem;
+  margin-top: 0.1rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.3rem;
 }
 .broadside .panel > .ledger {
   grid-column: 1 / -1;
@@ -31,7 +31,7 @@
 .broadside .ledger {
   display: grid;
   grid-template-columns: auto auto 1fr auto auto;
-  gap: 0.3rem 0.6rem;
+  gap: 0.15rem 0.6rem;
   align-items: center;
 }
 .broadside .l-row {
@@ -171,7 +171,7 @@
   grid-template-columns: subgrid;
   gap: inherit;
   align-items: center;
-  padding: 0.25rem 0.5rem;
+  padding: 0.15rem 0.5rem;
   background: var(--control-cream);
   border: 1px dashed var(--line-tan);
   border-radius: 4px;
@@ -185,10 +185,6 @@
   font-size: 0.82rem;
   line-height: 1.3;
   color: var(--ink-brown);
-}
-#broadside .slip-head {
-  padding-top: 0.95rem;
-  padding-bottom: 0.55rem;
 }
 #broadside .slip-body {
   padding-bottom: 0.4rem;

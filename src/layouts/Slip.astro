@@ -14,7 +14,7 @@ const titleId = `${id}-title`;
   <div class="slip-head">
     <button class="slip-fold" type="button" aria-label={fold}>&times;</button>
     <p class="card-verb">{verb}</p>
-    <h2 class="card-title" id={titleId}>{title}</h2>
+    <h2 class="card-title" id={titleId}>{title}</h2>{Astro.slots.has("mark") && <slot name="mark" />}
     <p class="card-where">{where}</p>
   </div>
   <div class="slip-body"><slot /></div>
