@@ -5,6 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { r16HostContract } from "./render/room.ts";
 import { r17SheetDepth } from "./render/dress.ts";
 import { r18RealPlace } from "./render/place.ts";
+import { r19RangeLimits } from "./render/ranges.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
@@ -12,6 +13,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   await r0ToR4Worker(ctx);
   await step("R16", () => r16HostContract(ctx));
+  await step("R19", () => r19RangeLimits(ctx));
   await step("R8", () => r8Theme(ctx));
 
   const landPresent = await evaluate<boolean>(`!!document.getElementById("land")`);

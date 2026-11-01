@@ -10,6 +10,8 @@ const landReadout = $("land-readout");
 const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
 export const sliderToLand = (v: string | number): number => clampLand(Number(v) / 1000);
 export const landToSlider = (f: number): number => Math.round(clampLand(f) * 1000);
+landSlider.min = String(landToSlider(LAND_MIN));
+landSlider.max = String(landToSlider(LAND_MAX));
 
 export function updateLandReadout(): void {
   const pct = Math.round(sliderToLand(landSlider.value) * 100);
