@@ -18,7 +18,7 @@ import { placeKey } from "../../src/world/founding/shapes.ts";
 useCommittedGazetteer();
 
 const LOCK =
-  "until the written-world link goes public in Issue #393, a change to version 1 re-pins these values; once it is public, version 1 is locked and a change is version 2, with version 1 kept (Alex, 2026-10-09)";
+  "version 1 is locked since Issue #393 made the written-world link public: a change is version 2, with version 1 kept (Alex, 2026-10-09)";
 
 type Row = readonly [
   sentence: string,

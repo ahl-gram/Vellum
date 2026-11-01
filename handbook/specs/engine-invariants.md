@@ -113,14 +113,14 @@ then `generateWorld` like every other, the seed FIRST.
 covers the whole procedure: the cleanup in `src/world/founding/normalize.ts`, the small words, the clash
 rule, the strengths, the climate traditions, the word list, the number rule (`countAt` in
 `src/world/founding/counts.ts`), the band words read anywhere (`scan` in `src/world/founding/found.ts`),
-the shape phrases (`shapeAt` in `src/world/founding/shapes.ts`) and the place names they read. Until the
-written-world link goes public (Issue #393), version 1 may still change, and the pins in
+the shape phrases (`shapeAt` in `src/world/founding/shapes.ts`) and the place names they read. Version 1
+is locked: Issue #393 made the written-world link public. A change is a new version added beside it, and
+every old version stays foundable, so an old sentence keeps its world; the pins in
 `test/world/founding-covenant.test.ts`, `test/world/founding-count-covenant.test.ts`,
-`test/world/founding-shape-covenant.test.ts` and `test/world/founding-sample.test.ts` move with it. Once it
-is public, version 1 is locked: a change is a new version added beside it, and every old version stays
-foundable, so an old sentence keeps its world. The place names come from the gazetteer the host installs,
-so the name index `src/world/outline-place-names.json` is part of version 1 with them: once the link is
-public, renaming, adding or removing a place changes what an old sentence founds, and is version 2's.
+`test/world/founding-shape-covenant.test.ts` and `test/world/founding-sample.test.ts` hold version 1 and
+never move. The place names come from the gazetteer the host installs, so the name index
+`src/world/outline-place-names.json` is part of version 1 with them: renaming, adding or removing a place
+changes what an old sentence founds, and is version 2's.
 
 **The constants and the rules in plain words live with the code, as data a page can render**: the
 exports of `src/world/founding/lexicon.ts` and `src/world/founding/lexicon-shapes.ts`, `FOUNDING_RULES`
@@ -131,7 +131,7 @@ sentence, one over the cap, one holding a control character or a character the p
 a version this build does not have, and a sentence asking for a real place's outline while no gazetteer
 is installed (`places-not-loaded`; `setFoundingGazetteer` in `src/world/founding/shapes.ts`). A surface
 shows the reason; it does not catch. `places-not-loaded` is the one reason a surface never shows: the
-host installs the name index the shape box fetches and founds the sentence again.
+host installs the name index the shape box fetches and founds the sentence again. The Writing Room checks the fetched index against `NAMES_CHECKSUM` (`src/site/writing-room/names.ts`) before it installs it, and refuses the sentence when the index cannot be read or does not match, so a stale or foreign list never founds a world.
 
 **A founding never asks the terrain for what it refuses.** After the clash, a count with no archipelago
 left steering, or beside a shape, is dropped with its sizes and the shape stays; beside a count or a

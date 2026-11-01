@@ -274,8 +274,9 @@ byte-identical, and the drift guard is green.**
   destinations rule above; the count-and-button minimum was drawn and passed on. The destination
   complies: the gathered sheets land on The Portfolio, its own page, under the Explorer.
 - **Issue #844 (Shape and count) HAS ITS SLOT, ratified 2026-10-10**, with its own board phase and
-  label. Its founding words are part of version 1 of the founding: they land before Issue #393 makes
-  the written-world link public and locks that version, and Issue #393 stays held until they have.
+  label. Its founding words are part of version 1 of the founding: they landed before Issue #393 made
+  the written-world link public and locked that version. The typed, combined place request is version 2's
+  (Alex, 2026-10-31, Issue #393 comment 6550522707 ruling 1, reversing Issue #844 comment 6281800234).
   What the epic carries past the lock is version 2 of the word list. Sub 0 (Issue #849) was the
   design sitting and gated the rest.
 - Each epic carries its own contract, sub shape (a Sub 0 spike or mockup round first), open decisions,
@@ -418,9 +419,13 @@ checks against.
   `handbook/specs/site-architecture.md` writes both kinds out. **The nav is a flat top line over a
   tree**, both modeled once as typed data: `NAV_ITEMS` stays flat and is all the nav renders, and a
   room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads and `test/site/atelier-chart.test.ts` holds the chart of the atelier to. Revisit the top
-  line only on a named trigger: an eighth surface scheduled for it, or the nav no longer fitting
+  line only on a named trigger: a ninth surface scheduled for it, or the nav no longer fitting
   beside the room's corner on its one line at 1024, at the browser's default text size (Alex,
-  2026-10-07, Issue #764).
+  2026-10-07, Issue #764). The eighth, the Writing Room, joined the flat line after the Explorer (Alex,
+  2026-10-31, Issue #393 comment 6550522707 ruling 2): the nav keeps its one line at 1024, the Print Room's
+  and the Ribbon's corners giving way to it by script, and with scripts off those two corners run under
+  its last item at 1024, a cost accepted and recorded in `handbook/errata/site.md` (Alex, 2026-11-01,
+  Issue #393 comment 6552178327 ruling 13).
 - **"Site-shell issues park behind the Scriptorium"** was a working agreement for the duration of that
   migration only. #201 closed 2026-07-23 and the agreement is discharged.
 - **The old comment rule** ("a local invariant belongs in a code comment at the line that breaks") was
