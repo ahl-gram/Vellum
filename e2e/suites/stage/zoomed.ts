@@ -247,7 +247,7 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   const rows: { r: RoomRead; ask: Ask }[] = [];
   for (const page of CHART_ROOM_FLOOR) {
     const explorer = page === "/explorer/";
-    // 2026-11-01: zoomed by two presses at 1024x768 the survey line in line-tan reads 3.26 in the Reading Room, 3.94 in the Prospect and the Ribbon, 3.98 in the Portfolio, 4.01 in the Writing Room and 4.03 in the Specimen Book, and the coordinates 3.92 in the Ribbon, 3.94 in the Specimen Book and 4.05 in the Writing Room, on the Mac harness browser; the Explorer's folio reads 5.48 over the deep since its sheet grew a twelfth wider (Issue #1159).
+    // 2026-11-01: zoomed by two presses at 1024x768 the survey line in line-tan reads 3.26 in the Reading Room, 3.94 in the Prospect and the Ribbon, 3.98 in the Portfolio, 4.01 in the Writing Room and 4.03 in the Specimen Book, and the coordinates 3.92 in the Ribbon, 3.94 in the Specimen Book and 4.05 in the Writing Room, on the Mac harness browser; the Explorer's folio reads 5.48 over the deep since its sheet grew a twelfth wider; on the CI runner (run 41353331462, lane B) the survey line reads 3.26 (1.24 under the 4.5 floor) in the Reading Room, 3.94 (0.56) in the Prospect and the Ribbon, 3.98 (0.52) in the Portfolio, 4.02 (0.48) in the Writing Room and 4.03 (0.47) in the Specimen Book, the coordinates 3.92 (0.58) in the Ribbon, 3.98 (0.52) in the Specimen Book and 4.05 (0.45) in the Writing Room, and the Explorer's folio 5.50 in both lines (Issue #1159).
     const ask: Ask = {
       pieces: ["cluster", "chart folio"],
       mark: explorer,
