@@ -125,7 +125,6 @@ export function rh27Roles(check: SuiteContext["check"], kits: Record<string, Kit
 
 export function rh28Idiom(check: SuiteContext["check"], kits: Record<string, KitSample | undefined>): void {
   const wrong: string[] = [];
-  const rem = kits["/explorer/"]?.rem ?? 16;
   const type = kits["/explorer/"]?.roles["#type"];
   if (!type) wrong.push("/explorer/ #type: absent");
   else {
@@ -133,14 +132,15 @@ export function rh28Idiom(check: SuiteContext["check"], kits: Record<string, Kit
     if (type.bs !== "solid") wrong.push(`#type border style ${type.bs}`);
     if (!nearRgba(type.bc, tokenRgba("--ink-dark"))) wrong.push(`#type border colour ${JSON.stringify(type.bc)}`);
     if (type.radius !== "4px") wrong.push(`#type radius ${type.radius}`);
-    if (Math.abs(type.size - 0.95 * rem) > 0.05 * rem) wrong.push(`#type size ${type.size}`);
   }
+  const rem = kits["/specimen/"]?.rem ?? 16;
   const report = kits["/specimen/"]?.roles["#sb-report"];
   if (!report) wrong.push("/specimen/ #sb-report: absent");
   else {
     if (!nearRgba(report.bg, tokenRgba("--ink-dark"))) wrong.push(`#sb-report background ${JSON.stringify(report.bg)}`);
     if (!nearRgba(report.color, tokenRgba("--chart-paper")))
       wrong.push(`#sb-report colour ${JSON.stringify(report.color)}`);
+    if (Math.abs(report.size - 0.95 * rem) > 0.05 * rem) wrong.push(`#sb-report size ${report.size}`);
   }
   check(
     "RH28 the control idiom as the house dresses a plain control and a plain primary",
