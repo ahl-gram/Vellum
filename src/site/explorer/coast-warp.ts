@@ -10,6 +10,8 @@ const coastReadout = $("coast-readout");
 const clampCoast = (w: number): number => Math.min(COAST_MAX, Math.max(COAST_MIN, w));
 export const sliderToCoast = (v: string | number): number => clampCoast(Number(v) / 100);
 export const coastToSlider = (w: number): number => Math.round(clampCoast(w) * 100);
+coastSlider.min = String(coastToSlider(COAST_MIN));
+coastSlider.max = String(coastToSlider(COAST_MAX));
 
 export function updateCoastReadout(): void {
   const w = sliderToCoast(coastSlider.value);

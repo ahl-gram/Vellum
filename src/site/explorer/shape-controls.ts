@@ -1,6 +1,6 @@
 // The Land panel's shape and count controls (Issue #854): DOM-bound at module scope by design, never imported from a unit test.
 import { $ } from "../shared/by-id.ts";
-import type { IsleSize } from "../../terrain/lobes.ts";
+import { MAX_ISLANDS, type IsleSize } from "../../terrain/lobes.ts";
 import { typeSel } from "./elements.ts";
 import {
   ISLANDS_SEEDS_CHOICE,
@@ -20,6 +20,8 @@ import { writtenNow } from "./written-hold.ts";
 const looseness = $<HTMLInputElement>("looseness");
 const islands = $<HTMLInputElement>("islands");
 const ragged = $<HTMLInputElement>("ragged");
+islands.min = String(ISLANDS_SEEDS_CHOICE);
+islands.max = String(MAX_ISLANDS);
 const equal = $<HTMLInputElement>("isle-equal");
 const varied = $<HTMLInputElement>("isle-varied");
 const loosenessReadout = $("looseness-readout");
