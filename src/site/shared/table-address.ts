@@ -27,7 +27,7 @@ import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
-import type { CultureId } from "../../society/culture-ids.ts";
+import { CULTURE_IDS, type CultureId } from "../../society/culture-ids.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 
 export const TABLE_KEY = "table";
@@ -49,9 +49,14 @@ export interface TableOverrides extends ShapeOverrides {
 }
 
 export function tableOverridesOf(o: Partial<WorldRecipe>): TableOverrides {
-  void shapeOf;
-  void o;
-  return {};
+  return {
+    ...(o.mapType !== undefined ? { mapType: o.mapType } : {}),
+    ...(o.band !== undefined ? { band: o.band } : {}),
+    ...(o.landFraction !== undefined ? { landFraction: o.landFraction } : {}),
+    ...(o.coastWarp !== undefined ? { coastWarp: o.coastWarp } : {}),
+    ...shapeOf(o),
+    ...(o.culture !== undefined ? { culture: o.culture } : {}),
+  };
 }
 
 export interface TableWorld {
@@ -133,8 +138,10 @@ function readWorld(fields: Map<string, string>): TableWorld | null {
   const band = allowed(fields.get("band"), CLIMATE_BANDS);
   const landFraction = landField(fields.get("land"));
   const coastWarp = coastField(fields.get("coast"));
+  const culture = allowed(fields.get("culture"), CULTURE_IDS);
   const shape = readShapeKeys((k) => fields.get(k), mapType);
   if (seed == null || mapType === null || band === null || landFraction === null || coastWarp === null) return null;
+  if (culture === null) return null;
   if (shape === null) return null;
   return {
     seed,
@@ -142,6 +149,7 @@ function readWorld(fields: Map<string, string>): TableWorld | null {
       ...(mapType !== undefined ? { mapType } : {}),
       ...(band !== undefined ? { band } : {}),
       ...overridesOfLand(gateLand({ land: landFraction ?? null, coast: coastWarp ?? null, shape })),
+      ...(culture !== undefined ? { culture } : {}),
     },
   };
 }
@@ -210,6 +218,7 @@ const worldFields = (overrides: TableOverrides): string[] => [
   ...(overrides.landFraction !== undefined ? [`land${PAIR}${Math.round(overrides.landFraction * 1000)}`] : []),
   ...(overrides.coastWarp !== undefined ? [`coast${PAIR}${Math.round(overrides.coastWarp * 100)}`] : []),
   ...shapePairs(overrides).map(([key, value]) => `${key}${PAIR}${value}`),
+  ...(overrides.culture !== undefined ? [`culture${PAIR}${overrides.culture}`] : []),
 ];
 
 const dressFields = (item: TableItem): string[] =>
@@ -295,7 +304,7 @@ export function prospectItemFrom(c: {
   return {
     kind: "prospect",
     seed: c.seed,
-    overrides: c.overrides,
+    overrides: tableOverridesOf(c.overrides),
     style: plateDressFor(c.style),
     index: c.index,
     year: c.year,

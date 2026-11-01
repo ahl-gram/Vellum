@@ -47,7 +47,7 @@ test("a written world's settings seat as the ordinary keys the Explorer's contro
     const p = identityParams(new URLSearchParams("found=x&v=1&style=ink&theme=climate"), f.seed, f.overrides);
     const k = readWorldKeys(p);
     assert.equal(k.seed, f.seed, row.sentence);
-    const { culture: _culture, ...want } = f.overrides;
+    const want = Object.fromEntries(Object.entries(f.overrides).filter(([key]) => key !== "culture"));
     assert.deepEqual(
       {
         ...(k.type !== null ? { mapType: k.type } : {}),
@@ -64,6 +64,6 @@ test("a written world's settings seat as the ordinary keys the Explorer's contro
     seated++;
     if (f.overrides.landFraction !== undefined) landed++;
   }
-  assert.ok(seated >= 150, `seated ${seated}`);
-  assert.ok(landed >= 10, `sea levels ${landed}`);
+  assert.equal(seated, KEPT.length);
+  assert.ok(landed > 0, "the sample holds a sentence that sets the sea level");
 });

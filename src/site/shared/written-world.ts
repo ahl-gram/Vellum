@@ -8,14 +8,12 @@ export type WrittenWorld = Written & { readonly seed: number; readonly overrides
 export const pageFounder = (): Founder => createFounder(createNameLoader((url) => fetch(url)));
 
 export async function foundAddress(hash: string, founder: Founder): Promise<WrittenWorld | null> {
-  void hash;
-  void founder;
-  void readWritten;
-  void recipeOverrides;
-  return null;
+  const w = readWritten(hash);
+  if (w === null) return null;
+  const f = await founder.found(w.sentence, w.version);
+  if (!f.ok) return null;
+  return { sentence: f.sentence, version: f.version, seed: f.seed, overrides: recipeOverrides(f) };
 }
 
-export const heldFor = (written: WrittenWorld | null, seed: number): WrittenWorld | null => {
-  void seed;
-  return written;
-};
+export const heldFor = (written: WrittenWorld | null, seed: number): WrittenWorld | null =>
+  written !== null && written.seed === seed ? written : null;

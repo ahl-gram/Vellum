@@ -11,7 +11,6 @@ export function writtenNow(): WrittenWorld | null {
 }
 
 export function writtenFor(seed: number): WrittenWorld | null {
-  void seed;
-  void heldFor;
+  held = heldFor(held, seed);
   return held;
 }

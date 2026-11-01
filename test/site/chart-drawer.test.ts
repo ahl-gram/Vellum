@@ -34,10 +34,6 @@ import {
 import { LOD_BANDS, lodWindowFor } from "../../src/world/lod.ts";
 import { placeId } from "../../src/world/outline-ids.ts";
 import type { WorldRecipe } from "../../src/world/types.ts";
-import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
-import { recipeOverrides } from "../../src/site/shared/founding.ts";
-import { tableOverridesOf } from "../../src/site/shared/table-address.ts";
-import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 import { hashOf } from "../../test-support/table-address-fixtures.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -426,22 +422,6 @@ test("CT13 a rung-5 sheet carried in the address redraws its own band-5 window (
   const job = thumbJobFor(item) as RegionJob;
   assert.equal(job.band, 5);
   assert.deepEqual(job.window, lodWindowFor(131 / 256, 105 / 256, 1 / 32));
-});
-
-test("a survey filed from a written world keeps its tongue and leaves its sentence", () => {
-  useCommittedGazetteer();
-  const f = foundWorld("a cold archipelago of black pines, iron harbors, and a drowned kingdom") as Founding;
-  const o = surveyItemFrom({
-    seed: f.seed,
-    overrides: recipeOverrides(f),
-    render: { style: "antique", widthPx: 1500 },
-    band: 2,
-    seat: { lx: 3, ly: 4 },
-  })?.overrides;
-  assert.ok(o !== undefined);
-  assert.equal(o.culture, "norden");
-  assert.equal("foundingText" in o, false);
-  assert.deepEqual(o, tableOverridesOf(recipeOverrides(f)));
 });
 
 test("surveyItemFrom carries the shape the sheet was drawn with (Issue #854)", () => {

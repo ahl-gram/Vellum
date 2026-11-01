@@ -39,9 +39,12 @@ const IDENTITY_KEYS: ReadonlySet<string> = new Set([
 ]);
 
 export function writtenParams(params: URLSearchParams, written: Written | null): URLSearchParams {
-  void written;
-  void IDENTITY_KEYS;
-  return params;
+  if (written === null) return params;
+  return new URLSearchParams([
+    [FOUND_KEY, written.sentence],
+    [VERSION_KEY, String(written.version)],
+    ...[...params].filter(([key]) => !IDENTITY_KEYS.has(key)),
+  ]);
 }
 
 export function identityParams(
@@ -49,10 +52,13 @@ export function identityParams(
   seed: number,
   overrides: Partial<WorldRecipe>,
 ): URLSearchParams {
-  void seed;
-  void overrides;
-  void emitLandKeys;
-  void gateLand;
-  void shapeOf;
-  return params;
+  const out = new URLSearchParams([["seed", String(seed)]]);
+  if (overrides.mapType !== undefined) out.set("type", overrides.mapType);
+  if (overrides.band !== undefined) out.set("band", overrides.band);
+  emitLandKeys(
+    out,
+    gateLand({ land: overrides.landFraction ?? null, coast: overrides.coastWarp ?? null, shape: shapeOf(overrides) }),
+  );
+  for (const [key, value] of params) if (!IDENTITY_KEYS.has(key)) out.append(key, value);
+  return out;
 }

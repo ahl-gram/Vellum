@@ -1,4 +1,4 @@
-import { type Written } from "../shared/written-address.ts";
+import { writtenHash, type Written } from "../shared/written-address.ts";
 import { coastDraws, drawnShape, landDraws, type ShapeOverrides } from "../shared/shape-address.ts";
 import type { OutlineId } from "../../world/outline-ids.ts";
 import type { IsleSize } from "../../terrain/lobes.ts";
@@ -30,8 +30,12 @@ export interface LandSeat {
 const heldIf = (is: boolean): RowState => (is ? "held" : "live");
 
 export function seatOf(type: string, choice: ShapeOverrides, written: Written | null = null): LandSeat {
-  void written;
-  return seatPlain(type, choice);
+  const plain = seatPlain(type, choice);
+  if (written === null) return plain;
+  const rows = Object.fromEntries(
+    LAND_ROWS.map((row) => [row, plain.rows[row] === "hidden" ? "hidden" : "held"]),
+  ) as Record<LandRow, RowState>;
+  return { rows, note: HELD_NOTES.written, road: "/writing-room/" + writtenHash(written.sentence, written.version) };
 }
 
 function seatPlain(type: string, choice: ShapeOverrides): LandSeat {

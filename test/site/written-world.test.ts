@@ -13,7 +13,7 @@ const TEXAS = "tropical island in the shape of Texas";
 
 test("a hash carrying a founding sentence names its founded world; a hash with no sentence, a refused one or an unreadable name list names none", async () => {
   setFoundingGazetteer(null);
-  const founder = createFounder(async () => committedGazetteer());
+  const founder = createFounder(() => Promise.resolve(committedGazetteer()));
   useCommittedGazetteer();
   const flagship = foundWorld(FLAGSHIP) as Founding;
   assert.deepEqual(await foundAddress(writtenHash(FLAGSHIP, 1) + "&style=ink", founder), {
@@ -28,9 +28,7 @@ test("a hash carrying a founding sentence names its founded world; a hash with n
   setFoundingGazetteer(null);
   assert.equal((await foundAddress(writtenHash(TEXAS, 1), founder))?.overrides.outline, "ne-1159315211");
   setFoundingGazetteer(null);
-  const offline = createFounder(async () => {
-    throw new Error("offline");
-  });
+  const offline = createFounder(() => Promise.reject(new Error("offline")));
   assert.equal(await foundAddress(writtenHash(TEXAS, 1), offline), null);
   setFoundingGazetteer(null);
 });

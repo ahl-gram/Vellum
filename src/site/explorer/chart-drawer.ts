@@ -4,13 +4,13 @@ import {
   emitTable,
   isRung,
   prospectItemFrom,
+  tableOverridesOf,
   tableWindow,
   type TableItem,
   type SurveyItem,
   type ProspectItem,
   type TableOverrides,
 } from "../shared/table-address.ts";
-import { shapeOf } from "../shared/shape-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { prospectTitle } from "../prospect/note-lines.ts";
@@ -143,13 +143,7 @@ export function surveyItemFrom(c: {
     rung: c.band,
     lx: c.seat.lx,
     ly: c.seat.ly,
-    overrides: {
-      ...(o.mapType ? { mapType: o.mapType } : {}),
-      ...(o.band ? { band: o.band } : {}),
-      ...(typeof o.landFraction === "number" ? { landFraction: o.landFraction } : {}),
-      ...(typeof o.coastWarp === "number" ? { coastWarp: o.coastWarp } : {}),
-      ...shapeOf(o),
-    },
+    overrides: tableOverridesOf(o),
     style: c.render.style,
     legend: c.render.legend !== false,
     arms: c.render.arms === true,
