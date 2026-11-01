@@ -28,6 +28,10 @@ test("a link with no version means version 1, a version that is not a whole numb
   assert.deepEqual(readWritten("#found=a+cold+island"), { sentence: "a cold island", version: 1 });
   assert.equal(readWritten("found=a+cold+island&v=2")?.version, 2);
   assert.equal(readWritten("#found=x&v=abc")?.version, 0);
+  for (const raw of ["0", "01", "007", "1.5", "-1", "1000000000", "9".repeat(31)]) {
+    assert.equal(readWritten(`#found=x&v=${raw}`)?.version, 0, `v=${raw} is not a whole number from 1 to nine digits`);
+  }
+  assert.equal(readWritten("#found=x&v=999999999")?.version, 999999999);
   assert.deepEqual(foundWorld("x", 0), { ok: false, reason: "unknown-version" });
   assert.equal(readWritten("#seed=42&type=island"), null);
   assert.equal(readWritten(""), null);

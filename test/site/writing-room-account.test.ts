@@ -45,4 +45,18 @@ test("the account says exactly what the founding steered, cancelled and hashed",
   const none = accountOf(founded("make a world that sdfhs fhsdfhsdf dsfhds"), placeName);
   assert.equal(none.quiet, true);
   assert.deepEqual(none.contested, []);
+
+  const coral = accountOf(founded("a cold coral islands"), placeName);
+  assert.deepEqual(coral.steered, [{ phrase: "coral islands", set: "an archipelago" }]);
+  assert.deepEqual(coral.contested, ["cold"]);
+
+  const varied = accountOf(founded("100 varied islands"), placeName);
+  assert.deepEqual(varied.steered, [
+    { phrase: "100 varied islands", set: "about 100 islands and islands of every size and an archipelago" },
+  ]);
+  assert.equal(chartNumberLine(varied), `№ ${varied.seed}, from no words at all`);
+  const equal = accountOf(founded("100 equal islands"), placeName);
+  assert.deepEqual(equal.steered, [
+    { phrase: "100 equal islands", set: "about 100 islands and islands alike and an archipelago" },
+  ]);
 });
