@@ -1,7 +1,9 @@
 import { foundWorld } from "../../../src/world/founding/found.ts";
 import { HELD_NOTES, LAND_ROWS, WRITE_ANEW, seatOf } from "../../../src/site/explorer/land-rows.ts";
+import { recipeOverrides } from "../../../src/site/shared/founding.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import { sendKey } from "../../support/home.ts";
+import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { WritingKit } from "./kit.ts";
 
@@ -196,5 +198,96 @@ export async function wr14Road(k: WritingKit): Promise<void> {
       room.line === FLAGSHIP &&
       room.seed === String(founded(FLAGSHIP).seed),
     `${JSON.stringify(road)} then ${JSON.stringify(room)}`,
+  );
+}
+
+const PRINT_SETTLED = (seed: number): string =>
+  `(typeof window.__vellumPrintRoomState === "function" && document.getElementById("pr-status").textContent === "" && !!document.querySelector("#pr-preview svg") && window.__vellumPrintRoomState().seed === ${seed})`;
+const READING_SETTLED = `(typeof window.__vellumReadingRoomUsesWorker === "function" && !!document.querySelector(${JSON.stringify(CHART_SVG)}) && (document.querySelector(".rf-status") || {}).textContent === "")`;
+
+export async function wr11PrintRoom(k: WritingKit): Promise<void> {
+  const { visit, until } = carryKit(k);
+  const f = founded(FLAGSHIP);
+  await visit("/print-room/" + writtenHash(FLAGSHIP, 1) + "&style=ink");
+  await until(PRINT_SETTLED(f.seed), "the Print Room's proof of the written world");
+  const chart = await k.evaluate<Chart>(chartRead("#pr-preview svg"));
+  const road = await k.evaluate<string | null>(`document.getElementById("pr-explorer").getAttribute("href")`);
+  const wantRoad =
+    "../explorer/#" +
+    new URLSearchParams([
+      ["found", FLAGSHIP],
+      ["v", "1"],
+      ["style", "ink"],
+      ["legend", "1"],
+      ["arms", "0"],
+      ["beasts", "0"],
+    ]).toString();
+  k.check(
+    "WR11 the Print Room presses a written world, beside its dress, and its road back carries the sentence",
+    chart.seed === String(f.seed) &&
+      chart.culture === f.overrides.culture &&
+      chart.text === FLAGSHIP &&
+      chart.style === "ink" &&
+      chart.hash["found"] === FLAGSHIP &&
+      chart.hash["v"] === "1" &&
+      chart.hash["style"] === "ink" &&
+      !("seed" in chart.hash) &&
+      road === wantRoad,
+    `${JSON.stringify(chart)} road ${road}`,
+  );
+}
+
+export async function wr12ReadingRoom(k: WritingKit): Promise<void> {
+  const { visit, until } = carryKit(k);
+  const f = founded(FLAGSHIP);
+  await visit("/reading-room/" + writtenHash(FLAGSHIP, 1));
+  await until(READING_SETTLED, "the Reading Room's telling of the written world");
+  const chart = await k.evaluate<Chart>(chartRead(CHART_SVG));
+  k.check(
+    "WR12 the Reading Room tells a written world and keeps its sentence in the address",
+    chart.seed === String(f.seed) &&
+      chart.culture === f.overrides.culture &&
+      chart.text === FLAGSHIP &&
+      chart.hash["found"] === FLAGSHIP &&
+      chart.hash["v"] === "1" &&
+      !("seed" in chart.hash),
+    JSON.stringify(chart),
+  );
+}
+
+type Named = { readonly index: number; readonly name: string };
+
+export async function wr13Names(k: WritingKit): Promise<void> {
+  const { visit, until, explorer } = carryKit(k);
+  const f = founded(FLAGSHIP);
+  await explorer(writtenHash(FLAGSHIP, 1));
+  const names = await k.evaluate<Record<string, string>>(
+    `(() => { const r = window.__vellumRunInline({ kind: "draw", seed: ${f.seed}, overrides: ${JSON.stringify(recipeOverrides(f))}, render: { style: "antique", widthPx: 1500, legend: true } }); return Object.fromEntries(r.manifest.places.map((p) => [String(p.idx), p.name])); })()`,
+  );
+  const ready = (state: string, status: string): string =>
+    `(${state} !== null && document.getElementById(${JSON.stringify(status)}).textContent === "")`;
+  await visit("/prospect/" + writtenHash(FLAGSHIP, 1));
+  await until(
+    ready(`(window.__vellumProspectState ? window.__vellumProspectState() : null)`, "pp-status"),
+    "the Prospect's plate",
+  );
+  const plate = await k.evaluate<Named & { hash: string }>(
+    `(() => { const s = window.__vellumProspectState(); return { index: s.index, name: s.name, hash: location.hash }; })()`,
+  );
+  await visit("/ribbon/" + writtenHash(FLAGSHIP, 1));
+  await until(
+    ready(`(window.__vellumRibbonState ? window.__vellumRibbonState() : null)`, "rb-status"),
+    "the Ribbon's route",
+  );
+  const ribbon = await k.evaluate<{ from: number; to: number; fromName: string; toName: string }>(
+    `(() => { const s = window.__vellumRibbonState(); const pick = (id) => { const o = document.getElementById(id).selectedOptions[0]; return o ? o.textContent : null; }; return { from: s.from, to: s.to, fromName: pick("rb-from"), toName: pick("rb-to") }; })()`,
+  );
+  k.check(
+    "WR13 the Prospect and the Ribbon draw a written world's places by its own names",
+    plate.name === names[String(plate.index)] &&
+      plate.hash.startsWith("#found=") &&
+      ribbon.fromName === names[String(ribbon.from)] &&
+      ribbon.toName === names[String(ribbon.to)],
+    `prospect ${JSON.stringify(plate)} against ${names[String(plate.index)]}; ribbon ${JSON.stringify(ribbon)} against ${names[String(ribbon.from)]} and ${names[String(ribbon.to)]}`,
   );
 }

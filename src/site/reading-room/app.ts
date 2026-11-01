@@ -23,6 +23,8 @@ import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
+import { foundAddress, heldFor, pageFounder, type WrittenWorld } from "../shared/written-world.ts";
+import { writtenParams } from "../shared/written-address.ts";
 
 // The ages hook is typed as the engine's own ReturnType, so tsc breaks this file if the hook ever grows, loses a member, or silently narrows again.
 declare global {
@@ -65,6 +67,7 @@ seatFrame(frame, stage, furniture);
 const { room, rebase } = bindReadingRoom(frame, furniture);
 
 let seed = 0;
+let written: WrittenWorld | null = null;
 // The seed of the world actually ON SCREEN, advanced only by a successful settle: the rollback target when a counter draw fails.
 let shownSeed = 0;
 let style: StyleName = "antique";
@@ -112,7 +115,7 @@ function prospectHrefFor(forSeed: number, b: PlateSpec): string {
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   p.set("i", String(b.index));
   p.set("year", String(b.year));
-  return "/prospect/#" + p.toString();
+  return "/prospect/#" + writtenParams(p, heldFor(written, forSeed)).toString();
 }
 
 // The one hash writer: recipe plus the live key, in the Explorer's exact format, so a copied link opens the same world at the same rest in any surface.
@@ -131,7 +134,7 @@ function syncHash(): void {
   const a = lc.agesState();
   // ages is unconditionally true: the room's instrument is always armed, the page equivalent of the Explorer's ticked checkbox.
   emitLive(p, liveNow({ ages: true, chamber: a?.chamber ?? null, year: a?.year, pending: pendingLive }));
-  history.replaceState(null, "", "#" + finalizeHash(p));
+  history.replaceState(null, "", "#" + finalizeHash(writtenParams(p, heldFor(written, seed))));
 }
 
 // The plate's world, bound in lockstep with lastRes; hasArms is the capital-or-seat test finished.ts draws by.
@@ -191,11 +194,13 @@ frame.root.addEventListener("animationcancel", retireArrival);
 
 // The carried recipe as the engine's override bag: only the keys a link actually pinned, so an unpinned dial stays the world's own.
 function recipeOverrides(): TableOverrides {
-  return {
-    ...(carried.type ? { mapType: carried.type } : {}),
-    ...(carried.band ? { band: carried.band } : {}),
-    ...overridesOfLand(carried.keys),
-  };
+  return (
+    heldFor(written, seed)?.overrides ?? {
+      ...(carried.type ? { mapType: carried.type } : {}),
+      ...(carried.band ? { band: carried.band } : {}),
+      ...overridesOfLand(carried.keys),
+    }
+  );
 }
 
 // A deep link's key becomes the arm's rest, one-shot, and it reaches the instrument through rearmAges rather than applyAges (a restored link is a photograph, not an arming gesture).
@@ -313,6 +318,7 @@ function draw(): void {
     .then((res) => {
       if (myGen !== drawGen) return;
       landChart(res);
+      written = heldFor(written, seed);
       const rest = restFor(pendingLive);
       // A deep link of either kind (year=N, or a bare survey parking at the return to the capital) is a reader asking for that moment, so it shows its plate on arrival; a plain visit opens bare.
       const armedByLink = pendingLive !== null;
@@ -367,7 +373,9 @@ window.__vellumReadingRoomAges = lc.agesState;
 installHostHooks({ livingChart: lc, runInline });
 if (!usesWorker()) warning.hidden = false;
 
+written = await foundAddress(location.hash, pageFounder());
 applyHash();
+if (written !== null) seed = written.seed;
 shownSeed = seed; // a boot failure rolls back to the boot world itself
 draw();
 // Wired after the first draw() so a click can never reach a worker still shaking hands.

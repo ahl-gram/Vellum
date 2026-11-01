@@ -11,6 +11,7 @@ import type { RibbonResult } from "../explorer/worker-client.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
+import { foundAddress, pageFounder } from "../shared/written-world.ts";
 
 declare global {
   interface Window {
@@ -51,14 +52,18 @@ const furniture: RoomFurniture = {
 const sheet = bindRibbonRoom(furniture);
 
 const addr = parseRibbonAddress(location.hash);
+const written = await foundAddress(location.hash, pageFounder());
 // A bare visit lands on today's seed-of-the-day (UTC), the same default world as every other surface.
-const seed = (addr.seed ?? seedForDate(new Date())) >>> 0;
+const seed = (written?.seed ?? addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
-const overrides: Partial<WorldRecipe> = {
-  ...(addr.type ? { mapType: addr.type } : {}),
-  ...(addr.band ? { band: addr.band } : {}),
-  ...overridesOfLand(addr),
-};
+const overrides: Partial<WorldRecipe> =
+  written !== null
+    ? written.overrides
+    : {
+        ...(addr.type ? { mapType: addr.type } : {}),
+        ...(addr.band ? { band: addr.band } : {}),
+        ...overridesOfLand(addr),
+      };
 
 chartLink.href = chartTarget(location.hash);
 // display, since the kit's .legend-btn display makes the hidden attribute inert.
