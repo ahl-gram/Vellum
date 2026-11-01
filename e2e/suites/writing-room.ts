@@ -18,6 +18,7 @@ import {
   wr12ReadingRoom,
   wr13Names,
   wr14Road,
+  wr15PlaceHeld,
   wr9Explorer,
 } from "./writing-room/carry.ts";
 import { writingKit } from "./writing-room/kit.ts";
@@ -46,6 +47,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("WR12", () => wr12ReadingRoom(k));
   await step("WR13", () => wr13Names(k));
   await step("WR14", () => wr14Road(k));
+  await step("WR15", () => wr15PlaceHeld(k));
   await ctx.send("Emulation.clearDeviceMetricsOverride");
   gate.check("WR0 the Writing Room logged no console error and fetched nothing that answered 4xx");
 }

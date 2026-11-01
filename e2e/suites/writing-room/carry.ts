@@ -133,8 +133,8 @@ export async function wr10Hold(k: WritingKit): Promise<void> {
   await explorer(writtenHash(FLAGSHIP, 1));
   const held = await k.evaluate<Held>(HELD_READ);
   const wanted = seatOf("archipelago", {}, { sentence: FLAGSHIP, version: 1 }).rows;
-  const refused = await k.evaluate<{ band: string; status: string }>(
-    `(() => { const b = document.getElementById("band"); b.value = "tropical"; b.dispatchEvent(new Event("change", { bubbles: true })); return { band: b.value, status: document.getElementById("status").textContent }; })()`,
+  const refused = await k.evaluate<{ band: string; type: string; status: string }>(
+    `(() => { const b = document.getElementById("band"), t = document.getElementById("type"); b.value = "tropical"; b.dispatchEvent(new Event("change", { bubbles: true })); t.value = "island"; t.dispatchEvent(new Event("change", { bubbles: true })); return { band: b.value, type: t.value, status: document.getElementById("status").textContent }; })()`,
   );
   const stood = await k.evaluate<{ band: string | null; text: string | null }>(
     `(() => { const svg = document.querySelector(${JSON.stringify(EXPLORER_CHART)}); return { band: svg.getAttribute("data-vellum-band"), text: svg.getAttribute("data-vellum-founding-text") }; })()`,
@@ -151,12 +151,13 @@ export async function wr10Hold(k: WritingKit): Promise<void> {
   const freed = await k.evaluate<Held>(HELD_READ);
   const sameRows = LAND_ROWS.every((row) => held.state[row] === wanted[row]);
   k.check(
-    "WR10 a written world holds the Explorer's Land panel under the sentence's note and refuses a climate change, and a new chart number lets it go with its settings",
+    "WR10 a written world holds the Explorer's Land panel under the sentence's note and refuses a change of its type or its climate, and a new chart number lets it go with its settings",
     held.shown &&
       held.note === `${HELD_NOTES.written} ${WRITE_ANEW}` &&
       held.road &&
       sameRows &&
       refused.band === "polar" &&
+      refused.type === "archipelago" &&
       refused.status === "" &&
       stood.band === "polar" &&
       stood.text === FLAGSHIP &&
@@ -199,6 +200,43 @@ export async function wr14Road(k: WritingKit): Promise<void> {
       room.line === FLAGSHIP &&
       room.seed === String(founded(FLAGSHIP).seed),
     `${JSON.stringify(road)} then ${JSON.stringify(room)}`,
+  );
+}
+
+type Place = { readonly value: string; readonly held: boolean; readonly status: string };
+
+const PLACE_READ = `(() => { const b = document.getElementById("place"); return { value: b.value, held: !!b.closest(".held"), status: document.getElementById("status").textContent }; })()`;
+
+export async function wr15PlaceHeld(k: WritingKit): Promise<void> {
+  const { explorer, settle } = carryKit(k);
+  await explorer(writtenHash(TEXAS, 1));
+  const named = await settle<string>(
+    `document.getElementById("place").value`,
+    (d, last) => d !== "" && d === last,
+    "the shape box to name the founded place",
+    POLLS,
+  );
+  await k.evaluate(
+    `(() => { const b = document.getElementById("place"); b.focus(); return document.activeElement === b; })()`,
+  );
+  await k.send("Input.insertText", { text: "x" });
+  const typed = await k.evaluate<Place>(PLACE_READ);
+  await sendKey(k.send, "Enter", "Enter", 13);
+  const entered = await k.evaluate<Place>(PLACE_READ);
+  // Emptied by script: it stands for a box focused before the first draw named its place, a window no natural gesture reaches on demand.
+  await k.evaluate(`(() => { document.getElementById("place").value = ""; return true; })()`);
+  await sendKey(k.send, "Enter", "Enter", 13);
+  const emptied = await k.evaluate<Place>(PLACE_READ);
+  k.check(
+    "WR15 a written world's held shape box names its place and keeps it through a refused keystroke, and Enter in it neither clears the place nor starts a draw, even with the box emptied",
+    named === "Texas" &&
+      typed.held &&
+      typed.value === "Texas" &&
+      entered.value === "Texas" &&
+      entered.status === "" &&
+      emptied.value === "Texas" &&
+      emptied.status === "",
+    `named "${named}"; typed ${JSON.stringify(typed)}; Enter ${JSON.stringify(entered)}; emptied, then Enter ${JSON.stringify(emptied)}`,
   );
 }
 
@@ -257,6 +295,14 @@ export async function wr12ReadingRoom(k: WritingKit): Promise<void> {
 }
 
 type Named = { readonly index: number; readonly name: string };
+type Links = { readonly hash: string; readonly road: string | null };
+
+const MIXED = "&seed=5&type=island";
+
+const writtenOnly = (link: string | null): boolean => {
+  const p = new URLSearchParams((link ?? "").split("#")[1] ?? "");
+  return p.get("found") === FLAGSHIP && IDENTITY.every((key) => !p.has(key));
+};
 
 export async function wr13Names(k: WritingKit): Promise<void> {
   const { visit, until, explorer } = carryKit(k);
@@ -267,28 +313,31 @@ export async function wr13Names(k: WritingKit): Promise<void> {
   );
   const ready = (state: string, status: string): string =>
     `(${state} !== null && document.getElementById(${JSON.stringify(status)}).textContent === "")`;
-  await visit("/prospect/" + writtenHash(FLAGSHIP, 1));
+  await visit("/prospect/" + writtenHash(FLAGSHIP, 1) + MIXED);
   await until(
     ready(`(window.__vellumProspectState ? window.__vellumProspectState() : null)`, "pp-status"),
     "the Prospect's plate",
   );
-  const plate = await k.evaluate<Named & { hash: string }>(
-    `(() => { const s = window.__vellumProspectState(); return { index: s.index, name: s.name, hash: location.hash }; })()`,
+  const plate = await k.evaluate<Named & Links>(
+    `(() => { const s = window.__vellumProspectState(); return { index: s.index, name: s.name, hash: location.hash, road: document.getElementById("pp-chart-link").getAttribute("href") }; })()`,
   );
-  await visit("/ribbon/" + writtenHash(FLAGSHIP, 1));
+  await visit("/ribbon/" + writtenHash(FLAGSHIP, 1) + MIXED);
   await until(
     ready(`(window.__vellumRibbonState ? window.__vellumRibbonState() : null)`, "rb-status"),
     "the Ribbon's route",
   );
-  const ribbon = await k.evaluate<{ from: number; to: number; fromName: string; toName: string }>(
-    `(() => { const s = window.__vellumRibbonState(); const pick = (id) => { const o = document.getElementById(id).selectedOptions[0]; return o ? o.textContent : null; }; return { from: s.from, to: s.to, fromName: pick("rb-from"), toName: pick("rb-to") }; })()`,
+  const ribbon = await k.evaluate<{ from: number; to: number; fromName: string; toName: string } & Links>(
+    `(() => { const s = window.__vellumRibbonState(); const pick = (id) => { const o = document.getElementById(id).selectedOptions[0]; return o ? o.textContent : null; }; return { from: s.from, to: s.to, fromName: pick("rb-from"), toName: pick("rb-to"), hash: location.hash, road: document.getElementById("rb-chart-link").getAttribute("href") }; })()`,
   );
   k.check(
-    "WR13 the Prospect and the Ribbon draw a written world's places by its own names",
+    "WR13 the Prospect and the Ribbon draw a written world's places by its own names from a link that also carries a chart number and a type, and write neither key beside the sentence in their address or their road to the Explorer",
     plate.name === names[String(plate.index)] &&
-      plate.hash.startsWith("#found=") &&
+      writtenOnly(plate.hash) &&
+      writtenOnly(plate.road) &&
       ribbon.fromName === names[String(ribbon.from)] &&
-      ribbon.toName === names[String(ribbon.to)],
+      ribbon.toName === names[String(ribbon.to)] &&
+      writtenOnly(ribbon.hash) &&
+      writtenOnly(ribbon.road),
     `prospect ${JSON.stringify(plate)} against ${names[String(plate.index)]}; ribbon ${JSON.stringify(ribbon)} against ${names[String(ribbon.from)]} and ${names[String(ribbon.to)]}`,
   );
 }
