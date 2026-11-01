@@ -1,6 +1,6 @@
 // The Land panel's rows seated by state (Issue #854): DOM-bound at module scope by design, never imported from a unit test.
 import { $ } from "../shared/by-id.ts";
-import { LAND_ROWS, type LandRow, type LandSeat } from "./land-rows.ts";
+import { LAND_ROWS, WRITE_ANEW, type LandRow, type LandSeat } from "./land-rows.ts";
 
 const found = document.querySelector<HTMLElement>('[aria-labelledby="grp-land"] .ledger');
 if (found === null) throw new Error("no Land ledger on this page");
@@ -14,7 +14,12 @@ const rowOf = (row: LandRow): HTMLElement => {
   return el;
 };
 
-const inputsOf = (row: Element): HTMLInputElement[] => [...row.querySelectorAll<HTMLInputElement>("input")];
+type Held = HTMLInputElement | HTMLSelectElement;
+
+const inputsOf = (row: Element): Held[] => [...row.querySelectorAll<Held>("input, select")];
+
+const keepsValue = (el: Held): boolean =>
+  el instanceof HTMLSelectElement || el.type === "range" || el.type === "search";
 
 function lay(target: HTMLElement, els: readonly HTMLElement[], anchor: Element): void {
   let next: Element = anchor;
@@ -35,8 +40,9 @@ function markHeld(row: HTMLElement, held: boolean): void {
     }
     input.setAttribute("aria-disabled", "true");
     input.setAttribute("aria-describedby", "land-held-note");
-    input.dataset["held"] = input.type === "range" ? input.value : input.checked ? "1" : "0";
-    if (input.type === "range") input.setAttribute("aria-valuetext", "held");
+    input.dataset["held"] =
+      input instanceof HTMLInputElement && !keepsValue(input) ? (input.checked ? "1" : "0") : input.value;
+    if (input instanceof HTMLInputElement && input.type === "range") input.setAttribute("aria-valuetext", "held");
   }
   if (held && readout !== null) readout.textContent = "held";
 }
@@ -54,7 +60,14 @@ export function seatLand(seat: LandSeat): void {
     states.filter((s) => s.state === "held").map((s) => s.el),
     note,
   );
-  note.textContent = seat.note;
+  if (seat.road === undefined) note.textContent = seat.note;
+  else {
+    const a = document.createElement("a");
+    a.id = "land-held-road";
+    a.href = seat.road;
+    a.textContent = WRITE_ANEW;
+    note.replaceChildren(seat.note + " ", a);
+  }
   box.hidden = !states.some((s) => s.state === "held");
   for (const { el, state } of states) markHeld(el, state === "held");
 }
@@ -70,14 +83,14 @@ export function fillTracks(): void {
   for (const input of document.querySelectorAll<HTMLInputElement>('.broadside input[type="range"]')) fillTrack(input);
 }
 
-export function refuses(input: HTMLInputElement): boolean {
+export function refuses(input: Held): boolean {
   const row = input.closest(".l-row");
   if (row === null || row.closest(".held") === null) return false;
   for (const each of inputsOf(row)) {
-    if (each.type === "range") {
+    if (keepsValue(each)) {
       each.value = each.dataset["held"] ?? each.value;
-      fillTrack(each);
-    } else each.checked = each.dataset["held"] === "1";
+      if (each instanceof HTMLInputElement && each.type === "range") fillTrack(each);
+    } else if (each instanceof HTMLInputElement) each.checked = each.dataset["held"] === "1";
   }
   return true;
 }

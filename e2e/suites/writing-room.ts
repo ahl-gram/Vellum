@@ -11,6 +11,7 @@ import {
   wr6Written,
   wr7FailedDraw,
 } from "./writing-room/checks.ts";
+import { wr10Hold, wr14Road, wr9Explorer } from "./writing-room/carry.ts";
 import { writingKit } from "./writing-room/kit.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -30,6 +31,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("WR5", () => wr5Lettering(k));
   await step("WR6", () => wr6Written(k));
   await step("WR7", () => wr7FailedDraw(k));
+  await step("WR9", () => wr9Explorer(k));
+  await step("WR10", () => wr10Hold(k));
+  await step("WR14", () => wr14Road(k));
   await ctx.send("Emulation.clearDeviceMetricsOverride");
   gate.check("WR0 the Writing Room logged no console error and fetched nothing that answered 4xx");
 }
