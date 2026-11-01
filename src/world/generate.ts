@@ -17,6 +17,7 @@ import { findLakes } from "../hydrology/lakes.ts";
 import { buildHeightfield, looseningOf, type MapType } from "../terrain/heightfield.ts";
 import { checkLandFraction, pickSeaLevel } from "../terrain/sealevel.ts";
 import { outlineCoverage } from "../terrain/outline-distance.ts";
+import { slopeField } from "../terrain/slope.ts";
 import { CULTURES, createNamer, makeMapTitle, type Culture, type MapTitle, type Namer } from "../society/names.ts";
 import { placeSettlements, type Settlement } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
@@ -29,6 +30,7 @@ import { nameSetOf } from "../society/hamlets.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import type { FeatureNames, NamedSettlement, Winds, World, WorldRecipe } from "./types.ts";
 import { terrainInputsOf } from "./terrain-inputs.ts";
+import { labelLandmasses, type LandmassLabels } from "./landmass.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
   ["island", 0.4],
@@ -138,17 +140,19 @@ type Ground = {
   readonly rivers: ReadonlyArray<River>;
   readonly riverCells: Uint8Array;
   readonly biomes: Uint8Array;
+  readonly slope: Field;
+  readonly landmasses: LandmassLabels;
 };
 
 function siteStage(ground: Ground, rng: Rng, citystate: boolean): Settlement[] {
-  const { elev, seaLevel, riverCells, biomes } = ground;
+  const { elev, seaLevel, riverCells, biomes, slope } = ground;
   return placeSettlements(
     elev,
     seaLevel,
     riverCells,
     biomes,
     rng.fork("sites"),
-    citystate ? { maxTowns: 2, maxVillages: 18 } : {},
+    citystate ? { maxTowns: 2, maxVillages: 18, slope } : { slope },
   );
 }
 
@@ -173,12 +177,14 @@ function realmStage(
   recipe: WorldRecipe,
   citystate: boolean,
 ): { realms: RealmsResult; roads: ReturnType<typeof buildRoads> } {
-  const { elev, seaLevel, riverCells } = ground;
+  const { elev, seaLevel, riverCells, slope, landmasses } = ground;
   const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
     ...(citystate ? { maxRealms: 1 } : {}),
     barrier: frontierMask(ground, recipe.gridW, recipe.gridH),
+    slope,
+    landmasses,
   });
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms);
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms, { slope, landmasses });
   return { realms, roads };
 }
 
@@ -329,7 +335,9 @@ export function generateWorld(recipe: WorldRecipe): World {
   const { elev, seaLevel, winds } = terrainStage(recipe, rng);
   const { dry, flow, rivers, riverCells } = hydrologyStage(recipe, elev, seaLevel, winds);
   const { climate, biomes } = climateStage(elev, seaLevel, dry, riverCells);
-  const ground: Ground = { elev, seaLevel, flow, rivers, riverCells, biomes };
+  const slope = slopeField(elev);
+  const landmasses = labelLandmasses(elev, seaLevel);
+  const ground: Ground = { elev, seaLevel, flow, rivers, riverCells, biomes, slope, landmasses };
 
   const citystate = mapType === "citystate";
   const settlements = siteStage(ground, rng, citystate);

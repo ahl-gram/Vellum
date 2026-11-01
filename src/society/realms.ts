@@ -2,7 +2,7 @@ import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { createMinHeap } from "../core/heap.ts";
 import { clamp } from "../core/math.ts";
 import { slopeField } from "../terrain/slope.ts";
-import { labelLandmasses } from "../world/landmass.ts";
+import { labelLandmasses, type LandmassLabels } from "../world/landmass.ts";
 import { attachSeatlessLandmasses } from "./sea-route.ts";
 import type { Settlement } from "./sites.ts";
 
@@ -24,6 +24,8 @@ const GENERATION_CEILING = 8;
 export type RealmOptions = {
   maxRealms?: number;
   barrier?: Uint8Array;
+  slope?: Field;
+  landmasses?: LandmassLabels;
 };
 
 export function partitionRealms(
@@ -35,8 +37,8 @@ export function partitionRealms(
 ): RealmsResult {
   const { w, h } = elev;
   const n = w * h;
-  const slope = slopeField(elev);
-  const { ids: landmassIds, sizes } = labelLandmasses(elev, seaLevel);
+  const slope = opts.slope ?? slopeField(elev);
+  const { ids: landmassIds, sizes } = opts.landmasses ?? labelLandmasses(elev, seaLevel);
   const lmOf = (s: Settlement): number => landmassIds[s.x + s.y * w] as number;
 
   const seats = selectSeats(settlements, sizes, n, lmOf, opts);
