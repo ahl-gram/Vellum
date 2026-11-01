@@ -47,7 +47,7 @@ export function seatOf(type: string, choice: ShapeOverrides, written: Written | 
   ) as Record<LandRow, RowState>;
   return {
     rows,
-    notes: { land: HELD_NOTES.written, strand: "" },
+    notes: { land: "", strand: HELD_NOTES.written },
     road: "/writing-room/" + writtenHash(written.sentence, written.version),
   };
 }
@@ -69,18 +69,11 @@ function seatPlain(type: string, choice: ShapeOverrides): LandSeat {
     coast: counted ? "hidden" : heldIf(!coastDraws(drawn)),
     ragged: counted ? "live" : "hidden",
   };
-  const land = outline
-    ? arch
-      ? loose
-        ? "the outline holds the count and the sea level; clear the place to free the islands"
-        : "the outline holds the count, the sea level and the coast; clear the place to free the islands"
-      : loose
-        ? HELD_NOTES.loose
-        : HELD_NOTES.exact
-    : counted
-      ? HELD_NOTES.counted
-      : HELD_NOTES.plain;
-  return { rows, notes: { land, strand: "" } };
+  const notes = {
+    land: outline && arch ? HELD_NOTES.count : "",
+    strand: outline ? (loose ? HELD_NOTES.loose : HELD_NOTES.exact) : counted ? HELD_NOTES.counted : HELD_NOTES.plain,
+  };
+  return { rows, notes };
 }
 
 export const ISLANDS_SEEDS_CHOICE = 1;

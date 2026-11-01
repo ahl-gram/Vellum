@@ -18,7 +18,7 @@ const tagline = "every seed is a world, draw one";
   room={room}
   description="Generate procedural fantasy maps in your browser. Every seed is a world."
   path="/explorer/"
-  extraCss={["/shared/living-chart.css", "/explorer/broadside.css", "/explorer/chart-drawer.css", "/explorer/loupe.css", "/shared/slide-away.css", "/shared/chart-stage.css"]}
+  extraCss={["/shared/living-chart.css", "/explorer/broadside.css", "/explorer/broadside-bill.css", "/explorer/chart-drawer.css", "/explorer/loupe.css", "/shared/slide-away.css", "/shared/chart-stage.css"]}
   chartRoom
 >
 <Fog />
@@ -44,8 +44,9 @@ const tagline = "every seed is a world, draw one";
   <p class="gloss">every chart is reproducible from the number in its margin</p>
 </RoomFolio>
 
-<!-- The Broadside (Issue #270 rulings): the controls grouped by what they do to the WORLD, The Land reshaping the geography and The Hand dressing the same world. Every input keeps its id, events, and redraw semantics exactly as `wirePageControls` in `src/site/explorer/app-wiring.ts` and `wireControls` in `src/site/explorer/controls.ts` wire them. -->
-<Slip id="broadside" verb="Make one" title="The Broadside" where="the land, and the hand that dresses it" fold="Fold the broadside away">
+<!-- The Broadside (Issue #270 rulings; Issue #1159, the posted bill): the controls grouped by what they do to the WORLD, The Land reshaping the geography, The Strand setting the water's edge and The Hand dressing the same world. Every input keeps its id, events, and redraw semantics exactly as `wirePageControls` in `src/site/explorer/app-wiring.ts` and `wireControls` in `src/site/explorer/controls.ts` wire them. -->
+<Slip id="broadside" verb="Make one" title="The Broadside" where="the land, the strand, and the hand that dresses it" fold="Fold the broadside away">
+  <a slot="mark" class="fn" href="/glossary/#broadside" data-note="note-broadside" aria-describedby="note-broadside" aria-label="note on the broadside">&#8258;</a>
   <div class="broadside">
     <div class="panel" role="group" aria-labelledby="grp-land">
       <p class="panel-head archivist-head" id="grp-land">The Land</p>
@@ -74,13 +75,6 @@ const tagline = "every seed is a world, draw one";
           <span class="l-label"><label for="place">shape</label><a class="fn" href="/glossary/#shape" data-note="note-shape" aria-describedby="note-shape" aria-label="note on the shape">&para;</a></span>
           <span class="l-ctl"><input id="place" class="control place-box" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place-options" autocomplete="off" spellcheck="false" placeholder="seed's choice"></span>
         </div>
-        <div class="l-row" data-row="looseness">
-          <span class="l-label"><label for="looseness">looseness</label></span>
-          <span class="land-end land-end-min">exact</span>
-          <input id="looseness" type="range" min="0" max="100" step="1" value="0">
-          <span class="land-end land-end-max">loose</span>
-          <span id="looseness-readout" class="land-readout"></span>
-        </div>
         <div class="l-row" data-row="islands" hidden>
           <span class="l-label"><label for="islands">islands</label><a class="fn" href="/glossary/#islands" data-note="note-islands" aria-describedby="note-islands" aria-label="note on the islands">&Vert;</a></span>
           <span class="land-end land-end-min">few</span>
@@ -95,6 +89,13 @@ const tagline = "every seed is a world, draw one";
             <label class="check seal">of every size <input id="isle-varied" type="radio" name="isle-size" value="varied"></label>
           </span>
         </div>
+        <div class="held" id="land-held" role="group" aria-label="held" hidden><p class="held-note" id="land-held-note"></p></div>
+      </div>
+    </div>
+    <div class="panel" role="group" aria-labelledby="grp-strand">
+      <p class="panel-head archivist-head" id="grp-strand">The Strand</p>
+      <p class="panel-gloss">these set the water&rsquo;s edge</p>
+      <div class="ledger">
         <div class="l-row" data-row="land">
           <span class="l-label"><label for="land">sea level</label></span>
           <span class="land-end land-end-min">more sea</span>
@@ -116,7 +117,14 @@ const tagline = "every seed is a world, draw one";
           <span class="land-end land-end-max">ragged</span>
           <span id="ragged-readout" class="land-readout"></span>
         </div>
-        <div class="held" id="land-held" role="group" aria-label="held" hidden><p class="held-note" id="land-held-note"></p></div>
+        <div class="l-row" data-row="looseness">
+          <span class="l-label"><label for="looseness">looseness</label></span>
+          <span class="land-end land-end-min">exact</span>
+          <input id="looseness" type="range" min="0" max="100" step="1" value="0">
+          <span class="land-end land-end-max">loose</span>
+          <span id="looseness-readout" class="land-readout"></span>
+        </div>
+        <div class="held" id="strand-held" role="group" aria-label="held" hidden><p class="held-note" id="strand-held-note"></p></div>
       </div>
     </div>
     <div class="panel" role="group" aria-labelledby="grp-hand">
@@ -146,6 +154,12 @@ const tagline = "every seed is a world, draw one";
           <label class="check seal">survey <input id="ages" type="checkbox"></label><a class="fn" href="/glossary/#survey" data-note="note-survey" aria-describedby="note-survey" aria-label="note on the survey">*</a>
         </span>
       </div>
+    </div>
+    <p class="imprint">Printed at the atelier, for Chart &#8470; <span id="imprint-no"></span></p>
+    <div class="fn-note" id="note-broadside" role="tooltip" popover="auto">
+      <strong class="fn-head">of the broadside</strong>
+      <span>In the old printing houses a broadside was one large sheet, printed on one side only and posted up for all to read: a proclamation, a ballad, a bill. Here it is the one sheet that sets out a world: the land, the strand, and the hand that dresses it.</span>
+      <a href="/glossary/#broadside">read more in the glossary</a>
     </div>
     <div class="fn-note" id="note-seeds-choice" role="tooltip" popover="auto">
       <strong class="fn-head">of the seed's choice</strong>

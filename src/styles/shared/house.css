@@ -26,11 +26,11 @@
 
 /* The print room's CHART No keeps its own 0.3em. */
 .archivist-head {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   letter-spacing: 0.18em;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--ink-faded);
+  color: var(--ink-dark);
 }
 
 /* The control idiom, one dark primary per page: the .place-hit exclusions keep the living-chart hit targets out of it (their reset loads after this sheet and wins ties), and input.control is the opt-in for inputs the attribute selector cannot see (home's seed input is type=text with inputmode=numeric for the iOS keypad). */

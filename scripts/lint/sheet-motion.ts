@@ -49,6 +49,8 @@ export const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS: readonly string[] = [
   "shared/motion.css :: .wordmark a",
   // A period mark inline in a control's label (Issue #270), not a list item.
   "explorer/broadside.css :: a.fn",
+  // The Broadside's title, an h2 sharing its line with its mark in the slip's head (Issue #1159), not a list item.
+  "explorer/broadside-bill.css :: #broadside .slip-head .card-title",
 ];
 
 const strings = { type: "array", items: { type: "string" } } as const;

@@ -54,6 +54,7 @@ import {
   caption,
   folioTitle,
   folioSub,
+  imprintNo,
   stageEl,
   chartDrawer,
   chartDrawerTab,
@@ -239,6 +240,7 @@ function writeFolio(res: { title: string; subtitle: string }, seed: number): voi
   folioTitle.textContent = `${res.title} · Chart № ${seed}`;
   const year = /in the year .+$/.exec(res.subtitle);
   folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
+  imprintNo.textContent = String(seed);
 }
 
 function keepDraw(res: DrawResult, seed: number, t0: number): void {

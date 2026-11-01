@@ -1,0 +1,122 @@
+/* The posted bill (Issue #1159): the Broadside dressed as a broadside, every arm scoped to #broadside so no other room's slip wears it; what broadside.css and house.css already set is changed there in place. */
+
+#broadside {
+  border: 2px solid var(--chart-ink);
+}
+/* The tacks stand outside the fold mark's box and take no pointer, so the mark stays in sight and in reach. */
+#broadside::before,
+#broadside::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 36% 32%,
+    var(--parchment-bright) 0 14%,
+    var(--control-gold) 26%,
+    var(--ink-brown) 64%,
+    var(--ink-dark) 100%
+  );
+  box-shadow: 1px 2px 2px rgb(from var(--chart-ink) r g b / 0.55);
+}
+#broadside::before {
+  left: 7px;
+}
+#broadside::after {
+  right: 7px;
+}
+
+#broadside .slip-head {
+  padding: 0.45rem 1.6rem 0.3rem;
+  text-align: center;
+}
+#broadside .slip-head .card-verb {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+#broadside .slip-head .card-verb::before,
+#broadside .slip-head .card-verb::after {
+  content: "";
+  flex: 1;
+  height: 6px;
+  background:
+    linear-gradient(var(--chart-ink), var(--chart-ink)) top / 100% 3px no-repeat,
+    linear-gradient(var(--chart-ink), var(--chart-ink)) bottom / 100% 1px no-repeat;
+}
+#broadside .slip-head .card-title {
+  display: inline-block;
+  font-size: calc(var(--slip-w) * 0.1);
+  line-height: 1;
+  letter-spacing: 0.07em;
+  margin: 0.18rem 0 0.1rem;
+  white-space: nowrap;
+}
+/* Outside the heading so its name stays "The Broadside"; raised to where the round drew it inside the title (16.03 px under the title's top against the mock's 16.14, Issue #1159). */
+#broadside .slip-head > a.fn {
+  font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: calc(var(--slip-w) * 0.05);
+  letter-spacing: 0;
+  margin-left: 0.1em;
+  vertical-align: calc(var(--slip-w) * 0.036);
+}
+#broadside .slip-head .card-where {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin: 0.15rem 0 0;
+  line-height: 1.2;
+}
+#broadside .slip-head .card-where::before,
+#broadside .slip-head .card-where::after {
+  content: "";
+  flex: 1;
+  height: 6px;
+  background:
+    linear-gradient(var(--chart-ink), var(--chart-ink)) top / 100% 1px no-repeat,
+    linear-gradient(var(--chart-ink), var(--chart-ink)) bottom / 100% 3px no-repeat;
+}
+#broadside .slip-head .slip-fold {
+  top: 0.4rem;
+  right: 0.2rem;
+}
+
+#broadside .panel + .panel > .panel-head,
+#broadside .panel + .panel > .panel-gloss {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#broadside .panel + .panel > .panel-head::before {
+  content: "";
+  width: 0.9rem;
+  height: 7px;
+  flex: none;
+  border-top: 3px double var(--chart-ink);
+}
+#broadside .panel + .panel > .panel-gloss::after {
+  content: "";
+  flex: 1;
+  height: 7px;
+  border-top: 3px double var(--chart-ink);
+}
+
+#broadside .imprint {
+  margin: 0;
+  padding-top: 0.2rem;
+  border-top: 1px solid var(--chart-ink);
+  text-align: center;
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  color: var(--ink-brown);
+}
