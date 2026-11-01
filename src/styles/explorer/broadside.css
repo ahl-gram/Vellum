@@ -140,12 +140,15 @@
   letter-spacing: 0.05em;
   color: var(--ink-brown);
 }
-.broadside .l-ctl > :is(select, input.place-box) {
-  padding-block: 0.22rem;
+/* 0.19rem keeps the 16px dropdowns in the 31px box the 15.2px ones had, so the Land slip's height at 1024 by 768 is unchanged (Issue #1140). */
+.broadside .l-ctl > select {
+  font-size: 1rem;
+  padding-block: 0.19rem;
 }
 .broadside .l-ctl > input.place-box {
   flex: 1;
   min-width: 0;
+  padding-block: 0.22rem;
   font-size: 1rem;
   font-family: inherit;
   text-overflow: ellipsis;
@@ -187,6 +190,9 @@
 #broadside .slip-head {
   padding-top: 0.95rem;
   padding-bottom: 0.55rem;
+}
+#broadside .slip-body {
+  padding-bottom: 0.4rem;
 }
 
 /* Reserved readout width: "34% land" and "warp 0.55" must never push their neighbours as they change length. */
