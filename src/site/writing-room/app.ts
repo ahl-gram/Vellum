@@ -10,8 +10,8 @@ import { $ } from "../shared/by-id.ts";
 import { errorText } from "../shared/error-text.ts";
 import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { accountOf, MAP_WORDS, refusalWords } from "./account.ts";
-import { readWritten, writtenHash } from "./address.ts";
-import { createFounder, lettered, opensOnPlate, recipeOverrides, type RoomReason } from "./founding.ts";
+import { readWritten, writtenHash } from "../shared/written-address.ts";
+import { createFounder, lettered, opensOnPlate, recipeOverrides, type RoomReason } from "../shared/founding.ts";
 import { renderAccount } from "./view.ts";
 
 type RoomState = {

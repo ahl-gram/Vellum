@@ -51,21 +51,25 @@ const tagline = "every seed is a world, draw one";
       <p class="panel-head archivist-head" id="grp-land">The Land</p>
       <p class="panel-gloss">these shape the world itself</p>
       <div class="ledger">
-        <span class="l-label"><label for="type">type</label><a class="fn" href="/glossary/#seeds-choice" data-note="note-seeds-choice" aria-describedby="note-seeds-choice" aria-label="note on the seed's choice">&dagger;</a></span>
-        <span class="l-ctl"><select id="type">
-          <option value="" selected>seed's choice</option>
-          <option value="island">island</option>
-          <option value="archipelago">archipelago</option>
-          <option value="continent">continent</option>
-          <option value="citystate">city-state</option>
-        </select></span>
-        <span class="l-label"><label for="band">climate</label></span>
-        <span class="l-ctl"><select id="band">
-          <option value="" selected>seed's choice</option>
-          <option value="temperate">temperate</option>
-          <option value="tropical">tropical</option>
-          <option value="polar">polar</option>
-        </select></span>
+        <div class="l-row" data-row="type">
+          <span class="l-label"><label for="type">type</label><a class="fn" href="/glossary/#seeds-choice" data-note="note-seeds-choice" aria-describedby="note-seeds-choice" aria-label="note on the seed's choice">&dagger;</a></span>
+          <span class="l-ctl"><select id="type">
+            <option value="" selected>seed's choice</option>
+            <option value="island">island</option>
+            <option value="archipelago">archipelago</option>
+            <option value="continent">continent</option>
+            <option value="citystate">city-state</option>
+          </select></span>
+        </div>
+        <div class="l-row" data-row="band">
+          <span class="l-label"><label for="band">climate</label></span>
+          <span class="l-ctl"><select id="band">
+            <option value="" selected>seed's choice</option>
+            <option value="temperate">temperate</option>
+            <option value="tropical">tropical</option>
+            <option value="polar">polar</option>
+          </select></span>
+        </div>
         <div class="l-row" data-row="place">
           <span class="l-label"><label for="place">shape</label><a class="fn" href="/glossary/#shape" data-note="note-shape" aria-describedby="note-shape" aria-label="note on the shape">&para;</a></span>
           <span class="l-ctl"><input id="place" class="control place-box" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place-options" autocomplete="off" spellcheck="false" placeholder="seed's choice"></span>

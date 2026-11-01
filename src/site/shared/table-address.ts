@@ -21,12 +21,14 @@ import {
   oneOf,
   overridesOfLand,
 } from "./address-grammar.ts";
-import { readShapeKeys, shapePairs, type ShapeOverrides } from "./shape-address.ts";
+import { readShapeKeys, shapeOf, shapePairs, type ShapeOverrides } from "./shape-address.ts";
 import { seedFromHash } from "../explorer/address.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
+import type { CultureId } from "../../society/culture-ids.ts";
+import type { WorldRecipe } from "../../world/types.ts";
 
 export const TABLE_KEY = "table";
 /** Issue #401 ruling 5. The refusal wording is the hosts', not the grammar's. */
@@ -43,6 +45,13 @@ export interface TableOverrides extends ShapeOverrides {
   readonly band?: ClimateBand;
   readonly landFraction?: number;
   readonly coastWarp?: number;
+  readonly culture?: CultureId;
+}
+
+export function tableOverridesOf(o: Partial<WorldRecipe>): TableOverrides {
+  void shapeOf;
+  void o;
+  return {};
 }
 
 export interface TableWorld {

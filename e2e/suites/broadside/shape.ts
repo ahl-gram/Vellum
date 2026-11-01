@@ -31,13 +31,13 @@ const rows = (live: string[], held: string[], hidden: string[]): Record<string, 
     ]),
   );
 
-const PLAIN = rows(["place", "land", "coast"], ["looseness"], ["islands", "sizes", "ragged"]);
-const EXACT = rows(["place", "looseness"], ["land", "coast"], ["islands", "sizes", "ragged"]);
-const LOOSE = rows(["place", "looseness", "coast"], ["land"], ["islands", "sizes", "ragged"]);
-const ARCH_PLAIN = rows(["place", "islands", "land", "coast"], ["looseness"], ["sizes", "ragged"]);
-const COUNTED = rows(["place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]);
-const ON_ARCH = rows(["place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]);
-const LOOSENED = rows(["place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]);
+const PLAIN = rows(["type", "band", "place", "land", "coast"], ["looseness"], ["islands", "sizes", "ragged"]);
+const EXACT = rows(["type", "band", "place", "looseness"], ["land", "coast"], ["islands", "sizes", "ragged"]);
+const LOOSE = rows(["type", "band", "place", "looseness", "coast"], ["land"], ["islands", "sizes", "ragged"]);
+const ARCH_PLAIN = rows(["type", "band", "place", "islands", "land", "coast"], ["looseness"], ["sizes", "ragged"]);
+const COUNTED = rows(["type", "band", "place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]);
+const ON_ARCH = rows(["type", "band", "place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]);
+const LOOSENED = rows(["type", "band", "place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]);
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const at = (want: Record<string, string>, place: string) => (d: Seat) => same(d.state, want) && d.place === place;

@@ -1,3 +1,7 @@
+import type { WorldRecipe } from "../../world/types.ts";
+import { emitLandKeys, gateLand } from "./address-grammar.ts";
+import { SHAPE_KEYS, shapeOf } from "./shape-address.ts";
+
 const FOUND_KEY = "found";
 const VERSION_KEY = "v";
 const UNVERSIONED = 1;
@@ -21,4 +25,34 @@ export function writtenHash(sentence: string, version: number): string {
       [VERSION_KEY, String(version)],
     ]).toString()
   );
+}
+
+const IDENTITY_KEYS: ReadonlySet<string> = new Set([
+  FOUND_KEY,
+  VERSION_KEY,
+  "seed",
+  "type",
+  "band",
+  "land",
+  "coast",
+  ...SHAPE_KEYS,
+]);
+
+export function writtenParams(params: URLSearchParams, written: Written | null): URLSearchParams {
+  void written;
+  void IDENTITY_KEYS;
+  return params;
+}
+
+export function identityParams(
+  params: URLSearchParams,
+  seed: number,
+  overrides: Partial<WorldRecipe>,
+): URLSearchParams {
+  void seed;
+  void overrides;
+  void emitLandKeys;
+  void gateLand;
+  void shapeOf;
+  return params;
 }

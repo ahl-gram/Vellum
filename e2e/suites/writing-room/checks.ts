@@ -1,5 +1,5 @@
 import { foundWorld } from "../../../src/world/founding/found.ts";
-import { writtenHash } from "../../../src/site/writing-room/address.ts";
+import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import type { Read, WritingKit } from "./kit.ts";
 
 const FLAGSHIP = "a cold archipelago of black pines, iron harbors, and a drowned kingdom";
