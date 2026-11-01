@@ -182,6 +182,7 @@ async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Pro
     "BR2 the Press keeps one row on seed 42 at the harness's window, every press on it, and the journal button is the print link's steady gold peer: same row, standing through tick and untick",
     br2.before.cls &&
       br2.sameRow &&
+      br2.before.tops.length === 3 &&
       new Set(br2.before.tops).size === 1 &&
       br2.before.j.shown &&
       br2.during.shown &&

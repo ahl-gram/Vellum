@@ -3,7 +3,7 @@ import { HELD_NOTES, LAND_ROWS, WRITE_ANEW, seatOf } from "../../../src/site/exp
 import { recipeOverrides } from "../../../src/site/shared/founding.ts";
 import { SHAPE_KEYS } from "../../../src/site/shared/shape-address.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
-import { SEAT } from "../broadside/shape.ts";
+import { SEAT, holdFaults } from "../broadside/shape.ts";
 import { sendKey } from "../../support/home.ts";
 import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
@@ -146,6 +146,7 @@ export async function wr10Hold(k: WritingKit): Promise<void> {
       seat.notes.land === "" &&
       seat.notes.strand === `${HELD_NOTES.written} ${WRITE_ANEW}` &&
       held.road === "strand-held-note" &&
+      holdFaults(seat).length === 0 &&
       sameRows &&
       refused.band === "polar" &&
       refused.type === "archipelago" &&

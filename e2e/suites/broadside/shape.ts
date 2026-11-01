@@ -14,18 +14,22 @@ const AEGEAN = "The Aegean: a thousand small isles, olive groves, a warm wine-da
 type Seat = {
   state: Record<string, string>;
   notes: { land: string; strand: string };
+  boxes: { land: boolean; strand: boolean };
+  described: Record<string, string | null>;
   place: string;
   landDisabled: string | null;
   readouts: Record<"land" | "coast" | "looseness" | "islands" | "ragged", string | null>;
 };
-export const SEAT: Payload<Seat> = `(()=>{const group=${JSON.stringify(GROUP_OF)},state={};
+export const SEAT: Payload<Seat> = `(()=>{const group=${JSON.stringify(GROUP_OF)},state={},described={};
   for(const row of ${JSON.stringify(LAND_ROWS)}){const r=document.querySelector('#broadside .l-row[data-row="'+row+'"]');
+    const ctl=r&&r.querySelector("input,select");described[row]=ctl?ctl.getAttribute("aria-describedby"):null;
     const shown=!!r&&!!r.firstElementChild&&r.firstElementChild.getClientRects().length>0;if(!shown){state[row]="hidden";continue;}
     const panel=r.closest('.panel[role="group"]'),box=r.closest(".held");
     state[row]=!panel||panel.getAttribute("aria-labelledby")!=="grp-"+group[row]||(!!box&&box.id!==group[row]+"-held")?"astray":box?"held":"live";}
   const noteOf=(g)=>{const box=document.getElementById(g+"-held"),note=document.getElementById(g+"-held-note");return !!box&&!!note&&box.getClientRects().length>0&&note.getClientRects().length>0?note.textContent:"";};
+  const shown=(id)=>{const e=document.getElementById(id);return !!e&&e.getClientRects().length>0;};
   const t=(id)=>{const e=document.getElementById(id);return e?e.textContent:null;};
-  return{state,notes:{land:noteOf("land"),strand:noteOf("strand")},place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
+  return{state,described,notes:{land:noteOf("land"),strand:noteOf("strand")},boxes:{land:shown("land-held"),strand:shown("strand-held")},place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
     readouts:{land:t("land-readout"),coast:t("coast-readout"),looseness:t("looseness-readout"),islands:t("islands-readout"),ragged:t("ragged-readout")}};})()`;
 
 const rows = (live: string[], held: string[], hidden: string[]): Record<string, string> =>
@@ -46,6 +50,24 @@ const LOOSENED = rows(["type", "band", "place", "looseness", "coast"], ["islands
 const WRITTEN = rows([], ["type", "band", "place", "islands", "sizes", "land", "ragged", "looseness"], ["coast"]);
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+
+// Each group's box shows exactly when the group holds a row, and every held row is described by its own group's note, or by the Strand's where that note is empty (the written world's Land rows), and no live row is described at all (Issue #1159).
+export function holdFaults(seat: Seat): string[] {
+  const faults: string[] = [];
+  for (const g of ["land", "strand"] as const) {
+    const held = LAND_ROWS.filter((r) => GROUP_OF[r] === g && seat.state[r] === "held");
+    if (seat.boxes[g] !== held.length > 0)
+      faults.push(`the ${g} box shows ${seat.boxes[g]} with ${held.length} held rows`);
+    for (const r of held) {
+      const want = seat.notes[g] === "" ? "strand-held-note" : `${g}-held-note`;
+      if (seat.described[r] !== want) faults.push(`${r} is described by ${seat.described[r]}, not ${want}`);
+    }
+  }
+  for (const r of LAND_ROWS)
+    if (seat.state[r] !== "held" && seat.described[r] !== null)
+      faults.push(`${r} is not held yet described by ${seat.described[r]}`);
+  return faults;
+}
 const at = (want: Record<string, string>, place: string) => (d: Seat) => same(d.state, want) && d.place === place;
 
 type Fit = { sh: number; ch: number };
@@ -310,7 +332,7 @@ export async function br17Holds(k: BroadsideKit): Promise<void> {
   for (const c of CASES) {
     await goto(EXP + c.hash, "broadside-" + c.name);
     const seat = await settle(SEAT, at(c.want, c.place), `BR17 the ${c.name} seat`);
-    seen.push({ name: c.name, ok: same(seat.notes, c.notes) && c.ok(seat), seat });
+    seen.push({ name: c.name, ok: same(seat.notes, c.notes) && holdFaults(seat).length === 0 && c.ok(seat), seat });
     refusals.push(...(await pressesRefused(k, PRESSES[c.name] ?? [])).map((f) => `${c.name} ${f}`));
   }
   check(

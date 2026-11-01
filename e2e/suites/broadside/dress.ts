@@ -108,9 +108,9 @@ export async function br21Fields({ evaluate, check }: BroadsideKit): Promise<voi
   );
 }
 
-type Bill = { width: string; style: string; colour: number[]; before: string; after: string };
+type Bill = { width: string; style: string; colour: number[]; before: string; after: string; tacksInert: boolean };
 const BILL: Payload<Bill | null> = `(() => { const rgba = ${PAGE_RGBA}, s = document.querySelector("#BILLID"); if (!s) return null;
-  const c = getComputedStyle(s); return { width: c.borderTopWidth, style: c.borderTopStyle, colour: rgba(c.borderTopColor), before: getComputedStyle(s, "::before").content, after: getComputedStyle(s, "::after").content }; })()`;
+  const c = getComputedStyle(s); return { width: c.borderTopWidth, style: c.borderTopStyle, colour: rgba(c.borderTopColor), before: getComputedStyle(s, "::before").content, after: getComputedStyle(s, "::after").content, tacksInert: ["::before", "::after"].every((p) => getComputedStyle(s, p).pointerEvents === "none") }; })()`;
 const billOf = (id: string): Payload<Bill | null> => BILL.replace("BILLID", id);
 const inkBorder = (b: Bill | null): boolean => !!b && b.width === "2px" && nearRgba(b.colour, tokenRgba("--chart-ink"));
 
@@ -126,6 +126,7 @@ export async function br22Bill(k: BroadsideKit): Promise<void> {
       broadside?.style === "solid" &&
       broadside.before === '""' &&
       broadside.after === '""' &&
+      broadside.tacksInert &&
       portfolio?.before === "none" &&
       portfolio.after === "none" &&
       !inkBorder(portfolio),
