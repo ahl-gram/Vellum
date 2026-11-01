@@ -1,5 +1,6 @@
 // The Broadside's shape and count controls (Issue #854, pull request 2): the Land panel's rows by state, the held rows' refusal, the shape box and its list, and the twins that scroll.
-import { HELD_NOTES, LAND_ROWS, looseWord } from "../../../src/site/explorer/land-rows.ts";
+import { GROUP_OF, HELD_NOTES, LAND_ROWS, looseWord } from "../../../src/site/explorer/land-rows.ts";
+import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import { sendKey } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
@@ -8,19 +9,23 @@ import type { BroadsideKit } from "./kit.ts";
 const TEXAS = "ne-1159315211";
 const TEXOMA = "ne-1159124507";
 const DRAFTING = "Drafting…";
+const AEGEAN = "The Aegean: a thousand small isles, olive groves, a warm wine-dark sea, and gods with Greek names.";
 
 type Seat = {
   state: Record<string, string>;
-  note: string;
+  notes: { land: string; strand: string };
   place: string;
   landDisabled: string | null;
   readouts: Record<"land" | "coast" | "looseness" | "islands" | "ragged", string | null>;
 };
-const SEAT: Payload<Seat> = `(()=>{const ledger=document.querySelector('[aria-labelledby="grp-land"] .ledger'),box=document.getElementById("land-held"),note=document.getElementById("land-held-note");
-  const state={};for(const row of ${JSON.stringify(LAND_ROWS)}){const r=ledger.querySelector('.l-row[data-row="'+row+'"]');
-    const shown=!!r&&!!r.firstElementChild&&r.firstElementChild.getClientRects().length>0;state[row]=!shown?"hidden":box.contains(r)?"held":"live";}
+export const SEAT: Payload<Seat> = `(()=>{const group=${JSON.stringify(GROUP_OF)},state={};
+  for(const row of ${JSON.stringify(LAND_ROWS)}){const r=document.querySelector('#broadside .l-row[data-row="'+row+'"]');
+    const shown=!!r&&!!r.firstElementChild&&r.firstElementChild.getClientRects().length>0;if(!shown){state[row]="hidden";continue;}
+    const panel=r.closest('.panel[role="group"]'),box=r.closest(".held");
+    state[row]=!panel||panel.getAttribute("aria-labelledby")!=="grp-"+group[row]||(!!box&&box.id!==group[row]+"-held")?"astray":box?"held":"live";}
+  const noteOf=(g)=>{const box=document.getElementById(g+"-held"),note=document.getElementById(g+"-held-note");return !!box&&!!note&&box.getClientRects().length>0&&note.getClientRects().length>0?note.textContent:"";};
   const t=(id)=>{const e=document.getElementById(id);return e?e.textContent:null;};
-  return{state,note:box.getClientRects().length>0?note.textContent:"",place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
+  return{state,notes:{land:noteOf("land"),strand:noteOf("strand")},place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
     readouts:{land:t("land-readout"),coast:t("coast-readout"),looseness:t("looseness-readout"),islands:t("islands-readout"),ragged:t("ragged-readout")}};})()`;
 
 const rows = (live: string[], held: string[], hidden: string[]): Record<string, string> =>
@@ -38,6 +43,7 @@ const ARCH_PLAIN = rows(["type", "band", "place", "islands", "land", "coast"], [
 const COUNTED = rows(["type", "band", "place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]);
 const ON_ARCH = rows(["type", "band", "place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]);
 const LOOSENED = rows(["type", "band", "place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]);
+const WRITTEN = rows([], ["type", "band", "place", "islands", "sizes", "land", "ragged", "looseness"], ["coast"]);
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const at = (want: Record<string, string>, place: string) => (d: Seat) => same(d.state, want) && d.place === place;
@@ -72,24 +78,13 @@ const LOOSE_DRAWN: Payload<{ status: string; loose: string | null }> =
   `(()=>{const s=document.querySelector("#map > svg[data-vellum-style]");return{status:document.getElementById("status").textContent,loose:s?s.getAttribute("data-vellum-looseness"):null};})()`;
 
 export async function br16To19(k: BroadsideKit): Promise<void> {
-  const { evaluate, send, sleep, check, goto, EXP } = k;
+  const { evaluate, send, sleep, check } = k;
   const settle = makeSettle({ evaluate, sleep });
   const stable = makeStable(settle);
   const fits = async (label: string): Promise<Fit> => stable(FIT, label, { departed: (d) => d.ch > 0 });
   await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
   try {
-    await goto(EXP + "#seed=1&style=antique&type=archipelago&islands=20", "broadside-counted");
-    const counted = await settle(
-      SEAT,
-      (d) => at(COUNTED, "")(d) && d.readouts.islands === "about 20",
-      "BR17 the counted seat",
-    );
-    const countedFit = await fits("BR16 the counted slip at rest");
-    check(
-      "BR17 the counted instance: the place, islands, sizes and ragged live; looseness and sea level held; coast hidden; the note is the counted one",
-      counted.note === HELD_NOTES.counted && counted.readouts.ragged === "round" && counted.readouts.land === "held",
-      JSON.stringify(counted),
-    );
+    const countedFit = await br16Counted(k, fits);
 
     await br18Refuses(k);
     await br19Picks(k);
@@ -103,20 +98,54 @@ export async function br16To19(k: BroadsideKit): Promise<void> {
     const onArch = await settle(SEAT, (d) => at(ON_ARCH, "Texas")(d), "BR17 the place-on-the-archipelago seat");
     const archFit = await fits("BR16 the slip with a place on the archipelago at rest");
     check(
-      "BR17 a place on the archipelago holds the count: the place and looseness live; islands, sizes, sea level and coast held; the note is the outline's",
-      onArch.note === HELD_NOTES.archExact && onArch.readouts.islands === "held" && onArch.landDisabled === "true",
+      "BR17 a place on the archipelago holds the count: the place and looseness live; islands, sizes, sea level and coast held; the Land's note is the count's and the Strand's the outline's",
+      same(onArch.notes, { land: HELD_NOTES.count, strand: HELD_NOTES.exact }) &&
+        onArch.readouts.islands === "held" &&
+        onArch.landDisabled === "true",
       JSON.stringify(onArch),
     );
     const loosened = await br16Loosened(k, fits);
-    check(
-      "BR16 the Broadside fits 1024 by 768 without scrolling: counted, with a place on the archipelago, and with that place loosened to the end over the held count",
-      countedFit.sh <= countedFit.ch && archFit.sh <= archFit.ch && loosened.fit.sh <= loosened.fit.ch,
-      JSON.stringify({ countedFit, archFit, loosened }),
-    );
     await br19Clears(k);
+    const writtenFit = await br16Written(k, fits);
+    check(
+      "BR16 the Broadside fits 1024 by 768 without scrolling: counted, with a place on the archipelago, with that place loosened to the end over the held count, and on a written counted archipelago (Issue #1159)",
+      countedFit.sh <= countedFit.ch &&
+        archFit.sh <= archFit.ch &&
+        loosened.fit.sh <= loosened.fit.ch &&
+        writtenFit.sh <= writtenFit.ch,
+      JSON.stringify({ countedFit, archFit, loosened, writtenFit }),
+    );
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
+}
+
+async function br16Counted(k: BroadsideKit, fits: (label: string) => Promise<Fit>): Promise<Fit> {
+  const { evaluate, sleep, check, goto, EXP } = k;
+  const settle = makeSettle({ evaluate, sleep });
+  await goto(EXP + "#seed=1&style=antique&type=archipelago&islands=20", "broadside-counted");
+  const counted = await settle(
+    SEAT,
+    (d) => at(COUNTED, "")(d) && d.readouts.islands === "about 20",
+    "BR17 the counted seat",
+  );
+  const countedFit = await fits("BR16 the counted slip at rest");
+  check(
+    "BR17 the counted instance: the place, islands, sizes and ragged live; looseness and sea level held; coast hidden; the Strand's note is the counted one",
+    same(counted.notes, { land: "", strand: HELD_NOTES.counted }) &&
+      counted.readouts.ragged === "round" &&
+      counted.readouts.land === "held",
+    JSON.stringify(counted),
+  );
+  return countedFit;
+}
+
+async function br16Written(k: BroadsideKit, fits: (label: string) => Promise<Fit>): Promise<Fit> {
+  const { evaluate, sleep, goto, EXP } = k;
+  const settle = makeSettle({ evaluate, sleep });
+  await goto(EXP + writtenHash(AEGEAN, 1), "broadside-written");
+  await settle(SEAT, at(WRITTEN, ""), "BR16 the written counted archipelago's seat");
+  return fits("BR16 the written counted archipelago at rest");
 }
 
 async function br16Loosened(k: BroadsideKit, fits: (label: string) => Promise<Fit>): Promise<{ fit: Fit; seat: Seat }> {
@@ -236,7 +265,7 @@ const CASES: Array<{
   hash: string;
   want: Record<string, string>;
   place: string;
-  note: string;
+  notes: { land: string; strand: string };
   ok: (d: Seat) => boolean;
 }> = [
   {
@@ -244,7 +273,7 @@ const CASES: Array<{
     hash: "#seed=30&style=antique&type=island&outline=" + TEXAS,
     want: EXACT,
     place: "Texas",
-    note: HELD_NOTES.exact,
+    notes: { land: "", strand: HELD_NOTES.exact },
     ok: (d) => d.landDisabled === "true" && d.readouts.land === "held" && d.readouts.coast === "held",
   },
   {
@@ -252,7 +281,7 @@ const CASES: Array<{
     hash: "#seed=30&style=antique&type=island&outline=" + TEXAS + "&looseness=75",
     want: LOOSE,
     place: "Texas",
-    note: HELD_NOTES.loose,
+    notes: { land: "", strand: HELD_NOTES.loose },
     ok: (d) => d.readouts.looseness === "looser" && d.readouts.coast !== "held",
   },
   {
@@ -260,7 +289,7 @@ const CASES: Array<{
     hash: "#seed=1&style=antique&type=archipelago",
     want: ARCH_PLAIN,
     place: "",
-    note: HELD_NOTES.plain,
+    notes: { land: "", strand: HELD_NOTES.plain },
     ok: (d) => d.readouts.islands === "seed's choice" && d.landDisabled === null,
   },
   {
@@ -268,7 +297,7 @@ const CASES: Array<{
     hash: "#seed=42&style=antique",
     want: PLAIN,
     place: "",
-    note: HELD_NOTES.plain,
+    notes: { land: "", strand: HELD_NOTES.plain },
     ok: (d) => d.landDisabled === null && d.readouts.looseness === "held",
   },
 ];
@@ -281,7 +310,7 @@ export async function br17Holds(k: BroadsideKit): Promise<void> {
   for (const c of CASES) {
     await goto(EXP + c.hash, "broadside-" + c.name);
     const seat = await settle(SEAT, at(c.want, c.place), `BR17 the ${c.name} seat`);
-    seen.push({ name: c.name, ok: seat.note === c.note && c.ok(seat), seat });
+    seen.push({ name: c.name, ok: same(seat.notes, c.notes) && c.ok(seat), seat });
     refusals.push(...(await pressesRefused(k, PRESSES[c.name] ?? [])).map((f) => `${c.name} ${f}`));
   }
   check(
@@ -290,7 +319,7 @@ export async function br17Holds(k: BroadsideKit): Promise<void> {
     refusals.join("; "),
   );
   check(
-    "BR17 the Land panel holds what the world on screen cannot use and shows the rest, each held row reading held under its note",
+    "BR17 the Land and the Strand each hold what the world on screen cannot use and show the rest, each held row reading held under its own box's note",
     seen.every((s) => s.ok),
     JSON.stringify(seen),
   );

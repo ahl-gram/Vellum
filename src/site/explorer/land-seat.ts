@@ -60,13 +60,13 @@ export function seatLand(seat: LandSeat): void {
     states.filter((s) => s.state === "held").map((s) => s.el),
     note,
   );
-  if (seat.road === undefined) note.textContent = seat.note;
+  if (seat.road === undefined) note.textContent = seat.notes.land;
   else {
     const a = document.createElement("a");
     a.id = "land-held-road";
     a.href = seat.road;
     a.textContent = WRITE_ANEW;
-    note.replaceChildren(seat.note + " ", a);
+    note.replaceChildren(seat.notes.land + " ", a);
   }
   box.hidden = !states.some((s) => s.state === "held");
   for (const { el, state } of states) markHeld(el, state === "held");

@@ -94,18 +94,18 @@ function roleHeads(kits: Record<string, KitSample | undefined>): string[] {
         nearRgba(d.color, tokenRgba("--parchment")),
     );
   }
-  for (const sel of ["#grp-land", "#grp-hand"]) {
+  for (const sel of ["#grp-land", "#grp-strand", "#grp-hand"]) {
     const head = at("/explorer/", sel);
     want(
       "/explorer/",
       sel,
       !!head &&
-        near("/explorer/", head.size, 0.82 * rem("/explorer/")) &&
+        near("/explorer/", head.size, 0.88 * rem("/explorer/")) &&
         head.spacing !== null &&
-        near("/explorer/", head.spacing, 0.18 * 0.82 * rem("/explorer/")) &&
+        near("/explorer/", head.spacing, 0.18 * 0.88 * rem("/explorer/")) &&
         head.weight === "600" &&
         head.transform === "uppercase" &&
-        nearRgba(head.color, tokenRgba("--ink-faded")),
+        nearRgba(head.color, tokenRgba("--ink-dark")),
     );
   }
   const find = at("/glossary/", ".find input[type=search]");

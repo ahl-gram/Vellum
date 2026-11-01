@@ -3,27 +3,37 @@ import { coastDraws, drawnShape, landDraws, type ShapeOverrides } from "../share
 import type { OutlineId } from "../../world/outline-ids.ts";
 import type { IsleSize } from "../../terrain/lobes.ts";
 
-export const LAND_ROWS = ["type", "band", "place", "looseness", "islands", "sizes", "land", "coast", "ragged"] as const;
+export const LAND_ROWS = ["type", "band", "place", "islands", "sizes", "land", "coast", "ragged", "looseness"] as const;
 export type LandRow = (typeof LAND_ROWS)[number];
 export type RowState = "live" | "held" | "hidden";
+export type Group = "land" | "strand";
 
-export const HELD_NOTES: Readonly<
-  Record<"plain" | "exact" | "loose" | "counted" | "archExact" | "archLoose" | "written", string>
-> = {
+export const GROUP_OF: Readonly<Record<LandRow, Group>> = {
+  type: "land",
+  band: "land",
+  place: "land",
+  islands: "land",
+  sizes: "land",
+  land: "strand",
+  coast: "strand",
+  ragged: "strand",
+  looseness: "strand",
+};
+
+export const HELD_NOTES: Readonly<Record<"plain" | "exact" | "loose" | "counted" | "count" | "written", string>> = {
   written: "the sentence holds the land; to change it,",
   plain: "the looseness waits for a place to loosen",
   exact: "the outline holds the sea level and the coast; loosen it to free the coast",
   loose: "the outline holds the sea level",
   counted: "the count holds the sea level, and the looseness waits for a place",
-  archExact: "the outline holds the count, the sea level and the coast; clear the place to free the islands",
-  archLoose: "the outline holds the count and the sea level; clear the place to free the islands",
+  count: "the outline holds the count; clear the place to free the islands",
 };
 
 export const WRITE_ANEW = "write it anew in the Writing Room";
 
 export interface LandSeat {
   readonly rows: Readonly<Record<LandRow, RowState>>;
-  readonly note: string;
+  readonly notes: Readonly<Record<Group, string>>;
   readonly road?: string;
 }
 
@@ -35,7 +45,11 @@ export function seatOf(type: string, choice: ShapeOverrides, written: Written | 
   const rows = Object.fromEntries(
     LAND_ROWS.map((row) => [row, plain.rows[row] === "hidden" ? "hidden" : "held"]),
   ) as Record<LandRow, RowState>;
-  return { rows, note: HELD_NOTES.written, road: "/writing-room/" + writtenHash(written.sentence, written.version) };
+  return {
+    rows,
+    notes: { land: HELD_NOTES.written, strand: "" },
+    road: "/writing-room/" + writtenHash(written.sentence, written.version),
+  };
 }
 
 function seatPlain(type: string, choice: ShapeOverrides): LandSeat {
@@ -55,18 +69,18 @@ function seatPlain(type: string, choice: ShapeOverrides): LandSeat {
     coast: counted ? "hidden" : heldIf(!coastDraws(drawn)),
     ragged: counted ? "live" : "hidden",
   };
-  const note = outline
+  const land = outline
     ? arch
       ? loose
-        ? HELD_NOTES.archLoose
-        : HELD_NOTES.archExact
+        ? "the outline holds the count and the sea level; clear the place to free the islands"
+        : "the outline holds the count, the sea level and the coast; clear the place to free the islands"
       : loose
         ? HELD_NOTES.loose
         : HELD_NOTES.exact
     : counted
       ? HELD_NOTES.counted
       : HELD_NOTES.plain;
-  return { rows, note };
+  return { rows, notes: { land, strand: "" } };
 }
 
 export const ISLANDS_SEEDS_CHOICE = 1;

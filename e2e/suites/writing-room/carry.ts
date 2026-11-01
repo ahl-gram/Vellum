@@ -3,6 +3,7 @@ import { HELD_NOTES, LAND_ROWS, WRITE_ANEW, seatOf } from "../../../src/site/exp
 import { recipeOverrides } from "../../../src/site/shared/founding.ts";
 import { SHAPE_KEYS } from "../../../src/site/shared/shape-address.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
+import { SEAT } from "../broadside/shape.ts";
 import { sendKey } from "../../support/home.ts";
 import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
@@ -109,29 +110,18 @@ export async function wr9Explorer(k: WritingKit): Promise<void> {
   );
 }
 
-type Held = {
-  readonly shown: boolean;
-  readonly note: string;
-  readonly state: Record<string, string>;
-  readonly road: boolean;
-  readonly bandHeld: boolean;
-};
+type Held = { readonly shown: boolean; readonly road: string | null; readonly bandHeld: boolean };
 
 const HELD_READ = `(() => {
-  const ledger = document.querySelector('[aria-labelledby="grp-land"] .ledger'), box = document.getElementById("land-held");
-  const state = {};
-  for (const row of ${JSON.stringify(LAND_ROWS)}) {
-    const r = ledger.querySelector('.l-row[data-row="' + row + '"]');
-    const shown = !!r && !!r.firstElementChild && r.firstElementChild.getClientRects().length > 0;
-    state[row] = !shown ? "hidden" : box.contains(r) ? "held" : "live";
-  }
-  return { shown: box.getClientRects().length > 0, note: document.getElementById("land-held-note").textContent, state, road: !!document.getElementById("land-held-road"), bandHeld: !!document.getElementById("band").closest(".held") };
+  const a = document.getElementById("land-held-road"), n = a && a.closest(".held-note");
+  return { shown: document.getElementById("land-held").getClientRects().length > 0, road: a ? (n ? n.id : "") : null, bandHeld: !!document.getElementById("band").closest(".held") };
 })()`;
 
 export async function wr10Hold(k: WritingKit): Promise<void> {
   const { explorer, until } = carryKit(k);
   await explorer(writtenHash(FLAGSHIP, 1));
   const held = await k.evaluate<Held>(HELD_READ);
+  const seat = await k.evaluate(SEAT);
   const wanted = seatOf("archipelago", {}, { sentence: FLAGSHIP, version: 1 }).rows;
   const refused = await k.evaluate<{ band: string; type: string; status: string }>(
     `(() => { const b = document.getElementById("band"), t = document.getElementById("type"); b.value = "tropical"; b.dispatchEvent(new Event("change", { bubbles: true })); t.value = "island"; t.dispatchEvent(new Event("change", { bubbles: true })); return { band: b.value, type: t.value, status: document.getElementById("status").textContent }; })()`,
@@ -149,12 +139,13 @@ export async function wr10Hold(k: WritingKit): Promise<void> {
   );
   const released = await k.evaluate<Chart>(chartRead(EXPLORER_CHART));
   const freed = await k.evaluate<Held>(HELD_READ);
-  const sameRows = LAND_ROWS.every((row) => held.state[row] === wanted[row]);
+  const sameRows = LAND_ROWS.every((row) => seat.state[row] === wanted[row]);
   k.check(
-    "WR10 a written world holds the Explorer's Land panel under the sentence's note and refuses a change of its type or its climate, and a new chart number lets it go with its settings",
+    "WR10 a written world holds the Explorer's Land and Strand under the sentence's note, which stands once, under the Strand's box, and refuses a change of its type or its climate, and a new chart number lets it go with its settings",
     held.shown &&
-      held.note === `${HELD_NOTES.written} ${WRITE_ANEW}` &&
-      held.road &&
+      seat.notes.land === "" &&
+      seat.notes.strand === `${HELD_NOTES.written} ${WRITE_ANEW}` &&
+      held.road === "strand-held-note" &&
       sameRows &&
       refused.band === "polar" &&
       refused.type === "archipelago" &&
@@ -169,8 +160,8 @@ export async function wr10Hold(k: WritingKit): Promise<void> {
       released.hash["band"] === "polar" &&
       !("found" in released.hash) &&
       !freed.bandHeld &&
-      !freed.road,
-    `${JSON.stringify(held)} refused ${JSON.stringify(refused)} stood ${JSON.stringify(stood)}; released ${JSON.stringify(released)} then ${JSON.stringify(freed)}`,
+      freed.road === null,
+    `${JSON.stringify({ held, seat })} refused ${JSON.stringify(refused)} stood ${JSON.stringify(stood)}; released ${JSON.stringify(released)} then ${JSON.stringify(freed)}`,
   );
 }
 

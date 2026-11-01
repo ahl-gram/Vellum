@@ -61,6 +61,7 @@ const ROLE_SELECTORS = [
   "#dateline",
   ".folio-room .dateline",
   "#grp-land",
+  "#grp-strand",
   "#grp-hand",
   ".find input[type=search]",
   "#type",
