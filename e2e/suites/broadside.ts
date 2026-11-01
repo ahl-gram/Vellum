@@ -1,10 +1,10 @@
-// Broadside e2e (BR1-BR20, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
+// Broadside e2e (BR1-BR21, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { br9Authored, br10Terms, br11Allowlist } from "./broadside/room.ts";
-import { br12Dress } from "./broadside/dress.ts";
+import { br12Dress, br21Fields } from "./broadside/dress.ts";
 import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
@@ -69,6 +69,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await br1cLegendClears(k);
   });
   await step("BR12", () => br12Dress(k));
+  await step("BR21", () => br21Fields(k));
   await step("BR11", () => br11Allowlist(k));
   await step("BR2", () => br2JournalPeer(k));
   await br3Seal(k);
