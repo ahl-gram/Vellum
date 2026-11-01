@@ -11,7 +11,7 @@
   display: none;
 }
 header.chrome:has(.atelier-fold[open]) {
-  z-index: 19;
+  z-index: 21;
 }
 .where:has(> .atelier-fold) {
   display: flex;

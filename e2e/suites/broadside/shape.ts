@@ -15,6 +15,7 @@ type Seat = {
   state: Record<string, string>;
   notes: { land: string; strand: string };
   boxes: { land: boolean; strand: boolean };
+  noteShown: { land: boolean; strand: boolean };
   described: Record<string, string | null>;
   place: string;
   landDisabled: string | null;
@@ -29,7 +30,7 @@ export const SEAT: Payload<Seat> = `(()=>{const group=${JSON.stringify(GROUP_OF)
   const noteOf=(g)=>{const box=document.getElementById(g+"-held"),note=document.getElementById(g+"-held-note");return !!box&&!!note&&box.getClientRects().length>0&&note.getClientRects().length>0?note.textContent:"";};
   const shown=(id)=>{const e=document.getElementById(id);return !!e&&e.getClientRects().length>0;};
   const t=(id)=>{const e=document.getElementById(id);return e?e.textContent:null;};
-  return{state,described,notes:{land:noteOf("land"),strand:noteOf("strand")},boxes:{land:shown("land-held"),strand:shown("strand-held")},place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
+  return{state,described,notes:{land:noteOf("land"),strand:noteOf("strand")},boxes:{land:shown("land-held"),strand:shown("strand-held")},noteShown:{land:shown("land-held-note"),strand:shown("strand-held-note")},place:document.getElementById("place").value,landDisabled:document.getElementById("land").getAttribute("aria-disabled"),
     readouts:{land:t("land-readout"),coast:t("coast-readout"),looseness:t("looseness-readout"),islands:t("islands-readout"),ragged:t("ragged-readout")}};})()`;
 
 const rows = (live: string[], held: string[], hidden: string[]): Record<string, string> =>
@@ -51,13 +52,14 @@ const WRITTEN = rows([], ["type", "band", "place", "islands", "sizes", "land", "
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
-// Each group's box shows exactly when the group holds a row, and every held row is described by its own group's note, or by the Strand's where that note is empty (the written world's Land rows), and no live row is described at all (Issue #1159).
+// Each group's box shows exactly when the group holds a row, its note never shows without words, and every held row is described by its own group's note, or by the Strand's where that note is empty (the written world's Land rows), and no live row is described at all (Issue #1159).
 export function holdFaults(seat: Seat): string[] {
   const faults: string[] = [];
   for (const g of ["land", "strand"] as const) {
     const held = LAND_ROWS.filter((r) => GROUP_OF[r] === g && seat.state[r] === "held");
     if (seat.boxes[g] !== held.length > 0)
       faults.push(`the ${g} box shows ${seat.boxes[g]} with ${held.length} held rows`);
+    if (seat.noteShown[g] && seat.notes[g] === "") faults.push(`the ${g} note shows with no words`);
     for (const r of held) {
       const want = seat.notes[g] === "" ? "strand-held-note" : `${g}-held-note`;
       if (seat.described[r] !== want) faults.push(`${r} is described by ${seat.described[r]}, not ${want}`);
