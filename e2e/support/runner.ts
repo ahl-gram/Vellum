@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { StartOptions, SuiteContext } from "../types.ts";
 import { browserlessAction } from "./browser-policy.ts";
 import { e2eOutSubdir, resolveE2ePorts } from "./ports.ts";
+import { NO_EMULATED_MEDIA } from "./reduced-motion.ts";
 import { runnerLayoutRequested } from "./runner-layout.ts";
 import { E2E_SKIPS, metSkips, unmetSkips } from "./skips.ts";
 import type { E2eSkip } from "./skips.ts";
@@ -29,7 +30,7 @@ export type Accumulators = Pick<
   StartOptions,
   "results" | "consoleErrors" | "http4xx" | "skippedGroups" | "skippedChecks"
 >;
-export type RunnerContext = Pick<SuiteContext, "check" | "alive" | "clearMobile">;
+export type RunnerContext = Pick<SuiteContext, "check" | "alive" | "clearMobile" | "send">;
 export type EnvLike = Readonly<Record<string, string | undefined>>;
 
 export interface RunnerDeps<C extends RunnerContext> {
@@ -107,6 +108,9 @@ export function runnerHooks<C extends RunnerContext>(
         ctx.clearMobile().catch(() => {}),
         new Promise((settle) => setTimeout(settle, boundMs).unref()),
       ]);
+    },
+    onSuiteNotWhole: async () => {
+      await ctx.send("Emulation.setEmulatedMedia", NO_EMULATED_MEDIA);
     },
   };
 }

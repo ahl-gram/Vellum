@@ -12,7 +12,7 @@ import {
   runE2eFromProcess,
   runnerHooks,
 } from "../../e2e/support/runner.ts";
-import type { Accumulators, EnvLike, RunnerIo } from "../../e2e/support/runner.ts";
+import type { Accumulators, EnvLike, RunnerContext, RunnerIo } from "../../e2e/support/runner.ts";
 import { E2E_SKIPS } from "../../e2e/support/skips.ts";
 import { E2E_SUITE_ORDER, resolveSuiteSelection } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
@@ -27,6 +27,7 @@ type Ctx = {
   check: (name: string, ok: unknown, detail?: string) => void;
   alive: () => Promise<boolean>;
   clearMobile: () => Promise<void>;
+  send: RunnerContext["send"];
 };
 
 async function withTTY<T>(value: boolean, body: () => Promise<T>): Promise<T> {
@@ -84,6 +85,7 @@ function rig(env: EnvLike, run: SuiteBody = () => {}) {
       details.push(detail);
     },
     alive: () => Promise.resolve(probes.alive),
+    send: <T>(): Promise<T> => Promise.resolve({} as T),
     clearMobile: () => {
       probes.resets++;
       return Promise.resolve();
@@ -180,7 +182,12 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
 });
 
 test("the viewport reset after a suite stops is bounded, so a reset that never settles cannot stall the lane", async () => {
-  const ctx: Ctx = { check: () => {}, alive: () => Promise.resolve(true), clearMobile: () => new Promise(() => {}) };
+  const ctx: Ctx = {
+    check: () => {},
+    alive: () => Promise.resolve(true),
+    clearMobile: () => new Promise(() => {}),
+    send: <T>(): Promise<T> => Promise.resolve({} as T),
+  };
   const acc = freshAccumulators();
   const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteError;
   assert.ok(handler, "the runner hands runSelected no per-suite handler");

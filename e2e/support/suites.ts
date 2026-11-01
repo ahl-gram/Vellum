@@ -146,6 +146,7 @@ export interface E2eSuiteTiming {
 export interface E2eRunHooks {
   readonly now?: () => number;
   readonly onSuiteError?: (name: E2eSuiteName, err: unknown) => void | Promise<void>;
+  readonly onSuiteNotWhole?: () => void | Promise<void>;
   readonly alive?: () => boolean | Promise<boolean>;
   readonly skippedGroups?: () => readonly string[];
 }
