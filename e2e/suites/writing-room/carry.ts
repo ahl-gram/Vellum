@@ -1,6 +1,7 @@
 import { foundWorld } from "../../../src/world/founding/found.ts";
 import { HELD_NOTES, LAND_ROWS, WRITE_ANEW, seatOf } from "../../../src/site/explorer/land-rows.ts";
 import { recipeOverrides } from "../../../src/site/shared/founding.ts";
+import { SHAPE_KEYS } from "../../../src/site/shared/shape-address.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import { sendKey } from "../../support/home.ts";
 import { CHART_SVG } from "../../support/room.ts";
@@ -60,7 +61,7 @@ function carryKit(k: WritingKit) {
   return { settle, until, visit, explorer, press };
 }
 
-const IDENTITY = ["seed", "type", "band", "land", "coast", "outline", "looseness", "islands", "isleSize", "raggedness"];
+const IDENTITY = ["seed", "type", "band", "land", "coast", ...SHAPE_KEYS];
 
 function carriesFlagship(r: Chart): boolean {
   const f = founded(FLAGSHIP);
