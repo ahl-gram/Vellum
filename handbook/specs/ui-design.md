@@ -225,8 +225,12 @@ takes tighter presses, which keep it on one line from 1280 up (BR2 in `e2e/suite
 **The Broadside's Land panel keeps every row and sets aside what the world on screen cannot use**:
 such a row stays on the panel inside a held box, the cream ground behind a dashed rule, under a note
 saying what holds it, and it refuses a press rather than being disabled (`seatOf` in
-`src/site/explorer/land-rows.ts`). **Provisional until the post-use review** (Alex, 2026-10-30,
-Issue #854 comments 6533770339 and 6536644793): the layout and its tightenings, the held box and its
+`src/site/explorer/land-rows.ts`). At 1024 by 768 it does not scroll in its tallest seat, a place picked
+over a held count and loosened to the end, where the looseness readout's last words take two lines; the
+slip's foot is tightened to make that room (`BR16` in `e2e/suites/broadside/shape.ts`).
+**Provisional until the post-use review** (Alex, 2026-10-30,
+Issue #854 comments 6533770339 and 6536644793; the foot, Alex, 2026-11-01, Issue #1140 comment
+6551936310): the layout and its tightenings, the tightened foot, the held box and its
 notes, the shape box and its list, each place's outline in it, the groove, the inset, the tighter
 presses and the follow and the risen row they bring at 1024 by 768 and about 1100 px wide, and every
 word on the new rows.
@@ -435,8 +439,9 @@ Warnings are panels, not slips. Beside them: one standard control in the cream f
 whose text is chart paper, one featured gold action, and the translucent overlay presses of the
 Glass, whose translucency is load-bearing over a chart.
 
-**A control a reader types into, a field or a select, does not go below a 16px font in the corner chrome**, because a smaller input font
-makes iOS Safari zoom the page on focus. A press takes no typing and keeps the size of the line it rides, as the chart of the atelier's does.
+**A control a reader types into, a field or a select, does not go below a 16px font in the corner chrome or on a slip** (Alex,
+2026-11-01, Issue #1140 comment 6551936310), because a smaller input font makes iOS Safari zoom the page on focus; the Broadside's
+dropdowns and shape box are held to it by `BR21` in `e2e/suites/broadside/dress.ts`. A press takes no typing and keeps the size of the line it rides, as the chart of the atelier's does.
 
 **On screen every page is laid out for 1024 wide and up, and nothing is designed for a narrower
 window**, a desktop window zoomed until it is narrower than 1024 included: what a narrower window
