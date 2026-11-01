@@ -86,3 +86,18 @@ export async function br12Dress(k: BroadsideKit): Promise<void> {
     JSON.stringify({ wrong, d, seat }),
   );
 }
+
+// 2026-11-01: ui-design.md's floor for a field or a select the reader types into, ruled to cover the slip (Issue #1140 comment 6551936310).
+const FIELD_FLOOR_PX = 16;
+type Field = { id: string; px: number; shown: boolean };
+const FIELDS: Payload<Field[]> =
+  `["type","band","style","theme","place"].map((id)=>{const e=document.getElementById(id);return{id,px:e?parseFloat(getComputedStyle(e).fontSize):0,shown:!!e&&e.getClientRects().length>0};})`;
+
+export async function br21Fields({ evaluate, check }: BroadsideKit): Promise<void> {
+  const fields = await evaluate(FIELDS);
+  check(
+    "BR21 every field the reader types into on the Broadside, the four dropdowns and the shape box, is set at 16 px or more (Issue #1140)",
+    fields.length === 5 && fields.every((f) => f.shown && f.px >= FIELD_FLOOR_PX),
+    JSON.stringify(fields),
+  );
+}

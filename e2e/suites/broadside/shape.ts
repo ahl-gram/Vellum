@@ -1,5 +1,5 @@
 // The Broadside's shape and count controls (Issue #854, pull request 2): the Land panel's rows by state, the held rows' refusal, the shape box and its list, and the twins that scroll.
-import { HELD_NOTES, LAND_ROWS } from "../../../src/site/explorer/land-rows.ts";
+import { HELD_NOTES, LAND_ROWS, looseWord } from "../../../src/site/explorer/land-rows.ts";
 import { sendKey } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
@@ -37,6 +37,7 @@ const LOOSE = rows(["place", "looseness", "coast"], ["land"], ["islands", "sizes
 const ARCH_PLAIN = rows(["place", "islands", "land", "coast"], ["looseness"], ["sizes", "ragged"]);
 const COUNTED = rows(["place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]);
 const ON_ARCH = rows(["place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]);
+const LOOSENED = rows(["place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]);
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const at = (want: Record<string, string>, place: string) => (d: Seat) => same(d.state, want) && d.place === place;
@@ -66,6 +67,9 @@ const ENDED: Payload<Ended> = `(()=>{const svg=document.querySelector("#map > sv
     box:document.getElementById("place").value,open:document.getElementById("place-list").matches(":popover-open")};})()`;
 const DRAWN: Payload<{ status: string; map: boolean; islands: string | null }> =
   `({status:document.getElementById("status").textContent,map:!!document.querySelector("#map > svg[data-vellum-style]"),islands:(document.querySelector("#map > svg[data-vellum-style]")||{getAttribute:()=>null}).getAttribute("data-vellum-islands")})`;
+
+const LOOSE_DRAWN: Payload<{ status: string; loose: string | null }> =
+  `(()=>{const s=document.querySelector("#map > svg[data-vellum-style]");return{status:document.getElementById("status").textContent,loose:s?s.getAttribute("data-vellum-looseness"):null};})()`;
 
 export async function br16To19(k: BroadsideKit): Promise<void> {
   const { evaluate, send, sleep, check, goto, EXP } = k;
@@ -103,15 +107,30 @@ export async function br16To19(k: BroadsideKit): Promise<void> {
       onArch.note === HELD_NOTES.archExact && onArch.readouts.islands === "held" && onArch.landDisabled === "true",
       JSON.stringify(onArch),
     );
+    const loosened = await br16Loosened(k, fits);
     check(
-      "BR16 the Broadside fits 1024 by 768 without scrolling, counted and with a place on the archipelago",
-      countedFit.sh <= countedFit.ch && archFit.sh <= archFit.ch,
-      JSON.stringify({ countedFit, archFit }),
+      "BR16 the Broadside fits 1024 by 768 without scrolling: counted, with a place on the archipelago, and with that place loosened to the end over the held count",
+      countedFit.sh <= countedFit.ch && archFit.sh <= archFit.ch && loosened.fit.sh <= loosened.fit.ch,
+      JSON.stringify({ countedFit, archFit, loosened }),
     );
     await br19Clears(k);
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
+}
+
+async function br16Loosened(k: BroadsideKit, fits: (label: string) => Promise<Fit>): Promise<{ fit: Fit; seat: Seat }> {
+  const { evaluate, send, sleep } = k;
+  const settle = makeSettle({ evaluate, sleep });
+  await evaluate(`(()=>{document.getElementById("looseness").focus();return true;})()`);
+  await sendKey(send, "End", "End", 35);
+  await settle(LOOSE_DRAWN, (d) => d.status !== DRAFTING && d.loose === "1", "BR16 the loosened draw");
+  const seat = await settle(
+    SEAT,
+    (d) => at(LOOSENED, "Texas")(d) && d.readouts.looseness === looseWord(1),
+    "BR16 the seat loosened over the held count",
+  );
+  return { fit: await fits("BR16 the slip loosened to the end at rest"), seat };
 }
 
 async function br18Refuses({ evaluate, send, sleep, check }: BroadsideKit): Promise<void> {
