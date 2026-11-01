@@ -14,6 +14,7 @@ export type Read = {
   readonly refusalText: string;
   readonly quiet: boolean;
   readonly verb: string;
+  readonly status: string;
   readonly hash: string;
 };
 
@@ -33,6 +34,7 @@ export const READ: Payload<Read> = `(() => {
     refusalText: document.getElementById("wr-refusal").textContent,
     quiet: !!document.querySelector(".wr-quiet"),
     verb: document.getElementById("wr-plate-verb").textContent,
+    status: document.getElementById("status").textContent,
     hash: location.hash,
   };
 })()`;

@@ -83,6 +83,7 @@ async function attempt(input: string, version: number, write: boolean): Promise<
   if (!result.ok) {
     refusal = result.reason;
     $("wr-refusal").textContent = refusalWords(result.reason, lengthOf(input));
+    $("status").textContent = "";
     settled++;
     return;
   }

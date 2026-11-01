@@ -47,14 +47,17 @@ export async function wr3Refusal(k: WritingKit): Promise<void> {
   await k.setLine("x".repeat(121));
   await k.pressAt("#wr-form button[type=submit]");
   const after = await k.settledAfter(before.n, "its refusal");
+  const bare = await k.goto(writtenHash("x".repeat(121), 1));
   k.check(
-    "WR3 a refused sentence leaves the last world, its account and its link standing, and says why",
+    "WR3 a refused sentence leaves the last world, its account and its link standing, and says why, and a link that is refused before any world stands leaves no founding pill over the empty sheet",
     after.refusal === "too-long" &&
       after.refusalText !== "" &&
       after.svgSeed === "1858074817" &&
       !after.quiet &&
-      after.hash === link,
-    `${show(after)} refusal ${after.refusal} "${after.refusalText}"`,
+      after.hash === link &&
+      bare.refusal === "too-long" &&
+      bare.status === "",
+    `${show(after)} refusal ${after.refusal} "${after.refusalText}"; by link: refusal ${bare.refusal} svg ${bare.svgSeed} status "${bare.status}"`,
   );
 }
 
