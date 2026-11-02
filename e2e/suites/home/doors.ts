@@ -1,6 +1,7 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { makeSettle } from "../../support/settle.ts";
+import type { makeStep } from "../../support/step.ts";
 import { doorShown } from "./reads.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;
@@ -84,6 +85,18 @@ export async function h13cDoorsRead({ evaluate, sleep }: SuiteContext) {
     } catch {}
     await sleep(150);
   }
+  return doors;
+}
+
+export async function h13DeadBundle(ctx: SuiteContext, step: ReturnType<typeof makeStep>): Promise<Doors> {
+  await ctx.send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
+  await h13aPrePaint(ctx);
+  const doorBase = await h13gDoorBase(ctx);
+  await h13bRelease(ctx);
+  // The doors share the veil's 10s window (Issue #470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
+  const doors = await h13cDoorsRead(ctx);
+  await step("H13g", () => h13gDoorFrame(ctx, doorBase));
+  await ctx.send("Network.setBlockedURLs", { urls: [] });
   return doors;
 }
 
