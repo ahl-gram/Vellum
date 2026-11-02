@@ -266,8 +266,8 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["test"],
-    "node --import ./test-support/source-read-guard.ts --test --test-timeout=600000",
-    "npm test is no longer the source-read guard's preload before node --test, so either the guard is off or the shard flag ci.yml appends lands on some other command",
+    "node scripts/unit-suite.ts",
+    "npm test no longer runs the unit launcher, so the shard flag ci.yml appends can land after the suite's pattern, where node --test reads it as one more pattern and every leg runs every file",
   );
   assert.match(
     body,
