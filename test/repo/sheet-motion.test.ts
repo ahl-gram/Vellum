@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { ESLint } from "eslint";
 import {
   CHART_INSTRUMENTS,
@@ -13,6 +13,7 @@ import { sheetsOnDisk, SRC_CSS_FILES } from "../../scripts/lint/sheet-tokens.ts"
 import { STYLES } from "../../scripts/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const LIFT = "vellum/css-lift-by-token";
@@ -23,24 +24,24 @@ const REFUSE = true;
 const PASS = false;
 type Plant = ReadonlyArray<readonly [string, boolean]>;
 
-const lintWith = (rule?: string, options?: unknown): ESLint =>
+const lintWith = (rule: string, options: unknown): ESLint =>
   new ESLint({
     cwd: ROOT,
     flags: ["unstable_native_nodejs_ts_config"],
-    ...(rule ? { overrideConfig: { files: ["src/styles/**/*.css"], rules: { [rule]: ["error", options] } } } : {}),
+    overrideConfig: { files: ["src/styles/**/*.css"], rules: { [rule]: ["error", options] } },
   });
 
 type Found = { readonly lines: number[]; readonly stale: string[] };
 
 const found = async (plant: Plant, path: string, rule: string, options?: unknown): Promise<Found> => {
-  const eslint = lintWith(options === undefined ? undefined : rule, options);
-  const [result] = await eslint.lintText(plant.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  const mine = result!.messages.filter((m) => m.ruleId === rule);
+  const linter = options === undefined ? eslint : lintWith(rule, options);
+  const mine = (
+    await plantMessages(
+      plant.map(([line]) => line),
+      path,
+      linter,
+    )
+  ).filter((m) => m.ruleId === rule);
   return {
     lines: [...new Set(mine.filter((m) => m.messageId !== "stale").map((m) => m.line))],
     stale: mine.filter((m) => m.messageId === "stale").map((m) => m.message.slice(0, m.message.indexOf(" is "))),
@@ -194,7 +195,7 @@ test("every list entry names a sheet under src/styles/ or a module that builds C
 });
 
 const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
-  ((await lintWith().calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
+  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
 test("the three motion rules resolve at error with the lists as their options on every sheet, and on no script (Issue #779 part 2d)", async () => {
   const expected: ReadonlyArray<readonly [string, unknown]> = [

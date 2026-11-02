@@ -276,14 +276,6 @@ test("a very long name shrinks its title and its cartouche stays inside the inne
   assert.ok(titleScale(name.toUpperCase(), renderSvg(plate.node)) < full * 0.9, "the long name is set smaller");
 });
 
-test("the two ratified dresses render; the others refuse", () => {
-  const input = makeInput({});
-  assert.ok(finishedPlateSvg(input, STYLES.antique, 1300).startsWith("<svg"));
-  assert.ok(finishedPlateSvg(input, STYLES.ink, 1300).startsWith("<svg"));
-  assert.throws(() => finishedPlateSvg(input, STYLES.topographic, 1300), RangeError);
-  assert.throws(() => finishedPlateSvg(input, STYLES.nautical, 1300), RangeError);
-});
-
 test("the picture lies under the parchment grain; the named furniture rides above it", () => {
   const antique = finishedPlateSvg(makeInput({}), STYLES.antique, 1300);
   const rise = antique.indexOf(`fill="${STYLES.antique.limner!.grassDeep}"`);

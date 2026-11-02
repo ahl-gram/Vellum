@@ -2,22 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint, Linter } from "eslint";
+import { Linter } from "eslint";
 import tseslint from "typescript-eslint";
 import importBounds, { ROOMS_UNDER_THE_EXPLORER } from "../../scripts/lint/import-bounds.ts";
+import { plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 
-const reports = async (lines: readonly string[], path: string, rules: readonly string[]): Promise<number[]> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages.filter((m) => rules.includes(m.ruleId ?? "")).map((m) => m.line);
-};
+const reports = async (lines: readonly string[], path: string, rules: readonly string[]): Promise<number[]> =>
+  (await plantMessages(lines, path)).filter((m) => rules.includes(m.ruleId ?? "")).map((m) => m.line);
 
 const PHILOLOGY_IMPORTS = [
   'import { glossName } from "../society/philology.ts";',

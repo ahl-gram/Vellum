@@ -2,14 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { dirname, join } from "node:path";
 import { declaredIn, sheetsOnDisk, SRC_CSS_FILES, type ReadDir } from "../../scripts/lint/sheet-tokens.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
-const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const TOKEN = "vellum/css-token-by-name";
 const SHADOW = "vellum/css-shadow-by-token";
 const VAR = "vellum/css-var-declared";
@@ -21,15 +19,18 @@ type Plant = ReadonlyArray<readonly [string, boolean]>;
 
 const refusedLines = (plant: Plant): number[] => plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 
-const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(plant.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return [...new Set(result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line))];
-};
+const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> => [
+  ...new Set(
+    (
+      await plantMessages(
+        plant.map(([line]) => line),
+        path,
+      )
+    )
+      .filter((m) => m.ruleId === rule)
+      .map((m) => m.line),
+  ),
+];
 
 const assertRefuses = async (plant: Plant, path: string, rule: string, blindSpots: string): Promise<void> => {
   const refused = refusedLines(plant);
