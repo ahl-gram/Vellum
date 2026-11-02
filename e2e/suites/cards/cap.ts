@@ -323,7 +323,7 @@ export async function p24NothingToScroll({
 }
 
 export async function pRestore({ send, waitReady, clearMobile, PORT }: SuiteContext): Promise<void> {
-  // settle-doctrine clause 14: the next suite starts on whatever page is current, and the runner's viewport reset is the ERROR path only.
+  // settle-doctrine clause 14: the next suite starts on whatever page is current, and the runner resets the viewport only after a suite that did not run whole.
   await clearMobile();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
