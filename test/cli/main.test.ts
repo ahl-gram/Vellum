@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CHART_OPTIONS, chartOptions, main, parseChartArgs } from "../../src/cli/main.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 
-// Bytes are compared only between two draws in the same run, never against a file from another run: an SVG byte-compare drifts across OS/Node; the --png path is raster.test.ts's.
+// Bytes are compared only between two draws in the same run, never against a file from another run: an SVG byte-compare drifts across OS/Node; a real PNG is raster.test.ts's.
 
 const TMP = "out/test-tmp-chart";
 
@@ -194,9 +194,24 @@ for (const [flag, value, drawn] of ACCEPTED) {
   });
 }
 
+const STAND_IN_BROWSER =
+  '#!/bin/sh\nfor a in "$@"; do case "$a" in --screenshot=*) printf \'%s\\n\' "$@" > "${a#--screenshot=}";; esac; done\n';
+
 for (const scale of ["0.5", "4"]) {
-  test(`a valid --scale ${scale} at its edge is accepted without --png`, async (t) => {
-    t.after(() => rm(TMP, { recursive: true, force: true }));
-    await draw([...SMALL, "--scale", scale], `accepted-scale-${scale}`);
+  test(`a valid --scale ${scale} at its edge is accepted and handed to the browser as its device scale`, { timeout: 60_000 }, async (t) => {
+    const dir = await mkdtemp(join(tmpdir(), "vellum-chart-scale-"));
+    const browser = join(dir, "browser");
+    await writeFile(browser, STAND_IN_BROWSER, { mode: 0o755 });
+    const saved = process.env["VELLUM_BROWSER"];
+    process.env["VELLUM_BROWSER"] = browser;
+    t.after(async () => {
+      if (saved === undefined) delete process.env["VELLUM_BROWSER"];
+      else process.env["VELLUM_BROWSER"] = saved;
+      await rm(dir, { recursive: true, force: true });
+      await rm(TMP, { recursive: true, force: true });
+    });
+    await draw([...SMALL, "--png", "--scale", scale], `accepted-scale-${scale}`);
+    const argv = (await readFile(`${TMP}/accepted-scale-${scale}.png`, "utf8")).split("\n");
+    assert.ok(argv.includes(`--force-device-scale-factor=${scale}`), `the browser was handed ${JSON.stringify(argv)}`);
   });
 }
