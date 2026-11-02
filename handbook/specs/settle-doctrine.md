@@ -267,7 +267,7 @@ skip list, and this section sets no rule for a unit test.
 - **One honest fix** for a slow step is one change aimed at its own seconds, planned, and read as
   above before and after: before, from main's three latest runs; after, from the pull request's
   own run and two more runs of that lane's job started by hand. Such a change makes a fixed sleep
-  a wait on the state it needs (Issue #785), leaves unloaded a page the step loads only to pass
+  a wait on the state it needs (clause 3), leaves unloaded a page the step loads only to pass
   over, shares a set-up its checks repeat, or moves a claim to the cheapest check that can see it
   (`handbook/specs/check-placement.md`). A step still too slow after that change is pulled out by
   a pull request that names its issue with no closing keyword, so the issue stays open as the
