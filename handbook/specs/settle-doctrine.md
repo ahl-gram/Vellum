@@ -173,7 +173,15 @@ headless browser actually do, so a green run can be believed.
     `onSuiteError` in `e2e/support/runner.ts` races the mobile-emulation reset against a timeout
     on the error path, and the race is bounded precisely because a browser that dies after the
     liveness probe would leave that send pending forever, which is the one path where the next suite
-    does inherit a phone viewport. Depend on the suite, not on the rescue. **Attribute a lane-order
+    does inherit a phone viewport. EMULATED MEDIA is the runner's too, on one path more: after a suite
+    that stopped early, and after one whose step never reached its assertion, `onSuiteNotWhole` in
+    `e2e/support/runner.ts` clears the emulated media and every emulated feature with
+    `NO_EMULATED_MEDIA` (`e2e/support/reduced-motion.ts`) inside the same bounded race, because
+    `makeStep` catches a throw that skipped a trailing reset and the suite then ends without
+    `onSuiteError` firing. A later step of the suite whose step threw still runs under what that step
+    set, so a condition its own later steps must not inherit is restored in a `finally`, as
+    `withReducedMotion` in `e2e/support/reduced-motion.ts` does. Depend on the suite, not on the
+    rescue. **Attribute a lane-order
     red by BISECTING the order, never by reasoning about what the last suite left behind**: the
     guess made that way on PR #482 blamed a cleared viewport override, was wrong, and had to be
     retracted; the un-awaited navigation was the cause. The selector is `E2E_SUITES_VAR` in
