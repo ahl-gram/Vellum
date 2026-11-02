@@ -211,15 +211,19 @@ test("withStyledBoot takes its forced style read back off by its own identifier,
 
 test("withBlockedUrls and withThrottle each switch their condition on for the body and off after it, also when the body throws", async () => {
   for (const { method, on, off, hold } of HOLDERS) {
+    const order = (sent: readonly Sent[]) =>
+      sent
+        .filter((s) => s.method === method || s.method === "Body.ran")
+        .map((s) => (s.method === method ? s.params : "body"));
     const quiet = recorder();
-    assert.equal(await hold(quiet.send, () => Promise.resolve("read")), "read");
-    assert.deepEqual(paramsOf(quiet.sent, method), [on, off], `${method} after a body that passed`);
+    assert.equal(await hold(quiet.send, () => quiet.send("Body.ran").then(() => "read")), "read");
+    assert.deepEqual(order(quiet.sent), [on, "body", off], `${method} after a body that passed`);
     const failing = recorder();
     await assert.rejects(
-      hold(failing.send, () => Promise.reject(new Error("the body's own error"))),
+      hold(failing.send, () => failing.send("Body.ran").then(() => Promise.reject(new Error("the body's own error")))),
       /the body's own error/,
     );
-    assert.deepEqual(paramsOf(failing.sent, method), [on, off], `${method} after a body that threw`);
+    assert.deepEqual(order(failing.sent), [on, "body", off], `${method} after a body that threw`);
   }
 });
 

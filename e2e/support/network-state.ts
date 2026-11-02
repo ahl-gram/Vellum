@@ -8,8 +8,8 @@ export type NetworkConditions = {
   readonly uploadThroughput: number;
 };
 
-export const NO_BLOCKED_URLS = { urls: [] } as const;
-export const NO_THROTTLE: NetworkConditions = {
+const NO_BLOCKED_URLS = { urls: [] } as const;
+const NO_THROTTLE: NetworkConditions = {
   offline: false,
   latency: 0,
   downloadThroughput: -1,
