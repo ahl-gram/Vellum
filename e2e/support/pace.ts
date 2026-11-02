@@ -32,13 +32,13 @@ export interface PaceSweepReading {
 /** Measured 2026-09-07: worst deviation 0.8 percent over CDP CPU throttling 1x, 2x, 4x, 8x and 20x (frame gaps 33 to 117 ms), three runs each; 12 percent is fifteen times that worst case and still bites a pace off by an eighth. */
 export const PACE_RATE_TOLERANCE = 0.12;
 
-/** Below this the fit reads noise rather than a rate (measured 2026-09-07: four samples per leg still fit to 0.3 percent at 50x throttling, but at 80x, gaps past 450 ms, three of them read 34 percent low), so a starved runner fails as frames instead of as a wrong ratio; a healthy runner lands about 48 per leg. */
+/** Below this the fit reads noise rather than a rate (measured 2026-09-07: four samples per leg still fit to 0.3 percent at 50x throttling, but at 80x, gaps past 450 ms, three of them read 34 percent low), so a starved runner fails as frames instead of as a wrong ratio; swept 2026-11-01 over 703 CI runs from 2026-09-15 to 2026-10-13, each lane on a runner of its own (Issue #623): fewest 11 at 1x and 12 at 4x, median 20 and 18, so the runner's worst leg stands 3 above the floor (Issue #622). */
 export const PACE_LEG_MIN_SAMPLES = 8;
 
 /** Each leg's wall window: long enough for about 48 frames, short enough that the whole measure spends about 4200 of SWEEP_MS's 7000 story ms, so the sweep cannot park mid-reading (`parked` catches it if it ever does). */
 export const PACE_LEG_MS = 800;
 
-/** Slack on a single step, which is the year's rounding at each end and nothing else: measured 2026-09-07 through a real browser at CPU throttling 1x to 50x (frame gaps 33 to 250 ms), every step ran at most 0.8 years past what its own gap allowed, whatever the gap. */
+/** Slack on a single step, which is the year's rounding at each end and nothing else, so no step reads more than 1 year past what its own gap allowed: measured 2026-09-07 through a real browser at CPU throttling 1x to 50x (frame gaps 33 to 250 ms) at most 0.8, and swept 2026-11-01 over 703 CI runs from 2026-09-15 to 2026-10-13 at most 0.9, so 2 keeps a year of headroom over the rounding (Issue #622). */
 const JUMP_SLACK_YEARS = 2;
 
 /** Least squares slope of year on frame time. NaN when the samples do not span any time. */

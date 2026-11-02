@@ -10,7 +10,6 @@ export interface E2eSkip extends E2eSuiteStep {
 }
 
 export const E2E_SKIPS: readonly E2eSkip[] = [
-  { suite: "room-instrument", step: "RS30", issue: 622 },
   { suite: "chart-drawer", step: "CD25, CD26, CD30", issue: 716 },
   { suite: "corners", step: "FL1", issue: 894 },
   { suite: "stage", step: "EA7", issue: 897 },
