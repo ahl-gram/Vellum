@@ -6,6 +6,7 @@ import { createProjection, marginFor } from "./transform.ts";
 
 export type PlaceMark = {
   readonly idx: number;
+  readonly worldIdx: number | null;
   readonly name: string;
   readonly formerName?: string;
   readonly kind: SettlementKind;
@@ -36,6 +37,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
   const mask = roadMask(world);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
+    worldIdx: idx,
     name: s.name,
     ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
     kind: s.kind,

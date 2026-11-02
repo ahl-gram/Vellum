@@ -21,6 +21,7 @@ import {
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
+  worldIdx: 0,
   name: "Aelmoor",
   kind: "town",
   founded: 300,
