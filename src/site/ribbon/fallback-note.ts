@@ -8,6 +8,17 @@ export interface RibbonAsk {
 
 export type DrawnJourney = Pick<RibbonPlateData, "fromIdx" | "toIdx" | "fromName" | "options">;
 
-export function fallbackNote(_ask: RibbonAsk, _res: DrawnJourney): string | null {
-  return null;
+const named = (res: DrawnJourney, ask: number | null): string | null =>
+  ask !== null && Number.isInteger(ask) && ask >= 0 && ask < res.options.length ? res.options[ask]!.name : null;
+
+export function fallbackNote(ask: RibbonAsk, res: DrawnJourney): string | null {
+  const sentences: string[] = [];
+  const from = named(res, ask.from);
+  if (from !== null && ask.from !== res.fromIdx)
+    sentences.push(`No road leaves ${from}; this is the road from the capital.`);
+  const to = named(res, ask.to);
+  if (to !== null && ask.to !== res.toIdx) {
+    sentences.push(`The road cannot take you to ${to}; this is the road to the farthest place from ${res.fromName}.`);
+  }
+  return sentences.length === 0 ? null : sentences.join(" ");
 }

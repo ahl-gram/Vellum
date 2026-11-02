@@ -30,6 +30,6 @@ export function journeyHash(hash: string, from: number, to: number): string {
   return "#" + [...worldKeys(hash), `a=${from}`, `b=${to}`].join("&");
 }
 
-export function rowProspectTarget(_hash: string, _row: Pick<RibbonRow, "kind" | "index">): string | null {
-  return null;
+export function rowProspectTarget(hash: string, row: Pick<RibbonRow, "kind" | "index">): string | null {
+  return row.kind === "waypoint" && row.index !== undefined ? prospectTarget(hash, row.index) : null;
 }
