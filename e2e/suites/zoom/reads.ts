@@ -81,7 +81,7 @@ export const AT_HOME = (
   if (!t) return null; const vr = vp.getBoundingClientRect(), r = t.getBoundingClientRect();
   return { px: r.left + r.width / 2 - vr.left, py: r.top + r.height / 2 - vr.top }; })()`;
 
-// At depth the town is seated an eighth of the box in from the two edges its card flips away from: the card keeps seven eighths of the box, where a centred town left it half and the capital's card outgrew that (Issue #428), and the mark moves off the spot it held at rest, so a card that stopped riding the camera would be left behind.
+// At depth the town is seated an eighth of the box in from the two edges its card flips away from: the card keeps seven eighths of the box, and the mark moves off the spot it held at rest, so a card that stopped riding the camera would be left behind.
 export const SEAT_AT = (px: number, py: number, left: boolean, up: boolean): Payload<boolean> =>
   `(() => { const vp = document.getElementById("map-viewport"), w = vp.clientWidth, h = vp.clientHeight;
   const want = { k: 4, x: (${left} ? w * 7 / 8 : w / 8) - 4 * ${px}, y: (${up} ? h * 7 / 8 : h / 8) - 4 * ${py} };

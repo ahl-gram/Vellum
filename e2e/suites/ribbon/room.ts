@@ -16,7 +16,6 @@ export async function rb17PlaceLink(k: RibbonKit): Promise<void> {
 }
 
 export async function rb18CardRoad({ check, goto, opened }: RibbonKit): Promise<void> {
-  // The Explorer's own address for PB1's link (the shape the card's road carries) with place 1 as the departure.
   await goto("#seed=42&style=antique&legend=1&arms=0&beasts=0&a=1");
   const st = await opened("the card's road from Paukilua");
   check(

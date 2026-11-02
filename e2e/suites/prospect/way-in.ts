@@ -57,11 +57,7 @@ export async function pb1cRoadOut({ evaluate, sleep, check }: SuiteContext): Pro
   await settle(ROAD, (d) => /&i=2$/.test(d.prospect ?? ""), "PB1e the card at place 2, before a lay");
   try {
     await evaluate(LAY);
-    const laid = await settle(
-      TABLED,
-      (d) => tableOf(d.hash) !== null && tableOf(d.prospect) !== null,
-      "PB1e the lay reaches the card's roads",
-    );
+    const laid = await settle(TABLED, (d) => tableOf(d.hash) !== null, "PB1e the lay reaches the card's roads");
     const table = tableOf(laid.hash);
     check(
       "PB1e a lay from the pinned card hands BOTH its roads the new table, so out by either and back never restores the sheet as it stood before the lay (Issue #428, Issue #1194)",

@@ -118,8 +118,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const el = placeOverlay.card;
     const inner = placeOverlay.inner;
     fillCardInner(inner, card, placeOverlay.acts);
-    if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
-    paintRoad(placeOverlay.ribbonLink, place, ribbonHref);
+    paintRoads(place);
     paintLay(place.idx);
     const at = placeOverlay.anchors[idx]!;
     el.style.setProperty("--pc-nx", String(at.nx));
@@ -153,8 +152,17 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     press.classList.toggle("dim", face.refuses);
   }
 
+  function paintRoads(place: Readonly<PlaceMark>): void {
+    if (!placeOverlay) return;
+    if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
+    paintRoad(placeOverlay.ribbonLink, place, ribbonHref);
+  }
+
   function relabelLay(): void {
-    if (placeOverlay) paintLay(placeOverlay.currentIdx);
+    if (!placeOverlay) return;
+    paintLay(placeOverlay.currentIdx);
+    const place = placeOverlay.places[placeOverlay.currentIdx];
+    if (place) paintRoads(place);
   }
 
   function markScroll(el: HTMLElement, innerEl: HTMLElement): void {
