@@ -1,29 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { Survey, SurveyRoad } from "../../src/render/survey.ts";
 import { routeVoyage, type RoutedLeg } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
 import type { Pt } from "../../src/core/rdp.ts";
-
-// Picture legend: '#' land, '.' sea, '=' land carrying a road.
-
-function survey(rows: string[]): Survey {
-  const gridH = rows.length;
-  const gridW = rows[0]!.length;
-  const land = new Uint8Array(gridW * gridH);
-  const roadCells: Array<readonly [number, number]> = [];
-  rows.forEach((r, y) =>
-    r.split("").forEach((c, x) => {
-      if (c !== ".") land[x + y * gridW] = 1;
-      if (c === "=") roadCells.push([x, y]);
-    }),
-  );
-  const roads: SurveyRoad[] = roadCells.length ? [roadCells] : [];
-  return { gridW, gridH, land, roads };
-}
-
-const site = (idx: number, x: number, y: number) => ({ idx, x, y });
-const leg = (fromIdx: number, toIdx: number) => ({ fromIdx, toIdx });
+import { leg, site, survey } from "../../test-support/voyage-route-fixtures.ts";
 
 const polylineLength = (points: ReadonlyArray<Pt>): number => {
   let d = 0;
