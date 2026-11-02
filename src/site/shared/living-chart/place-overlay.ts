@@ -301,7 +301,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     card.addEventListener("focusout", (e) => {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
     });
-    const { prospectLink, ribbonLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect, ribbonHref);
+    const { prospectLink, ribbonLink, layPress, acts } = cardActs(inner, prospectHref, layProspect, ribbonHref);
     const wiring = { feed, inCard, markPress, takePress, track };
     const anchors = manifest.places.map((place) => anchorOf(place, opts?.box));
     const hits = manifest.places.map((place, idx) => {

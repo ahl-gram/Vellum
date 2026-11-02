@@ -14,7 +14,8 @@ import {
   z19bSupersession,
   zInsetContextShot,
 } from "../../e2e/suites/zoom/region.ts";
-import { recording } from "../../test-support/recording-ctx.ts";
+import { INSET_CARDS, z21dInsetCards } from "../../e2e/suites/zoom/inset-cards.ts";
+import { count, recording } from "../../test-support/recording-ctx.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
 type Cam = { k: number; x: number; y: number };
@@ -217,5 +218,60 @@ test("Z19b does not press home once the job it waited for has already landed", a
   const k = zoomKitOver(ctx, { rgn: () => Promise.resolve({ redrafts: 5, band: 0, committed: false }) });
   await assert.rejects(z19bSupersession(k), (err: Error) =>
     err.message.startsWith("settle timeout Z19b the region job in flight: "),
+  );
+});
+
+test("W1 Z21d reads the close-up's cards only once band 5 stands committed and alone (Issue #403)", async () => {
+  const { ctx, said, checked, slept } = recording((expression) =>
+    expression === INSET_CARDS
+      ? [
+          {
+            at: 0,
+            tier: "town",
+            name: "Lamahai",
+            world: 6,
+            shown: true,
+            i: "6",
+            a: "6",
+            lay: "6",
+            road: true,
+            worldRoads: true,
+          },
+          {
+            at: 1,
+            tier: "hamlet",
+            name: "Kaki",
+            world: -1,
+            shown: false,
+            i: null,
+            a: null,
+            lay: null,
+            road: false,
+            worldRoads: false,
+          },
+        ]
+      : {},
+  );
+  const reads = [
+    { redrafts: 5, band: 3, committed: true },
+    { redrafts: 6, band: 5, committed: false },
+    { redrafts: 6, band: 5, committed: true },
+  ];
+  let at = 0;
+  const k = zoomKitOver(ctx, { rgn: () => Promise.resolve(reads[Math.min(at++, reads.length - 1)]) });
+  await z21dInsetCards(k);
+  assert.equal(count(said, INSET_CARDS), 1);
+  assert.deepEqual(slept, [40, 40]);
+  assert.deepEqual(
+    checked.filter((c) => c.code === "Z21d"),
+    [{ code: "Z21d", ok: true }],
+  );
+});
+
+test("W2 Z21d fails its step by the wait's own message when the close-up never stands alone (Issue #403)", async () => {
+  const { ctx } = recording(() => ({}));
+  const k = zoomKitOver(ctx, { rgn: () => Promise.resolve({ redrafts: 5, band: 3, committed: true }) });
+  await assert.rejects(z21dInsetCards(k), (err: Error) =>
+    err.message.startsWith("Z21d: the band-5 close-up never stood alone"),
   );
 });
