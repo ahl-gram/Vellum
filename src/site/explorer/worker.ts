@@ -1,6 +1,6 @@
 // Render worker: the CPU-heavy world-gen + SVG render off the main thread; worldFor memoizes the last world, and the output stays byte-identical to the inline path.
 import { renderMap } from "../../render/map-renderer.ts";
-import { buildPlaceManifest } from "../../render/place-manifest.ts";
+import { buildPlaceManifest, regionPlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey } from "../../render/survey.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
@@ -52,7 +52,7 @@ function answerRegion(msg: Job<"region">): void {
     id: msg.id,
     ok: true,
     svg: renderMap(region, { ...msg.render, regionRecipe }),
-    manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
+    manifest: regionPlaceManifest(world, region, msg.render.widthPx ?? 1500),
     window: msg.window,
     band: msg.band,
     title,
