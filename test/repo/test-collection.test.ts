@@ -4,13 +4,14 @@ import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
+// npm test runs only the .test.ts files under test/ (`SUITE` in `scripts/unit-suite.ts`), while a bare node --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules), so all three defects below hide in a green run: a suite under test/ under another name, or outside test/, never runs under npm test, a module so placed or named is a phantom pass under a bare run, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
 const pruned = (name: string) => name === "node_modules" || name.startsWith(".");
+const prunedAtRoot = (name: string) => pruned(name) || name === "out";
 
-// Sibling suites build and remove 19 scratch trees under out/ during the same npm test run, racing this walk, so tolerating ENOENT errs toward MISSING a collectible name in a tree that vanished mid-walk; it is the one place this file errs toward a miss rather than a false positive.
+// A sibling suite removes generated/ during the same npm test run (`cleanGenerated` in `scripts/clean-generated.ts`), racing this walk, so tolerating ENOENT errs toward MISSING a collectible name in a tree that vanished mid-walk; it is the one place this file errs toward a miss rather than a false positive.
 const entriesOf = (dir: string) => {
   try {
     return readdirSync(dir, { withFileTypes: true });
@@ -20,12 +21,12 @@ const entriesOf = (dir: string) => {
   }
 };
 
-const walk = (dir: string): string[] =>
+const walk = (dir: string, skip: (name: string) => boolean = pruned): string[] =>
   entriesOf(dir).flatMap((e) =>
-    e.isDirectory() ? (pruned(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
+    e.isDirectory() ? (skip(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
   );
 
-const filesUnder = (root: string) => walk(root).map((p) => relative(root, p));
+const filesUnder = (root: string) => walk(root, prunedAtRoot).map((p) => relative(root, p));
 
 // Node's own kDefaultPattern (its test runner's internal utils module) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": .TS is matched case-insensitively on macOS and Windows, then refused by the loader as a loud red, so it is no phantom anywhere.
 const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
@@ -86,12 +87,14 @@ test("a stray is a file node --test would load that is not a .test.ts, never a f
   assert.deepEqual([...stray, ...notStray].filter(isStray), stray);
 });
 
-test("the walk prunes node_modules and dot dirs at every depth and nothing else, so it sees the tree node sees", () => {
+test("the walk prunes node_modules and dot dirs at every depth and the scratch out/ at the root alone, so it reads every tree an author writes", () => {
   const seeded = [
     "src/f.ts",
+    "src/out/w.ts",
     "test/out/x.ts",
     "test/design/y.ts",
     "out/a.ts",
+    "out/copy/test/z.test.ts",
     "dist/b.ts",
     "public/c.ts",
     "design/d.ts",
@@ -104,9 +107,9 @@ test("the walk prunes node_modules and dot dirs at every depth and nothing else,
     assert.deepEqual(filesUnder(dir).sort(), [
       "design/d.ts",
       "dist/b.ts",
-      "out/a.ts",
       "public/c.ts",
       "src/f.ts",
+      "src/out/w.ts",
       "test/design/y.ts",
       "test/out/x.ts",
     ]);
@@ -194,7 +197,7 @@ test("the walk's recursion returns empty for a directory that is already gone, a
   });
 });
 
-test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
+test("every file a bare node --test loads under test/ is a .test.ts, so npm test runs every suite there and a bare run counts no phantom", () => {
   assert.ok(
     testDirFiles.length > 100,
     `walked only ${testDirFiles.length} files under test/; this guard is reading the wrong tree`,
@@ -203,11 +206,11 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
   assert.deepEqual(
     strays,
     [],
-    `${strays.length} file(s) under test/ that node --test loads yet are not .test.ts suites (${strays.join(", ")}): a helper here counts as a passing test of its own, and a suite under any other name escapes the guards keyed to the .test.ts name, vellum/test-no-test-import among them; helpers belong in test-support/`,
+    `${strays.length} file(s) under test/ that a bare node --test loads yet are not .test.ts suites (${strays.join(", ")}): npm test runs only the .test.ts files under test/, so a suite under any other name never runs and escapes the guards keyed to the .test.ts name, vellum/test-no-test-import among them, and a bare node --test counts a helper here as a passing test of its own; helpers belong in test-support/`,
   );
 });
 
-test("every file node --test collects lives under test/, where the runner is aimed", () => {
+test("every file in node --test's own family lives under test/, where npm test is aimed, and the scratch out/ is not read", () => {
   assert.ok(
     repoFiles.includes("package.json"),
     "the walk did not reach the repo root; this guard is reading the wrong tree",
@@ -218,6 +221,6 @@ test("every file node --test collects lives under test/, where the runner is aim
   assert.deepEqual(
     outside,
     [],
-    `${outside.length} file(s) node --test collects outside test/ (${outside.join(", ")}): it collects any directory named test at any depth and any file named test, test-*, *-test, *_test or *.test, so a module there is reported as a passing test of its own and a suite there escapes the guards keyed to the .test.ts name, vellum/test-no-test-import among them; move a real suite under test/, rename a helper out of that family (test-support/ is its home), and keep generated output from carrying one of those names`,
+    `${outside.length} file(s) node --test's own patterns collect outside test/ (${outside.join(", ")}): npm test runs only the .test.ts files under test/, so a suite there never runs, and a bare node --test collects any directory named test at any depth and any file named test, test-*, *-test, *_test or *.test, so a module there is a passing test of its own; move a real suite under test/, rename a helper out of that family (test-support/ is its home), and keep generated output from carrying one of those names`,
   );
 });
