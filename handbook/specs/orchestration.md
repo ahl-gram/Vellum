@@ -68,7 +68,9 @@ home's line wins for the lane and this file's for the orchestrator.
   confirm the parts, joined, equal the file apart from a final newline. A lost plan is restored
   from `out/plans/`, or from the comments by joining the parts, dropping each opening line and
   checking the sha256. `.claude/agents/vellum-implementer.md` quotes the opening line's fixed text
-  so that it does not count these comments as new ones: edit the two together.
+  so that it does not count these comments as new ones, `.claude/agents/vellum-planner.md` to count
+  revisions and `.claude/agents/vellum-pr-skeptic.md` to read a plan as the design the rulings
+  ratified and not as a ruling: edit the four together.
 - **Once the plan is archived, retire the planner's tree** after copying its `out/` across
   (Retiring, below), and dispatch the implementer on the plan's scratchpad path.
 - **An implementer's hand-back goes to a fresh `vellum-planner`**, which gets a fresh tree, dispatched
