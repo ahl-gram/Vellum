@@ -30,6 +30,8 @@ const ONE_RED = {
   "test/a.test.ts": `import { test } from "node:test";\ntest("red", () => { throw new Error("red"); });\n`,
 };
 
+const RUNNER_KILLED = { "test/a.test.ts": `process.kill(process.ppid, "SIGKILL");\n` };
+
 const PRELOAD_SEEN = {
   "test-support/source-read-guard.ts": "Object.assign(globalThis, { vellumPreload: true });\n",
   "test/a.test.ts": `import { test } from "node:test";\ntest("vellumPreload" in globalThis ? "after the preload" : "without the preload", () => {});\n`,
@@ -102,6 +104,15 @@ test("a red suite reds npm test, since the launcher hands back the runner's exit
   const run = runIn(ONE_RED, [LAUNCHER, TAP]);
   assert.deepEqual(run.ran, ["red"], `the red suite never ran:\n${run.output}`);
   assert.equal(run.status, 1, `npm test exited ${run.status} over a red suite, so CI reads a red run as green`);
+});
+
+test("a runner killed by a signal reds npm test, since the launcher reads no exit status as a failure", () => {
+  const run = runIn(RUNNER_KILLED, [LAUNCHER, TAP]);
+  assert.equal(
+    run.status,
+    1,
+    `npm test exited ${run.status} after its runner was killed, so CI reads a dead leg as green`,
+  );
 });
 
 test("every suite npm test runs, the whole suite or a named path, loads test-support/source-read-guard.ts first, which a bare node --test never does", () => {
