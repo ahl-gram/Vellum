@@ -65,7 +65,7 @@ test("the legend stays in frame and clears the other furniture", () => {
       const reserved = [cart.rect, scale.box];
       if (compass) reserved.push(compass.box);
       const legend = planLegend(ctx, reserved);
-      if (!legend) continue;
+      assert.ok(legend, `no legend planned (seed ${seed}, ${name})`);
       const { box } = legend;
       const m = ctx.proj.margin;
       assert.ok(box.x >= m && box.y >= m, `legend off the left/top edge (seed ${seed}, ${name})`);

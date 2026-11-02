@@ -51,12 +51,11 @@ test("the compass rose clears the legend", () => {
     const cart = planCartouche(ctx);
     const scale = planScalebar(ctx);
     const legend = planLegend(ctx, [cart.rect, scale.box]);
-    const compass = planCompass(ctx, cart, scale.box, legend?.box);
+    assert.ok(legend, `no legend planned for seed ${seed}`);
+    const compass = planCompass(ctx, cart, scale.box, legend.box);
     if (!compass) continue;
     drawn++;
-    if (legend) {
-      assert.ok(!boxesOverlap(compass.box, legend.box), `compass overlaps the legend for seed ${seed}`);
-    }
+    assert.ok(!boxesOverlap(compass.box, legend.box), `compass overlaps the legend for seed ${seed}`);
   }
   assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);
 });
