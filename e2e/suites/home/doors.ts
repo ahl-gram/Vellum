@@ -156,7 +156,7 @@ export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: Suite
   }
 }
 
-// 2026-11-01, Issue #1172: the planner's probe held 21 to 27 samples in the 2s window and read .cam 84 to 167 ms after the release, 7.8s inside the 10s reveal; HELD_TRIES is three times the samples it used and CAM_TRIES twenty times.
+// 2026-11-02, Issue #1172: the Mac probe held 21 to 27 samples in the 2s window and read .cam 84 to 167 ms after the release; GitHub's runner (the proof control, then the pull request's own run) held 20 and read it 273 and 280 ms after, 7.7s inside the 10s reveal; HELD_TRIES is three times the 27 samples most read and CAM_TRIES (3s of samples) ten times the slowest release to .cam.
 const HELD_MS = 2000;
 const HELD_TRIES = 80;
 const CAM_TRIES = 40;
@@ -169,7 +169,7 @@ export async function h13ePrmNoFlash(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, PORT } = ctx;
   // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
   await evaluate(`window.__h13d = 1`);
-  // Hold home's bundle on the server so the pre-.cam window is 2s of the page's clock on any runner: unthrottled the module boots within a frame and a 75ms sampler proves nothing (skeptic round 3), and a network throttle's window was every byte the page fetches over its rate, which ran the sampler out (Issue #1172).
+  // Hold home's bundle on the server so the pre-.cam window is 2s of the page's clock on any runner: unthrottled the module boots within a frame and a 75ms sampler proves nothing (skeptic round 3, Issue #470).
   const { held, after } = await withHeldBundle(async (release) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -199,7 +199,7 @@ export async function h13ePrmNoFlash(ctx: SuiteContext): Promise<void> {
 async function heldWindow({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">): Promise<NoFlash[]> {
   const first = await makeSettle({ evaluate, sleep, tolerant: true })(
     NO_FLASH,
-    (d) => !d.old && d.ready,
+    (d) => !d.old && d.ready && d.reveal !== null,
     "h13e-fresh-page",
   );
   const held = [first];

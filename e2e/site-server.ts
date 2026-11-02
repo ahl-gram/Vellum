@@ -67,7 +67,6 @@ export function startServer(SITE: string, PORT: number): Promise<import("node:ht
           res.writeHead(404).end("worker blocked for fallback test");
           return;
         }
-        // heldBundle keeps home's bundle waiting until the check that holds it lets it go, so H13e reads the page before its boot for as long as it chooses (Issue #1172).
         if (serverState.heldBundle !== null && pathname === HELD_BUNDLE) await serverState.heldBundle;
         if (await serveEngineModule(pathname, res)) return;
         if (pathname.endsWith("/")) pathname += "index.html";
