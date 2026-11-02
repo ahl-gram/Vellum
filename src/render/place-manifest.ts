@@ -34,8 +34,16 @@ function worldIdxOf(world: World, idx: number): number | null {
   return world.region === undefined ? idx : (world.region.parentIdx[idx] ?? null);
 }
 
-export function regionPlaceManifest(_parent: World, region: World, widthPx: number): PlaceManifest {
-  return buildPlaceManifest(region, widthPx);
+export function regionPlaceManifest(parent: World, region: World, widthPx: number): PlaceManifest {
+  const manifest = buildPlaceManifest(region, widthPx);
+  const mask = roadMask(parent);
+  return {
+    ...manifest,
+    places: manifest.places.map((p) => ({
+      ...p,
+      roads: p.worldIdx !== null && roadReachable(parent, mask, p.worldIdx).length > 0,
+    })),
+  };
 }
 
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
