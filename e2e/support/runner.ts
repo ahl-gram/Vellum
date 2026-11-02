@@ -87,6 +87,9 @@ export function browserlessExit(
   return 0;
 }
 
+const bounded = (reset: Promise<unknown>, boundMs: number): Promise<unknown> =>
+  Promise.race([reset.catch(() => {}), new Promise((settle) => setTimeout(settle, boundMs).unref())]);
+
 export function runnerHooks<C extends RunnerContext>(
   ctx: C,
   accumulators: Accumulators,
@@ -104,13 +107,10 @@ export function runnerHooks<C extends RunnerContext>(
         false,
         e && e.message ? e.message : String(failure),
       );
-      await Promise.race([
-        ctx.clearMobile().catch(() => {}),
-        new Promise((settle) => setTimeout(settle, boundMs).unref()),
-      ]);
+      await bounded(ctx.clearMobile(), boundMs);
     },
     onSuiteNotWhole: async () => {
-      await ctx.send("Emulation.setEmulatedMedia", NO_EMULATED_MEDIA);
+      await bounded(ctx.send("Emulation.setEmulatedMedia", NO_EMULATED_MEDIA), boundMs);
     },
   };
 }

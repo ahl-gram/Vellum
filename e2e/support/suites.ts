@@ -163,7 +163,7 @@ export async function runSelected<C extends object>(
   hooks: E2eRunHooks = {},
 ): Promise<readonly E2eSuiteTiming[]> {
   const now = hooks.now ?? (() => performance.now());
-  const { onSuiteError, alive, skippedGroups } = hooks;
+  const { onSuiteError, onSuiteNotWhole, alive, skippedGroups } = hooks;
   const timings: E2eSuiteTiming[] = [];
   let streak: E2eSuiteName[] = [];
   for (const name of names) {
@@ -195,6 +195,7 @@ export async function runSelected<C extends object>(
     }
     const ms = now() - started;
     const skipped = skippedGroups ? skippedGroups().slice(skippedBefore) : [];
+    if ((stoppedEarly || skipped.length > 0) && onSuiteNotWhole) await onSuiteNotWhole();
     timings.push({
       name,
       ms,
