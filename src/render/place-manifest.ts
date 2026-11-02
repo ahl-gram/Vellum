@@ -34,6 +34,10 @@ function worldIdxOf(world: World, idx: number): number | null {
   return world.region === undefined ? idx : (world.region.parentIdx[idx] ?? null);
 }
 
+export function regionPlaceManifest(_parent: World, region: World, widthPx: number): PlaceManifest {
+  return buildPlaceManifest(region, widthPx);
+}
+
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
