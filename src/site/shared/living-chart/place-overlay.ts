@@ -15,7 +15,7 @@ import {
   type HoldInput,
   type Point,
 } from "./place-card-hold.ts";
-import { cardActs, cardShell, fillCardInner, seatCard } from "./place-overlay-card.ts";
+import { cardActs, cardShell, fillCardInner, paintRoad, seatCard } from "./place-overlay-card.ts";
 
 export interface PlaceOverlayState {
   card: HTMLDivElement;
@@ -119,6 +119,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = placeOverlay.inner;
     fillCardInner(inner, card, placeOverlay.acts);
     if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
+    paintRoad(placeOverlay.ribbonLink, place, ribbonHref);
     paintLay(place.idx);
     const at = placeOverlay.anchors[idx]!;
     el.style.setProperty("--pc-nx", String(at.nx));

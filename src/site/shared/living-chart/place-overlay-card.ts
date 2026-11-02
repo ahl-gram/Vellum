@@ -1,4 +1,5 @@
 import type { PlaceCard } from "../../../render/place-card.ts";
+import type { PlaceMark } from "../../../render/place-manifest.ts";
 import type { Hold } from "./place-card-hold.ts";
 import type { BuildPlaceOverlayOpts, LayProspectHost, PlaceOverlayDeps, PlaceOverlayState } from "./place-overlay.ts";
 
@@ -41,27 +42,39 @@ export function cardActs(
   opts: Readonly<BuildPlaceOverlayOpts> | undefined,
   prospectHref: PlaceOverlayDeps["prospectHref"],
   layProspect: Readonly<LayProspectHost> | undefined,
-  _ribbonHref: PlaceOverlayDeps["ribbonHref"],
+  ribbonHref: PlaceOverlayDeps["ribbonHref"],
 ) {
   // Every card action is world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
   const onWorldSheet = !(opts && opts.box);
-  const ribbonLink: HTMLAnchorElement | null = null;
   let prospectLink: HTMLAnchorElement | null = null;
   if (prospectHref && onWorldSheet) {
     prospectLink = document.createElement("a");
     prospectLink.className = "pc-prospect";
     prospectLink.textContent = "View the prospect";
   }
+  let ribbonLink: HTMLAnchorElement | null = null;
+  if (ribbonHref && onWorldSheet) {
+    ribbonLink = document.createElement("a");
+    ribbonLink.className = "pc-ribbon";
+    ribbonLink.textContent = "Take the road";
+  }
   const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
-  const acts = prospectLink || layPress ? document.createElement("div") : null;
+  const acts = prospectLink || ribbonLink || layPress ? document.createElement("div") : null;
   if (acts) {
     acts.className = "pc-acts";
     if (prospectLink) acts.appendChild(prospectLink);
+    if (ribbonLink) acts.appendChild(ribbonLink);
     if (layPress) acts.appendChild(layPress);
     inner.appendChild(acts);
   }
   return { prospectLink, ribbonLink, layPress, acts };
 }
+
+export function paintRoad(
+  _link: HTMLAnchorElement | null,
+  _place: Readonly<PlaceMark>,
+  _href: PlaceOverlayDeps["ribbonHref"],
+): void {}
 
 export function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement | null): void {
   for (const child of [...innerEl.children]) if (child !== acts) child.remove();

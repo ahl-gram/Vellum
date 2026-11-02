@@ -170,3 +170,26 @@ test("LP4 the press names the place the card is SHOWING, so a second card's pres
   armed.press().fire("click");
   assert.deepEqual(host.laid, [1], "so pressing files the place on screen, not the one before it");
 });
+
+// The shim's El declares no href; the link's assignment lands as an own property, which is what a browser anchor would read back.
+const hrefOf = (el: object): unknown => (el as { href?: string }).href;
+
+test("LP6 the road names the place the card is SHOWING and stands down where no road leaves it, coming back at the next place that has one (Issue #428)", async () => {
+  const { manifest } = await realWorld();
+  assert.equal(manifest.places[24]!.roads, false, "witness: seed 42's Tewetulua has no road");
+  assert.equal(manifest.places[1]!.roads, true, "witness: seed 42's Paukilua has one");
+  const { lc, mount } = await barlessHost({ ribbonHref: (idx) => `/ribbon/#a=${idx}` });
+  lc.buildPlaceOverlay(manifest);
+  const armed = await armShow(mount);
+  const road = armed.road();
+  assert.ok(road, "the world-sheet card holds the road");
+
+  armed.show(1);
+  assert.equal(hrefOf(road), "/ribbon/#a=1", "the road names the shown place");
+  assert.equal(road.style.display, "", "and shows where a road leaves it");
+  armed.show(24);
+  assert.equal(road.style.display, "none", "it stands down where none does");
+  armed.show(1);
+  assert.equal(road.style.display, "", "and comes back at the next place that has one");
+  assert.equal(hrefOf(road), "/ribbon/#a=1");
+});
