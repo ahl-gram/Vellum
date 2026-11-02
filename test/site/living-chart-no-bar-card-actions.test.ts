@@ -175,7 +175,6 @@ test("LP4 the press names the place the card is SHOWING, so a second card's pres
   assert.deepEqual(host.laid, [1], "so pressing files the place on screen, not the one before it");
 });
 
-// The shim's El declares no href; the link's assignment lands as an own property, which is what a browser anchor would read back.
 const hrefOf = (el: object): unknown => (el as { href?: string }).href;
 
 test("LP6 the road names the place the card is SHOWING and stands down where no road leaves it, coming back at the next place that has one (Issue #428)", async () => {
