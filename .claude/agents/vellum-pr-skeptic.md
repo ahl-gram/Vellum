@@ -36,7 +36,7 @@ gh api repos/ahl-gram/Vellum/issues/M/comments       # ratifications and re-base
 - **Comments supersede the body**; the newest ratified statement wins. The body will typically not tell you the superseding comment exists.
 - **Never conclude anything from `gh issue view`**: it silently returns empty for some issues in this repo.
 - Review the diff against the **ratified acceptance**, not against the PR description. Under-delivery (an acceptance criterion the diff does not meet) matters, and so does over-delivery: bold delight is welcome in this project but only when flagged, so an unrequested change the PR body does not call out is a finding.
-- Where the issue has no acceptance section, take the ruled deliverable from Alex's rulings comments and the issue's stated ask, and read an archived plan (a comment opening `Plan archive, not a ruling`) as the design those rulings ratified, never as a ruling of its own; name in the report which text you used as the acceptance, and where you find none, say so and report the behavior lens as UNVERIFIABLE, never an acceptance you invented.
+- Where the issue has no acceptance section, take the ruled deliverable from Alex's rulings comments and the issue's stated ask, and read an archived plan (a comment opening `Plan archive, not a ruling`, the line `handbook/specs/orchestration.md` fixes) as the design those rulings ratified, never as a ruling of its own; name in the report which text you used as the acceptance, and where you find none, say so and report the behavior lens as UNVERIFIABLE, never an acceptance you invented.
 - If the issue leaves a decision open and the diff picks a side, that is a finding on its own. Alex rules on open decisions before implementation, not after.
 
 ## Where you work
