@@ -470,9 +470,17 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   `touch-action` down the ancestor chain, so an ancestor at `none` may defeat the card's own line,
   and the harness cannot see a `touch-action` line at all. A green run there says only that the
   camera no longer swallows the gesture, and a real device is the evidence.
-- **A place link is world-sheet only.** A region inset renumbers its places and its hamlets,
-  farmsteads and mills have no world index, so an inset card is deliberately linkless. Why an inset
-  renumbers is `handbook/specs/region-and-voyage.md`'s.
+- **A card action names the place's WORLD settlement, never its place in the manifest.** The way in
+  to the prospect, the road to the Ribbon and the filing press take `worldIdx` on a `PlaceMark`
+  (`buildPlaceManifest` in `src/render/place-manifest.ts`), and a host's link functions are handed
+  that number. A region inset renumbers its places, so a town it carries over takes its world index
+  from the region carry (`parentIdx`, `generateRegionWorld` in `src/world/region.ts`), and its road
+  flag reads the world's network (`regionPlaceManifest` in `src/render/place-manifest.ts`), since the
+  Ribbon walks the world's roads and a close-up finds only the towns inside its window. A hamlet,
+  farmstead or mill has no world index, and its card hides the action row through style
+  (`paintActs` in `src/site/shared/living-chart/place-overlay-card.ts`), never the `hidden`
+  attribute, which the row's own `display` makes inert. Why an inset renumbers is
+  `handbook/specs/region-and-voyage.md`'s.
 - **A shown card holds while the pointer is anywhere over its outline, and stays see-through
   while it does** (Issue #750, the rules pure in `src/site/shared/living-chart/place-card-hold.ts`). The
   outline is the card's rectangle read against the pointer, never a card that takes the pointer, so
