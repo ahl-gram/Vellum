@@ -17,6 +17,7 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   founded: 300,
   ruined: false,
   seat: false,
+  roads: false,
   nx: 0.5,
   ny: 0.5,
   // buildVoyagePlan orders ports by the chart fractions nx/ny and never reads gx/gy, so these are filler, not fixtures.

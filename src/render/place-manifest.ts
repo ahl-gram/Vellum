@@ -11,6 +11,7 @@ export type PlaceMark = {
   readonly founded: number;
   readonly ruined: boolean;
   readonly seat: boolean;
+  readonly roads: boolean;
   readonly nx: number;
   readonly ny: number;
   readonly gx: number;
@@ -39,6 +40,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
     founded: s.founded,
     ruined: s.ruined,
     seat: seats.has(idx),
+    roads: true,
     nx: proj.px(s.x) / proj.widthPx,
     ny: proj.py(s.y) / proj.heightPx,
     gx: s.x,
