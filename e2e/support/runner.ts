@@ -87,7 +87,7 @@ export function browserlessExit(
   return 0;
 }
 
-const bounded = (reset: Promise<unknown>, boundMs: number): Promise<unknown> =>
+export const bounded = (reset: Promise<unknown>, boundMs: number): Promise<unknown> =>
   Promise.race([reset.catch(() => {}), new Promise((settle) => setTimeout(settle, boundMs).unref())]);
 
 export function runnerHooks<C extends RunnerContext>(

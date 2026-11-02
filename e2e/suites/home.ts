@@ -20,16 +20,12 @@ import {
   h11Clean,
 } from "./home/ceremony.ts";
 import {
-  h13aPrePaint,
-  h13bRelease,
-  h13cDoorsRead,
+  h13DeadBundle,
   h13cStaticDoors,
   h13dPrmDoors,
   h13ePrmNoFlash,
   h13fNoScriptRead,
   h13fNoScript,
-  h13gDoorBase,
-  h13gDoorFrame,
   h13hShelf,
 } from "./home/doors.ts";
 import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h17Clean } from "./home/stations.ts";
@@ -89,14 +85,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h18CameraSeat(k, seat390);
   h11Clean(ctx, errBase2, httpBase2);
   // H13 runs AFTER the clean check on purpose: blocking the bundle logs an expected load error. It proves the pre-paint story (Issue #457, the incognito flash): the inline script dresses first paint without the module, and an unadopted veil releases itself rather than trapping the page.
-  await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
-  await h13aPrePaint(ctx);
-  const doorBase = await h13gDoorBase(ctx);
-  await h13bRelease(ctx);
-  // The doors share the veil's 10s window (Issue #470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
-  const doors = await h13cDoorsRead(ctx);
-  await step("H13g", () => h13gDoorFrame(ctx, doorBase));
-  await send("Network.setBlockedURLs", { urls: [] });
+  const doors = await h13DeadBundle(ctx, step);
   await h13cStaticDoors(ctx, doors);
   // Reduced motion crosses the doors both ways (Issue #470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });

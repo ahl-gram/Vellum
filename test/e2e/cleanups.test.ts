@@ -1,10 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withScriptsOff } from "../../e2e/support/scripts-off.ts";
+import { withBlockedUrls, withThrottle } from "../../e2e/support/network-state.ts";
 import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
 import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import { h13DeadBundle, h13ePrmNoFlash } from "../../e2e/suites/home/doors.ts";
 import { withStyledBoot } from "../../e2e/suites/stage/styled-boot.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
@@ -25,6 +27,38 @@ function recorder(fail: (sent: Sent) => boolean = () => false) {
 
 const scriptsSwitches = (sent: readonly Sent[]) =>
   sent.filter((s) => s.method === SCRIPTS).map((s) => s.params?.["value"]);
+
+const BLOCK = "Network.setBlockedURLs";
+const THROTTLE = "Network.emulateNetworkConditions";
+const UNBLOCKED = { urls: [] };
+const UNTHROTTLED = { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 };
+const SLOW = { offline: false, latency: 200, downloadThroughput: 120000, uploadThroughput: 120000 };
+const paramsOf = (sent: readonly Sent[], method: string) =>
+  sent.filter((s) => s.method === method).map((s) => s.params);
+const refusingSecond = (method: string) => {
+  let seen = 0;
+  return recorder((s) => s.method === method && ++seen === 2);
+};
+type Holder = {
+  method: string;
+  on: Record<string, unknown>;
+  off: Record<string, unknown>;
+  hold: (send: SuiteContext["send"], body: () => Promise<unknown>, boundMs?: number) => Promise<unknown>;
+};
+const HOLDERS: readonly Holder[] = [
+  {
+    method: BLOCK,
+    on: { urls: ["*app.bundle.js*"] },
+    off: UNBLOCKED,
+    hold: (send, body, boundMs) => withBlockedUrls(send, ["*app.bundle.js*"], body, boundMs),
+  },
+  {
+    method: THROTTLE,
+    on: SLOW,
+    off: UNTHROTTLED,
+    hold: (send, body, boundMs) => withThrottle(send, SLOW, body, boundMs),
+  },
+];
 
 test("withScriptsOff turns page scripts off for its body and back on after it, also when the body throws", async () => {
   const quiet = recorder();
@@ -173,4 +207,90 @@ test("withStyledBoot takes its forced style read back off by its own identifier,
       "a forced style read outlives its step",
     );
   }
+});
+
+test("withBlockedUrls and withThrottle each switch their condition on for the body and off after it, also when the body throws", async () => {
+  for (const { method, on, off, hold } of HOLDERS) {
+    const order = (sent: readonly Sent[]) =>
+      sent
+        .filter((s) => s.method === method || s.method === "Body.ran")
+        .map((s) => (s.method === method ? s.params : "body"));
+    const quiet = recorder();
+    assert.equal(await hold(quiet.send, () => quiet.send("Body.ran").then(() => "read")), "read");
+    assert.deepEqual(order(quiet.sent), [on, "body", off], `${method} after a body that passed`);
+    const failing = recorder();
+    await assert.rejects(
+      hold(failing.send, () => failing.send("Body.ran").then(() => Promise.reject(new Error("the body's own error")))),
+      /the body's own error/,
+    );
+    assert.deepEqual(order(failing.sent), [on, "body", off], `${method} after a body that threw`);
+  }
+});
+
+test("a network condition the browser refuses to switch off keeps the body's own error when the body failed, and fails the run when it passed", async () => {
+  for (const { method, hold } of HOLDERS) {
+    await assert.rejects(
+      hold(refusingSecond(method).send, () => Promise.reject(new Error("the body's own error"))),
+      /the body's own error/,
+    );
+    await assert.rejects(
+      hold(refusingSecond(method).send, () => Promise.resolve(7)),
+      new RegExp(`${method} refused`),
+      `${method} may still be on for every check after this one, and the run said nothing`,
+    );
+  }
+});
+
+test("a network condition whose switch-off never answers after the body failed gives up at its bound, so the body's own error still reaches its step", async () => {
+  for (const { method, hold } of HOLDERS) {
+    let seen = 0;
+    const send = <T>(m: string): Promise<T> =>
+      m === method && ++seen === 2 ? new Promise<T>(() => {}) : Promise.resolve({} as T);
+    let guard: NodeJS.Timeout | undefined;
+    const stalled = new Promise<string>((settle) => {
+      guard = setTimeout(() => settle("stalled"), 2000);
+    });
+    const outcome = await Promise.race([
+      hold(send, () => Promise.reject(new Error("the body's own error")), 20).then(
+        () => "passed",
+        (failure: unknown) => (failure instanceof Error ? failure.message : String(failure)),
+      ),
+      stalled,
+    ]);
+    clearTimeout(guard);
+    assert.equal(outcome, "the body's own error", method);
+  }
+});
+
+test("home's dead-bundle stretch unblocks the app bundles itself when it fails part way, so the next suite does not start with every app bundle blocked (Issue #1178)", async () => {
+  const { sent, send } = recorder();
+  const ctx = {
+    send,
+    evaluate: () => Promise.reject(new Error("eval exception: the page went away")),
+    check: () => {},
+    sleep: () => Promise.resolve(),
+    PORT: 8765,
+  } as unknown as SuiteContext;
+  await assert.rejects(
+    h13DeadBundle(ctx, (_name, body) => body()),
+    /eval exception: the page went away/,
+  );
+  assert.deepEqual(paramsOf(sent, BLOCK), [{ urls: ["*app.bundle.js*"] }, UNBLOCKED], JSON.stringify(sent));
+  assert.equal(sent.at(-1)?.method, BLOCK, "something ran after the bundles were unblocked");
+});
+
+test("H13e lifts its own throttle when it fails part way, so the checks after it in home do not load their pages throttled (Issue #1178)", async () => {
+  const { sent, send } = recorder((s) => s.method === "Page.navigate");
+  const ctx = {
+    send,
+    evaluate: () => Promise.resolve(undefined),
+    check: () => {},
+    sleep: () => Promise.resolve(),
+    PORT: 8765,
+  } as unknown as SuiteContext;
+  await assert.rejects(h13ePrmNoFlash(ctx), /Page.navigate refused/);
+  const throttles = paramsOf(sent, THROTTLE) as { latency?: number }[];
+  assert.ok((throttles[0]?.latency ?? 0) > 0, `the check never slowed the network: ${JSON.stringify(sent)}`);
+  assert.deepEqual(throttles.slice(1), [UNTHROTTLED], JSON.stringify(sent));
+  assert.equal(sent.at(-1)?.method, THROTTLE, "something ran after the throttle was lifted");
 });
