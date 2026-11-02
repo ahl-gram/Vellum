@@ -180,7 +180,7 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
   );
 });
 
-test("the viewport reset after a suite stops is bounded, so a reset that never settles cannot stall the lane", async () => {
+test("the viewport reset after a suite that did not run whole is bounded, so a reset that never settles cannot stall the lane", async () => {
   const ctx: Ctx = {
     check: () => {},
     alive: () => Promise.resolve(true),
@@ -188,11 +188,11 @@ test("the viewport reset after a suite stops is bounded, so a reset that never s
     send: <T>(): Promise<T> => Promise.resolve({} as T),
   };
   const acc = freshAccumulators();
-  const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteError;
-  assert.ok(handler, "the runner hands runSelected no per-suite handler");
+  const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteNotWhole;
+  assert.ok(handler, "the runner hands runSelected no handler for a suite that did not run whole");
   let guard: NodeJS.Timeout | undefined;
   const stalled = new Promise<"stalled">((settle) => (guard = setTimeout(() => settle("stalled"), 2000)));
-  const outcome = await Promise.race([Promise.resolve(handler("render", new Error("x"))).then(() => "done"), stalled]);
+  const outcome = await Promise.race([Promise.resolve(handler()).then(() => "done"), stalled]);
   clearTimeout(guard);
   assert.equal(outcome, "done");
 });
