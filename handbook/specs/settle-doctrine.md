@@ -178,7 +178,7 @@ headless browser actually do, so a green run can be believed.
     reset and the suite then ends without `onSuiteError` firing. Each reset is raced against a
     timeout, and the race is bounded precisely because a browser that dies after the liveness probe
     would leave that send pending forever, which is the one path where the next suite does inherit
-    what the suite set. A later step of the suite whose step threw still runs under what that step
+    a viewport, touch or media override the suite set. A later step of the suite whose step threw still runs under what that step
     set, so a condition its own later steps must not inherit is restored in a `finally`, as
     `withReducedMotion` in `e2e/support/reduced-motion.ts` does. Depend on the suite, not on the
     rescue. **Attribute a lane-order red by BISECTING the order, never by reasoning about what the
