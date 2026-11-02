@@ -18,6 +18,7 @@ export interface RoomFurniture {
   readonly plate: HTMLImageElement;
   readonly slipTitle: HTMLElement;
   readonly slipWhere: HTMLElement;
+  readonly fallback: HTMLElement;
   readonly itinerary: HTMLElement;
   readonly folioTitle: HTMLElement;
   readonly folioSub: HTMLElement;
@@ -73,7 +74,20 @@ const inline = (tag: "strong" | "em", text: string): HTMLElement => {
   return el;
 };
 
-function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => void): HTMLLIElement {
+function prospectLink(town: string, href: string): HTMLAnchorElement {
+  const a = document.createElement("a");
+  a.className = "row-prospect";
+  a.href = href;
+  a.setAttribute("aria-label", `See ${town} in The Prospect`);
+  a.textContent = "prospect";
+  return a;
+}
+
+function rowNode(
+  r: RibbonRow,
+  prospect: string | null,
+  onLean: (row: RibbonRow, li: HTMLLIElement) => void,
+): HTMLLIElement {
   const li = document.createElement("li");
   li.className = r.kind;
   li.dataset.nx = String(r.nx);
@@ -89,17 +103,22 @@ function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => vo
   btn.append(...contentsRow(String(Math.round(r.leagues)), parts));
   btn.addEventListener("click", () => onLean(r, li));
   li.append(btn);
+  if (prospect !== null) li.append(prospectLink(r.text, prospect));
   return li;
 }
 
 export function writeItinerary(
   roomEls: RoomFurniture,
   res: Facts,
+  note: string | null,
+  prospectOf: (row: RibbonRow) => string | null,
   onLean: (row: RibbonRow, li: HTMLLIElement) => void,
 ): void {
   roomEls.slipTitle.textContent = `${res.fromName} to ${res.toName}`;
   roomEls.slipWhere.textContent = `${Math.round(res.leagues)} leagues · in ${res.realm ?? res.title} · An. ${res.year}`;
-  roomEls.itinerary.replaceChildren(...res.events.map((r) => rowNode(r, onLean)));
+  roomEls.fallback.textContent = note ?? "";
+  roomEls.fallback.hidden = note === null;
+  roomEls.itinerary.replaceChildren(...res.events.map((r) => rowNode(r, prospectOf(r), onLean)));
 }
 
 export function markLeaned(roomEls: RoomFurniture, li: HTMLLIElement | null): void {
