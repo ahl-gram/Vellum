@@ -169,16 +169,16 @@ headless browser actually do, so a green run can be believed.
 14. **A suite leaves the browser in a known state for the next one.** The next suite in the lane
     starts on whatever page is current, so the last navigation waits for readiness instead of
     returning mid-boot, or a suite that reads the page it expects without navigating of its own goes
-    red in lane order and green alone. The VIEWPORT is the runner's job, not the suite's:
-    `onSuiteError` in `e2e/support/runner.ts` races the mobile-emulation reset against a timeout
-    on the error path, and the race is bounded precisely because a browser that dies after the
-    liveness probe would leave that send pending forever, which is the one path where the next suite
-    does inherit a phone viewport. EMULATED MEDIA is the runner's too, on one path more: after a suite
-    that stopped early, and after one whose step never reached its assertion, `onSuiteNotWhole` in
-    `e2e/support/runner.ts` clears the emulated media and every emulated feature with
-    `NO_EMULATED_MEDIA` (`e2e/support/reduced-motion.ts`) inside the same bounded race, because
-    `makeStep` catches a throw that skipped a trailing reset and the suite then ends without
-    `onSuiteError` firing. A later step of the suite whose step threw still runs under what that step
+    red in lane order and green alone. The VIEWPORT and the EMULATED MEDIA are the runner's to
+    rescue: after a suite that stopped early, and after one whose step never reached its assertion,
+    `onSuiteNotWhole` in `e2e/support/runner.ts` resets the device metrics and the touch emulation
+    with `clearMobile` in `e2e/harness.ts`, leaving no override, as at the start of a lane, and then
+    clears the emulated media and every emulated feature with `NO_EMULATED_MEDIA`
+    (`e2e/support/reduced-motion.ts`), because `makeStep` catches a throw that skipped a trailing
+    reset and the suite then ends without `onSuiteError` firing. Each reset is raced against a
+    timeout, and the race is bounded precisely because a browser that dies after the liveness probe
+    would leave that send pending forever, which is the one path where the next suite does inherit
+    a viewport, touch or media override the suite set. A later step of the suite whose step threw still runs under what that step
     set, so a condition its own later steps must not inherit is restored in a `finally`, as
     `withReducedMotion` in `e2e/support/reduced-motion.ts` does. Depend on the suite, not on the
     rescue. **Attribute a lane-order red by BISECTING the order, never by reasoning about what the
@@ -570,9 +570,9 @@ section points there rather than restating it.
   `e2e/suites/reading-room.ts` both do, at different sizes, which is why the rule is size
   your own fixture and not any one figure. It is the raw call rather than `setMobileViewport`
   because that wrapper sets `mobile: true`, which changes layout semantics as well as size. **This
-  is not the case clause 14 governs**: there the VIEWPORT is the runner's job because the reset on
-  the ERROR path decides what the NEXT suite inherits, while here a suite sizes its own fixture
-  inside its own run, and leaving that to the runner is what loses the fixture.
+  is not the case clause 14 governs**: there the runner rescues the VIEWPORT because its reset after
+  a suite that did not run whole decides what the NEXT suite inherits, while here a suite sizes its
+  own fixture inside its own run, and leaving that to the runner is what loses the fixture.
 
 ### Where the Mac and the CI runner disagree
 
