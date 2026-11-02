@@ -72,11 +72,15 @@ test("LP1 the card carries the LAY press only on a world sheet whose host provid
   );
 });
 
-test("LP2 both actions sit inside ONE .pc-acts row, so Issue #428's third action joins a row that already exists rather than re-laying the card out (#522)", async () => {
+test("LP2 the card's actions sit inside ONE .pc-acts row, the road to the Ribbon right under the way in to the prospect and the filing press last (#522; Issue #428, ruled 2026-11-02)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
   const host = layHost();
-  const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}`, layProspect: host.dep });
+  const { lc, mount } = await barlessHost({
+    prospectHref: (idx) => `/prospect/#i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#a=${idx}`,
+    layProspect: host.dep,
+  });
   lc.buildPlaceOverlay(manifest);
   const overlay = mount.children.find((c) => c.classList.contains("place-overlay"))!;
   const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card")!;
@@ -84,10 +88,47 @@ test("LP2 both actions sit inside ONE .pc-acts row, so Issue #428's third action
   const acts = inner.children.filter((c) => c.classList.contains("pc-acts"));
   assert.equal(acts.length, 1, "exactly one action row, and it is a direct child of the card's inner");
   const names = acts[0]!.children.map((c) => String(c.className));
-  assert.deepEqual(names, ["pc-prospect", "pc-lay"], "both actions are the row's children, in the ruled stills' order");
+  assert.deepEqual(
+    names,
+    ["pc-prospect", "pc-ribbon", "pc-lay"],
+    "the two roads together, then the press, in the ruled order",
+  );
   assert.ok(
-    !inner.children.some((c) => c.classList.contains("pc-prospect") || c.classList.contains("pc-lay")),
-    "and neither action is left a bare sibling of the prose",
+    !inner.children.some(
+      (c) => c.classList.contains("pc-prospect") || c.classList.contains("pc-ribbon") || c.classList.contains("pc-lay"),
+    ),
+    "and no action is left a bare sibling of the prose",
+  );
+});
+
+test("LP5 the card carries the road to the Ribbon only on a world sheet whose host provides one, and it is a real link named for what it opens (Issue #428)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+
+  const linked = await barlessHost({
+    prospectHref: (idx) => `/prospect/#i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#a=${idx}`,
+  });
+  linked.lc.buildPlaceOverlay(manifest);
+  const overlay = linked.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  const road = walk(overlay).find((n) => n.classList.contains("pc-ribbon"));
+  assert.ok(road, "a world-sheet card whose host has a Ribbon holds the road to it");
+  assert.equal(road.tagName, "A", "a real link, not a button");
+  assert.equal(road.textContent, "Take the road", "named for what it opens");
+
+  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
+  assert.ok(
+    !walk(overlays[overlays.length - 1]!).some((n) => n.classList.contains("pc-ribbon")),
+    "a region inset's renumbered card carries no road to the Ribbon",
+  );
+
+  const prospectOnly = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}` });
+  prospectOnly.lc.buildPlaceOverlay(manifest);
+  const plain = prospectOnly.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  assert.ok(
+    !walk(plain).some((n) => n.classList.contains("pc-ribbon")),
+    "a host with no Ribbon (the Reading Room) gets no road",
   );
 });
 
@@ -132,4 +173,56 @@ test("LP4 the press names the place the card is SHOWING, so a second card's pres
   assert.equal(armed.press().dataset["idx"], "1", "and follows the card to the next place");
   armed.press().fire("click");
   assert.deepEqual(host.laid, [1], "so pressing files the place on screen, not the one before it");
+});
+
+const hrefOf = (el: object): unknown => (el as { href?: string }).href;
+
+test("LP6 the road names the place the card is SHOWING and stands down where no road leaves it, coming back at the next place that has one (Issue #428)", async () => {
+  const { manifest } = await realWorld();
+  assert.equal(manifest.places[24]!.roads, false, "witness: seed 42's Tewetulua has no road");
+  assert.equal(manifest.places[1]!.roads, true, "witness: seed 42's Paukilua has one");
+  const { lc, mount } = await barlessHost({ ribbonHref: (idx) => `/ribbon/#a=${idx}` });
+  lc.buildPlaceOverlay(manifest);
+  const armed = await armShow(mount);
+  const road = armed.road();
+  assert.ok(road, "the world-sheet card holds the road");
+
+  armed.show(1);
+  assert.equal(hrefOf(road), "/ribbon/#a=1", "the road names the shown place");
+  assert.equal(road.style.display, "", "and shows where a road leaves it");
+  armed.show(24);
+  assert.equal(road.style.display, "none", "it stands down where none does");
+  armed.show(1);
+  assert.equal(road.style.display, "", "and comes back at the next place that has one");
+  assert.equal(hrefOf(road), "/ribbon/#a=1");
+});
+
+test("LP7 both roads are repainted for the SHOWN place when the table changes under a pinned card, so neither carries the address it was painted with (Issue #428, Issue #1194)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+  let table = "before";
+  const { lc, mount } = await barlessHost({
+    prospectHref: (idx) => `/prospect/#table=${table}&i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#table=${table}&a=${idx}`,
+  });
+  lc.buildPlaceOverlay(manifest);
+  lc.relabelLay();
+  const armed = await armShow(mount);
+  const road = armed.road();
+  const prospect = walk(mount).find((n) => n.classList.contains("pc-prospect"));
+  assert.ok(road && prospect, "the world-sheet card holds both roads");
+
+  armed.show(1);
+  assert.equal(hrefOf(road), "/ribbon/#table=before&a=1");
+  assert.equal(hrefOf(prospect), "/prospect/#table=before&i=1");
+  table = "after";
+  lc.relabelLay();
+  assert.equal(hrefOf(road), "/ribbon/#table=after&a=1", "the road follows the table and still names the shown place");
+  assert.equal(hrefOf(prospect), "/prospect/#table=after&i=1", "and so does the way in to the prospect");
+
+  armed.show(24);
+  table = "later";
+  lc.relabelLay();
+  assert.equal(road.style.display, "none", "a repaint keeps the road stood down where none leaves the shown place");
+  assert.equal(hrefOf(prospect), "/prospect/#table=later&i=24");
 });

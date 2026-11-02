@@ -1,6 +1,7 @@
 import type { World } from "../world/types.ts";
 import type { SettlementKind } from "../society/sites.ts";
 import type { HistoricalEvent } from "../society/history.ts";
+import { roadMask, roadReachable } from "../itinerary/route.ts";
 import { createProjection, marginFor } from "./transform.ts";
 
 export type PlaceMark = {
@@ -11,6 +12,7 @@ export type PlaceMark = {
   readonly founded: number;
   readonly ruined: boolean;
   readonly seat: boolean;
+  readonly roads: boolean;
   readonly nx: number;
   readonly ny: number;
   readonly gx: number;
@@ -31,6 +33,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
   const seats = new Set(world.realms.seats);
+  const mask = roadMask(world);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
     name: s.name,
@@ -39,6 +42,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
     founded: s.founded,
     ruined: s.ruined,
     seat: seats.has(idx),
+    roads: roadReachable(world, mask, idx).length > 0,
     nx: proj.px(s.x) / proj.widthPx,
     ny: proj.py(s.y) / proj.heightPx,
     gx: s.x,

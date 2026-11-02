@@ -26,7 +26,7 @@ export async function p16Glass({ evaluate, check }: SuiteContext, pm: Manifest):
     };
   })()`);
   check(
-    "P16 the glass reads the capital's name: tongue, syllabified word, glossed roots (#124), and the card's ACTION ROW stands between the founding and the note with both actions inside it (#522)",
+    "P16 the glass reads the capital's name: tongue, syllabified word, glossed roots (#124), and the card's ACTION ROW stands between the founding and the note with all three actions inside it, the two roads first and the filing press last (#522; Issue #428)",
     typeof p16.tongue === "string" &&
       p16.tongue.startsWith("A word of the Oromi speech: ") &&
       p16.tongue.includes("·") &&
@@ -37,7 +37,7 @@ export async function p16Glass({ evaluate, check }: SuiteContext, pm: Manifest):
         .split(",")
         .filter((c) => c !== "pc-former")
         .join(",") === "pc-name,pc-rank,pc-founded,pc-acts,pc-tongue,pc-roots" &&
-      p16.acts === "pc-prospect,pc-lay",
+      p16.acts === "pc-prospect,pc-ribbon,pc-lay",
     JSON.stringify(p16),
   );
 }

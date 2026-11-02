@@ -4,7 +4,6 @@ import type { SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import {
   AT_HOME,
-  CENTRE,
   FOCUS,
   HIDE,
   INKED,
@@ -12,6 +11,7 @@ import {
   PART,
   PICK,
   PICKS,
+  SEAT_AT,
   ZERO_NUDGE,
   actsWants,
   cardWants,
@@ -113,8 +113,9 @@ async function seatAt(
   await zoomHome(evaluate, sleep);
   if (k === 4) {
     const at = await evaluate(AT_HOME(idx));
-    if (!at) return { row: "", wrong: [`${variant} at k=${k}: no target to centre`] };
-    await evaluate(CENTRE(idx, at.px, at.py));
+    if (!at) return { row: "", wrong: [`${variant} at k=${k}: no target to seat`] };
+    if (!(await evaluate(SEAT_AT(at.px, at.py, variant.includes("h"), variant.includes("v")))))
+      return { row: "", wrong: [`${variant} at k=${k}: the camera did not land where the seat asked`] };
   }
   const hidden = await evaluate(HIDE, true);
   const still = await evaluate(ZERO_NUDGE, true);

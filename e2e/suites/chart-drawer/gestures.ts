@@ -70,7 +70,7 @@ async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Pre
   }
   if (hover === null) throw new Error("the hand never rested on the filing press");
   await park(send);
-  const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-prospect"))
+  const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-ribbon"))
     ? await settle(
         PRESS,
         (d, last) => d.focus && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),

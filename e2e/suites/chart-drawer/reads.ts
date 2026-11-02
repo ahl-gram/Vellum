@@ -95,6 +95,7 @@ export type Card = {
     disabled: boolean;
   } | null;
   link: { hit: string; inActs: boolean } | null;
+  road: { hit: string; inActs: boolean } | null;
   actsRow: number;
   pressInActs: boolean;
   cuttings: number;
@@ -248,6 +249,7 @@ export const SURFACES: Payload<Surfaces> = `(() => {
 export const CARD: Payload<Card> = `(() => {
     const press = document.querySelector("#place-card .pc-lay");
     const link = document.querySelector("#place-card .pc-prospect");
+    const road = document.querySelector("#place-card .pc-ribbon");
     const acts = document.querySelector("#place-card .pc-acts");
     const box = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2), w: +b.width.toFixed(2), h: +b.height.toFixed(2) }; };
     const hit = (e) => { const b = box(e); if (!b || b.w < 1) return "no-box"; const h = document.elementFromPoint(b.x, b.y); return h === e || e.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); };
@@ -257,6 +259,7 @@ export const CARD: Payload<Card> = `(() => {
       name: (document.querySelector("#place-card .pc-name") || {}).textContent || null,
       press: press ? { text: press.textContent, dim: press.classList.contains("dim"), idx: press.dataset.idx, box: box(press), hit: hit(press), disabled: press.hasAttribute("disabled") } : null,
       link: link ? { hit: hit(link), inActs: !!acts && acts.contains(link) } : null,
+      road: road ? { hit: hit(road), inActs: !!acts && acts.contains(road) } : null,
       actsRow: acts ? acts.children.length : 0,
       pressInActs: !!acts && !!press && acts.contains(press),
       cuttings: document.querySelectorAll("#cuttings li").length,

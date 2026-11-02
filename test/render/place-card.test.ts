@@ -24,6 +24,7 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   founded: 312,
   ruined: false,
   seat: false,
+  roads: false,
   nx: 0.5,
   ny: 0.5,
   gx: 0,

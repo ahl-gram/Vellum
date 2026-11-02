@@ -31,7 +31,7 @@ export const TIPPING_LINKS: readonly string[] = [
   "explorer/broadside.css :: a.fn:hover",
   "src/cli/gallery.ts :: figure img:hover",
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
-  "shared/living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
+  "shared/living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible, .pc-ribbon:hover, .pc-ribbon:focus-visible",
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ];
 

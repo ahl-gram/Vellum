@@ -156,8 +156,9 @@
   gap: 0.3rem;
   margin-top: 0.45rem;
 }
-/* The card's road to the prospect page; pointer-events restored because the card box is pointer-events: none. */
-.pc-prospect {
+/* The card's roads out, to the prospect page and to the Ribbon; pointer-events restored because the card box is pointer-events: none. */
+.pc-prospect,
+.pc-ribbon {
   display: inline-block;
   vertical-align: top;
   margin-top: 0;
@@ -175,7 +176,9 @@
     border-color 160ms ease;
 }
 .pc-prospect:hover,
-.pc-prospect:focus-visible {
+.pc-prospect:focus-visible,
+.pc-ribbon:hover,
+.pc-ribbon:focus-visible {
   border-color: var(--ink-brown);
   transform: translateY(var(--raise)) rotate(-0.6deg);
 }

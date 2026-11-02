@@ -81,9 +81,11 @@ export const AT_HOME = (
   if (!t) return null; const vr = vp.getBoundingClientRect(), r = t.getBoundingClientRect();
   return { px: r.left + r.width / 2 - vr.left, py: r.top + r.height / 2 - vr.top }; })()`;
 
-export const CENTRE = (idx: number, px: number, py: number): Payload<boolean> =>
-  `(() => { const vp = document.getElementById("map-viewport"), t = document.querySelector('#map .place-hit[data-idx="${idx}"]');
-  if (!t) return false; window.__vellumZoomTo({ k: 4, x: vp.clientWidth / 2 - 4 * ${px}, y: vp.clientHeight / 2 - 4 * ${py} }); return true; })()`;
+// At depth the town is seated an eighth of the box in from the two edges its card flips away from: the card keeps seven eighths of the box, and the mark moves off the spot it held at rest, so a card that stopped riding the camera would be left behind.
+export const SEAT_AT = (px: number, py: number, left: boolean, up: boolean): Payload<boolean> =>
+  `(() => { const vp = document.getElementById("map-viewport"), w = vp.clientWidth, h = vp.clientHeight;
+  const want = { k: 4, x: (${left} ? w * 7 / 8 : w / 8) - 4 * ${px}, y: (${up} ? h * 7 / 8 : h / 8) - 4 * ${py} };
+  window.__vellumZoomTo(want); const s = window.__vellumZoomState(); return s.k === want.k && s.x === want.x && s.y === want.y; })()`;
 
 export type Part = { cls: string; props: Record<string, string | number[]> };
 export const PART = (

@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
+import type { World } from "../../src/world/types.ts";
+import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
 
 // The expected pixels are reconstructed BY HAND, independent of `createProjection` in `src/render/map-renderer.ts`, so a regression on either side is caught (never the tautological nx*widthPx === proj.px).
 
@@ -107,4 +109,41 @@ test("gx/gy are grid coords, distinct from the chart-space nx/ny", () => {
   // The projection is affine with a margin, so nx*widthPx recovers the pixel, not the cell.
   assert.equal(Math.round(expectedPx(p.gx)), Math.round(p.nx * WIDTH));
   assert.equal(Math.round(expectedPy(p.gy)), Math.round(p.ny * expectedHeightPx));
+});
+
+// Swept 2026-11-02 over seeds 1 to 25 and 42: 11 of 661 places have no road, every one a village but seed 21's Hjau, the witness that a town can be roadless too.
+const ROAD_SEEDS = [42, 21];
+const roadWorlds = ROAD_SEEDS.map((seed) => generateWorld(defaultRecipe(seed)));
+
+test("roads flags a place exactly where the Ribbon would set out from it, so the card never offers a road the Ribbon re-seats on the capital (Issue #428)", () => {
+  roadWorlds.forEach((w, n) => {
+    const m = buildPlaceManifest(w, WIDTH);
+    const r = ribbonResultFor(w, { from: null, to: null, dress: "antique" });
+    assert.deepEqual(
+      m.places.map((p) => p.roads),
+      r.options.map((o) => o.roads),
+      `seed ${ROAD_SEEDS[n]}: the card's flag and the Ribbon's own setting-out list agree place by place`,
+    );
+  });
+});
+
+test("roads witnesses: seed 42's Tewetulua (24, a village) and seed 21's Hjau (4, a town) are the places no road leaves, and the Ribbon re-seats a departure from Tewetulua (Issue #428)", () => {
+  const [w42, w21] = roadWorlds as [World, World];
+  const m42 = buildPlaceManifest(w42, WIDTH);
+  const m21 = buildPlaceManifest(w21, WIDTH);
+  assert.equal(m42.places[24]!.name, "Tewetulua");
+  assert.equal(m42.places[24]!.roads, false, "no road leaves Tewetulua");
+  assert.equal(m21.places[4]!.name, "Hjau");
+  assert.equal(m21.places[4]!.roads, false, "no road leaves Hjau, a town");
+  assert.equal(m42.places.filter((p) => p.roads).length, 25, "seed 42 has 25 roaded places");
+  assert.equal(
+    ribbonResultFor(w42, { from: 24, to: null, dress: "antique" }).fromIdx,
+    0,
+    "the Ribbon re-seats a departure from Tewetulua on the capital",
+  );
+  assert.equal(
+    ribbonResultFor(w42, { from: 1, to: null, dress: "antique" }).fromIdx,
+    1,
+    "and keeps a departure from a roaded place",
+  );
 });
