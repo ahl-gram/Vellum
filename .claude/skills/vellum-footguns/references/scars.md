@@ -133,6 +133,13 @@ left open and the session failed to write down).
   nested `test/` directory as uncollected; and "err toward a false positive" was applied to node's
   literal pattern segments, where it prevents no miss on any platform and only makes the message
   false, the reasoning that had withdrawn #561's extension fold eight hours earlier.
+- Later, Issue #926: the handoff rule kept a copied tool under no name `node --test` collects, and a
+  copied TREE defeated it, since every directory named `test` is collected whole: the issue records
+  a saved suite under `out/` failing a local `npm test` twice and a lane's folder holding whole
+  repository copies a level below where a cleanup looked, and on 2026-11-01 a planner's dry run left
+  copies of the whole test tree under `out/` while two by-name files sat in the main checkout's
+  `out/`. A guard over `out/` reds beside the copies it cannot stop, so `npm test` was aimed at
+  `test/` instead (`scripts/unit-suite.ts`).
 - Later, #564: a 200 KB `input` to a child that DRAINS it wedged `spawnSync` on darwin and hung the
   unit lane with no red, twice on 2026-09-10 and twice more in 2000 reproduction runs on 2026-09-11
   (a further 12 in 12000 came back as ETIMEDOUT rather than hanging, because those runs were capped,

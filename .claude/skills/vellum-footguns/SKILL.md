@@ -45,13 +45,14 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite. A
    determinism oracle builds a FRESH subject for the second run: a per-object memo makes a
    same-object compare a tautology that passes however broken the computation is (#423).
-8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
-   --test` collects every module under ANY directory named `test` outside dot segments and
-   `node_modules`, and ANYWHERE a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a
-   helper there or so named runs as a passing test of its own, and a `.test.ts` importing a sibling
-   `.test.ts` runs the sibling's tests twice; neither fails, both inflate the count, and
-   `test/repo/test-collection.test.ts` and the lint red them. No precedent in `test-support/` is no
-   evidence against the convention.
+8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `npm
+   test` runs only the `.test.ts` files under `test/` (`handbook/specs/check-placement.md`, The
+   unit suite), but a bare `node --test` collects every module under ANY directory named `test`
+   outside dot segments and `node_modules`, and ANYWHERE a file named `test`, `test-*`, `*-test`,
+   `*_test` or `*.test`, so there a helper so placed or named runs as a passing test of its own;
+   under either, a `.test.ts` importing a sibling `.test.ts` runs the sibling's tests twice. Neither
+   fails, both inflate the count, and `test/repo/test-collection.test.ts` and the lint red them. No
+   precedent in `test-support/` is no evidence against the convention.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover`, one round (step 15), for the guard set (10 minutes, unit tests only,
    untried mutations named). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
