@@ -1,6 +1,8 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { makeSettle } from "../../support/settle.ts";
+import { withBlockedUrls, withThrottle } from "../../support/network-state.ts";
+import type { NetworkConditions } from "../../support/network-state.ts";
 import type { makeStep } from "../../support/step.ts";
 import { doorShown } from "./reads.ts";
 
@@ -89,15 +91,15 @@ export async function h13cDoorsRead({ evaluate, sleep }: SuiteContext) {
 }
 
 export async function h13DeadBundle(ctx: SuiteContext, step: ReturnType<typeof makeStep>): Promise<Doors> {
-  await ctx.send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
-  await h13aPrePaint(ctx);
-  const doorBase = await h13gDoorBase(ctx);
-  await h13bRelease(ctx);
-  // The doors share the veil's 10s window (Issue #470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
-  const doors = await h13cDoorsRead(ctx);
-  await step("H13g", () => h13gDoorFrame(ctx, doorBase));
-  await ctx.send("Network.setBlockedURLs", { urls: [] });
-  return doors;
+  return withBlockedUrls(ctx.send, ["*app.bundle.js*"], async () => {
+    await h13aPrePaint(ctx);
+    const doorBase = await h13gDoorBase(ctx);
+    await h13bRelease(ctx);
+    // The doors share the veil's 10s window (Issue #470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
+    const doors = await h13cDoorsRead(ctx);
+    await step("H13g", () => h13gDoorFrame(ctx, doorBase));
+    return doors;
+  });
 }
 
 export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doors): Promise<void> {
@@ -153,18 +155,33 @@ export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: Suite
   }
 }
 
+const H13E_THROTTLE: NetworkConditions = {
+  offline: false,
+  latency: 200,
+  downloadThroughput: 120000,
+  uploadThroughput: 120000,
+};
+
 export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
   await evaluate(`window.__h13d = 1`);
   // Throttle so the pre-.cam window is seconds wide: on an unthrottled localhost the module boots within a frame and a 75ms sampler proves nothing about a flash (skeptic round 3).
-  await send("Network.emulateNetworkConditions", {
-    offline: false,
-    latency: 200,
-    downloadThroughput: 120000,
-    uploadThroughput: 120000,
+  const { prmCam, prmFlash } = await withThrottle(send, H13E_THROTTLE, async () => {
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    return noFlashSamples({ evaluate, sleep });
   });
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  check(
+    "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
+    prmCam && !prmFlash,
+    JSON.stringify({ prmCam, prmFlash }),
+  );
+}
+
+async function noFlashSamples({
+  evaluate,
+  sleep,
+}: Pick<SuiteContext, "evaluate" | "sleep">): Promise<{ prmCam: boolean; prmFlash: boolean }> {
   let prmFlash = false;
   let prmCam = false;
   let fresh = false;
@@ -184,17 +201,7 @@ export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: Sui
     if (prmCam && ++afterCam > 4) break;
     await sleep(75);
   }
-  await send("Network.emulateNetworkConditions", {
-    offline: false,
-    latency: 0,
-    downloadThroughput: -1,
-    uploadThroughput: -1,
-  });
-  check(
-    "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
-    prmCam && !prmFlash,
-    JSON.stringify({ prmCam, prmFlash }),
-  );
+  return { prmCam, prmFlash };
 }
 
 export async function h13fNoScriptRead(ctx: SuiteContext) {

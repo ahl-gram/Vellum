@@ -27,8 +27,14 @@ async function holding<T>(
   boundMs: number,
 ): Promise<T> {
   await send(method, on);
-  const value = await body();
-  await bounded(send(method, off), boundMs);
+  let value: T;
+  try {
+    value = await body();
+  } catch (failure) {
+    await bounded(send(method, off), boundMs);
+    throw failure;
+  }
+  await send(method, off);
   return value;
 }
 
