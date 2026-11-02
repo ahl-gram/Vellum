@@ -15,6 +15,11 @@ export const plantMessages = async (
   linter: ESLint = eslint,
 ): Promise<Linter.LintMessage[]> => {
   const [result] = await linter.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
+  assert.deepEqual(
+    result!.messages.filter((m) => m.fatal).map((m) => m.message),
+    [],
+    `the plant at ${path} does not parse, so no rule read it`,
+  );
   return result!.messages;
 };
 
