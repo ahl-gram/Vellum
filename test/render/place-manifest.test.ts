@@ -136,6 +136,14 @@ test("roads witnesses: seed 42's Tewetulua (24, a village) and seed 21's Hjau (4
   assert.equal(m21.places[4]!.name, "Hjau");
   assert.equal(m21.places[4]!.roads, false, "no road leaves Hjau, a town");
   assert.equal(m42.places.filter((p) => p.roads).length, 25, "seed 42 has 25 roaded places");
-  assert.equal(ribbonResultFor(w42, { from: 24, to: null, dress: "antique" }).fromIdx, 0, "the Ribbon re-seats a departure from Tewetulua on the capital");
-  assert.equal(ribbonResultFor(w42, { from: 1, to: null, dress: "antique" }).fromIdx, 1, "and keeps a departure from a roaded place");
+  assert.equal(
+    ribbonResultFor(w42, { from: 24, to: null, dress: "antique" }).fromIdx,
+    0,
+    "the Ribbon re-seats a departure from Tewetulua on the capital",
+  );
+  assert.equal(
+    ribbonResultFor(w42, { from: 1, to: null, dress: "antique" }).fromIdx,
+    1,
+    "and keeps a departure from a roaded place",
+  );
 });

@@ -58,7 +58,7 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
   await pinCard(1);
   const armed = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-press");
   check(
-    "CD25 the place card's two actions stand in ONE row and BOTH answer a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7)",
+    "CD25 the place card's three actions stand in ONE row and EACH answers a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7; Issue #428)",
     at.hits > 1 &&
       armed.shown &&
       !!armed.press &&
@@ -66,13 +66,16 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
       !!armed.link &&
       armed.link.hit === "self" &&
       armed.link.inActs &&
+      !!armed.road &&
+      armed.road.hit === "self" &&
+      armed.road.inActs &&
       armed.pressInActs &&
-      armed.actsRow === 2 &&
+      armed.actsRow === 3 &&
       armed.press.text === "Lay the prospect on the table" &&
       !armed.press.dim &&
       !armed.press.disabled &&
       armed.press.idx === "1",
-    JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, actsRow: armed.actsRow }),
+    JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, road: armed.road, actsRow: armed.actsRow }),
   );
   await cd26DrawsPlate({ check, settle, pressCard }, armed);
   // The DRAWN world and not the controls: a seed typed without pressing Draw is the reachable way to file a chart nobody drew.

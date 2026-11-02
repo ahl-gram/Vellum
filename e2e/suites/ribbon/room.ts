@@ -15,6 +15,17 @@ export async function rb17PlaceLink(k: RibbonKit): Promise<void> {
   );
 }
 
+export async function rb18CardRoad({ check, goto, opened }: RibbonKit): Promise<void> {
+  // The Explorer's own address for PB1's link (the shape the card's road carries) with place 1 as the departure.
+  await goto("#seed=42&style=antique&legend=1&arms=0&beasts=0&a=1");
+  const st = await opened("the card's road from Paukilua");
+  check(
+    "RB18 the place card's road arrives on the Explorer's own address with a nonzero departure, and the scroll sets out from that place for its farthest road (Issue #428)",
+    st.from === 1 && st.to !== 1 && /^Paukilua to /.test(st.title ?? ""),
+    JSON.stringify({ from: st.from, to: st.to, title: st.title }),
+  );
+}
+
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -33,7 +44,7 @@ type Corner = {
   to: unknown[] | null;
 };
 // Tewetulua (24) is seed 42's one settlement no road leaves, PB7e's witness in e2e/suites/prospect.ts.
-const ORPHAN = 24;
+export const ORPHAN = 24;
 const CORNER: Payload<Corner> = `(() => { const text = ${TEXT}, kids = ${KIDS}, corner = document.querySelector(".corner.tr.folio-room"), group = corner && corner.querySelector(":scope > .folio-controls");
   const swap = document.getElementById("rb-swap"), to = document.getElementById("rb-to");
   return { h1s: [...document.querySelectorAll("h1")].map((h) => (corner && corner.contains(h) ? "corner " : "") + h.className + ": " + text(h)),

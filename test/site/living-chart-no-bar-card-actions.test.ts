@@ -88,7 +88,11 @@ test("LP2 the card's actions sit inside ONE .pc-acts row, the road to the Ribbon
   const acts = inner.children.filter((c) => c.classList.contains("pc-acts"));
   assert.equal(acts.length, 1, "exactly one action row, and it is a direct child of the card's inner");
   const names = acts[0]!.children.map((c) => String(c.className));
-  assert.deepEqual(names, ["pc-prospect", "pc-ribbon", "pc-lay"], "the two roads together, then the press, in the ruled order");
+  assert.deepEqual(
+    names,
+    ["pc-prospect", "pc-ribbon", "pc-lay"],
+    "the two roads together, then the press, in the ruled order",
+  );
   assert.ok(
     !inner.children.some(
       (c) => c.classList.contains("pc-prospect") || c.classList.contains("pc-ribbon") || c.classList.contains("pc-lay"),

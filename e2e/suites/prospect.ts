@@ -5,6 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { pb13Dress } from "./prospect/dress.ts";
 import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
 import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
+import { pb1cRoadOut } from "./prospect/way-in.ts";
 import { pb12Markup, pb16ScriptsOff, pb17Boot, pb18TableHomes, pb19PlaceLink } from "./prospect/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -14,6 +15,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = prospectKit(ctx);
 
   const href = await pb1WayIn(ctx);
+  await step("PB1c to PB1d", () => pb1cRoadOut(ctx));
   // Health bases AFTER the Explorer leg: its load belongs to earlier suites, this page's own requests fire below.
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
