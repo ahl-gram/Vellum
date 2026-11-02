@@ -8,6 +8,7 @@ import {
   liveNow,
   forwardTarget,
   prospectTarget,
+  ribbonTarget,
 } from "../../src/site/explorer/address.ts";
 import { NOT_A_YEAR } from "../../test-support/hash-grammar-fixtures.ts";
 
@@ -175,4 +176,17 @@ test("prospectTarget: the chart's hash rides through verbatim with the settlemen
 test("prospectTarget: a bare-visit Explorer (empty hash) still addresses the place", () => {
   assert.equal(prospectTarget("", 5), "/prospect/#i=5");
   assert.equal(prospectTarget("#", 5), "/prospect/#i=5");
+});
+
+test("ribbonTarget: the chart's hash rides through verbatim with the place as the departure, a=, and no b (Issue #428)", () => {
+  assert.equal(ribbonTarget("#seed=42&style=ink&legend=1&arms=0", 3), "/ribbon/#seed=42&style=ink&legend=1&arms=0&a=3");
+  assert.equal(
+    ribbonTarget("#seed=7&style=antique&cx=0.5100&cy=0.4900&k=3.0000&survey&note=a%20b", 0),
+    "/ribbon/#seed=7&style=antique&cx=0.5100&cy=0.4900&k=3.0000&survey&note=a%20b&a=0",
+  );
+});
+
+test("ribbonTarget: a bare-visit Explorer (empty hash) still names the place", () => {
+  assert.equal(ribbonTarget("", 5), "/ribbon/#a=5");
+  assert.equal(ribbonTarget("#", 5), "/ribbon/#a=5");
 });

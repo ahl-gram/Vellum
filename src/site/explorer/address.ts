@@ -32,6 +32,10 @@ export function prospectTarget(hash: string, idx: number): string {
   return "/prospect/#" + (raw ? raw + "&" : "") + "i=" + idx;
 }
 
+export function ribbonTarget(_hash: string, idx: number): string {
+  return "/ribbon/#a=" + idx;
+}
+
 export function liveNow(state: {
   ages: boolean;
   chamber: "survey" | "ages" | null;
