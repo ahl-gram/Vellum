@@ -1,10 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/param-excuse-holds-element";
 
 test("a parameter bearing a name no-param-reassign excuses holds a page element, an element-shaped type or a record of read-only page elements, and nothing else (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
@@ -24,14 +23,9 @@ test("a parameter bearing a name no-param-reassign excuses holds a page element,
     "export const m = (statusEl: { n: number }): void => { void statusEl; };",
     "export function n(statusEl: { n: number } = { n: 1 }): void { void statusEl; }",
   ];
-  const [result] = await eslint.lintText(plant.join("\n"), { filePath: join(ROOT, "src/site/home/veil.ts") });
+  const messages = await plantMessages(plant, "src/site/home/veil.ts");
   assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    "the plant does not parse, so no rule read it",
-  );
-  assert.deepEqual(
-    result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line),
+    messages.filter((m) => m.ruleId === RULE).map((m) => m.line),
     [2, 4, 5, 7, 10, 12, 13, 14],
     "DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }) passes, erring toward passing, a handbook/errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
   );

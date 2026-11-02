@@ -1,23 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { plantMessages } from "../../test-support/source-shape-reports.ts";
 
-const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/no-em-dash-in-string";
 const D = String.fromCharCode(0x2014);
 const ESCAPE = "\\" + "u2014";
 
-const refusals = async (code: string, file: string): Promise<number> => {
-  const [result] = await eslint.lintText(code, { filePath: join(ROOT, file) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    "the plant does not parse, so no rule read it",
-  );
-  return result!.messages.filter((m) => m.ruleId === RULE).length;
-};
+const refusals = async (code: string, file: string): Promise<number> =>
+  (await plantMessages([code], file)).filter((m) => m.ruleId === RULE).length;
 
 test("a string or template literal holding the character is refused in shipped code (Issue #981)", async () => {
   assert.equal(await refusals(`export const a = "x ${D} y";`, "src/atlas/document.ts"), 1);

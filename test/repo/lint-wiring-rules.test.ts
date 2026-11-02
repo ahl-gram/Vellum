@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint } from "../../test-support/source-shape-reports.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import {
   CHART_INSTRUMENTS,
@@ -229,7 +229,6 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     LINT_SCOPE.filter((g) => !REFUSED.includes(g)),
     "every ruled glob that carries rules needs a witness file here; the refused JavaScript globs have none by design, and the test below is their witness",
   );
-  const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
   assert.equal(
     await eslint.findConfigFile("src/cli/main.ts"),
     join(ROOT, "eslint.config.ts"),

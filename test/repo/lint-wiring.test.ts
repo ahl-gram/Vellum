@@ -2,11 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint, type Linter } from "eslint";
+import type { Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import ts from "typescript";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
+import { eslint } from "../../test-support/source-shape-reports.ts";
 import { LINT_SCOPE, REFUSED, blocks, shortName, type Resolved } from "../../test-support/lint-wiring-scope.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -178,7 +179,6 @@ function parameterBindings(sf: ts.SourceFile, names?: ReadonlySet<string>): ts.I
 }
 
 async function excusedNames(): Promise<Set<string>> {
-  const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
   const resolved = (await eslint.calculateConfigForFile(WITNESSES["src/**/*.ts"]!)) as Resolved;
   const option = (
     resolved.rules?.["no-param-reassign"] as [number, { ignorePropertyModificationsFor?: string[] }?] | undefined
@@ -260,7 +260,6 @@ const DIRECTIVES = [
 ];
 
 test("through ESLint itself, a JavaScript file anywhere outside design/ is refused, even under an inline directive, one inside design/ is not, and nothing gitignored is read (Issue #653 ruling D)", async () => {
-  const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
   const verdict = async (path: string, lead = ""): Promise<string> => {
     if (await eslint.isPathIgnored(path)) return "unread";
     const [result] = await eslint.lintText(lead + sourceFor(path), { filePath: join(ROOT, path) });

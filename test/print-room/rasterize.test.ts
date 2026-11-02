@@ -84,9 +84,7 @@ test("rasterizeErrorMessage gives a distinct, in-voice message per failure kind"
 });
 
 test("rasterizeErrorMessage falls back to a generic line for an unknown kind", () => {
-  const generic = rasterizeErrorMessage("something-unexpected");
-  assert.equal(typeof generic, "string");
-  assert.ok(generic.length > 0);
+  assert.equal(rasterizeErrorMessage("something-unexpected"), "The plate could not be pulled as a PNG.");
 });
 
 test("rasterizeSvg rejects on malformed markup instead of resolving a silent null", async () => {

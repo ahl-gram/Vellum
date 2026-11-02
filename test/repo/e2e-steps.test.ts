@@ -1,21 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/e2e-throw-inside-step";
 
-const reports = async (lines: readonly string[], path: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line);
-};
+const reports = (lines: readonly string[], path: string): Promise<number[]> => ruleLines(lines, path, RULE);
 
 const HEAD = [
   'import type { SuiteContext } from "../types.ts";',

@@ -2,12 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/package-import-declared";
 
 const PASS = null;
@@ -50,22 +49,16 @@ const BLIND_SPOTS =
   'BLIND SPOTS, declared. Toward passing: a source computed at run time (import(name), a template with an expression); require, createRequire and import.meta.resolve("pkg"), which no file the lint reads uses as a loader (scan, 2026-10-16), and import x = require(...), which the type checker refuses here (TS1294 under erasableSyntaxOnly); a /// <reference types="pkg" /> directive, a comment, none in the roots; a subpath import (#name), which package.json\'s own imports field would map and it has none; every file the lint does not read, outside the roots Issue #653 ruling D bounds (the three configs at the root, the hooks under .claude/, the .astro pages, a sheet\'s @import, and design/, whose spike keeps its own package.json this rule never reads), none of which names a package undeclared against its own manifest today (scan, 2026-10-16); the reverse, a package declared and imported nowhere, which is no import; a bare Node built-in name (punycode, events, buffer, util, url) written in a file Vite bundles for the browser under src/site/, which Vite resolves to an installed npm package of that name where one is hoisted (punycode, pulled in by uri-js and declared nowhere) while the rule reads it as the built-in, none in the roots today. Toward red: a type-only import of a scoped package whose types come from a scoped twin (@types/scope__name), none declared today; a query on a bare package root (pkg?raw), read as part of the name, none today. Each toward-red item is loud and is fixed when it lands';
 
 test("a bare import names a package package.json declares, a type-only import may name its @types twin instead, and a relative, absolute, node:, built-in or scheme source names none (Issue #826)", async () => {
-  const [result] = await eslint.lintText(PLANT.map(([line]) => line).join("\n"), {
-    filePath: join(ROOT, "scripts/lint/package-imports.ts"),
-  });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    "the plant does not parse, so no rule read it",
+  const messages = await plantMessages(
+    PLANT.map(([line]) => line),
+    "scripts/lint/package-imports.ts",
   );
   assert.ok(
     REPORTED.length > 0 && REPORTED.length < PLANT.length,
     "the plant holds no line to refuse or none to pass, so this test cannot tell the rule from its negation",
   );
   assert.deepEqual(
-    result!.messages
-      .filter((m) => m.ruleId === RULE)
-      .map((m) => `${m.line} ${/^(\S+) is imported here/.exec(m.message)?.[1]}`),
+    messages.filter((m) => m.ruleId === RULE).map((m) => `${m.line} ${/^(\S+) is imported here/.exec(m.message)?.[1]}`),
     REPORTED,
     BLIND_SPOTS,
   );

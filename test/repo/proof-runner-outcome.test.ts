@@ -28,7 +28,12 @@ const realRun = async () => {
       Promise.reject(new Error('settle timeout l13-marks: {"n":0}')),
     );
     const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
-    const ctx = { check, alive: () => Promise.resolve(true), clearMobile: () => Promise.resolve() };
+    const ctx = {
+      check,
+      alive: () => Promise.resolve(true),
+      clearMobile: () => Promise.resolve(),
+      send: <T>(): Promise<T> => Promise.resolve({} as T),
+    };
     const hooks = runnerHooks(ctx, accumulators, (...parts) => err.push(format(...parts)), 50);
     assert.ok(
       hooks.onSuiteError,

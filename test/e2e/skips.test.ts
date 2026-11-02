@@ -109,6 +109,7 @@ const runnerCtx = (accumulators: Accumulators) => ({
   },
   alive: () => Promise.resolve(true),
   clearMobile: () => Promise.resolve(),
+  send: <T>(): Promise<T> => Promise.resolve({} as T),
 });
 type RunnerCtx = ReturnType<typeof runnerCtx>;
 

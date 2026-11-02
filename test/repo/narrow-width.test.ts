@@ -2,12 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const CSS_RULE = "vellum/css-no-narrow-width";
 const TS_RULE = "vellum/no-narrow-width";
 
@@ -129,15 +128,18 @@ const refusedLines = (plant: Plant): number[] => plant.flatMap(([, refused], i) 
 const BLIND_SPOTS =
   "BLIND SPOTS, declared, each erring toward passing (the PR #807 row in handbook/errata/guards.md; outside the guard as the plan Issue #763 ruling 2A was taken on listed them, the ruling itself naming a length that shrinks with the window, a height, the window's shape and a box's own size): a length that shrinks with the window (vw and its kin, or a Math.min or Math.max of a width read against a constant), a comparison with a value the checker cannot fold, a width read or a matchMedia stored in a variable first, a computed key the checker cannot read as a literal, height, the window's shape (orientation, aspect-ratio), a box's own size (@container, an element's clientWidth or rect), a ResizeObserver on the root, <source media> and sizes, a matchMedia in an .astro inline script, which this lint never reads";
 
-const lintPlant = async (plant: Plant, filePath: string, rule: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(plant.map(([line]) => line).join("\n"), { filePath: join(ROOT, filePath) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    "the plant does not parse, so no rule read it",
-  );
-  return [...new Set(result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line))];
-};
+const lintPlant = async (plant: Plant, filePath: string, rule: string): Promise<number[]> => [
+  ...new Set(
+    (
+      await plantMessages(
+        plant.map(([line]) => line),
+        filePath,
+      )
+    )
+      .filter((m) => m.ruleId === rule)
+      .map((m) => m.line),
+  ),
+];
 
 test("no sheet switches layout at a fixed window width at or below the 1024 floor, in either media query form, and a width it cannot read in px is refused (Issue #763 ruling 2A)", async () => {
   const refused = refusedLines(CSS_PLANT);

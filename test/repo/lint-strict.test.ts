@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
-import { ESLint, type Linter } from "eslint";
+import type { Linter } from "eslint";
 import lintConfig from "../../eslint.config.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
+import { eslint } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const BLOCK = "Issue #779: the strict rules adopted one at a time";
@@ -223,7 +224,6 @@ const tsRootGlobs = (): string[] =>
   lintTsRoots()
     .map((r) => `${r}/**/*.ts`)
     .sort();
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const resolvedEntry = (entry: Linter.RuleEntry): unknown[] => {
   const [severity, ...options]: unknown[] = Array.isArray(entry) ? entry : [entry];
   return [severity === "error" ? 2 : severity, ...options];
