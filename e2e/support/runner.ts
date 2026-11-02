@@ -99,7 +99,7 @@ export function runnerHooks<C extends RunnerContext>(
   return {
     alive: ctx.alive,
     skippedGroups: () => accumulators.skippedGroups,
-    onSuiteError: async (name, failure) => {
+    onSuiteError: (name, failure) => {
       err(`  ${name} stopped early:`, failure);
       const e = failure as { message?: string } | null | undefined;
       ctx.check(
@@ -107,9 +107,9 @@ export function runnerHooks<C extends RunnerContext>(
         false,
         e && e.message ? e.message : String(failure),
       );
-      await bounded(ctx.clearMobile(), boundMs);
     },
     onSuiteNotWhole: async () => {
+      await bounded(ctx.clearMobile(), boundMs);
       await bounded(ctx.send("Emulation.setEmulatedMedia", NO_EMULATED_MEDIA), boundMs);
     },
   };

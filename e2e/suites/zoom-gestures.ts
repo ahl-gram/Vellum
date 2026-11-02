@@ -46,7 +46,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
   await k.evaluate(forgetChartTouch);
 
-  // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
+  // clearMobile stays OUTSIDE every step, so a throw a step caught cannot skip it before ZG restore: the runner's own reset waits for the suite to end.
   await clearMobile();
   await step("ZG restore", () => zgRestore(k));
 }
