@@ -63,10 +63,11 @@ belongs in.
 - **A switched-off check is a skip**, and the accepted skips are `handbook/specs/rulebook.md`'s list.
 - **The lint toolchain's `minimatch` is held past an advisory by `overrides` in `package.json`**,
   because `eslint` and `typescript-eslint` still ask for a version the advisory names (Issue #1174).
-  The entry leaves in the upgrade that has both ask for a fixed `minimatch` themselves (`npm view
-  eslint dependencies.minimatch`, and the same for `@typescript-eslint/typescript-estree`), and any
-  change to it compares what the lint reaches before and after: the files ESLint lints and the rules
-  `calculateConfigForFile` gives each.
+  At each `eslint` or `typescript-eslint` upgrade the override is removed, `npm install` and `npm
+  audit` are run, and the entry is kept if the `minimatch` findings return; it leaves when they do not.
+  The audit decides, not one package's declared range, since `@eslint/config-array` asks for
+  `minimatch` as well. Any change to the entry compares what the lint reaches before and after: the
+  files ESLint lints and the rules `calculateConfigForFile` gives each.
 
 ## The unit suite
 
