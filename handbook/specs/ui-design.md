@@ -394,6 +394,11 @@ face is `--ink-faded` or `--line-tan`, and at small sizes on the deep or on a pa
 between 2.8:1 and 4.0:1, so **the shipped face goes up a step, to parchment on the deep or ink-brown
 on a panel.** Assume a small label taken from a mockup needs this until you have measured it.
 
+**A press whose only face is a glyph is held to the same 4.5:1**, the slip's fold mark among them
+(Alex, 2026-11-02, Issue #1160 comment 6569036260): the house keeps one floor for every glyph a
+reader reads, and no lower one for a mark that is part of a control (`SB20` in
+`e2e/suites/specimen/slip-ink.ts`).
+
 **Sample a ground with the median of a wide run**, never a single point, and never a maximum or a
 minimum: a maximum passes on one bright control sitting under the sample, a minimum fails on one
 hairline crossing it, and the point you assumed was dark may be the parchment chart.

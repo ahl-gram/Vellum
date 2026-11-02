@@ -1,11 +1,14 @@
 // The Explorer at rest as dressed (Issue #779 part 2h): the stage's reserves, the sheet's depth, the fitted chart, the folio's written lines and the legend's seat.
-import { nearRgba, PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
+import { nearRgba, PAGE_RGBA, SHADE, tokenRgba, type Rgb } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { clearMetrics } from "../print-room/kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
 import { sendKey } from "../../support/home.ts";
+import { contrast } from "../cluster/trail.ts";
+import { FLOOR_PLAIN } from "../stage/stage.ts";
+import { FONTS_LOADED, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -187,5 +190,52 @@ export async function br23Imprint(k: BroadsideKit): Promise<void> {
     "BR23 the printer's line follows the chart on screen: drawn anew in place, from seed 42 to the seed 7 set in the seed field and entered, it reads 7 as the folio's title does (Issue #1159)",
     before.imprint === "42" && !!before.folio && before.folio.endsWith("Chart № 42") && after.imprint === SECOND,
     JSON.stringify({ before, after }),
+  );
+}
+
+const BR24_PIECES: readonly InkPiece[] = [
+  ["head", "#note-broadside .fn-head"],
+  ["fold", "#broadside .slip-fold"],
+];
+type Head = { id: string; ink: Rgb; ground: Rgb };
+const HEADS: Payload<Head[]> =
+  `[...document.querySelectorAll(".fn-note")].map((n) => { const c = getComputedStyle(n.querySelector(".fn-head")).color.match(/[0-9.]+/g).map(Number), b = getComputedStyle(n).backgroundColor.match(/[0-9.]+/g).map(Number); return { id: n.id, ink: [c[0], c[1], c[2]], ground: [b[0], b[1], b[2]] }; })`;
+const OPEN_NOTE: Payload<boolean> = `(() => { document.querySelector('a.fn[data-note="note-broadside"]').focus(); const n = document.getElementById("note-broadside"); return n.matches(":popover-open") && n.getClientRects().length > 0; })()`;
+const SHUT_NOTE: Payload<boolean> = `(() => { document.activeElement.blur(); return !document.getElementById("note-broadside").matches(":popover-open"); })()`;
+
+export async function br24Ink(k: BroadsideKit): Promise<void> {
+  const { evaluate, send, sleep, check, goto, EXP } = k;
+  await goto(EXP + "#seed=42&style=antique", "broadside-ink");
+  await makeSettle({ evaluate, sleep })(FONTS_LOADED, (d) => d === "loaded", "BR24 fonts");
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  const opened = await evaluate(OPEN_NOTE);
+  const reads = await slipInk(k, BR24_PIECES, "br24-hide");
+  const heads = await evaluate(HEADS);
+  const shut = await evaluate(SHUT_NOTE);
+  const under = reads.find((r) => r.piece === "head")?.ground ?? null;
+  const faults = [
+    ...(opened ? [] : ["the note of the broadside did not open on its mark's focus"]),
+    ...(shut ? [] : ["the note of the broadside stayed open after its mark's blur"]),
+    ...inkFaults(reads),
+    ...(reads.some((r) => r.piece === "head") ? [] : ["no footnote head read"]),
+    ...(reads.some((r) => r.piece === "fold") ? [] : ["no fold mark read"]),
+    ...(heads.length > 0 ? [] : ["no footnote on the page"]),
+    ...heads.flatMap((h) => [
+      ...(nearRgba([...h.ground, 255], tokenRgba("--parchment-panel"))
+        ? []
+        : [`${h.id} stands on ${h.ground.join(",")}, not the panel`]),
+      ...(under !== null && contrast(h.ink, under) >= FLOOR_PLAIN
+        ? []
+        : [`${h.id}'s head reads ${under === null ? "against no ground" : contrast(h.ink, under).toFixed(2)}`]),
+    ]),
+  ];
+  check(
+    "BR24 every footnote head on the Broadside, and the bill's fold mark, read at 4.5:1 or better against the panel: the note of the broadside opened by its mark's focus, its head and the fold mark read against the ground painted under them, and every note's head against that ground, every note standing on the panel (Issue #1160)",
+    faults.length === 0,
+    JSON.stringify({
+      faults,
+      reads: inkBrief(reads),
+      heads: heads.map((h) => `${h.id} ${under === null ? "-" : contrast(h.ink, under).toFixed(2)}`),
+    }),
   );
 }
