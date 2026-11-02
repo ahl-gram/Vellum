@@ -53,7 +53,6 @@ export const copySources = async (
       .sort();
     for (const file of files) {
       await mkdir(dirname(join(to, file)), { recursive: true });
-      // The refusal fires inside astro build only because Astro 7.1.3 copies the public folder during its Vite build, before astro:build:done: re-check it on an Astro upgrade (Issue #768).
       await copyFile(join(from, file), join(to, file), constants.COPYFILE_EXCL);
       copied.push(file.split(sep).join("/"));
     }

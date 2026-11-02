@@ -1,10 +1,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { extname, join } from "node:path";
-import { copySources, REPO, SERVED_SOURCES, sourceFor, type ServedSource } from "../../scripts/served-sources.ts";
+import { dirname, extname, join } from "node:path";
+import { build } from "astro";
+import {
+  copySources,
+  REPO,
+  SERVED_SOURCES,
+  servedSources,
+  sourceFor,
+  type ServedSource,
+} from "../../scripts/served-sources.ts";
 
 const SOURCES: readonly ServedSource[] = [
   { dir: "styles", types: { ".css": "text/css; charset=utf-8" } },
@@ -94,6 +112,48 @@ test("the build copies every served source file to its address unchanged and not
     );
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+const ASTRO_MODULES = dirname(dirname(createRequire(import.meta.url).resolve("astro/package.json")));
+
+const astroSite = (planted: boolean): string => {
+  const repo = fixture();
+  symlinkSync(ASTRO_MODULES, join(repo, "node_modules"));
+  put(repo, "src/pages/index.astro", "<p>fixture</p>\n");
+  if (planted) put(repo, "public/room/index.css", "planted { color: black; }\n");
+  return repo;
+};
+
+const buildSite = (repo: string): Promise<void> =>
+  build({
+    root: repo,
+    configFile: false,
+    logLevel: "silent",
+    cacheDir: join(repo, "cache"),
+    vite: { cacheDir: join(repo, "cache/vite") },
+    integrations: [servedSources(repo, SOURCES)],
+  });
+
+test("astro build refuses a public file at an address a served source holds, since Astro copies its public folder before astro:build:done runs the copy (Issue #768)", async () => {
+  const clean = astroSite(false);
+  const planted = astroSite(true);
+  try {
+    await buildSite(clean);
+    const built = join(clean, "dist/room/index.css");
+    assert.equal(
+      existsSync(built) ? readFileSync(built, "utf8") : null,
+      "room { color: blue; }\n",
+      "a clean build should serve the source's bytes at its address, or the refusal below proves nothing",
+    );
+    await assert.rejects(
+      buildSite(planted),
+      (error: NodeJS.ErrnoException) => error.code === "EEXIST",
+      "a public file at a served address should fail the build, never be overwritten by the source or overwrite it",
+    );
+  } finally {
+    rmSync(clean, { recursive: true, force: true });
+    rmSync(planted, { recursive: true, force: true });
   }
 });
 

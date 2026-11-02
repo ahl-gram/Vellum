@@ -61,6 +61,13 @@ belongs in.
   refuse and one it must pass (`test/repo/source-shape.test.ts` carries the form). A rule with no
   fixture it refuses is a rule nobody has seen fire.
 - **A switched-off check is a skip**, and the accepted skips are `handbook/specs/rulebook.md`'s list.
+- **The lint toolchain's `minimatch` is held past an advisory by `overrides` in `package.json`**,
+  because `eslint` and `typescript-eslint` still ask for a version the advisory names (Issue #1174).
+  At each `eslint` or `typescript-eslint` upgrade the override is removed, `npm install` and `npm
+  audit` are run, and the entry is kept if the `minimatch` findings return; it leaves when they do not.
+  The audit decides, not one package's declared range, since `@eslint/config-array` asks for
+  `minimatch` as well. Any change to the entry compares what the lint reaches before and after: the
+  files ESLint lints and the rules `calculateConfigForFile` gives each.
 
 ## The unit suite
 
@@ -155,6 +162,18 @@ belongs in.
   (When a check is pulled out of the run).
 - How a browser check waits and what the harness environment does is
   `handbook/specs/settle-doctrine.md`'s.
+
+## What no check holds
+
+- **No check holds a dependency advisory.** Whether a package the tree installs has a published
+  advisory is a fact about the day, not about the commit: the same commit passes one evening and
+  fails the next morning when an advisory lands, which is the flake `handbook/specs/settle-doctrine.md`
+  keeps out of the browser lanes. So no workflow under `.github/workflows/` runs `npm audit` as a step
+  that can fail, and no test or lint rule reads one. Advisories reach Alex as the repository's
+  Dependabot alerts; a session reads them with `gh api repos/ahl-gram/Vellum/dependabot/alerts` and
+  with `npm audit`, and acts on them as an issue (Issue #1174). `npm audit --omit=dev` reads only the
+  libraries the pages ship, the `dependencies` in `package.json`, since the tools that build the site
+  are `devDependencies`.
 
 ## Order
 
