@@ -509,7 +509,7 @@ body:has(.slip.folded) .legend {
 }
 .slip .note {
   font-size: 0.82rem;
-  color: var(--ink-faded);
+  color: var(--ink-brown);
   line-height: 1.45;
   margin: 0;
   text-align: left;
@@ -528,7 +528,7 @@ body:has(.slip.folded) .legend {
   cursor: pointer;
   font-size: 1.05rem;
   line-height: 1;
-  color: var(--ink-faded);
+  color: var(--ink-brown);
   padding: 0.2rem 0.4rem;
 }
 /* Four classes deep: the house button hover wash is (0,3,1) and outranks a plain .slip-fold:hover. */
