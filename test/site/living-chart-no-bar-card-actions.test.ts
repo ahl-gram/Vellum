@@ -196,3 +196,33 @@ test("LP6 the road names the place the card is SHOWING and stands down where no 
   assert.equal(road.style.display, "", "and comes back at the next place that has one");
   assert.equal(hrefOf(road), "/ribbon/#a=1");
 });
+
+test("LP7 both roads are repainted for the SHOWN place when the table changes under a pinned card, so neither carries the address it was painted with (Issue #428, Issue #1194)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+  let table = "before";
+  const { lc, mount } = await barlessHost({
+    prospectHref: (idx) => `/prospect/#table=${table}&i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#table=${table}&a=${idx}`,
+  });
+  lc.buildPlaceOverlay(manifest);
+  lc.relabelLay();
+  const armed = await armShow(mount);
+  const road = armed.road();
+  const prospect = walk(mount).find((n) => n.classList.contains("pc-prospect"));
+  assert.ok(road && prospect, "the world-sheet card holds both roads");
+
+  armed.show(1);
+  assert.equal(hrefOf(road), "/ribbon/#table=before&a=1");
+  assert.equal(hrefOf(prospect), "/prospect/#table=before&i=1");
+  table = "after";
+  lc.relabelLay();
+  assert.equal(hrefOf(road), "/ribbon/#table=after&a=1", "the road follows the table and still names the shown place");
+  assert.equal(hrefOf(prospect), "/prospect/#table=after&i=1", "and so does the way in to the prospect");
+
+  armed.show(24);
+  table = "later";
+  lc.relabelLay();
+  assert.equal(road.style.display, "none", "a repaint keeps the road stood down where none leaves the shown place");
+  assert.equal(hrefOf(prospect), "/prospect/#table=later&i=24");
+});

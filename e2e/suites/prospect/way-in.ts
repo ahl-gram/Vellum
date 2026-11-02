@@ -2,6 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { ORPHAN } from "../ribbon/room.ts";
+import { STORE } from "./kit.ts";
 
 type Road = {
   name: string | null;
@@ -14,6 +15,10 @@ type Road = {
 } | null;
 
 const ROAD: Payload<Road> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const p = c.querySelector(".pc-prospect"), r = c.querySelector(".pc-ribbon"); return { name: (c.querySelector(".pc-name") || {}).textContent, prospect: p ? p.getAttribute("href") : null, ribbon: r ? r.getAttribute("href") : null, ribbonDisplay: r ? getComputedStyle(r).display : null, prospectDisplay: p ? getComputedStyle(p).display : null, ribbonWidth: r ? r.getBoundingClientRect().width : null, prospectWidth: p ? p.getBoundingClientRect().width : null }; })()`;
+type Tabled = { prospect: string | null; ribbon: string | null; hash: string };
+const TABLED: Payload<Tabled | null> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const p = c.querySelector(".pc-prospect"), r = c.querySelector(".pc-ribbon"); return { prospect: p ? p.getAttribute("href") : null, ribbon: r ? r.getAttribute("href") : null, hash: location.hash }; })()`;
+const LAY: Payload<void> = `document.querySelector("#place-card .pc-lay").click()`;
+const tableOf = (address: string | null): string | null => /[#&]table=([^&]*)/.exec(address ?? "")?.[1] ?? null;
 const ESCAPE: Payload<void> = `document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`;
 // A press is wiring here, not a gesture, as PB1's own presses are.
 const PRESS = (idx: number): Payload<void> => `document.querySelector('.place-hit[data-idx="${idx}"]').click()`;
@@ -47,4 +52,23 @@ export async function pb1cRoadOut({ evaluate, sleep, check }: SuiteContext): Pro
       orphan.prospectWidth! > 0,
     JSON.stringify(orphan),
   );
+  await evaluate(ESCAPE);
+  await evaluate(PRESS(2));
+  await settle(ROAD, (d) => /&i=2$/.test(d.prospect ?? ""), "PB1e the card at place 2, before a lay");
+  try {
+    await evaluate(LAY);
+    const laid = await settle(
+      TABLED,
+      (d) => tableOf(d.hash) !== null && tableOf(d.prospect) !== null,
+      "PB1e the lay reaches the card's roads",
+    );
+    const table = tableOf(laid.hash);
+    check(
+      "PB1e a lay from the pinned card hands BOTH its roads the new table, so out by either and back never restores the sheet as it stood before the lay (Issue #428, Issue #1194)",
+      !!table && tableOf(laid.prospect) === table && tableOf(laid.ribbon) === table,
+      JSON.stringify(laid),
+    );
+  } finally {
+    await evaluate(`localStorage.removeItem(${STORE})`);
+  }
 }
