@@ -26,7 +26,7 @@ import {
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { draftDress, draftOverrides, pageGlass, wirePageControls, type DrawOverrides } from "./app-wiring.ts";
 import { createMotion } from "./world-motion.ts";
-import { forwardTarget, prospectTarget } from "./address.ts";
+import { forwardTarget, prospectTarget, ribbonTarget } from "./address.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
@@ -102,6 +102,7 @@ const lc = createLivingChart({
   statusEl: status,
   tourOrder,
   prospectHref: (idx) => prospectTarget(location.hash, idx),
+  ribbonHref: (idx) => ribbonTarget(location.hash, idx),
   layProspect: {
     state: (idx) => {
       const item = prospectAt(idx);

@@ -71,13 +71,13 @@ export function cardActs(
 }
 
 export function paintRoad(
-  link: HTMLAnchorElement | null,
+  pillEl: HTMLAnchorElement | null,
   place: Readonly<PlaceMark>,
   href: PlaceOverlayDeps["ribbonHref"],
 ): void {
-  if (!link || !href) return;
-  link.href = href(place.idx);
-  link.style.display = place.roads ? "" : "none";
+  if (!pillEl || !href) return;
+  pillEl.href = href(place.idx);
+  pillEl.style.display = place.roads ? "" : "none";
 }
 
 export function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement | null): void {
