@@ -1,4 +1,4 @@
-// Issue #522 Sub 4: the card's SECOND action, injected on the same terms as the prospect link.
+// Issue #522 Sub 4: the card's filing press, injected on the same terms as the prospect link.
 // The shim's querySelector answers null by design, so showing a card needs the .pc-inner stub place-card-clamp.test.ts already uses.
 export const armShow = async (mount: { children: unknown[] }) => {
   const { walk } = await import("./element-shim.ts");

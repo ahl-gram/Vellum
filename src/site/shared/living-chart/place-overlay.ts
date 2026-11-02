@@ -56,7 +56,6 @@ export interface PlaceAnchor {
   readonly ny: number;
 }
 
-/** The card's second action, injected the way `prospectHref` is. */
 export interface LayProspectHost {
   state: (idx: number) => { label: string; refuses: boolean };
   lay: (idx: number) => void;
