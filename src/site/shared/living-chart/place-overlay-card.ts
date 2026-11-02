@@ -67,13 +67,17 @@ export function cardActs(
   return { prospectLink, ribbonLink, layPress, acts };
 }
 
+export function paintActs(acts: HTMLElement | null, place: Readonly<PlaceMark>): void {
+  acts?.style.setProperty("display", place.worldIdx === null ? "none" : "");
+}
+
 export function paintRoad(
   pillEl: HTMLAnchorElement | null,
   place: Readonly<PlaceMark>,
   href: PlaceOverlayDeps["ribbonHref"],
 ): void {
-  if (!pillEl || !href) return;
-  pillEl.href = href(place.idx);
+  if (!pillEl || !href || place.worldIdx === null) return;
+  pillEl.href = href(place.worldIdx);
   pillEl.style.display = place.roads ? "" : "none";
 }
 
