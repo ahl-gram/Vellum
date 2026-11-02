@@ -1,8 +1,8 @@
 import type { Payload, SuiteContext } from "../../types.ts";
+import { withHeldBundle } from "../../site-server.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { withBlockedUrls, withThrottle } from "../../support/network-state.ts";
-import type { NetworkConditions } from "../../support/network-state.ts";
+import { withBlockedUrls } from "../../support/network-state.ts";
 import type { makeStep } from "../../support/step.ts";
 import { doorShown } from "./reads.ts";
 
@@ -117,6 +117,7 @@ export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doo
 }
 
 const REVEAL_MS = 10_000;
+const REVEAL_STATEMENT = ["lf-doors-reveal", "0s", "10s", "forwards"] as const;
 const PAST_REVEAL_MS = 2 * REVEAL_MS;
 const FAST = 10;
 type PageClock = { t: number; start: number | null };
@@ -155,53 +156,77 @@ export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: Suite
   }
 }
 
-const H13E_THROTTLE: NetworkConditions = {
-  offline: false,
-  latency: 200,
-  downloadThroughput: 120000,
-  uploadThroughput: 120000,
-};
+// 2026-11-01, Issue #1172: the planner's probe held 21 to 27 samples in the 2s window and read .cam 84 to 167 ms after the release, 7.8s inside the 10s reveal; HELD_TRIES is three times the samples it used and CAM_TRIES twenty times.
+const HELD_MS = 2000;
+const HELD_TRIES = 80;
+const CAM_TRIES = 40;
+const SAMPLE_MS = 75;
+const AFTER_CAM = 4;
+type NoFlash = { t: number; old: boolean; ready: boolean; door: boolean; cam: boolean; reveal: string[] | null };
+const NO_FLASH: Payload<NoFlash> = `({ t: performance.now(), old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam"), reveal: (() => { const c = document.getElementById("lf-card-explorer"); if (!c) return null; const s = getComputedStyle(c); return [s.animationName, s.animationDuration, s.animationDelay, s.animationFillMode]; })() })`;
 
-export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
+export async function h13ePrmNoFlash(ctx: SuiteContext): Promise<void> {
+  const { evaluate, send, check, PORT } = ctx;
   // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
   await evaluate(`window.__h13d = 1`);
-  // Throttle so the pre-.cam window is seconds wide: on an unthrottled localhost the module boots within a frame and a 75ms sampler proves nothing about a flash (skeptic round 3).
-  const { prmCam, prmFlash } = await withThrottle(send, H13E_THROTTLE, async () => {
+  // Hold home's bundle on the server so the pre-.cam window is 2s of the page's clock on any runner: unthrottled the module boots within a frame and a 75ms sampler proves nothing (skeptic round 3), and a network throttle's window was every byte the page fetches over its rate, which ran the sampler out (Issue #1172).
+  const { held, after } = await withHeldBundle(async (release) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-    return noFlashSamples({ evaluate, sleep });
+    const heldSamples = await heldWindow(ctx);
+    release();
+    return { held: heldSamples, after: await afterRelease(ctx) };
   });
+  const cam = after.find((s) => s.cam);
+  const prmFlash = [...held, ...after].some((s) => s.door);
+  const heldNoCam = held.every((s) => !s.cam);
+  const reveal = [...new Set(held.map((s) => (s.reveal ?? ["none"]).join(" ")))];
   check(
-    "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
-    prmCam && !prmFlash,
-    JSON.stringify({ prmCam, prmFlash }),
+    "H13e and never shows them on a healthy load whose bundle comes late: while the server holds home's bundle for 2s of the page's clock no prm sample sees .cam or a door, each reads the reveal still the 10s timer, and no sample sees a door once the released bundle boots (Issue #1172)",
+    cam !== undefined && !prmFlash && heldNoCam && reveal.length === 1 && reveal[0] === REVEAL_STATEMENT.join(" "),
+    JSON.stringify({
+      prmCam: cam !== undefined,
+      prmFlash,
+      held: held.length,
+      heldNoCam,
+      reveal,
+      releasedAt: Math.round(held[held.length - 1]!.t),
+      camAt: cam === undefined ? null : Math.round(cam.t),
+    }),
   );
 }
 
-async function noFlashSamples({
-  evaluate,
-  sleep,
-}: Pick<SuiteContext, "evaluate" | "sleep">): Promise<{ prmCam: boolean; prmFlash: boolean }> {
-  let prmFlash = false;
-  let prmCam = false;
-  let fresh = false;
-  let afterCam = 0;
-  for (let i = 0; i < 120; i++) {
-    try {
-      const s = await evaluate<{ old: boolean; ready: boolean; door: boolean; cam: boolean }>(
-        `({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`,
-      );
-      if (fresh) {
-        if (s.door) prmFlash = true;
-        if (s.cam) prmCam = true;
-      } else {
-        fresh = !s.old && s.ready;
-      }
-    } catch {}
-    if (prmCam && ++afterCam > 4) break;
-    await sleep(75);
+async function heldWindow({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">): Promise<NoFlash[]> {
+  const first = await makeSettle({ evaluate, sleep, tolerant: true })(
+    NO_FLASH,
+    (d) => !d.old && d.ready,
+    "h13e-fresh-page",
+  );
+  const held = [first];
+  for (let i = 1; i < HELD_TRIES && held[held.length - 1]!.t < HELD_MS; i++) {
+    await sleep(SAMPLE_MS, "window: the pre-.cam window the held bundle keeps open, read for a door");
+    held.push(await evaluate(NO_FLASH));
   }
-  return { prmCam, prmFlash };
+  if (held[held.length - 1]!.t < HELD_MS)
+    throw new Error(
+      `h13e-held-window never reached ${HELD_MS} ms of the page's clock: ${JSON.stringify(held[held.length - 1])}`,
+    );
+  return held;
+}
+
+async function afterRelease({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">): Promise<NoFlash[]> {
+  const after: NoFlash[] = [];
+  for (let i = 0; i < CAM_TRIES && !after.some((s) => s.cam); i++) {
+    await sleep(SAMPLE_MS, "pace: the released bundle's boot, read for a door until .cam");
+    after.push(await evaluate(NO_FLASH));
+  }
+  if (!after.some((s) => s.cam))
+    throw new Error(`h13e-released-boot never saw .cam: ${JSON.stringify(after[after.length - 1] ?? null)}`);
+  for (let i = 0; i < AFTER_CAM; i++) {
+    await sleep(SAMPLE_MS, "window: four samples after .cam, read for a door");
+    after.push(await evaluate(NO_FLASH));
+  }
+  return after;
 }
 
 export async function h13fNoScriptRead(ctx: SuiteContext) {
@@ -286,7 +311,7 @@ export async function h13gDoorFrame({ evaluate, check }: SuiteContext, base: Doo
       base.p === "static" &&
       base.v === "hidden" &&
       [base.mh, base.pad, base.bw, base.ow, base.mt].every((x) => x === "0px") &&
-      JSON.stringify(base.an) === JSON.stringify(["lf-doors-reveal", "0s", "10s", "forwards"]) &&
+      JSON.stringify(base.an) === JSON.stringify(REVEAL_STATEMENT) &&
       !!frame &&
       frame.v === "visible" &&
       frame.mh === "1600px" &&

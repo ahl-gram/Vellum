@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { serverState } from "../../e2e/site-server.ts";
 import { withScriptsOff } from "../../e2e/support/scripts-off.ts";
-import { withBlockedUrls, withThrottle } from "../../e2e/support/network-state.ts";
+import { withBlockedUrls } from "../../e2e/support/network-state.ts";
 import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
@@ -30,10 +30,7 @@ const scriptsSwitches = (sent: readonly Sent[]) =>
   sent.filter((s) => s.method === SCRIPTS).map((s) => s.params?.["value"]);
 
 const BLOCK = "Network.setBlockedURLs";
-const THROTTLE = "Network.emulateNetworkConditions";
 const UNBLOCKED = { urls: [] };
-const UNTHROTTLED = { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 };
-const SLOW = { offline: false, latency: 200, downloadThroughput: 120000, uploadThroughput: 120000 };
 const paramsOf = (sent: readonly Sent[], method: string) =>
   sent.filter((s) => s.method === method).map((s) => s.params);
 const refusingSecond = (method: string) => {
@@ -52,12 +49,6 @@ const HOLDERS: readonly Holder[] = [
     on: { urls: ["*app.bundle.js*"] },
     off: UNBLOCKED,
     hold: (send, body, boundMs) => withBlockedUrls(send, ["*app.bundle.js*"], body, boundMs),
-  },
-  {
-    method: THROTTLE,
-    on: SLOW,
-    off: UNTHROTTLED,
-    hold: (send, body, boundMs) => withThrottle(send, SLOW, body, boundMs),
   },
 ];
 
@@ -210,7 +201,7 @@ test("withStyledBoot takes its forced style read back off by its own identifier,
   }
 });
 
-test("withBlockedUrls and withThrottle each switch their condition on for the body and off after it, also when the body throws", async () => {
+test("withBlockedUrls switches the block on for the body and off after it, also when the body throws", async () => {
   for (const { method, on, off, hold } of HOLDERS) {
     const order = (sent: readonly Sent[]) =>
       sent

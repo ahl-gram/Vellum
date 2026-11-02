@@ -22,6 +22,7 @@ const MIME: Record<string, string | undefined> = {
 type ServerState = { blockWorker: boolean; heldBundle: Promise<void> | null };
 export const serverState: ServerState = { blockWorker: false, heldBundle: null };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
+const HELD_BUNDLE = "/app.bundle.js";
 
 export async function withHeldBundle<T>(body: (release: () => void) => Promise<T>): Promise<T> {
   let release: () => void = () => {};
@@ -31,7 +32,11 @@ export async function withHeldBundle<T>(body: (release: () => void) => Promise<T
       resolve();
     };
   });
-  return body(release);
+  try {
+    return await body(release);
+  } finally {
+    release();
+  }
 }
 
 // In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since Issue #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
@@ -62,6 +67,8 @@ export function startServer(SITE: string, PORT: number): Promise<import("node:ht
           res.writeHead(404).end("worker blocked for fallback test");
           return;
         }
+        // heldBundle keeps home's bundle waiting until the check that holds it lets it go, so H13e reads the page before its boot for as long as it chooses (Issue #1172).
+        if (serverState.heldBundle !== null && pathname === HELD_BUNDLE) await serverState.heldBundle;
         if (await serveEngineModule(pathname, res)) return;
         if (pathname.endsWith("/")) pathname += "index.html";
         const filePath = resolve(SITE, "." + pathname);
