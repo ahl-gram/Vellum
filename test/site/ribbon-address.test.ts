@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "../../src/site/ribbon/address.ts";
+import {
+  parseRibbonAddress,
+  chartTarget,
+  journeyHash,
+  prospectTarget,
+  rowProspectTarget,
+} from "../../src/site/ribbon/address.ts";
 import { NOT_A_SEED } from "../../test-support/hash-grammar-fixtures.ts";
 
 test("parseRibbonAddress reads the Explorer's world keys plus a and b", () => {
@@ -98,6 +104,18 @@ test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= th
     "/prospect/#seed=42&i=2",
     "a hand-shared hash already carrying the Prospect's keys loses them, or the first i= wins on parse (skeptic on PR #500)",
   );
+});
+
+test("rowProspectTarget gives a waypoint row its own town's prospect on the page's world, and every other row none", () => {
+  const hash = "#seed=7&style=ink&band=temperate&a=1&b=9";
+  assert.equal(
+    rowProspectTarget(hash, { kind: "waypoint", index: 4 }),
+    "/prospect/#seed=7&style=ink&band=temperate&i=4",
+  );
+  for (const kind of ["branch", "summit", "crossing"] as const) {
+    assert.equal(rowProspectTarget(hash, { kind, index: 4 }), null, kind);
+  }
+  assert.equal(rowProspectTarget(hash, { kind: "waypoint" }), null, "a waypoint with no index has no town to open");
 });
 
 test("parseRibbonAddress reads seed, a and b by the seed's grammar: nothing but a run of digits is a number (Issue #1003)", () => {

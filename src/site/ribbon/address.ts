@@ -1,6 +1,7 @@
 // The ribbon page's address grammar, pure and DOM-free like src/site/prospect/address.ts (presence-gated, allowlisted, clamped): the Explorer's world keys plus its own `a` (setting out from) and `b` (bound for).
 import { readWorldKeys, type WorldKeys } from "../shared/address-grammar.ts";
 import { seedFromHash } from "../explorer/address.ts";
+import type { RibbonRow } from "../explorer/ribbon-job.ts";
 
 export interface RibbonAddress extends WorldKeys {
   readonly from: number | null;
@@ -27,4 +28,8 @@ export function prospectTarget(hash: string, index: number): string {
 
 export function journeyHash(hash: string, from: number, to: number): string {
   return "#" + [...worldKeys(hash), `a=${from}`, `b=${to}`].join("&");
+}
+
+export function rowProspectTarget(_hash: string, _row: Pick<RibbonRow, "kind" | "index">): string | null {
+  return null;
 }
