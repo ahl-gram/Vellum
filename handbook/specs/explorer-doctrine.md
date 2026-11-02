@@ -479,8 +479,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   Ribbon walks the world's roads and a close-up finds only the towns inside its window. A hamlet,
   farmstead or mill has no world index, and its card hides the action row through style
   (`paintActs` in `src/site/shared/living-chart/place-overlay-card.ts`), never the `hidden`
-  attribute, which the row's own `display` makes inert. Why an inset renumbers is
-  `handbook/specs/region-and-voyage.md`'s.
+  attribute, which the row's own `display` makes inert.
 - **A shown card holds while the pointer is anywhere over its outline, and stays see-through
   while it does** (Issue #750, the rules pure in `src/site/shared/living-chart/place-card-hold.ts`). The
   outline is the card's rectangle read against the pointer, never a card that takes the pointer, so

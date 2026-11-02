@@ -13,7 +13,6 @@ export type InsetCard = {
   worldRoads: boolean;
 };
 
-// hit.focus() is wiring: keyboard focus is the card's own switch (explorer-doctrine "Only KEYBOARD focus switches the card"), as P16 in e2e/suites/cards/glass.ts focuses.
 export const INSET_CARDS = `(async () => {
   const { defaultRecipe, generateWorld } = await import("/explorer/engine/world/generate.js");
   const { roadMask, roadReachable } = await import("/explorer/engine/itinerary/route.js");
