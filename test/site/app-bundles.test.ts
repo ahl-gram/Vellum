@@ -152,8 +152,7 @@ const OUTLINES: ReadonlyArray<readonly [string, string]> = [
   ["italic", longestOutline(ITALIC)],
   ["numero", NUMERO[5]],
 ];
-const PLATE_MODULE =
-  /^\/\/#region (src\/prospect\/\S+|src\/atlas\/compose\.ts|src\/site\/explorer\/prospect-job\.ts)$/gm;
+const PLATE_MODULE = /^\/\/ (src\/prospect\/\S+|src\/atlas\/compose\.ts|src\/site\/explorer\/prospect-job\.ts)$/gm;
 const SHARED_WITH_PAGES: ReadonlySet<string> = new Set([
   "src/prospect/dress/context.ts",
   "src/prospect/dress/glyphs.ts",
