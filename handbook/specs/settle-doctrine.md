@@ -181,10 +181,9 @@ headless browser actually do, so a green run can be believed.
     `onSuiteError` firing. A later step of the suite whose step threw still runs under what that step
     set, so a condition its own later steps must not inherit is restored in a `finally`, as
     `withReducedMotion` in `e2e/support/reduced-motion.ts` does. Depend on the suite, not on the
-    rescue. **Attribute a lane-order
-    red by BISECTING the order, never by reasoning about what the last suite left behind**: the
-    guess made that way on PR #482 blamed a cleared viewport override, was wrong, and had to be
-    retracted; the un-awaited navigation was the cause. The selector is `E2E_SUITES_VAR` in
+    rescue. **Attribute a lane-order red by BISECTING the order, never by reasoning about what the
+    last suite left behind**: the guess made that way on PR #482 blamed a cleared viewport override,
+    was wrong, and had to be retracted; the un-awaited navigation was the cause. The selector is `E2E_SUITES_VAR` in
     `e2e/support/suites.ts`, and it carries two traps. The lane runner REFUSES to start when it is
     set, because the lanes are themselves the selection (`ambientSelectionRefusal` in
     `e2e/support/lanes.ts`), so a bisect runs the serial script. And `resolveSuiteSelection` reorders

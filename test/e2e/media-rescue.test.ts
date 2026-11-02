@@ -9,28 +9,35 @@ import type { SuiteTagged } from "../../e2e/support/suites.ts";
 const MEDIA = "Emulation.setEmulatedMedia";
 const REDUCE = { features: [{ name: "prefers-reduced-motion", value: "reduce" }] };
 const CLEARED = { media: "", features: [] };
-const NEXT = ["the next suite starts", undefined];
-
 type Logged = [string, Record<string, unknown> | undefined];
 
-function lane(first: (c: SuiteTagged<RunnerContext>, acc: Accumulators) => Promise<void>) {
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
+const NEXT: Logged = ["the next suite starts", undefined];
+const fresh = (): Accumulators => ({
+  results: [],
+  consoleErrors: [],
+  http4xx: [],
+  skippedGroups: [],
+  skippedChecks: [],
+});
+
+function lane(first: (c: SuiteTagged<RunnerContext>, acc: Accumulators) => Promise<void>, refuse = false) {
+  const acc = fresh();
   const log: Logged[] = [];
   const ctx: RunnerContext = {
     send: <T>(method: string, params?: Record<string, unknown>): Promise<T> => {
       log.push([method, params]);
-      return Promise.resolve({} as T);
+      return refuse ? Promise.reject(new Error("staged: the browser refused")) : Promise.resolve({} as T);
     },
     check: (name, ok) => {
       acc.results.push({ name, ok: Boolean(ok) });
     },
     alive: () => Promise.resolve(true),
-    clearMobile: () => Promise.resolve(),
+    clearMobile: () => (refuse ? Promise.reject(new Error("staged: the browser refused")) : Promise.resolve()),
   };
   const suites = {
     render: (c: SuiteTagged<RunnerContext>) => first(c, acc),
     motion: () => {
-      log.push(["the next suite starts", undefined] as Logged);
+      log.push(NEXT);
       return Promise.resolve();
     },
   };
@@ -87,7 +94,7 @@ test("the media clear after a suite that did not run whole is bounded, so a clea
     alive: () => Promise.resolve(true),
     clearMobile: () => Promise.resolve(),
   };
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
+  const acc = fresh();
   const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteNotWhole;
   assert.ok(handler, "the runner hands runSelected no handler for a suite that did not run whole");
   let guard: NodeJS.Timeout | undefined;
@@ -95,4 +102,14 @@ test("the media clear after a suite that did not run whole is bounded, so a clea
   const outcome = await Promise.race([Promise.resolve(handler()).then(() => "done"), stalled]);
   clearTimeout(guard);
   assert.equal(outcome, "done");
+});
+
+test("a browser that refuses the viewport reset or the media clear after a suite stops does not end the lane: the next suite still starts", async () => {
+  const { log, run } = lane(async (c) => {
+    await c.send(MEDIA, REDUCE).catch(() => {});
+    throw new Error("staged: a throw outside every step");
+  }, true);
+  const timings = await run();
+  assert.equal(timings[0]?.aborted, true, "the fixture did not stop the suite");
+  assert.deepEqual(log, [[MEDIA, REDUCE], [MEDIA, CLEARED], NEXT]);
 });
