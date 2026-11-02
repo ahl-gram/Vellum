@@ -2,10 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, globSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/founding-locale-clock-free";
 const AT = "src/world/founding/normalize.ts";
 
@@ -15,17 +14,10 @@ interface Refusal {
   message: string;
 }
 
-const refusals = async (lines: readonly string[], path: string): Promise<Refusal[]> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages
+const refusals = async (lines: readonly string[], path: string): Promise<Refusal[]> =>
+  (await plantMessages(lines, path))
     .filter((m) => m.ruleId === RULE)
     .map((m): Refusal => ({ line: m.line, messageId: m.messageId ?? "", message: m.message }));
-};
 const reports = async (lines: readonly string[], path: string): Promise<Array<[number, string]>> =>
   (await refusals(lines, path)).map((r): [number, string] => [r.line, r.messageId]);
 

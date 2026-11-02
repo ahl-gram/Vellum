@@ -2,22 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { globSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
 import { OLDER_CALLS, SPLIT_FILES } from "../../scripts/lint/split-arguments.ts";
+import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/split-arguments-by-name";
 
-const reports = async (lines: readonly string[], path: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line);
-};
+const reports = (lines: readonly string[], path: string): Promise<number[]> => ruleLines(lines, path, RULE);
 
 test("a split builder hands each value to its own file's parts under the name of the parameter it lands in, and a call of an exported function is not read (Issue #654)", async () => {
   const plant = [

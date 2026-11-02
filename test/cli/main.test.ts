@@ -198,20 +198,27 @@ const STAND_IN_BROWSER =
   '#!/bin/sh\nfor a in "$@"; do case "$a" in --screenshot=*) printf \'%s\\n\' "$@" > "${a#--screenshot=}";; esac; done\n';
 
 for (const scale of ["0.5", "4"]) {
-  test(`a valid --scale ${scale} at its edge is accepted and handed to the browser as its device scale`, { timeout: 60_000 }, async (t) => {
-    const dir = await mkdtemp(join(tmpdir(), "vellum-chart-scale-"));
-    const browser = join(dir, "browser");
-    await writeFile(browser, STAND_IN_BROWSER, { mode: 0o755 });
-    const saved = process.env["VELLUM_BROWSER"];
-    process.env["VELLUM_BROWSER"] = browser;
-    t.after(async () => {
-      if (saved === undefined) delete process.env["VELLUM_BROWSER"];
-      else process.env["VELLUM_BROWSER"] = saved;
-      await rm(dir, { recursive: true, force: true });
-      await rm(TMP, { recursive: true, force: true });
-    });
-    await draw([...SMALL, "--png", "--scale", scale], `accepted-scale-${scale}`);
-    const argv = (await readFile(`${TMP}/accepted-scale-${scale}.png`, "utf8")).split("\n");
-    assert.ok(argv.includes(`--force-device-scale-factor=${scale}`), `the browser was handed ${JSON.stringify(argv)}`);
-  });
+  test(
+    `a valid --scale ${scale} at its edge is accepted and handed to the browser as its device scale`,
+    { timeout: 60_000 },
+    async (t) => {
+      const dir = await mkdtemp(join(tmpdir(), "vellum-chart-scale-"));
+      const browser = join(dir, "browser");
+      await writeFile(browser, STAND_IN_BROWSER, { mode: 0o755 });
+      const saved = process.env["VELLUM_BROWSER"];
+      process.env["VELLUM_BROWSER"] = browser;
+      t.after(async () => {
+        if (saved === undefined) delete process.env["VELLUM_BROWSER"];
+        else process.env["VELLUM_BROWSER"] = saved;
+        await rm(dir, { recursive: true, force: true });
+        await rm(TMP, { recursive: true, force: true });
+      });
+      await draw([...SMALL, "--png", "--scale", scale], `accepted-scale-${scale}`);
+      const argv = (await readFile(`${TMP}/accepted-scale-${scale}.png`, "utf8")).split("\n");
+      assert.ok(
+        argv.includes(`--force-device-scale-factor=${scale}`),
+        `the browser was handed ${JSON.stringify(argv)}`,
+      );
+    },
+  );
 }

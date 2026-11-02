@@ -23,16 +23,12 @@ export const plantMessages = async (
   return result!.messages;
 };
 
-export const houseReports = async (lines: readonly string[], path: string): Promise<Array<[string, number]>> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages
+export const ruleLines = async (lines: readonly string[], path: string, rule: string): Promise<number[]> =>
+  (await plantMessages(lines, path)).filter((m) => m.ruleId === rule).map((m) => m.line);
+
+export const houseReports = async (lines: readonly string[], path: string): Promise<Array<[string, number]>> =>
+  (await plantMessages(lines, path))
     .filter((m) => m.ruleId?.startsWith("vellum/") && m.ruleId !== SPLIT_FILE_RULE && m.ruleId !== SHARED_BINDING_RULE)
     .map((m): [string, number] => [m.ruleId!, m.line]);
-};
 export const at = (rule: string, lines: readonly number[]): Array<[string, number]> =>
   lines.map((line) => [rule, line]);

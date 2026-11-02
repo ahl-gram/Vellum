@@ -2,12 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/e2e-scripts-off-through-helper";
 const HELPER = "e2e/support/scripts-off.ts";
 
@@ -55,15 +54,12 @@ const REFUSED = PLANT.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOT =
   "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces, and the whole name held in a binding the file never spells, such as a constant imported from a file the rule does not read (the last two plant lines); no syntax read of the one file can resolve either";
 
-const reported = async (path: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(PLANT.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
+const reported = (path: string): Promise<number[]> =>
+  ruleLines(
+    PLANT.map(([line]) => line),
+    path,
+    RULE,
   );
-  return result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line);
-};
 
 test("no e2e file names the scripts-off switch but its one helper, which always turns scripts back on (Issue #779)", async () => {
   assert.ok(REFUSED.length > 0 && REFUSED.length < PLANT.length, "the plant cannot tell the rule from its negation");

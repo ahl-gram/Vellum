@@ -1,20 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
-
-const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
-
-const reports = async (lines: readonly string[], path: string, rule: string): Promise<number[]> => {
-  const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    `the plant at ${path} does not parse, so no rule read it`,
-  );
-  return result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line);
-};
+import { ruleLines } from "../../test-support/source-shape-reports.ts";
 
 test("a prospect table item is built only by prospectItemFrom: no other site script writes the kind beside the item's own style, however the keys are spelled (Issue #522)", async () => {
   const plant = [
@@ -26,9 +12,9 @@ test("a prospect table item is built only by prospectItemFrom: no other site scr
     'export const f = { "kind": "prospect", "style": "ink" };',
   ];
   const rule = "vellum/prospect-item-through-builder";
-  assert.deepEqual(await reports(plant, "src/site/prospect/app.ts", rule), [1, 2, 5, 6]);
-  assert.deepEqual(await reports(plant, "src/site/explorer/app.ts", rule), [1, 2, 5, 6], "the other door");
-  assert.deepEqual(await reports(plant, "src/site/shared/table-address.ts", rule), [], "the builder's own file");
+  assert.deepEqual(await ruleLines(plant, "src/site/prospect/app.ts", rule), [1, 2, 5, 6]);
+  assert.deepEqual(await ruleLines(plant, "src/site/explorer/app.ts", rule), [1, 2, 5, 6], "the other door");
+  assert.deepEqual(await ruleLines(plant, "src/site/shared/table-address.ts", rule), [], "the builder's own file");
 });
 
 const SCROLL_PLANT = [
@@ -62,11 +48,15 @@ test("no chart room moves the reading position: no scroll call and no scroll wri
     "src/site/writing-room/app.ts",
   ])
     assert.deepEqual(
-      await reports(SCROLL_PLANT, room, rule),
+      await ruleLines(SCROLL_PLANT, room, rule),
       [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17],
       `${room}. BLIND SPOTS, declared, erring toward passing: a focus() that scrolls its element into view, a jump through location.hash, a scroll offset written through Object.assign or under a key assembled from pieces`,
     );
-  assert.deepEqual(await reports(SCROLL_PLANT, "src/site/explorer/app.ts", rule), [], "the Explorer is no chart room");
+  assert.deepEqual(
+    await ruleLines(SCROLL_PLANT, "src/site/explorer/app.ts", rule),
+    [],
+    "the Explorer is no chart room",
+  );
 });
 
 test("the prospect stage writes nothing to the status line: no status element by name, selector or id lookup (Issue #311)", async () => {
@@ -79,9 +69,9 @@ test("the prospect stage writes nothing to the status line: no status element by
     "// the #status line, named in a comment",
   ];
   const rule = "vellum/stage-no-status";
-  assert.deepEqual(await reports(plant, "src/site/reading-room/prospect-stage.ts", rule), [1, 1, 2, 3, 4]);
+  assert.deepEqual(await ruleLines(plant, "src/site/reading-room/prospect-stage.ts", rule), [1, 1, 2, 3, 4]);
   assert.deepEqual(
-    await reports(plant, "src/site/reading-room/told-plate.ts", rule),
+    await ruleLines(plant, "src/site/reading-room/told-plate.ts", rule),
     [],
     "the rule reaches the stage alone",
   );

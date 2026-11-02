@@ -9,15 +9,15 @@ import tseslint from "typescript-eslint";
 import * as prettier from "prettier";
 import { blockWitnesses } from "../../test-support/lint-block-witnesses.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const NO_JS = "vellum/ts-comment-no-js-module";
 const ISSUE_FORM = "vellum/ts-comment-issue-form";
 const EVERY_ROOT = [NO_JS, ISSUE_FORM, "vellum/template-silent-escape"];
 
 test("no comment in the TypeScript tree names a .js module, a trailing comment included, the bundle twins excepted", async () => {
-  const [result] = await eslint.lintText(
+  const messages = await plantMessages(
     [
       "// see worker.js for the old copy",
       "export const a = 1; // was x.js",
@@ -25,15 +25,11 @@ test("no comment in the TypeScript tree names a .js module, a trailing comment i
       'export const b = "x.js";',
       "/* reveal.js and stage.js, both gone */",
       "// mybundle.js is no twin: a twin's name is app.bundle.js or bundle.js",
-    ].join("\n"),
-    { filePath: join(ROOT, "src/cli/main.ts") },
+    ],
+    "src/cli/main.ts",
   );
   assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-  );
-  assert.deepEqual(
-    result!.messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]),
+    messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]),
     [
       [1, "worker.js"],
       [2, "x.js"],
@@ -109,17 +105,12 @@ const FORMS: ReadonlyArray<readonly [string, string | null]> = [
 
 test("every comment in the TypeScript tree writes Issue #N or PR #N, each number with its own word, and a string is never read (Issue #675)", async () => {
   const starts = FORMS.map((_, i) => 1 + FORMS.slice(0, i).reduce((n, [form]) => n + form.split("\n").length, 0));
-  const [result] = await eslint.lintText(FORMS.map(([form]) => form).join("\n"), {
-    filePath: join(ROOT, "src/cli/main.ts"),
-  });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
+  const messages = await plantMessages(
+    FORMS.map(([form]) => form),
+    "src/cli/main.ts",
   );
   assert.deepEqual(
-    result!.messages
-      .filter((m) => m.ruleId === ISSUE_FORM)
-      .map((m) => [m.line, m.message.match(/names (.+) bare:/)?.[1]]),
+    messages.filter((m) => m.ruleId === ISSUE_FORM).map((m) => [m.line, m.message.match(/names (.+) bare:/)?.[1]]),
     FORMS.flatMap(([, numbers], i) => (numbers === null ? [] : [[starts[i], numbers]])),
     "the comments reporting differ from the planted forms. DECLARED, each erring toward failing: an all-digit hex colour, digits after a word and a hash, an HTML numeric entity, a field label (Issue: #N), another repository's number (owner/repo#N), a doc block wrapped between the word and the number with its * leader, and a run of line comments wrapped the same way all report. DECLARED, erring toward passing (handbook/errata/guards.md rows): the rule reads the form and never the kind, so Issue #731, a pull request, passes; digits running straight into a hex letter read as a colour, so #675b passes; and the word after any character but a letter, a digit or an underscore reads as the word, so re-issue #36, non-PR #37, sub/issue #38 and vite.pr #39 pass, which keeps the ranges ruling A1 wrote (Issue #455-Issue #470, pre-Issue #260) clean",
   );

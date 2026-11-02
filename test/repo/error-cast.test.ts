@@ -2,12 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const RULE = "vellum/no-error-cast";
 
 const REFUSE = true;
@@ -76,20 +75,16 @@ const BLIND_SPOTS =
   'BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): an error type named any other way, through an alias (type Failure = Error), a type parameter (T extends Error), a qualified name (globalThis.Error, or NodeJS.ErrnoException, whose two casts read a code errorText cannot give), a subclass the house defines (class ParseError extends Error), DOMException, a wrapper (Readonly<Error>, InstanceType<typeof Error>), an indexed access (ErrorConstructor["prototype"]) or a container (Error[], Promise<Error>); a made-up shape ({ message?: string }), which five null-safe reads use (Issue #799 ruling 5); and a rejection handler passed by name whose parameter is annotated Error (.catch(onErr)), which is no cast';
 
 test("no value is cast to Error or one of JavaScript's own error kinds, read or not, alone, in a union or with fields attached, and errorText, instanceof and new Error are the ways round it (Issue #799)", async () => {
-  const [result] = await eslint.lintText(PLANT.map(([line]) => line).join("\n"), {
-    filePath: join(ROOT, "src/site/prospect/app.ts"),
-  });
-  assert.deepEqual(
-    result!.messages.filter((m) => m.fatal).map((m) => m.message),
-    [],
-    "the plant does not parse, so no rule read it",
+  const messages = await plantMessages(
+    PLANT.map(([line]) => line),
+    "src/site/prospect/app.ts",
   );
   assert.ok(
     REFUSED.length > 0 && REFUSED.length < PLANT.length,
     "the plant holds no line to refuse or none to pass, so this test cannot tell the rule from its negation",
   );
   assert.deepEqual(
-    result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line),
+    messages.filter((m) => m.ruleId === RULE).map((m) => m.line),
     REFUSED,
     BLIND_SPOTS,
   );

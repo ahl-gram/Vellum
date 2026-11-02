@@ -2,11 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { eslint } from "../../test-support/source-shape-reports.ts";
 import { STYLES } from "../../scripts/served-sources.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const ONE_LINE = "vellum/css-comment-one-line";
 const ISSUE_FORM = "vellum/css-comment-issue-form";
 const NO_JS_MODULE = "vellum/css-comment-no-js-module";
