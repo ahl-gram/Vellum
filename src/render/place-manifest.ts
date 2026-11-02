@@ -30,6 +30,10 @@ export type PlaceManifest = {
   readonly marginPx: number;
 };
 
+function worldIdxOf(world: World, idx: number): number | null {
+  return world.region === undefined ? idx : (world.region.parentIdx[idx] ?? null);
+}
+
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
@@ -37,7 +41,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
   const mask = roadMask(world);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
-    worldIdx: idx,
+    worldIdx: worldIdxOf(world, idx),
     name: s.name,
     ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
     kind: s.kind,

@@ -228,12 +228,14 @@ function regionCarry(
   land: Pick<RegionLand, "elev" | "seaLevel">,
   labels: Int16Array,
   detail: number,
+  parentIdx: ReadonlyArray<number | null>,
 ): NonNullable<World["region"]> {
   const { world, window, gridW, gridH } = g;
   const { recipe } = world;
   return {
     window,
     detail,
+    parentIdx,
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
     seaGate: regionSeaGate(world, window, { gridW, gridH }, land),
@@ -247,7 +249,13 @@ function regionPeople(
   g: RegionGrid,
   spec: RegionSpec,
   land: RegionLand,
-): { peopled: NamedSettlement[]; roads: Road[]; roadLabels: Int16Array; seats: number[] } {
+): {
+  peopled: NamedSettlement[];
+  roads: Road[];
+  roadLabels: Int16Array;
+  seats: number[];
+  parentIdx: (number | null)[];
+} {
   const { world, window } = g;
   const { elev, seaLevel } = land;
   const placed = projectSettlements(g, spec, land);
@@ -261,7 +269,9 @@ function regionPeople(
   const farms = window.u1 - window.u0 <= FARMSTEAD_MAX_WINDOW_UV + 1e-9 ? placeFarmsteads(world, window, land) : [];
   const smallest = [...hamlets, ...farms];
   const peopled = smallest.length > 0 ? [...settlements, ...smallest] : settlements;
-  return { peopled, roads, roadLabels, seats };
+  const worldOf = new Map([...placed.regionIdxOf].map(([wi, ri]) => [ri, wi] as const));
+  const parentIdx = peopled.map((_, ri) => worldOf.get(ri) ?? null);
+  return { peopled, roads, roadLabels, seats, parentIdx };
 }
 
 export function generateRegionWorld(world: World, spec: RegionSpec): World {
@@ -276,7 +286,12 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { dry, flow, rivers, riverCells, laidRiverCells } = regionWaters(g, { elev, ground, seaLevel }, elevSpan);
   const { climate, biomes } = regionClimate(elev, seaLevel, dry, riverCells, elevSpan);
 
-  const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells, laidRiverCells });
+  const { peopled, roads, roadLabels, seats, parentIdx } = regionPeople(g, spec, {
+    elev,
+    seaLevel,
+    riverCells,
+    laidRiverCells,
+  });
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) => (elev.data[x + y * gridW] as number) > seaLevel);
 
@@ -300,7 +315,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: regionCarry(g, { elev, seaLevel }, roadLabels, regionDetailLevel(spec)),
+    region: regionCarry(g, { elev, seaLevel }, roadLabels, regionDetailLevel(spec), parentIdx),
   };
 }
 
