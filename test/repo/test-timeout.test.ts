@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+
+import { unitArgs } from "../../scripts/unit-suite.ts";
 
 // Type-only and erased at run time: it puts the fixture in the type-check and lint program without running its wedged test here.
 import type {} from "../../test-support/wedged-fixture.ts";
@@ -33,10 +34,8 @@ test("a wedged test fails by name within the cap instead of hanging the lane", (
 });
 
 test("npm test passes --test-timeout at or above the bound", () => {
-  const scripts = (
-    JSON.parse(readFileSync(resolve(REPO, "package.json"), "utf8")) as { scripts: Record<string, string> }
-  ).scripts;
-  const value = /--test-timeout=(\d+)/.exec(scripts["test"] ?? "")?.[1];
-  assert.notEqual(value, undefined, `scripts.test carries no --test-timeout: ${scripts["test"]}`);
+  const argv = unitArgs([]).join(" ");
+  const value = /--test-timeout=(\d+)/.exec(argv)?.[1];
+  assert.notEqual(value, undefined, `npm test's runner carries no --test-timeout: ${argv}`);
   assert.ok(Number(value) >= MIN_SUITE_TIMEOUT_MS, `--test-timeout=${value} is under ${MIN_SUITE_TIMEOUT_MS}`);
 });

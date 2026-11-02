@@ -287,9 +287,8 @@ home's line wins for the lane and this file's for the orchestrator.
 ## Before the session ends
 
 - **The scratchpad does not outlive the session.** Copy each lane's tools, and every plan not yet
-  finished, to `out/scratch-<date>/`; a finished plan is already in `out/plans/`
-  with a handover note of each lane's open items, under no name `node --test` collects: Gate 1
-  item 8 names the patterns, and they are collected inside the gitignored `out/` too.
+  finished, to `out/scratch-<date>/` with a handover note of each lane's open items; a finished
+  plan is already in `out/plans/`.
 - **Every issue filed in the session is on the board and phased** (`CLAUDE.md`, Session handoff).
 
 ---

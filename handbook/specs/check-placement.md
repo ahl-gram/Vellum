@@ -64,6 +64,13 @@ belongs in.
 
 ## The unit suite
 
+- **`npm test` runs the `.test.ts` files under `test/` and nothing else** (`SUITE` in
+  `scripts/unit-suite.ts`), so nothing under `out/` or any other folder is ever collected. A path
+  after `npm test --` runs that path alone, and a flag after it reaches `node --test`, written as
+  `--flag=value`, since a value written as its own word reads as a path and the run falls back to
+  `node --test`'s own collection of the whole checkout. A suite outside `test/`, or under it under
+  another name, never runs, and `test/repo/test-collection.test.ts` reds one whose name is in
+  `node --test`'s own family.
 - **A unit test runs the code and asserts what it does.** Assert the outcome, never the declaration
   (`vellum-footguns` Gate 1).
 - **A unit test of date logic passes its own date**, as `test/world/seed-of-the-day.test.ts` passes
