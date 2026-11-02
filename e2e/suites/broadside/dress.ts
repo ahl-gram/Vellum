@@ -8,7 +8,7 @@ import type { BroadsideKit } from "./kit.ts";
 import { sendKey } from "../../support/home.ts";
 import { contrast } from "../cluster/trail.ts";
 import { FLOOR_PLAIN } from "../stage/stage.ts";
-import { FONTS_LOADED, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";
+import { FONTS_LOADED, INK_RGBA, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -197,9 +197,9 @@ const BR24_PIECES: readonly InkPiece[] = [
   ["head", "#note-broadside .fn-head"],
   ["fold", "#broadside .slip-fold"],
 ];
-type Head = { id: string; ink: Rgb; ground: Rgb };
+type Head = { id: string; ink: Rgb; alpha: number; ground: number[] };
 const HEADS: Payload<Head[]> =
-  `[...document.querySelectorAll(".fn-note")].map((n) => { const c = getComputedStyle(n.querySelector(".fn-head")).color.match(/[0-9.]+/g).map(Number), b = getComputedStyle(n).backgroundColor.match(/[0-9.]+/g).map(Number); return { id: n.id, ink: [c[0], c[1], c[2]], ground: [b[0], b[1], b[2]] }; })`;
+  `(() => { const rgba = ${INK_RGBA}; return [...document.querySelectorAll(".fn-note")].map((n) => { const c = rgba(getComputedStyle(n.querySelector(".fn-head")).color); return { id: n.id, ink: [c[0], c[1], c[2]], alpha: c[3], ground: rgba(getComputedStyle(n).backgroundColor) }; }); })()`;
 const OPEN_NOTE: Payload<boolean> = `(() => { document.querySelector('a.fn[data-note="note-broadside"]').focus(); const n = document.getElementById("note-broadside"); return n.matches(":popover-open") && n.getClientRects().length > 0; })()`;
 const SHUT_NOTE: Payload<boolean> = `(() => { document.activeElement.blur(); return !document.getElementById("note-broadside").matches(":popover-open"); })()`;
 
@@ -221,7 +221,8 @@ export async function br24Ink(k: BroadsideKit): Promise<void> {
     ...(reads.some((r) => r.piece === "fold") ? [] : ["no fold mark read"]),
     ...(heads.length > 0 ? [] : ["no footnote on the page"]),
     ...heads.flatMap((h) => [
-      ...(nearRgba([...h.ground, 255], tokenRgba("--parchment-panel"))
+      ...(h.alpha === 255 ? [] : [`${h.id}'s head is see-through, alpha ${h.alpha}`]),
+      ...(nearRgba(h.ground, tokenRgba("--parchment-panel"))
         ? []
         : [`${h.id} stands on ${h.ground.join(",")}, not the panel`]),
       ...(under !== null && contrast(h.ink, under) >= FLOOR_PLAIN

@@ -1,5 +1,5 @@
 // The slip's own lines read for contrast as EA4 reads the chrome's: each line's computed ink against the ground painted under it with the slip's and the footnotes' text hidden, for SB20 here and BR24 on the Broadside (Issue #1160).
-import { nearRgba, sampleRow, tokenRgba, type Rgb } from "../../support/pixel.ts";
+import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba, type Rgb } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { contrast } from "../cluster/trail.ts";
@@ -7,14 +7,27 @@ import { FLOOR_PLAIN, withStyle } from "../stage/stage.ts";
 import type { SpecimenKit } from "./kit.ts";
 
 export type InkPiece = readonly [piece: string, selector: string];
-type InkLine = { piece: string; t: string; ink: Rgb; row: number; x: number; w: number; seen: boolean; foot: boolean };
+type InkLine = {
+  piece: string;
+  t: string;
+  ink: Rgb;
+  alpha: number;
+  row: number;
+  x: number;
+  w: number;
+  seen: boolean;
+  foot: boolean;
+};
 type InkRead = InkLine & { ground: Rgb; ratio: number; panel: boolean };
 
+// A computed colour read exactly where Chromium serialises it as rgb() or rgba() and through the canvas for color(srgb ...), oklab() and the rest, alpha as the fourth channel.
+export const INK_RGBA = `((css) => { const m = /^rgba?\\(([\\d.]+), ([\\d.]+), ([\\d.]+)(?:, ([\\d.]+))?\\)$/.exec(css); return m ? [+m[1], +m[2], +m[3], Math.round(255 * +(m[4] ?? 1))] : ${PAGE_RGBA}(css); })`;
 export const FONTS_LOADED: Payload<string> = `document.fonts.status`;
 const HIDE_SLIP_TEXT = `.slip *, .fn-note * { color: transparent !important; text-decoration-color: transparent !important; }`;
 const COUNT = (selector: string): Payload<number> => `document.querySelectorAll(${JSON.stringify(selector)}).length`;
 // One element at a time, scrolled into its own scroller's view first: the Book's body note stands under the slip's foot until its body is scrolled (1280x800).
 const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]> => `(() => {
+  const rgba = ${INK_RGBA};
   const el = document.querySelectorAll(${JSON.stringify(selector)})[${i}], out = [];
   el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
   const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -26,8 +39,8 @@ const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]
     for (const b of rg.getClientRects()) {
       if (!(b.width > 0)) continue;
       const cx = b.left + b.width / 2, cy = b.top + b.height / 2, hit = document.elementFromPoint(cx, cy);
-      const m = getComputedStyle(host).color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: ${JSON.stringify(piece)}, t: n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)), seen: !!hit && el.contains(hit), foot: !!el.closest(".slip-foot") });
+      const m = rgba(getComputedStyle(host).color);
+      out.push({ piece: ${JSON.stringify(piece)}, t: n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], alpha: m[3], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)), seen: !!hit && el.contains(hit), foot: !!el.closest(".slip-foot") });
     }
   }
   return out;
@@ -78,6 +91,7 @@ export async function slipInk(ctx: SuiteContext, pieces: readonly InkPiece[], id
 export const inkFaults = (reads: readonly InkRead[]): string[] =>
   reads.flatMap((r) => [
     ...(r.seen ? [] : [`${r.piece} "${r.t}" is covered at its own line`]),
+    ...(r.alpha === 255 ? [] : [`${r.piece} "${r.t}" is see-through, alpha ${r.alpha}`]),
     ...(r.panel ? [] : [`${r.piece} "${r.t}" stands on ${r.ground.join(",")}, not the panel`]),
     ...(r.ratio >= FLOOR_PLAIN ? [] : [`${r.piece} "${r.t}" reads ${r.ratio.toFixed(2)}`]),
   ]);
@@ -88,6 +102,7 @@ export const inkBrief = (reads: readonly InkRead[]): string[] =>
 const SB20_PIECES: readonly InkPiece[] = [
   ["note", ".slip .note"],
   ["fold", ".slip .slip-fold"],
+  ["where", ".slip .card-where"],
 ];
 
 export async function sb20SlipInk(k: SpecimenKit): Promise<void> {
@@ -100,9 +115,10 @@ export async function sb20SlipInk(k: SpecimenKit): Promise<void> {
     ...(reads.some((r) => r.piece === "note" && !r.foot) ? [] : ["no note line read in the slip's body"]),
     ...(reads.some((r) => r.piece === "note" && r.foot) ? [] : ["no note line read in the slip's foot"]),
     ...(reads.some((r) => r.piece === "fold") ? [] : ["no fold mark read"]),
+    ...(reads.some((r) => r.piece === "where") ? [] : ["no where line read"]),
   ];
   k.check(
-    "SB20 the slip's note lines, in its body and in its foot, and its fold mark read at 4.5:1 or better against the ground painted under them, which is the panel, each brought into its own view first (Issue #1160)",
+    "SB20 the slip's note lines, in its body and in its foot, its where line and its fold mark read at 4.5:1 or better, opaque, against the ground painted under them, which is the panel, each brought into its own view first (Issue #1160)",
     faults.length === 0,
     JSON.stringify({ faults, reads: inkBrief(reads) }),
   );
