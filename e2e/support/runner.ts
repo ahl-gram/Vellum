@@ -87,7 +87,7 @@ export function browserlessExit(
   return 0;
 }
 
-const bounded = (reset: Promise<unknown>, boundMs: number): Promise<unknown> =>
+export const bounded = (reset: Promise<unknown>, boundMs: number): Promise<unknown> =>
   Promise.race([reset.catch(() => {}), new Promise((settle) => setTimeout(settle, boundMs).unref())]);
 
 export function runnerHooks<C extends RunnerContext>(
@@ -99,7 +99,7 @@ export function runnerHooks<C extends RunnerContext>(
   return {
     alive: ctx.alive,
     skippedGroups: () => accumulators.skippedGroups,
-    onSuiteError: async (name, failure) => {
+    onSuiteError: (name, failure) => {
       err(`  ${name} stopped early:`, failure);
       const e = failure as { message?: string } | null | undefined;
       ctx.check(
@@ -107,9 +107,9 @@ export function runnerHooks<C extends RunnerContext>(
         false,
         e && e.message ? e.message : String(failure),
       );
-      await bounded(ctx.clearMobile(), boundMs);
     },
     onSuiteNotWhole: async () => {
+      await bounded(ctx.clearMobile(), boundMs);
       await bounded(ctx.send("Emulation.setEmulatedMedia", NO_EMULATED_MEDIA), boundMs);
     },
   };

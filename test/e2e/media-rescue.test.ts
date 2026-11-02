@@ -12,6 +12,7 @@ const CLEARED = { media: "", features: [] };
 type Logged = [string, Record<string, unknown> | undefined];
 
 const NEXT: Logged = ["the next suite starts", undefined];
+const VIEWPORT: Logged = ["the viewport is reset", undefined];
 const fresh = (): Accumulators => ({
   results: [],
   consoleErrors: [],
@@ -32,7 +33,10 @@ function lane(first: (c: SuiteTagged<RunnerContext>, acc: Accumulators) => Promi
       acc.results.push({ name, ok: Boolean(ok) });
     },
     alive: () => Promise.resolve(true),
-    clearMobile: () => (refuse ? Promise.reject(new Error("staged: the browser refused")) : Promise.resolve()),
+    clearMobile: () => {
+      log.push(VIEWPORT);
+      return refuse ? Promise.reject(new Error("staged: the browser refused")) : Promise.resolve();
+    },
   };
   const suites = {
     render: (c: SuiteTagged<RunnerContext>) => first(c, acc),
@@ -54,7 +58,7 @@ function lane(first: (c: SuiteTagged<RunnerContext>, acc: Accumulators) => Promi
   };
 }
 
-test("a suite whose step never reached its assertion has every emulated media condition cleared before the next suite starts", async (t) => {
+test("a suite whose step never reached its assertion has its viewport reset and every emulated media condition cleared before the next suite starts", async (t) => {
   t.mock.method(console, "error", () => {});
   const { acc, log, run } = lane(async (c, a) => {
     await makeStep({ check: c.check, suite: c.suite, skippedGroups: a.skippedGroups })("P1", async () => {
@@ -64,20 +68,20 @@ test("a suite whose step never reached its assertion has every emulated media co
   });
   await run();
   assert.deepEqual(acc.skippedGroups, ["P1"], "the fixture never reached the step's catch");
-  assert.deepEqual(log, [[MEDIA, REDUCE], [MEDIA, CLEARED], NEXT]);
+  assert.deepEqual(log, [[MEDIA, REDUCE], VIEWPORT, [MEDIA, CLEARED], NEXT]);
 });
 
-test("a suite that stopped early has every emulated media condition cleared before the next suite starts", async () => {
+test("a suite that stopped early has its viewport reset and every emulated media condition cleared before the next suite starts", async () => {
   const { log, run } = lane(async (c) => {
     await c.send(MEDIA, REDUCE);
     throw new Error("staged: a throw outside every step");
   });
   const timings = await run();
   assert.equal(timings[0]?.aborted, true, "the fixture did not stop the suite");
-  assert.deepEqual(log, [[MEDIA, REDUCE], [MEDIA, CLEARED], NEXT]);
+  assert.deepEqual(log, [[MEDIA, REDUCE], VIEWPORT, [MEDIA, CLEARED], NEXT]);
 });
 
-test("a suite that ran whole has nothing cleared after it, so a passing run sends the browser nothing new", async () => {
+test("a suite that ran whole has nothing reset or cleared after it, so a passing run sends the browser nothing new", async () => {
   const { log, run } = lane(async (c) => {
     await c.send(MEDIA, REDUCE);
     await c.send(MEDIA, { features: [] });
@@ -111,5 +115,5 @@ test("a browser that refuses the viewport reset or the media clear after a suite
   }, true);
   const timings = await run();
   assert.equal(timings[0]?.aborted, true, "the fixture did not stop the suite");
-  assert.deepEqual(log, [[MEDIA, REDUCE], [MEDIA, CLEARED], NEXT]);
+  assert.deepEqual(log, [[MEDIA, REDUCE], VIEWPORT, [MEDIA, CLEARED], NEXT]);
 });
