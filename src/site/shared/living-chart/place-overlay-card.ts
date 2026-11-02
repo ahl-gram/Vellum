@@ -41,9 +41,11 @@ export function cardActs(
   opts: Readonly<BuildPlaceOverlayOpts> | undefined,
   prospectHref: PlaceOverlayDeps["prospectHref"],
   layProspect: Readonly<LayProspectHost> | undefined,
+  _ribbonHref: PlaceOverlayDeps["ribbonHref"],
 ) {
-  // Both card actions are world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
+  // Every card action is world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
   const onWorldSheet = !(opts && opts.box);
+  const ribbonLink: HTMLAnchorElement | null = null;
   let prospectLink: HTMLAnchorElement | null = null;
   if (prospectHref && onWorldSheet) {
     prospectLink = document.createElement("a");
@@ -58,7 +60,7 @@ export function cardActs(
     if (layPress) acts.appendChild(layPress);
     inner.appendChild(acts);
   }
-  return { prospectLink, layPress, acts };
+  return { prospectLink, ribbonLink, layPress, acts };
 }
 
 export function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement | null): void {

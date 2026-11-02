@@ -28,6 +28,7 @@ export interface PlaceOverlayState {
   presentYear: number;
   currentIdx: number;
   prospectLink: HTMLAnchorElement | null;
+  ribbonLink: HTMLAnchorElement | null;
   acts: HTMLElement | null;
   layPress: HTMLButtonElement | null;
 }
@@ -65,6 +66,7 @@ export interface PlaceOverlayDeps {
   mapEl: HTMLElement;
   isSuppressed: () => boolean;
   prospectHref?: (idx: number) => string;
+  ribbonHref?: (idx: number) => string;
   layProspect?: LayProspectHost;
   clampBox?: () => CardBox | null;
 }
@@ -98,7 +100,7 @@ function placeHit(place: PlaceMark, idx: number, at: PlaceAnchor): HTMLButtonEle
 
 // eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
-  const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
+  const { mapEl, isSuppressed, prospectHref, ribbonHref, layProspect, clampBox } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
   let hold: Hold = CLOSED;
@@ -291,7 +293,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     card.addEventListener("focusout", (e) => {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
     });
-    const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
+    const { prospectLink, ribbonLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect, ribbonHref);
     const wiring = { feed, inCard, markPress, takePress, track };
     const anchors = manifest.places.map((place) => anchorOf(place, opts?.box));
     const hits = manifest.places.map((place, idx) => {
@@ -311,6 +313,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       presentYear: manifest.presentYear,
       currentIdx: -1,
       prospectLink,
+      ribbonLink,
       acts,
       layPress,
     };

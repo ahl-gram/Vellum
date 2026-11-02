@@ -40,6 +40,7 @@ export interface LivingChartHost {
   scrubber?: ScrubberRefs;
   restingTrackSink?: RestingTrackSink;
   prospectHref?: (idx: number) => string;
+  ribbonHref?: (idx: number) => string;
   layProspect?: LayProspectHost;
   clampBox?: () => CardBox | null;
   tourOrder?: TourOrderSource;
@@ -143,6 +144,7 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     isSuppressed: () => chronicle.isActive(),
     ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
+    ...(host.ribbonHref ? { ribbonHref: host.ribbonHref } : {}),
     ...(host.layProspect ? { layProspect: host.layProspect } : {}),
     ...(host.clampBox ? { clampBox: host.clampBox } : {}),
   });

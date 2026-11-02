@@ -72,11 +72,15 @@ test("LP1 the card carries the LAY press only on a world sheet whose host provid
   );
 });
 
-test("LP2 both actions sit inside ONE .pc-acts row, so Issue #428's third action joins a row that already exists rather than re-laying the card out (#522)", async () => {
+test("LP2 the card's actions sit inside ONE .pc-acts row, the road to the Ribbon right under the way in to the prospect and the filing press last (#522; Issue #428, ruled 2026-11-02)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
   const host = layHost();
-  const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}`, layProspect: host.dep });
+  const { lc, mount } = await barlessHost({
+    prospectHref: (idx) => `/prospect/#i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#a=${idx}`,
+    layProspect: host.dep,
+  });
   lc.buildPlaceOverlay(manifest);
   const overlay = mount.children.find((c) => c.classList.contains("place-overlay"))!;
   const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card")!;
@@ -84,10 +88,43 @@ test("LP2 both actions sit inside ONE .pc-acts row, so Issue #428's third action
   const acts = inner.children.filter((c) => c.classList.contains("pc-acts"));
   assert.equal(acts.length, 1, "exactly one action row, and it is a direct child of the card's inner");
   const names = acts[0]!.children.map((c) => String(c.className));
-  assert.deepEqual(names, ["pc-prospect", "pc-lay"], "both actions are the row's children, in the ruled stills' order");
+  assert.deepEqual(names, ["pc-prospect", "pc-ribbon", "pc-lay"], "the two roads together, then the press, in the ruled order");
   assert.ok(
-    !inner.children.some((c) => c.classList.contains("pc-prospect") || c.classList.contains("pc-lay")),
-    "and neither action is left a bare sibling of the prose",
+    !inner.children.some(
+      (c) => c.classList.contains("pc-prospect") || c.classList.contains("pc-ribbon") || c.classList.contains("pc-lay"),
+    ),
+    "and no action is left a bare sibling of the prose",
+  );
+});
+
+test("LP5 the card carries the road to the Ribbon only on a world sheet whose host provides one, and it is a real link named for what it opens (Issue #428)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+
+  const linked = await barlessHost({
+    prospectHref: (idx) => `/prospect/#i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#a=${idx}`,
+  });
+  linked.lc.buildPlaceOverlay(manifest);
+  const overlay = linked.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  const road = walk(overlay).find((n) => n.classList.contains("pc-ribbon"));
+  assert.ok(road, "a world-sheet card whose host has a Ribbon holds the road to it");
+  assert.equal(road.tagName, "A", "a real link, not a button");
+  assert.equal(road.textContent, "Take the road", "named for what it opens");
+
+  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
+  assert.ok(
+    !walk(overlays[overlays.length - 1]!).some((n) => n.classList.contains("pc-ribbon")),
+    "a region inset's renumbered card carries no road to the Ribbon",
+  );
+
+  const prospectOnly = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}` });
+  prospectOnly.lc.buildPlaceOverlay(manifest);
+  const plain = prospectOnly.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  assert.ok(
+    !walk(plain).some((n) => n.classList.contains("pc-ribbon")),
+    "a host with no Ribbon (the Reading Room) gets no road",
   );
 });
 

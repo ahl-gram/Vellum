@@ -13,6 +13,7 @@ export const armShow = async (mount: { children: unknown[] }) => {
       hits[at]!.fire("focus");
     },
     press: () => walk(overlay).find((n) => n.classList.contains("pc-lay"))!,
+    road: () => walk(overlay).find((n) => n.classList.contains("pc-ribbon")),
   };
 };
 

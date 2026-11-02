@@ -198,6 +198,7 @@ export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Su
 
 export async function barlessHost(opts?: {
   prospectHref?: (idx: number) => string;
+  ribbonHref?: (idx: number) => string;
   layProspect?: { state: (idx: number) => { label: string; refuses: boolean }; lay: (idx: number) => void };
 }): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
   const [{ El }, { createLivingChart }] = await Promise.all([
@@ -212,6 +213,7 @@ export async function barlessHost(opts?: {
     statusEl: new El("p") as unknown as HTMLElement,
     restingTrackSink: sink,
     ...(opts && opts.prospectHref ? { prospectHref: opts.prospectHref } : {}),
+    ...(opts && opts.ribbonHref ? { ribbonHref: opts.ribbonHref } : {}),
     ...(opts && opts.layProspect ? { layProspect: opts.layProspect } : {}),
   });
   return { lc, mount, calls };
