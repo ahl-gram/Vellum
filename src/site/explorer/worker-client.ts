@@ -1,6 +1,6 @@
 // Render worker plumbing: world-gen + SVG render run in ./worker.ts off the main thread, falling back to the same engine inline; runInline mirrors ./worker.ts exactly so the worker/inline byte-identity check (e2e R2/R3) stays a clean compare.
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
-import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
+import { buildPlaceManifest, regionPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
@@ -202,7 +202,7 @@ export function runInline(msg: RenderJob): JobResult | Promise<JobResult> {
     return {
       ok: true,
       svg: renderMap(region, { ...msg.render, regionRecipe }),
-      manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
+      manifest: regionPlaceManifest(world, region, msg.render.widthPx ?? 1500),
       window: msg.window,
       band: msg.band,
       title,

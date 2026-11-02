@@ -15,7 +15,7 @@ import {
   type HoldInput,
   type Point,
 } from "./place-card-hold.ts";
-import { cardActs, cardShell, fillCardInner, paintRoad, seatCard } from "./place-overlay-card.ts";
+import { cardActs, cardShell, fillCardInner, paintActs, paintRoad, seatCard } from "./place-overlay-card.ts";
 
 export interface PlaceOverlayState {
   card: HTMLDivElement;
@@ -117,8 +117,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const el = placeOverlay.card;
     const inner = placeOverlay.inner;
     fillCardInner(inner, card, placeOverlay.acts);
+    paintActs(placeOverlay.acts, place);
     paintRoads(place);
-    paintLay(place.idx);
+    paintLay(place.worldIdx);
     const at = placeOverlay.anchors[idx]!;
     el.style.setProperty("--pc-nx", String(at.nx));
     el.style.setProperty("--pc-ny", String(at.ny));
@@ -142,9 +143,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     clampIntoView(placeOverlay.card);
   }
 
-  function paintLay(idx: number): void {
+  function paintLay(idx: number | null): void {
     const press = placeOverlay && placeOverlay.layPress;
-    if (!press || !layProspect || idx < 0) return;
+    if (!press || !layProspect || idx === null || idx < 0) return;
     const face = layProspect.state(idx);
     press.textContent = face.label;
     press.dataset["idx"] = String(idx);
@@ -153,15 +154,17 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function paintRoads(place: Readonly<PlaceMark>): void {
     if (!placeOverlay) return;
-    if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
+    if (placeOverlay.prospectLink && place.worldIdx !== null)
+      placeOverlay.prospectLink.href = prospectHref!(place.worldIdx);
     paintRoad(placeOverlay.ribbonLink, place, ribbonHref);
   }
 
   function relabelLay(): void {
     if (!placeOverlay) return;
-    paintLay(placeOverlay.currentIdx);
     const place = placeOverlay.places[placeOverlay.currentIdx];
-    if (place) paintRoads(place);
+    if (!place) return;
+    paintLay(place.worldIdx);
+    paintRoads(place);
   }
 
   function markScroll(el: HTMLElement, innerEl: HTMLElement): void {
@@ -301,7 +304,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     card.addEventListener("focusout", (e) => {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
     });
-    const { prospectLink, ribbonLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect, ribbonHref);
+    const { prospectLink, ribbonLink, layPress, acts } = cardActs(inner, prospectHref, layProspect, ribbonHref);
     const wiring = { feed, inCard, markPress, takePress, track };
     const anchors = manifest.places.map((place) => anchorOf(place, opts?.box));
     const hits = manifest.places.map((place, idx) => {

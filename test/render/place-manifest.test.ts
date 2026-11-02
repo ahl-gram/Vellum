@@ -25,6 +25,7 @@ test("one PlaceMark per settlement, with matching name/kind/founded/ruined", () 
   m.places.forEach((p, i) => {
     const s = world.settlements[i]!;
     assert.equal(p.idx, i, `place ${i} idx`);
+    assert.equal(p.worldIdx, i, `place ${i} worldIdx`);
     assert.equal(p.name, s.name, `place ${i} name`);
     assert.equal(p.kind, s.kind, `place ${i} kind`);
     assert.equal(p.founded, s.founded, `place ${i} founded`);

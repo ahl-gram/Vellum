@@ -2,8 +2,18 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { barlessHost, realWorld } from "../../test-support/living-chart-hosts.ts";
 import { armShow, layHost } from "../../test-support/living-chart-no-bar-card-fixtures.ts";
+import type { PlaceManifest } from "../../src/render/place-manifest.ts";
 
-test("the place card carries the prospect way in only on a world sheet whose host provides one (#242)", async () => {
+const BOX = { x: 0.25, y: 0.25, w: 0.5, h: 0.5 };
+const SHIFT = 7;
+const insetOf = (m: PlaceManifest): PlaceManifest => ({
+  ...m,
+  places: m.places.map((p) =>
+    p.idx === 0 ? { ...p, kind: "hamlet", worldIdx: null, roads: false } : { ...p, worldIdx: p.idx + SHIFT },
+  ),
+});
+
+test("the place card carries the prospect way in wherever its host provides one, on a close-up as on the main chart (#242; Issue #403)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
 
@@ -15,13 +25,12 @@ test("the place card carries the prospect way in only on a world sheet whose hos
   assert.equal(link.tagName, "A", "and it is a real link, not a button");
   assert.match(link.textContent, /prospect/i, "named for what it opens");
 
-  // A region inset renumbers its places (Issue #169), so a world-index link there would name the WRONG settlement.
-  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  linked.lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
   const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
   const inset = overlays[overlays.length - 1]!;
   assert.ok(
-    !walk(inset).some((n) => n.classList.contains("pc-prospect")),
-    "a region inset's renumbered card carries no prospect link",
+    walk(inset).some((n) => n.classList.contains("pc-prospect")),
+    "a close-up's card carries the way in too, under each town's world number (LP8)",
   );
 
   const bare = await barlessHost();
@@ -33,7 +42,7 @@ test("the place card carries the prospect way in only on a world sheet whose hos
   );
 });
 
-test("LP1 the card carries the LAY press only on a world sheet whose host provides one, and it is a real button rather than a link (#522)", async () => {
+test("LP1 the card carries the LAY press only where its host provides one, on a close-up as on the main chart, and it is a real button rather than a link (#522)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
 
@@ -55,12 +64,11 @@ test("LP1 the card carries the LAY press only on a world sheet whose host provid
     "the card sits inside the zoom-bound gesture box, so the press stops d3's gesture events or a rapid double-press zooms the chart under the reader (the makeDogEar rule)",
   );
 
-  // A region inset renumbers its places (Issue #242), so the world index a filing would carry names the WRONG settlement there.
-  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  linked.lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
   const insets = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
   assert.ok(
-    !walk(insets[insets.length - 1]!).some((n) => n.classList.contains("pc-lay")),
-    "a region inset's renumbered card carries no filing press",
+    walk(insets[insets.length - 1]!).some((n) => n.classList.contains("pc-lay")),
+    "a close-up's card carries the filing press too",
   );
 
   const bare = await barlessHost();
@@ -101,7 +109,7 @@ test("LP2 the card's actions sit inside ONE .pc-acts row, the road to the Ribbon
   );
 });
 
-test("LP5 the card carries the road to the Ribbon only on a world sheet whose host provides one, and it is a real link named for what it opens (Issue #428)", async () => {
+test("LP5 the card carries the road to the Ribbon only where its host provides one, on a close-up as on the main chart, and it is a real link named for what it opens (Issue #428)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
 
@@ -116,11 +124,11 @@ test("LP5 the card carries the road to the Ribbon only on a world sheet whose ho
   assert.equal(road.tagName, "A", "a real link, not a button");
   assert.equal(road.textContent, "Take the road", "named for what it opens");
 
-  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  linked.lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
   const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
   assert.ok(
-    !walk(overlays[overlays.length - 1]!).some((n) => n.classList.contains("pc-ribbon")),
-    "a region inset's renumbered card carries no road to the Ribbon",
+    walk(overlays[overlays.length - 1]!).some((n) => n.classList.contains("pc-ribbon")),
+    "a close-up's card carries the road to the Ribbon too",
   );
 
   const prospectOnly = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}` });
@@ -225,4 +233,40 @@ test("LP7 both roads are repainted for the SHOWN place when the table changes un
   lc.relabelLay();
   assert.equal(road.style.display, "none", "a repaint keeps the road stood down where none leaves the shown place");
   assert.equal(hrefOf(prospect), "/prospect/#table=later&i=24");
+});
+
+test("LP8 on a close-up every card action names the place's WORLD number, a place the world does not hold shows no action row, and a table change repaints by the world number too (Issue #403)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+  const host = layHost();
+  const { lc, mount } = await barlessHost({
+    prospectHref: (idx) => `/prospect/#i=${idx}`,
+    ribbonHref: (idx) => `/ribbon/#a=${idx}`,
+    layProspect: host.dep,
+  });
+  lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
+  const armed = await armShow(mount);
+  const acts = walk(mount).find((n) => n.classList.contains("pc-acts"));
+  const prospect = walk(mount).find((n) => n.classList.contains("pc-prospect"));
+  const road = armed.road();
+  assert.ok(acts && prospect && road, "the close-up's card holds the row, the way in and the road");
+
+  armed.show(1);
+  assert.equal(hrefOf(prospect), "/prospect/#i=8", "the way in names the world number, not the close-up's 1");
+  assert.equal(hrefOf(road), "/ribbon/#a=8");
+  assert.equal(road.style.display, "", "seed 42's place 1 has a road");
+  assert.equal(armed.press().dataset["idx"], "8");
+  assert.equal(armed.press().textContent, "lay 8");
+  assert.equal(acts.style.display, "");
+
+  armed.show(0);
+  assert.equal(acts.style.display, "none", "a place the world does not hold shows no row");
+  armed.show(1);
+  assert.equal(acts.style.display, "", "and the row comes back at the next town");
+
+  lc.relabelLay();
+  assert.equal(armed.press().dataset["idx"], "8", "a table change repaints the press by the world number");
+  assert.equal(hrefOf(prospect), "/prospect/#i=8");
+  armed.press().fire("click");
+  assert.deepEqual(host.laid, [8]);
 });

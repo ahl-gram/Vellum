@@ -77,6 +77,7 @@ import {
   zh14bPressIgnoredWhileTurning,
 } from "./zoom/registration.ts";
 import { zh15HoldLights } from "./zoom/hold-dress.ts";
+import { z21dInsetCards } from "./zoom/inset-cards.ts";
 import {
   zl1PressShowsLens,
   zl2StandsAsideInMotion,
@@ -134,10 +135,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const deep21 = await z21Hamlets(k, target21);
     await z21bOneBandUp(k, target21, deep21);
   });
-  await step("Z21c", () => z21cFarmsteads(k));
+  await step("Z21c, Z21d", () => z21cThenD(k));
   const pick = await zHold(step, k, target21);
   await zLoupe(step, k, pick);
   await step("Z restore", () => zRestore(k));
+}
+
+async function z21cThenD(k: ZoomKit): Promise<void> {
+  await z21cFarmsteads(k);
+  await z21dInsetCards(k);
 }
 
 async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Target21): Promise<HamletWindow> {

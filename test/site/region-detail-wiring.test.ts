@@ -9,7 +9,8 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../src/world/region.ts";
 import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
-import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import { LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "../../src/world/lod.ts";
+import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
 // What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region spec is proved live by e2e R14, and only its held cache is read from source at the foot of this file.
 
@@ -117,4 +118,36 @@ test("a chain cache held across jobs cannot move a byte: the same window redraws
 test("the worker's region job builds in the held chain cache (kept at the close of Issue #779: the cache is transparent to every byte, so only time could see it)", () => {
   const worker = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/explorer/worker.ts"), "utf8");
   assert.ok(/chainCache: regionChainCache/.test(worker), "the worker no longer builds in the held chain cache");
+});
+
+test("RP4 the Explorer's region job hands the card the main chart's numbers and the main chart's roads (Issue #403)", () => {
+  const world42 = generateWorld(defaultRecipe(42));
+  const gridW = 320;
+  const gridH = 240;
+  const s = world42.settlements[1]!;
+  const q = quantizeCenter(s.x / (gridW - 1), s.y / (gridH - 1), 0.125);
+  const window = lodWindowFor(q.cx, q.cy, 0.125);
+  const closeUp = generateRegionWorld(world42, {
+    window,
+    gridW,
+    gridH,
+    title: regionTitle(world42, window),
+    detail: true,
+    chainCache: regionChainCache,
+  });
+  assert.equal(
+    buildPlaceManifest(closeUp, 1500).places[0]!.roads,
+    false,
+    "the close-up's own flag at Paukilua is false",
+  );
+  const res = runInline({ kind: "region", seed: 42, overrides: {}, window, gridW, gridH, band: 3, render: RENDER });
+  const places = res.manifest.places;
+  assert.equal(places[0]!.name, "Paukilua");
+  assert.equal(places[0]!.worldIdx, 1);
+  assert.equal(places[0]!.roads, true, "the main chart's road leaves it");
+  assert.equal(places.length, 21);
+  assert.ok(
+    places.slice(1).every((p) => p.worldIdx === null),
+    "the 20 places that follow are hamlets, farmsteads or mills",
+  );
 });

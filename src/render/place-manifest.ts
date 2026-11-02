@@ -6,6 +6,7 @@ import { createProjection, marginFor } from "./transform.ts";
 
 export type PlaceMark = {
   readonly idx: number;
+  readonly worldIdx: number | null;
   readonly name: string;
   readonly formerName?: string;
   readonly kind: SettlementKind;
@@ -29,6 +30,22 @@ export type PlaceManifest = {
   readonly marginPx: number;
 };
 
+function worldIdxOf(world: World, idx: number): number | null {
+  return world.region === undefined ? idx : (world.region.parentIdx[idx] ?? null);
+}
+
+export function regionPlaceManifest(parent: World, region: World, widthPx: number): PlaceManifest {
+  const manifest = buildPlaceManifest(region, widthPx);
+  const mask = roadMask(parent);
+  return {
+    ...manifest,
+    places: manifest.places.map((p) => ({
+      ...p,
+      roads: p.worldIdx !== null && roadReachable(parent, mask, p.worldIdx).length > 0,
+    })),
+  };
+}
+
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
@@ -36,6 +53,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
   const mask = roadMask(world);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
+    worldIdx: worldIdxOf(world, idx),
     name: s.name,
     ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
     kind: s.kind,

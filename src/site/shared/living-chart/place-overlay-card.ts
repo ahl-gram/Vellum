@@ -1,7 +1,7 @@
 import type { PlaceCard } from "../../../render/place-card.ts";
 import type { PlaceMark } from "../../../render/place-manifest.ts";
 import type { Hold } from "./place-card-hold.ts";
-import type { BuildPlaceOverlayOpts, LayProspectHost, PlaceOverlayDeps, PlaceOverlayState } from "./place-overlay.ts";
+import type { LayProspectHost, PlaceOverlayDeps, PlaceOverlayState } from "./place-overlay.ts";
 
 function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   const press = document.createElement("button");
@@ -39,26 +39,23 @@ export function cardShell() {
 
 export function cardActs(
   inner: HTMLDivElement,
-  opts: Readonly<BuildPlaceOverlayOpts> | undefined,
   prospectHref: PlaceOverlayDeps["prospectHref"],
   layProspect: Readonly<LayProspectHost> | undefined,
   ribbonHref: PlaceOverlayDeps["ribbonHref"],
 ) {
-  // Every card action is world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
-  const onWorldSheet = !(opts && opts.box);
   let prospectLink: HTMLAnchorElement | null = null;
-  if (prospectHref && onWorldSheet) {
+  if (prospectHref) {
     prospectLink = document.createElement("a");
     prospectLink.className = "pc-prospect";
     prospectLink.textContent = "View the prospect";
   }
   let ribbonLink: HTMLAnchorElement | null = null;
-  if (ribbonHref && onWorldSheet) {
+  if (ribbonHref) {
     ribbonLink = document.createElement("a");
     ribbonLink.className = "pc-ribbon";
     ribbonLink.textContent = "Take the road";
   }
-  const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
+  const layPress = layProspect ? makeLayPress(layProspect) : null;
   const acts = prospectLink || ribbonLink || layPress ? document.createElement("div") : null;
   if (acts) {
     acts.className = "pc-acts";
@@ -70,13 +67,17 @@ export function cardActs(
   return { prospectLink, ribbonLink, layPress, acts };
 }
 
+export function paintActs(acts: HTMLElement | null, place: Readonly<PlaceMark>): void {
+  acts?.style.setProperty("display", place.worldIdx === null ? "none" : "");
+}
+
 export function paintRoad(
   pillEl: HTMLAnchorElement | null,
   place: Readonly<PlaceMark>,
   href: PlaceOverlayDeps["ribbonHref"],
 ): void {
-  if (!pillEl || !href) return;
-  pillEl.href = href(place.idx);
+  if (!pillEl || !href || place.worldIdx === null) return;
+  pillEl.href = href(place.worldIdx);
   pillEl.style.display = place.roads ? "" : "none";
 }
 
