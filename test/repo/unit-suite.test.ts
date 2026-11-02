@@ -30,6 +30,11 @@ const ONE_RED = {
   "test/a.test.ts": `import { test } from "node:test";\ntest("red", () => { throw new Error("red"); });\n`,
 };
 
+const PRELOAD_SEEN = {
+  "test-support/source-read-guard.ts": "Object.assign(globalThis, { vellumPreload: true });\n",
+  "test/a.test.ts": `import { test } from "node:test";\ntest("vellumPreload" in globalThis ? "after the preload" : "without the preload", () => {});\n`,
+};
+
 type Run = { status: number | null; ran: string[]; output: string };
 
 const runIn = (files: Readonly<Record<string, string>>, argv: readonly string[]): Run => {
@@ -84,13 +89,12 @@ test("the shard flag ci.yml appends after npm test -- slices the suites under te
   );
 });
 
-// BLIND SPOT, declared, erring toward running more: a flag's value written as its own word (--test-reporter tap) reads as a path, so the run falls back to node's own collection, out/ included (2026-11-01, Node v26.13.0: all four suites of COPY_UNDER_OUT ran).
 test("a path after npm test -- runs that path alone, as node's own patterns do", () => {
   const run = runIn(COPY_UNDER_OUT, [LAUNCHER, TAP, "test/sub/b.test.ts"]);
   assert.deepEqual(
     run.ran,
     ["test/sub/b.test.ts"],
-    `a named path no longer narrows the run, which ran ${run.ran.join(", ")}`,
+    `a named path no longer narrows the run, which ran ${run.ran.join(", ")}. BLIND SPOT, declared, erring toward running more: a flag's value written as its own word (--test-reporter tap) reads as a path, so the run falls back to node's own collection, out/ included`,
   );
 });
 
@@ -98,4 +102,20 @@ test("a red suite reds npm test, since the launcher hands back the runner's exit
   const run = runIn(ONE_RED, [LAUNCHER, TAP]);
   assert.deepEqual(run.ran, ["red"], `the red suite never ran:\n${run.output}`);
   assert.equal(run.status, 1, `npm test exited ${run.status} over a red suite, so CI reads a red run as green`);
+});
+
+test("every suite npm test runs, the whole suite or a named path, loads test-support/source-read-guard.ts first, which a bare node --test never does", () => {
+  const control = runIn(PRELOAD_SEEN, ["--test", TAP]);
+  assert.deepEqual(
+    control.ran,
+    ["without the preload"],
+    `a bare node --test already loads the seeded preload (an --import reaching it from the environment), so this fixture cannot tell a launcher that drops it:\n${control.output}`,
+  );
+  const whole = runIn(PRELOAD_SEEN, [LAUNCHER, TAP]);
+  const named = runIn(PRELOAD_SEEN, [LAUNCHER, TAP, "test/a.test.ts"]);
+  assert.deepEqual(
+    [whole.ran, named.ran],
+    [["after the preload"], ["after the preload"]],
+    `npm test ran a suite without test-support/source-read-guard.ts loaded first, so the source-read guard watches no read in it:\n${whole.output}\n${named.output}`,
+  );
 });
