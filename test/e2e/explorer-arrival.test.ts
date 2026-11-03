@@ -26,15 +26,19 @@ function arrival(ready: boolean) {
 
 function ink(answers: number[]) {
   const reads = { n: 0 };
+  const sleeps: number[] = [];
   const ctx = {
     evaluate: (): Promise<number> => {
       const answer = answers[Math.min(reads.n, answers.length - 1)] as number;
       reads.n += 1;
       return Promise.resolve(answer);
     },
-    sleep: (): Promise<void> => Promise.resolve(),
+    sleep: (ms: number): Promise<void> => {
+      sleeps.push(ms);
+      return Promise.resolve();
+    },
   } as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
-  return { reads, ctx };
+  return { reads, sleeps, ctx };
 }
 
 test("toExplorer bounces through about:blank, takes the Explorer's ready answer, then waits for the settled draw under its label", async () => {
@@ -85,4 +89,5 @@ test("waitInked throws naming its label once its 120 reads never reach the floor
   const p = ink([3]);
   await assert.rejects(waitInked(p.ctx, "L", 11), (err: Error) => err.message === "waitInked timeout L");
   assert.equal(p.reads.n, 120);
+  assert.deepEqual(p.sleeps, Array(120).fill(50), "the budget is 120 reads 50 ms apart");
 });

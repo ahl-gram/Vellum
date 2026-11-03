@@ -1,4 +1,4 @@
-// The Explorer's arrival and its survey-ink wait, once each (Issue #1016): a page the suites reach at six sites and read the ink of at three.
+// The Explorer's arrival and its survey-ink wait, once each (Issue #1016).
 import type { Payload, SuiteContext } from "../types.ts";
 import { bounce } from "./nav.ts";
 
