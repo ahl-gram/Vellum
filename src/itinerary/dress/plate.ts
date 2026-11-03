@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import type { Rng } from "../../core/rng.ts";
+import { WIDTH_FACTOR } from "../../render/geometry.ts";
 import type { RibbonInput } from "../input.ts";
 import { ribbonTitle, stagesLine } from "../prose.ts";
 import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W } from "./layout.ts";
@@ -102,8 +103,15 @@ function bannerCloth(c: RibbonContext, paint: RibbonPaint): SvgNode[] {
   ];
 }
 
+const STAGES_SIZE = 8.6;
+const STAGES_WIDTH = RIBBON_W - 2 * (RIBBON_MARGIN - 10);
+
+const stagesSize = (stages: string): number =>
+  Math.min(STAGES_SIZE, Math.floor((STAGES_WIDTH / (stages.length * WIDTH_FACTOR.mixed)) * 10) / 10);
+
 function bannerLettering(c: RibbonContext, input: RibbonInput): SvgNode[] {
   const { title, subtitle } = ribbonTitle(input);
+  const stages = stagesLine(input);
   const cx = RIBBON_W / 2;
   const top = RIBBON_MARGIN;
   const line = (y: number, size: number, text: string, fill: string, extra: Record<string, string | number>): SvgNode =>
@@ -128,7 +136,7 @@ function bannerLettering(c: RibbonContext, input: RibbonInput): SvgNode[] {
     ),
     line(top + 58, 11, subtitle[0] ?? "", c.soft, { "font-style": "italic" }),
     line(top + 71, 9.5, subtitle[1] ?? "", c.soft, { "font-style": "italic" }),
-    line(top + 85, 8.6, stagesLine(input), c.ink, { "font-style": "italic", "fill-opacity": 0.8 }),
+    line(top + 85, stagesSize(stages), stages, c.ink, { "font-style": "italic", "fill-opacity": 0.8 }),
   ];
 }
 
