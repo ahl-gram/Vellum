@@ -118,7 +118,7 @@ type Seen = {
 const SEEN = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]"),a=document.getElementById("order-plates"),strip=(s)=>s.replace(/&table=[^&]*/,""),at=(n)=>svg?svg.getAttribute("data-vellum-"+n):null;
   return{drawn:!!svg&&document.getElementById("status").textContent==="",outline:at("outline"),looseness:at("looseness"),islands:at("islands"),isleSize:at("isle-size"),raggedness:at("raggedness"),hash:strip(location.hash),href:a?strip(a.getAttribute("href")):null};})()`;
 
-// Through about:blank, because a navigate that differs only in the hash is same-document and never re-boots the page (settle-doctrine clause 9); the poll keeps its last read and the check asserts on that.
+// The poll keeps its last read and the check asserts on that.
 async function explorerAt({ evaluate, send, sleep, PORT }: SuiteContext, hash: string): Promise<Seen | null> {
   await bounce(send, `http://127.0.0.1:${PORT}/explorer/${hash}`);
   let seen: Seen | null = null;

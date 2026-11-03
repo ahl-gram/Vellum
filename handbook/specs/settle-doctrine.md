@@ -126,9 +126,9 @@ headless browser actually do, so a green run can be believed.
    device's table and not the address's. `handbook/specs/explorer-doctrine.md` carries the rule; a suite that
    wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
    `e2e/suites/chart-drawer/kit.ts` does in its own `go`. Reach a new address by
-   re-bootstrapping through `about:blank` and then the target, which `bounce` in
-   `e2e/support/nav.ts` does for every e2e file (`vellum/e2e-cdp-through-helper` refuses the
-   address anywhere else), then poll for the boot committing, as `goto` in
+   re-bootstrapping through `about:blank` and then the target, which `bounce` and
+   `leaveBlank` in `e2e/support/nav.ts` do for every e2e file (`vellum/e2e-cdp-through-helper`
+   refuses the address anywhere else), then poll for the boot committing, as `goto` in
    `e2e/support/room.ts` does; a fixed sleep in its place is the flake.
 10. **Region-job settles scale with the runner.** 20s on CI where 6s passes locally; derive the
     factor from a measured worst case and date it at the constant.
