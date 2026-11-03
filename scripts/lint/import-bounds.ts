@@ -327,6 +327,13 @@ const srcNoToolingImport: Rule.RuleModule = {
         const text = literalText((node as unknown as { source: Node }).source);
         if (text !== null && reaches(text)) context.report({ node, messageId: "found" });
       },
+      CallExpression(node) {
+        const callee = node.callee;
+        if (callee.type !== "MemberExpression" || memberName(callee as Node) !== "glob") return;
+        if (!isImportMeta(callee.object as Node)) return;
+        if (literals(node.arguments as Node[]).some((text) => text.startsWith("/") && reaches(text)))
+          context.report({ node, messageId: "found" });
+      },
     };
   },
 };

@@ -258,7 +258,7 @@ const toolingPlant = (file: string): string[] => {
   ];
 };
 
-test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source and no type import, static, dynamic, by URL, from the root or held in a string, and a mention, a site path, src/ itself, a folder of src/ named test and a sibling folder are not a reach (Issue #1132)", async () => {
+test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source and no type import, static, dynamic, by URL, by glob, from the root or held in a string, and a mention, a site path, src/ itself, a folder of src/ named test and a sibling folder are not a reach (Issue #1132)", async () => {
   for (const file of TOOLING_FILES)
     assert.deepEqual(
       await reports(toolingPlant(file), file, [TOOLING_RULE]),

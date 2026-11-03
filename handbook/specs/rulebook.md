@@ -356,8 +356,9 @@ comment. This is a convenience index, not their home.
 presses a page, the stylesheets, and the committed charts. **`scripts/` holds what runs around the
 product**: the commands that produce, check, prove or deliver something, each run with `node`, from
 a `package.json` script or by another command, the unit suite's runner among them, the house's lint
-rules, the design rounds' tools, and the modules those commands, the lint and the tests share.
-`test/`, `test-support/` and `e2e/` hold the checks and their helpers, and `e2e/` the browser lanes'
+rules, the design rounds' tools, and the modules those commands, the lint and the tests share. The
+one command that is no `node` file is `scripts/cloud-setup.sh`, the shell script pasted into the
+cloud environment's setup field (`handbook/specs/cloud-routine.md`). `test/`, `test-support/` and `e2e/` hold the checks and their helpers, and `e2e/` the browser lanes'
 runner.
 
 **Place a file by what runs it.** Code the site or the CLI runs goes in `src/`, a module a page
@@ -370,9 +371,13 @@ something goes in `scripts/`. A command whose logic the product also needs keeps
 or `e2e/`, a type included, so a type both sides use lives in `src/` and the script or the test
 imports it from there. The four may import from `src/` and from one another.
 `vellum/src-no-tooling-import` (`srcNoToolingImport` in `scripts/lint/import-bounds.ts`, its folders
-`TOOLING_ROOTS`) refuses such an import in every TypeScript file under `src/`, and
-`test/repo/import-bounds.test.ts` names what it cannot see. The lint reads TypeScript alone, so hold
-a page under `src/pages/` and a sheet under `src/styles/` to the rule by hand.
+`TOOLING_ROOTS`) refuses such an import in every TypeScript file under `src/`, a root-absolute
+`import.meta.glob` pattern included, and `test/repo/import-bounds.test.ts` names what it cannot see.
+The lint reads TypeScript alone, so hold every `.astro` file under `src/pages/` and `src/layouts/`
+and every sheet under `src/styles/` to the rule by hand. The rule errs toward refusing: a
+root-absolute piece inside an assembled source, as a `/test/` segment in a template that opens
+with `./`, is read as a path from the repo root though the source lands under `src/`, and no file
+under `src/` writes one today.
 
 ## The accepted lint and type-check skips
 
