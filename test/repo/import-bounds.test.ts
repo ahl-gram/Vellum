@@ -255,6 +255,9 @@ const toolingPlant = (file: string): string[] => {
     `export const l = import.meta.glob("${up}scripts/*.ts");`,
     `export const m = import.meta.glob("/src/core/*.ts");`,
     `declare const fs: { glob: (pattern: string) => void }; fs.glob("/scripts/*.ts");`,
+    `export const n = import.meta.glob(["/e2e/**", "/src/core/*.ts"]);`,
+    `export const o = import.meta.glob(["/src/test/*.ts", "/src/scripts/*.ts"]);`,
+    `export const p = import.meta.resolve("/scripts/x.ts");`,
   ];
 };
 
@@ -262,7 +265,7 @@ test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source a
   for (const file of TOOLING_FILES)
     assert.deepEqual(
       await reports(toolingPlant(file), file, [TOOLING_RULE]),
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19, 20, 21],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19, 20, 21, 24],
       `${file}. ${TOOLING_BLIND_SPOTS}`,
     );
 });
