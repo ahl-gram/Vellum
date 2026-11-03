@@ -2,5 +2,6 @@
 import type { SuiteContext } from "../types.ts";
 
 export const bounce = async (send: SuiteContext["send"], url: string): Promise<void> => {
+  await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url });
 };
