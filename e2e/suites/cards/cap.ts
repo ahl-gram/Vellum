@@ -1,5 +1,5 @@
 import { makeSettle, makeStable } from "../../support/settle.ts";
-import { countEvents } from "../../support/witness.ts";
+import { CARD_CARRIER, countEvents } from "../../support/witness.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
@@ -247,29 +247,36 @@ export async function p23CapHolds(
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-async function p24PinKralgov({ send, settle }: Pick<CardsKit, "send" | "settle">, at: Point) {
+export type PinnedAtRest = {
+  name: string;
+  pinned: boolean;
+  scrolls: boolean;
+  tail: number;
+  pe: string;
+  k: number;
+  aim: Point;
+  clear: boolean;
+  h: number;
+};
+export const PINNED_AT_REST: Payload<PinnedAtRest | null> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const n = c.querySelector(".pc-name"); if (!i || !n) return null;
+    const r = c.getBoundingClientRect(); const nr = n.getBoundingClientRect(); const aim = { x: Math.round(nr.left + nr.width / 2), y: Math.round(nr.top + nr.height / 2) };
+    const on = (b) => aim.x >= b.left && aim.x <= b.right && aim.y >= b.top && aim.y <= b.bottom;
+    return { name: n.textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
+      tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
+      aim, clear: [...c.querySelectorAll(".pc-acts > *")].every((e) => !on(e.getBoundingClientRect())), h: +r.height.toFixed(2) }; })()`;
+
+async function p24PinKralgov(
+  { send }: Pick<CardsKit, "send">,
+  stable: ReturnType<typeof makeStable>,
+  at: Point,
+): Promise<PinnedAtRest> {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  const card = await settle<{
-    name: string | undefined;
-    pinned: boolean;
-    scrolls: boolean;
-    tail: number;
-    pe: string;
-    k: number;
-    x: number;
-    y: number;
-    h: number;
-  } | null>(
-    `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect();
-        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
-          tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
-          x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
-    (d, last) => d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
-    "P24 Kralgov pinned at 1280x800",
-  );
-  return card;
+  return stable(PINNED_AT_REST, "P24 Kralgov pinned and unrolled at 1280x800", {
+    departed: (d) => d.name === "Kralgov" && d.pinned,
+    animated: CARD_CARRIER,
+  });
 }
 
 export async function p24NothingToScroll({
@@ -290,19 +297,21 @@ export async function p24NothingToScroll({
   const at = await evaluate<Point>(
     `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`,
   );
-  const card = await p24PinKralgov({ send, settle }, at);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
+  const card = await p24PinKralgov({ send }, stable, at);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.aim.x, y: card.aim.y });
   await sleep(120, "pace: the hover lands before the wheel");
   await evaluate(WHEELS.arm);
-  await wheel(card.x, card.y, -240);
+  await wheel(card.aim.x, card.aim.y, -240);
   const after = (await stable(WHEELED, "P24 the wheel handled", { departed: (d) => d.wheels > 0 })).k;
   check(
-    "P24 a pinned card with nothing to scroll does NOT swallow the camera under it (#633)",
-    card.tail <= 1 && card.scrolls === false && card.pe === "none" && after > card.k + 0.05,
+    "P24 a pinned card with nothing to scroll does NOT swallow the camera under it, the wheel aimed at the card's name once it has unrolled, clear of the card's actions (#633; Issue #1211)",
+    card.tail <= 1 && card.scrolls === false && card.pe === "none" && card.clear && after > card.k + 0.05,
     JSON.stringify({
       tail: card.tail,
       scrolls: card.scrolls,
       pointerEvents: card.pe,
+      aim: card.aim,
+      aimClearOfActions: card.clear,
       kBefore: card.k,
       kAfterWheelOverCard: after,
     }),

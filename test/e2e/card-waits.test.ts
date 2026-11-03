@@ -4,13 +4,14 @@ import vm from "node:vm";
 import {
   p24NothingToScroll,
   p26TailScrolls,
+  PINNED_AT_REST,
   COUNT_FRAMES,
   QUIET_FRAMES,
   SCROLLED,
   STOP_FRAMES,
   WHEELED,
 } from "../../e2e/suites/cards/cap.ts";
-import type { Scrolled } from "../../e2e/suites/cards/cap.ts";
+import type { PinnedAtRest, Scrolled } from "../../e2e/suites/cards/cap.ts";
 import { pCardShot } from "../../e2e/suites/cards/glass.ts";
 import { p30Tablet, TAPPED } from "../../e2e/suites/cards/hold-tablet.ts";
 import type { CardsKit } from "../../e2e/suites/cards/kit.ts";
@@ -19,7 +20,7 @@ import type { Manifest } from "../../e2e/suites/cards/overlay.ts";
 import { z6PinnedCard, z8CardConstant } from "../../e2e/suites/zoom/camera.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import { CARD_ROLL } from "../../e2e/support/witness.ts";
-import type { SuiteContext } from "../../e2e/types.ts";
+import type { Point, SuiteContext } from "../../e2e/types.ts";
 import { count, recording } from "../../test-support/recording-ctx.ts";
 import type { Said } from "../../test-support/recording-ctx.ts";
 
@@ -125,29 +126,56 @@ test("COUNT_FRAMES counts each painted frame once however soon it is armed again
   assert.equal(queue.length, 0, "a frame callback was still queued");
 });
 
-const cardsKitOver = (ctx: SuiteContext) =>
-  ({
-    ...ctx,
-    settle: makeSettle(ctx),
-    waitReady: () => Promise.resolve(true),
-    setNarrowViewport: () => Promise.resolve(),
-    wheel: () => Promise.resolve(),
-  }) as unknown as CardsKit;
-const KRALGOV = { name: "Kralgov", pinned: true, scrolls: false, tail: 0, pe: "none", k: 1, x: 500, y: 300, h: 200 };
-const wheelFake = (wheeled: (n: number) => { wheels: number; k: number }) => {
+type Wheeled = { x: number; y: number; dy: number; restReads: number };
+type Rest = { read: PinnedAtRest | null; anims: string[] };
+const KRALGOV: PinnedAtRest = {
+  name: "Kralgov",
+  pinned: true,
+  scrolls: false,
+  tail: 0,
+  pe: "none",
+  k: 1,
+  aim: { x: 500, y: 328 },
+  clear: true,
+  h: 322,
+};
+const AT_REST: Rest = { read: KRALGOV, anims: ["finished"] };
+const wheelFake = (
+  wheeled: (n: number) => { wheels: number; k: number },
+  rest: (n: number) => Rest = () => AT_REST,
+) => {
   let n = 0;
-  return recording((expression) => {
+  let r = 0;
+  const wheels: Wheeled[] = [];
+  const hovers: Point[] = [];
+  const rec = recording((expression) => {
     if (expression === WHEELED) return wheeled(++n);
-    if (expression === "window.__vellumZoomState().k") return 1;
-    if (expression.includes("pc-name")) return KRALGOV;
+    if (expression === PINNED_AT_REST) return rest(++r).read;
+    if (expression.includes(PINNED_AT_REST)) return rest(++r);
     if (expression.includes("place-hit")) return { x: 500, y: 300 };
     return {};
   });
+  const kit = {
+    ...rec.ctx,
+    settle: makeSettle(rec.ctx),
+    waitReady: () => Promise.resolve(true),
+    setNarrowViewport: () => Promise.resolve(),
+    send: (method: string, params?: { type?: string; x: number; y: number }) => {
+      if (method === "Input.dispatchMouseEvent" && params?.type === "mouseMoved")
+        hovers.push({ x: params.x, y: params.y });
+      return rec.ctx.send(method);
+    },
+    wheel: (x: number, y: number, dy: number) => {
+      wheels.push({ x, y, dy, restReads: r });
+      return Promise.resolve();
+    },
+  } as unknown as CardsKit;
+  return { ...rec, kit, wheels, hovers };
 };
 
 test("P24 reads the camera only once the wheel has reached the page", async () => {
-  const { ctx, checked } = wheelFake((n) => (n <= 2 ? { wheels: 0, k: 1 } : { wheels: 1, k: 1.5 }));
-  await p24NothingToScroll(cardsKitOver(ctx));
+  const { kit, checked } = wheelFake((n) => (n <= 2 ? { wheels: 0, k: 1 } : { wheels: 1, k: 1.5 }));
+  await p24NothingToScroll(kit);
   assert.deepEqual(
     checked.filter((c) => c.code === "P24"),
     [{ code: "P24", ok: true }],
@@ -155,9 +183,76 @@ test("P24 reads the camera only once the wheel has reached the page", async () =
 });
 
 test("P24 times out naming the wheel when it never reaches the page", async () => {
-  const { ctx } = wheelFake(() => ({ wheels: 0, k: 1.5 }));
-  await assert.rejects(p24NothingToScroll(cardsKitOver(ctx)), (err: Error) =>
+  const { kit } = wheelFake(() => ({ wheels: 0, k: 1.5 }));
+  await assert.rejects(p24NothingToScroll(kit), (err: Error) =>
     err.message.startsWith("settle timeout P24 the wheel handled: "),
+  );
+});
+
+test("P24 sends no wheel until the pinned card has finished unrolling", async () => {
+  const { kit, wheels } = wheelFake(
+    () => ({ wheels: 1, k: 1.5 }),
+    (n) => ({ read: KRALGOV, anims: [n <= 3 ? "running" : "finished"] }),
+  );
+  await p24NothingToScroll(kit);
+  assert.deepEqual(
+    wheels.map((w) => w.restReads),
+    [4],
+  );
+});
+
+test("P24 times out naming the card when its unroll never finishes", async () => {
+  const { kit } = wheelFake(
+    () => ({ wheels: 1, k: 1.5 }),
+    () => ({ read: KRALGOV, anims: ["running"] }),
+  );
+  await assert.rejects(p24NothingToScroll(kit), (err: Error) =>
+    err.message.startsWith("settle timeout P24 Kralgov pinned and unrolled at 1280x800: "),
+  );
+});
+
+test("P24 sends its wheel at the aim the page reads off the card's name, not at the mark it pressed", async () => {
+  const { kit, wheels } = wheelFake(() => ({ wheels: 1, k: 1.5 }));
+  await p24NothingToScroll(kit);
+  assert.deepEqual(
+    wheels.map(({ x, y, dy }) => ({ x, y, dy })),
+    [{ x: 500, y: 328, dy: -240 }],
+  );
+});
+
+test("P24 hovers the aim the page reads off the card's name before it wheels there", async () => {
+  const { kit, hovers } = wheelFake(() => ({ wheels: 1, k: 1.5 }));
+  await p24NothingToScroll(kit);
+  assert.deepEqual(hovers, [
+    { x: 500, y: 300 },
+    { x: 500, y: 328 },
+  ]);
+});
+
+test("P24 takes the card for pinned only once it is Kralgov's and pinned", async () => {
+  const { kit, wheels } = wheelFake(
+    () => ({ wheels: 1, k: 1.5 }),
+    (n) => ({
+      read: n <= 2 ? { ...KRALGOV, pinned: false } : n <= 4 ? { ...KRALGOV, name: "Stale" } : KRALGOV,
+      anims: ["finished"],
+    }),
+  );
+  await p24NothingToScroll(kit);
+  assert.deepEqual(
+    wheels.map((w) => w.restReads),
+    [6],
+  );
+});
+
+test("P24 fails on its own line when its aim lands on one of the card's links or its press", async () => {
+  const { kit, checked } = wheelFake(
+    () => ({ wheels: 1, k: 1.5 }),
+    () => ({ read: { ...KRALGOV, clear: false }, anims: ["finished"] }),
+  );
+  await p24NothingToScroll(kit);
+  assert.deepEqual(
+    checked.filter((c) => c.code === "P24"),
+    [{ code: "P24", ok: false }],
   );
 });
 
