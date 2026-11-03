@@ -60,25 +60,29 @@ export async function mouseMove(
   y: number,
   { buttons = 0 }: { buttons?: 0 | 1 } = {},
 ): Promise<void> {
-  await send(MOUSE_EVENT, { type: "mouseMoved", x, y, buttons });
+  await send(
+    MOUSE_EVENT,
+    buttons === 1 ? { type: "mouseMoved", x, y, button: "left", buttons } : { type: "mouseMoved", x, y },
+  );
 }
 
 export async function mouseDown(send: Send, x: number, y: number, { clickCount = 1 }: Clicks = {}): Promise<void> {
-  await send(MOUSE_EVENT, { type: "mousePressed", x, y, clickCount });
+  await send(MOUSE_EVENT, { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount });
 }
 
 export async function mouseUp(send: Send, x: number, y: number, { clickCount = 1 }: Clicks = {}): Promise<void> {
-  await send(MOUSE_EVENT, { type: "mouseReleased", x, y, clickCount });
+  await send(MOUSE_EVENT, { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount });
 }
 
 export async function sendClick(send: Send, x: number, y: number, options: Clicks = {}): Promise<void> {
   await mouseDown(send, x, y, options);
+  await mouseUp(send, x, y, options);
 }
 
 export async function mouseWheel(send: Send, x: number, y: number, deltaY: number, deltaX = 0): Promise<void> {
-  await send(MOUSE_EVENT, { type: "mouseWheel", x, y, deltaX: deltaY, deltaY: deltaX });
+  await send(MOUSE_EVENT, { type: "mouseWheel", x, y, deltaX, deltaY });
 }
 
 export async function sendTouch(send: Send, type: string, points: readonly TouchPoint[]): Promise<void> {
-  await send("Input.dispatchTouchEvent", { type, points });
+  await send("Input.dispatchTouchEvent", { type, touchPoints: points });
 }
