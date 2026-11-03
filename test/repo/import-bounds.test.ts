@@ -227,7 +227,7 @@ const TOOLING_FILES = [
   "src/site/shared/living-chart/voyage.ts",
 ];
 const TOOLING_BLIND_SPOTS =
-  "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces none of which is itself a relative path into those folders (a path join, a concatenation); a module that reaches them through another module; a triple-slash reference path, which TypeScript reads and this rule does not; and a page or a sheet under src/, which this TypeScript lint never reads. Erring toward refusing: a module source opening with / is read from the repo root, as the site's bundler reads it, and a relative string anywhere in src/ that lands in one of the folders is refused though nothing imports it. An import alias (import x = require) is refused first by npm run check (TS1294).";
+  "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces none of which is itself a path into those folders, relative or root-absolute (a path join, a concatenation); an import.meta.glob pattern whose folder segment is a wildcard; a module that reaches them through another module; a triple-slash reference path, which TypeScript reads and this rule does not; and a page, a layout or a sheet under src/, which this TypeScript lint never reads. Erring toward refusing: a module source or an import.meta.glob pattern opening with / is read from the repo root, as the site's bundler reads it; a relative string anywhere in src/ that lands in one of the folders is refused though nothing imports it; and a root-absolute piece inside an assembled source, import(`./${x}/test/part.ts`) or import(base + '/scripts/x.ts'), is read as a root path though it lands under src/ or nowhere, which no src/ file does today. An import alias (import x = require) is refused first by npm run check (TS1294).";
 
 const toolingPlant = (file: string): string[] => {
   const up = "../".repeat(file.split("/").length - 1);
@@ -250,6 +250,11 @@ const toolingPlant = (file: string): string[] => {
     `export const h = () => import("./test/part.ts");`,
     `export const i = () => import("${up}scripts-archive/x.ts");`,
     `export * from "${up}test-support";`,
+    `export const j = import.meta.glob("/scripts/*.ts");`,
+    `export const k = import.meta.glob(["/src/core/*.ts", "/e2e/**", "/test-support/*.ts"]);`,
+    `export const l = import.meta.glob("${up}scripts/*.ts");`,
+    `export const m = import.meta.glob("/src/core/*.ts");`,
+    `declare const fs: { glob: (pattern: string) => void }; fs.glob("/scripts/*.ts");`,
   ];
 };
 
@@ -257,7 +262,7 @@ test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source a
   for (const file of TOOLING_FILES)
     assert.deepEqual(
       await reports(toolingPlant(file), file, [TOOLING_RULE]),
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19, 20, 21],
       `${file}. ${TOOLING_BLIND_SPOTS}`,
     );
 });
