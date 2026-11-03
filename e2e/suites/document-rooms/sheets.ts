@@ -178,12 +178,13 @@ const ADDED = [
   "The court & the realm",
   "What a place smells of",
   "What a place ships",
+  "On the Ribbon",
 ];
 const CHART_SPLIT = ["The sheet and its frame", "On the chart itself", "Soundings & sea marks"];
 const OWED =
-  "Quay Weir Breakwater Chandler Osier Drover Reeve Reach Holding_ground Warp Beck Fen Waterman Wharf Moorings League Plate Colophon Docket Neat_line Contour_line Attar Kvass Copal Copra Cochineal Iron_bloom Kurgan"
+  "Quay Weir Breakwater Chandler Osier Drover Reeve Reach Holding_ground Warp Beck Fen Waterman Wharf Moorings League Plate Colophon Docket Neat_line Contour_line Attar Kvass Copal Copra Cochineal Iron_bloom Kurgan An. Height_of_the_way Itinerary Turn_about Wayfarers'_chain"
     .split(" ")
-    .map((t) => t.replace("_", " "));
+    .map((t) => t.replaceAll("_", " "));
 const headword = (t: string): string =>
   t
     .toLowerCase()
@@ -220,7 +221,7 @@ function shapeFaults(sections: readonly Section[]): string[] {
 export function ix12GlossaryShape({ check }: Kit, { glossary }: Sheets): void {
   const faults = shapeFaults(glossary.sections);
   check(
-    "IX12 the Glossary keeps its #353 shape on the page: no section past 8 terms (Zoryan and Ordai to 10), the seven added sections 5 to 8 each, the chart section split in three, every term Vellum prints documented, no headword twice, terms alphabetical in each section, and a definition for every term",
+    "IX12 the Glossary keeps its #353 shape on the page: no section past 8 terms (Zoryan and Ordai to 10), the sections Issues #353 and #430 added 5 to 8 each, the chart section split in three, every term Vellum prints documented, no headword twice, terms alphabetical in each section, and a definition for every term",
     faults.length === 0,
     faults.join("; ") || `${glossary.sections.length} headings`,
   );
