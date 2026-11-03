@@ -50,3 +50,13 @@ test("a tree or hill gives way to a caption over it, and every other glyph stays
     all.filter((g) => !covered.includes(g)).map((g) => renderSvg(g)),
   );
 });
+
+test("a glyph within a unit of a caption gives way, and one farther off stays", () => {
+  const nodes = press([]);
+  const glyph = nodes.find((n, i) => n.tag === "g" && nodes[i - 1]?.tag === "circle") as SvgNode;
+  const box = boxOf(glyph);
+  const beside = (gap: number): Box => ({ x: box.x + box.w + gap, y: box.y, w: 6, h: 6 });
+  const drawn = (caption: Box): boolean => glyphs(press([caption])).some((g) => renderSvg(g) === renderSvg(glyph));
+  assert.equal(drawn(beside(0.5)), false, "half a unit off its box, the glyph gives way");
+  assert.equal(drawn(beside(1.5)), true, "a unit and a half off, it stays");
+});
