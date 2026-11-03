@@ -94,8 +94,13 @@ const slipFaults = (s: Slip): string[] =>
   faults([
     s.slip === "ASIDE.slip" || "the itinerary an aside slip",
     same(s.head, ["The itinerary", "The Itinerary", "Fold the itinerary away"]) || "the slip's head",
-    same(s.body, ["P.intro", "P.itinerary-head", "OL#rb-itinerary.contents.itinerary", "P.row-gloss"]) ||
-      "the slip's body in order, the itinerary the kit's contents row",
+    same(s.body, [
+      "P#rb-fallback.fallback-gloss",
+      "P.intro",
+      "P.itinerary-head",
+      "OL#rb-itinerary.contents.itinerary",
+      "P.row-gloss",
+    ]) || "the slip's body in order, the itinerary the kit's contents row",
     same(s.texts, [INTRO, "The way, league by league", "A row leans the Glass on that stretch of the road."]) ||
       "the intro, the head and the row gloss",
     s.beforeFolio || "the slip before the chart folio",

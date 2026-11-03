@@ -3,7 +3,8 @@ import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { errorText } from "../shared/error-text.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
-import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "./address.ts";
+import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget, rowProspectTarget } from "./address.ts";
+import { fallbackNote } from "./fallback-note.ts";
 import { overridesOfLand } from "../shared/address-grammar.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindRibbonRoom, markLeaned, showPlate, writeFolio, writeItinerary, type RoomFurniture } from "./seats.ts";
@@ -44,6 +45,7 @@ const furniture: RoomFurniture = {
   plate: $<HTMLImageElement>("rb-plate"),
   slipTitle: $("itinerary-title"),
   slipWhere: document.querySelector<HTMLElement>("#itinerary .card-where")!,
+  fallback: $("rb-fallback"),
   itinerary: $("rb-itinerary"),
   folioTitle: $("folio-title"),
   folioSub: $("folio-sub"),
@@ -110,10 +112,16 @@ function draw(from: number | null, to: number | null): void {
       prospectVerb.textContent = `See ${res.toName} in`;
       prospectLink.style.display = "";
       writeFolio(furniture, res, seed, dress, Math.round(performance.now() - t0));
-      writeItinerary(furniture, res, (row, li) => {
-        sheet.lean(row.nx, row.ny);
-        markLeaned(furniture, li);
-      });
+      writeItinerary(
+        furniture,
+        res,
+        fallbackNote({ from, to }, res),
+        (row) => rowProspectTarget(location.hash, row),
+        (row, li) => {
+          sheet.lean(row.nx, row.ny);
+          markLeaned(furniture, li);
+        },
+      );
       status.textContent = "";
       sheet.room.layout();
       last = {

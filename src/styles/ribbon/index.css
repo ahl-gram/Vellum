@@ -95,7 +95,8 @@
 .itinerary li.branch .cr-text {
   color: var(--ink-brown);
 }
-.row-gloss {
+.row-gloss,
+.fallback-gloss {
   font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
   font-style: italic;
   font-size: 0.85rem;
@@ -103,6 +104,31 @@
   line-height: 1.45;
   margin: 0.7rem 0 0;
   text-align: left;
+}
+
+.itinerary li.waypoint {
+  flex-wrap: nowrap;
+  align-items: baseline;
+}
+.itinerary li.waypoint .lean {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.itinerary .row-prospect {
+  flex: none;
+  align-self: center;
+  font-family: var(--font-body, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  border-radius: 4px;
+  padding: 0.2rem 0.45rem;
+  text-decoration: none;
+}
+.itinerary .row-prospect:is(:hover, :focus-visible) {
+  background: var(--control-gold-lit);
 }
 
 @media print {

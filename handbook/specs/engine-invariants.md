@@ -367,13 +367,9 @@ reading the composer back to itself, which is what makes it a real pin on rank-t
 but it derives that expectation with `localeCompare` too, so both sides would move together under a
 different collation and the pin cannot see it.
 
-**A ribbon result substitutes the capital's departure without announcing it.** `ribbonResultFor` in
+**A ribbon result substitutes a refused departure or destination without announcing it.** `ribbonResultFor` in
 `src/site/explorer/ribbon-job.ts` reassigns the departure to the capital when `roadReachable` in
-`src/itinerary/route.ts` returns nothing. The substitution is detectable in the result, which
-carries the resolved departure index and name and a per-option road flag, but nothing raises it and
-nothing fails. **So any surface offering "the road from X" owes a check that X has a road, and
-carries that answer.** A non-empty result is not evidence that the asked-for departure was honoured;
-compare the resolved departure against the one you asked for.
+`src/itinerary/route.ts` returns nothing, and the destination to the farthest place the departure reaches when the one asked for is not among them. The substitution is detectable in the result, which carries the resolved indices and names and a per-option road flag, but the job raises nothing and nothing fails. **So any surface offering "the road from X" owes a check that X has a road, and carries that answer**, and a surface that draws an address it was handed compares the resolved departure and destination with the ones it asked for and says so, as the Ribbon's slip does (`fallbackNote` in `src/site/ribbon/fallback-note.ts`). A non-empty result is not evidence that the ask was honoured.
 
 **A road's far end need not be a town.** `roadSearch` in `src/society/roads.ts` stops at the first
 cell already on the network, so a road runs from the place it wires to wherever it meets the web,
