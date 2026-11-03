@@ -266,9 +266,12 @@ export default defineConfig(
     },
   },
   {
-    name: "Issue #763: no script switches layout at a fixed window width at or below the 1024 floor",
+    name: "the house's rules on every script under src/",
     files: ["src/**/*.ts"],
     plugins: { vellum },
-    rules: { "vellum/no-narrow-width": "error" },
+    rules: {
+      "vellum/no-narrow-width": "error",
+      "vellum/src-no-tooling-import": "error",
+    },
   },
 );
