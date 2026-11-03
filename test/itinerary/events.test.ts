@@ -204,6 +204,15 @@ test("a named crossing's caption takes one of three phrasings, and a river whose
     ],
     "River Skuksvy keeps the phrasing's the",
   );
+  assert.deepEqual(
+    told("Theodor Run"),
+    [
+      "a bridge of stone over the Theodor Run",
+      "a timber bridge over the Theodor Run",
+      "here the Theodor Run is crossed by a bridge",
+    ],
+    "a name that only begins with the letters The is not a The",
+  );
 });
 
 test("seed 42's default road says here begins The Hauwaiwa Atolls and the road enters The Ferns of Peroa", () => {
