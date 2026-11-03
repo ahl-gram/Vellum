@@ -2,6 +2,7 @@
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { rv7FullLog } from "./room-voyage-route/full-log.ts";
+import { bounce } from "../support/nav.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 
@@ -27,10 +28,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 async function rv0Arms({ evaluate, check, send, PORT }: SuiteContext, room: Room): Promise<void> {
   // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff. Landed by hand rather than through room.goto (Issue #418) because both guards below instrument the page BETWEEN the boot and the arm: this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", {
-    url: `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey`,
-  });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey`);
   const booted = await room.boot();
   const armT0 = Date.now();
   await evaluate(`(()=>{window.__gap=0;window.__gapStop=false;let last=performance.now();

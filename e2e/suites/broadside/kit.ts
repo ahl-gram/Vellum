@@ -1,6 +1,7 @@
 // The Broadside suite's kit: the Explorer's address, its boot, its survey-ink wait and its plain boot.
 import { toExplorer, waitInked } from "../../support/explorer.ts";
 import type { SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 export type BroadsideKit = ReturnType<typeof broadsideKit>;
 
@@ -9,8 +10,7 @@ export function broadsideKit(ctx: SuiteContext) {
   const EXP = `http://127.0.0.1:${PORT}/explorer/`;
   const goto = (url: string, label: string): Promise<void> => toExplorer(ctx, url, label);
   const gotoPlain = async (url: string, label: string): Promise<void> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url });
+    await bounce(send, url);
     for (let i = 0; i < 100; i++) {
       if (await evaluate<boolean>(`document.readyState === "complete"`)) return;
       await sleep(50);

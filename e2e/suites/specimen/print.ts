@@ -1,6 +1,7 @@
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { NOSCRIPT_READ, PAGE } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 export async function sb9bPrinted({ send, check, read }: SpecimenKit): Promise<void> {
   const leanedScreen = await read();
@@ -83,8 +84,7 @@ export async function sb9dNoScript({ evaluate, send, check, sleep, PORT }: Speci
   try {
     ({ noJsScreen, noJsPrint } = await withScriptsOff(send, async () => {
       let screen: Notice | null = null;
-      await send("Page.navigate", { url: "about:blank" });
-      await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+      await bounce(send, `http://127.0.0.1:${PORT}${PAGE}`);
       for (let i = 0; i < 200; i++) {
         let s: Notice | null = null;
         try {

@@ -2,6 +2,7 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
@@ -70,8 +71,7 @@ const READY: Payload<boolean> = `document.readyState === "complete" && (!documen
 export function trailKit(ctx: SuiteContext) {
   const settle = makeSettle(ctx);
   const goto = async (path: string): Promise<void> => {
-    await ctx.send("Page.navigate", { url: "about:blank" });
-    await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${path}` });
+    await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${path}`);
     const at: Payload<string | null> = `(${READY}) ? location.pathname : null`;
     await settle(at, (d, last) => d === path && last === path, `trail-goto-${path}`);
   };

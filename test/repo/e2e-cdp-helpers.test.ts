@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { CDP_HOMES } from "../../scripts/lint/e2e-cdp-helpers.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
+import { eslint, plantMessages, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/e2e-cdp-through-helper";
@@ -89,4 +89,126 @@ test("each row's home is a file in the tree, and its method is refused in a suit
     assert.deepEqual(await ruleLines(lines, "e2e/suites/cards.ts", RULE), [1, 2], `${spelling} passes in a suite`);
     assert.deepEqual(await ruleLines(lines, home, RULE), [], `${spelling} is refused at its own home`);
   }
+});
+
+const linted = (plant: ReadonlyArray<readonly [string, boolean]>, path: string): Promise<number[]> =>
+  ruleLines(
+    plant.map(([line]) => line),
+    path,
+    RULE,
+  );
+const refusedOf = (plant: ReadonlyArray<readonly [string, boolean]>): number[] =>
+  plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
+
+const HOP_HOME = "e2e/support/nav.ts";
+const HOP_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  ['export const a = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "about:blank" });', REFUSE],
+  ['export const b = ({ send }: SuiteContext) => send("Page.navigate", { url: `about:blank` });', REFUSE],
+  ['export const c = ["--headless=new", "--window-size=1280,2400", "about:blank"];', REFUSE],
+  [
+    'const AWAY = "about:blank"; export const d = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: AWAY });',
+    REFUSE,
+  ],
+  ["// a hop leaves through about:blank, named in a comment, which navigates nowhere", PASS],
+  ['export const e = "every fresh address arrives through about:blank first";', PASS],
+  ['export const f = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "about:" + "blank" });', PASS],
+  [
+    'const s = "blank"; export const g = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: `about:${s}` });',
+    PASS,
+  ],
+  [
+    'import { ABOUT_BLANK } from "../../support/nav.ts"; export const h = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: ABOUT_BLANK });',
+    PASS,
+  ],
+  ['export const i = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "http://127.0.0.1:8765/faq/" });', PASS],
+];
+const HOP_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the address assembled from pieces or from a template holding an expression (plant lines 8 and 9), and ABOUT_BLANK imported from its home and handed to a raw Page.navigate (plant line 10), since no syntax read of one file resolves either; and a hop written by hand on top of leaveBlank or bounce, since the rule reads spellings and not what a function does. A navigate to any other address is no row (plant line 11)";
+
+test("no e2e file names about:blank but its one home, e2e/support/nav.ts, the harness's launch argument included (Issue #1016)", async () => {
+  const refused = refusedOf(HOP_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < HOP_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(HOP_PLANT, "e2e/suites/document-rooms.ts"), refused, HOP_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(HOP_PLANT, "e2e/harness.ts"),
+    refused,
+    "the harness launches its browser on ABOUT_BLANK from the home, never on a spelling of its own",
+  );
+  assert.deepEqual(await linted(HOP_PLANT, HOP_HOME), [], "the home itself is refused the address it exists to hold");
+});
+
+const SCRIPTS_OFF_HOME = "e2e/support/scripts-off.ts";
+const SCRIPTS_OFF_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  [
+    'export const a = (ctx: SuiteContext) => ctx.send("Emulation.setScriptExecutionDisabled", { value: true });',
+    REFUSE,
+  ],
+  [
+    'export const b = ({ send }: SuiteContext) => send("Emulation.setScriptExecutionDisabled", { value: false });',
+    REFUSE,
+  ],
+  [
+    "export const c = (ctx: SuiteContext) => ctx.send(`Emulation.setScriptExecutionDisabled`, { value: true });",
+    REFUSE,
+  ],
+  [
+    'export const d = (ctx: SuiteContext) => ctx["send"]("Emulation.setScriptExecutionDisabled", { value: true });',
+    REFUSE,
+  ],
+  [
+    'const METHOD = "Emulation.setScriptExecutionDisabled"; export const e = (ctx: SuiteContext) => ctx.send(METHOD);',
+    REFUSE,
+  ],
+  ["// Emulation.setScriptExecutionDisabled, named in a comment, which switches nothing", PASS],
+  ['export const f = "scripts go off through Emulation.setScriptExecutionDisabled\'s one helper";', PASS],
+  ['export const g = (ctx: SuiteContext) => ctx.send("Emulation.setEmulatedMedia", { media: "print" });', PASS],
+  [
+    'const s = "x"; export const i = (ctx: SuiteContext) => ctx.send(`Emulation.setScriptExecutionDisabled${s}`);',
+    PASS,
+  ],
+  [
+    'export const h = (ctx: SuiteContext) => ctx.send("Emulation." + "setScriptExecutionDisabled", { value: true });',
+    PASS,
+  ],
+  [
+    'import { SWITCH } from "../../test-support/cdp-methods.ts"; export const j = (ctx: SuiteContext) => ctx.send(SWITCH);',
+    PASS,
+  ],
+];
+const SCRIPTS_OFF_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces, and the whole name held in a binding the file never spells, such as a constant imported from a file the rule does not read (the last two plant lines); no syntax read of the one file can resolve either";
+
+test("no e2e file names the scripts-off switch but its one helper, which always turns scripts back on (Issue #779)", async () => {
+  const refused = refusedOf(SCRIPTS_OFF_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < SCRIPTS_OFF_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(SCRIPTS_OFF_PLANT, "e2e/suites/document-rooms.ts"), refused, SCRIPTS_OFF_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(SCRIPTS_OFF_PLANT, "e2e/support/settle.ts"),
+    refused,
+    "a support module that is not the helper",
+  );
+  assert.deepEqual(
+    await linted(SCRIPTS_OFF_PLANT, SCRIPTS_OFF_HOME),
+    [],
+    "the helper itself is refused the switch it exists to hold",
+  );
+  const [why] = (
+    await plantMessages(
+      SCRIPTS_OFF_PLANT.map(([line]) => line),
+      "e2e/suites/document-rooms.ts",
+    )
+  ).filter((m) => m.ruleId === RULE);
+  assert.match(
+    why?.message ?? "",
+    /withScriptsOff always turns page scripts back on/,
+    "the refusal no longer says why the switch has one helper",
+  );
 });

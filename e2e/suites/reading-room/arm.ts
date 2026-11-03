@@ -1,11 +1,11 @@
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead } from "./reads.ts";
 import type { Ages } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 export async function rr23Usurped({ evaluate, send, check, sleep, boot, PORT }: ReadingRoomKit): Promise<void> {
   // Clicking right after boot() deterministically supersedes the boot draft (its worker round-trip is hundreds of ms); preStatus pins that the race really ran, and 1059 is seed 42's own present (the golden's year).
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=7&year=850` });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=7&year=850`);
   check("RR23a the deep-linked boot draft is underway", await boot());
   const pre = await evaluate<{ preStatus: string | undefined }>(
     `(()=>{const st=(document.querySelector(".rf-status")||{}).textContent;const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();return{preStatus:st};})()`,
@@ -62,8 +62,7 @@ export async function rr24BeforeArm({
   PORT,
 }: ReadingRoomKit): Promise<void> {
   // Issue #418: the arm waits for an off-thread travel order, so a window NEW to this issue opens between the painted chart and the armed instrument. `.rf-ages` is hidden across it (reading-frame.css gives [hidden] display:none), so a reader cannot click the scrubber; what IS live is every handler behind it, reachable from a stray keypress, a document click, or any programmatic dispatch. Each guards on `if (!ages) return`, and until this window existed nothing could test that they do.
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1`);
   const pokeBooted = await boot();
   let unarmed = null;
   for (let i = 0; i < 400; i++) {

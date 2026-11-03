@@ -5,6 +5,7 @@ import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
 import { axName } from "../prospect/kit.ts";
 import { parseTableValue } from "../../../src/site/shared/table-address.ts";
+import { bounce, leaveBlank } from "../../support/nav.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -192,8 +193,7 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
   try {
     const read = await withScriptsOff(send, async (): Promise<Authored> => {
-      await send("Page.navigate", { url: "about:blank" });
-      await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+      await bounce(send, `http://127.0.0.1:${PORT}/explorer/`);
       // The scripts-off notice having width is the witness that the page's module never ran.
       await settle(NOTICE, (d) => d.ready === "complete" && d.w > 0, "explorer-scripts-off");
       return {
@@ -219,7 +219,7 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
     );
   } finally {
     // A hash-only navigate from here would keep this scripts-off document, so the next load starts from a blank one.
-    await send("Page.navigate", { url: "about:blank" });
+    await leaveBlank(send);
   }
 }
 

@@ -1,5 +1,6 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
 import type { SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 export function rr12Clean(ctx: SuiteContext, rrErrBase: number, rrHttpBase: number): void {
   const { check, consoleErrors, http4xx } = ctx;
@@ -23,8 +24,7 @@ export async function rr14Fallback(ctx: SuiteContext): Promise<void> {
     await send("Network.clearBrowserCache");
     await send("Network.setCacheDisabled", { cacheDisabled: true });
     serverState.blockWorker = true;
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+    await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1`);
     let fb = null;
     for (let i = 0; i < 220; i++) {
       let s = null;

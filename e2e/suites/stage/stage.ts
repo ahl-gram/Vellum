@@ -11,6 +11,7 @@ import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "../corners/geometry.ts";
 import { switchFaults, withStyledBoot } from "./styled-boot.ts";
 import type { DeskSwitch } from "./styled-boot.ts";
+import { bounce } from "../../support/nav.ts";
 
 export const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = [
@@ -202,8 +203,7 @@ export async function open(
   laidOut: { w: number; h: number },
   label: string,
 ): Promise<Stage | null> {
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
   return rest(ctx, laidOut.w, laidOut.h, `${label} ${page} ${w}x${h}`);
 }
 

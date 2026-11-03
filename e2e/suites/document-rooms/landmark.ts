@@ -1,11 +1,11 @@
 import type { DocRoomsKit } from "../document-rooms.ts";
+import { bounce } from "../../support/nav.ts";
 
 type AxNode = { role?: { value?: string }; name?: { value?: string }; ignored?: boolean };
 const LANDMARKS = new Set(["main", "banner", "navigation", "complementary", "contentinfo", "region", "form", "search"]);
 
 async function roomName({ evaluate, send, sleep, PORT }: DocRoomsKit, page: string): Promise<string> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${page}` });
+  await bounce(send, `http://127.0.0.1:${PORT}${page}`);
   for (let i = 0; i < 200; i++) {
     const name = await evaluate<string>(
       `document.readyState === "complete" && location.pathname === ${JSON.stringify(page)} ? (document.querySelector("h1.room-name") || {}).textContent || "" : ""`,

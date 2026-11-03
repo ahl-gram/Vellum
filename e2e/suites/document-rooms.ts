@@ -16,6 +16,7 @@ import {
 } from "./document-rooms/sheets.ts";
 import type { Sheets } from "./document-rooms/sheets.ts";
 import { ix8Landmark } from "./document-rooms/landmark.ts";
+import { bounce } from "../support/nav.ts";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
@@ -158,8 +159,7 @@ export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
   const stable = makeStable(ctx.settle);
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
   const goto = async (path: string) => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${path}` });
+    await bounce(send, `http://127.0.0.1:${PORT}${path}`);
     for (let i = 0; i < 200; i++) {
       const up = await evaluate<boolean>(
         `document.readyState === "complete" && !!document.getElementById("index")`,

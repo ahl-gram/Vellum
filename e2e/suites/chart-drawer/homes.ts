@@ -4,6 +4,7 @@ import type { Payload } from "../../types.ts";
 import type { TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE, READ } from "./reads.ts";
 import type { Read, Stored } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 const LAY: Payload<{ w: number; box: number[] } | null> =
   `(() => { const e = document.getElementById("pp-lay"); if (!e) return null; const b = e.getBoundingClientRect(); return { w: b.width, box: [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
@@ -159,8 +160,7 @@ export async function cd39LinkBeatsDevice(
 ): Promise<void> {
   // Seeded on the site's own origin: about:blank has no storage to seed, so this write happens before the hop.
   await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(TWO)})`);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${DRESS}&table=${ONE}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/#${DRESS}&table=${ONE}`);
   await atExplorer();
   const arrived = await settle<Read & Stored>(
     `(() => ({ ...${READ}, stored: ${STORE} }))()`,
@@ -196,8 +196,7 @@ export async function cd40EmptySticks({
   );
   // The key is read directly because a bare table alone cannot tell an ABSENT key from an empty one, and the empty
   // one is exactly what would hand the table back on the next keyless arrival.
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${emptied.rawHash}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/${emptied.rawHash}`);
   await atExplorer();
   const still = await evaluate<Read & Stored>(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
   check(
@@ -303,8 +302,7 @@ const PAIR_OF_SURVEYS = [
 ].join("_");
 
 async function folioAt({ evaluate, send, sleep, PORT }: TableKit, hash: string): Promise<Folio> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/${hash}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/${hash}`);
   return makeSettle({ evaluate, sleep, tolerant: true })(FOLIO, (d) => d.items > 0, "portfolio-folio");
 }
 

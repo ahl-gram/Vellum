@@ -5,14 +5,14 @@ import { makeSettle } from "../../support/settle.ts";
 import { withBlockedUrls } from "../../support/network-state.ts";
 import type { makeStep } from "../../support/step.ts";
 import { doorShown } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;
 type NoJs = Awaited<ReturnType<typeof h13fNoScriptRead>>;
 
 export async function h13aPrePaint({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   await evaluate(`sessionStorage.clear()`);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/`);
   let preModule = null;
   for (let i = 0; i < 100; i++) {
     try {
@@ -142,8 +142,7 @@ export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: Suite
   await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
   try {
     await evaluate(`sessionStorage.clear()`);
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/`);
     const clock = await pastTheReveal({ evaluate, send, sleep }, "h13d-past-the-reveal");
     const prmDoors = await evaluate(doorShown);
     check(
@@ -171,8 +170,7 @@ export async function h13ePrmNoFlash(ctx: SuiteContext): Promise<void> {
   await evaluate(`window.__h13d = 1`);
   // Hold home's bundle on the server so the pre-.cam window is 2s of the page's clock on any runner: unthrottled the module boots within a frame and a 75ms sampler proves nothing (skeptic round 3, Issue #470).
   const { held, after } = await withHeldBundle(async (release) => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/`);
     const heldSamples = await heldWindow(ctx);
     release();
     return { held: heldSamples, after: await afterRelease(ctx) };
@@ -233,8 +231,7 @@ export async function h13fNoScriptRead(ctx: SuiteContext) {
   const { evaluate, send, sleep, PORT } = ctx;
   // The round-2 blocker's live proof: script execution OFF plus reduced motion is the one visitor class where the noscript stand-down must out-cascade the prm exemption (both !important, specificity tied, document order decides).
   return withScriptsOff(send, async () => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/`);
     const clock = await pastTheReveal({ evaluate, send, sleep }, "h13f-past-the-reveal");
     const nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
       const nav = document.querySelector(".lf-noscript-rooms");

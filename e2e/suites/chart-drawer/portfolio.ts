@@ -10,6 +10,7 @@ import {
   gatheredLine,
 } from "../../../src/site/explorer/portfolio/folio-lines.ts";
 import { PLATE_ROOM, PLATE_VERB } from "../../../src/site/explorer/portfolio/how-plate.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Arrival = {
   path: string;
@@ -37,8 +38,7 @@ const ROADS: Payload<Roads> = `(() => { const href = (id) => { const a = documen
 
 export async function cd49bPrintRoomAddress({ evaluate, send, check, settle, PORT, forget }: TableKit): Promise<void> {
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}`);
   // Keyed on the draw and never on the roads, so a road the page fails to rewrite reads as a fault here.
   await settle(ROADS, (d) => d.drawn, "chart-drawer-print-room-drawn", DRAWN);
   const r = await evaluate(ROADS);
@@ -65,8 +65,7 @@ export async function cd49PrintRoomRoad({
   pressById,
 }: TableKit): Promise<void> {
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}`);
   // The road carries this page's address only once the proof has drawn (`writeHash` in `src/site/print-room/app.ts`), so the press waits for that; where it lands is the claim.
   const written = await settle<{ href: string | null } | null>(
     `(() => { const a = document.getElementById("pr-portfolio"); return a ? { href: a.getAttribute("href") } : null; })()`,
@@ -97,8 +96,7 @@ export async function cd50ScriptsOffHome({
   clickAt,
 }: TableKit): Promise<void> {
   await withScriptsOff(send, async () => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/`);
     // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
     const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(
       `(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`,
@@ -214,8 +212,7 @@ const BARE_READY: Payload<BareVisit> = `({ ready: document.readyState, fonts: do
 
 export async function bareArrived({ evaluate, send, sleep, PORT, forget }: DrawerKit): Promise<void> {
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/`);
   await makeSettle({ evaluate, sleep, tolerant: true })(
     BARE_READY,
     (d) => d.ready === "complete" && d.fonts === "loaded" && d.app,
@@ -382,10 +379,9 @@ const PLACED_SHEET: Payload<{ items: number; drawn: number; stage: boolean; outl
 export async function cd64PlaceSheet(k: DrawerKit): Promise<void> {
   const { evaluate, send, check, sleep, PORT, forget } = k;
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
   const sheet =
     "k-s.seed-42.type-island.outline-ne-1159315211.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-17.ly-13";
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${sheet}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${sheet}`);
   const read = await makeSettle({ evaluate, sleep, tolerant: true })(
     PLACED_SHEET,
     (d) => d.items === 1 && (d.drawn === 1 || d.outlines.some((p) => p !== "/outlines/ne-1159315211.txt")),

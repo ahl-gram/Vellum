@@ -8,6 +8,7 @@ import {
 } from "../../support/runner-layout.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { ROOMS } from "../slide-away/kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 const SENTINEL_PX = 50;
 const SENTINEL_SCRIPT = runnerLayoutScript(
@@ -63,8 +64,7 @@ export async function pr40RunnerLayout(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   try {
     for (const room of ROOMS) {
-      await ctx.send("Page.navigate", { url: "about:blank" });
-      await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${room.path}` });
+      await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${room.path}`);
       const read = await settle(
         STAGED,
         (d) => d.path === room.path.split("#")[0] && d.ready === "complete" && d.fonts === "loaded",

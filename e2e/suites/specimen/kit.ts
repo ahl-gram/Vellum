@@ -3,6 +3,7 @@ import { makeStable, type Settle } from "../../support/settle.ts";
 import type { SuiteContext } from "../../types.ts";
 import { PAGE, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 const moved = (a: Specimen["map"], b: Specimen["map"]): boolean => JSON.stringify(a) !== JSON.stringify(b);
 export type SpecimenKit = ReturnType<typeof specimenKit>;
@@ -16,10 +17,8 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
       `(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`,
     );
 
-  // Bounce through about:blank (the Z13 idiom): a navigate to the tab's current URL is a no-op.
   const goto = async (): Promise<Specimen | null> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+    await bounce(send, `http://127.0.0.1:${PORT}${PAGE}`);
     for (let i = 0; i < 200; i++) {
       let s: Specimen | null = null;
       try {

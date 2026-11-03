@@ -8,6 +8,7 @@ import { sendKey } from "../../support/input.ts";
 import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { WritingKit } from "./kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 const FLAGSHIP = "a cold archipelago of black pines, iron harbors, and a drowned kingdom";
 const TEXAS = "tropical island in the shape of Texas";
@@ -41,8 +42,7 @@ function carryKit(k: WritingKit) {
     await settle<boolean>(`(${expression}) === true`, (d) => d, label, POLLS);
   };
   const visit = async (path: string): Promise<void> => {
-    await k.send("Page.navigate", { url: "about:blank" });
-    await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}${path}` });
+    await bounce(k.send, `http://127.0.0.1:${k.PORT}${path}`);
   };
   const explorer = async (hash: string): Promise<void> => {
     await visit("/explorer/" + hash);
