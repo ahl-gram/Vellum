@@ -109,7 +109,7 @@ export async function z13DeepLink({
     { send, waitReady, waitSettled },
     `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4`,
     "zoom-deeplink-load",
-    () => evaluate(`window.__vellumSetRedraftEnabled(false)`), // Issue #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
+    () => evaluate<undefined>(`window.__vellumSetRedraftEnabled(false)`), // Issue #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
   );
   const z13 = await evaluate<{ k: number; x: number; W: number }>(
     `(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`,

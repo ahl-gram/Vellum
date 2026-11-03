@@ -56,7 +56,7 @@ function gesturesKit(ctx: SuiteContext) {
   const { evaluate, PORT } = ctx;
   const reloadHome = (label: string): Promise<void> =>
     toExplorer(ctx, `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique`, label, () =>
-      evaluate(`window.__vellumSetRedraftEnabled(false)`),
+      evaluate<undefined>(`window.__vellumSetRedraftEnabled(false)`),
     );
   const vpRect = () =>
     evaluate<{ L: number; T: number; W: number; H: number }>(

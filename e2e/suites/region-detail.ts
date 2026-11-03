@@ -148,7 +148,7 @@ async function rd3SameBytes(
   deepest: Ladder[number],
 ): Promise<void> {
   await toExplorer(ctx, LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, ""), "region-detail-direct", () =>
-    evaluate(`window.__vellumSetRedraftEnabled(true)`),
+    evaluate<undefined>(`window.__vellumSetRedraftEnabled(true)`),
   );
   let redrafts = (await rgn()).redrafts;
   await enterAt(32, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
