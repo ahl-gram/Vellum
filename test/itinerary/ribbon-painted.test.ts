@@ -202,6 +202,27 @@ function seaLiesWhereTheSamplesSay(): void {
   assert.equal(dOf(ribbonSvgFor(dry, "antique"), SEA_WASH).length, 0, "and it holds no sea wash");
 }
 
+function everyVertex(d: string): Array<readonly [number, number]> {
+  const out: Array<readonly [number, number]> = [];
+  for (const m of d.matchAll(/[MLQ]([^MLQZ]*)/g)) {
+    const n = (m[1] ?? "").split(/[ ,]/).map(Number);
+    for (let i = 0; i + 1 < n.length; i += 2) out.push([n[i] as number, n[i + 1] as number]);
+  }
+  return out;
+}
+
+function withinCloth(strip: StripLayout, x: number, y: number, what: string): void {
+  const body = stripBody(strip);
+  assert.ok(
+    x >= body.left(y) - 0.1,
+    `${what}: ${x} at y ${y} lies past the cloth's left edge ${body.left(y).toFixed(1)}`,
+  );
+  assert.ok(
+    x <= body.right(y) + 0.1,
+    `${what}: ${x} at y ${y} lies past the cloth's right edge ${body.right(y).toFixed(1)}`,
+  );
+}
+
 function seaStaysOnTheCloth(): void {
   const coast = namedJourney(worlds.find((w) => w.seed === 42)!.world, "Laukuwelua", "Paukilua");
   const first = layoutRibbon(coast).strips[0]!;
@@ -218,13 +239,14 @@ function seaStaysOnTheCloth(): void {
   );
   let shores = 0;
   let waves = 0;
-  for (const input of [coast, ...sweep]) {
+  for (const input of [coast, road15, ...sweep]) {
     const strips = layoutRibbon(input).strips;
     const svg = ribbonSvgFor(input, "antique");
     const where = `${input.fromName} to ${input.toName}`;
     for (const d of dOf(svg, SEA_WASH)) {
       const strip = stripAtX(strips, headOf(d)[0]);
       for (const [x, y] of shorePoints(d)) withinHairlines(strip, x, x, y, `${where}, a shore point`);
+      for (const [x, y] of everyVertex(d)) withinCloth(strip, x, y, `${where}, strip ${strip.index}, a wash vertex`);
       shores++;
     }
     for (const d of dOf(svg, WAVE)) {
