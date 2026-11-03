@@ -61,6 +61,8 @@ export function captionSeat(
     case "waypoint":
       return { sx: p.sx, sy: p.sy, side: freeSide, lines: waypointLines(e, caption) };
     case "crossing":
+    case "border":
+    case "forest":
       return { sx: p.sx, sy: p.sy - 8, side: freeSide, lines: [{ text: caption }] };
     case "branch":
       return { sx: p.sx + e.side * 20, sy: p.sy - 9, side: e.side, lines: [{ text: caption }] };

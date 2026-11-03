@@ -36,6 +36,10 @@ export function eventCaption(e: RibbonEvent, rng: Rng): string {
       return `to ${e.toName}`;
     case "summit":
       return rng.fork(`summit-${e.k}`).pick(SUMMITS);
+    case "border":
+      return "a border";
+    case "forest":
+      return "a wood";
   }
 }
 

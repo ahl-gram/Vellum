@@ -2,6 +2,7 @@ import { isMajorRiver } from "../hydrology/rivers.ts";
 import { bfsPath } from "../core/bfs-path.ts";
 import type { SettlementKind } from "../society/sites.ts";
 import type { World } from "../world/types.ts";
+import { borderEvents, forestEvents, type BorderEvent, type ForestEvent } from "./realm-wood.ts";
 
 /** `k` is the event's integer step along the road chain: fork keys use it, never `dist`, which is an accumulated float no two libm round alike. */
 export type RibbonEvent =
@@ -28,7 +29,9 @@ export type RibbonEvent =
       readonly side: -1 | 1;
       readonly toName: string;
     }
-  | { readonly kind: "summit"; readonly dist: number; readonly k: number; readonly rel: number };
+  | { readonly kind: "summit"; readonly dist: number; readonly k: number; readonly rel: number }
+  | BorderEvent
+  | ForestEvent;
 
 const MAX_BRANCHES = 10;
 
@@ -207,6 +210,8 @@ export function findEvents(
     ...waypoints,
     ...crossingEvents(world, chain, dists),
     ...branchEvents(world, mask, chain, dists, onRoute),
+    ...borderEvents(world, chain, dists),
+    ...forestEvents(world, chain, dists),
   ];
   const summit = summitEvent(world, chain, dists);
   if (summit) events.push(summit);

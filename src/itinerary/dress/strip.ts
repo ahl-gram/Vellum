@@ -137,6 +137,9 @@ function eventArt(
         e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg),
       ];
     }
+    case "border":
+    case "forest":
+      return [];
     case "branch":
       return [
         el("path", {
