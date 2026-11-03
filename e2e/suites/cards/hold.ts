@@ -2,6 +2,7 @@ import type { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { HOLD_GRACE_MS } from "../../../src/site/shared/living-chart/place-card-hold.ts";
 import { NARROW_SEED } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Settle = ReturnType<typeof makeSettle>;
 type HoldKit = SuiteContext & { settle: Settle };
@@ -268,36 +269,8 @@ export async function p31Keyboard(k: Kit, marks: Mark[]): Promise<void> {
   const m = marks[3]!;
   await k.reset();
   await k.evaluate(`document.querySelector('.place-overlay .place-hit[data-idx="${m.idx}"]').focus()`);
-  await k.send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Enter",
-    code: "Enter",
-    text: "\r",
-    unmodifiedText: "\r",
-    windowsVirtualKeyCode: 13,
-    nativeVirtualKeyCode: 13,
-  });
-  await k.send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Enter",
-    code: "Enter",
-    windowsVirtualKeyCode: 13,
-    nativeVirtualKeyCode: 13,
-  });
-  await k.send("Input.dispatchKeyEvent", {
-    type: "rawKeyDown",
-    key: "Tab",
-    code: "Tab",
-    windowsVirtualKeyCode: 9,
-    nativeVirtualKeyCode: 9,
-  });
-  await k.send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Tab",
-    code: "Tab",
-    windowsVirtualKeyCode: 9,
-    nativeVirtualKeyCode: 9,
-  });
+  await sendKey(k.send, "Enter", "Enter", 13, { text: "\r", unmodifiedText: "\r", nativeVirtualKeyCode: 13 });
+  await sendKey(k.send, "Tab", "Tab", 9, { down: "rawKeyDown", nativeVirtualKeyCode: 9 });
   const at = await k.evaluate<{ active: string; card: string | null; pinned: boolean }>(
     `(() => { const a = document.activeElement; const c = document.getElementById("place-card"); return { active: a ? String(a.className) : "none", card: c.hidden ? null : (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned") }; })()`,
   );

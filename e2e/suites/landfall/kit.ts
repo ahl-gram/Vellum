@@ -2,6 +2,7 @@ import { readCam, buttonPoint, makeStage } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { Headroom } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 export type StageKit = ReturnType<typeof stageKit>;
 export type GestureKit = ReturnType<typeof gestureKit>;
@@ -109,23 +110,6 @@ export function stageKit(ctx: SuiteContext) {
   };
 }
 
-async function navKeys(
-  { send }: Pick<SuiteContext, "send">,
-  key: string,
-  code: string,
-  vk: number,
-  text: string | undefined,
-): Promise<void> {
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key,
-    code,
-    windowsVirtualKeyCode: vk,
-    ...(text === undefined ? {} : { text }),
-  });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
-}
-
 async function twoFingers(
   { touch, evaluate, settle }: Pick<StageKit, "touch" | "evaluate" | "settle">,
   p: Point,
@@ -149,7 +133,7 @@ export function gestureKit(k0: StageKit) {
   const { evaluate, send, sleep, touch, pressKey, settle, stable } = k0;
   // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default. The navigation keys carry only their codes.
   const pressNav = async (key: string, code: string, vk: number, text?: string) => {
-    await navKeys({ send }, key, code, vk, text);
+    await sendKey(send, key, code, vk, { text });
   };
   const headroom = () =>
     evaluate<Headroom | null>(`(() => {

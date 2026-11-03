@@ -1,4 +1,5 @@
 import type { SuiteContext } from "../../types.ts";
+import { sendKey } from "../../support/input.ts";
 
 export type RunningHeadKit = ReturnType<typeof runningHeadKit>;
 
@@ -21,13 +22,7 @@ export function runningHeadKit(ctx: SuiteContext) {
     if (route !== "/") return true;
     // Home's first arrival raises the ceremony veil (Issue #457); a key before the module arms the skip hits nothing, so press until the veil goes and the cluster shows on the stage.
     for (let i = 0; i < VEIL_PRESSES; i++) {
-      await send("Input.dispatchKeyEvent", {
-        type: "keyDown",
-        key: "Escape",
-        code: "Escape",
-        windowsVirtualKeyCode: 27,
-      });
-      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await sendKey(send, "Escape", "Escape", 27);
       await sleep(150);
       let up = true;
       try {

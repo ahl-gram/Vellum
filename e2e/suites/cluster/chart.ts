@@ -6,6 +6,7 @@ import { ROUTE_NAMES } from "../../../src/layouts/nav.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { spacing } from "./trail.ts";
 import type { TrailKit } from "./trail.ts";
+import { sendKey } from "../../support/input.ts";
 
 export type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Size = readonly [number, number];
@@ -32,10 +33,13 @@ export async function pressAt(k: TrailKit, x: number, y: number): Promise<void> 
 
 async function key(k: TrailKit, name: "Enter" | "Tab" | "Escape"): Promise<void> {
   const vk = { Enter: 13, Tab: 9, Escape: 27 }[name];
-  const text = name === "Enter" ? { text: "\r", unmodifiedText: "\r" } : {};
-  const type = name === "Enter" ? "keyDown" : "rawKeyDown";
-  await k.send("Input.dispatchKeyEvent", { type, key: name, code: name, windowsVirtualKeyCode: vk, ...text });
-  await k.send("Input.dispatchKeyEvent", { type: "keyUp", key: name, code: name, windowsVirtualKeyCode: vk });
+  await sendKey(
+    k.send,
+    name,
+    name,
+    vk,
+    name === "Enter" ? { text: "\r", unmodifiedText: "\r" } : { down: "rawKeyDown" },
+  );
 }
 
 export const polled = <T>(k: TrailKit, read: Payload<T>, label: string) =>

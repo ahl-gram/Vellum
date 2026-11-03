@@ -4,6 +4,7 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Pinned = Awaited<ReturnType<typeof p20PinnedTakesPointer>>;
 
@@ -147,20 +148,7 @@ async function p27PageDown({
   const kbAfter = await scrollAfter(
     { evaluate, sleep },
     async () => {
-      await send("Input.dispatchKeyEvent", {
-        type: "rawKeyDown",
-        windowsVirtualKeyCode: 34,
-        nativeVirtualKeyCode: 34,
-        code: "PageDown",
-        key: "PageDown",
-      });
-      await send("Input.dispatchKeyEvent", {
-        type: "keyUp",
-        windowsVirtualKeyCode: 34,
-        nativeVirtualKeyCode: 34,
-        code: "PageDown",
-        key: "PageDown",
-      });
+      await sendKey(send, "PageDown", "PageDown", 34, { down: "rawKeyDown", nativeVirtualKeyCode: 34 });
     },
     "P27 PageDown's outcome at rest",
   );

@@ -9,6 +9,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART, SHELLED } from "./reads.ts";
 import type { RunningHeadKit } from "./kit.ts";
+import { sendKey } from "../../support/input.ts";
 
 export type Shell = {
   body: string;
@@ -258,8 +259,7 @@ const RING = (selector: string): Payload<{ visible: boolean; colour: number[] } 
 export async function rh12FocusRing({ evaluate, send, check, visit }: RunningHeadKit): Promise<void> {
   if (!(await visit("/faq/"))) throw new Error("RH12: the Q & A never loaded");
   // A key first, so the browser takes the focus that follows as keyboard focus and :focus-visible applies.
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 });
+  await sendKey(send, "Shift", "ShiftLeft", 16);
   const chrome = await evaluate(RING("header.chrome a"));
   const paper = await evaluate(RING(".sheet a"));
   check(
@@ -278,13 +278,7 @@ type Wordmark = { x: number; y: number; hovered: boolean; focused: boolean; movi
 const WORDMARK: Payload<Wordmark> = `(() => { const a = document.querySelector("header.chrome .wordmark a"); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), focused: a.matches(":focus-visible"), moving: a.getAnimations().length, transform: getComputedStyle(a).transform }; })()`;
 
 async function focusWordmark(k: RunningHeadKit): Promise<string> {
-  await k.send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Shift",
-    code: "ShiftLeft",
-    windowsVirtualKeyCode: 16,
-  });
-  await k.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 });
+  await sendKey(k.send, "Shift", "ShiftLeft", 16);
   await k.evaluate(`document.querySelector("header.chrome .wordmark a").focus()`);
   try {
     const rest = await makeSettle(k)(WORDMARK, (d) => d.focused && d.moving === 0, "wordmark-focus", 40);

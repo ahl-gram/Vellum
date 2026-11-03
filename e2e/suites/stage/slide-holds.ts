@@ -21,6 +21,7 @@ import {
   settleTy,
   travelsOf,
 } from "./slide-kit.ts";
+import { sendKey } from "../../support/input.ts";
 
 const EASE_WAIT = 340;
 const ROOM_BOX: Payload<number[]> =
@@ -197,9 +198,7 @@ export async function es10Drawer(ctx: SuiteContext): Promise<void> {
 }
 
 async function tab(ctx: SuiteContext, shift: boolean): Promise<void> {
-  const key = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: shift ? 8 : 0 };
-  await ctx.send("Input.dispatchKeyEvent", { type: "keyDown", ...key });
-  await ctx.send("Input.dispatchKeyEvent", { type: "keyUp", ...key });
+  await sendKey(ctx.send, "Tab", "Tab", 9, { modifiers: shift ? 8 : 0 });
 }
 
 const FOCUSED_ON_TOP: Payload<boolean> = `(() => { const a = document.activeElement, r = a.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, e = document.elementFromPoint(x, y); return !!e && (e === a || a.contains(e)) && r.top >= 0 && r.bottom <= innerHeight; })()`;

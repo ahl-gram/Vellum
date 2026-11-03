@@ -9,6 +9,7 @@ import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
 import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
+import { sendKey } from "../support/input.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
 type Room = {
@@ -239,8 +240,7 @@ async function br4Notes({ evaluate, send, check }: BroadsideKit): Promise<void> 
     mark.focus();
     return{wired,open,closed,reopened:note.matches(":popover-open")};
   })()`);
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await sendKey(send, "Escape", "Escape", 27);
   const br4b = await evaluate<{ escClosed: boolean; focusHeld: boolean }>(`(()=>{
     const note=document.getElementById("note-seeds-choice");
     return{escClosed:!note.matches(":popover-open"),focusHeld:document.activeElement===document.querySelector('a.fn[data-note="note-seeds-choice"]')};
