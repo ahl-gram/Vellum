@@ -1,4 +1,4 @@
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";

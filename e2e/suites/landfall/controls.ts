@@ -4,6 +4,7 @@ import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 async function l9gPipTap({
   evaluate,
@@ -147,8 +148,7 @@ export async function l23KitReach({ evaluate, check }: SuiteContext): Promise<vo
 // Focus by a real Tab from the last station, so the press wears :focus-visible as a keyboard reader's would.
 async function tabToZoomIn({ evaluate, send }: LandfallKit): Promise<boolean> {
   await evaluate(`document.querySelector('.lf-station[data-station="how"]').focus()`);
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  await sendKey(send, "Tab", "Tab", 9);
   return evaluate<boolean>(
     `document.activeElement?.id === "zoom-in" && document.activeElement.matches(":focus-visible")`,
   );

@@ -4,6 +4,7 @@ import { PAGE_FLOOR } from "../../../src/site/shared/page-box.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
+import { sendKey } from "../../support/input.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
@@ -330,21 +331,7 @@ export async function fl5KeyboardDrawer(ctx: SuiteContext): Promise<void> {
     for (const w of [1280, 640]) {
       await open(ctx, "/explorer/", w, 800);
       await ctx.evaluate(`document.getElementById("chart-drawer-tab").focus()`);
-      await ctx.send("Input.dispatchKeyEvent", {
-        type: "keyDown",
-        key: "Enter",
-        code: "Enter",
-        windowsVirtualKeyCode: 13,
-        nativeVirtualKeyCode: 13,
-        text: "\r",
-      });
-      await ctx.send("Input.dispatchKeyEvent", {
-        type: "keyUp",
-        key: "Enter",
-        code: "Enter",
-        windowsVirtualKeyCode: 13,
-        nativeVirtualKeyCode: 13,
-      });
+      await sendKey(ctx.send, "Enter", "Enter", 13, { text: "\r", nativeVirtualKeyCode: 13 });
       const d = await settle(
         DISPLACED,
         (x, last) => x.open && x.running === 0 && last !== null && JSON.stringify(x) === JSON.stringify(last),

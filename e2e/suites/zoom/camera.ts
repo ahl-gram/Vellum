@@ -1,5 +1,5 @@
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";

@@ -4,7 +4,7 @@ import { recipeOverrides } from "../../../src/site/shared/founding.ts";
 import { SHAPE_KEYS } from "../../../src/site/shared/shape-address.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import { SEAT, holdFaults } from "../broadside/shape.ts";
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { WritingKit } from "./kit.ts";

@@ -1,7 +1,7 @@
 // The Broadside's shape and count controls (Issue #854, pull request 2): the Land panel's rows by state, the held rows' refusal, the shape box and its list, and the twins that scroll.
 import { GROUP_OF, HELD_NOTES, LAND_ROWS, looseWord } from "../../../src/site/explorer/land-rows.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";

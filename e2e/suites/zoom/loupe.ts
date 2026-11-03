@@ -8,6 +8,7 @@ import { sheetAtRest } from "./hold-dress.ts";
 import { ensureHeldDeepInset, pollLast } from "./registration.ts";
 import type { HamletWindow } from "./registration.ts";
 import type { ZoomKit } from "./kit.ts";
+import { keyDown, keyUp } from "../../support/input.ts";
 
 export type Point = { x: number; y: number };
 export type Centre = Point & { L: number; T: number; W: number; H: number; iw: number; ih: number };
@@ -56,14 +57,9 @@ const HAMLET_DOT = (box: Centre): string =>
 
 export const mouse = (k: ZoomKit, x: number, y: number) =>
   k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
-const key = (k: ZoomKit, type: "keyDown" | "keyUp") =>
-  k.send(
-    "Input.dispatchKeyEvent",
-    type === "keyDown"
-      ? { type, key: "l", code: "KeyL", windowsVirtualKeyCode: 76, text: "l" }
-      : { type, key: "l", code: "KeyL", windowsVirtualKeyCode: 76 },
-  );
-const OPTION_UP = { type: "keyUp", key: "\u00ac", code: "KeyL", windowsVirtualKeyCode: 76, modifiers: 1 };
+const key = (k: ZoomKit, type: "keyDown" | "keyUp"): Promise<void> =>
+  type === "keyDown" ? keyDown(k.send, "l", "KeyL", 76, { text: "l" }) : keyUp(k.send, "l", "KeyL", 76);
+const optionUp = (k: ZoomKit): Promise<void> => keyUp(k.send, "\u00ac", "KeyL", 76, { modifiers: 1 });
 const lens = (k: ZoomKit) => k.evaluate<Lens>(LENS);
 export const shown = (d: Lens): boolean => d.hidden === false;
 const hiddenNow = (d: Lens): boolean => d.hidden === true;
@@ -323,7 +319,7 @@ async function heldAtPointer(k: ZoomKit, p1: Point): Promise<[Lens, Lens, Lens, 
   const r2 = await pollLast<Lens>(k, LENS, hiddenNow, 40);
   await key(k, "keyDown");
   const r2b = await pollLast<Lens>(k, LENS, shown, 40);
-  await k.send("Input.dispatchKeyEvent", OPTION_UP);
+  await optionUp(k);
   const r2c = await pollLast<Lens>(k, LENS, hiddenNow, 40);
   return [r0, r1, r2, r2b, r2c];
 }

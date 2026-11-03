@@ -6,6 +6,7 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";
 import type { Back, Card } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Mouse = Pick<ReturnType<typeof makeMouse>, "press" | "moveTo" | "release">;
 export type DrawerKit = ReturnType<typeof drawerKit>;
@@ -185,16 +186,7 @@ export function tableKit(kd: DragKit) {
 }
 
 type Keys = Pick<SuiteContext, "evaluate" | "send" | "sleep">;
-const key = async (send: SuiteContext["send"], modifiers = 0): Promise<void> => {
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Tab",
-    code: "Tab",
-    windowsVirtualKeyCode: 9,
-    modifiers,
-  });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers });
-};
+const key = (send: SuiteContext["send"], modifiers = 0): Promise<void> => sendKey(send, "Tab", "Tab", 9, { modifiers });
 
 // A keyboard's focus, so :focus-visible holds: a Tab from the element before it, or out and back with Shift; the answer is a premise the caller reads, never a throw.
 export async function tabInto({ evaluate, send, sleep }: Keys, selector: string, from?: string): Promise<boolean> {

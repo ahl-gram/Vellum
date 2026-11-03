@@ -20,6 +20,7 @@ import {
   travelsOf,
 } from "./kit.ts";
 import type { Pieces } from "./kit.ts";
+import { sendKey } from "../../support/input.ts";
 
 const ROW_LEAN = "#rb-itinerary button.lean";
 const CENTRE: Payload<{ x: number; y: number }> =
@@ -42,9 +43,7 @@ async function enterOnLastRow(ctx: SuiteContext): Promise<boolean> {
   );
   if (!focused) throw new Error("SW5: the last itinerary row's lean button took no focus");
   const before = await ctx.evaluate(TRANSFORM);
-  const key = { key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 };
-  await ctx.send("Input.dispatchKeyEvent", { type: "keyDown", ...key, text: "\r" });
-  await ctx.send("Input.dispatchKeyEvent", { type: "keyUp", ...key });
+  await sendKey(ctx.send, "Enter", "Enter", 13, { text: "\r" });
   const moved = await leanedFrom(ctx, before, "SW5 Enter");
   return moved;
 }

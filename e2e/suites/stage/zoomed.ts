@@ -9,6 +9,7 @@ import { GLYPH_LINES } from "./glyphs.ts";
 import type { Glyph } from "./glyphs.ts";
 import { CHART_ROOM_FLOOR, FLOOR_PLAIN, grounds, open, rest, size, withStyle, worstOf } from "./stage.ts";
 import type { Stage } from "./stage.ts";
+import { sendKey } from "../../support/input.ts";
 
 export type Panel = { content: string; stops: number[][]; filter: string };
 type Piece = "cluster" | "chart folio" | "Press" | "room folio" | "strip";
@@ -76,18 +77,7 @@ async function ringOf(ctx: SuiteContext, selector: string): Promise<Ring> {
 }
 
 async function markRing(ctx: SuiteContext): Promise<{ mark: Ring; control: Ring }> {
-  await ctx.send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Shift",
-    code: "ShiftLeft",
-    windowsVirtualKeyCode: 16,
-  });
-  await ctx.send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Shift",
-    code: "ShiftLeft",
-    windowsVirtualKeyCode: 16,
-  });
+  await sendKey(ctx.send, "Shift", "ShiftLeft", 16);
   return {
     mark: await ringOf(ctx, ".legend .legend-row a.fn"),
     control: await ringOf(ctx, '.slip a.fn[data-note="note-seeds-choice"]'),

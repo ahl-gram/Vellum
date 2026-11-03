@@ -1,6 +1,7 @@
 // Shared helpers for the homepage-hosted suites (Issue #460): the camera oracle and real-input plumbing suite-home built across Issue #455-Issue #470, lifted here so the second landfall suite drives the same stage; extraction only, no check added or changed (ratified 2026-08-25 on Issue #460).
 
 import type { Payload, Point, SuiteContext } from "../types.ts";
+import { sendKey } from "./input.ts";
 
 export type Cam = {
   veil: boolean;
@@ -42,11 +43,6 @@ export const buttonPoint = (selector: string): Payload<Point | null> => `(() => 
   const r = b.getBoundingClientRect();
   return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
 })()`;
-
-export const sendKey = async (send: SuiteContext["send"], key: string, code: string, vk: number): Promise<void> => {
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
-};
 
 export const makeStage = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" | "PORT">) => {
   const { evaluate, send, sleep, PORT } = ctx;

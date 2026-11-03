@@ -6,6 +6,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import { glideLanded, homeCamera, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { STORE, type ProspectKit } from "./kit.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Paper = { map: string; plate: (string | number)[] };
 const PAPER: Payload<Paper> = `(() => { const p = document.getElementById("pp-plate"), r = p.getBoundingClientRect();
@@ -92,8 +93,7 @@ async function pb15Held(k: ProspectKit): Promise<{ under: Press; away: Press; ke
   await parkMouse();
   const away = await held(k, "prospect-dim-at-rest", (p) => !p.hover);
   await evaluate(`(() => { document.querySelector("#note .slip-fold").focus(); return true; })()`);
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  await sendKey(send, "Tab", "Tab", 9);
   const keyed = await held(k, "prospect-dim-keyed", (p) => p.active);
   await pressAt(keyed.x, keyed.y);
   await sleep(REFUSAL_DWELL_MS, "window: the refusal's dwell, before the press is read again");

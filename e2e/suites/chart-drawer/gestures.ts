@@ -6,6 +6,7 @@ import { TIPPED } from "./desk.ts";
 import { park, tabInto, type DrawerKit } from "./kit.ts";
 import { pressAtRest } from "./prospect.ts";
 import { CARD, DRESS, READ, type Card } from "./reads.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Press = {
   text: string;
@@ -175,22 +176,7 @@ async function midTurn(
     `(() => { const p = document.querySelector("#place-card .pc-lay"); if (p) p.focus({ preventScroll: true }); return !!p && document.activeElement === p; })()`,
   );
   // Enter presses the button only with its character: without it row CT7b.a, a lay that ignores the turn, stayed green on the runner (send T, run 38087000715), and with it CD58 stops on its next filing, measured locally.
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Enter",
-    code: "Enter",
-    text: "\r",
-    unmodifiedText: "\r",
-    windowsVirtualKeyCode: 13,
-    nativeVirtualKeyCode: 13,
-  });
-  await send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Enter",
-    code: "Enter",
-    windowsVirtualKeyCode: 13,
-    nativeVirtualKeyCode: 13,
-  });
+  await sendKey(send, "Enter", "Enter", 13, { text: "\r", unmodifiedText: "\r", nativeVirtualKeyCode: 13 });
   const after: Turn[] = [];
   for (let i = 0; i < 6; i++) {
     after.push(await evaluate(TURN));

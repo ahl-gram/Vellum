@@ -6,6 +6,7 @@ import type { Payload } from "../../types.ts";
 import { glideLanded, homeCamera, LENS, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import type { RibbonKit } from "./kit.ts";
 import { pressAt } from "../print-room/kit.ts";
+import { sendKey } from "../../support/input.ts";
 
 type Lean = {
   x: number;
@@ -44,8 +45,7 @@ export async function rb13RowHover(k: RibbonKit): Promise<void> {
     const hovered = await settle(LEAN, (d, last) => d.hover && still(d, last), "ribbon-row-hovered");
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
     await evaluate(`(() => { document.querySelector("#itinerary .slip-fold").focus(); return true; })()`);
-    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+    await sendKey(send, "Tab", "Tab", 9);
     const keyed = await settle(LEAN, (d, last) => d.focus && !d.hover && still(d, last), "ribbon-row-keyed");
     await evaluate(`(() => { document.activeElement.blur(); return true; })()`);
     await mouse.press(atRest.x, atRest.y);
