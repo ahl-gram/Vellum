@@ -8,6 +8,7 @@ import { BAND, type StripBody } from "./cloth.ts";
 import { paintedWave } from "./glyphs.ts";
 
 const SHORE_INSET = 4;
+const EDGE_STEP = 0.25;
 const WAVE_LENGTH = 11.2;
 
 type Run = readonly [number, number];
@@ -107,17 +108,14 @@ function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: 
   const yBot = clampY(Math.max(...inner.map((p) => p[1])) + 12);
   const yTop = clampY(Math.min(...inner.map((p) => p[1])) - 12);
   const mid = (yBot + yTop) / 2;
-  const edgeX = side < 0 ? body.left(mid) + BAND : body.right(mid) - BAND;
-  const onCloth = (x: number, y: number): Point => [
-    side > 0 ? Math.min(x, body.right(y)) : Math.max(x, body.left(y)),
-    y,
-  ];
-  const edgeBot = onCloth(edgeX, yBot);
-  const edgeTop = onCloth(edgeX, yTop);
+  let edgeX = side < 0 ? body.left(mid) + BAND : body.right(mid) - BAND;
+  for (let y = yTop; y <= yBot + EDGE_STEP; y += EDGE_STEP) {
+    edgeX = side > 0 ? Math.min(edgeX, body.right(y)) : Math.max(edgeX, body.left(y));
+  }
   const shore: Point[] = [[edgeX - side * 6, yBot], ...inner, [edgeX - side * 6, yTop]];
   const nodes: SvgNode[] = [
     el("path", {
-      d: `M${r1(edgeBot[0])} ${r1(edgeBot[1])}${smooth(shore)}L${r1(edgeTop[0])} ${r1(edgeTop[1])}Z`,
+      d: `M${r1(edgeX)} ${r1(yBot)}${smooth(shore)}L${r1(edgeX)} ${r1(yTop)}Z`,
       fill: paint.azuriteWash,
       "fill-opacity": 0.55,
       stroke: paint.azurite,
