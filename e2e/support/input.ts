@@ -7,6 +7,14 @@ type PressOptions = BothEvents & { down?: "rawKeyDown"; text?: string; unmodifie
 
 const KEY_EVENT = "Input.dispatchKeyEvent";
 
+const keyFields = (key: string, code: string, vk: number, { nativeVirtualKeyCode, modifiers }: BothEvents) => ({
+  key,
+  code,
+  windowsVirtualKeyCode: vk,
+  ...(nativeVirtualKeyCode === undefined ? {} : { nativeVirtualKeyCode }),
+  ...(modifiers === undefined ? {} : { modifiers }),
+});
+
 export async function keyDown(
   send: Send,
   key: string,
@@ -14,8 +22,13 @@ export async function keyDown(
   vk: number,
   options: PressOptions = {},
 ): Promise<void> {
-  void options;
-  await send(KEY_EVENT, { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
+  const { down = "keyDown", text, unmodifiedText } = options;
+  await send(KEY_EVENT, {
+    type: down,
+    ...keyFields(key, code, vk, options),
+    ...(text === undefined ? {} : { text }),
+    ...(unmodifiedText === undefined ? {} : { unmodifiedText }),
+  });
 }
 
 export async function keyUp(
@@ -25,8 +38,7 @@ export async function keyUp(
   vk: number,
   options: BothEvents = {},
 ): Promise<void> {
-  void options;
-  await send(KEY_EVENT, { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
+  await send(KEY_EVENT, { type: "keyUp", ...keyFields(key, code, vk, options) });
 }
 
 export async function sendKey(
@@ -37,4 +49,5 @@ export async function sendKey(
   options: PressOptions = {},
 ): Promise<void> {
   await keyDown(send, key, code, vk, options);
+  await keyUp(send, key, code, vk, options);
 }
