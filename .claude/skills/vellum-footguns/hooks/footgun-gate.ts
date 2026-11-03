@@ -162,7 +162,7 @@ const escapeScan = async (text: string, where: string): Promise<{ refusal: Decis
 
 const CLICK_WARNING =
   "`.click()` ignores pointer-events and everything painted over the target (#520, #545, #546). A gesture check drives with " +
-  "clickAt/touch at the element's own rect and asserts elementFromPoint; keep `.click()` for wiring only, with the reason at the check.";
+  "sendClick/touch at the element's own rect and asserts elementFromPoint; keep `.click()` for wiring only, with the reason at the check.";
 
 const checkEdit = async (payload: Payload, sessionId: string): Promise<Decision> => {
   const input = payload.tool_input ?? {};
