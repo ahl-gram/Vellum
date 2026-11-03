@@ -1,5 +1,8 @@
+import { toExplorer, waitInked } from "../../support/explorer.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+
+const ARMED_POINTS = 11;
 
 export type SurveyKit = ReturnType<typeof surveyKit>;
 
@@ -9,25 +12,9 @@ export const restOnVerso = (k: Pick<SuiteContext, "evaluate" | "sleep">, label: 
   makeStable(makeSettle(k))(LEAF, label, { departed: (d) => d.m11 < -0.999 });
 
 export function surveyKit(ctx: SuiteContext) {
-  const { evaluate, send, sleep, waitSettled, waitReady, PORT } = ctx;
+  const { evaluate, sleep, PORT } = ctx;
   const EXP = `http://127.0.0.1:${PORT}/explorer/`;
-  // A navigate differing only in the hash is same-document and never re-runs the boot, so bounce through about:blank first (the suite-zoom Z13 idiom).
-  const goto = async (hash: string, label: string) => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: EXP + hash });
-    await waitReady();
-    await waitSettled(label);
-  };
-
-  const waitInked = async (label: string) => {
-    for (let i = 0; i < 120; i++) {
-      const n = await evaluate<number>(`(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
-        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()`);
-      if (n > 10) return n;
-      await sleep(50);
-    }
-    throw new Error("waitInked timeout " + label);
-  };
+  const goto = (hash: string, label: string): Promise<void> => toExplorer(ctx, EXP + hash, label);
 
   // A marker registered on the same rAF-then-task hop the arm uses queues behind it, so absence checks need no sleep a slow CI runner could outlast.
   const waitBeat = async (label: string) => {
@@ -61,5 +48,13 @@ export function surveyKit(ctx: SuiteContext) {
       hash:location.hash,status:document.getElementById("status").textContent,
       href:document.getElementById("journal-link").getAttribute("href")};
   })()`);
-  return { ...ctx, EXP, goto, waitInked, waitBeat, setBox, tick };
+  return {
+    ...ctx,
+    EXP,
+    goto,
+    waitInked: (label: string): Promise<number> => waitInked(ctx, label, ARMED_POINTS),
+    waitBeat,
+    setBox,
+    tick,
+  };
 }

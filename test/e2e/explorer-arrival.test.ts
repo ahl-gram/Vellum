@@ -54,13 +54,19 @@ test("toExplorer runs the caller's step between the ready answer and the settled
 
 test("toExplorer throws naming its label when the Explorer never answers ready, and never waits for a settled draw", async () => {
   const a = arrival(false);
-  await assert.rejects(toExplorer(a.ctx, URL, "L"), (err: Error) => err.message === "the Explorer never answered ready: L");
+  await assert.rejects(
+    toExplorer(a.ctx, URL, "L"),
+    (err: Error) => err.message === "the Explorer never answered ready: L",
+  );
   assert.deepEqual(a.timeline, ["Page.navigate about:blank", `Page.navigate ${URL}`, "ready"]);
 });
 
 test("explorerUp passes on a ready answer and throws naming its label on a false one", async () => {
   await assert.doesNotReject(explorerUp(arrival(true).ctx, "L"));
-  await assert.rejects(explorerUp(arrival(false).ctx, "L"), (err: Error) => err.message === "the Explorer never answered ready: L");
+  await assert.rejects(
+    explorerUp(arrival(false).ctx, "L"),
+    (err: Error) => err.message === "the Explorer never answered ready: L",
+  );
 });
 
 test("waitInked hands back the track's point count once it reaches the floor it is given", async () => {

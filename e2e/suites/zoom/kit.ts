@@ -1,3 +1,4 @@
+import { waitInked } from "../../support/explorer.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { Ring } from "./reads.ts";
 
@@ -31,15 +32,6 @@ export const REDRAFT_TRIES = 375;
 
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
-  // Fixed sleeps only outlasted the Issue #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
-  const waitInked = async (label: string): Promise<void> => {
-    for (let i = 0; i < 120; i++) {
-      if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
-      await sleep(50);
-    }
-    throw new Error("waitInked timeout " + label);
-  };
-
   const readRing = () =>
     evaluate<Ring>(`(()=>{
     const h=document.querySelector("#map .place-hit:hover");
@@ -72,5 +64,15 @@ export function zoomKit(ctx: SuiteContext) {
       `(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`,
     );
   const { insetView } = zoomInsetView({ evaluate });
-  return { ...ctx, waitInked, readRing, rgn, goHome, enterAt, waitRedraft, captionMs, insetView };
+  return {
+    ...ctx,
+    waitInked: (label: string): Promise<number> => waitInked(ctx, label),
+    readRing,
+    rgn,
+    goHome,
+    enterAt,
+    waitRedraft,
+    captionMs,
+    insetView,
+  };
 }

@@ -1,4 +1,5 @@
 // The Glass sees it e2e (RD, Issue #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
+import { toExplorer } from "../support/explorer.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { REDRAFT_TRIES } from "./zoom/kit.ts";
@@ -142,27 +143,13 @@ async function rd2CoastGains({ evaluate, check }: RegionKit, deepest: Ladder[num
 // RD3: two camera routes to one window must commit the same bytes, and the reload is load-bearing: zoom-reset never drops the worker, so the held chain cache would hand the second descent the FIRST one's own field and the check could not fail. RD4 shares the step because it compares against RD3's own digest.
 async function rd3SameBytes(
   ctx: SuiteContext,
-  {
-    evaluate,
-    check,
-    waitReady,
-    waitSettled,
-    LINK,
-    rgn,
-    enterAt,
-    waitRedraft,
-    waitInset,
-    insetDigest,
-    captionMs,
-  }: RegionKit,
+  { evaluate, check, LINK, rgn, enterAt, waitRedraft, waitInset, insetDigest, captionMs }: RegionKit,
   ladder: Ladder,
   deepest: Ladder[number],
 ): Promise<void> {
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, "") });
-  await waitReady();
-  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
-  await waitSettled("region-detail-direct");
+  await toExplorer(ctx, LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, ""), "region-detail-direct", () =>
+    evaluate(`window.__vellumSetRedraftEnabled(true)`),
+  );
   let redrafts = (await rgn()).redrafts;
   await enterAt(32, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
   await waitRedraft(redrafts);
@@ -190,13 +177,10 @@ async function rd3SameBytes(
 
 async function rd5SharedLink(
   ctx: SuiteContext,
-  { check, shoot, waitReady, waitSettled, LINK, waitInset, insetDigest }: RegionKit,
+  { check, shoot, LINK, waitInset, insetDigest }: RegionKit,
   deepest: Ladder[number],
 ): Promise<void> {
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: LINK });
-  await waitReady();
-  await waitSettled("region-detail-link");
+  await toExplorer(ctx, LINK, "region-detail-link");
   await waitInset();
   const linked = await insetDigest();
   check(
