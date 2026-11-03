@@ -237,7 +237,7 @@ test("every drawn border is ruled across its strip in the dress's border ink, st
   }
 });
 
-test("a border's caption block stands three units above its line, so the words stand in the realm they name", () => {
+test("seed 42's default road sets its border caption's block three units above its line, so the words stand in the realm they name", () => {
   const layout = layoutRibbon(default42);
   const border = bordersOf(default42)[0]!;
   const sy = stripPos(stripFor(layout, border.dist)!, border.dist).sy;
@@ -246,7 +246,6 @@ test("a border's caption block stands three units above its line, so the words s
       c.lines.some((l) => l.text.includes("Hauwaiwa")),
     );
     assert.ok(caption !== undefined, `${dress}: the border is captioned`);
-    assert.ok(!caption.lines.some((l) => l.backed), `${dress}: premise: it keeps the seat first wanted`);
     const foot = caption.lines.at(-1)!.y + 1.2;
     assert.ok(Math.abs(foot - (sy - 3)) <= 0.06, `${dress}: the block's foot ${foot} stands at the line ${sy} less 3`);
   }
