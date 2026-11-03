@@ -120,7 +120,7 @@ test("a strip boundary one double below .5 keeps its flanking decor (the decor f
   );
 });
 
-// These five boundaries were measured to discriminate for both new fork labels: a key on the rounded distance picks differently across each.
+// 2026-11-03, Issue #431 plan (431-phrases.log): measured to discriminate for both new fork labels, a key on the rounded distance picks a different phrasing across each of these five.
 const REALM_WOOD_BOUNDARIES = [3.5, 13.5, 21.5, 23.5, 33.5];
 
 test("a border and a wood one double below a .5 boundary press the same scroll (the border and forest forks)", () => {
