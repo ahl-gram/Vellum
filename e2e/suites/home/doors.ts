@@ -6,6 +6,7 @@ import { withBlockedUrls } from "../../support/network-state.ts";
 import type { makeStep } from "../../support/step.ts";
 import { doorShown } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
+import { mouseWheel } from "../../support/input.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;
 type NoJs = Awaited<ReturnType<typeof h13fNoScriptRead>>;
@@ -255,7 +256,7 @@ async function shelfWithoutScripts({ evaluate, send, sleep }: SuiteContext): Pro
   const at = await evaluate<{ x: number; y: number }>(
     `({ x: Math.round(innerWidth / 2), y: Math.round(innerHeight / 2) })`,
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: at.x, y: at.y, deltaX: 0, deltaY: 300 });
+  await mouseWheel(send, at.x, at.y, 300);
   let scrolled = 0;
   for (let i = 0; i < 20 && scrolled === 0; i++) {
     await sleep(100);

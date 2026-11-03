@@ -4,7 +4,7 @@ import { PAGE_FLOOR } from "../../../src/site/shared/page-box.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, mouseWheel, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
@@ -173,8 +173,8 @@ const VIEW: Payload<View> = `(() => {
 })()`;
 
 async function wheel(ctx: SuiteContext, x: number, y: number, dx: number, dy: number): Promise<void> {
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX: dx, deltaY: dy });
+  await mouseMove(ctx.send, x, y);
+  await mouseWheel(ctx.send, x, y, dy, dx);
 }
 
 export async function fl2Reach(ctx: SuiteContext): Promise<void> {

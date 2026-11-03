@@ -6,6 +6,7 @@ import { GLYPH_LINES } from "../stage/glyphs.ts";
 import { FLOOR_PLAIN, grounds, withStyle, worstOf } from "../stage/stage.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import { leaveBlank } from "../../support/nav.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
 
@@ -255,11 +256,11 @@ const LIFT_READ: Payload<Lift> = `(() => { ${PARTS}
 async function liftedPlate(k: RunningHeadKit): Promise<Lift> {
   const at = await k.evaluate(LIFT_READ);
   if (!at) throw new Error("no plate in view to lift");
-  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  await mouseMove(k.send, at.x, at.y);
   try {
     return await makeSettle(k)(LIFT_READ, (d) => d.hovered && d.moving === 0, "plate-lifted", 40);
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1, button: "none" });
+    await mouseMove(k.send, 1, 1);
   }
 }
 

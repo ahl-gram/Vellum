@@ -1,6 +1,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { bounce } from "../../support/nav.ts";
+import { sendClick } from "../../support/input.ts";
 
 export type Read = {
   readonly n: number;
@@ -50,22 +51,7 @@ async function press({ evaluate, send }: Pick<SuiteContext, "evaluate" | "send">
     `(() => { const el = document.querySelector(${JSON.stringify(selector)}); const r = el.getBoundingClientRect(); const x = r.left + r.width / 2; const y = r.top + r.height / 2; const top = document.elementFromPoint(x, y); return { x, y, hit: !!top && (top === el || el.contains(top)) }; })()`,
   );
   if (!at.hit) throw new Error(`${selector} is covered at its own centre`);
-  await send("Input.dispatchMouseEvent", {
-    type: "mousePressed",
-    x: at.x,
-    y: at.y,
-    button: "left",
-    buttons: 1,
-    clickCount: 1,
-  });
-  await send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: at.x,
-    y: at.y,
-    button: "left",
-    buttons: 0,
-    clickCount: 1,
-  });
+  await sendClick(send, at.x, at.y);
 }
 
 export type WritingKit = ReturnType<typeof writingKit>;

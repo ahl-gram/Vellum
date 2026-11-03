@@ -1,6 +1,6 @@
 // The camera's presses under the hand and under focus (Issue #779 part 2h): dark at four classes deep, on each of the three.
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import type { Payload } from "../../types.ts";
 import type { GlassKit } from "../glass-ceremony.ts";
 import { PRESSES } from "./dress.ts";
@@ -36,7 +36,7 @@ async function darkOf(
   const read: { hover: Press; focus: Focus } = { hover: null, focus: null };
   try {
     if (reach?.first) {
-      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: reach.first[0]!, y: reach.first[1]! });
+      await mouseMove(send, reach.first[0]!, reach.first[1]!);
     }
     read.hover = await evaluate(PRESS(id));
     for (let i = 0; i < 20 && read.hover; i++) {
@@ -44,11 +44,11 @@ async function darkOf(
       await sleep(50);
       read.hover = await evaluate(PRESS(id));
     }
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     await sendKey(send, "Shift", "ShiftLeft", 16);
     read.focus = await evaluate(FOCUS(id));
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   }
   return { id, reach, ...read };

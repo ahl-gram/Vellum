@@ -2,6 +2,7 @@
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
 import type { GlassKit } from "../glass-ceremony.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export const PRESSES = ["zoom-in", "zoom-out", "zoom-reset"] as const;
 
@@ -59,7 +60,7 @@ const faultsOf = (id: string, d: Press): string[] => {
 };
 
 export async function g9PressFace({ evaluate, send, check }: GlassKit): Promise<void> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await mouseMove(send, 5, 5);
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   const reads: { id: string; d: Press }[] = [];
   for (const id of PRESSES) reads.push({ id, d: await evaluate(FACE(id)) });

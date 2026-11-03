@@ -2,6 +2,7 @@
 import { PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { holdKit } from "./hold.ts";
+import { mouseDown, mouseMove, mouseUp } from "../../support/input.ts";
 
 type Draw = {
   x: number;
@@ -38,12 +39,10 @@ type Lift = {
   after: { status: string | null; seed: string };
 };
 
-const moveTo = (send: SuiteContext["send"], x: number, y: number, buttons = 0): Promise<unknown> =>
-  send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y, buttons });
-const pressDown = (send: SuiteContext["send"], x: number, y: number): Promise<unknown> =>
-  send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
-const pressUp = (send: SuiteContext["send"], x: number, y: number): Promise<unknown> =>
-  send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
+const moveTo = (send: SuiteContext["send"], x: number, y: number, buttons: 0 | 1 = 0): Promise<unknown> =>
+  mouseMove(send, x, y, { buttons });
+const pressDown = (send: SuiteContext["send"], x: number, y: number): Promise<unknown> => mouseDown(send, x, y);
+const pressUp = (send: SuiteContext["send"], x: number, y: number): Promise<unknown> => mouseUp(send, x, y);
 
 async function liftReads({ evaluate, send, sleep }: Pick<SuiteContext, "evaluate" | "send" | "sleep">): Promise<Lift> {
   await moveTo(send, 5, 5);
@@ -131,7 +130,7 @@ const fOf = (m: string): number | null => {
 };
 
 export async function p35ProspectLift({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await mouseMove(send, 5, 5);
   // Wiring, not the gesture under test: the capital's card is pinned by a click (P8's form; a real press can open a neighbour, Issue #750).
   const pinned = await evaluate(PIN_CAPITAL);
   const read: { card: Card; link: Link } = { card: null, link: null };
@@ -141,7 +140,7 @@ export async function p35ProspectLift({ evaluate, send, check, sleep }: SuiteCon
     await sleep(50);
   }
   try {
-    if (read.card) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: read.card.x, y: read.card.y });
+    if (read.card) await mouseMove(send, read.card.x, read.card.y);
     read.link = await evaluate(LINK);
     for (let i = 0; i < 20 && read.link; i++) {
       if (read.link.hover && read.link.anims === 0) break;
@@ -149,7 +148,7 @@ export async function p35ProspectLift({ evaluate, send, check, sleep }: SuiteCon
       read.link = await evaluate(LINK);
     }
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
   }
@@ -192,7 +191,7 @@ export async function p36RaisedTakesHand({ evaluate, send, check, sleep }: Retur
   let raised = false;
   let atPoint: string | null = null;
   try {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 2, y: 2 });
+    await mouseMove(send, 2, 2);
     await evaluate(OWN_RESET);
     const marks = await evaluate(MARKS);
     for (const m of marks) {
@@ -203,7 +202,7 @@ export async function p36RaisedTakesHand({ evaluate, send, check, sleep }: Retur
       }
     }
     if (pair) {
-      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: pair.m.x, y: pair.m.y });
+      await mouseMove(send, pair.m.x, pair.m.y);
       for (let i = 0; i < 20; i++) {
         raised = await evaluate(NEAR(pair.m.idx));
         if (raised) break;
@@ -212,7 +211,7 @@ export async function p36RaisedTakesHand({ evaluate, send, check, sleep }: Retur
       atPoint = await evaluate(HIT_AT(pair.m));
     }
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 2, y: 2 });
+    await mouseMove(send, 2, 2);
     await evaluate(OWN_RESET);
   }
   check(

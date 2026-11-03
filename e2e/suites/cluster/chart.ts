@@ -6,7 +6,7 @@ import { ROUTE_NAMES } from "../../../src/layouts/nav.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import { spacing } from "./trail.ts";
 import type { TrailKit } from "./trail.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendClick, sendKey } from "../../support/input.ts";
 
 export type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Size = readonly [number, number];
@@ -27,8 +27,7 @@ export const sized = (k: TrailKit, [width, height]: Size) =>
   k.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
 
 export async function pressAt(k: TrailKit, x: number, y: number): Promise<void> {
-  await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
-  await k.send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  await sendClick(k.send, x, y);
 }
 
 async function key(k: TrailKit, name: "Enter" | "Tab" | "Escape"): Promise<void> {
@@ -330,11 +329,11 @@ async function paintedRow(k: TrailKit, b: Rect): Promise<number[]> {
 }
 
 async function underHand(k: TrailKit, b: Rect): Promise<Dress> {
-  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: centre(b).x, y: centre(b).y, button: "none" });
+  await mouseMove(k.send, centre(b).x, centre(b).y);
   try {
     return await k.settle(DRESS, (d) => d.hovered && d.moving === 0, "AT6 hover");
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+    await mouseMove(k.send, 1, 700);
   }
 }
 
@@ -350,7 +349,7 @@ const litOk = (d: Dress): boolean =>
 export async function at6Dress(k: TrailKit): Promise<void> {
   try {
     await arrive(k, "/faq/", BIG);
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+    await mouseMove(k.send, 1, 700);
     const rest = await k.evaluate(DRESS);
     const restRow = await paintedRow(k, rest.box);
     const hot = await underHand(k, rest.box);

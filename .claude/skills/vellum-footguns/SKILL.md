@@ -119,8 +119,9 @@ Gate 1 binds here too. Whether the check belongs in a unit test at all is
 
 Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
 
-1. **A gesture check drives the gesture.** Press and release with the suites' `clickAt` (`makeStage`
-   in `e2e/support/home.ts`) and the harness's touch helpers, at coordinates read from the
+1. **A gesture check drives the gesture.** Press and release with `sendClick`, `mouseDown` and
+   `mouseUp` in `e2e/support/input.ts`, which `vellum/e2e-cdp-through-helper` makes the one home
+   of every CDP mouse and touch send (not an in-page event, Issue #1213), and the harness's touch helpers, at coordinates read from the
    element's own rect. `element.click()` ignores `pointer-events`
    and every element painted over the target; use it only for wiring, with the reason at the check.
    A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two

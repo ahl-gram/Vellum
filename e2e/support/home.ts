@@ -1,7 +1,7 @@
 // Shared helpers for the homepage-hosted suites (Issue #460): the camera oracle and real-input plumbing suite-home built across Issue #455-Issue #470, lifted here so the second landfall suite drives the same stage; extraction only, no check added or changed (ratified 2026-08-25 on Issue #460).
 
 import type { Payload, Point, SuiteContext } from "../types.ts";
-import { sendKey } from "./input.ts";
+import { mouseDown, mouseMove, mouseUp, sendClick, sendKey } from "./input.ts";
 
 export type Cam = {
   veil: boolean;
@@ -50,8 +50,7 @@ export const makeStage = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" 
   const pressKey = (key: string, code: string, vk: number): Promise<void> => sendKey(send, key, code, vk);
 
   const clickAt = async (x: number, y: number): Promise<void> => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+    await sendClick(send, x, y);
   };
 
   const settleHome = async (): Promise<Cam | null> => {
@@ -83,23 +82,17 @@ export const makeStage = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" 
   return { pressKey, clickAt, settleHome };
 };
 
-// Real mouse input as the primitives a drag is made of, lifted at second use (Issue #523): suite-cluster's dragAcross was the first, and the Chart Table's carry needs the press and the moves apart from the release so it can read the ghost mid-carry. The moves carry button and buttons DELIBERATELY: Chromium ignores a move whose button is none for a held drag.
+// Real mouse input as the primitives a drag is made of, lifted at second use (Issue #523): suite-cluster's dragAcross was the first, and the Chart Table's carry needs the press and the moves apart from the release so it can read the ghost mid-carry.
 export const makeMouse = (ctx: Pick<SuiteContext, "send" | "sleep">) => {
   const { send } = ctx;
-  const press = (x: number, y: number): Promise<unknown> =>
-    send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
+  const press = (x: number, y: number): Promise<unknown> => mouseDown(send, x, y);
   const moveTo = async (from: Point, to: Point, steps = 8): Promise<void> => {
     for (let i = 1; i <= steps; i++)
-      await send("Input.dispatchMouseEvent", {
-        type: "mouseMoved",
-        x: from.x + ((to.x - from.x) * i) / steps,
-        y: from.y + ((to.y - from.y) * i) / steps,
-        button: "left",
+      await mouseMove(send, from.x + ((to.x - from.x) * i) / steps, from.y + ((to.y - from.y) * i) / steps, {
         buttons: 1,
       });
   };
-  const release = (x: number, y: number): Promise<unknown> =>
-    send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  const release = (x: number, y: number): Promise<unknown> => mouseUp(send, x, y);
   const dragAcross = async (from: Point, dx: number, dy: number): Promise<void> => {
     await press(from.x, from.y);
     await moveTo(from, { x: from.x + dx, y: from.y + dy });

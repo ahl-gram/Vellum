@@ -1,11 +1,13 @@
-// The suites' key presses, once (Issue #1016).
-import type { SuiteContext } from "../types.ts";
+// The suites' key presses, mouse events and touches, once (Issue #1016).
+import type { SuiteContext, TouchPoint } from "../types.ts";
 
 type Send = SuiteContext["send"];
 type BothEvents = { nativeVirtualKeyCode?: number; modifiers?: number };
 type PressOptions = BothEvents & { down?: "rawKeyDown"; text?: string; unmodifiedText?: string };
+type Clicks = { clickCount?: number };
 
 const KEY_EVENT = "Input.dispatchKeyEvent";
+const MOUSE_EVENT = "Input.dispatchMouseEvent";
 
 const keyFields = (key: string, code: string, vk: number, { nativeVirtualKeyCode, modifiers }: BothEvents) => ({
   key,
@@ -50,4 +52,37 @@ export async function sendKey(
 ): Promise<void> {
   await keyDown(send, key, code, vk, options);
   await keyUp(send, key, code, vk, options);
+}
+
+export async function mouseMove(
+  send: Send,
+  x: number,
+  y: number,
+  { buttons = 0 }: { buttons?: 0 | 1 } = {},
+): Promise<void> {
+  await send(
+    MOUSE_EVENT,
+    buttons === 1 ? { type: "mouseMoved", x, y, button: "left", buttons } : { type: "mouseMoved", x, y },
+  );
+}
+
+export async function mouseDown(send: Send, x: number, y: number, { clickCount = 1 }: Clicks = {}): Promise<void> {
+  await send(MOUSE_EVENT, { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount });
+}
+
+export async function mouseUp(send: Send, x: number, y: number, { clickCount = 1 }: Clicks = {}): Promise<void> {
+  await send(MOUSE_EVENT, { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount });
+}
+
+export async function sendClick(send: Send, x: number, y: number, options: Clicks = {}): Promise<void> {
+  await mouseDown(send, x, y, options);
+  await mouseUp(send, x, y, options);
+}
+
+export async function mouseWheel(send: Send, x: number, y: number, deltaY: number, deltaX = 0): Promise<void> {
+  await send(MOUSE_EVENT, { type: "mouseWheel", x, y, deltaX, deltaY });
+}
+
+export async function sendTouch(send: Send, type: string, points: readonly TouchPoint[]): Promise<void> {
+  await send("Input.dispatchTouchEvent", { type, touchPoints: points });
 }

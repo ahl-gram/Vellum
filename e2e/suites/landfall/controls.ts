@@ -4,7 +4,7 @@ import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy } from "./reads.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 
 async function l9gPipTap({
   evaluate,
@@ -192,12 +192,12 @@ export async function l24CameraLeaks(k: LandfallKit): Promise<void> {
   const bracketed = tabbed ? await evaluate(LEAKS(".corner :is(a, button):focus-visible { margin-top: 3px; }")) : null;
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   const at = await evaluate(ZOOM_IN_AT);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  await mouseMove(send, at.x, at.y);
   let hovered;
   try {
     hovered = await evaluate(LEAKS(".zoom-btn:hover { margin-top: 3px; }"));
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
+    await mouseMove(send, 20, 20);
   }
   check(
     "L24 home wears the kit's camera through the component alone: no kit declaration that is not dress wins on the Glass at rest, under a keyboard's focus or under the hand, and a seat planted on the corner, a lift planted on a hovered press and one planted on a focused press through an arm whose brackets hold a comma are each read as winning (#505)",

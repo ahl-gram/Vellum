@@ -5,6 +5,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { contrast } from "../cluster/trail.ts";
 import { FLOOR_PLAIN, withStyle } from "../stage/stage.ts";
 import type { SpecimenKit } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type InkPiece = readonly [piece: string, selector: string];
 type InkLine = {
@@ -108,7 +109,7 @@ const SB20_PIECES: readonly InkPiece[] = [
 export async function sb20SlipInk(k: SpecimenKit): Promise<void> {
   if ((await k.goto()) === null) throw new Error("SB20: the Book never came up at rest");
   await k.settle(FONTS_LOADED, (d) => d === "loaded", "SB20 fonts");
-  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(k.send, 1, 1);
   const reads = await slipInk(k, SB20_PIECES, "sb20-hide");
   const faults = [
     ...inkFaults(reads),

@@ -1,4 +1,4 @@
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
@@ -111,19 +111,19 @@ async function paceUnderHand({ evaluate, send, sleep }: InstrumentKit): Promise<
   const settle = makeSettle({ evaluate, sleep });
   const tab = () => sendKey(send, "Tab", "Tab", 9);
   const rest = await evaluate(PACE);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.presses[1]!.x, y: rest.presses[1]!.y });
+  await mouseMove(send, rest.presses[1]!.x, rest.presses[1]!.y);
   const hovered = await settle(
     PACE,
     stillAt(1, (p) => p.hover),
     "pace-hovered",
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.presses[0]!.x, y: rest.presses[0]!.y });
+  await mouseMove(send, rest.presses[0]!.x, rest.presses[0]!.y);
   const chosenHovered = await settle(
     PACE,
     stillAt(0, (p) => p.hover),
     "pace-chosen-hovered",
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   await evaluate<boolean>(`(() => { document.querySelector(".rf-range").focus(); return true; })()`);
   await tab();
   const chosenKeyed = await settle(
@@ -162,7 +162,7 @@ export async function rs31PaceDress(k: InstrumentKit): Promise<void> {
       JSON.stringify(r),
     );
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await mouseMove(send, 1, 1);
     await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
   }
 }

@@ -4,7 +4,7 @@ import { recipeOverrides } from "../../../src/site/shared/founding.ts";
 import { SHAPE_KEYS } from "../../../src/site/shared/shape-address.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import { SEAT, holdFaults } from "../broadside/shape.ts";
-import { sendKey } from "../../support/input.ts";
+import { sendClick, sendKey } from "../../support/input.ts";
 import { CHART_SVG } from "../../support/room.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { WritingKit } from "./kit.ts";
@@ -49,15 +49,7 @@ function carryKit(k: WritingKit) {
     await until(EXPLORER_SETTLED, `the Explorer settled at ${hash}`);
   };
   const press = async (x: number, y: number): Promise<void> => {
-    await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
-    await k.send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x,
-      y,
-      button: "left",
-      buttons: 0,
-      clickCount: 1,
-    });
+    await sendClick(k.send, x, y);
   };
   return { settle, until, visit, explorer, press };
 }

@@ -3,6 +3,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import type { PrintRoomKit } from "./kit.ts";
 import type { Warning } from "./reads.ts";
 import { clearMetrics, pressAt } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type Lens = { k: number; t: string; zoomed: boolean };
 export const LENS: Payload<Lens> = `(() => { const t = getComputedStyle(document.getElementById("map")).transform, m = /^matrix\\(([^,]+),/.exec(t);
@@ -45,7 +46,7 @@ export async function homeCamera(
     await wheel(c.x, c.y, 4000);
     at = await lensRest(ctx, "still", "camera-wheeled-home", lens);
   }
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   return at;
 }
 

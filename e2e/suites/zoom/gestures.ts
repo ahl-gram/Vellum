@@ -2,6 +2,7 @@
 import { sampleRow } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Mark = { idx: number; name: string; x: number; y: number };
 const MARKS: Payload<Mark[]> =
@@ -49,7 +50,7 @@ async function pinCard(
   { evaluate, send, sleep }: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
   a: Mark,
 ): Promise<Card> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: a.x, y: a.y });
+  await mouseMove(send, a.x, a.y);
   await pressAt({ send }, a.x, a.y);
   let card: Card = null;
   let before: Card | undefined;
@@ -68,7 +69,7 @@ async function pinAndFind(
 ): Promise<Found | null> {
   for (const a of marks) {
     await ctx.evaluate(RESET);
-    await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(ctx.send, 5, 5);
     if (!(await ctx.evaluate(HIT_AT(a)))) continue;
     const card = await pinCard(ctx, a);
     const b = card && marks.find((m) => m.idx !== a.idx && inside(m, card.rect, 14) && !inside(m, card.acts, -14));
@@ -88,12 +89,12 @@ export async function z27UnderPinned({ evaluate, send, check, sleep }: SuiteCont
   const held: { found: Found | null; over: Over | null } = { found: null, over: null };
   try {
     await evaluate(RESET);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     const marks = await evaluate(MARKS);
     held.found = await pinAndFind({ evaluate, send, sleep }, marks);
     if (held.found) held.over = await moveOntoCard({ evaluate, send, sleep }, held.found);
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     await evaluate(RESET);
   }
   const { found, over } = held;
@@ -135,7 +136,7 @@ async function moveOntoCard(
   { evaluate, send, sleep }: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
   found: Found,
 ): Promise<Over> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: found.b.x, y: found.b.y });
+  await mouseMove(send, found.b.x, found.b.y);
   let seen = await evaluate(NEAR(found.b.idx));
   for (let i = 0; i < 30 && !(seen.near && seen.opacity === "1"); i++) {
     await sleep(50);

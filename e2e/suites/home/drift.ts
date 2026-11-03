@@ -3,6 +3,7 @@ import { atLandfall, buttonPoint, readCam, readXform } from "../../support/home.
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
+import { mouseWheel } from "../../support/input.ts";
 
 // 2026-10-26: the sine.inOut start moves the printed transform about 0.25 s in; 3000 ms is runner-stall headroom, unswept (no browser reading when set); lane C CI read H15a at 9.2 s.
 const DRIFT_HEADROOM_MS = 3000;
@@ -52,13 +53,7 @@ export async function h15bWheelStops({ evaluate, send, check, sleep }: SuiteCont
   );
   const stable = makeStable(makeSettle({ evaluate, sleep }));
   const before = await evaluate(readCam);
-  await send("Input.dispatchMouseEvent", {
-    type: "mouseWheel",
-    x: Math.round(stagePt.x),
-    y: Math.round(stagePt.y),
-    deltaX: 0,
-    deltaY: -120,
-  });
+  await mouseWheel(send, Math.round(stagePt.x), Math.round(stagePt.y), -120);
   await stable(readCam, "H15b the wheel's zoom landed", {
     departed: (d) => before !== null && Math.abs(d.scale / before.scale - 1) > DRIFT_SCALE - 1,
     tries: WHEEL_TRIES,

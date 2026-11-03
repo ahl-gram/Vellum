@@ -2,7 +2,7 @@ import type { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { HOLD_GRACE_MS } from "../../../src/site/shared/living-chart/place-card-hold.ts";
 import { NARROW_SEED } from "./reads.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseDown, mouseMove, mouseUp, sendClick, sendKey, sendTouch } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
 
@@ -34,33 +34,18 @@ const CAUGHT: Payload<string | null> =
 const RESET: Payload<boolean> = `(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return document.getElementById("place-card").hidden; })()`;
 
 async function pressPair({ send }: Pick<SuiteContext, "send">, p: Point, clickCount: number): Promise<void> {
-  await send("Input.dispatchMouseEvent", {
-    type: "mousePressed",
-    x: p.x,
-    y: p.y,
-    button: "left",
-    buttons: 1,
-    clickCount,
-  });
-  await send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: p.x,
-    y: p.y,
-    button: "left",
-    buttons: 0,
-    clickCount,
-  });
+  await sendClick(send, p.x, p.y, { clickCount });
 }
 
 export function holdKit(ctx: HoldKit) {
   const { evaluate, send, sleep, settle, waitReady, setTouch, PORT } = ctx;
-  const move = (p: Point) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p.x, y: p.y, buttons: 0 });
+  const move = (p: Point) => mouseMove(send, p.x, p.y);
   const press = async (p: Point, clickCount = 1) => {
     await pressPair({ send }, p, clickCount);
   };
   const tap = async (p: Point) => {
-    await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: p.x, y: p.y, id: 1 }] });
-    await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await sendTouch(send, "touchStart", [{ x: p.x, y: p.y, id: 1 }]);
+    await sendTouch(send, "touchEnd", []);
   };
   const card = () => evaluate(CARD);
   const atRest = (label: string) =>
@@ -208,30 +193,9 @@ export async function p29NearestTown(k: Kit, marks: Mark[]): Promise<void> {
 
 async function p33DragFrom(k: Kit, b: Mark): Promise<void> {
   await k.move(b);
-  await k.send("Input.dispatchMouseEvent", {
-    type: "mousePressed",
-    x: b.x,
-    y: b.y,
-    button: "left",
-    buttons: 1,
-    clickCount: 1,
-  });
-  for (let i = 1; i <= 8; i++)
-    await k.send("Input.dispatchMouseEvent", {
-      type: "mouseMoved",
-      x: b.x + 5 * i,
-      y: b.y + 3 * i,
-      button: "left",
-      buttons: 1,
-    });
-  await k.send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: b.x + 40,
-    y: b.y + 24,
-    button: "left",
-    buttons: 0,
-    clickCount: 1,
-  });
+  await mouseDown(k.send, b.x, b.y);
+  for (let i = 1; i <= 8; i++) await mouseMove(k.send, b.x + 5 * i, b.y + 3 * i, { buttons: 1 });
+  await mouseUp(k.send, b.x + 40, b.y + 24);
 }
 
 export async function p33DragKeepsPin(k: Kit, marks: Mark[]): Promise<void> {

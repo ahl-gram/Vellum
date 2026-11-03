@@ -1,5 +1,5 @@
 // The kit's gestures and paper state across the sweep (Issue #779 part 2h): the printed read RH29 judges, the house ring and a nav link's rise.
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import { SHELLED } from "./reads.ts";
@@ -92,7 +92,7 @@ const fOf = (m: string): number | null => {
 
 async function raised({ evaluate, send, sleep }: RunningHeadKit, at: 0 | -1): Promise<Link> {
   let last = await evaluate(LINK(at));
-  if (last) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: last.x, y: last.y });
+  if (last) await mouseMove(send, last.x, last.y);
   for (let i = 0; i < 20 && last; i++) {
     last = await evaluate(LINK(at));
     if (last && last.hover && last.moving === 0) break;
@@ -115,6 +115,6 @@ export async function rh31Raise(k: RunningHeadKit): Promise<void> {
       JSON.stringify(reads),
     );
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await mouseMove(k.send, 1, 700);
   }
 }

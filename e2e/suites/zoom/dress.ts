@@ -27,6 +27,7 @@ import {
   taleWants,
 } from "./reads.ts";
 import type { Part, Seat, Want } from "./reads.ts";
+import { mouseMove } from "../../support/input.ts";
 
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
 const near = (a: number, b: number, tolerance: number): boolean => Math.abs(a - b) <= tolerance;
@@ -150,7 +151,7 @@ export async function z24CardSeats({ evaluate, send, check, sleep }: SuiteContex
   try {
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
     const seats = [1, 4].flatMap((k) => variants.map((variant, i) => ({ variant, k, idx: picks[i] ?? -1 })));
     for (const seat of seats) {
@@ -350,7 +351,7 @@ export async function z26CardDress({ evaluate, send, check, sleep }: SuiteContex
   try {
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    await mouseMove(send, 5, 5);
     wrong.push(...(await capitalFaults({ evaluate, sleep }, capital, rem)));
     wrong.push(...(await taleFaults({ evaluate, sleep }, ruin, rem)));
   } finally {

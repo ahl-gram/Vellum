@@ -4,7 +4,7 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendClick, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
 
@@ -82,9 +82,8 @@ async function p20PressKralgov({ evaluate, send }: Pick<CardsKit, "evaluate" | "
         x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
     })()`);
   if (at.error) throw new Error(`P20 ${at.error}`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
-  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  await mouseMove(send, at.x, at.y);
+  await sendClick(send, at.x, at.y);
   return at;
 }
 
@@ -173,7 +172,7 @@ export async function p26TailScrolls(
   const reaches = await evaluate<boolean>(
     `(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`,
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
+  await mouseMove(send, onCard.x, onCard.y);
   await sleep(120, "pace: the hover lands before the wheel");
   const afterWheel = await scrollAfter(
     { evaluate, sleep },
@@ -198,7 +197,7 @@ export async function p23CapHolds(
   const bare = await evaluate<{ x: number; y: number; k: number }>(
     `(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`,
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });
+  await mouseMove(send, bare.x, bare.y);
   await sleep(120, "pace: the hover lands before the wheel");
   await wheel(bare.x, bare.y, -240);
   const deep = await settle<{ k: number; w: number; h: number; boxH: number; over: number } | null>(
@@ -270,9 +269,8 @@ async function p24PinKralgov(
   stable: ReturnType<typeof makeStable>,
   at: Point,
 ): Promise<PinnedAtRest> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
-  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  await mouseMove(send, at.x, at.y);
+  await sendClick(send, at.x, at.y);
   return stable(PINNED_AT_REST, "P24 Kralgov pinned and unrolled at 1280x800", {
     departed: (d) => d.name === "Kralgov" && d.pinned,
     animated: CARD_CARRIER,
@@ -298,7 +296,7 @@ export async function p24NothingToScroll({
     `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`,
   );
   const card = await p24PinKralgov({ send }, stable, at);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.aim.x, y: card.aim.y });
+  await mouseMove(send, card.aim.x, card.aim.y);
   await sleep(120, "pace: the hover lands before the wheel");
   await evaluate(WHEELS.arm);
   await wheel(card.aim.x, card.aim.y, -240);
