@@ -256,3 +256,15 @@ test("a river crossing's band stays between the hairlines", () => {
   assert.ok(onRoad15 >= 1, "premise: seed 15's road carries a crossing");
   assert.ok(bands >= 10, `the sweep draws crossings to measure: ${bands}`);
 });
+
+test("every caption is drawn above every strip", () => {
+  for (const dress of ["antique", "ink"] as const) {
+    const svg = ribbonSvgFor(road42, dress);
+    const caption = svg.indexOf(">to Lamahai</text>");
+    assert.notEqual(caption, -1, `${dress}: seed 42's side road to Lamahai is captioned`);
+    assert.ok(
+      caption > svg.lastIndexOf('class="road"'),
+      `${dress}: the caption lies after the last strip's road, so no strip covers it`,
+    );
+  }
+});

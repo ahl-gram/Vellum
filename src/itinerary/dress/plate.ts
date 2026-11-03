@@ -130,14 +130,19 @@ function colophon(c: DressContext, input: RibbonInput): SvgNode {
 export function renderRibbon(c: RibbonContext, input: RibbonInput, rng: Rng): SvgNode {
   const layout = layoutRibbon(input);
   const grainId = `ribbon-grain-${c.style.name}-${input.seed}-${input.fromIdx}-${input.toIdx}`;
-  const strips = layout.strips.map((s, i) => stripNodes(c, input, s, rng, i === layout.strips.length - 1));
+  const drawn = layout.strips.map((s, i) => stripNodes(c, input, s, rng, i === layout.strips.length - 1));
   return el("g", {}, [
     el("defs", {}, grain(c, grainId, input.seed)),
     el("rect", { x: 0, y: 0, width: RIBBON_W, height: RIBBON_H, fill: c.style.paper }),
     el("rect", { x: 0, y: 0, width: RIBBON_W, height: RIBBON_H, filter: `url(#${grainId})` }),
     ...plateFrame(c),
     ...titleBand(c, input),
-    ...strips,
+    ...drawn.map((d) => d.art),
+    el(
+      "g",
+      {},
+      drawn.flatMap((d) => [...d.captions]),
+    ),
     colophon(c, input),
   ]);
 }

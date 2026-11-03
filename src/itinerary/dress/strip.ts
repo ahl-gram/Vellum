@@ -275,18 +275,20 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
   ];
 }
 
+export type StripDrawing = { readonly art: SvgNode; readonly captions: ReadonlyArray<SvgNode> };
+
 export function stripNodes(
   c: RibbonContext,
   input: RibbonInput,
   strip: StripLayout,
   rng: Rng,
   isLast: boolean,
-): SvgNode {
+): StripDrawing {
   const body = stripBody(strip);
   const compassX = strip.x0 + strip.w / 2 - Math.sign(strip.lean || 1) * (strip.w / 4 + 4);
   const compassY = strip.y0 + strip.h * 0.36;
   const events = eventNodes(c, input, strip, body, rng);
-  return el("g", {}, [
+  const art = el("g", {}, [
     ...(c.paint ? clothFrame(c, c.paint, strip, body) : plainFrame(c, strip)),
     ...(c.paint ? seaWash(c.paint, strip, body, rng.fork(`sea-${strip.index}`)) : []),
     ...decorNodes(c, strip, rng),
@@ -296,7 +298,7 @@ export function stripNodes(
     ...roadNodes(c, input, strip),
     ...leagueMarks(c, strip),
     ...events.art,
-    ...events.laid.nodes,
     ...continuation(c, strip, isLast),
   ]);
+  return { art, captions: events.laid.nodes };
 }
