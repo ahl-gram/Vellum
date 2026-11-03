@@ -11,6 +11,7 @@ import errorCast from "./scripts/lint/error-cast.ts";
 import emDashString from "./scripts/lint/em-dash-string.ts";
 import narrowWidth from "./scripts/lint/narrow-width.ts";
 import e2eScriptsOff from "./scripts/lint/e2e-scripts-off.ts";
+import e2eCdpHelpers from "./scripts/lint/e2e-cdp-helpers.ts";
 import e2eSteps from "./scripts/lint/e2e-steps.ts";
 import e2eSleep from "./scripts/lint/e2e-sleep.ts";
 import importBounds from "./scripts/lint/import-bounds.ts";
@@ -30,7 +31,7 @@ import sheetMotion, {
   TIPS_AWAITING_A_RULING,
 } from "./scripts/lint/sheet-motion.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...emDashString.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...e2eSleep.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...emDashString.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...e2eCdpHelpers.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...e2eSleep.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
@@ -259,6 +260,7 @@ export default defineConfig(
     plugins: { vellum },
     rules: {
       "vellum/e2e-cancellation-roster": "error",
+      "vellum/e2e-cdp-through-helper": "error",
       "vellum/e2e-console-read-through-drop": "error",
       "vellum/e2e-scripts-off-through-helper": "error",
       "vellum/e2e-sleep-inside-poll": "error",
