@@ -15,7 +15,6 @@ export type RibbonPaint = {
   readonly sepia: string;
 };
 
-/** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged. */
 export type RibbonContext = DressContext & { readonly paint: RibbonPaint | null };
 
 function paintFor(style: MapStyle): RibbonPaint | null {
@@ -23,6 +22,7 @@ function paintFor(style: MapStyle): RibbonPaint | null {
   return { ...style.ribbonLimner, vermilion: style.limner.vermilion, azurite: style.river, sepia: style.road };
 }
 
+/** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged. */
 export function ribbonDress(style: MapStyle): RibbonContext {
   if (!(RIBBON_DRESSES as ReadonlyArray<string>).includes(style.name)) {
     throw new RangeError(`ribbons dress in ${RIBBON_DRESSES.join(" or ")}, not ${style.name}`);

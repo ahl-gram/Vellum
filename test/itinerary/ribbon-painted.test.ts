@@ -11,7 +11,7 @@ import type { StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { attrsOf, inkExtent } from "../../test-support/dress-svg.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { STYLES } from "../../src/render/style.ts";
-import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
+import { capitalJourneys, namedJourney, stripNearestX } from "../../test-support/ribbon-fixtures.ts";
 
 const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -157,10 +157,6 @@ const RIVER_BAND = new RegExp(`<path d="([^"]*)" fill="none" stroke="${PAINT.azu
 const dOf = (svg: string, re: RegExp): string[] => [...svg.matchAll(re)].map((m) => m[1] as string);
 const headOf = (d: string): readonly [number, number] => vertices(d)[0] as readonly [number, number];
 
-function stripAtX(strips: ReadonlyArray<StripLayout>, x: number): StripLayout {
-  return strips.reduce((a, b) => (Math.abs(x - (b.x0 + b.w / 2)) < Math.abs(x - (a.x0 + a.w / 2)) ? b : a));
-}
-
 function shorePoints(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
   for (const m of d.matchAll(/Q(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)) out.push([Number(m[1]), Number(m[2])]);
@@ -189,7 +185,9 @@ function seaLiesWhereTheSamplesSay(): void {
     "premise: and never on the left",
   );
   const meanX = last.pts.reduce((a, p) => a + p.sx, 0) / last.pts.length;
-  const washes = dOf(ribbonSvgFor(road42, "antique"), SEA_WASH).filter((d) => stripAtX(strips, headOf(d)[0]) === last);
+  const washes = dOf(ribbonSvgFor(road42, "antique"), SEA_WASH).filter(
+    (d) => stripNearestX(strips, headOf(d)[0]) === last,
+  );
   assert.ok(washes.length >= 1, "seed 42's last strip holds a sea wash");
   for (const d of washes)
     for (const [x] of shorePoints(d))
@@ -265,7 +263,7 @@ function seaStaysOnTheCloth(): void {
     const svg = ribbonSvgFor(input, "antique");
     const where = `${input.fromName} to ${input.toName}`;
     for (const d of dOf(svg, SEA_WASH)) {
-      const strip = stripAtX(strips, headOf(d)[0]);
+      const strip = stripNearestX(strips, headOf(d)[0]);
       for (const [x, y] of shorePoints(d)) withinHairlines(strip, x, x, y, `${where}, a shore point`);
       for (const [x, y] of outlineOf(d)) withinCloth(strip, x, y, `${where}, strip ${strip.index}, a wash outline`);
       shores++;
@@ -273,7 +271,7 @@ function seaStaysOnTheCloth(): void {
     for (const d of dOf(svg, WAVE)) {
       const [, wy] = headOf(d);
       const e = inkExtent(`<path d="${d}"/>`);
-      withinHairlines(stripAtX(strips, headOf(d)[0]), e.x0, e.x1, wy, `${where}, a wave`);
+      withinHairlines(stripNearestX(strips, headOf(d)[0]), e.x0, e.x1, wy, `${where}, a wave`);
       waves++;
     }
   }
@@ -293,7 +291,7 @@ test("a river crossing's band stays between the hairlines", () => {
     for (const d of dOf(ribbonSvgFor(input, "antique"), RIVER_BAND)) {
       const e = inkExtent(`<path d="${d}"/>`);
       const [hx, sy] = headOf(d);
-      withinHairlines(stripAtX(strips, hx), e.x0, e.x1, sy, `${input.fromName} to ${input.toName}, a river band`);
+      withinHairlines(stripNearestX(strips, hx), e.x0, e.x1, sy, `${input.fromName} to ${input.toName}, a river band`);
       bands++;
       if (input === road15) onRoad15++;
     }

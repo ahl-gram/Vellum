@@ -5,9 +5,9 @@ import type { RibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { layoutRibbon, STRIP_PAD, type StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
-import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
+import { capitalJourneys, namedJourney, stripNearestX } from "../../test-support/ribbon-fixtures.ts";
 
-// 2026-11-02, 77 journeys (seeds 99/15/42 plus the four extremes): painted casings 16.2 inside the hairline at worst, side roads 0.49 inside (seed 42 Laukuwelua to Naukoa, strip 2), the ends 1.26 past (seed 99 Taliport to Ceasairmere, strip 2); the plain frame 0.65 past (the same journey and strip). TOLERANCE and PAINTED_TOLERANCE are the casings' half-widths written out, not imported, so they cannot widen with the module they guard.
+// 2026-11-02, 77 journeys (seeds 99/15/42 plus the four extremes): painted casings 16.2 inside the hairline at worst, side roads 0.49 inside (seed 42 Laukuwelua to Naukoa, strip 2), the ends 1.30 past (seed 99 Taliport to Ceasairmere, strip 2); the plain frame 0.60 past (the same journey and strip). TOLERANCE and PAINTED_TOLERANCE are the casings' half-widths written out, not imported, so they cannot widen with the module they guard.
 
 const SEEDS = [99, 15, 42];
 const TOLERANCE = 2.3;
@@ -33,14 +33,6 @@ function roadShapes(svg: string): RoadShape[] {
 
 const worlds = SEEDS.map((seed) => ({ seed, world: generateWorld(defaultRecipe(seed)) }));
 
-function stripOf(layout: ReadonlyArray<StripLayout>, x: number): StripLayout | undefined {
-  let best: StripLayout | undefined;
-  for (const s of layout) {
-    if (best === undefined || Math.abs(x - (s.x0 + s.w / 2)) < Math.abs(x - (best.x0 + best.w / 2))) best = s;
-  }
-  return best;
-}
-
 function pastOf(dress: Dress, strip: StripLayout, x: number, y: number): number {
   const endsPast = Math.max(strip.y0 - y, y - (strip.y0 + strip.h), 0);
   if (dress === "ink") {
@@ -63,8 +55,7 @@ function overshootOf(
   for (const shape of roadShapes(ribbonSvgFor(input, dress))) {
     const head = shape.pts[0];
     if (!head) continue;
-    const strip = stripOf(strips, head[0]);
-    if (!strip) continue;
+    const strip = stripNearestX(strips, head[0]);
     shapes++;
     kinds.set(shape.kind, (kinds.get(shape.kind) ?? 0) + 1);
     for (const [x, y] of shape.pts) {

@@ -1,5 +1,6 @@
 import { buildRibbonInput, type RibbonInput } from "../src/itinerary/input.ts";
 import { roadMask, roadReachable } from "../src/itinerary/route.ts";
+import type { StripLayout } from "../src/itinerary/dress/layout.ts";
 import type { World } from "../src/world/types.ts";
 
 export function capitalJourneys(world: World): RibbonInput[] {
@@ -18,4 +19,8 @@ export function namedJourney(world: World, from: string, to: string): RibbonInpu
   const input = buildRibbonInput(world, a, b);
   if (input === null) throw new Error(`namedJourney: no road from ${from} to ${to} on seed ${world.recipe.seed}`);
   return input;
+}
+
+export function stripNearestX(strips: ReadonlyArray<StripLayout>, x: number): StripLayout {
+  return strips.reduce((a, b) => (Math.abs(x - (b.x0 + b.w / 2)) < Math.abs(x - (a.x0 + a.w / 2)) ? b : a));
 }

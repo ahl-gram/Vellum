@@ -37,8 +37,8 @@ woods, azurite water and a swallow-tailed title banner. Its pigments are tokens 
 the style's `river` for azurite and its `road` for the sepia shading, and every other dress carries
 `ribbonLimner: null`. The ink dress draws the plain impression: the same layout, events and captions
 in line, with no wash, no band and no banner. `ribbonDress` in `src/itinerary/dress/context.ts`
-resolves which, and a colour on either dress that is none of those tokens fails
-`test/itinerary/ribbon-dress.test.ts`.
+resolves which, and a hex colour on either dress that is not one of those pigment tokens, the dress's
+own paper, inks or land, or its road or river, fails `test/itinerary/ribbon-dress.test.ts`.
 
 **The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
 so every collectible survey is antique and the only other dress that can reach a gathered sheet is a
