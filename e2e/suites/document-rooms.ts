@@ -1,4 +1,5 @@
 // The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, stands beside the 1024 page in a narrower window (Issue #762), and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
+import { explorerUp } from "../support/explorer.ts";
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { withScriptsOff } from "../support/scripts-off.ts";
@@ -100,7 +101,7 @@ const LANDING: Payload<{ sheet: number[] | null; slip: number[] | null }> =
 export type DocRoomsKit = ReturnType<typeof docRoomsKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setTouch, waitReady, PORT } = ctx;
+  const { send, setTouch, PORT } = ctx;
   const settle = makeSettle(ctx);
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
@@ -146,8 +147,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
-  await waitReady();
+  await step("IX restore", async () => {
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+    await explorerUp(ctx, "IX restore");
+  });
 }
 
 export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
