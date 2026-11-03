@@ -67,4 +67,6 @@ test("an index that names no place is no request, as the address grammar treats 
   assert.equal(noteFor(w42, { from: 9999, to: null }), null);
   assert.equal(noteFor(w42, { from: null, to: 9999 }), null);
   assert.equal(noteFor(w42, { from: 26, to: null }), null);
+  assert.equal(noteFor(w42, { from: -1, to: null }), null);
+  assert.equal(noteFor(w42, { from: null, to: 1.5 }), null);
 });
