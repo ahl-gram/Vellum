@@ -7,6 +7,7 @@ import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { WIDTH_FACTOR } from "../../src/render/geometry.ts";
 import { r1 } from "../../src/prospect/dress/context.ts";
 import { stagesLine } from "../../src/itinerary/prose.ts";
+import { ringArea } from "../../src/terrain/polyline.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import type { StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { attrsOf, inkExtent } from "../../test-support/dress-svg.ts";
@@ -29,16 +30,6 @@ function vertices(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
   for (const m of d.matchAll(/[ML](-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)) out.push([Number(m[1]), Number(m[2])]);
   return out;
-}
-
-function shoelace(pts: ReadonlyArray<readonly [number, number]>): number {
-  let a = 0;
-  for (let i = 0; i < pts.length; i++) {
-    const [x1, y1] = pts[i] as readonly [number, number];
-    const [x2, y2] = pts[(i + 1) % pts.length] as readonly [number, number];
-    a += x1 * y2 - x2 * y1;
-  }
-  return Math.abs(a) / 2;
 }
 
 test("every strip's cloth stays inside the plate frame's inner rule", () => {
@@ -75,7 +66,7 @@ test("each strip's two edge bands enclose the band they paint", () => {
   bands.forEach((d, i) => {
     const strip = strips[Math.floor(i / 2)]!;
     assert.ok(d.endsWith("Z"), `band ${i} closes`);
-    const area = shoelace(vertices(d));
+    const area = Math.abs(ringArea(vertices(d)));
     assert.ok(
       area >= 0.9 * BAND * strip.h,
       `band ${i} encloses ${area.toFixed(0)}, a band ${BAND} wide is ${BAND * strip.h}`,
@@ -201,7 +192,6 @@ function seaLiesWhereTheSamplesSay(): void {
   assert.equal(dOf(ribbonSvgFor(dry, "antique"), SEA_WASH).length, 0, "and it holds no sea wash");
 }
 
-/** The whole outline of a closed M, L, Q path, the closing edge included, walked in steps under a unit: a segment between two vertices on the cloth can still leave it. */
 function outlineOf(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
   let start: readonly [number, number] = [0, 0];
