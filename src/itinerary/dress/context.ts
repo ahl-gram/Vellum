@@ -18,8 +18,9 @@ export type RibbonPaint = {
 /** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged; `paint` is the limner's box on the antique dress and null on the plain ink one. */
 export type RibbonContext = DressContext & { readonly paint: RibbonPaint | null };
 
-function paintFor(_style: MapStyle): RibbonPaint | null {
-  return null;
+function paintFor(style: MapStyle): RibbonPaint | null {
+  if (style.ribbonLimner === null || style.limner === null) return null;
+  return { ...style.ribbonLimner, vermilion: style.limner.vermilion, azurite: style.river, sepia: style.road };
 }
 
 export function ribbonDress(style: MapStyle): RibbonContext {
