@@ -108,10 +108,16 @@ function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: 
   const yTop = clampY(Math.min(...inner.map((p) => p[1])) - 12);
   const mid = (yBot + yTop) / 2;
   const edgeX = side < 0 ? body.left(mid) + BAND : body.right(mid) - BAND;
-  const shore: Point[] = [[edgeX - side * 6, yBot], ...inner, [edgeX - side * 6, yTop]];
+  const onCloth = (x: number, y: number): Point => [
+    side > 0 ? Math.min(x, body.right(y)) : Math.max(x, body.left(y)),
+    y,
+  ];
+  const edgeBot = onCloth(edgeX, yBot);
+  const edgeTop = onCloth(edgeX, yTop);
+  const shore: Point[] = [onCloth(edgeX - side * 6, yBot), ...inner, onCloth(edgeX - side * 6, yTop)];
   const nodes: SvgNode[] = [
     el("path", {
-      d: `M${r1(edgeX)} ${r1(yBot)}${smooth(shore)}L${r1(edgeX)} ${r1(yTop)}Z`,
+      d: `M${r1(edgeBot[0])} ${r1(edgeBot[1])}${smooth(shore)}L${r1(edgeTop[0])} ${r1(edgeTop[1])}Z`,
       fill: paint.azuriteWash,
       "fill-opacity": 0.55,
       stroke: paint.azurite,
