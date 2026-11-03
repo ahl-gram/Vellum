@@ -5,6 +5,7 @@ import { plateDressFor } from "../../prospect/dress/context.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
 import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget, rowProspectTarget } from "./address.ts";
 import { fallbackNote } from "./fallback-note.ts";
+import { bindInk } from "./ink.ts";
 import { overridesOfLand } from "../shared/address-grammar.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindRibbonRoom, markLeaned, showPlate, writeFolio, writeItinerary, type RoomFurniture } from "./seats.ts";
@@ -52,6 +53,7 @@ const furniture: RoomFurniture = {
   unrolled: $("rb-unrolled"),
 };
 const sheet = bindRibbonRoom(furniture);
+const ink = bindInk({ plate: furniture.plate, ground: furniture.map, stage: furniture.stage });
 
 const addr = parseRibbonAddress(location.hash);
 const written = await foundAddress(location.hash, pageFounder());
@@ -92,25 +94,32 @@ function fillSelect(sel: HTMLSelectElement, res: RibbonResult, end: "from" | "to
   );
 }
 
-function draw(from: number | null, to: number | null): void {
+function writeJourney(res: RibbonResult): void {
+  fillSelect(fromSel, res, "from");
+  fillSelect(toSel, res, "to");
+  fromSel.value = String(res.fromIdx);
+  toSel.value = String(res.toIdx);
+  history.replaceState(null, "", journeyHash(location.hash, res.fromIdx, res.toIdx));
+  chartLink.href = chartTarget(location.hash);
+  prospectLink.href = prospectTarget(location.hash, res.toIdx);
+  prospectVerb.textContent = `See ${res.toName} in`;
+  prospectLink.style.display = "";
+}
+
+function draw(from: number | null, to: number | null, ceremony: boolean): void {
   const myGen = ++drawGen;
   const t0 = performance.now();
+  if (ceremony) ink.hold();
+  else ink.retire();
   status.textContent = "The surveyor unrolls the scroll…";
   runJob({ kind: "ribbon", seed, overrides, from, to, dress })
     .then((res) => {
       if (myGen !== drawGen) return;
       lastUrl = nextObjectUrl(lastUrl, new Blob([res.svg], { type: "image/svg+xml" }));
       showPlate(furniture, res, seed, lastUrl);
+      if (ceremony) ink.begin(res.strips, res.paper);
       sheet.rebase();
-      fillSelect(fromSel, res, "from");
-      fillSelect(toSel, res, "to");
-      fromSel.value = String(res.fromIdx);
-      toSel.value = String(res.toIdx);
-      history.replaceState(null, "", journeyHash(location.hash, res.fromIdx, res.toIdx));
-      chartLink.href = chartTarget(location.hash);
-      prospectLink.href = prospectTarget(location.hash, res.toIdx);
-      prospectVerb.textContent = `See ${res.toName} in`;
-      prospectLink.style.display = "";
+      writeJourney(res);
       writeFolio(furniture, res, seed, dress, Math.round(performance.now() - t0));
       writeItinerary(
         furniture,
@@ -118,6 +127,7 @@ function draw(from: number | null, to: number | null): void {
         fallbackNote({ from, to }, res),
         (row) => rowProspectTarget(location.hash, row),
         (row, li) => {
+          ink.retire();
           sheet.lean(row.nx, row.ny);
           markLeaned(furniture, li);
         },
@@ -136,17 +146,18 @@ function draw(from: number | null, to: number | null): void {
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
+      ink.retire();
       status.textContent = "The surveyor turned back: " + errorText(err);
     });
 }
 
-fromSel.addEventListener("change", () => draw(Number(fromSel.value), null));
-toSel.addEventListener("change", () => draw(Number(fromSel.value), Number(toSel.value)));
+fromSel.addEventListener("change", () => draw(Number(fromSel.value), null, false));
+toSel.addEventListener("change", () => draw(Number(fromSel.value), Number(toSel.value), false));
 swap.addEventListener("click", () => {
   if (last === null) return;
-  draw(last.to, last.from);
+  draw(last.to, last.from, true);
 });
 
 await initWorker();
 if (!usesWorker()) warning.hidden = false;
-draw(addr.from, addr.to);
+draw(addr.from, addr.to, true);

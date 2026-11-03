@@ -10,9 +10,30 @@
 #rb-plate[hidden] {
   display: none;
 }
+@property --rb-ink {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@keyframes rb-ink {
+  from {
+    --rb-ink: 0;
+  }
+  to {
+    --rb-ink: 1;
+  }
+}
+#rb-plate.rb-inking {
+  animation: rb-ink calc(var(--rb-ink-strip) * var(--rb-strips, 3)) linear;
+}
+#rb-plate.rb-inking:hover {
+  transform: none;
+  box-shadow: none;
+}
 
 :root {
   --folio-cap: 30rem;
+  --rb-ink-strip: 450ms;
 }
 .folio-controls {
   flex-wrap: wrap;
@@ -148,10 +169,12 @@
   #map {
     position: static;
     transform: none !important;
+    background: none !important;
   }
   #rb-plate {
     position: static;
     width: 100%;
     height: auto;
+    clip-path: none !important;
   }
 }
