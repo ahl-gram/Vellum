@@ -9,7 +9,7 @@ import { eventCaption, tierTag } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
 import { stripPos, type StripLayout } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
-import { stripCompass } from "./compass.ts";
+import { paintedCompass, stripCompass } from "./compass.ts";
 import { leagueMarks, roadAngleDeg, roadNodes } from "./road.ts";
 import type { RibbonContext } from "./context.ts";
 import { clothFrame, plainFrame, stripBody } from "./cloth.ts";
@@ -219,7 +219,9 @@ export function stripNodes(
   return el("g", {}, [
     ...(c.paint ? clothFrame(c, c.paint, strip, stripBody(strip)) : plainFrame(c, strip)),
     ...decorNodes(c, strip, rng),
-    stripCompass(c, compassX, compassY, strip.needleDeg),
+    c.paint
+      ? paintedCompass(c, c.paint, compassX, compassY, strip.needleDeg)
+      : stripCompass(c, compassX, compassY, strip.needleDeg),
     ...roadNodes(c, input, strip),
     ...leagueMarks(c, strip),
     ...eventNodes(c, input, strip, rng),

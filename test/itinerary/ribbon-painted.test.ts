@@ -5,10 +5,13 @@ import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W, stripPos } from "../../src/itinerary/dress/layout.ts";
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { WIDTH_FACTOR } from "../../src/render/geometry.ts";
+import { r1 } from "../../src/prospect/dress/context.ts";
 import { attrsOf } from "../../test-support/dress-svg.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
+
+const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const SWEEP_SEEDS = [99, 15, 42];
 const PLATE_INNER_RULE = RIBBON_MARGIN - 14 + 4;
@@ -120,5 +123,23 @@ test("every league's halo is wider than its numeral", () => {
     const half = Number(v.halo.rx ?? v.halo.r);
     const need = (String(v.n).length * 5.2 * WIDTH_FACTOR.mixed) / 2 + 0.6;
     assert.ok(half >= need, `league ${v.n}: halo half-width ${half} under the numeral's ${need.toFixed(2)}`);
+  }
+});
+
+test("each strip's rose turns with its strip's needle", () => {
+  const paper = STYLES.antique.land;
+  const vermilion = STYLES.antique.limner!.vermilion;
+  for (const input of [road42, road15]) {
+    const svg = ribbonSvgFor(input, "antique");
+    for (const strip of layoutRibbon(input).strips) {
+      const group = `<g transform="rotate(${r1(strip.needleDeg)})">`;
+      const turned = new RegExp(
+        `${escapeRegExp(group)}<path d="[^"]*" fill="${paper}"[^>]*/><path d="[^"]*" fill="${vermilion}"`,
+      );
+      assert.ok(
+        turned.test(svg),
+        `${input.fromName} to ${input.toName}, strip ${strip.index}: the paper star and the vermilion star ride ${group}`,
+      );
+    }
   }
 });
