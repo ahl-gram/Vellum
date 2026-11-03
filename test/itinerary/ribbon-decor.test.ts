@@ -31,17 +31,22 @@ const meets = (a: Box, b: Box): boolean =>
   a.x - 1 < b.x + b.w && a.x + a.w + 1 > b.x && a.y - 1 < b.y + b.h && a.y + a.h + 1 > b.y;
 
 test("a tree or hill gives way to a caption over it, and every other glyph stays put", () => {
-  const all = glyphs(press([]));
-  assert.ok(all.length >= 2, `premise: the strip draws at least two glyphs: ${all.length}`);
-  const caption = boxOf(all[0] as SvgNode);
-  const covered = all.filter((g) => meets(boxOf(g), caption));
-  const kept = glyphs(press([caption]));
+  const nodes = press([]);
+  const all = glyphs(nodes);
+  const wooded = nodes.findIndex((n, i) => n.tag === "g" && nodes[i - 1]?.tag === "circle");
   assert.ok(
-    covered.length >= 1 && covered.length < all.length,
-    `premise: the caption covers some glyphs and not all: ${covered.length} of ${all.length}`,
+    wooded > 0 && all.length >= 2,
+    `premise: the strip draws a tree among its dots and glyphs (node ${wooded} of ${nodes.length})`,
+  );
+  const caption = boxOf(nodes[wooded] as SvgNode);
+  const covered = all.filter((g) => meets(boxOf(g), caption));
+  const after = all.filter((g) => !covered.includes(g) && nodes.indexOf(g) > wooded);
+  assert.ok(
+    covered.length >= 1 && after.length >= 1,
+    `premise: the caption covers ${covered.length} and leaves ${after.length} glyphs after the tree`,
   );
   assert.deepEqual(
-    kept.map((g) => renderSvg(g)),
+    glyphs(press([caption])).map((g) => renderSvg(g)),
     all.filter((g) => !covered.includes(g)).map((g) => renderSvg(g)),
   );
 });

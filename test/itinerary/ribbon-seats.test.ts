@@ -150,6 +150,13 @@ function roadDistance(b: Box, strip: StripLayout): number {
   return best;
 }
 
+// The ornament riding the rose: the fleur-de-lis (20.5 out, 4.8 wide) on antique, the N (14.6 out and 2.5 up, 3.5 wide) on ink.
+function ornamentOf(dress: Dress, strip: StripLayout, rose: Disc): Disc {
+  const t = (strip.needleDeg * Math.PI) / 180;
+  if (dress === "antique") return { x: rose.x + 20.5 * Math.sin(t), y: rose.y - 20.5 * Math.cos(t), r: 4.8 };
+  return { x: rose.x + 14.6 * Math.sin(t), y: rose.y - 14.6 * Math.cos(t) - 2.5, r: 3.5 };
+}
+
 function discsOf(plate: Plate): Disc[] {
   const rose = plate.dress === "antique" ? "15" : "13.4";
   const roses = /<g transform="translate\((-?[\d.]+) (-?[\d.]+)\)"><circle cx="0" cy="0" r="([\d.]+)"/g;
@@ -157,10 +164,12 @@ function discsOf(plate: Plate): Disc[] {
     plate.dress === "antique"
       ? /<(?:circle|ellipse) cx="(-?[\d.]+)" cy="(-?[\d.]+)" (?:r|rx)="([\d.]+)"[^>]*\/><text [^>]*font-size="5.2"/g
       : /<circle cx="(-?[\d.]+)" cy="(-?[\d.]+)" r="(1\.4)"/g;
+  const found = [...plate.svg.matchAll(roses)].filter((m) => m[3] === rose);
+  assert.equal(found.length, plate.strips.length, "premise: every strip draws one rose");
+  const discs = found.map((m) => ({ x: Number(m[1]), y: Number(m[2]), r: ROSE_R[plate.dress] }));
   return [
-    ...[...plate.svg.matchAll(roses)]
-      .filter((m) => m[3] === rose)
-      .map((m) => ({ x: Number(m[1]), y: Number(m[2]), r: ROSE_R[plate.dress] })),
+    ...discs,
+    ...discs.map((d, i) => ornamentOf(plate.dress, plate.strips[i] as StripLayout, d)),
     ...[...plate.svg.matchAll(marks)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), r: Number(m[3]) })),
   ];
 }
