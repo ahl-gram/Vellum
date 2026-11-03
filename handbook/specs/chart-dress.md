@@ -38,7 +38,18 @@ the style's `river` for azurite and its `road` for the sepia shading, and every 
 `ribbonLimner: null`. The ink dress draws the plain impression: the same layout, events and captions
 in line, with no wash, no band and no banner. `ribbonDress` in `src/itinerary/dress/context.ts`
 resolves which, and a hex colour on either dress that is not one of those pigment tokens, the dress's
-own paper, inks or land, or its road or river, fails `test/itinerary/ribbon-dress.test.ts`.
+own paper, inks or land, or its road or river, fails `test/itinerary/ribbon-dress.test.ts`. In both
+dresses each caption is seated inside its own strip by `seatCaption` in `src/itinerary/dress/seats.ts`:
+its house-estimated box stays 9 units inside the strip's long edges and under the continuation line,
+clear of the compass rose, the towns' houses, the league numbers, the road and the other captions; it
+keeps today's seat where that fits, and otherwise moves inward or along the road, to the road's other
+side, onto shorter lines if it is a description, across the road under its town on a backing of the
+dress's ground, or down to seven tenths of its size; a caption with no clear seat takes the least
+crowded one inside its strip, backed; and a decoration glyph under a caption gives way to it.
+`test/itinerary/ribbon-seats.test.ts` holds the class over the frame guard's sweep. **Provisional
+until the post-use review** (Issue #1207): the across-the-road seat and its backing, the size floor,
+the shorter lines, a side road's name crossing to the road's other side, the ink departure name set
+smaller at the strip's foot, and the decoration giving way.
 
 **The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
 so every collectible survey is antique and the only other dress that can reach a gathered sheet is a

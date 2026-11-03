@@ -1,4 +1,5 @@
 import { el, type SvgNode } from "../../render/svg.ts";
+import { boxesOverlap, type Box } from "../../render/geometry.ts";
 import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import { treeRound, treePine, treePalm, marshTuft, dune, waveFlourish } from "../../prospect/dress/glyphs.ts";
 import type { XYS } from "../../prospect/geometry.ts";
@@ -6,7 +7,7 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
-import { eventCaption, tierTag } from "../prose.ts";
+import { eventCaption } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
 import { stripPos, type StripLayout } from "./layout.ts";
 import {
@@ -30,6 +31,8 @@ import { paintedCompass, stripCompass } from "./compass.ts";
 import { leagueMarks, roadAngleDeg, roadNodes } from "./road.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 import { clothFrame, plainFrame, stripBody, type StripBody } from "./cloth.ts";
+import { captionKeep, captionNode, captionRoom, layCaption, type CaptionsLaid } from "./captions.ts";
+import type { Seat } from "./seats.ts";
 
 const DECOR_STRIDE = 2;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
@@ -77,7 +80,12 @@ function paintedDecor(
   return [];
 }
 
-function decorNodes(c: RibbonContext, strip: StripLayout, rng: Rng): SvgNode[] {
+function glyphMeets(x: number, y: number, s: number, captions: ReadonlyArray<Box>): boolean {
+  const glyph: Box = { x: x - 9 * s, y: y - 12 * s, w: 18 * s, h: 12 * s + 1 };
+  return captions.some((b) => boxesOverlap(glyph, b, 1));
+}
+
+export function decorNodes(c: RibbonContext, strip: StripLayout, rng: Rng, captions: ReadonlyArray<Box>): SvgNode[] {
   const nodes: SvgNode[] = [];
   const fork = rng.fork(`decor-${strip.index}`);
   const margin = c.paint ? 12 : 10;
@@ -94,97 +102,13 @@ function decorNodes(c: RibbonContext, strip: StripLayout, rng: Rng): SvgNode[] {
       if (x < strip.x0 + margin || x > strip.x0 + strip.w - margin) continue;
       const y = pt.sy + fork.range(-2, 2);
       const p = { x, y, s: 0.72 + fork.range(0, 0.2) };
-      nodes.push(
-        ...(c.paint
-          ? paintedDecor(c, c.paint, biome, rel, smp.rel, p, fork)
-          : plainDecor(c, biome, rel, smp.rel, x, y, p)),
-      );
+      const made = c.paint
+        ? paintedDecor(c, c.paint, biome, rel, smp.rel, p, fork)
+        : plainDecor(c, biome, rel, smp.rel, x, y, p);
+      if (!glyphMeets(!c.paint && biome === BIOMES.ocean ? x - 6 : x, y, p.s, captions)) nodes.push(...made);
     }
   }
   return nodes;
-}
-
-type CaptionTrack = { readonly left: number; readonly right: number };
-type CaptionsLaid = { readonly nodes: ReadonlyArray<SvgNode>; readonly track: CaptionTrack };
-type CaptionLine = { text: string; caps?: boolean; size?: number };
-
-function wrapLine(text: string): string[] {
-  const lines: string[] = [];
-  let cur = "";
-  for (const word of text.split(" ")) {
-    if (cur.length > 0 && cur.length + word.length > 17) {
-      lines.push(cur);
-      cur = word;
-    } else cur = cur.length === 0 ? word : `${cur} ${word}`;
-  }
-  if (cur.length > 0) lines.push(cur);
-  return lines;
-}
-
-function captionNodes(
-  c: DressContext,
-  strip: StripLayout,
-  sx: number,
-  sy: number,
-  side: -1 | 1,
-  spec: ReadonlyArray<CaptionLine>,
-  laid: CaptionsLaid,
-): CaptionsLaid {
-  const lines = spec.flatMap((l) =>
-    wrapLine(l.text).map((text) => ({ text, caps: l.caps === true, size: l.size ?? 8.2 })),
-  );
-  const need = lines.reduce((a, l) => a + l.size + 1.2, 0);
-  const key = side < 0 ? "left" : "right";
-  let y = Math.min(sy + 2.6, laid.track[key] - need);
-  y = Math.max(y, strip.y0 + 22);
-  const anchorX = side < 0 ? sx - 10 : sx + 10;
-  const out: SvgNode[] = [];
-  let dy = 0;
-  for (const line of lines) {
-    dy += line.size + 1.2;
-    out.push(
-      el(
-        "text",
-        {
-          x: r1(anchorX),
-          y: r1(y + dy - 1.2),
-          "text-anchor": side < 0 ? "end" : "start",
-          "font-family": c.style.fontFamily,
-          "font-size": line.size,
-          "font-style": line.caps ? "normal" : "italic",
-          ...(line.caps ? { "letter-spacing": 0.8 } : {}),
-          fill: c.ink,
-        },
-        [line.caps ? line.text.toUpperCase() : line.text],
-      ),
-    );
-  }
-  return { nodes: [...laid.nodes, ...out], track: { ...laid.track, [key]: y - 4 } };
-}
-
-function waypointLines(e: Extract<RibbonEvent, { kind: "waypoint" }>, caption: string): CaptionLine[] {
-  const lines: CaptionLine[] = e.endpoint
-    ? [{ text: caption, caps: true, size: 10.5 }]
-    : [
-        { text: caption, caps: true, size: 8.6 },
-        { text: tierTag(e.tier), size: 7.6 },
-      ];
-  return lines;
-}
-
-type Seat = { sx: number; sy: number; side: -1 | 1; lines: ReadonlyArray<CaptionLine> };
-
-function captionSeat(e: RibbonEvent, p: { sx: number; sy: number }, freeSide: -1 | 1, caption: string): Seat {
-  switch (e.kind) {
-    case "waypoint":
-      return { sx: p.sx, sy: p.sy, side: freeSide, lines: waypointLines(e, caption) };
-    case "crossing":
-      return { sx: p.sx, sy: p.sy - 8, side: freeSide, lines: [{ text: caption }] };
-    case "branch":
-      return { sx: p.sx + e.side * 20, sy: p.sy - 9, side: e.side, lines: [{ text: caption }] };
-    case "summit":
-      return { sx: p.sx, sy: p.sy - 10, side: (freeSide * -1) as -1 | 1, lines: [{ text: caption }] };
-  }
 }
 
 function eventArt(
@@ -240,19 +164,22 @@ function eventNodes(
   strip: StripLayout,
   body: StripBody,
   rng: Rng,
-): { readonly art: SvgNode[]; readonly laid: CaptionsLaid } {
+  compass: { readonly x: number; readonly y: number },
+  isLast: boolean,
+): { readonly art: SvgNode[]; readonly seats: ReadonlyArray<Seat> } {
   const art: SvgNode[] = [];
-  let laid: CaptionsLaid = { nodes: [], track: { left: strip.y0 + strip.h, right: strip.y0 + strip.h } };
+  const room = captionRoom(c, strip, body);
+  const keep = captionKeep(c, input, strip, compass, isLast);
+  let laid: CaptionsLaid = { seats: [], track: { left: strip.y0 + strip.h, right: strip.y0 + strip.h } };
   for (const e of input.events) {
     if (e.dist < strip.d0 || e.dist >= strip.d1) continue;
     const p = stripPos(strip, e.dist);
     const freeSide: -1 | 1 = p.sx > strip.x0 + strip.w / 2 ? -1 : 1;
     const caption = eventCaption(e, rng);
     art.push(...eventArt(c, strip, body, e, p, freeSide, rng));
-    const seat = captionSeat(e, p, freeSide, caption);
-    laid = captionNodes(c, strip, seat.sx, seat.sy, seat.side, seat.lines, laid);
+    laid = layCaption(laid, e, p, freeSide, caption, strip, room, keep);
   }
-  return { art, laid };
+  return { art, seats: laid.seats };
 }
 
 function continuation(c: DressContext, strip: StripLayout, isLast: boolean): SvgNode[] {
@@ -317,11 +244,16 @@ export function stripNodes(
   const body = stripBody(strip);
   const compassX = strip.x0 + strip.w / 2 - Math.sign(strip.lean || 1) * (strip.w / 4 + 4);
   const compassY = strip.y0 + strip.h * 0.36;
-  const events = eventNodes(c, input, strip, body, rng);
+  const events = eventNodes(c, input, strip, body, rng, { x: compassX, y: compassY }, isLast);
   const art = el("g", {}, [
     ...(c.paint ? clothFrame(c, c.paint, strip, body) : plainFrame(c, strip)),
     ...(c.paint ? seaWash(c.paint, strip, body, rng.fork(`sea-${strip.index}`)) : []),
-    ...decorNodes(c, strip, rng),
+    ...decorNodes(
+      c,
+      strip,
+      rng,
+      events.seats.flatMap((seat) => [...seat.boxes]),
+    ),
     c.paint
       ? paintedCompass(c, c.paint, compassX, compassY, strip.needleDeg)
       : stripCompass(c, compassX, compassY, strip.needleDeg),
@@ -331,5 +263,5 @@ export function stripNodes(
     ...continuation(c, strip, isLast),
     ...(c.paint ? realmEdges(c, input, strip, isLast) : []),
   ]);
-  return { art, captions: events.laid.nodes };
+  return { art, captions: events.seats.map((seat) => captionNode(c, seat)) };
 }
