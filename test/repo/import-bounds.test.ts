@@ -249,6 +249,7 @@ const toolingPlant = (file: string): string[] => {
     `import { createRng } from "${up}src/core/rng.ts";`,
     `export const h = () => import("./test/part.ts");`,
     `export const i = () => import("${up}scripts-archive/x.ts");`,
+    `export * from "${up}test-support";`,
   ];
 };
 
@@ -256,7 +257,7 @@ test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source a
   for (const file of TOOLING_FILES)
     assert.deepEqual(
       await reports(toolingPlant(file), file, [TOOLING_RULE]),
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18],
       `${file}. ${TOOLING_BLIND_SPOTS}`,
     );
 });
