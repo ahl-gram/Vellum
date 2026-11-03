@@ -1,4 +1,5 @@
 // The head cluster (Issue #480 Landfall Sub 6b; Issue #762): on home the cluster on the kit's crisp panel and every line of it read and the stage's lettering opted out of selection, the desk notice, and the trail under the nav on every room; every geometry MEASURED against the rendered page, since the Issue #480 screenshots were all things source-scan tests could not see.
+import { explorerUp } from "../support/explorer.ts";
 import { makeStage, makeMouse, readCam, atLandfall, landed } from "../support/home.ts";
 import { GRADIENT_STOPS, PAGE_RGBA } from "../support/pixel.ts";
 import { makeStep } from "../support/step.ts";
@@ -28,7 +29,7 @@ const rectOf = (sel: string): Payload<Rect | null> =>
   `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, clearMobile, waitReady, PORT } = ctx;
+  const { send, clearMobile, PORT } = ctx;
   // CL2 is deliberately not stepped: its landfall loop answers with its last read rather than throwing, and CL2 asserts that read stands at its landfall.
   const step = makeStep(ctx);
   const { settleHome } = makeStage(ctx);
@@ -67,8 +68,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
   // The next suite in the lane starts on whatever page is current: hand it a SETTLED Explorer, since a suite that reads the Explorer without navigating races its boot draw (RD2/RD3 red on PR #482 CI).
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
-  await waitReady();
+  await step("CL restore", async () => {
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+    await explorerUp(ctx, "CL restore");
+  });
 }
 
 const CL1_PANEL: Payload<{

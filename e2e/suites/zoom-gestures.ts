@@ -1,5 +1,6 @@
 // Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards; the chart takes a finger only once its touch press is pressed (Issue #778), so ZG5 to ZG7 read it off, ZG9 reads every other room off, ZG10 carries it from room to room and takes it back, ZG8 presses it for ZG2 to ZG4, ZG8c takes it back, and the suite forgets it before the next. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), and NEVER load a page in the touch block after a dispatched two-finger touch (later touches then reach no listener, a tap landing only as its click, and a pinch zooms the page whatever touch-action says; measured 2026-10-13 on main's build too, Issue #778), so every page load comes before ZG2's pinch, the touch-off pinch is the browser's own (Input.synthesizePinchGesture) and is read for its two fingers and the camera, never for the page's own zoom (linux Chrome on CI never moves visualViewport.scale under it, where Brave on macOS zooms the page to 2; measured 2026-10-13, Issue #778), and ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
 import { forgetChartTouch } from "../support/chart-touch.ts";
+import { toExplorer } from "../support/explorer.ts";
 import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { countEvents } from "../support/witness.ts";
@@ -52,14 +53,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 function gesturesKit(ctx: SuiteContext) {
-  const { evaluate, send, waitReady, waitSettled, PORT } = ctx;
-  async function reloadHome(label: string): Promise<void> {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique` });
-    await waitReady();
-    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-    await waitSettled(label);
-  }
+  const { evaluate, PORT } = ctx;
+  const reloadHome = (label: string): Promise<void> =>
+    toExplorer(ctx, `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique`, label, () =>
+      evaluate<undefined>(`window.__vellumSetRedraftEnabled(false)`),
+    );
   const vpRect = () =>
     evaluate<{ L: number; T: number; W: number; H: number }>(
       `(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{L:r.left,T:r.top,W:v.clientWidth,H:v.clientHeight};})()`,

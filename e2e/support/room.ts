@@ -1,4 +1,4 @@
-// Shared helpers for the Reading-Room-hosted suites (Issue #320); reading-room/kit.ts deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
+// Shared helpers for the Reading-Room-hosted suites (Issue #320), the reading-room suite's own kit among them; the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 import { dropExpectedCancellations } from "./console.ts";
 import type { Evaluate, SuiteContext } from "../types.ts";
 
