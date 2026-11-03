@@ -9,6 +9,18 @@ const NAMED_CROSSINGS = [
   (r: string): string => `here the ${r} is crossed by a bridge`,
 ];
 
+const ENTERED_REALMS = [
+  (n: string): string => `here you enter ${n}`,
+  (n: string): string => `here begins ${n}`,
+  (n: string): string => `the road passes into ${n}`,
+];
+
+const ENTERED_WOODS = [
+  (n: string): string => `the road enters ${n}`,
+  (n: string): string => `the way runs into ${n}`,
+  (n: string): string => `into the shade of ${n}`,
+];
+
 const UNNAMED_CROSSINGS = ["a ford", "a brook, crossed by a ford", "a wooden foot-bridge"];
 
 const SUMMITS = ["here the road climbs", "a hard pull to the height", "the height of the way"];
@@ -37,9 +49,9 @@ export function eventCaption(e: RibbonEvent, rng: Rng): string {
     case "summit":
       return rng.fork(`summit-${e.k}`).pick(SUMMITS);
     case "border":
-      return "a border";
+      return rng.fork(`border-${e.k}`).pick(ENTERED_REALMS)(e.name);
     case "forest":
-      return "a wood";
+      return rng.fork(`forest-${e.k}`).pick(ENTERED_WOODS)(e.name);
   }
 }
 
