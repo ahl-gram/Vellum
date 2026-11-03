@@ -90,3 +90,53 @@ test("each row's home is a file in the tree, and its method is refused in a suit
     assert.deepEqual(await ruleLines(lines, home, RULE), [], `${spelling} is refused at its own home`);
   }
 });
+
+const linted = (plant: ReadonlyArray<readonly [string, boolean]>, path: string): Promise<number[]> =>
+  ruleLines(
+    plant.map(([line]) => line),
+    path,
+    RULE,
+  );
+const refusedOf = (plant: ReadonlyArray<readonly [string, boolean]>): number[] =>
+  plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
+
+const HOP_HOME = "e2e/support/nav.ts";
+const HOP_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  ['export const a = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "about:blank" });', REFUSE],
+  ['export const b = ({ send }: SuiteContext) => send("Page.navigate", { url: `about:blank` });', REFUSE],
+  ['export const c = ["--headless=new", "--window-size=1280,2400", "about:blank"];', REFUSE],
+  [
+    'const AWAY = "about:blank"; export const d = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: AWAY });',
+    REFUSE,
+  ],
+  ["// a hop leaves through about:blank, named in a comment, which navigates nowhere", PASS],
+  ['export const e = "every fresh address arrives through about:blank first";', PASS],
+  ['export const f = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "about:" + "blank" });', PASS],
+  [
+    'const s = "blank"; export const g = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: `about:${s}` });',
+    PASS,
+  ],
+  [
+    'import { ABOUT_BLANK } from "../../support/nav.ts"; export const h = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: ABOUT_BLANK });',
+    PASS,
+  ],
+  ['export const i = (ctx: SuiteContext) => ctx.send("Page.navigate", { url: "http://127.0.0.1:8765/faq/" });', PASS],
+];
+const HOP_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the address assembled from pieces or from a template holding an expression (plant lines 8 and 9), and ABOUT_BLANK imported from its home and handed to a raw Page.navigate (plant line 10), since no syntax read of one file resolves either; and a hop written by hand on top of leaveBlank or bounce, since the rule reads spellings and not what a function does. A navigate to any other address is no row (plant line 11)";
+
+test("no e2e file names about:blank but its one home, e2e/support/nav.ts, the harness's launch argument included (Issue #1016)", async () => {
+  const refused = refusedOf(HOP_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < HOP_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(HOP_PLANT, "e2e/suites/document-rooms.ts"), refused, HOP_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(HOP_PLANT, "e2e/harness.ts"),
+    refused,
+    "the harness launches its browser on ABOUT_BLANK from the home, never on a spelling of its own",
+  );
+  assert.deepEqual(await linted(HOP_PLANT, HOP_HOME), [], "the home itself is refused the address it exists to hold");
+});
