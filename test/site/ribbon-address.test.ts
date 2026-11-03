@@ -112,7 +112,7 @@ test("rowProspectTarget gives a waypoint row its own town's prospect on the page
     rowProspectTarget(hash, { kind: "waypoint", index: 4 }),
     "/prospect/#seed=7&style=ink&band=temperate&i=4",
   );
-  for (const kind of ["branch", "summit", "crossing"] as const) {
+  for (const kind of ["branch", "summit", "crossing", "border", "forest"] as const) {
     assert.equal(rowProspectTarget(hash, { kind, index: 4 }), null, kind);
   }
   assert.equal(rowProspectTarget(hash, { kind: "waypoint" }), null, "a waypoint with no index has no town to open");

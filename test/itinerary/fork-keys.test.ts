@@ -119,3 +119,30 @@ test("a strip boundary one double below .5 keeps its flanking decor (the decor f
     "one double of accumulated float must not reshuffle the wayside trees",
   );
 });
+
+// 2026-11-03, Issue #431 plan (431-phrases.log): measured to discriminate for both new fork labels, a key on the rounded distance picks a different phrasing across each of these five.
+const REALM_WOOD_BOUNDARIES = [3.5, 13.5, 21.5, 23.5, 33.5];
+
+test("a border and a wood one double below a .5 boundary press the same scroll (the border and forest forks)", () => {
+  const events = (dist: number): Array<[string, RibbonEvent]> => [
+    ["Marches", { kind: "border", k: 7, dist, name: "The Marches", fromName: "Aester Vale" }],
+    ["Aln", { kind: "forest", k: 7, dist, name: "The Ferns of Aln" }],
+  ];
+  for (const boundary of REALM_WOOD_BOUNDARIES) {
+    const lower = justBelow(boundary);
+    assert.equal(Math.round(boundary), boundary + 0.5, `${boundary} rounds up`);
+    assert.equal(Math.round(lower), boundary - 0.5, "and the double below it rounds down");
+    for (const dress of ["antique", "ink"] as const) {
+      events(boundary).forEach(([word, event], i) => {
+        const drawn = ribbonSvgFor(inputWith([event], 40, BIOMES.grassland), dress);
+        assert.ok(drawn.includes(word), `the ${dress} fixture at ${boundary} draws its ${event.kind} caption`);
+        const twin = (events(lower)[i] as [string, RibbonEvent])[1];
+        assert.equal(
+          drawn,
+          ribbonSvgFor(inputWith([twin], 40, BIOMES.grassland), dress),
+          `one double of accumulated float must not reword the ${event.kind} at ${boundary}`,
+        );
+      });
+    }
+  }
+});

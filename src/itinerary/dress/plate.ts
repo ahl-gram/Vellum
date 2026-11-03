@@ -6,6 +6,7 @@ import type { RibbonInput } from "../input.ts";
 import { ribbonTitle, stagesLine } from "../prose.ts";
 import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W } from "./layout.ts";
 import { stripNodes } from "./strip.ts";
+import { bandNames } from "./bands.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 
 function grain(c: DressContext, id: string, seed: number): SvgNode[] {
@@ -195,6 +196,7 @@ export function renderRibbon(c: RibbonContext, input: RibbonInput, rng: Rng): Sv
     ...plateFrame(c),
     ...(c.paint ? bannerTitle(c, c.paint, input) : titleBand(c, input)),
     ...drawn.map((d) => d.art),
+    ...bandNames(c, input, layout),
     el(
       "g",
       {},

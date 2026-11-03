@@ -33,6 +33,7 @@ import type { RibbonContext, RibbonPaint } from "./context.ts";
 import { clothFrame, plainFrame, stripBody, type StripBody } from "./cloth.ts";
 import { captionKeep, captionNode, captionRoom, layCaption, type CaptionsLaid } from "./captions.ts";
 import type { Seat } from "./seats.ts";
+import { borderHeights, borderLines, onBorderLine } from "./border-line.ts";
 
 const DECOR_STRIDE = 2;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
@@ -137,6 +138,9 @@ function eventArt(
         e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg),
       ];
     }
+    case "border":
+    case "forest":
+      return [];
     case "branch":
       return [
         el("path", {
@@ -179,7 +183,7 @@ function eventNodes(
     art.push(...eventArt(c, strip, body, e, p, freeSide, rng));
     laid = layCaption(laid, e, p, freeSide, caption, strip, room, keep);
   }
-  return { art, seats: laid.seats };
+  return { art: [...art, ...borderLines(c, strip, borderHeights(input, strip), keep)], seats: laid.seats };
 }
 
 function continuation(c: DressContext, strip: StripLayout, isLast: boolean): SvgNode[] {
@@ -200,36 +204,6 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
       [`· ${leagues} leagues ·`],
     ),
   ];
-}
-
-function realmEdges(c: RibbonContext, input: RibbonInput, strip: StripLayout, isLast: boolean): SvgNode[] {
-  const names: Array<{ name: string | null; x: number; turn: -90 | 90 }> = [
-    { name: strip.index === 0 ? input.realmFrom : null, x: strip.x0 + 4.6, turn: -90 },
-    { name: isLast ? input.realmName : null, x: strip.x0 + strip.w - 4.6, turn: 90 },
-  ];
-  const y = strip.y0 + strip.h / 2;
-  return names.flatMap(({ name, x, turn }) =>
-    name === null
-      ? []
-      : [
-          el(
-            "text",
-            {
-              x: r1(x),
-              y: r1(y),
-              "text-anchor": "middle",
-              "dominant-baseline": "middle",
-              transform: `rotate(${turn} ${r1(x)} ${r1(y)})`,
-              "font-family": c.style.fontFamily,
-              "font-size": 7.6,
-              "font-style": "italic",
-              "letter-spacing": 1.2,
-              fill: c.ink,
-            },
-            [name],
-          ),
-        ],
-  );
 }
 
 export type StripDrawing = { readonly art: SvgNode; readonly captions: ReadonlyArray<SvgNode> };
@@ -261,7 +235,12 @@ export function stripNodes(
     ...leagueMarks(c, strip),
     ...events.art,
     ...continuation(c, strip, isLast),
-    ...(c.paint ? realmEdges(c, input, strip, isLast) : []),
   ]);
-  return { art, captions: events.seats.map((seat) => captionNode(c, seat)) };
+  const ys = borderHeights(input, strip);
+  return {
+    art,
+    captions: events.seats.map((seat) =>
+      captionNode(c, onBorderLine(seat.boxes, ys) ? { ...seat, backed: true } : seat),
+    ),
+  };
 }

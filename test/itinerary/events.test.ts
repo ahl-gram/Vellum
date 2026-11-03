@@ -7,6 +7,7 @@ import { eventCaption, ribbonTitle, stagesLine } from "../../src/itinerary/prose
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { capitalJourneys } from "../../test-support/ribbon-fixtures.ts";
+import { sweepJourneys } from "../../test-support/ribbon-captions.ts";
 
 // Issue #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
 
@@ -141,4 +142,62 @@ test("the stages line names each stop at its own league and closes on the title'
       );
     }
   }
+});
+
+const BORDER_PHRASINGS = (n: string): string[] => [
+  `here you enter ${n}`,
+  `here begins ${n}`,
+  `the road passes into ${n}`,
+];
+const WOOD_PHRASINGS = (n: string): string[] => [
+  `the road enters ${n}`,
+  `the way runs into ${n}`,
+  `into the shade of ${n}`,
+];
+
+function captionsAtEachStep(make: (k: number) => RibbonEvent): string[] {
+  return Array.from({ length: 30 }, (_, k) => eventCaption(make(k), createRng(7).fork("ribbon-0-5")));
+}
+
+test("a border's and a wood's caption take one of three phrasings each, picked by the event's own fork, and the world's name whole", () => {
+  for (const name of ["The Tsardom of Gyksvu", "Greater Tolo"]) {
+    const borders = captionsAtEachStep((k) => ({ kind: "border", dist: 1, k, name, fromName: "Aester Vale" }));
+    assert.deepEqual([...new Set(borders)].sort(), BORDER_PHRASINGS(name).sort(), `${name} as a border`);
+    assert.ok(
+      borders.every((c) => !/\b[Tt]he The\b/.test(c)),
+      `${name} never doubles its article`,
+    );
+  }
+  for (const name of ["The Ferns of Peroa", "Deep Railo"]) {
+    const woods = captionsAtEachStep((k) => ({ kind: "forest", dist: 1, k, name }));
+    assert.deepEqual([...new Set(woods)].sort(), WOOD_PHRASINGS(name).sort(), `${name} as a wood`);
+    assert.ok(
+      woods.every((c) => !/\b[Tt]he The\b/.test(c)),
+      `${name} never doubles its article`,
+    );
+  }
+  const event: RibbonEvent = { kind: "border", dist: 1, k: 11, name: "Greater Tolo", fromName: "Aester Vale" };
+  const once = (): string => eventCaption(event, createRng(7).fork("ribbon-0-5"));
+  assert.equal(once(), once(), "the same event on a fresh fork says the same words: the fork, not a draw, decides");
+});
+
+test("seed 42's default road says here begins The Hauwaiwa Atolls and the road enters The Ferns of Peroa", () => {
+  const { input, rng } = journey(42, "Homaitani");
+  assert.equal(eventCaption(only(input, "border")[0]!, rng), "here begins The Hauwaiwa Atolls");
+  assert.equal(eventCaption(only(input, "forest")[0]!, rng), "the road enters The Ferns of Peroa");
+});
+
+test("every phrasing is told on the sweep", () => {
+  const told = new Set<string>();
+  for (const { input } of sweepJourneys()) {
+    const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
+    for (const e of input.events) {
+      if (e.kind === "border" || e.kind === "forest") told.add(eventCaption(e, rng).replace(e.name, "N"));
+    }
+  }
+  assert.deepEqual(
+    [...told].sort(),
+    [...BORDER_PHRASINGS("N"), ...WOOD_PHRASINGS("N")].sort(),
+    "all three openings of each kind are heard",
+  );
 });

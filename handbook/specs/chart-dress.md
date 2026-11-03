@@ -46,10 +46,33 @@ keeps today's seat where that fits, and otherwise moves inward or along the road
 side, onto shorter lines if it is a description, across the road under its town on a backing of the
 dress's ground, or down to seven tenths of its size; a caption with no clear seat takes the least
 crowded one inside its strip, backed; and a decoration glyph under a caption gives way to it.
-`test/itinerary/ribbon-seats.test.ts` holds the class over the frame guard's sweep. **Provisional
-until the post-use review** (Issue #1207): the across-the-road seat and its backing, the size floor,
-the shorter lines, a side road's name crossing to the road's other side, the ink departure name set
-smaller at the strip's foot, and the decoration giving way.
+`test/itinerary/ribbon-seats.test.ts` holds the class over the frame guard's sweep. A border the road
+crosses into another named realm is captioned where the road enters it, in the traveller's voice (one
+of three phrasings the road's own fork picks, "here you enter", "here begins" or "the road passes
+into", then the realm's own name as the world spells it), and ruled straight across its strip in the
+dress's border tokens (`borderStroke`, `borderDash`, `borderOpacity`) at a width of 1.1 written at the
+layer, the road casing's, not `borderWidth`, which the chart scales by its own k and the plate does not,
+the line giving way to every town, summit, crossing mark, rose, league number and continuation line it
+would cross and running under lettering, which stands on its backing where the line meets it (`borderLines` in `src/itinerary/dress/border-line.ts`); the road's entry into the
+chart's named forest is captioned the same way ("the road enters", "the way runs into" or "into the
+shade of", then the forest's name), the forest being the wood the chart's own gate names, its largest
+stand of the five forest biomes, 25 cells or more (`namedForestBlob` in `src/render/named-forest.ts`),
+whether or not the chart found room to letter it. On the painted dress the realm names ride the left
+gamboge band at each border, the old realm's ending just below the line and the new realm's starting
+just above it, a name with no room on its own strip standing on the neighbouring strip where the road
+meets the line, and a name with no room there and no neighbouring strip is not drawn, which leaves the
+arrival's realm off the band on a road whose last border lies on the last strip (2 of the 99 roads with
+a border in the frame guard's sweep and the capital's roads of seeds 2, 7, 11, 15, 42, 99, 123 and 2024,
+2026-11-03: seed 11 Laihe to Lomowe and seed 2024 Velel to Taliomaro); a road that
+crosses no border names its realm at the plate's two ends, the departure's on the first strip and the
+arrival's on the last (`bandNames` in `src/itinerary/dress/bands.ts`).
+`test/itinerary/ribbon-borders.test.ts` holds the band and the line. **Provisional until the post-use
+review** (Issue #1207): the across-the-road seat and its backing, the size floor, the shorter lines, a
+side road's name crossing to the road's other side, the ink departure name set smaller at the strip's
+foot, the decoration giving way, and from Issue #431 the border line, its width and its giving way, the
+lettering backed where the line meets it, the band names at the line and their move to the
+neighbouring strip, the six phrasings, and the rules for when a border and an entry into the wood are
+told (three cells of the new realm; six cells of the wood after twenty-four clear of it).
 
 **The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
 so every collectible survey is antique and the only other dress that can reach a gathered sheet is a
@@ -67,7 +90,8 @@ chart side is inside the byte-determinism contract, and the site quotes it as a 
 
 **A value that changes with the dress is a style token; a value that holds across every dress is
 written at the layer.** A border is tokenized whole, its ink and its geometry alike (`borderStroke`,
-`borderWidth`, `borderDash` and `borderOpacity` in `src/render/style.ts`), because a dress changes
+`borderWidth`, `borderDash` and `borderOpacity` in `src/render/style.ts`; the Ribbon's border line takes
+all but the width, as its paragraph above says), because a dress changes
 how a border is drawn and not only what colour it is. A realm name takes its ink and its halo from
 tokens too, but its type size, tracking, weight, opacity and halo width sit inline in
 `featureLabelsLayer` (`src/render/layers/feature-labels.ts`): that treatment is what keeps the name
