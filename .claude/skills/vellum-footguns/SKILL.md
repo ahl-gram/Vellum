@@ -121,7 +121,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 
 1. **A gesture check drives the gesture.** Press and release with `sendClick`, `mouseDown` and
    `mouseUp` in `e2e/support/input.ts`, which `vellum/e2e-cdp-through-helper` makes the one home
-   of every mouse and touch event, and the harness's touch helpers, at coordinates read from the
+   of every CDP mouse and touch send (not an in-page event, Issue #1213), and the harness's touch helpers, at coordinates read from the
    element's own rect. `element.click()` ignores `pointer-events`
    and every element painted over the target; use it only for wiring, with the reason at the check.
    A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
