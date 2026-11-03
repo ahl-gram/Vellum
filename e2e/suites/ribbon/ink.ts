@@ -22,13 +22,14 @@ type Ink = {
   removes: number;
   ends: number[];
   rect: number[];
+  groundAnims: number;
 };
 const INK: Payload<Ink> = `(() => { const rgba = ${PAGE_RGBA}, p = document.getElementById("rb-plate"), m = document.getElementById("map"), w = window.__rbInk || { adds: 0, removes: 0, ends: [] };
   const a = p.getAnimations().find((x) => x.animationName === "rb-ink"), r = p.getBoundingClientRect(), cs = getComputedStyle(p);
   return { cls: p.classList.contains("rb-inking"), play: a ? a.playState : null, duration: a ? a.effect.getComputedTiming().duration : null, ink: parseFloat(cs.getPropertyValue("--rb-ink")),
     strip: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--rb-ink-strip")), clip: cs.clipPath, ground: rgba(getComputedStyle(m).backgroundColor),
     transform: cs.transform, hovered: p.matches(":hover"), zoomed: document.getElementById("map-viewport").classList.contains("zoomed"),
-    decoded: !p.hidden && p.complete && p.naturalWidth > 0, adds: w.adds, removes: w.removes, ends: w.ends.slice(), rect: [r.left, r.top, r.width, r.height] }; })()`;
+    decoded: !p.hidden && p.complete && p.naturalWidth > 0, adds: w.adds, removes: w.removes, ends: w.ends.slice(), rect: [r.left, r.top, r.width, r.height], groundAnims: m.getAnimations().length }; })()`;
 const WITNESS = `(() => { const w = (window.__rbInk = { adds: 0, removes: 0, ends: [] }); document.addEventListener("animationend", (e) => { if (e.animationName === "rb-ink") w.ends.push(e.elapsedTime); }, true); const plate = () => document.getElementById("rb-plate"); let had = !!plate() && plate().classList.contains("rb-inking");
   new MutationObserver(() => { const p = plate(), has = !!p && p.classList.contains("rb-inking"); if (has === had) return; had = has; if (has) w.adds++; else w.removes++; })
     .observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] }); return true; })()`;
@@ -301,7 +302,7 @@ const reducedArrival = (k: RibbonKit): Promise<Landed> =>
 const reducedSwitch = (k: RibbonKit, endsBefore: number): Promise<Ink> =>
   underReduced(k, async () => {
     const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));
-    return stable(INK, "ribbon-ink-collapsed", { departed: (d) => d.ends.length > endsBefore });
+    return stable(INK, "ribbon-ink-collapsed", { departed: (d) => d.ends.length > endsBefore && d.groundAnims === 0 });
   });
 
 export async function rb23Reduced(k: RibbonKit, fullMs: number): Promise<void> {
@@ -326,6 +327,7 @@ export async function rb23Reduced(k: RibbonKit, fullMs: number): Promise<void> {
       if (after.cls || after.clip !== "none" || after.ground[3] !== 0) faults.push("and lands whole");
     }
     k.check(
+      // 2026-11-03: rewritten for a red on CI: RB23, run 41719348554, Issue #432: the wait after the reduced-motion switch took two equal reads of #map's ground while its 0.01 ms transition was still pending, so it now departs only once #map lists no animation
       "RB23 under reduced motion the first plate of a visit lands whole at once, taking no reveal (RB21's inked arrival the control), and a reveal running when reduced motion is turned on ends at once, its own end reporting a run of under 10 ms, and lands whole",
       faults.length === 0,
       JSON.stringify({ faults, fullMs, rest, running: turn.running, after }),
