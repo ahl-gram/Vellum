@@ -1,6 +1,6 @@
 // The camera's presses under the hand and under focus (Issue #779 part 2h): dark at four classes deep, on each of the three.
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import type { Payload } from "../../types.ts";
 import type { GlassKit } from "../glass-ceremony.ts";
 import { PRESSES } from "./dress.ts";

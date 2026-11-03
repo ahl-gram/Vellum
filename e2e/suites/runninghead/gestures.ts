@@ -1,5 +1,5 @@
 // The kit's gestures and paper state across the sweep (Issue #779 part 2h): the printed read RH29 judges, the house ring and a nav link's rise.
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import { SHELLED } from "./reads.ts";

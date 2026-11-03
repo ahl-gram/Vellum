@@ -5,7 +5,7 @@ import { clearMetrics } from "../print-room/kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { contrast } from "../cluster/trail.ts";
 import { FLOOR_PLAIN } from "../stage/stage.ts";
 import { FONTS_LOADED, INK_RGBA, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";

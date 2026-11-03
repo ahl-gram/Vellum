@@ -1,4 +1,4 @@
-import { sendKey } from "../../support/home.ts";
+import { sendKey } from "../../support/input.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
