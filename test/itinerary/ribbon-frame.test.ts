@@ -1,96 +1,121 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts";
+import { type RibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
-import { layoutRibbon, STRIP_PAD } from "../../src/itinerary/dress/layout.ts";
-import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
-import { STYLES } from "../../src/render/style.ts";
-import type { World } from "../../src/world/types.ts";
+import { layoutRibbon, STRIP_PAD, type StripLayout } from "../../src/itinerary/dress/layout.ts";
+import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
+import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
 
-// Measured worst overshoot post-fix: 0.60px over 1457 connected pairs (seeds 2/15/42/99/123), the road casing's half-width leaning on the frame stroke; TOLERANCE is that half-width written out, not imported, so it cannot widen with the module it guards.
+// 2026-11-02, 77 journeys (seeds 99/15/42 plus the four extremes): painted casings 16.2 inside the hairline at worst, side roads 0.49 inside (seed 42 Laukuwelua to Naukoa, strip 2), the ends 1.26 past (seed 99 Taliport to Ceasairmere, strip 2); the plain frame 0.65 past (the same journey and strip). TOLERANCE and PAINTED_TOLERANCE are the casings' half-widths written out, not imported, so they cannot widen with the module they guard.
 
 const SEEDS = [99, 15, 42];
 const TOLERANCE = 2.3;
+const PAINTED_TOLERANCE = 4.2;
 
+type Dress = "antique" | "ink";
 type RoadShape = { readonly kind: string; readonly pts: ReadonlyArray<readonly [number, number]> };
 
-function roadShapes(svg: string, roadColor: string): RoadShape[] {
+function roadShapes(svg: string): RoadShape[] {
   const out: RoadShape[] = [];
   for (const m of svg.matchAll(/<path ([^>]*?)\/>/g)) {
     const attrs = m[1] as string;
-    if (!attrs.includes(`stroke="${roadColor}"`)) continue;
+    if (!attrs.includes('class="road"')) continue;
     const dash = /stroke-dasharray="([^"]*)"/.exec(attrs)?.[1] ?? "none";
     const d = /d="([^"]*)"/.exec(attrs)?.[1] ?? "";
     const nums = (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
     const pts: Array<readonly [number, number]> = [];
     for (let i = 0; i + 1 < nums.length; i += 2) pts.push([nums[i] as number, nums[i + 1] as number]);
-    out.push({ kind: dash === "0.2 3.4" ? "casing" : dash === "0.2 3" ? "branch" : "waypoint-span", pts });
+    out.push({ kind: dash === "0.2 3.4" ? "casing" : dash === "0.2 3" ? "branch" : "town span", pts });
   }
   return out;
 }
 
-function journeysOf(world: World): RibbonInput[] {
-  const mask = roadMask(world);
-  const capital = world.settlements.findIndex((s) => s.kind === "capital");
-  return roadReachable(world, mask, capital)
-    .map((to) => buildRibbonInput(world, capital, to))
-    .filter((i): i is RibbonInput => i !== null);
-}
-
 const worlds = SEEDS.map((seed) => ({ seed, world: generateWorld(defaultRecipe(seed)) }));
 
-function overshootOf(input: RibbonInput): { worst: number; where: string; shapes: number } {
-  const layout = layoutRibbon(input);
+function stripOf(layout: ReadonlyArray<StripLayout>, x: number): StripLayout | undefined {
+  let best: StripLayout | undefined;
+  for (const s of layout) {
+    if (best === undefined || Math.abs(x - (s.x0 + s.w / 2)) < Math.abs(x - (best.x0 + best.w / 2))) best = s;
+  }
+  return best;
+}
+
+/** How far a vertex stands past what its dress allows: antique, past the band's inner hairline (bound 0) or the strip's ends by the painted casing's half-width; ink, past the rect frame by its casing's half-width. */
+function pastOf(dress: Dress, strip: StripLayout, x: number, y: number): number {
+  const endsPast = Math.max(strip.y0 - y, y - (strip.y0 + strip.h), 0);
+  if (dress === "ink") {
+    return Math.max(Math.max(strip.x0 - x, x - (strip.x0 + strip.w), endsPast) - TOLERANCE, 0);
+  }
+  const body = stripBody(strip);
+  const sidePast = Math.max(body.left(y) + BAND - x, x - (body.right(y) - BAND), 0);
+  return Math.max(sidePast, endsPast - PAINTED_TOLERANCE, 0);
+}
+
+function overshootOf(
+  input: RibbonInput,
+  dress: Dress,
+): { worst: number; where: string; shapes: number; kinds: Map<string, number> } {
+  const strips = layoutRibbon(input).strips;
   let worst = 0;
   let where = "";
   let shapes = 0;
-  for (const shape of roadShapes(ribbonSvgFor(input, "antique"), STYLES.antique.road)) {
+  const kinds = new Map<string, number>();
+  for (const shape of roadShapes(ribbonSvgFor(input, dress))) {
     const head = shape.pts[0];
     if (!head) continue;
-    const strip = layout.strips.find((s) => head[0] >= s.x0 - 30 && head[0] <= s.x0 + s.w + 30);
+    const strip = stripOf(strips, head[0]);
     if (!strip) continue;
     shapes++;
+    kinds.set(shape.kind, (kinds.get(shape.kind) ?? 0) + 1);
     for (const [x, y] of shape.pts) {
-      const over = Math.max(strip.x0 - x, x - (strip.x0 + strip.w), strip.y0 - y, y - (strip.y0 + strip.h), 0);
-      if (over > worst) {
-        worst = over;
+      const past = pastOf(dress, strip, x, y);
+      if (past > worst) {
+        worst = past;
         where = `${input.fromName} to ${input.toName}, strip ${strip.index}, ${shape.kind} at ${x},${y}`;
       }
     }
   }
-  return { worst, where, shapes };
+  return { worst, where, shapes, kinds };
 }
 
-test("no road ink escapes its strip frame, on any journey, on any seed", () => {
-  let checked = 0;
-  let shapes = 0;
-  let worst = 0;
-  let worstAt = "";
-  for (const { seed, world } of worlds) {
-    for (const input of journeysOf(world)) {
-      const m = overshootOf(input);
-      shapes += m.shapes;
-      if (m.worst > worst) {
-        worst = m.worst;
-        worstAt = `seed ${seed} ${m.where}`;
+test("no road ink escapes its strip, inside the painted hairlines on antique and the plain frame on ink, on any journey, on any seed", () => {
+  for (const dress of ["antique", "ink"] as const) {
+    let checked = 0;
+    let shapes = 0;
+    let worst = 0;
+    let worstAt = "";
+    const kinds = new Map<string, number>();
+    for (const { seed, world } of worlds) {
+      for (const input of capitalJourneys(world)) {
+        const m = overshootOf(input, dress);
+        shapes += m.shapes;
+        for (const [k, n] of m.kinds) kinds.set(k, (kinds.get(k) ?? 0) + n);
+        if (m.worst > worst) {
+          worst = m.worst;
+          worstAt = `seed ${seed} ${m.where}`;
+        }
+        checked++;
       }
-      checked++;
     }
+    assert.ok(checked >= 60, `${dress}: the sweep is real: ${checked} journeys`);
+    assert.ok(shapes >= 500, `${dress}: and it found road ink to measure: ${shapes} shapes`);
+    for (const kind of ["casing", "branch", "town span"]) {
+      assert.ok((kinds.get(kind) ?? 0) > 0, `${dress}: and it found a ${kind} to measure`);
+    }
+    assert.equal(
+      worst,
+      0,
+      `${dress}: road ink must stay inside its frame. Worst ${worst.toFixed(2)}px past: ${worstAt}`,
+    );
   }
-  assert.ok(checked >= 60, `the sweep is real: ${checked} journeys`);
-  assert.ok(shapes >= 500, `and it found road ink to measure: ${shapes} shapes`);
-  assert.ok(
-    worst <= TOLERANCE,
-    `road ink must stay within its strip frame, give or take its own casing (${TOLERANCE}px). Worst ${worst.toFixed(2)}px: ${worstAt}`,
-  );
 });
 
 test("the sweep includes journeys short enough for the overlap clamp to bind, or it proves nothing", () => {
   let binding = 0;
   let total = 0;
   for (const { world } of worlds) {
-    for (const input of journeysOf(world)) {
+    for (const input of capitalJourneys(world)) {
       total++;
       if (STRIP_PAD / layoutRibbon(input).pxPerCell < 0.75) binding++;
     }
@@ -103,14 +128,13 @@ test("the sweep includes journeys short enough for the overlap clamp to bind, or
 
 test("seed 99's Mialiscove to Con, the journey that first drew off the sheet, stays on it", () => {
   const world = worlds.find((w) => w.seed === 99)!.world;
-  const from = world.settlements.findIndex((s) => s.name === "Mialiscove");
-  const to = world.settlements.findIndex((s) => s.name === "Con");
-  assert.ok(from >= 0 && to >= 0, "seed 99 still names both ends of the reference journey");
-  const input = buildRibbonInput(world, from, to);
-  assert.ok(input, "and still joins them by road");
+  const input = namedJourney(world, "Mialiscove", "Con");
   assert.ok(STRIP_PAD / layoutRibbon(input).pxPerCell < 0.75, "it is still short enough to be the case that broke");
-  const { worst, where } = overshootOf(input);
-  assert.ok(worst <= TOLERANCE, `worst ${worst.toFixed(2)}px: ${where}`);
+  for (const dress of ["antique", "ink"] as const) {
+    const { worst, where, shapes } = overshootOf(input, dress);
+    assert.ok(shapes > 0, `${dress}: it found road ink to measure`);
+    assert.equal(worst, 0, `${dress}: worst ${worst.toFixed(2)}px past: ${where}`);
+  }
 });
 
 test("the three journeys that lean hardest on the frame still hold", () => {
@@ -122,19 +146,18 @@ test("the three journeys that lean hardest on the frame still hold", () => {
   ];
   for (const { seed, from, to } of extremes) {
     const world = worlds.find((w) => w.seed === seed)?.world ?? generateWorld(defaultRecipe(seed));
-    const a = world.settlements.findIndex((s) => s.name === from);
-    const b = world.settlements.findIndex((s) => s.name === to);
-    assert.ok(a >= 0 && b >= 0, `seed ${seed} still names ${from} and ${to}`);
-    const input = buildRibbonInput(world, a, b);
-    assert.ok(input, `seed ${seed} still joins ${from} to ${to} by road`);
-    const { worst, where } = overshootOf(input);
-    assert.ok(worst <= TOLERANCE, `seed ${seed} worst ${worst.toFixed(2)}px: ${where}`);
+    const input = namedJourney(world, from, to);
+    for (const dress of ["antique", "ink"] as const) {
+      const { worst, where, shapes } = overshootOf(input, dress);
+      assert.ok(shapes > 0, `seed ${seed} ${dress}: it found road ink to measure`);
+      assert.equal(worst, 0, `seed ${seed} ${dress}: worst ${worst.toFixed(2)}px past: ${where}`);
+    }
   }
 });
 
 test("two presses of the same journey are byte-identical (the unit twin of e2e RB7)", () => {
   const world = worlds[0]!.world;
-  const input = journeysOf(world)[0]!;
+  const input = capitalJourneys(world)[0]!;
   for (const dress of ["antique", "ink"] as const) {
     assert.equal(ribbonSvgFor(input, dress), ribbonSvgFor(input, dress), `${dress} presses the same`);
   }

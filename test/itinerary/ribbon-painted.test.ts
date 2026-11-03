@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
-import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
+import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W, stripPos } from "../../src/itinerary/dress/layout.ts";
+import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
+import { WIDTH_FACTOR } from "../../src/render/geometry.ts";
+import { attrsOf } from "../../test-support/dress-svg.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
@@ -14,6 +17,7 @@ const GAMBOGE = STYLES.antique.ribbonLimner!.gamboge;
 const worlds = SWEEP_SEEDS.map((seed) => ({ seed, world: generateWorld(defaultRecipe(seed)) }));
 const sweep = worlds.flatMap(({ world }) => capitalJourneys(world));
 const road42 = namedJourney(worlds.find((w) => w.seed === 42)!.world, "Laukuwelua", "Homaitani");
+const road15 = namedJourney(worlds.find((w) => w.seed === 15)!.world, "Stanbyl", "Svidsvikov");
 
 function vertices(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
@@ -71,4 +75,50 @@ test("each strip's two edge bands enclose the band they paint", () => {
       `band ${i} encloses ${area.toFixed(0)}, a band ${BAND} wide is ${BAND * strip.h}`,
     );
   });
+});
+
+type Numeral = { readonly n: number; readonly x: number; readonly y: number; readonly halo: Record<string, string> };
+
+function numeralsOf(svg: string): Numeral[] {
+  const out: Numeral[] = [];
+  for (const m of svg.matchAll(
+    /(?:<(?:circle|ellipse) ([^>]*)\/>)?<text ([^>]*font-size="5\.2"[^>]*)>(\d+)<\/text>/g,
+  )) {
+    const a = attrsOf(m[2] as string);
+    out.push({ n: Number(m[3]), x: Number(a.x), y: Number(a.y), halo: attrsOf(m[1] ?? "") });
+  }
+  return out;
+}
+
+test("every league is numbered on the road's centreline on antique", () => {
+  for (const input of [road42, road15]) {
+    const strips = layoutRibbon(input).strips;
+    const numerals = numeralsOf(ribbonSvgFor(input, "antique"));
+    const whole = Math.floor(input.totalLeagues);
+    assert.deepEqual(
+      numerals.map((v) => v.n).sort((a, b) => a - b),
+      Array.from({ length: whole }, (_, i) => i + 1),
+      `${input.fromName} to ${input.toName}: leagues 1 to ${whole} are each numbered once, and no other number is`,
+    );
+    for (const v of numerals) {
+      const near = strips.some((s) => {
+        const p = stripPos(s, v.n * CELLS_PER_LEAGUE);
+        return Math.abs(p.sx - v.x) <= 0.1 && Math.abs(p.sy - (v.y - 1.9)) <= 0.1;
+      });
+      assert.ok(near, `league ${v.n} stands on the road's centreline`);
+    }
+  }
+});
+
+test("every league's halo is wider than its numeral", () => {
+  const numerals = numeralsOf(ribbonSvgFor(road15, "antique"));
+  assert.ok(
+    numerals.some((v) => v.n === 100) && numerals.some((v) => v.n === 115),
+    "premise: leagues 100 to 115 are numbered",
+  );
+  for (const v of numerals) {
+    const half = Number(v.halo.rx ?? v.halo.r);
+    const need = (String(v.n).length * 5.2 * WIDTH_FACTOR.mixed) / 2 + 0.6;
+    assert.ok(half >= need, `league ${v.n}: halo half-width ${half} under the numeral's ${need.toFixed(2)}`);
+  }
 });

@@ -7,101 +7,15 @@ import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { eventCaption, tierTag } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
-import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
+import { stripPos, type StripLayout } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
 import { stripCompass } from "./compass.ts";
+import { leagueMarks, roadAngleDeg, roadNodes } from "./road.ts";
 import type { RibbonContext } from "./context.ts";
 import { clothFrame, plainFrame, stripBody } from "./cloth.ts";
 
-const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
-
-function offsetPath(pts: ReadonlyArray<StripPoint>, off: number): string {
-  let d = "";
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[Math.max(0, i - 1)] as StripPoint;
-    const b = pts[Math.min(pts.length - 1, i + 1)] as StripPoint;
-    const dx = b.sx - a.sx;
-    const dy = b.sy - a.sy;
-    const len = Math.hypot(dx, dy) || 1;
-    const x = (pts[i] as StripPoint).sx + (-dy / len) * off;
-    const y = (pts[i] as StripPoint).sy + (dx / len) * off;
-    d += `${i === 0 ? "M" : "L"}${r1(x)} ${r1(y)}`;
-  }
-  return d;
-}
-
-function roadAngleDeg(strip: StripLayout, dist: number): number {
-  const a = stripPos(strip, dist - 1.1);
-  const b = stripPos(strip, dist + 1.1);
-  return (Math.atan2(b.sy - a.sy, b.sx - a.sx) * 180) / Math.PI;
-}
-
-function roadNodes(c: DressContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
-  const nodes: SvgNode[] = [];
-  for (const off of [-ROAD_HALF, ROAD_HALF]) {
-    nodes.push(
-      el("path", {
-        d: offsetPath(strip.pts, off),
-        fill: "none",
-        stroke: c.style.road,
-        "stroke-width": 1.1,
-        "stroke-dasharray": "0.2 3.4",
-        "stroke-linecap": "round",
-      }),
-    );
-  }
-  const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
-  for (const e of input.events) {
-    if (e.kind !== "waypoint" || e.dist < strip.d0 - 0.75 || e.dist > strip.d1 + 0.75) continue;
-    const a = stripPos(strip, Math.max(strip.d0, e.dist - solidSpan));
-    const b = stripPos(strip, Math.min(strip.d1, e.dist + solidSpan));
-    const dx = b.sx - a.sx;
-    const dy = b.sy - a.sy;
-    const len = Math.hypot(dx, dy);
-    if (len < 2) continue;
-    for (const off of [-ROAD_HALF, ROAD_HALF]) {
-      const nx = (-dy / len) * off;
-      const ny = (dx / len) * off;
-      nodes.push(
-        el("path", {
-          d: `M${r1(a.sx + nx)} ${r1(a.sy + ny)}L${r1(b.sx + nx)} ${r1(b.sy + ny)}`,
-          fill: "none",
-          stroke: c.style.road,
-          "stroke-width": 1.2,
-        }),
-      );
-    }
-  }
-  return nodes;
-}
-
-function leagueDots(c: DressContext, strip: StripLayout): SvgNode[] {
-  const nodes: SvgNode[] = [];
-  const first = Math.ceil(strip.d0 / CELLS_PER_LEAGUE);
-  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
-  for (let l = Math.max(1, first); l <= last; l++) {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
-    nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 1.4, fill: c.ink }));
-    if (l % 5 === 0) {
-      nodes.push(
-        el(
-          "text",
-          {
-            x: r1(p.sx + 5.5),
-            y: r1(p.sy + 2.4),
-            "font-family": c.style.fontFamily,
-            "font-size": 7,
-            fill: c.soft,
-          },
-          [String(l)],
-        ),
-      );
-    }
-  }
-  return nodes;
-}
 
 function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
@@ -251,6 +165,7 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
         const endY = p.sy - 9;
         nodes.push(
           el("path", {
+            class: "road",
             d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(endX)} ${r1(endY)}`,
             fill: "none",
             stroke: c.style.road,
@@ -306,7 +221,7 @@ export function stripNodes(
     ...decorNodes(c, strip, rng),
     stripCompass(c, compassX, compassY, strip.needleDeg),
     ...roadNodes(c, input, strip),
-    ...leagueDots(c, strip),
+    ...leagueMarks(c, strip),
     ...eventNodes(c, input, strip, rng),
     ...continuation(c, strip, isLast),
   ]);
