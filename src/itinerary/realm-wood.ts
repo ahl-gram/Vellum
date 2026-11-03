@@ -28,7 +28,7 @@ export function borderSteps(labels: ReadonlyArray<number>): BorderStep[] {
   if (first < 0) return [];
   const steps: BorderStep[] = [];
   let cur = labels[first] as number;
-  for (let k = first; k < labels.length; ) {
+  for (let k = first; k < labels.length;) {
     const l = labels[k] as number;
     const len = runLength(labels, k);
     if (l >= 0 && l !== cur && (len >= BORDER_HOLD || k + len === labels.length)) {
