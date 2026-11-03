@@ -19,7 +19,6 @@ const press = (captions: ReadonlyArray<Box>): SvgNode[] =>
 const glyphs = (nodes: ReadonlyArray<SvgNode>): SvgNode[] =>
   nodes.filter((n) => n.tag === "g" && /^translate\(/.test(String(n.attrs.transform)));
 
-// A glyph at translate(x y) scale(s) fills x - 9s to x + 9s across and y - 12s to y + 1 down, and gives way to a caption box widened by 1.
 function boxOf(node: SvgNode): Box {
   const m = /^translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\)$/.exec(String(node.attrs.transform));
   assert.ok(m, `premise: a glyph group is placed by translate and scale: ${String(node.attrs.transform)}`);

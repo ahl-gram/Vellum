@@ -150,11 +150,11 @@ function roadDistance(b: Box, strip: StripLayout): number {
   return best;
 }
 
-// The ornament riding the rose: the fleur-de-lis (20.5 out, 4.8 wide) on antique, the N (14.6 out and 2.5 up, 3.5 wide) on ink.
+// The ornament riding the rose, out along its needle: the fleur-de-lis (20.5 out, 4.8 wide) on antique, the N (its letter centred 17.2 out, 3.9 wide) on ink.
 function ornamentOf(dress: Dress, strip: StripLayout, rose: Disc): Disc {
   const t = (strip.needleDeg * Math.PI) / 180;
   if (dress === "antique") return { x: rose.x + 20.5 * Math.sin(t), y: rose.y - 20.5 * Math.cos(t), r: 4.8 };
-  return { x: rose.x + 14.6 * Math.sin(t), y: rose.y - 14.6 * Math.cos(t) - 2.5, r: 3.5 };
+  return { x: rose.x + 17.2 * Math.sin(t), y: rose.y - 17.2 * Math.cos(t), r: 3.9 };
 }
 
 function discsOf(plate: Plate): Disc[] {
@@ -189,7 +189,6 @@ function housesOf(plate: Plate): Box[] {
   });
 }
 
-// The two antique captions the forced stage owns on the sweep (Issue #511's plan, Calls made 14): seed 99 Mialiscove to Minmari's crossing and Mialiscove to Ler's TALICETHMAR.
 const FORCED = [
   { to: "Minmari", first: "a bridge of stone" },
   { to: "Ler", first: "TALICETHMAR" },
