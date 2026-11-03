@@ -40,8 +40,8 @@ const seekTo = (f: number): Payload<boolean> =>
   `(() => { const a = document.getElementById("rb-plate").getAnimations().find((x) => x.animationName === "rb-ink"); if (!a) return false; a.pause(); a.currentTime = ${f} * a.effect.getComputedTiming().duration; return true; })()`;
 const FRAMES: Payload<boolean> = `new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(true))))`;
 const FINISH: Payload<boolean> = `(() => { const a = document.getElementById("rb-plate").getAnimations().find((x) => x.animationName === "rb-ink"); if (!a) return false; a.finish(); return true; })()`;
-const PICK: Payload<number | null> =
-  `(() => { const sel = document.getElementById("rb-to"), cur = sel.value, opt = [...sel.options].find((o) => o.value !== cur); if (!opt) return null; sel.value = opt.value; sel.dispatchEvent(new Event("change")); return Number(opt.value); })()`;
+const pick = (id: string): Payload<number | null> =>
+  `(() => { const sel = document.getElementById(${JSON.stringify(id)}), cur = sel.value, opt = [...sel.options].find((o) => o.value !== cur); if (!opt) return null; sel.value = opt.value; sel.dispatchEvent(new Event("change")); return Number(opt.value); })()`;
 const HOLD_AT_PRESS: Payload<{ cls: boolean; play: string }> =
   `(() => { const p = document.getElementById("rb-plate"), a = p.getAnimations().find((x) => x.animationName === "rb-ink");
   if (a) a.currentTime = 0.6 * a.effect.getComputedTiming().duration; document.getElementById("rb-swap").click(); return { cls: p.classList.contains("rb-inking"), play: getComputedStyle(p).animationPlayState }; })()`;
@@ -136,7 +136,7 @@ async function heldFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
   await k.evaluate(seekTo(0.5));
   await k.evaluate(FRAMES, true);
   const { rect } = await k.evaluate(INK);
-  const [x, y] = toScreen(rect, plate, plate.strips[0]!.x0 + plate.strips[0]!.w / 2, midOf(plate));
+  const [x, y] = toScreen(rect, plate, plate.W / 2, TITLE_ROW);
   await mouseMove(k.send, x, y);
   const hovered = await stable(INK, "ribbon-ink-hovered", { departed: (d) => d.hovered });
   if (hovered.transform !== "none") faults.push("the plate stands still under the pointer while it inks");
@@ -201,7 +201,7 @@ export async function rb22TurnAbout(k: RibbonKit): Promise<void> {
   const stable = makeStable(settle);
   const faults: string[] = [];
   await k.evaluate(WITNESS);
-  const picked = await k.evaluate(PICK);
+  const picked = await k.evaluate(pick("rb-to"));
   const afterPick = await k.opened("a picked destination", (s) => s.to === picked);
   const f0 = afterPick.from;
   const picker = await k.evaluate(INK);
@@ -228,10 +228,16 @@ export async function rb22TurnAbout(k: RibbonKit): Promise<void> {
     faults.push("a lean mid-reveal lands the plate whole at once");
   await mouseMove(k.send, 1, 1);
   await k.glassHome();
+  const addsBefore = (await k.evaluate(INK)).adds;
+  const departed = await k.evaluate(pick("rb-from"));
+  await k.opened("a picked departure", (s) => s.from === departed);
+  const departure = await k.evaluate(INK);
+  if (departure.adds !== addsBefore || departure.cls || departure.clip !== "none")
+    faults.push("a picked departure's plate arrives whole, with no ink");
   k.check(
-    "RB22 a picked destination's plate arrives whole with no ink, Turn about's plate inks in afresh and holds a reveal still running until the turned plate arrives, and a lean pressed mid-reveal lands the plate whole at once",
+    "RB22 a picked destination's or departure's plate arrives whole with no ink, Turn about's plate inks in afresh and holds a reveal still running until the turned plate arrives, and a lean pressed mid-reveal lands the plate whole at once",
     faults.length === 0,
-    JSON.stringify({ faults, picker, turned, held, leaned }),
+    JSON.stringify({ faults, picker, turned, held, leaned, departure }),
   );
 }
 
