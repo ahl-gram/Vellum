@@ -97,9 +97,11 @@ test("every road arrives in the realm its last border names, the arrival standin
     assert.equal(last === undefined ? j.realmFrom : last.name, j.realmName, `${j.fromName} to ${j.toName}`);
   }
   const seed11 = journeys[journeys.length - 1]!;
-  assert.equal(
-    only(seed11, "border").at(-1)?.name,
-    "Greater Lalau",
-    "premise: seed 11's border is its arrival's, across a line",
-  );
+  const last = only(seed11, "border").at(-1)!;
+  assert.equal(last.name, "Greater Lalau", "premise: seed 11's border is into the arrival's realm");
+  assert.equal(last.fromName, "The Tararu Atolls");
+  assert.equal(last.k, 130, "premise: it falls on the road's last chain step");
+  assert.equal(last.dist, seed11.totalCells, "premise: at the road's exact end");
+  const arrival = seed11.events.find((e) => e.kind === "waypoint" && e.index === seed11.toIdx)!;
+  assert.equal(arrival.k, 129, "premise: one cell after the arrival's waypoint, so the run is a single cell");
 });

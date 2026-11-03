@@ -124,12 +124,15 @@ test("every band name lies on its strip's band between the strip's ends, no two 
   }
   assert.ok(names >= 140, `the sweep reads names to measure: ${names}`);
   assert.ok(borderless >= 10, `and some stand on a strip with no border: ${borderless}`);
-  const five = bandNames(ribbonSvgFor(namedJourney(world123, "Tauwoamo", "Laupehau"), "antique"));
+  const road123 = namedJourney(world123, "Tauwoamo", "Laupehau");
+  const five = bandNames(ribbonSvgFor(road123, "antique"));
   assert.equal(five.length, 5, "seed 123's three borders name five");
+  const nopauha = five.filter((n) => n.name === "The Chiefdom of Nopauha");
+  assert.equal(nopauha.length, 1, "the Nopauha name that would meet itself is not drawn");
   assert.equal(
-    five.filter((n) => n.name === "The Chiefdom of Nopauha").length,
-    1,
-    "the Nopauha name that would meet itself is not drawn",
+    stripNearestX(layoutRibbon(road123).strips, nopauha[0]!.x).index,
+    4,
+    "the one drawn stands on strip 4, its second border's own",
   );
 });
 
