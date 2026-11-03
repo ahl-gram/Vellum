@@ -497,8 +497,14 @@ Motion is design material here and it is ruled like the rest.
 
 **A ceremony is an arrival, and how often it plays is a ruling.** The homepage's veil plays once per
 sitting and any click or key skips it (#457, ratified at #454 ruling 20); a room's landing ceremony
-plays on every arrival (#461, ratified at #454 ruling 21). Neither is a default to reason from: a new surface asks
-which of the two it is.
+plays on every arrival (#461, ratified at #454 ruling 21); and the Wayfarer's Ribbon's ink-in, its
+strips revealed one after another up the scroll, plays on the first plate of a visit and on Turn about,
+never on a journey picked (Alex, 2026-09-03, Issue #432; `src/site/ribbon/ink.ts`), and a press on an
+itinerary row ends it (the builder's call at Issue #432, which Alex left to the builder). None is a
+default to reason from: a new surface asks which it is. **Provisional until the post-use review
+(Issue #1226):** the ink-in's pace, what each strip hides while it waits and what shows there, its wait
+for the room's landing, the plate standing still under the pointer while it inks, and its
+interruption policy.
 
 **The sheet settles onto the desk, then the chrome inks in.** That is the order, and it is quicker and
 subtler in a room than on the homepage.

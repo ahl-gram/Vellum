@@ -3,9 +3,10 @@ import { createRng } from "../../core/rng.ts";
 import { buildRibbonInput, type RibbonInput } from "../../itinerary/input.ts";
 import { ribbonSvgFor } from "../../itinerary/finished.ts";
 import { eventCaption } from "../../itinerary/prose.ts";
-import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../itinerary/dress/layout.ts";
+import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W, type RibbonLayout } from "../../itinerary/dress/layout.ts";
 import { roadMask, roadReachable, roadWalk } from "../../itinerary/route.ts";
 import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
+import { STYLES } from "../../render/style.ts";
 import type { RibbonEvent } from "../../itinerary/events.ts";
 import type { SettlementKind } from "../../society/sites.ts";
 import type { PlateDress } from "./prospect-job.ts";
@@ -34,8 +35,17 @@ export interface RibbonRow {
   readonly ny: number;
 }
 
+export interface StripBox {
+  readonly x0: number;
+  readonly y0: number;
+  readonly w: number;
+  readonly h: number;
+}
+
 export interface RibbonPlateData {
   readonly svg: string;
+  readonly strips: ReadonlyArray<StripBox>;
+  readonly paper: string;
   readonly fromIdx: number;
   readonly toIdx: number;
   readonly fromName: string;
@@ -49,9 +59,8 @@ export interface RibbonPlateData {
   readonly reachable: ReadonlyArray<number>;
 }
 
-function itineraryRows(input: RibbonInput): ReadonlyArray<RibbonRow> {
+function itineraryRows(input: RibbonInput, layout: RibbonLayout): ReadonlyArray<RibbonRow> {
   const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
-  const layout = layoutRibbon(input);
   return input.events.flatMap((e) => {
     const seat = eventSeat(layout, e.dist);
     if (seat === null) return [];
@@ -110,8 +119,11 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
   if (toIdx === null) throw new Error("no road joins these places");
   const input = buildRibbonInput(world, fromIdx, toIdx);
   if (input === null) throw new Error("no road joins these places");
+  const layout = layoutRibbon(input);
   return {
     svg: ribbonSvgFor(input, spec.dress),
+    strips: layout.strips.map(({ x0, y0, w, h }) => ({ x0, y0, w, h })),
+    paper: STYLES[spec.dress].paper,
     fromIdx,
     toIdx,
     fromName: input.fromName,
@@ -120,7 +132,7 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
     title: world.title.title,
     year: input.year,
     realm: input.realmName,
-    events: itineraryRows(input),
+    events: itineraryRows(input, layout),
     options: world.settlements.map((s, i) => ({
       i,
       name: s.name,

@@ -9,6 +9,8 @@ import { createRng } from "../../src/core/rng.ts";
 import { eventCaption } from "../../src/itinerary/prose.ts";
 import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
+import { STYLES } from "../../src/render/style.ts";
+import { capitalJourneys } from "../../test-support/ribbon-fixtures.ts";
 import type { World } from "../../src/world/types.ts";
 
 // A hash a visitor can type is the untrusted boundary: every way of asking for a journey that does not exist has to land somewhere sensible rather than throw.
@@ -165,4 +167,28 @@ test("the itinerary lists only what the scroll drew: every row's caption words s
     dropped.name !== null && !text.includes(dropped.name.toUpperCase()),
     `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`,
   );
+});
+
+test("the job sends the strip boxes the plate is drawn in and the paper it is printed on", () => {
+  const byLeagues = [...capitalJourneys(world)].sort((a, b) => a.totalLeagues - b.totalLeagues);
+  const shortest = byLeagues[0]!;
+  const longest = byLeagues[byLeagues.length - 1]!;
+  assert.notEqual(
+    layoutRibbon(shortest).strips.length,
+    layoutRibbon(longest).strips.length,
+    "premise: the shortest and the longest capital journey stand on different strip counts",
+  );
+  assert.notEqual(STYLES.antique.paper, STYLES.ink.paper, "premise: the two dresses print on different paper");
+  for (const input of [shortest, longest]) {
+    for (const dress of ["antique", "ink"] as const) {
+      const res = ribbonResultFor(world, { from: input.fromIdx, to: input.toIdx, dress });
+      const label = `${input.fromName} to ${input.toName}, ${dress}`;
+      assert.deepEqual(
+        res.strips,
+        layoutRibbon(input).strips.map(({ x0, y0, w, h }) => ({ x0, y0, w, h })),
+        `${label}: the strips are the layout the plate is drawn from, in reading order`,
+      );
+      assert.equal(res.paper, STYLES[dress].paper, `${label}: the paper is the dress's own`);
+    }
+  }
 });
