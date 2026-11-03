@@ -161,7 +161,6 @@ function stripAtX(strips: ReadonlyArray<StripLayout>, x: number): StripLayout {
   return strips.reduce((a, b) => (Math.abs(x - (b.x0 + b.w / 2)) < Math.abs(x - (a.x0 + a.w / 2)) ? b : a));
 }
 
-/** The shore's own points: the control points of every Q after the first, which stands on the band by construction. */
 function shorePoints(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
   for (const m of d.matchAll(/Q(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)) out.push([Number(m[1]), Number(m[2])]);
@@ -208,7 +207,10 @@ function seaStaysOnTheCloth(): void {
   const first = layoutRibbon(coast).strips[0]!;
   const body = stripBody(first);
   const runsPast = first.samples.some(
-    (s, i) => s.biomeR === BIOMES.ocean && (first.pts[i]?.sx ?? 0) + 26 > body.right(first.pts[i]?.sy ?? 0) - BAND - 4,
+    (s, i) =>
+      s.biomeR === BIOMES.ocean &&
+      first.samples[i + 1]?.biomeR === BIOMES.ocean &&
+      (first.pts[i]?.sx ?? 0) + 26 > body.right(first.pts[i]?.sy ?? 0) - BAND,
   );
   assert.ok(
     runsPast,

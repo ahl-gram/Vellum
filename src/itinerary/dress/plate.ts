@@ -87,7 +87,6 @@ function titleBand(c: DressContext, input: RibbonInput): SvgNode[] {
   ];
 }
 
-/** The swallow-tailed banner the title rides on: a sepia shadow, the gamboge cloth with its notched tails, two folds. */
 function bannerCloth(c: RibbonContext, paint: RibbonPaint): SvgNode[] {
   const cx = RIBBON_W / 2;
   const yc = RIBBON_MARGIN + 24;

@@ -98,7 +98,6 @@ export function paintedMountain(c: RibbonContext, paint: RibbonPaint, x: number,
   ]);
 }
 
-/** A house or a tower split into its paper wall and its vermilion roof. */
 function paintedBuilding(
   c: RibbonContext,
   paint: RibbonPaint,
@@ -214,7 +213,6 @@ export function paintedWave(paint: RibbonPaint, x: number, y: number, s: number)
   });
 }
 
-/** A scatter of pigment dots under a wood or a marsh. */
 export function stipple(
   rng: Rng,
   x: number,

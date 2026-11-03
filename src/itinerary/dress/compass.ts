@@ -62,7 +62,6 @@ function fleur(c: RibbonContext): SvgNode {
   ]);
 }
 
-/** The painted rose: a vermilion eight-point star over a paper one at half a point's turn, a paper four-point star over both, the fleur-de-lis riding north with the needle. */
 export function paintedCompass(c: RibbonContext, paint: RibbonPaint, x: number, y: number, needleDeg: number): SvgNode {
   return el("g", { transform: `translate(${r1(x)} ${r1(y)})` }, [
     el("circle", { cx: 0, cy: 0, r: 15, fill: c.paper, "fill-opacity": 0.85, stroke: c.ink, "stroke-width": 0.9 }),

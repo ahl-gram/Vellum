@@ -39,7 +39,6 @@ export function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltD
   ]);
 }
 
-/** A river crossing as an azurite-wash band between the two hairlines, an azurite line above and below. */
 export function paintedRiverBand(paint: RibbonPaint, body: StripBody, sy: number, tiltDeg: number): SvgNode {
   const x0 = body.left(sy) + BAND + 1;
   const x1 = body.right(sy) - BAND - 1;
@@ -76,7 +75,6 @@ function smooth(pts: ReadonlyArray<Point>): string {
   return `${d}L${r1(last[0])} ${r1(last[1])}`;
 }
 
-/** The stretches of two or more consecutive samples that run on ocean on one side. */
 function seaRuns(strip: StripLayout, side: -1 | 1): Run[] {
   const isSea = (i: number): boolean =>
     (side < 0 ? strip.samples[i]?.biomeL : strip.samples[i]?.biomeR) === BIOMES.ocean;
@@ -95,7 +93,6 @@ function seaRuns(strip: StripLayout, side: -1 | 1): Run[] {
   return runs;
 }
 
-/** One run's wash: a smoothed shore 26 to 38 off the road, held inside the hairline, and waves held wholly inside it. */
 function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: -1 | 1, run: Run, rng: Rng): SvgNode[] {
   const [i, j] = run;
   const clampY = (y: number): number => Math.min(strip.y0 + strip.h - 4, Math.max(strip.y0 + 4, y));
@@ -133,7 +130,6 @@ function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: 
   return nodes;
 }
 
-/** A sea wash on each side of the road where the samples run beside ocean, with wave flourishes; ocean decor is not drawn there. */
 export function seaWash(paint: RibbonPaint, strip: StripLayout, body: StripBody, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
   for (const side of [-1, 1] as const) {

@@ -15,7 +15,7 @@ export type RibbonPaint = {
   readonly sepia: string;
 };
 
-/** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged; `paint` is the limner's box on the antique dress and null on the plain ink one. */
+/** Same shape as the prospect's DressContext so its side-on glyphs draw here unchanged. */
 export type RibbonContext = DressContext & { readonly paint: RibbonPaint | null };
 
 function paintFor(style: MapStyle): RibbonPaint | null {

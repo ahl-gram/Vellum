@@ -29,7 +29,6 @@ export function roadAngleDeg(strip: StripLayout, dist: number): number {
   return (Math.atan2(b.sy - a.sy, b.sx - a.sx) * 180) / Math.PI;
 }
 
-/** The road as two dotted casings with a solid span through every town; painted, they stand wider apart and draw in ink. */
 export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
   const half = c.paint ? PAINTED_ROAD_HALF : ROAD_HALF;
   const ink = c.paint ? c.ink : c.style.road;
@@ -99,7 +98,6 @@ function leagueDots(c: RibbonContext, strip: StripLayout): SvgNode[] {
   return nodes;
 }
 
-/** Every league numbered in the road itself, on a land-wash halo; a three-digit league takes an ellipse wide enough to clear the casings. */
 function leagueNumerals(c: RibbonContext, paint: RibbonPaint, strip: StripLayout): SvgNode[] {
   const nodes: SvgNode[] = [];
   const first = Math.max(1, Math.ceil(strip.d0 / CELLS_PER_LEAGUE));

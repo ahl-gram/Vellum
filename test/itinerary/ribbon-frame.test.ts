@@ -41,7 +41,6 @@ function stripOf(layout: ReadonlyArray<StripLayout>, x: number): StripLayout | u
   return best;
 }
 
-/** How far a vertex stands past what its dress allows: antique, past the band's inner hairline (bound 0) or the strip's ends by the painted casing's half-width; ink, past the rect frame by its casing's half-width. */
 function pastOf(dress: Dress, strip: StripLayout, x: number, y: number): number {
   const endsPast = Math.max(strip.y0 - y, y - (strip.y0 + strip.h), 0);
   if (dress === "ink") {

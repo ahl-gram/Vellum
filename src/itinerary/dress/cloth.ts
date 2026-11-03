@@ -11,7 +11,6 @@ const SAMPLE_STEP = 6;
 
 export type StripBody = { readonly left: (y: number) => number; readonly right: (y: number) => number };
 
-/** Each long edge undulates: one long swell with a per-strip phase and one short ripple, the cloth of a hand-cut ribbon. */
 export function stripBody(strip: StripLayout): StripBody {
   const { x0, y0, w, index } = strip;
   return {
@@ -46,7 +45,6 @@ function bandPath(strip: StripLayout, body: StripBody, side: -1 | 1): string {
   return `${edgePath(strip, body, side, 0, true)}${edgePath(strip, body, side, -side * BAND, false).replace(/^M/, "L")}Z`;
 }
 
-/** The painted strip: a land-wash body between two gamboge bands, inked outline, a soft hairline on each band's inner side. */
 export function clothFrame(c: RibbonContext, paint: RibbonPaint, strip: StripLayout, body: StripBody): SvgNode[] {
   return [
     el("path", { d: bodyPath(strip, body), fill: paint.landWash }),
@@ -58,7 +56,6 @@ export function clothFrame(c: RibbonContext, paint: RibbonPaint, strip: StripLay
   ];
 }
 
-/** The plain impression's frame: the ink rect and its soft inset, with no lift under it. */
 export function plainFrame(c: RibbonContext, s: StripLayout): SvgNode[] {
   return [
     el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "none", stroke: c.ink, "stroke-width": 1.1 }),

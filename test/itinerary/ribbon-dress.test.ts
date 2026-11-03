@@ -15,7 +15,6 @@ const sweep = worlds.flatMap(({ world }) => capitalJourneys(world));
 const seed42 = worlds.find((w) => w.seed === 42)!.world;
 const road42 = namedJourney(seed42, "Laukuwelua", "Homaitani");
 
-/** Every colour a ribbon plate may draw: the dress's own inks and papers, the road and river tokens, the limner's vermilion and the ribbon's own pigments; the prospect's allowlist is a different list on purpose. */
 function ribbonTokens(s: MapStyle): Set<string> {
   return new Set(
     [

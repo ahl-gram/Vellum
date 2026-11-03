@@ -41,7 +41,6 @@ export function eventCaption(e: RibbonEvent, rng: Rng): string {
 
 const roundedLeagues = (input: RibbonInput): number => Math.round(input.totalLeagues);
 
-/** The stages in Ogilby's manner: each stop past the departure at its own league, the arrival at the title's rounded total. */
 export function stagesLine(input: RibbonInput): string {
   const stops = input.events.flatMap((e) =>
     e.kind === "waypoint" && e.dist > 0 && e.index !== input.toIdx

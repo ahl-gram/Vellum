@@ -1,5 +1,3 @@
-// The journeys the ribbon's guards sweep: every road-reachable place from a world's capital, and one named pair.
-
 import { buildRibbonInput, type RibbonInput } from "../src/itinerary/input.ts";
 import { roadMask, roadReachable } from "../src/itinerary/route.ts";
 import type { World } from "../src/world/types.ts";

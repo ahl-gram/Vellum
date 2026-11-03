@@ -275,7 +275,6 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
   ];
 }
 
-/** The departure's realm down the first strip's left band and the arrival's down the last strip's right band; Issue #431 moves the change-over to the actual border. */
 function realmEdges(c: RibbonContext, input: RibbonInput, strip: StripLayout, isLast: boolean): SvgNode[] {
   const names: Array<{ name: string | null; x: number; turn: -90 | 90 }> = [
     { name: strip.index === 0 ? input.realmFrom : null, x: strip.x0 + 4.6, turn: -90 },
