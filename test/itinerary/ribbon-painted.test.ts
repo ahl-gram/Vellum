@@ -257,6 +257,24 @@ test("a river crossing's band stays between the hairlines", () => {
   assert.ok(bands >= 10, `the sweep draws crossings to measure: ${bands}`);
 });
 
+const BAND_NAME = /<text x="([^"]*)" y="([^"]*)"[^>]*transform="rotate\((-?90) [^)]*\)"[^>]*>([^<]*)<\/text>/g;
+const bandNames = (svg: string): Array<{ x: number; turn: string; name: string }> =>
+  [...svg.matchAll(BAND_NAME)].map((m) => ({ x: Number(m[1]), turn: m[3] as string, name: m[4] as string }));
+
+test("the realm names ride the outer bands, the departure's first and the arrival's last", () => {
+  assert.equal(road42.realmFrom, "The Chiefdom of Rekekoa", "premise: the departure lies in the Chiefdom of Rekekoa");
+  assert.equal(road42.realmName, "The Hauwaiwa Atolls", "and the arrival in the Hauwaiwa Atolls");
+  const strips = layoutRibbon(road42).strips;
+  const first = strips[0]!;
+  const last = strips.at(-1)!;
+  assert.deepEqual(bandNames(ribbonSvgFor(road42, "antique")), [
+    { x: r1(first.x0 + 4.6), turn: "-90", name: "The Chiefdom of Rekekoa" },
+    { x: r1(last.x0 + last.w - 4.6), turn: "90", name: "The Hauwaiwa Atolls" },
+  ]);
+  const unnamed = { ...road42, realmFrom: null, realmName: null };
+  assert.deepEqual(bandNames(ribbonSvgFor(unnamed, "antique")), [], "a journey with no realm names none");
+});
+
 test("every caption is drawn above every strip", () => {
   for (const dress of ["antique", "ink"] as const) {
     const svg = ribbonSvgFor(road42, dress);

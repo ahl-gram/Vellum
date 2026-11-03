@@ -275,6 +275,37 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
   ];
 }
 
+/** The departure's realm down the first strip's left band and the arrival's down the last strip's right band; Issue #431 moves the change-over to the actual border. */
+function realmEdges(c: RibbonContext, input: RibbonInput, strip: StripLayout, isLast: boolean): SvgNode[] {
+  const names: Array<{ name: string | null; x: number; turn: -90 | 90 }> = [
+    { name: strip.index === 0 ? input.realmFrom : null, x: strip.x0 + 4.6, turn: -90 },
+    { name: isLast ? input.realmName : null, x: strip.x0 + strip.w - 4.6, turn: 90 },
+  ];
+  const y = strip.y0 + strip.h / 2;
+  return names.flatMap(({ name, x, turn }) =>
+    name === null
+      ? []
+      : [
+          el(
+            "text",
+            {
+              x: r1(x),
+              y: r1(y),
+              "text-anchor": "middle",
+              "dominant-baseline": "middle",
+              transform: `rotate(${turn} ${r1(x)} ${r1(y)})`,
+              "font-family": c.style.fontFamily,
+              "font-size": 7.6,
+              "font-style": "italic",
+              "letter-spacing": 1.2,
+              fill: c.ink,
+            },
+            [name],
+          ),
+        ],
+  );
+}
+
 export type StripDrawing = { readonly art: SvgNode; readonly captions: ReadonlyArray<SvgNode> };
 
 export function stripNodes(
@@ -299,6 +330,7 @@ export function stripNodes(
     ...leagueMarks(c, strip),
     ...events.art,
     ...continuation(c, strip, isLast),
+    ...(c.paint ? realmEdges(c, input, strip, isLast) : []),
   ]);
   return { art, captions: events.laid.nodes };
 }
