@@ -6,7 +6,9 @@ import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W, stripPos } from "../..
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { WIDTH_FACTOR } from "../../src/render/geometry.ts";
 import { r1 } from "../../src/prospect/dress/context.ts";
-import { attrsOf } from "../../test-support/dress-svg.ts";
+import { BIOMES } from "../../src/climate/biomes.ts";
+import type { StripLayout } from "../../src/itinerary/dress/layout.ts";
+import { attrsOf, inkExtent } from "../../test-support/dress-svg.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
@@ -142,4 +144,115 @@ test("each strip's rose turns with its strip's needle", () => {
       );
     }
   }
+});
+
+const PAINT = STYLES.antique.ribbonLimner!;
+const SEA_WASH = new RegExp(`<path d="([^"]*)" fill="${PAINT.azuriteWash}" fill-opacity="0.55"`, "g");
+const WAVE = new RegExp(
+  `<path d="([^"]*)" fill="none" stroke="${STYLES.antique.river}" stroke-width="0.9" stroke-opacity="0.8"`,
+  "g",
+);
+const RIVER_BAND = new RegExp(`<path d="([^"]*)" fill="none" stroke="${PAINT.azuriteWash}" stroke-width="7"`, "g");
+
+const dOf = (svg: string, re: RegExp): string[] => [...svg.matchAll(re)].map((m) => m[1] as string);
+const headOf = (d: string): readonly [number, number] => vertices(d)[0] as readonly [number, number];
+
+function stripAtX(strips: ReadonlyArray<StripLayout>, x: number): StripLayout {
+  return strips.reduce((a, b) => (Math.abs(x - (b.x0 + b.w / 2)) < Math.abs(x - (a.x0 + a.w / 2)) ? b : a));
+}
+
+/** The shore's own points: the control points of every Q after the first, which stands on the band by construction. */
+function shorePoints(d: string): Array<readonly [number, number]> {
+  const out: Array<readonly [number, number]> = [];
+  for (const m of d.matchAll(/Q(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)) out.push([Number(m[1]), Number(m[2])]);
+  return out.slice(1);
+}
+
+function withinHairlines(strip: StripLayout, x0: number, x1: number, y: number, what: string): void {
+  const body = stripBody(strip);
+  assert.ok(
+    x0 >= body.left(y) + BAND - 0.1,
+    `${what}: left end ${x0} past the hairline ${(body.left(y) + BAND).toFixed(1)}`,
+  );
+  assert.ok(
+    x1 <= body.right(y) - BAND + 0.1,
+    `${what}: right end ${x1} past the hairline ${(body.right(y) - BAND).toFixed(1)}`,
+  );
+}
+
+function seaLiesWhereTheSamplesSay(): void {
+  const strips = layoutRibbon(road42).strips;
+  const last = strips.at(-1)!;
+  const oceanR = last.samples.filter((s) => s.biomeR === BIOMES.ocean).length;
+  assert.ok(oceanR >= 2, `premise: the last strip's samples run on ocean on the right (${oceanR})`);
+  assert.ok(
+    last.samples.every((s) => s.biomeL !== BIOMES.ocean),
+    "premise: and never on the left",
+  );
+  const meanX = last.pts.reduce((a, p) => a + p.sx, 0) / last.pts.length;
+  const washes = dOf(ribbonSvgFor(road42, "antique"), SEA_WASH).filter((d) => stripAtX(strips, headOf(d)[0]) === last);
+  assert.ok(washes.length >= 1, "seed 42's last strip holds a sea wash");
+  for (const d of washes)
+    for (const [x] of shorePoints(d))
+      assert.ok(x > meanX, `a shore point ${x} lies right of the road ${meanX.toFixed(1)}`);
+  const dry = namedJourney(worlds.find((w) => w.seed === 99)!.world, "Mialiscove", "Selea");
+  assert.ok(
+    dry.samples.every((s) => s.biomeL !== BIOMES.ocean && s.biomeR !== BIOMES.ocean),
+    "premise: no sample of Mialiscove to Selea is ocean",
+  );
+  assert.equal(dOf(ribbonSvgFor(dry, "antique"), SEA_WASH).length, 0, "and it holds no sea wash");
+}
+
+function seaStaysOnTheCloth(): void {
+  const coast = namedJourney(worlds.find((w) => w.seed === 42)!.world, "Laukuwelua", "Paukilua");
+  const first = layoutRibbon(coast).strips[0]!;
+  const body = stripBody(first);
+  const runsPast = first.samples.some(
+    (s, i) => s.biomeR === BIOMES.ocean && (first.pts[i]?.sx ?? 0) + 26 > body.right(first.pts[i]?.sy ?? 0) - BAND - 4,
+  );
+  assert.ok(
+    runsPast,
+    "premise, the witness: a right-side ocean run on strip 0 where the road's x plus 26 passes the hairline",
+  );
+  let shores = 0;
+  let waves = 0;
+  for (const input of [coast, ...sweep]) {
+    const strips = layoutRibbon(input).strips;
+    const svg = ribbonSvgFor(input, "antique");
+    const where = `${input.fromName} to ${input.toName}`;
+    for (const d of dOf(svg, SEA_WASH)) {
+      const strip = stripAtX(strips, headOf(d)[0]);
+      for (const [x, y] of shorePoints(d)) withinHairlines(strip, x, x, y, `${where}, a shore point`);
+      shores++;
+    }
+    for (const d of dOf(svg, WAVE)) {
+      const [, wy] = headOf(d);
+      const e = inkExtent(`<path d="${d}"/>`);
+      withinHairlines(stripAtX(strips, headOf(d)[0]), e.x0, e.x1, wy, `${where}, a wave`);
+      waves++;
+    }
+  }
+  assert.ok(shores >= 20 && waves >= 40, `the sweep draws seas to measure: ${shores} shores, ${waves} waves`);
+}
+
+test("the sea lies beside the road where the samples say, and stays on the cloth", () => {
+  seaLiesWhereTheSamplesSay();
+  seaStaysOnTheCloth();
+});
+
+test("a river crossing's band stays between the hairlines", () => {
+  let bands = 0;
+  let onRoad15 = 0;
+  for (const input of [road15, ...sweep]) {
+    const strips = layoutRibbon(input).strips;
+    for (const d of dOf(ribbonSvgFor(input, "antique"), RIVER_BAND)) {
+      const e = inkExtent(`<path d="${d}"/>`);
+      const [hx, sy] = headOf(d);
+      withinHairlines(stripAtX(strips, hx), e.x0, e.x1, sy, `${input.fromName} to ${input.toName}, a river band`);
+      bands++;
+      if (input === road15) onRoad15++;
+    }
+  }
+  assert.ok(onRoad15 >= 1, "premise: seed 15's road carries a crossing");
+  assert.ok(bands >= 10, `the sweep draws crossings to measure: ${bands}`);
 });
