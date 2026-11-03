@@ -109,6 +109,19 @@ function checkRibbonRows(writeItinerary: RibbonWrite): void {
     ],
     "the lean's seat rides the li",
   );
+  writeItinerary(
+    rf as unknown as Parameters<typeof writeItinerary>[0],
+    RIBBON_RES as unknown as Parameters<typeof writeItinerary>[1],
+    "A note.",
+    () => null,
+    () => {},
+  );
+  assert.deepEqual([fallback.textContent, fallback.hidden], ["A note.", false], "a note fills the gloss and shows it");
+  assert.equal(
+    itinerary.children.filter((li) => li.children.length > 1).length,
+    0,
+    "a row given no target has no pill",
+  );
 }
 
 function checkProspectKey(writeNote: ProspectWrite): void {
