@@ -380,9 +380,17 @@ strict walk, along each road's own points and stopping at the first settlement o
 eight neighbours, so roads that merely touch join, and walks on through every town.
 
 **A ribbon event can sit at a road's exact end**, past the arrival waypoint, where a half-open strip
-filter drops it. `stripFor` in `src/itinerary/dress/layout.ts` tests a half-open interval, so
+filter drops it, a border whose realm the arrival town stands in included. `stripFor` in
+`src/itinerary/dress/layout.ts` tests a half-open interval, so
 `eventSeat` answers null there and the itinerary skips it. A seating surface answers null too rather
 than inventing a seat.
+
+**A world can name a forest the chart never letters.** `names.forest` is minted on the share of
+forest in the land, the wood is the largest four-connected stand of the five forest biomes of 25
+cells or more (`namedForestBlob` in `src/render/named-forest.ts`), and `forestLabelNodes` in
+`src/render/layers/feature-labels.ts` drops the name when every height it tries is already claimed,
+which happens on five of 44 seeds swept 2026-11-03 (1, 9, 12, 15, 40). A surface that quotes the
+forest's name reads the wood from `namedForestBlob` and does not assume the chart prints it.
 
 ## Measuring a world in a script
 
