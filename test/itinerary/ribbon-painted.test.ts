@@ -271,7 +271,12 @@ function seaStaysOnTheCloth(): void {
     for (const d of dOf(svg, WAVE)) {
       const [, wy] = headOf(d);
       const e = inkExtent(`<path d="${d}"/>`);
-      withinHairlines(stripNearestX(strips, headOf(d)[0]), e.x0, e.x1, wy, `${where}, a wave`);
+      const strip = stripNearestX(strips, headOf(d)[0]);
+      withinHairlines(strip, e.x0, e.x1, wy, `${where}, a wave`);
+      assert.ok(
+        e.y0 >= strip.y0 && e.y1 <= strip.y0 + strip.h,
+        `${where}, strip ${strip.index}, a wave spans y ${e.y0} to ${e.y1} outside the strip's ${strip.y0} to ${strip.y0 + strip.h}`,
+      );
       waves++;
     }
   }
