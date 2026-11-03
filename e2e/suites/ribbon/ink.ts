@@ -1,6 +1,6 @@
 // The Ribbon's ink-in (Issue #432) on seed 42's default road: the first plate of a visit and Turn about's plate reveal up each strip in reading order over bare paper and land whole, a picked journey's plate arrives whole, a lean mid-reveal lands it whole at once, and reduced motion lands it whole at once.
 import { mouseMove, sendClick } from "../../support/input.ts";
-import { PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
+import { PAGE_RGBA, sampleRect, sampleRow, tokenRgba, type Rgb } from "../../support/pixel.ts";
 import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
@@ -50,9 +50,14 @@ const centreOf = (selector: string): Payload<{ x: number; y: number; ok: boolean
 
 const PAPER = tokenRgba("--chart-paper");
 const HALF = 0.5;
+// 2026-11-03, seeds 42 and 15 at 1280 and 1024 (the plate reader's run): the bare frame differs from the whole plate by at most 4 per channel outside the holes; 8 is twice the worst
+const INK_NOISE = 8;
 const NEAR_ZERO_S = 0.01;
 // the painted banner's middle line, RIBBON_MARGIN + 24 in bannerCloth in src/itinerary/dress/plate.ts
 const TITLE_ROW = 50;
+// the colophon's glyph band, its baseline RIBBON_H - RIBBON_MARGIN + 9 in colophon in src/itinerary/dress/plate.ts
+const COLOPHON = [717, 725] as const;
+const COLOPHON_HALF_WIDTH = 130;
 const UNDER_CHROME = "a sampled point under the chrome";
 const onGround = (p: readonly number[]): boolean => PAPER.every((v, i) => i === 3 || Math.abs(p[i]! - v) <= 2);
 
@@ -96,6 +101,24 @@ async function look(k: RibbonKit, plate: Plate, y: number): Promise<Look> {
 async function titleShare(k: RibbonKit, plate: Plate): Promise<number> {
   const [share] = await sharesOnGround(k, plate, TITLE_ROW, [[plate.W / 2 - 300, plate.W / 2 + 300]]);
   return share!;
+}
+
+async function colophonBand(k: RibbonKit, plate: Plate): Promise<Rgb[][]> {
+  const { rect } = await k.evaluate(INK);
+  const [x0, y0] = toScreen(rect, plate, plate.W / 2 - COLOPHON_HALF_WIDTH, COLOPHON[0]);
+  const [x1, y1] = toScreen(rect, plate, plate.W / 2 + COLOPHON_HALF_WIDTH, COLOPHON[1]);
+  return sampleRect(k.send, Math.floor(x0), Math.ceil(y0), Math.ceil(x1 - x0) + 1, Math.floor(y1) - Math.ceil(y0));
+}
+
+async function colophonFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
+  await k.evaluate(seekTo(0));
+  await k.evaluate(FRAMES, true);
+  const bare = await colophonBand(k, plate);
+  await k.evaluate(seekTo(0.999));
+  await k.evaluate(FRAMES, true);
+  const whole = await colophonBand(k, plate);
+  const moved = bare.flat().filter((p, i) => p.some((v, c) => Math.abs(v - whole.flat()[i]![c]!) > INK_NOISE)).length;
+  return moved === 0 && bare.length > 0 ? [] : ["the colophon stands from the first frame"];
 }
 
 const hiddenAll = (share: number[]): boolean => share.every((s) => s > HALF);
@@ -174,7 +197,7 @@ async function landingFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
 export async function rb21InksIn(k: RibbonKit): Promise<number> {
   const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep });
   const label =
-    "RB21 the first plate of a visit inks in on seed 42's default road: it arrives on bare paper with its title standing, its strips revealed one after another from the bottom-left, each from its foot to its head, over the strip token times the strip count, the plate standing still under a resting pointer and printing whole while it inks, and it lands whole with no clip and no ground, the house lift back once it has (the control)";
+    "RB21 the first plate of a visit inks in on seed 42's default road: it arrives on bare paper with its title and colophon standing, its strips revealed one after another from the bottom-left, each from its foot to its head, over the strip token times the strip count, the plate standing still under a resting pointer and printing whole while it inks, and it lands whole with no clip and no ground, the house lift back once it has (the control)";
   await mouseMove(k.send, 1, 1);
   await k.goto("#seed=42");
   await k.opened("seed 42, inking in");
@@ -189,6 +212,7 @@ export async function rb21InksIn(k: RibbonKit): Promise<number> {
   if (!(Math.abs(arriving.duration! - plate.strips.length * arriving.strip) < 0.5))
     faults.push("the run lasts the strip token times the strip count");
   faults.push(...(await orderFaults(k, plate)));
+  faults.push(...(await colophonFaults(k, plate)));
   faults.push(...(await heldFaults(k, plate)));
   faults.push(...(await landingFaults(k, plate)));
   const landed = await k.evaluate(INK);
