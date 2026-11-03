@@ -233,14 +233,14 @@ test("P24 takes the card for pinned only once it is Kralgov's and pinned", async
   const { kit, wheels } = wheelFake(
     () => ({ wheels: 1, k: 1.5 }),
     (n) => ({
-      read: n === 1 ? { ...KRALGOV, pinned: false } : n <= 3 ? { ...KRALGOV, name: "Stale" } : KRALGOV,
+      read: n <= 2 ? { ...KRALGOV, pinned: false } : n <= 4 ? { ...KRALGOV, name: "Stale" } : KRALGOV,
       anims: ["finished"],
     }),
   );
   await p24NothingToScroll(kit);
   assert.deepEqual(
     wheels.map((w) => w.restReads),
-    [5],
+    [6],
   );
 });
 
