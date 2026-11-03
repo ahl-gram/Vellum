@@ -107,10 +107,10 @@ requirement it is not. If a dependency is the right tool, propose it plainly and
 New code is **TypeScript**, in `src/` when the product runs it and in `scripts/` when it runs around
 the product (`handbook/specs/rulebook.md`, What `src/` holds, and what runs around it), covered by
 `npm run check`, and reaches the browser only through the existing build (the Vite press bundles
-`src/site/` + engine; Node runs the engine/CLI/scripts natively). **No JavaScript file is tracked outside `design/`** (`.js`, `.mjs`,
-`.cjs`, `.jsx`), and `npm run lint` is what enforces it: the blocks named for Issue #653's ruling D in
-`eslint.config.ts` refuse every such file the `.gitignore` does not ignore, whatever inline directive
-it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
+`src/site/` + engine; Node runs the engine/CLI/scripts natively). **No JavaScript file is tracked
+outside `design/`** (`.js`, `.mjs`, `.cjs`, `.jsx`), and `npm run lint` is what enforces it: the
+blocks named for Issue #653's ruling D in `eslint.config.ts` refuse every such file the `.gitignore`
+does not ignore, whatever inline directive it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
 exemption. The sheets are written under `src/styles/` and the committed charts, icons and preview card under `src/static/`; everything else the site serves is written by `npm run astro:generate` into `generated/`, which nothing tracks, its fonts copied in from `design/kit/fonts/` (`handbook/specs/site-architecture.md`).
 
 ## Measure before you assert
