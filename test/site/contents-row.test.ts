@@ -57,34 +57,49 @@ test("the two faces are one shape: a plain row serialized from the nodes, attrib
 type RibbonWrite = typeof import("../../src/site/ribbon/seats.ts").writeItinerary;
 type ProspectWrite = typeof import("../../src/site/prospect/seats.ts").writeNote;
 
+const RIBBON_RES = {
+  fromIdx: 0,
+  toIdx: 3,
+  fromName: "Laukuwelua",
+  toName: "Toatauhe",
+  leagues: 80.2,
+  title: "The Isle of Rahai",
+  year: 1059,
+  realm: null,
+  events: [
+    { kind: "waypoint", leagues: 0, text: "Laukuwelua", tier: "capital", index: 0, nx: 0.2, ny: 0.9 },
+    { kind: "summit", leagues: 62.4, text: "here the road climbs", nx: 0.6, ny: 0.4 },
+    { kind: "waypoint", leagues: 80.2, text: "Toatauhe", index: 3, nx: 0.8, ny: 0.2 },
+  ],
+};
+
 function checkRibbonRows(writeItinerary: RibbonWrite): void {
   const itinerary = new El("ol");
-  const rf = { slipTitle: new El("h2"), slipWhere: new El("p"), itinerary };
-  const res = {
-    fromIdx: 0,
-    toIdx: 3,
-    fromName: "Laukuwelua",
-    toName: "Toatauhe",
-    leagues: 80.2,
-    title: "The Isle of Rahai",
-    year: 1059,
-    realm: null,
-    events: [
-      { kind: "waypoint", leagues: 0, text: "Laukuwelua", tier: "capital", index: 0, nx: 0.2, ny: 0.9 },
-      { kind: "summit", leagues: 62.4, text: "here the road climbs", nx: 0.6, ny: 0.4 },
-      { kind: "waypoint", leagues: 80.2, text: "Toatauhe", index: 3, nx: 0.8, ny: 0.2 },
-    ],
-  };
+  const fallback = new El("p");
+  const rf = { slipTitle: new El("h2"), slipWhere: new El("p"), fallback, itinerary };
   writeItinerary(
     rf as unknown as Parameters<typeof writeItinerary>[0],
-    res as unknown as Parameters<typeof writeItinerary>[1],
+    RIBBON_RES as unknown as Parameters<typeof writeItinerary>[1],
+    null,
+    (row) => (row.index === 3 ? "/prospect/#seed=42&i=3" : null),
     () => {},
   );
   assert.deepEqual(itinerary.children.map(serialize), [
     `<li class="waypoint"><button class="lean"><span class="cr-num">0</span><span class="cr-text"><strong>Laukuwelua</strong> <em>the capital</em></span></button></li>`,
     `<li class="summit"><button class="lean"><span class="cr-num">62</span><span class="cr-text"><em>here the road climbs</em></span></button></li>`,
-    `<li class="waypoint"><button class="lean"><span class="cr-num">80</span><span class="cr-text"><strong>Toatauhe</strong> </span></button></li>`,
+    `<li class="waypoint"><button class="lean"><span class="cr-num">80</span><span class="cr-text"><strong>Toatauhe</strong> </span></button><a class="row-prospect" aria-label="See Toatauhe in The Prospect">prospect</a></li>`,
   ]);
+  const pill = itinerary.children[2]!.children[1]! as unknown as { href: string };
+  assert.equal(
+    pill.href,
+    "/prospect/#seed=42&i=3",
+    "the pill is a sibling of the lean button, after it, and carries the row's target",
+  );
+  assert.deepEqual(
+    [fallback.textContent, fallback.hidden],
+    ["", true],
+    "no note leaves the slip's gloss empty and hidden",
+  );
   assert.deepEqual(
     itinerary.children.map((li) => [li.dataset.nx, li.dataset.ny]),
     [
