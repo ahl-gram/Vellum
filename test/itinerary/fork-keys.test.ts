@@ -44,6 +44,7 @@ function inputWith(events: ReadonlyArray<RibbonEvent>, totalCells: number, biome
     fromKind: "capital",
     toKind: "town",
     realmName: "The Marches",
+    realmFrom: null,
     worldName: "Test",
     year: 800,
     totalCells,

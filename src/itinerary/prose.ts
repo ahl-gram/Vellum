@@ -1,4 +1,5 @@
 import type { Rng } from "../core/rng.ts";
+import { CELLS_PER_LEAGUE } from "../render/layers/scalebar.ts";
 import type { RibbonEvent } from "./events.ts";
 import type { RibbonInput } from "./input.ts";
 
@@ -38,8 +39,20 @@ export function eventCaption(e: RibbonEvent, rng: Rng): string {
   }
 }
 
+const roundedLeagues = (input: RibbonInput): number => Math.round(input.totalLeagues);
+
+export function stagesLine(input: RibbonInput): string {
+  const stops = input.events.flatMap((e) =>
+    e.kind === "waypoint" && e.dist > 0 && e.index !== input.toIdx
+      ? [`to ${e.name} ${Math.round(e.dist / CELLS_PER_LEAGUE)}`]
+      : [],
+  );
+  stops.push(`to ${input.toName} ${roundedLeagues(input)}`);
+  return `From ${input.fromName} ${stops.join(", ")} leagues`;
+}
+
 export function ribbonTitle(input: RibbonInput): { title: string; subtitle: string[] } {
-  const leagues = Math.round(input.totalLeagues);
+  const leagues = roundedLeagues(input);
   const realm = input.realmName === null ? input.worldName : input.realmName;
   return {
     title: `The ROAD from ${input.fromName.toUpperCase()} to ${input.toName.toUpperCase()}`,
