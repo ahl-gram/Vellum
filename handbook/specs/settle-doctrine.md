@@ -434,7 +434,18 @@ section points there rather than restating it.
   signal is the class's absence AFTER it was seen present, since the same page also removes that
   class on a shut and on an off-screen list, and an absence with no witness reads a settle that
   never played as rest; `restSeeing` in `e2e/suites/chart-drawer/kit.ts` is the shape, the
-  poll counting the class or the running animation on the way to `atRest`. And this harness is
+  poll counting the class or the running animation on the way to `atRest`. A property that
+  interpolates, a colour, a length or a transform, reaches the value a change gives it under
+  reduced motion through a transition of the same near zero wherever `transition-property` is
+  left at `all` (`handbook/specs/cascade-traps.md`, the bullet opening "Under reduced motion a
+  change of style is a transition"); a property that does not interpolate, a `clip-path` going to
+  `none`, changes at once. The element lists that transition in `getAnimations()`, pending at its
+  start value with no start time until the browser starts it, which can be after its
+  `transitionrun` and `transitionstart` have fired, and drops it once it ends, so two equal reads
+  of the property can both be its old value, and its own events are no rest signal either; a
+  check that reads such a property waits, after a departure that shows the change was made,
+  until the element carrying it lists no animation, as `reducedSwitch` in
+  `e2e/suites/ribbon/ink.ts` does for `#map`'s ground. And this harness is
   Chromium only (it drives the browser over the debug port, `e2e/harness.ts`), whose
   computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a
   number (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
@@ -624,6 +635,11 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
 - **Speed: the runner is slower**, so a wait sized on a Mac runs out there. Home: clause 10 and
   `vellum-footguns` Gate 2 item 8 for a budget, with a dated factor at `REDRAFT_TRIES` in
   `e2e/suites/zoom/kit.ts`; clause 15 never counts it as explaining a wait or a budget that ran out.
+- **Transitions: under reduced motion a style change's transition is held at its start value
+  longer on the runner**, through two of a wait's polls there where on a Mac it has ended by the
+  next one, so a wait that takes two equal reads of the style for rest passes on a Mac and fails
+  on CI. Home: the bullet above opening "A sleep past an animation's nominal duration", and the
+  readings in `handbook/plans/400/432/432-r2-plan.md`.
 - **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
   session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
   above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.
