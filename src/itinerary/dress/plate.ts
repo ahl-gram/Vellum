@@ -5,6 +5,7 @@ import type { RibbonInput } from "../input.ts";
 import { ribbonTitle } from "../prose.ts";
 import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W } from "./layout.ts";
 import { stripNodes } from "./strip.ts";
+import type { RibbonContext } from "./context.ts";
 
 function grain(c: DressContext, id: string, seed: number): SvgNode[] {
   const alpha = c.style.name === "antique" ? 0.05 : 0.028;
@@ -126,7 +127,7 @@ function colophon(c: DressContext, input: RibbonInput): SvgNode {
   );
 }
 
-export function renderRibbon(c: DressContext, input: RibbonInput, rng: Rng): SvgNode {
+export function renderRibbon(c: RibbonContext, input: RibbonInput, rng: Rng): SvgNode {
   const layout = layoutRibbon(input);
   const grainId = `ribbon-grain-${c.style.name}-${input.seed}-${input.fromIdx}-${input.toIdx}`;
   const strips = layout.strips.map((s, i) => stripNodes(c, input, s, rng, i === layout.strips.length - 1));

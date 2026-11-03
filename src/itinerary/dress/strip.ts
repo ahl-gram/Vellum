@@ -10,28 +10,12 @@ import type { RibbonEvent } from "../events.ts";
 import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
 import { stripCompass } from "./compass.ts";
+import type { RibbonContext } from "./context.ts";
+import { clothFrame, plainFrame, stripBody } from "./cloth.ts";
 
 const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
-const STRIP_LIFT = "#ffffff";
-const STRIP_LIFT_OPACITY = 0.16;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
-
-function frame(c: DressContext, s: StripLayout): SvgNode[] {
-  return [
-    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: STRIP_LIFT, "fill-opacity": STRIP_LIFT_OPACITY }),
-    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "none", stroke: c.ink, "stroke-width": 1.1 }),
-    el("rect", {
-      x: s.x0 + 3,
-      y: s.y0 + 3,
-      width: s.w - 6,
-      height: s.h - 6,
-      fill: "none",
-      stroke: c.soft,
-      "stroke-width": 0.5,
-    }),
-  ];
-}
 
 function offsetPath(pts: ReadonlyArray<StripPoint>, off: number): string {
   let d = "";
@@ -309,7 +293,7 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
 }
 
 export function stripNodes(
-  c: DressContext,
+  c: RibbonContext,
   input: RibbonInput,
   strip: StripLayout,
   rng: Rng,
@@ -318,7 +302,7 @@ export function stripNodes(
   const compassX = strip.x0 + strip.w / 2 - Math.sign(strip.lean || 1) * (strip.w / 4 + 4);
   const compassY = strip.y0 + strip.h * 0.36;
   return el("g", {}, [
-    ...frame(c, strip),
+    ...(c.paint ? clothFrame(c, c.paint, strip, stripBody(strip)) : plainFrame(c, strip)),
     ...decorNodes(c, strip, rng),
     stripCompass(c, compassX, compassY, strip.needleDeg),
     ...roadNodes(c, input, strip),
