@@ -16,7 +16,7 @@ READING before the work its row names.
 
 | spec | what it holds | read it before |
 |---|---|---|
-| `handbook/specs/rulebook.md` | the sequencing rules and working agreements: product direction, the cost axis, the golden and committed-chart discipline, the re-roll set, scheduling, cross-epic coordination, and the index of durable engineering constraints from shipped work | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
+| `handbook/specs/rulebook.md` | the sequencing rules and working agreements: product direction, the cost axis, the golden and committed-chart discipline, the re-roll set, scheduling, cross-epic coordination, the index of durable engineering constraints from shipped work, and what `src/` holds against `scripts/` | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
 | `handbook/specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the rooms, the voice, contrast, gesture, motion and print | any work whose deliverable is an appearance |
 | `handbook/specs/chart-dress.md` | how a chart itself is dressed: a style as a palette over identical geometry, what is a style token and what is a layer literal, the mount, the hatching, the tint, the river names and the sea beasts | any change to a chart's dress, in the renderer or in how the site mounts a drawn sheet |
 | `handbook/specs/cascade-traps.md` | how the cascade breaks here: the declaration that is present in the file and loses, and the two habits of looking that catch it | writing or moving CSS, and reading a rendered frame after a change |
@@ -104,12 +104,13 @@ requirement it is not. If a dependency is the right tool, propose it plainly and
 
 ## One language, one pipeline
 
-New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser only
-through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
-engine/CLI/scripts natively). **No JavaScript file is tracked outside `design/`** (`.js`, `.mjs`,
-`.cjs`, `.jsx`), and `npm run lint` is what enforces it: the blocks named for Issue #653's ruling D in
-`eslint.config.ts` refuse every such file the `.gitignore` does not ignore, whatever inline directive
-it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
+New code is **TypeScript**, in `src/` when the product runs it and in `scripts/` when it runs around
+the product (`handbook/specs/rulebook.md`, What `src/` holds, and what runs around it), covered by
+`npm run check`, and reaches the browser only through the existing build (the Vite press bundles
+`src/site/` + engine; Node runs the engine/CLI/scripts natively). **No JavaScript file is tracked
+outside `design/`** (`.js`, `.mjs`, `.cjs`, `.jsx`), and `npm run lint` is what enforces it: the
+blocks named for Issue #653's ruling D in `eslint.config.ts` refuse every such file the `.gitignore`
+does not ignore, whatever inline directive it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
 exemption. The sheets are written under `src/styles/` and the committed charts, icons and preview card under `src/static/`; everything else the site serves is written by `npm run astro:generate` into `generated/`, which nothing tracks, its fonts copied in from `design/kit/fonts/` (`handbook/specs/site-architecture.md`).
 
 ## Measure before you assert

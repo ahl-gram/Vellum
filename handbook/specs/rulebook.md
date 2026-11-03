@@ -349,6 +349,36 @@ comment. This is a convenience index, not their home.
   #470, so this line is the rule's durable home until a lazy heavyweight embed returns; the atlas
   keeps reserved frames plus `loading="lazy"` in `src/atlas/document.ts`.
 
+## What `src/` holds, and what runs around it
+
+**`src/` holds the product, the code Vellum runs**: the engine and the renderer, the CLI
+(`src/cli/main.ts`), the site's pages and every module they run, in the browser or while the build
+presses a page, the stylesheets, and the committed charts. **`scripts/` holds what runs around the
+product**: the commands that produce, check, prove or deliver something, each run with `node`, from
+a `package.json` script or by another command, the unit suite's runner among them, the house's lint
+rules, the design rounds' tools, and the modules those commands, the lint and the tests share. The
+one command that is no `node` file is `scripts/cloud-setup.sh`, the shell script pasted into the
+cloud environment's setup field (`handbook/specs/cloud-routine.md`). `test/`, `test-support/` and `e2e/` hold the checks and their helpers, and `e2e/` the browser lanes'
+runner.
+
+**Place a file by what runs it.** Code the site or the CLI runs goes in `src/`, a module a page
+runs while the build presses it included. A command run to produce, check, prove or deliver
+something goes in `scripts/`. A command whose logic the product also needs keeps that logic in
+`src/` and wraps it: `scripts/place-files.ts` writes each place under the name `placeFile` in
+`src/site/explorer/place-fetch.ts` gives it, the name the site fetches.
+
+**The dependency points one way.** `src/` imports nothing from `scripts/`, `test/`, `test-support/`
+or `e2e/`, a type included, so a type both sides use lives in `src/` and the script or the test
+imports it from there. The four may import from `src/` and from one another.
+`vellum/src-no-tooling-import` (`srcNoToolingImport` in `scripts/lint/import-bounds.ts`, its folders
+`TOOLING_ROOTS`) refuses such an import in every TypeScript file under `src/`, a root-absolute
+`import.meta.glob` pattern included, and `test/repo/import-bounds.test.ts` names what it cannot see.
+The lint reads TypeScript alone, so hold every `.astro` file under `src/pages/` and `src/layouts/`
+and every sheet under `src/styles/` to the rule by hand. The rule errs toward refusing: a
+root-absolute piece inside an assembled source, as a `/test/` segment in a template that opens
+with `./`, is read as a path from the repo root though the source lands under `src/`, and no file
+under `src/` writes one today.
+
 ## The accepted lint and type-check skips
 
 **A skip in the linted tree is one of the entries below, or it does not exist.** A skip is any

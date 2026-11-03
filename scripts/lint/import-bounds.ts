@@ -302,6 +302,42 @@ const huntFixedWorld: Rule.RuleModule = {
   },
 };
 
+export const TOOLING_ROOTS: readonly string[] = ["e2e", "scripts", "test", "test-support"];
+const intoTooling = (file: string, text: string): boolean => {
+  const target = text.startsWith("/")
+    ? text.slice(1)
+    : text.startsWith(".")
+      ? repoPath(resolve(dirname(file), text))
+      : null;
+  return target !== null && TOOLING_ROOTS.some((root) => target === root || target.startsWith(`${root}/`));
+};
+const srcNoToolingImport: Rule.RuleModule = {
+  meta: {
+    type: "problem",
+    messages: {
+      found:
+        "src/ imports nothing from scripts/, test/, test-support/ or e2e/, a type included: the product is what runs, and what runs around it imports from it, never the other way, so a type both sides use lives in src/ (handbook/specs/rulebook.md, What src/ holds, and what runs around it)",
+    },
+  },
+  create(context) {
+    const reaches = (text: string): boolean => intoTooling(context.filename, text);
+    return {
+      ...sourcesJudged(context, reaches, (text) => text.startsWith(".") && reaches(text)),
+      TSImportType(node: Node) {
+        const text = literalText((node as unknown as { source: Node }).source);
+        if (text !== null && reaches(text)) context.report({ node, messageId: "found" });
+      },
+      CallExpression(node) {
+        const callee = node.callee;
+        if (callee.type !== "MemberExpression" || memberName(callee as Node) !== "glob") return;
+        if (!isImportMeta(callee.object as Node)) return;
+        if (literals(node.arguments as Node[]).some((text) => text.startsWith("/") && reaches(text)))
+          context.report({ node, messageId: "found" });
+      },
+    };
+  },
+};
+
 export default {
   rules: {
     "world-no-philology": worldNoPhilology,
@@ -310,5 +346,6 @@ export default {
     "founding-locale-clock-free": foundingLocaleClockFree,
     "home-client-no-engine": homeClientNoEngine,
     "hunt-fixed-world": huntFixedWorld,
+    "src-no-tooling-import": srcNoToolingImport,
   },
 };
