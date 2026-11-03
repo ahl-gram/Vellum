@@ -26,6 +26,7 @@ export type RibbonInput = {
   readonly fromKind: SettlementKind;
   readonly toKind: SettlementKind;
   readonly realmName: string | null;
+  readonly realmFrom: string | null;
   readonly worldName: string;
   readonly year: number;
   readonly totalCells: number;
@@ -103,6 +104,7 @@ export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): 
 
   const events = findEvents(world, mask, chain, dists, fromIdx, toIdx);
   const realm = world.realms.labels[to.x + to.y * w] ?? -1;
+  const realmFrom = world.realms.labels[from.x + from.y * w] ?? -1;
   return {
     seed: world.recipe.seed,
     fromIdx,
@@ -112,6 +114,7 @@ export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): 
     fromKind: from.kind,
     toKind: to.kind,
     realmName: realm >= 0 ? (world.names.realms[realm] ?? null) : null,
+    realmFrom: realmFrom >= 0 ? (world.names.realms[realmFrom] ?? null) : null,
     worldName: world.title.title,
     year: world.title.year,
     totalCells: dist,

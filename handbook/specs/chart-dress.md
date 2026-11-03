@@ -29,6 +29,17 @@ far hills, the people's skin and the cartouche, each a token in the `limner` gro
 `src/render/style.ts`, and every other dress carries `limner: null` and draws the plate in line. The
 people's clothes are the realm's tinctures, through the same heraldic palette the arms use.
 
+**The ribbon plate's antique is painted, its ink is plain.** The Wayfarer's Ribbon draws its antique
+dress as the painted ribbon of `design/ribbon-limner/c-painted-42.png`: cloth-edged strips in a land
+wash between gamboge bands, every league numbered in the road, vermilion roses and roofs, verdigris
+woods, azurite water and a swallow-tailed title banner. Its pigments are tokens in the
+`ribbonLimner` group on `MapStyle` in `src/render/style.ts`, beside the `limner` group's vermilion,
+the style's `river` for azurite and its `road` for the sepia shading, and every other dress carries
+`ribbonLimner: null`. The ink dress draws the plain impression: the same layout, events and captions
+in line, with no wash, no band and no banner. `ribbonDress` in `src/itinerary/dress/context.ts`
+resolves which, and a hex colour on either dress that is not one of those pigment tokens, the dress's
+own paper, inks or land, or its road or river, fails `test/itinerary/ribbon-dress.test.ts`.
+
 **The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
 so every collectible survey is antique and the only other dress that can reach a gathered sheet is a
 prospect's pen and ink. A feature that gathers charts inherits that gate whether it means to or not.

@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts";
-import { eventCaption } from "../../src/itinerary/prose.ts";
+import { eventCaption, ribbonTitle, stagesLine } from "../../src/itinerary/prose.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
+import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
+import { capitalJourneys } from "../../test-support/ribbon-fixtures.ts";
 
 // Issue #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
 
@@ -110,6 +112,33 @@ test("events arrive in the order the road meets them, and every one sits on the 
     for (const e of input.events) {
       assert.ok(Number.isInteger(e.k) && e.k >= 0, "every event knows its integer step along the chain");
       assert.ok(e.dist >= 0 && e.dist <= input.totalCells, "and falls within the journey it belongs to");
+    }
+  }
+});
+
+test("the stages line names each stop at its own league and closes on the title's total", () => {
+  const { input } = journey(42, "Homaitani");
+  assert.equal(
+    stagesLine(input),
+    "From Laukuwelua to Noloatatani 32, to Won 69, to Homaitani 83 leagues",
+    "each stop at its own league, the arrival at the title's rounded total",
+  );
+  const arrival = input.events.find((e) => e.kind === "waypoint" && e.index === input.toIdx)!;
+  assert.equal(
+    Math.round(arrival.dist / CELLS_PER_LEAGUE),
+    82,
+    "premise: the arrival's own league rounds to 82, the total to 83",
+  );
+  for (const seed of [15, 42]) {
+    for (const each of capitalJourneys(generateWorld(defaultRecipe(seed)))) {
+      const closing = /(\d+) leagues$/.exec(stagesLine(each))?.[1];
+      const title = /containing (\d+) leagues/.exec(ribbonTitle(each).subtitle[0] ?? "")?.[1];
+      assert.ok(title !== undefined, "the title names its total");
+      assert.equal(
+        closing,
+        title,
+        `seed ${seed} ${each.fromName} to ${each.toName}: the line closes on the title's total`,
+      );
     }
   }
 });

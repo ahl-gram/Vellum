@@ -1,127 +1,86 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import { treeRound, treePine, treePalm, marshTuft, dune, waveFlourish } from "../../prospect/dress/glyphs.ts";
+import type { XYS } from "../../prospect/geometry.ts";
 import { BIOMES } from "../../climate/biomes.ts";
 import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { eventCaption, tierTag } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
-import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
-import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
-import { stripCompass } from "./compass.ts";
+import { stripPos, type StripLayout } from "./layout.ts";
+import {
+  bridgeMark,
+  fordMark,
+  hillProfile,
+  mountainProfile,
+  paintedDune,
+  paintedHill,
+  paintedMarshTuft,
+  paintedMountain,
+  paintedSettlementCluster,
+  paintedTreePalm,
+  paintedTreePine,
+  paintedTreeRound,
+  settlementCluster,
+  stipple,
+} from "./glyphs.ts";
+import { paintedRiverBand, riverBand, seaWash } from "./water.ts";
+import { paintedCompass, stripCompass } from "./compass.ts";
+import { leagueMarks, roadAngleDeg, roadNodes } from "./road.ts";
+import type { RibbonContext, RibbonPaint } from "./context.ts";
+import { clothFrame, plainFrame, stripBody, type StripBody } from "./cloth.ts";
 
-const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
-const STRIP_LIFT = "#ffffff";
-const STRIP_LIFT_OPACITY = 0.16;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
 
-function frame(c: DressContext, s: StripLayout): SvgNode[] {
-  return [
-    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: STRIP_LIFT, "fill-opacity": STRIP_LIFT_OPACITY }),
-    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "none", stroke: c.ink, "stroke-width": 1.1 }),
-    el("rect", {
-      x: s.x0 + 3,
-      y: s.y0 + 3,
-      width: s.w - 6,
-      height: s.h - 6,
-      fill: "none",
-      stroke: c.soft,
-      "stroke-width": 0.5,
-    }),
-  ];
+function plainDecor(
+  c: RibbonContext,
+  biome: number,
+  rel: number,
+  smpRel: number,
+  x: number,
+  y: number,
+  p: XYS,
+): SvgNode[] {
+  if (biome === BIOMES.ocean) return [waveFlourish(c, x - 6, y, 0.8)];
+  if (biome === BIOMES.alpine || biome === BIOMES.snow) return [mountainProfile(c, x, y, 0.8)];
+  if (rel - smpRel > 0.045) return [hillProfile(c, x, y, 0.85)];
+  if (FOREST.has(biome)) return [treeRound(c, p)];
+  if (biome === BIOMES.taiga) return [treePine(c, p)];
+  if (biome === BIOMES.jungle || biome === BIOMES.savanna) return [treePalm(c, p)];
+  if (biome === BIOMES.marsh) return [marshTuft(c, p)];
+  if (biome === BIOMES.desert) return [dune(c, p)];
+  return [];
 }
 
-function offsetPath(pts: ReadonlyArray<StripPoint>, off: number): string {
-  let d = "";
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[Math.max(0, i - 1)] as StripPoint;
-    const b = pts[Math.min(pts.length - 1, i + 1)] as StripPoint;
-    const dx = b.sx - a.sx;
-    const dy = b.sy - a.sy;
-    const len = Math.hypot(dx, dy) || 1;
-    const x = (pts[i] as StripPoint).sx + (-dy / len) * off;
-    const y = (pts[i] as StripPoint).sy + (dx / len) * off;
-    d += `${i === 0 ? "M" : "L"}${r1(x)} ${r1(y)}`;
-  }
-  return d;
+function paintedDecor(
+  c: RibbonContext,
+  paint: RibbonPaint,
+  biome: number,
+  rel: number,
+  smpRel: number,
+  p: XYS,
+  fork: Rng,
+): SvgNode[] {
+  const { x, y } = p;
+  if (biome === BIOMES.ocean) return [];
+  if (biome === BIOMES.alpine || biome === BIOMES.snow) return [paintedMountain(c, paint, x, y, 0.8)];
+  if (rel - smpRel > 0.045) return [paintedHill(c, paint, x, y, 0.85)];
+  if (FOREST.has(biome))
+    return [...stipple(fork, x, y - 3, 7, 10, paint.verdigris, 0.55), paintedTreeRound(c, paint, p)];
+  if (biome === BIOMES.taiga)
+    return [...stipple(fork, x, y - 3, 4, 8, paint.verdigris, 0.5), paintedTreePine(c, paint, p)];
+  if (biome === BIOMES.jungle || biome === BIOMES.savanna) return [paintedTreePalm(c, paint, p)];
+  if (biome === BIOMES.marsh) return [...stipple(fork, x, y - 2, 3, 8, paint.azurite, 0.5), paintedMarshTuft(paint, p)];
+  if (biome === BIOMES.desert) return [paintedDune(paint, p)];
+  return [];
 }
 
-function roadAngleDeg(strip: StripLayout, dist: number): number {
-  const a = stripPos(strip, dist - 1.1);
-  const b = stripPos(strip, dist + 1.1);
-  return (Math.atan2(b.sy - a.sy, b.sx - a.sx) * 180) / Math.PI;
-}
-
-function roadNodes(c: DressContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
-  const nodes: SvgNode[] = [];
-  for (const off of [-ROAD_HALF, ROAD_HALF]) {
-    nodes.push(
-      el("path", {
-        d: offsetPath(strip.pts, off),
-        fill: "none",
-        stroke: c.style.road,
-        "stroke-width": 1.1,
-        "stroke-dasharray": "0.2 3.4",
-        "stroke-linecap": "round",
-      }),
-    );
-  }
-  const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
-  for (const e of input.events) {
-    if (e.kind !== "waypoint" || e.dist < strip.d0 - 0.75 || e.dist > strip.d1 + 0.75) continue;
-    const a = stripPos(strip, Math.max(strip.d0, e.dist - solidSpan));
-    const b = stripPos(strip, Math.min(strip.d1, e.dist + solidSpan));
-    const dx = b.sx - a.sx;
-    const dy = b.sy - a.sy;
-    const len = Math.hypot(dx, dy);
-    if (len < 2) continue;
-    for (const off of [-ROAD_HALF, ROAD_HALF]) {
-      const nx = (-dy / len) * off;
-      const ny = (dx / len) * off;
-      nodes.push(
-        el("path", {
-          d: `M${r1(a.sx + nx)} ${r1(a.sy + ny)}L${r1(b.sx + nx)} ${r1(b.sy + ny)}`,
-          fill: "none",
-          stroke: c.style.road,
-          "stroke-width": 1.2,
-        }),
-      );
-    }
-  }
-  return nodes;
-}
-
-function leagueDots(c: DressContext, strip: StripLayout): SvgNode[] {
-  const nodes: SvgNode[] = [];
-  const first = Math.ceil(strip.d0 / CELLS_PER_LEAGUE);
-  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
-  for (let l = Math.max(1, first); l <= last; l++) {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
-    nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 1.4, fill: c.ink }));
-    if (l % 5 === 0) {
-      nodes.push(
-        el(
-          "text",
-          {
-            x: r1(p.sx + 5.5),
-            y: r1(p.sy + 2.4),
-            "font-family": c.style.fontFamily,
-            "font-size": 7,
-            fill: c.soft,
-          },
-          [String(l)],
-        ),
-      );
-    }
-  }
-  return nodes;
-}
-
-function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
+function decorNodes(c: RibbonContext, strip: StripLayout, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
   const fork = rng.fork(`decor-${strip.index}`);
+  const margin = c.paint ? 12 : 10;
   for (let i = 0; i < strip.samples.length; i += DECOR_STRIDE) {
     const smp = strip.samples[i];
     const pt = strip.pts[i];
@@ -132,17 +91,14 @@ function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
       const biome = side < 0 ? smp.biomeL : smp.biomeR;
       if (fork.next() < 0.42) continue;
       const x = pt.sx + side * (25 + fork.range(0, 9));
-      if (x < strip.x0 + 10 || x > strip.x0 + strip.w - 10) continue;
+      if (x < strip.x0 + margin || x > strip.x0 + strip.w - margin) continue;
       const y = pt.sy + fork.range(-2, 2);
       const p = { x, y, s: 0.72 + fork.range(0, 0.2) };
-      if (biome === BIOMES.ocean) nodes.push(waveFlourish(c, x - 6, y, 0.8));
-      else if (biome === BIOMES.alpine || biome === BIOMES.snow) nodes.push(mountainProfile(c, x, y, 0.8));
-      else if (rel - smp.rel > 0.045) nodes.push(hillProfile(c, x, y, 0.85));
-      else if (FOREST.has(biome)) nodes.push(treeRound(c, p));
-      else if (biome === BIOMES.taiga) nodes.push(treePine(c, p));
-      else if (biome === BIOMES.jungle || biome === BIOMES.savanna) nodes.push(treePalm(c, p));
-      else if (biome === BIOMES.marsh) nodes.push(marshTuft(c, p));
-      else if (biome === BIOMES.desert) nodes.push(dune(c, p));
+      nodes.push(
+        ...(c.paint
+          ? paintedDecor(c, c.paint, biome, rel, smp.rel, p, fork)
+          : plainDecor(c, biome, rel, smp.rel, x, y, p)),
+      );
     }
   }
   return nodes;
@@ -206,27 +162,6 @@ function captionNodes(
   return { nodes: [...laid.nodes, ...out], track: { ...laid.track, [key]: y - 4 } };
 }
 
-function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltDeg: number): SvgNode {
-  const x0 = strip.x0 + 4;
-  const x1 = strip.x0 + strip.w - 4;
-  const span = (x1 - x0) / 4;
-  let d = `M${r1(x0)} ${r1(sy)}`;
-  for (let i = 0; i < 4; i++) {
-    d += `q${r1(span / 2)} ${i % 2 === 0 ? -3 : 3} ${r1(span)} 0`;
-  }
-  return el("g", { transform: `rotate(${r1(tiltDeg)} ${r1((x0 + x1) / 2)} ${r1(sy)})` }, [
-    el("path", { d, fill: "none", stroke: c.style.river, "stroke-width": 2.1, "stroke-opacity": 0.85 }),
-    el("path", {
-      d,
-      fill: "none",
-      stroke: c.style.river,
-      "stroke-width": 0.7,
-      "stroke-opacity": 0.5,
-      transform: "translate(0 2.6)",
-    }),
-  ]);
-}
-
 function waypointLines(e: Extract<RibbonEvent, { kind: "waypoint" }>, caption: string): CaptionLine[] {
   const lines: CaptionLine[] = e.endpoint
     ? [{ text: caption, caps: true, size: 10.5 }]
@@ -237,55 +172,87 @@ function waypointLines(e: Extract<RibbonEvent, { kind: "waypoint" }>, caption: s
   return lines;
 }
 
-function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng: Rng): SvgNode[] {
-  const nodes: SvgNode[] = [];
+type Seat = { sx: number; sy: number; side: -1 | 1; lines: ReadonlyArray<CaptionLine> };
+
+function captionSeat(e: RibbonEvent, p: { sx: number; sy: number }, freeSide: -1 | 1, caption: string): Seat {
+  switch (e.kind) {
+    case "waypoint":
+      return { sx: p.sx, sy: p.sy, side: freeSide, lines: waypointLines(e, caption) };
+    case "crossing":
+      return { sx: p.sx, sy: p.sy - 8, side: freeSide, lines: [{ text: caption }] };
+    case "branch":
+      return { sx: p.sx + e.side * 20, sy: p.sy - 9, side: e.side, lines: [{ text: caption }] };
+    case "summit":
+      return { sx: p.sx, sy: p.sy - 10, side: (freeSide * -1) as -1 | 1, lines: [{ text: caption }] };
+  }
+}
+
+function eventArt(
+  c: RibbonContext,
+  strip: StripLayout,
+  body: StripBody,
+  e: RibbonEvent,
+  p: { sx: number; sy: number },
+  freeSide: -1 | 1,
+  rng: Rng,
+): SvgNode[] {
+  switch (e.kind) {
+    case "waypoint": {
+      const tier = e.tier === "farmstead" || e.tier === "mill" ? "hamlet" : e.tier;
+      return [
+        c.paint
+          ? paintedSettlementCluster(c, c.paint, p.sx, p.sy - 1, tier)
+          : settlementCluster(c, p.sx, p.sy - 1, tier),
+      ];
+    }
+    case "crossing": {
+      const tilt = rng.fork(`tilt-${e.k}`).range(-9, 9);
+      const deg = roadAngleDeg(strip, e.dist);
+      return [
+        c.paint ? paintedRiverBand(c.paint, body, p.sy, tilt) : riverBand(c, strip, p.sy, tilt),
+        e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg),
+      ];
+    }
+    case "branch":
+      return [
+        el("path", {
+          class: "road",
+          d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(p.sx + e.side * 20)} ${r1(p.sy - 9)}`,
+          fill: "none",
+          stroke: c.paint ? c.ink : c.style.road,
+          "stroke-width": 0.9,
+          "stroke-dasharray": "0.2 3",
+          "stroke-linecap": "round",
+        }),
+      ];
+    case "summit":
+      return [
+        c.paint
+          ? paintedMountain(c, c.paint, p.sx + freeSide * 27, p.sy + 4, 1.05)
+          : mountainProfile(c, p.sx + freeSide * 27, p.sy + 4, 1.05),
+      ];
+  }
+}
+
+function eventNodes(
+  c: RibbonContext,
+  input: RibbonInput,
+  strip: StripLayout,
+  body: StripBody,
+  rng: Rng,
+): { readonly art: SvgNode[]; readonly laid: CaptionsLaid } {
+  const art: SvgNode[] = [];
   let laid: CaptionsLaid = { nodes: [], track: { left: strip.y0 + strip.h, right: strip.y0 + strip.h } };
   for (const e of input.events) {
     if (e.dist < strip.d0 || e.dist >= strip.d1) continue;
     const p = stripPos(strip, e.dist);
     const freeSide: -1 | 1 = p.sx > strip.x0 + strip.w / 2 ? -1 : 1;
     const caption = eventCaption(e, rng);
-    switch (e.kind) {
-      case "waypoint": {
-        nodes.push(
-          settlementCluster(c, p.sx, p.sy - 1, e.tier === "farmstead" || e.tier === "mill" ? "hamlet" : e.tier),
-        );
-        const lines = waypointLines(e, caption);
-        laid = captionNodes(c, strip, p.sx, p.sy, freeSide, lines, laid);
-        break;
-      }
-      case "crossing": {
-        const tilt = rng.fork(`tilt-${e.k}`).range(-9, 9);
-        nodes.push(riverBand(c, strip, p.sy, tilt));
-        const deg = roadAngleDeg(strip, e.dist);
-        nodes.push(e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg));
-        laid = captionNodes(c, strip, p.sx, p.sy - 8, freeSide, [{ text: caption }], laid);
-        break;
-      }
-      case "branch": {
-        const endX = p.sx + e.side * 20;
-        const endY = p.sy - 9;
-        nodes.push(
-          el("path", {
-            d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(endX)} ${r1(endY)}`,
-            fill: "none",
-            stroke: c.style.road,
-            "stroke-width": 0.9,
-            "stroke-dasharray": "0.2 3",
-            "stroke-linecap": "round",
-          }),
-        );
-        laid = captionNodes(c, strip, endX, endY, e.side, [{ text: caption }], laid);
-        break;
-      }
-      case "summit": {
-        nodes.push(mountainProfile(c, p.sx + freeSide * 27, p.sy + 4, 1.05));
-        laid = captionNodes(c, strip, p.sx, p.sy - 10, (freeSide * -1) as -1 | 1, [{ text: caption }], laid);
-        break;
-      }
-    }
+    art.push(...eventArt(c, strip, body, e, p, freeSide, rng));
+    const seat = captionSeat(e, p, freeSide, caption);
+    laid = captionNodes(c, strip, seat.sx, seat.sy, seat.side, seat.lines, laid);
   }
-  return [...nodes, ...laid.nodes];
+  return { art, laid };
 }
 
 function continuation(c: DressContext, strip: StripLayout, isLast: boolean): SvgNode[] {
@@ -308,22 +275,61 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
   ];
 }
 
+function realmEdges(c: RibbonContext, input: RibbonInput, strip: StripLayout, isLast: boolean): SvgNode[] {
+  const names: Array<{ name: string | null; x: number; turn: -90 | 90 }> = [
+    { name: strip.index === 0 ? input.realmFrom : null, x: strip.x0 + 4.6, turn: -90 },
+    { name: isLast ? input.realmName : null, x: strip.x0 + strip.w - 4.6, turn: 90 },
+  ];
+  const y = strip.y0 + strip.h / 2;
+  return names.flatMap(({ name, x, turn }) =>
+    name === null
+      ? []
+      : [
+          el(
+            "text",
+            {
+              x: r1(x),
+              y: r1(y),
+              "text-anchor": "middle",
+              "dominant-baseline": "middle",
+              transform: `rotate(${turn} ${r1(x)} ${r1(y)})`,
+              "font-family": c.style.fontFamily,
+              "font-size": 7.6,
+              "font-style": "italic",
+              "letter-spacing": 1.2,
+              fill: c.ink,
+            },
+            [name],
+          ),
+        ],
+  );
+}
+
+export type StripDrawing = { readonly art: SvgNode; readonly captions: ReadonlyArray<SvgNode> };
+
 export function stripNodes(
-  c: DressContext,
+  c: RibbonContext,
   input: RibbonInput,
   strip: StripLayout,
   rng: Rng,
   isLast: boolean,
-): SvgNode {
+): StripDrawing {
+  const body = stripBody(strip);
   const compassX = strip.x0 + strip.w / 2 - Math.sign(strip.lean || 1) * (strip.w / 4 + 4);
   const compassY = strip.y0 + strip.h * 0.36;
-  return el("g", {}, [
-    ...frame(c, strip),
+  const events = eventNodes(c, input, strip, body, rng);
+  const art = el("g", {}, [
+    ...(c.paint ? clothFrame(c, c.paint, strip, body) : plainFrame(c, strip)),
+    ...(c.paint ? seaWash(c.paint, strip, body, rng.fork(`sea-${strip.index}`)) : []),
     ...decorNodes(c, strip, rng),
-    stripCompass(c, compassX, compassY, strip.needleDeg),
+    c.paint
+      ? paintedCompass(c, c.paint, compassX, compassY, strip.needleDeg)
+      : stripCompass(c, compassX, compassY, strip.needleDeg),
     ...roadNodes(c, input, strip),
-    ...leagueDots(c, strip),
-    ...eventNodes(c, input, strip, rng),
+    ...leagueMarks(c, strip),
+    ...events.art,
     ...continuation(c, strip, isLast),
+    ...(c.paint ? realmEdges(c, input, strip, isLast) : []),
   ]);
+  return { art, captions: events.laid.nodes };
 }

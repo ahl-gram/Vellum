@@ -36,6 +36,15 @@ export type MapStyle = {
   readonly currents: boolean;
   readonly realmTints: ReadonlyArray<string>;
   readonly limner: Limner | null;
+  readonly ribbonLimner: RibbonLimner | null;
+};
+
+export type RibbonLimner = {
+  readonly gamboge: string;
+  readonly verdigris: string;
+  readonly verdigrisWash: string;
+  readonly azuriteWash: string;
+  readonly landWash: string;
 };
 
 export type Limner = {
@@ -97,6 +106,13 @@ const ANTIQUE: MapStyle = {
     skin: "#e8cfae",
     horse: "#c9b38a",
   },
+  ribbonLimner: {
+    gamboge: "#d9a92e",
+    verdigris: "#5f9a5a",
+    verdigrisWash: "#a9c48f",
+    azuriteWash: "#9fbdcc",
+    landWash: "#e6e7c6",
+  },
 };
 
 const TOPOGRAPHIC: MapStyle = {
@@ -141,6 +157,7 @@ const TOPOGRAPHIC: MapStyle = {
   currents: false,
   realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad", "#1abc9c", "#9bc53d", "#e84393"],
   limner: null,
+  ribbonLimner: null,
 };
 
 const INK: MapStyle = {
@@ -176,6 +193,7 @@ const INK: MapStyle = {
   currents: false,
   realmTints: ["#888", "#aaa", "#777", "#999", "#666"],
   limner: null,
+  ribbonLimner: null,
 };
 
 const NAUTICAL: MapStyle = {
@@ -211,6 +229,7 @@ const NAUTICAL: MapStyle = {
   currents: true,
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6"],
   limner: null,
+  ribbonLimner: null,
 };
 
 export const STYLES: Record<StyleName, MapStyle> = {

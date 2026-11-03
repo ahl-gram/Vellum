@@ -1,4 +1,4 @@
-// Renders the limner mockups over the dumped geometry: `node design/ribbon-limner/build.ts` writes the SVGs here and the PNGs plus a gallery to out/ribbon-limner/.
+// Renders the limner mockups over the dumped geometry: `node design/ribbon-limner/build.ts` writes the SVGs, the PNGs and a gallery to out/ribbon-limner/.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { el, renderSvg, type SvgNode } from "../../src/render/svg.ts";
@@ -74,8 +74,8 @@ for (const job of JOBS) {
   shots.push({ file: `0-${current}.png`, name: `Today: chart ${job.seed}, antique`, note: `${rb.from} to ${rb.to}, ${Math.round(rb.leagues)} leagues, as the site draws it now.` });
   for (const v of VARIANTS.filter((x) => job.keys.includes(x.key))) {
     const name = `${v.key}-${job.seed}`;
-    writeFileSync(resolve(HERE, `${name}.svg`), plate(v, rb, armsFrom, armsTo));
-    if (browser) await rasterizeSvg(browser, resolve(HERE, `${name}.svg`), resolve(OUT, `${name}.png`), 2);
+    writeFileSync(resolve(OUT, `${name}.svg`), plate(v, rb, armsFrom, armsTo));
+    if (browser) await rasterizeSvg(browser, resolve(OUT, `${name}.svg`), resolve(OUT, `${name}.png`), 2);
     shots.push({ file: `${name}.png`, name: `${v.name} (chart ${job.seed})`, note: v.note });
     console.log(`out/ribbon-limner/${name}.png`);
   }
