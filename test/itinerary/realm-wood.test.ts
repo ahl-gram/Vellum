@@ -31,6 +31,8 @@ test("a border fires where the road passes into another named realm and stays th
     [[-1, -1, 0, 0, 0, 1, 1, 1], [{ k: 5, from: 0, to: 1 }]],
     [[], []],
     [[-1, -1], []],
+    [[0, 0, -1, -1, -1, 0, 0], []],
+    [[0, 0, -1, -1], []],
   ];
   for (const [labels, want] of cases) assert.deepEqual(borderSteps(labels), want, `labels ${JSON.stringify(labels)}`);
 });
