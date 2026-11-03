@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { CDP_HOMES } from "../../scripts/lint/e2e-cdp-helpers.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
+import { eslint, plantMessages, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/e2e-cdp-through-helper";
@@ -139,4 +139,76 @@ test("no e2e file names about:blank but its one home, e2e/support/nav.ts, the ha
     "the harness launches its browser on ABOUT_BLANK from the home, never on a spelling of its own",
   );
   assert.deepEqual(await linted(HOP_PLANT, HOP_HOME), [], "the home itself is refused the address it exists to hold");
+});
+
+const SCRIPTS_OFF_HOME = "e2e/support/scripts-off.ts";
+const SCRIPTS_OFF_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  [
+    'export const a = (ctx: SuiteContext) => ctx.send("Emulation.setScriptExecutionDisabled", { value: true });',
+    REFUSE,
+  ],
+  [
+    'export const b = ({ send }: SuiteContext) => send("Emulation.setScriptExecutionDisabled", { value: false });',
+    REFUSE,
+  ],
+  [
+    "export const c = (ctx: SuiteContext) => ctx.send(`Emulation.setScriptExecutionDisabled`, { value: true });",
+    REFUSE,
+  ],
+  [
+    'export const d = (ctx: SuiteContext) => ctx["send"]("Emulation.setScriptExecutionDisabled", { value: true });',
+    REFUSE,
+  ],
+  [
+    'const METHOD = "Emulation.setScriptExecutionDisabled"; export const e = (ctx: SuiteContext) => ctx.send(METHOD);',
+    REFUSE,
+  ],
+  ["// Emulation.setScriptExecutionDisabled, named in a comment, which switches nothing", PASS],
+  ['export const f = "scripts go off through Emulation.setScriptExecutionDisabled\'s one helper";', PASS],
+  ['export const g = (ctx: SuiteContext) => ctx.send("Emulation.setEmulatedMedia", { media: "print" });', PASS],
+  [
+    'const s = "x"; export const i = (ctx: SuiteContext) => ctx.send(`Emulation.setScriptExecutionDisabled${s}`);',
+    PASS,
+  ],
+  [
+    'export const h = (ctx: SuiteContext) => ctx.send("Emulation." + "setScriptExecutionDisabled", { value: true });',
+    PASS,
+  ],
+  [
+    'import { SWITCH } from "../../test-support/cdp-methods.ts"; export const j = (ctx: SuiteContext) => ctx.send(SWITCH);',
+    PASS,
+  ],
+];
+const SCRIPTS_OFF_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces, and the whole name held in a binding the file never spells, such as a constant imported from a file the rule does not read (the last two plant lines); no syntax read of the one file can resolve either";
+
+test("no e2e file names the scripts-off switch but its one helper, which always turns scripts back on (Issue #779)", async () => {
+  const refused = refusedOf(SCRIPTS_OFF_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < SCRIPTS_OFF_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(SCRIPTS_OFF_PLANT, "e2e/suites/document-rooms.ts"), refused, SCRIPTS_OFF_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(SCRIPTS_OFF_PLANT, "e2e/support/settle.ts"),
+    refused,
+    "a support module that is not the helper",
+  );
+  assert.deepEqual(
+    await linted(SCRIPTS_OFF_PLANT, SCRIPTS_OFF_HOME),
+    [],
+    "the helper itself is refused the switch it exists to hold",
+  );
+  const [why] = (
+    await plantMessages(
+      SCRIPTS_OFF_PLANT.map(([line]) => line),
+      "e2e/suites/document-rooms.ts",
+    )
+  ).filter((m) => m.ruleId === RULE);
+  assert.match(
+    why?.message ?? "",
+    /withScriptsOff always turns page scripts back on/,
+    "the refusal no longer says why the switch has one helper",
+  );
 });
