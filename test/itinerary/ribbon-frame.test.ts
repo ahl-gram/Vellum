@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import { type RibbonInput } from "../../src/itinerary/input.ts";
+import type { RibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { layoutRibbon, STRIP_PAD, type StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
