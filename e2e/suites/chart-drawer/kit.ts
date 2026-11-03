@@ -7,6 +7,7 @@ import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";
 import type { Back, Card } from "./reads.ts";
 import { sendKey } from "../../support/input.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Mouse = Pick<ReturnType<typeof makeMouse>, "press" | "moveTo" | "release">;
 export type DrawerKit = ReturnType<typeof drawerKit>;
@@ -44,8 +45,7 @@ export function drawerKit(ctx: SuiteContext & { settle: Settle }) {
   };
   const go = async (hash: string) => {
     await forget();
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${hash}` });
+    await bounce(send, `http://127.0.0.1:${PORT}/explorer/#${hash}`);
     for (let i = 0; i < 200; i++) {
       await sleep(150);
       if (await evaluate<boolean>(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`))

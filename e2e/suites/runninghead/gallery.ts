@@ -5,13 +5,14 @@ import type { Payload, Point } from "../../types.ts";
 import { GLYPH_LINES } from "../stage/glyphs.ts";
 import { FLOOR_PLAIN, grounds, withStyle, worstOf } from "../stage/stage.ts";
 import type { RunningHeadKit } from "./kit.ts";
+import { leaveBlank } from "../../support/nav.ts";
 
 export const SCROLLED: Payload<{ y: number }> = `({ y: scrollY })`;
 
 export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit }: RunningHeadKit): Promise<void> {
   // The harness window is tall, so this check pins its own viewport; the Gallery is the one chart room that scrolls.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(send);
   const galleryUp = await visit("/gallery/");
   type GalleryRead = { sh: number; y: number; plate: Point | null; loaded: boolean };
   let scrolled: GalleryRead | null = null;
@@ -318,7 +319,7 @@ const PLATE_UNDER_CLUSTER: Payload<boolean> = `(() => { const p = document.query
 export async function rh33ClusterReads(k: RunningHeadKit): Promise<void> {
   const { evaluate, send, sleep, check, visit } = k;
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(send);
   if (!(await visit("/gallery/"))) throw new Error("RH33: the Gallery never came up");
   await makeSettle(k)(FIRST_PLATE_LOADED, (loaded) => loaded, "RH33 the first plate loaded");
   await evaluate(PLATE_UNDER_CLUSTER);

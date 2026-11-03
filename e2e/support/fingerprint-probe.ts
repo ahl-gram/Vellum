@@ -2,6 +2,7 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { NUMERO_GLYPH, NUMERO_TEXT, unreadBrowser } from "./fingerprint.ts";
 import type { BrowserFacts } from "./fingerprint.ts";
 import { errorText } from "./suites.ts";
+import { leaveBlank } from "./nav.ts";
 
 export type ProbeContext = Pick<SuiteContext, "evaluate" | "send" | "sleep">;
 export type Measured = { readonly numeroWidth: number; readonly selectHeight: number } | { readonly missing: string };
@@ -130,7 +131,7 @@ async function boundedProbe(ctx: ProbeContext): Promise<BrowserFacts> {
 }
 
 async function handBack(ctx: ProbeContext, page: string, signal: AbortSignal): Promise<void> {
-  await ctx.send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(ctx.send);
   signal.throwIfAborted();
   await ctx.send("Page.navigate", { url: page });
 }

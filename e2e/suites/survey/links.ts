@@ -1,6 +1,7 @@
 import type { makeRoom } from "../../support/room.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { SurveyKit } from "./kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 
@@ -57,8 +58,7 @@ export async function sv4DeepLink({ evaluate, check, goto, waitInked }: SurveyKi
 
 export async function sv5Forwards({ evaluate, send, check, sleep, EXP }: SurveyKit, room: Room): Promise<void> {
   const fwdHash = "#seed=42&style=antique&legend=1&arms=0&year=1030";
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: EXP + fwdHash });
+  await bounce(send, EXP + fwdHash);
   let landed = false;
   for (let i = 0; i < 200; i++) {
     let p = null;
@@ -92,8 +92,7 @@ export async function sv5Forwards({ evaluate, send, check, sleep, EXP }: SurveyK
 
 export async function sv5bVerbatim({ evaluate, send, check, sleep, EXP }: SurveyKit): Promise<void> {
   const richHash = "#seed=7&style=ink&legend=0&arms=1&land=520&year=2&cx=0.5100&cy=0.4900&k=3.0000";
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: EXP + richHash });
+  await bounce(send, EXP + richHash);
   let landedB = false;
   for (let i = 0; i < 200; i++) {
     let p = null;

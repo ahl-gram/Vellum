@@ -2,6 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;
@@ -192,8 +193,7 @@ const NOTICE: Payload<{ ready: string; w: number }> =
 export async function pr36Authored({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
   const read = await withScriptsOff(send, async () => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/print-room/`);
     // The scripts-off notice having width is the witness that the page loaded with its scripts off.
     await settle(NOTICE, (d) => d.ready === "complete" && d.w > 0, "print-room-scripts-off");
     return {

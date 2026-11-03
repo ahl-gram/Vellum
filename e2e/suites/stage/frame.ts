@@ -7,6 +7,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, DESK_FRAME_H, PHONE, open, rest, stageFaults } from "./stage.ts";
 import type { Read } from "./stage.ts";
 import { switchFaults, withStyledBoot } from "./styled-boot.ts";
+import { leaveBlank } from "../../support/nav.ts";
 
 const UPRIGHT = { w: 390, h: 844, laidOut: { w: 1024, h: 2217 } };
 const DESK_ROWS = [772, 1500];
@@ -169,7 +170,7 @@ export async function ea8Pinched(ctx: SuiteContext): Promise<void> {
   await ctx.evaluate('(window.dispatchEvent(new Event("resize")), true)');
   await rest(ctx, PHONE.laidOut.w, PHONE.laidOut.h, "EA8 relaid");
   const after = await ctx.evaluate(SEATS);
-  await ctx.send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(ctx.send);
   const faults = seatFaults("/explorer/", before, after);
   ctx.check(
     "EA8 a pinch that zooms the page past full size, and the room laid out again after it, leave the desk frame standing: whether the page was set small is read once, as the room binds (Issue #778)",

@@ -1,6 +1,7 @@
 // Shared helpers for the Reading-Room-hosted suites (Issue #320), the reading-room suite's own kit among them; the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 import { dropExpectedCancellations } from "./console.ts";
 import type { Evaluate, SuiteContext } from "../types.ts";
+import { bounce } from "./nav.ts";
 
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
 
@@ -34,10 +35,8 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
     return false;
   };
 
-  // Re-bootstrap through about:blank (the Z13 idiom): a hash-only navigate is same-document, and the room reads its hash once at boot with no hashchange listener.
   const goto = async (hash: string): Promise<boolean> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/${hash}` });
+    await bounce(send, `http://127.0.0.1:${PORT}/reading-room/${hash}`);
     const booted = await boot();
     return booted && (await settled());
   };

@@ -1,12 +1,12 @@
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { LandfallKit } from "./kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 export async function l10NoScriptGet(k: LandfallKit): Promise<void> {
   const { evaluate, send, check, sleep, PORT, clickAt, centerOf } = k;
   // L10/L11: the seed form's no-JS GET fallback (Issue #454: "no-JS GET fallback degrading to today's world"), then the JS-on control proving the Explorer ignores the query (bare visit and ?seed=777 visit must show the SAME seed; comparing to 777's absence would flake the day the daily seed IS 777).
   await withScriptsOff(send, async () => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    await bounce(send, `http://127.0.0.1:${PORT}/`);
     let formReady = false;
     for (let i = 0; i < 120; i++) {
       try {
@@ -52,11 +52,9 @@ export async function l10NoScriptGet(k: LandfallKit): Promise<void> {
 }
 
 export async function l11IgnoresQuery({ evaluate, send, check, PORT, seedShown }: LandfallKit): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/`);
   const bareSeed = await seedShown();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/?seed=777` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/?seed=777`);
   const querySeed = await seedShown();
   const queryKept = await evaluate<string>(`location.search`);
   check(

@@ -2,6 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
+import { bounce } from "../../support/nav.ts";
 
 const W = 640;
 const H = 800;
@@ -22,8 +23,7 @@ const centreOf = (selector: string): Payload<Point | null> =>
 
 async function landHome(k: HomeKit, w: number): Promise<View> {
   await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
-  await k.send("Page.navigate", { url: "about:blank" });
-  await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}/` });
+  await bounce(k.send, `http://127.0.0.1:${k.PORT}/`);
   let committed = false;
   for (let i = 0; i < 300 && !committed; i++) {
     committed = await k

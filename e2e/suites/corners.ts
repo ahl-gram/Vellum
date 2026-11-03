@@ -21,6 +21,7 @@ import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
 import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl7Degenerate } from "./corners/floor.ts";
 import { fl6Paper, fl8ChartOnPaper } from "./corners/floor-paper.ts";
+import { bounce } from "../support/nav.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = [
@@ -125,8 +126,7 @@ async function load(ctx: SuiteContext, page: string, w: number): Promise<string 
   const { send, evaluate, sleep, PORT } = ctx;
   await ctx.setTouch(false);
   await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${page}` });
+  await bounce(send, `http://127.0.0.1:${PORT}${page}`);
   let up = false;
   for (let i = 0; i < 300 && !up; i++) {
     up = await evaluate<boolean>(
@@ -238,8 +238,7 @@ async function linksAtRest(
   ctx: SuiteContext,
   page: string,
 ): Promise<{ links: readonly string[]; media: readonly string[] }> {
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
   const read: Payload<{ ready: string; links: string[]; media: string[] }> =
     `({ ready: document.readyState, links: ${LINKS}, media: ${MEDIA} })`;
   const rest = await makeSettle(ctx)(

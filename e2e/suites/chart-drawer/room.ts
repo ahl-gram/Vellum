@@ -5,6 +5,7 @@ import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
+import { bounce, leaveBlank } from "../../support/nav.ts";
 
 const TWO = [
   "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4",
@@ -36,8 +37,7 @@ async function dwell({ evaluate, sleep }: SuiteContext, ms: number, until?: (d: 
 async function pillLines(k: DrawerKit): Promise<{ counted: Pill[]; next: { hit: boolean } | null; said: Pill[] }> {
   const { evaluate, send, sleep, PORT, clickAt, forget } = k;
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${TWO}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${TWO}`);
   await makeSettle({ evaluate, sleep, tolerant: true })(
     PILL,
     (d) => d.drawn === 1 && d.line !== "",
@@ -88,8 +88,7 @@ export async function cd55WhereAuthored({ evaluate, send, check, sleep, PORT }: 
   const control = await evaluate(WHERE);
   try {
     const off = await withScriptsOff(send, async () => {
-      await send("Page.navigate", { url: "about:blank" });
-      await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
+      await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/`);
       return makeSettle({ evaluate, sleep, tolerant: true })(
         WHERE,
         (d) => d.ready === "complete",
@@ -105,7 +104,7 @@ export async function cd55WhereAuthored({ evaluate, send, check, sleep, PORT }: 
       JSON.stringify({ control, off }),
     );
   } finally {
-    await send("Page.navigate", { url: "about:blank" });
+    await leaveBlank(send);
   }
 }
 
@@ -136,8 +135,7 @@ export async function cd56WorkerBlocked(k: DrawerKit): Promise<void> {
     await send("Network.setCacheDisabled", { cacheDisabled: true });
     serverState.blockWorker = true;
     await forget();
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#${DRESS}&table=${ONE}` });
+    await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/#${DRESS}&table=${ONE}`);
     const settle = makeSettle({ evaluate, sleep, tolerant: true });
     const read = await settle(FALLBACK, (d) => d.drawn === 1, "portfolio-drafted-inline", DRAWN);
     check(

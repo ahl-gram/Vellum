@@ -5,6 +5,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
 import { sendKey } from "../../support/input.ts";
+import { bounce } from "../../support/nav.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
@@ -70,8 +71,7 @@ async function still(ctx: SuiteContext, page: string, w: number, h: number, labe
 // A read that lands between documents is taken again (lane C on PR #795 caught one with no document element).
 export async function load(ctx: SuiteContext, page: string, w: number, h: number): Promise<void> {
   await size(ctx, w, h);
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
   const committed = `location.pathname === ${JSON.stringify(page.split("#")[0])} && document.readyState === "complete" && !!document.querySelector("main, body.atlas-sheet")`;
   for (let i = 0; i < 300; i++) {
     if (await ctx.evaluate<boolean>(committed).catch(() => false)) return;

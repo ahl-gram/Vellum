@@ -3,6 +3,8 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { HOLD_GRACE_MS } from "../../../src/site/shared/living-chart/place-card-hold.ts";
 import { NARROW_SEED } from "./reads.ts";
 import { sendKey } from "../../support/input.ts";
+import { bounce } from "../../support/nav.ts";
+import { explorerUp } from "../../support/explorer.ts";
 
 type Settle = ReturnType<typeof makeSettle>;
 type HoldKit = SuiteContext & { settle: Settle };
@@ -70,11 +72,8 @@ export function holdKit(ctx: HoldKit) {
   const boot = async (touch: boolean) => {
     await send("Emulation.setDeviceMetricsOverride", { ...DESK, deviceScaleFactor: 1, mobile: touch });
     await setTouch(touch);
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", {
-      url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique&legend=1&arms=0&beasts=0`,
-    });
-    if (!(await waitReady())) throw new Error("the explorer never drew at 1024");
+    await bounce(send, `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique&legend=1&arms=0&beasts=0`);
+    await explorerUp({ waitReady }, "the hold kit at 1024");
     await settle<string>(`document.fonts ? document.fonts.status : "loaded"`, (s) => s !== "loading", "fonts at 1024");
     return evaluate(MARKS);
   };

@@ -1,5 +1,6 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 export type Read = {
   readonly n: number;
@@ -82,10 +83,8 @@ export function writingKit(ctx: SuiteContext) {
     return read();
   };
 
-  // Bounce through about:blank (the Z13 idiom): a navigate to the tab's current URL is a no-op.
   const goto = async (hash: string): Promise<Read> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/writing-room/${hash}` });
+    await bounce(send, `http://127.0.0.1:${PORT}/writing-room/${hash}`);
     await settle(`document.readyState`, (d) => d === "complete", `a complete document at ${hash}`, POLLS);
     await settledAtLeast(1, `its first founding at ${hash}`);
     return read();
