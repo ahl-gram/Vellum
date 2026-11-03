@@ -6,6 +6,7 @@ import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W, stripPos } from "../..
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { WIDTH_FACTOR } from "../../src/render/geometry.ts";
 import { r1 } from "../../src/prospect/dress/context.ts";
+import { stagesLine } from "../../src/itinerary/prose.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import type { StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { attrsOf, inkExtent } from "../../test-support/dress-svg.ts";
@@ -337,4 +338,29 @@ test("every caption is drawn above every strip", () => {
     }
   }
   assert.ok(ribbonSvgFor(road42, "antique").includes(">to Lamahai</text>"), "the side road to Lamahai is captioned");
+});
+
+const STAGES = /<text [^>]*font-size="([^"]*)"[^>]*>(From [^<]*)<\/text>/;
+const stagesOf = (svg: string): { size: number; width: number } => {
+  const m = STAGES.exec(svg);
+  assert.ok(m, "the stages line is drawn");
+  return { size: Number(m[1]), width: (m[2] as string).length * Number(m[1]) * WIDTH_FACTOR.mixed };
+};
+
+test("the stages line fits inside the plate frame's rule, and a short one keeps its size", () => {
+  const rule = RIBBON_W - 2 * PLATE_INNER_RULE;
+  const long = namedJourney(generateWorld(defaultRecipe(2024)), "Cial", "Viareamere");
+  assert.ok(
+    stagesLine(long).length * 8.6 * WIDTH_FACTOR.mixed > rule,
+    "premise: the fixture's line at the full 8.6 is wider than the rule",
+  );
+  const fitted = stagesOf(ribbonSvgFor(long, "antique"));
+  assert.ok(fitted.width <= rule, `the longest line is ${fitted.width.toFixed(0)} wide against a rule of ${rule}`);
+  assert.ok(fitted.size >= 6.5 && fitted.size < 8.6, `and is set at ${fitted.size}, shrunk but legible`);
+  for (const input of [road42, road15, ...sweep]) {
+    const { size, width } = stagesOf(ribbonSvgFor(input, "antique"));
+    assert.ok(width <= rule, `${input.fromName} to ${input.toName}: ${width.toFixed(0)} against ${rule}`);
+    if (stagesLine(input).length * 8.6 * WIDTH_FACTOR.mixed <= rule)
+      assert.equal(size, 8.6, "a line that fits keeps its size");
+  }
 });
