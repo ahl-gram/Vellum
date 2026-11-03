@@ -10,6 +10,7 @@ import { paintedWave } from "./glyphs.ts";
 const SHORE_INSET = 4;
 const EDGE_STEP = 0.25;
 const WAVE_LENGTH = 11.2;
+const WAVE_RISE = 2.55;
 
 type Run = readonly [number, number];
 type Point = readonly [number, number];
@@ -127,7 +128,7 @@ function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: 
   for (let k = 0; k < Math.max(2, Math.round((yBot - yTop) / 40)); k++) {
     const p = inner[Math.floor(rng.range(0, inner.length - 0.01))] as Point;
     const wx = p[0] + side * rng.range(4, 12) - 8;
-    const wy = p[1] + rng.range(-8, 8);
+    const wy = Math.min(Math.max(p[1] + rng.range(-8, 8), strip.y0 + WAVE_RISE), strip.y0 + strip.h - WAVE_RISE);
     const held = Math.min(Math.max(wx, body.left(wy) + BAND), body.right(wy) - BAND - WAVE_LENGTH);
     nodes.push(paintedWave(paint, held, wy, 0.7));
   }
