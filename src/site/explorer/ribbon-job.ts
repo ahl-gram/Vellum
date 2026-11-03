@@ -34,8 +34,17 @@ export interface RibbonRow {
   readonly ny: number;
 }
 
+export interface StripBox {
+  readonly x0: number;
+  readonly y0: number;
+  readonly w: number;
+  readonly h: number;
+}
+
 export interface RibbonPlateData {
   readonly svg: string;
+  readonly strips: ReadonlyArray<StripBox>;
+  readonly paper: string;
   readonly fromIdx: number;
   readonly toIdx: number;
   readonly fromName: string;
@@ -112,6 +121,8 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
   if (input === null) throw new Error("no road joins these places");
   return {
     svg: ribbonSvgFor(input, spec.dress),
+    strips: [],
+    paper: "",
     fromIdx,
     toIdx,
     fromName: input.fromName,

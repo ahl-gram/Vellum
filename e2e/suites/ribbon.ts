@@ -1,10 +1,11 @@
-// Ribbon e2e (the RB checks; the chart room since Issue #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, an address the roads refuse is named on the slip, each town row opens its prospect, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
+// Ribbon e2e (the RB checks; the chart room since Issue #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the first plate and Turn about's ink in up each strip while a picked journey's arrives whole, an address the roads refuse is named on the slip, each town row opens its prospect, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { SuiteContext } from "../types.ts";
 import { rb19Refused, rb20RowProspects } from "./ribbon/courtesies.ts";
 import { rb12Dress } from "./ribbon/dress.ts";
 import { rb13RowHover, rb14Glass, rb15Paper } from "./ribbon/gestures.ts";
+import { rb21InksIn, rb22TurnAbout, rb23Reduced } from "./ribbon/ink.ts";
 import { ribbonKit, type Ribbon, type RibbonKit, type Row } from "./ribbon/kit.ts";
 import { rb11Markup, rb16RoadStandsDown, rb17PlaceLink, rb18CardRoad } from "./ribbon/room.ts";
 
@@ -35,6 +36,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RB18", () => rb18CardRoad(k));
   await step("RB19", () => rb19Refused(k));
   await step("RB20", () => rb20RowProspects(k));
+  await step("RB21 to RB23", async () => {
+    const fullMs = await rb21InksIn(k);
+    await rb22TurnAbout(k);
+    await rb23Reduced(k, fullMs);
+  });
   rb9NoErrors(ctx, errBase, httpBase);
 }
 
