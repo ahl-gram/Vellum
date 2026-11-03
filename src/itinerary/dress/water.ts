@@ -114,7 +114,7 @@ function washRun(paint: RibbonPaint, strip: StripLayout, body: StripBody, side: 
   ];
   const edgeBot = onCloth(edgeX, yBot);
   const edgeTop = onCloth(edgeX, yTop);
-  const shore: Point[] = [onCloth(edgeX - side * 6, yBot), ...inner, onCloth(edgeX - side * 6, yTop)];
+  const shore: Point[] = [[edgeX - side * 6, yBot], ...inner, [edgeX - side * 6, yTop]];
   const nodes: SvgNode[] = [
     el("path", {
       d: `M${r1(edgeBot[0])} ${r1(edgeBot[1])}${smooth(shore)}L${r1(edgeTop[0])} ${r1(edgeTop[1])}Z`,
