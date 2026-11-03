@@ -202,11 +202,32 @@ function seaLiesWhereTheSamplesSay(): void {
   assert.equal(dOf(ribbonSvgFor(dry, "antique"), SEA_WASH).length, 0, "and it holds no sea wash");
 }
 
-function everyVertex(d: string): Array<readonly [number, number]> {
+/** The whole outline of a closed M, L, Q path, the closing edge included, walked in steps under a unit: a segment between two vertices on the cloth can still leave it. */
+function outlineOf(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
-  for (const m of d.matchAll(/[MLQ]([^MLQZ]*)/g)) {
-    const n = (m[1] ?? "").split(/[ ,]/).map(Number);
-    for (let i = 0; i + 1 < n.length; i += 2) out.push([n[i] as number, n[i + 1] as number]);
+  let start: readonly [number, number] = [0, 0];
+  let cur: readonly [number, number] = [0, 0];
+  const walk = (to: readonly [number, number], at: (t: number) => readonly [number, number]): void => {
+    for (let t = 0; t <= 1; t += 0.01) out.push(at(t));
+    cur = to;
+  };
+  for (const m of d.matchAll(/([MLQ])([^MLQZ]*)|Z/g)) {
+    const n = (m[2] ?? "").split(/[ ,]/).map(Number);
+    const from = cur;
+    if (m[1] === undefined)
+      walk(start, (t) => [from[0] + (start[0] - from[0]) * t, from[1] + (start[1] - from[1]) * t]);
+    else if (m[1] === "M") start = cur = [n[0] as number, n[1] as number];
+    else if (m[1] === "L") {
+      const to: readonly [number, number] = [n[0] as number, n[1] as number];
+      walk(to, (t) => [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]);
+    } else {
+      const c = [n[0] as number, n[1] as number] as const;
+      const to: readonly [number, number] = [n[2] as number, n[3] as number];
+      walk(to, (t) => [
+        (1 - t) ** 2 * from[0] + 2 * (1 - t) * t * c[0] + t * t * to[0],
+        (1 - t) ** 2 * from[1] + 2 * (1 - t) * t * c[1] + t * t * to[1],
+      ]);
+    }
   }
   return out;
 }
@@ -246,7 +267,7 @@ function seaStaysOnTheCloth(): void {
     for (const d of dOf(svg, SEA_WASH)) {
       const strip = stripAtX(strips, headOf(d)[0]);
       for (const [x, y] of shorePoints(d)) withinHairlines(strip, x, x, y, `${where}, a shore point`);
-      for (const [x, y] of everyVertex(d)) withinCloth(strip, x, y, `${where}, strip ${strip.index}, a wash vertex`);
+      for (const [x, y] of outlineOf(d)) withinCloth(strip, x, y, `${where}, strip ${strip.index}, a wash outline`);
       shores++;
     }
     for (const d of dOf(svg, WAVE)) {
