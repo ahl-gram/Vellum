@@ -302,6 +302,18 @@ const huntFixedWorld: Rule.RuleModule = {
   },
 };
 
+export const TOOLING_ROOTS: readonly string[] = ["e2e", "scripts", "test", "test-support"];
+const srcNoToolingImport: Rule.RuleModule = {
+  meta: {
+    type: "problem",
+    messages: {
+      found:
+        "src/ imports nothing from scripts/, test/, test-support/ or e2e/, a type included: the product is what runs, and what runs around it imports from it, never the other way, so a type both sides use lives in src/ (handbook/specs/rulebook.md, What src/ holds, and what runs around it)",
+    },
+  },
+  create: () => ({}),
+};
+
 export default {
   rules: {
     "world-no-philology": worldNoPhilology,
@@ -310,5 +322,6 @@ export default {
     "founding-locale-clock-free": foundingLocaleClockFree,
     "home-client-no-engine": homeClientNoEngine,
     "hunt-fixed-world": huntFixedWorld,
+    "src-no-tooling-import": srcNoToolingImport,
   },
 };

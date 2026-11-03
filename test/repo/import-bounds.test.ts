@@ -4,8 +4,10 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { Linter } from "eslint";
 import tseslint from "typescript-eslint";
-import importBounds, { ROOMS_UNDER_THE_EXPLORER } from "../../scripts/lint/import-bounds.ts";
-import { plantMessages } from "../../test-support/source-shape-reports.ts";
+import importBounds, { ROOMS_UNDER_THE_EXPLORER, TOOLING_ROOTS } from "../../scripts/lint/import-bounds.ts";
+import { lintTsRoots } from "../../test-support/lint-roots.ts";
+import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -214,4 +216,75 @@ test("the glass-keys ban spares the Portfolio's own folder under the Explorer an
     "the exemption names the Portfolio's folder and no other",
   );
   for (const room of ROOMS_UNDER_THE_EXPLORER) assert.ok(existsSync(join(ROOT, room)), `${room} exists on disk`);
+});
+
+const TOOLING_RULE = "vellum/src-no-tooling-import";
+const TOOLING_FILES = [
+  "src/cli/main.ts",
+  "src/world/generate.ts",
+  "src/site/explorer/place-fetch.ts",
+  "src/site/explorer/worker.ts",
+  "src/site/shared/living-chart/voyage.ts",
+];
+const TOOLING_BLIND_SPOTS =
+  "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces none of which is itself a relative path into those folders (a path join, a concatenation); a module that reaches them through another module; a triple-slash reference path, which TypeScript reads and this rule does not; and a page or a sheet under src/, which this TypeScript lint never reads. Erring toward refusing: a module source opening with / is read from the repo root, as the site's bundler reads it, and a relative string anywhere in src/ that lands in one of the folders is refused though nothing imports it. An import alias (import x = require) is refused first by npm run check (TS1294).";
+
+const toolingPlant = (file: string): string[] => {
+  const up = "../".repeat(file.split("/").length - 1);
+  return [
+    `import { placeFile } from "${up}scripts/place-files.ts";`,
+    `import type { WITNESSES } from "${up}test-support/lint-witnesses.ts";`,
+    `export * from "${up}e2e/harness.ts";`,
+    `export type { Plant } from "${up}test/repo/fixture.ts";`,
+    `export const a = () => import("${up}scripts/delivery/main.ts");`,
+    `export const b = new URL("${up}e2e/harness.ts", import.meta.url);`,
+    `export type C = typeof import("${up}scripts/place-files.ts");`,
+    `export type D = import("${up}test-support/lint-witnesses.ts").Witnesses;`,
+    `import "/scripts/kit-fonts.ts";`,
+    `const spec = "${up}test/repo/fixture.ts"; export const load = () => import(spec);`,
+    "export const e = (name: string) => import(`" + up + "e2e/suites/${name}.ts`);",
+    `// imports ${up}scripts/place-files.ts, named in a comment`,
+    `export const f = "scripts/ holds the commands, named in prose";`,
+    `export const g = "/scripts/";`,
+    `import { createRng } from "${up}src/core/rng.ts";`,
+    `export const h = () => import("./test/part.ts");`,
+    `export const i = () => import("${up}scripts-archive/x.ts");`,
+  ];
+};
+
+test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source and no type import, static, dynamic, by URL, from the root or held in a string, and a mention, a site path, src/ itself, a folder of src/ named test and a sibling folder are not a reach (Issue #1132)", async () => {
+  for (const file of TOOLING_FILES)
+    assert.deepEqual(
+      await reports(toolingPlant(file), file, [TOOLING_RULE]),
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      `${file}. ${TOOLING_BLIND_SPOTS}`,
+    );
+});
+
+const resolvedRule = async (file: string): Promise<unknown> =>
+  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[TOOLING_RULE];
+
+test("the src/ import rule resolves at error on every file under src/, a room not yet written too, and on no other TypeScript root, whose files import from scripts/ freely; and its four folders are the ruled four and stand on disk (Issue #1132)", async () => {
+  for (const file of [WITNESSES["src/**/*.ts"]!, "src/site/zz-new-room/part.ts"])
+    assert.deepEqual(await resolvedRule(file), [2], `${TOOLING_RULE} does not resolve at error on ${file}`);
+  const roots = lintTsRoots();
+  assert.ok(
+    roots.includes("src") && roots.length > 1,
+    "the lint reads no TypeScript root but src, so the sweep below reads nothing",
+  );
+  for (const root of roots.filter((r) => r !== "src")) {
+    const witness = WITNESSES[`${root}/**/*.ts`];
+    assert.ok(witness !== undefined, `${root} has no witness in test-support/lint-witnesses.ts`);
+    assert.equal(
+      await resolvedRule(witness),
+      undefined,
+      `${TOOLING_RULE} reaches ${witness}, code that may import scripts/`,
+    );
+  }
+  assert.deepEqual(
+    TOOLING_ROOTS,
+    ["e2e", "scripts", "test", "test-support"],
+    "the guarded folders are the four ruled: the tooling around the product",
+  );
+  for (const root of TOOLING_ROOTS) assert.ok(existsSync(join(ROOT, root)), `${root} does not exist on disk`);
 });
