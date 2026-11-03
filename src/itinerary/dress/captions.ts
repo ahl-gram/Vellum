@@ -13,6 +13,7 @@ import { seatCaption, type Seat, type SeatKeep, type SeatLine, type SeatRoom, ty
 // 2026-11-03, 469 distinct caption lines over every reachable pair of seeds 2 7 11 15 42 99 123 2024, measured in a browser in Iowan Old Style, Palatino and Georgia: real letters run at most 8.47 past the house estimate (Palatino, NUMOWOPUA at 10.5), so 9 inside the edge keeps them on the strip.
 export const CAPTION_EDGE = 9;
 
+const REWRAPPED: ReadonlySet<RibbonEvent["kind"]> = new Set(["crossing", "summit", "border", "forest"]);
 const CASING_HALF = { painted: 4.2, plain: 2.3 };
 const CLUSTER_BOX: Record<string, Box> = {
   capital: { x: -11.5, y: -11.6, w: 23, h: 14.8 },
@@ -147,7 +148,7 @@ function eventKeep(input: RibbonInput, strip: StripLayout): Pick<SeatKeep, "boxe
     } else if (e.kind === "summit") {
       const freeSide = p.sx > strip.x0 + strip.w / 2 ? -1 : 1;
       boxes.push({ x: p.sx + freeSide * 27 - 9.5, y: p.sy + 4 - 12.6, w: 19, h: 12.6 });
-    } else boxes.push({ x: p.sx - 7.5, y: p.sy - 5.5, w: 15, h: 11 });
+    } else if (e.kind === "crossing") boxes.push({ x: p.sx - 7.5, y: p.sy - 5.5, w: 15, h: 11 });
   }
   return { boxes, lines };
 }
@@ -213,13 +214,19 @@ export function layCaption(
   const need = lines.reduce((a, l) => a + l.size + 1.2, 0);
   const want: SeatWant = {
     x: first.side < 0 ? first.sx - 10 : first.sx + 10,
-    top: Math.max(Math.min(first.sy + 2.6, laid.track[first.side < 0 ? "left" : "right"] - need), strip.y0 + 22),
+    top: Math.max(
+      Math.min(
+        e.kind === "border" ? p.sy - 3 - need : first.sy + 2.6,
+        laid.track[first.side < 0 ? "left" : "right"] - need,
+      ),
+      strip.y0 + 22,
+    ),
     side: first.side,
     lines,
     roadX: (y) => nearestRoadX(strip, y, p.sx),
     acrossTop: e.kind === "waypoint" ? p.sy + 2.6 : p.sy + 6,
     sticky: e.kind === "branch",
-    rewrap: (at) => (e.kind === "crossing" || e.kind === "summit" ? linesOf(first.lines, at) : lines),
+    rewrap: (at) => (REWRAPPED.has(e.kind) ? linesOf(first.lines, at) : lines),
   };
   const seat = seatCaption(want, room, { ...keep, boxes: [...keep.boxes, ...laid.seats.flatMap((s) => s.boxes)] });
   const track = seat.backed ? laid.track : { ...laid.track, [seat.anchor === "end" ? "left" : "right"]: seat.top - 4 };

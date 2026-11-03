@@ -35,7 +35,8 @@ test("a border fires where the road passes into another named realm and stays th
   for (const [labels, want] of cases) assert.deepEqual(borderSteps(labels), want, `labels ${JSON.stringify(labels)}`);
 });
 
-const run = (...parts: Array<[number, boolean]>): boolean[] => parts.flatMap(([n, inside]) => Array(n).fill(inside));
+const run = (...parts: Array<[number, boolean]>): boolean[] =>
+  parts.flatMap(([n, inside]) => Array.from({ length: n }, () => inside));
 
 test("the road enters the wood on a stay of six cells, once it has been twenty-four cells clear of it", () => {
   assert.deepEqual(woodEntries(run([30, false], [6, true])), [30]);

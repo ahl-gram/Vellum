@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
-import { layoutRibbon, stripFor, stripPos, type StripLayout } from "../../src/itinerary/dress/layout.ts";
+import { layoutRibbon, stripFor, type StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { textBox, WIDTH_FACTOR } from "../../src/render/geometry.ts";
 import { unescapeXml } from "../../src/render/svg.ts";
@@ -11,7 +11,7 @@ import { STYLES } from "../../src/render/style.ts";
 import type { RibbonInput } from "../../src/itinerary/input.ts";
 import { attrsOf } from "../../test-support/dress-svg.ts";
 import { namedJourney, stripNearestX } from "../../test-support/ribbon-fixtures.ts";
-import { plateCaptions, sweepJourneys } from "../../test-support/ribbon-captions.ts";
+import { plateCaptions, sweepJourneys, type PlateCaptionLine } from "../../test-support/ribbon-captions.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
 import { buildRibbonInput } from "../../src/itinerary/input.ts";
 
@@ -164,6 +164,42 @@ function rosesOf(svg: string, dress: "antique" | "ink"): Rose[] {
     .map((m) => ({ x: Number(m[1]), y: Number(m[2]), r: Number(radius) + 0.45 }));
 }
 
+type Dress = "antique" | "ink";
+type PlateRose = Rose & { readonly strip: StripLayout };
+
+function checkRun(run: Run, dress: Dress, roses: ReadonlyArray<PlateRose>, where: string): void {
+  const body = stripBody(run.strip);
+  const lo = dress === "antique" ? body.left(run.y) + BAND : run.strip.x0 + 3;
+  const hi = dress === "antique" ? body.right(run.y) - BAND : run.strip.x0 + run.strip.w - 3;
+  assert.ok(
+    run.a >= lo - 0.06 && run.b <= hi + 0.06,
+    `${where}: a run ${run.a} to ${run.b} lies between ${lo} and ${hi}`,
+  );
+  for (const rose of roses.filter((r) => r.strip === run.strip && Math.abs(run.y - r.y) < r.r)) {
+    const half = Math.sqrt(rose.r * rose.r - (run.y - rose.y) ** 2);
+    assert.ok(run.b <= rose.x - half + 0.06 || run.a >= rose.x + half - 0.06, `${where}: a run enters its rose`);
+  }
+}
+
+function lettersOnRuns(
+  svg: string,
+  layout: ReturnType<typeof layoutRibbon>,
+  runs: ReadonlyArray<Run>,
+): PlateCaptionLine[] {
+  return plateCaptions(svg, layout.strips).flatMap((cap) =>
+    cap.lines.filter((line) =>
+      runs.some(
+        (run) =>
+          run.strip === cap.strip &&
+          line.box.y - 1.94 <= run.y &&
+          run.y <= line.box.y + line.box.h + 1.94 &&
+          line.box.x <= run.b &&
+          line.box.x + line.box.w >= run.a,
+      ),
+    ),
+  );
+}
+
 test("every drawn border is ruled across its strip in the dress's border ink, steps round every rose, and runs under lettering that stands on its backing", () => {
   for (const dress of ["antique", "ink"] as const) {
     const style = STYLES[dress];
@@ -183,31 +219,14 @@ test("every drawn border is ruled across its strip in the dress's border ink, st
       }
       const roses = rosesOf(svg, dress).map((r) => ({ ...r, strip: stripNearestX(layout.strips, r.x) }));
       assert.equal(roses.length, layout.strips.length, `${where}: one rose to a strip`);
-      for (const run of runs) {
-        const body = stripBody(run.strip);
-        const lo = dress === "antique" ? body.left(run.y) + BAND : run.strip.x0 + 3;
-        const hi = dress === "antique" ? body.right(run.y) - BAND : run.strip.x0 + run.strip.w - 3;
-        assert.ok(
-          run.a >= lo - 0.06 && run.b <= hi + 0.06,
-          `${where}: a run ${run.a} to ${run.b} lies between ${lo} and ${hi}`,
-        );
-        for (const rose of roses.filter((r) => r.strip === run.strip && Math.abs(run.y - r.y) < r.r)) {
-          const half = Math.sqrt(rose.r * rose.r - (run.y - rose.y) ** 2);
-          assert.ok(run.b <= rose.x - half + 0.06 || run.a >= rose.x + half - 0.06, `${where}: a run enters its rose`);
-        }
-      }
-      const rosy = new Set(
+      for (const run of runs) checkRun(run, dress, roses, where);
+      meetsRose += new Set(
         runs.filter((r) => roses.some((o) => o.strip === r.strip && Math.abs(r.y - o.y) < o.r)).map((r) => r.strip),
-      );
-      meetsRose += rosy.size;
-      for (const cap of plateCaptions(svg, layout.strips))
-        for (const line of cap.lines)
-          for (const run of runs.filter((r) => r.strip === cap.strip)) {
-            const holds = line.box.y - 1.94 <= run.y && run.y <= line.box.y + line.box.h + 1.94;
-            if (!holds || line.box.x > run.b || line.box.x + line.box.w < run.a) continue;
-            onLine++;
-            assert.ok(line.backed, `${where}: "${line.text}" stands on a border line without its backing`);
-          }
+      ).size;
+      for (const line of lettersOnRuns(svg, layout, runs)) {
+        onLine++;
+        assert.ok(line.backed, `${where}: "${line.text}" stands on a border line without its backing`);
+      }
     }
     assert.ok(drawnBorders >= 30, `${dress}: the sweep draws borders: ${drawnBorders}`);
     assert.ok(meetsRose >= 1, `${dress}: some line meets its strip's rose: ${meetsRose}`);

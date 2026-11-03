@@ -19,7 +19,7 @@ const FIVE: ReadonlySet<number> = new Set([
 function block(biome: number, rows: number, cols: number): World {
   const biomes = new Uint8Array(world.biomes.length).fill(BIOMES.grassland);
   for (let y = 10; y < 10 + rows; y++) for (let x = 10; x < 10 + cols; x++) biomes[x + y * w] = biome;
-  return { ...world, biomes } as World;
+  return { ...world, biomes };
 }
 
 test("the named wood is the chart's largest four-connected wood of its five forest biomes, 25 cells or more, where the world names one", () => {
@@ -28,7 +28,7 @@ test("the named wood is the chart's largest four-connected wood of its five fore
   assert.equal(blob.length, 4173, "seed 42's wood holds the cells the planning probe counted");
   for (const i of blob) assert.ok(FIVE.has(world.biomes[i] as number), `cell ${i} is one of the five forest biomes`);
 
-  assert.equal(namedForestBlob({ ...world, names: { ...world.names, forest: null } } as World), null);
+  assert.equal(namedForestBlob({ ...world, names: { ...world.names, forest: null } }), null);
 
   const five = namedForestBlob(block(BIOMES.taiga, 5, 5));
   assert.ok(five !== null, "a 5 by 5 block of taiga is a wood");

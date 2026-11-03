@@ -114,6 +114,17 @@ test("every caption sits inside its own strip, nine inside its edge, on any jour
     const lines = linesOf(dress);
     assert.ok(plates.filter((x) => x.dress === dress).length >= 70, `${dress}: the sweep is real`);
     assert.ok(lines.length >= 500, `${dress}: and it found captions to measure: ${lines.length} lines`);
+    const told = plates
+      .filter((x) => x.dress === dress)
+      .flatMap((x) => x.captions.map((c) => c.lines.map((l) => l.text).join(" ")));
+    assert.ok(
+      told.some((t) => /here you enter|here begins|passes into/.test(t)),
+      `${dress}: the sweep seats a border`,
+    );
+    assert.ok(
+      told.some((t) => /road enters|runs into|shade of/.test(t)),
+      `${dress}: and a wood`,
+    );
     const past = (a: LineAt): number => pastRoom(dress, a.caption.strip, a.line.box);
     const worst = lines.reduce((a, b) => (past(b) > past(a) ? b : a));
     assert.ok(

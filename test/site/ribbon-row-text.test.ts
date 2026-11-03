@@ -28,4 +28,18 @@ test("a waypoint row sets the place in strong and its rank in the italic; every 
     strong: null,
     em: "a ford",
   });
+  assert.deepEqual(
+    rowText({ kind: "border", leagues: 35, text: "here begins The Hauwaiwa Atolls", nx: 0.5, ny: 0.5 }),
+    {
+      strong: null,
+      em: "here begins The Hauwaiwa Atolls",
+    },
+  );
+  assert.deepEqual(
+    rowText({ kind: "forest", leagues: 16, text: "the road enters The Ferns of Peroa", nx: 0.3, ny: 0.6 }),
+    {
+      strong: null,
+      em: "the road enters The Ferns of Peroa",
+    },
+  );
 });
