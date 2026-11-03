@@ -321,13 +321,17 @@ test("the realm names ride the outer bands, the departure's first and the arriva
 });
 
 test("every caption is drawn above every strip", () => {
-  for (const dress of ["antique", "ink"] as const) {
-    const svg = ribbonSvgFor(road42, dress);
-    const caption = svg.indexOf(">to Lamahai</text>");
-    assert.notEqual(caption, -1, `${dress}: seed 42's side road to Lamahai is captioned`);
-    assert.ok(
-      caption > svg.lastIndexOf('class="road"'),
-      `${dress}: the caption lies after the last strip's road, so no strip covers it`,
-    );
+  for (const input of [road42, road15]) {
+    for (const dress of ["antique", "ink"] as const) {
+      const svg = ribbonSvgFor(input, dress);
+      const lines = [...svg.matchAll(/<text [^>]*text-anchor="(?:start|end)"/g)];
+      const where = `${input.fromName} to ${input.toName}, ${dress}`;
+      assert.ok(lines.length >= input.events.length, `${where}: every event is captioned (${lines.length} lines)`);
+      assert.ok(
+        (lines[0]?.index ?? -1) > svg.lastIndexOf('class="road"'),
+        `${where}: every caption lies after the last strip's road, so no strip covers it`,
+      );
+    }
   }
+  assert.ok(ribbonSvgFor(road42, "antique").includes(">to Lamahai</text>"), "the side road to Lamahai is captioned");
 });
