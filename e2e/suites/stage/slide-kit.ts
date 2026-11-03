@@ -4,6 +4,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { open, size } from "./stage.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export const SEED_42 = "/explorer/#seed=42";
 export const LINK = "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=2.7440";
@@ -111,8 +112,7 @@ export async function pressSelector(ctx: SuiteContext, selector: string): Promis
   await pressAt(ctx, at.x, at.y);
 }
 
-export const mouseTo = (ctx: SuiteContext, x: number, y: number): Promise<unknown> =>
-  ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y, button: "none", buttons: 0 });
+export const mouseTo = (ctx: SuiteContext, x: number, y: number): Promise<unknown> => mouseMove(ctx.send, x, y);
 
 export const lineAim = (selector: string): Payload<Aim & { inside: boolean }> =>
   `(() => { const e = document.querySelector(${JSON.stringify(selector)}); const r = new Range(); r.selectNodeContents(e); const b = r.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2, h = document.elementFromPoint(x, y); return { x, y, hit: !!h && !!h.closest(${JSON.stringify(selector)}), inside: !!h && !!h.closest("#chart-drawer") }; })()`;

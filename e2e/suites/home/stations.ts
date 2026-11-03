@@ -4,6 +4,7 @@ import type { Cam } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Flight = Awaited<ReturnType<typeof h14aFlight>>;
 
@@ -133,18 +134,13 @@ export async function h14dPipHover({ evaluate, send, check, sleep, pressKey }: H
   await evaluate(`document.getElementById("lf-stage").focus()`);
   await pressKey("0", "Digit0", 48);
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
+  await mouseMove(send, 20, 20);
   await stable(HOMED, "H14d the camera flown home", { departed: (d) => movedFrom(d.cam, before) });
   const pipRest = await evaluate(PIP_BOX);
-  await send("Input.dispatchMouseEvent", {
-    type: "mouseMoved",
-    x: Math.round(pipRest.cx),
-    y: Math.round(pipRest.cy),
-    button: "none",
-  });
+  await mouseMove(send, Math.round(pipRest.cx), Math.round(pipRest.cy));
   await stable(PIP_BOX, "H14d the pip took the hover", { departed: (d) => d.hover });
   const pipHover = await evaluate(PIP_BOX);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
+  await mouseMove(send, 20, 20);
   check(
     "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
     Math.abs(pipHover.cx - pipRest.cx) < 0.5 &&

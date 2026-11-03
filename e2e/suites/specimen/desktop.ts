@@ -3,6 +3,7 @@ import type { Payload } from "../../types.ts";
 import { atFolded, CHART_ASPECT, CONTROL_GOLD, INK_BROWN, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
+import { sendClick } from "../../support/input.ts";
 
 function sb2AtRest({ check }: Pick<SpecimenKit, "check">, rest: Specimen | null): void {
   check(
@@ -315,8 +316,7 @@ const PRESS = (id: string): Payload<{ x: number; y: number } | null> =>
 async function press(k: SpecimenKit, id: string): Promise<void> {
   const at = await k.evaluate(PRESS(id));
   if (!at) throw new Error(`no ${id} to press`);
-  await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  await k.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  await sendClick(k.send, at.x, at.y);
 }
 
 export async function sb13GlassPress(k: SpecimenKit): Promise<void> {

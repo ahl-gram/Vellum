@@ -4,6 +4,7 @@ import { makeStep } from "../../support/step.ts";
 import { clearMetrics } from "../print-room/kit.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Plate = { x: number; y: number; r: number[]; t: string; anims: number; hover: boolean; reach: boolean } | null;
 const PLATE: Payload<Plate> = `(() => { const p = document.querySelector(".lf-shelf-grid .plate"); if (!p) return null;
@@ -21,7 +22,7 @@ export async function h21PlateTip(ctx: SuiteContext): Promise<void> {
   await clearMetrics(ctx, 640, 800);
   await makeSettle(ctx)(`innerWidth`, (w) => w === 1280, "home-gestures-wide");
   await send("Emulation.setEmulatedMedia", { features: [] });
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   await evaluate(
     `(() => { const p = document.querySelector(".lf-shelf-grid .plate"); if (p) p.scrollIntoView({ block: "center" }); return !!p; })()`,
   );
@@ -37,14 +38,14 @@ export async function h21PlateTip(ctx: SuiteContext): Promise<void> {
     }
   }
   try {
-    if (rest) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.x, y: rest.y });
+    if (rest) await mouseMove(send, rest.x, rest.y);
     for (let i = 0; i < 30 && rest; i++) {
       hovered = await evaluate(PLATE);
       if (hovered && hovered.hover && hovered.anims === 0) break;
       await sleep(50);
     }
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await mouseMove(send, 1, 1);
     await evaluate(`window.scrollTo(0, 0)`);
   }
   check(

@@ -4,6 +4,8 @@ import { relative, resolve, sep } from "node:path";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 export const CDP_HOMES: ReadonlyMap<string, string> = new Map([
   ["Input.dispatchKeyEvent", "e2e/support/input.ts"],
+  ["Input.dispatchMouseEvent", "e2e/support/input.ts"],
+  ["Input.dispatchTouchEvent", "e2e/support/input.ts"],
   ["about:blank", "e2e/support/nav.ts"],
   ["Emulation.setScriptExecutionDisabled", "e2e/support/scripts-off.ts"],
 ]);

@@ -2,6 +2,7 @@
 import { LENS, homeCamera, lensRest } from "../print-room/print.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Tip = { t: string; hover: boolean; moving: boolean } | null;
 const TIP = (sel: string): Payload<Tip> =>
@@ -38,7 +39,7 @@ async function hovered(k: BroadsideKit, sel: string, tries: number): Promise<{ a
     `document.querySelectorAll(".fn-note").forEach((n) => { if (n.matches(":popover-open")) n.hidePopover(); })`,
   );
   const at = await k.evaluate(AT(sel));
-  if (at) await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+  if (at) await mouseMove(k.send, at.x, at.y);
   return { at, tip: at ? await tipOf(k, sel, tries) : null };
 }
 
@@ -66,7 +67,7 @@ export async function br13Tip(k: BroadsideKit): Promise<void> {
       JSON.stringify({ word, wrong, marks }),
     );
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await mouseMove(k.send, 1, 1);
   }
 }
 

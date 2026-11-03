@@ -1,6 +1,7 @@
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Point, SuiteContext } from "../../types.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type Manifest = Awaited<ReturnType<typeof pManifest>>;
 
@@ -292,9 +293,9 @@ export async function p15RealHover({ evaluate, send, check, sleep }: SuiteContex
   const p15c = await evaluate<Point>(
     `(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');h.scrollIntoView({block:"center"});const r=h.getBoundingClientRect();return{x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`,
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
+  await mouseMove(send, 5, 5);
   await sleep(40, "pace: the move away lands before the move onto the town");
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p15c.x, y: p15c.y, buttons: 0 });
+  await mouseMove(send, p15c.x, p15c.y);
   // Poll, never sleep: ringOp is read to 2dp so it tolerates 0.005, and this is the same ring Z8b reads in suite-zoom, where a fixed wait with four times the slack still went red under Issue #381's second lane.
   const readP15 = () =>
     evaluate<{ bg: string; bw: string; ringOp: string }>(
@@ -305,7 +306,7 @@ export async function p15RealHover({ evaluate, send, check, sleep }: SuiteContex
     await sleep(50);
     p15 = await readP15();
   }
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
+  await mouseMove(send, 5, 5);
   check(
     "P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring",
     p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00",

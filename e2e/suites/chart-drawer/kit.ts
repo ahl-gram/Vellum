@@ -6,7 +6,7 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";
 import type { Back, Card } from "./reads.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
 type Mouse = Pick<ReturnType<typeof makeMouse>, "press" | "moveTo" | "release">;
@@ -208,5 +208,4 @@ export async function tabInto({ evaluate, send, sleep }: Keys, selector: string,
   return false;
 }
 
-export const park = (send: SuiteContext["send"]): Promise<unknown> =>
-  send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+export const park = (send: SuiteContext["send"]): Promise<unknown> => mouseMove(send, 1, 700);

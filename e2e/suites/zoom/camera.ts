@@ -1,5 +1,5 @@
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
@@ -155,7 +155,7 @@ export async function z8bHoverRing({ evaluate, send, check, sleep, readRing }: Z
       overlayK:overlay?overlay.style.getPropertyValue("--zoom-k"):null,
       mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
   })()`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
+  await mouseMove(send, z8b.x ?? 0, z8b.y ?? 0);
   // Poll, never sleep: opacity below has NO tolerance, and Issue #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
   let z8bRing = await readRing();
   for (let i = 0; i < 60 && !ringAtRest(z8bRing); i++) {
@@ -174,7 +174,7 @@ export async function z8bHoverRing({ evaluate, send, check, sleep, readRing }: Z
       Math.abs(z8b.hitW - 26) <= 1,
     JSON.stringify({ z8b, z8bRing, z8bScale }),
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await mouseMove(send, 5, 5);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
@@ -233,7 +233,7 @@ const park = async ({ evaluate, send }: Pick<SuiteContext, "evaluate" | "send">)
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await mouseMove(send, 5, 5);
 };
 const scaleOf = (m: string): number => Number((/^matrix\(([-\d.]+)/.exec(m) || [])[1] ?? "NaN");
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
@@ -279,7 +279,7 @@ async function restedHit(
 }
 
 export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await mouseMove(send, 5, 5);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   const target = await evaluate(TARGET);
   type Shown = { focused: boolean; visible: boolean; opacity: string; transform: string } | null;

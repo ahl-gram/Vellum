@@ -1,6 +1,7 @@
 // Room voyage e2e (RW1-RW13, Issue #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
+import { mouseDown, mouseMove, mouseUp } from "../support/input.ts";
 
 const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
 type Room = ReturnType<typeof makeRoom>;
@@ -312,27 +313,13 @@ async function rw12Detent({ evaluate, send, check }: SuiteContext): Promise<void
   const TH = 16; // the .ages-range thumb width (living-chart.css)
   const xAt = (u: number) => Math.round(bar.x + TH / 2 + u * (bar.w - TH));
   const yMid = Math.round(bar.y + bar.h / 2);
-  await send("Input.dispatchMouseEvent", {
-    type: "mousePressed",
-    x: xAt(0.4),
-    y: yMid,
-    button: "left",
-    buttons: 1,
-    clickCount: 1,
-  });
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.52), y: yMid, button: "left", buttons: 1 });
+  await mouseDown(send, xAt(0.4), yMid);
+  await mouseMove(send, xAt(0.52), yMid, { buttons: 1 });
   const held = await evaluate<{ u: number; held: boolean; chamber: string; readout: string }>(
     `(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber,readout:document.querySelector(".rf-year").textContent};})()`,
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.6), y: yMid, button: "left", buttons: 1 });
-  await send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: xAt(0.6),
-    y: yMid,
-    button: "left",
-    buttons: 0,
-    clickCount: 1,
-  });
+  await mouseMove(send, xAt(0.6), yMid, { buttons: 1 });
+  await mouseUp(send, xAt(0.6), yMid);
   const escaped = await evaluate<{ u: number; held: boolean; chamber: string }>(
     `(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber};})()`,
   );

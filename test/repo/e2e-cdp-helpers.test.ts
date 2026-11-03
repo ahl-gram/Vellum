@@ -212,3 +212,110 @@ test("no e2e file names the scripts-off switch but its one helper, which always 
     "the refusal no longer says why the switch has one helper",
   );
 });
+
+const MOUSE_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  [
+    'export const a = (ctx: SuiteContext) => ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });',
+    REFUSE,
+  ],
+  [
+    'export const b = ({ send }: SuiteContext) => send("Input.dispatchMouseEvent", { type: "mousePressed", x: 1, y: 1, button: "left", clickCount: 1 });',
+    REFUSE,
+  ],
+  [
+    'export const c = (ctx: SuiteContext) => ctx.send(`Input.dispatchMouseEvent`, { type: "mouseWheel", x: 1, y: 1, deltaX: 0, deltaY: 120 });',
+    REFUSE,
+  ],
+  [
+    'export const d = (ctx: SuiteContext) => ctx["send"]("Input.dispatchMouseEvent", { type: "mouseReleased", x: 1, y: 1 });',
+    REFUSE,
+  ],
+  ['const METHOD = "Input.dispatchMouseEvent"; export const e = (ctx: SuiteContext) => ctx.send(METHOD);', REFUSE],
+  ["// Input.dispatchMouseEvent, named in a comment, which presses nothing", PASS],
+  ['export const f = "a click goes through Input.dispatchMouseEvent\'s one home";', PASS],
+  [
+    'export const g = (ctx: SuiteContext) => ctx.send("Input.synthesizePinchGesture", { x: 1, y: 1, scaleFactor: 2, gestureSourceType: "touch" });',
+    PASS,
+  ],
+  ['const s = "Mouse"; export const h = (ctx: SuiteContext) => ctx.send(`Input.dispatch${s}Event`);', PASS],
+  ['export const i = (ctx: SuiteContext) => ctx.send("Input." + "dispatchMouseEvent", { type: "mouseMoved" });', PASS],
+  [
+    'import { MOUSE } from "../../test-support/cdp-methods.ts"; export const j = (ctx: SuiteContext) => ctx.send(MOUSE);',
+    PASS,
+  ],
+  [
+    "export const k = (ctx: SuiteContext) => ctx.evaluate('document.body.dispatchEvent(new MouseEvent(\"click\", { bubbles: true }))');",
+    PASS,
+  ],
+];
+const MOUSE_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces or from a template holding an expression, and a name held in a binding the file never spells (plant lines 10 to 12), since no syntax read of one file resolves either; a click, drag or hover written by hand on top of the shared helpers, since the rule reads spellings and not what a function does; and a mouse event made inside the page through evaluate (plant line 13), which no CDP spelling carries. A synthesized gesture is no row (plant line 9)";
+
+test("no e2e file sends a mouse event but through its one home, e2e/support/input.ts, the harness's wheel and the home page's click included (Issue #1016)", async () => {
+  const refused = refusedOf(MOUSE_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < MOUSE_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(MOUSE_PLANT, "e2e/suites/document-rooms.ts"), refused, MOUSE_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(MOUSE_PLANT, "e2e/harness.ts"),
+    refused,
+    "the harness wheels through the home, never on a spelling of its own",
+  );
+  assert.deepEqual(
+    await linted(MOUSE_PLANT, "e2e/support/home.ts"),
+    refused,
+    "clickAt and makeMouse press through the home",
+  );
+  assert.deepEqual(await linted(MOUSE_PLANT, HOME), [], "the home itself is refused the method it exists to hold");
+});
+
+const TOUCH_PLANT: ReadonlyArray<readonly [string, boolean]> = [
+  ['import type { SuiteContext } from "../../types.ts";', PASS],
+  [
+    'export const a = (ctx: SuiteContext) => ctx.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 1, y: 1, id: 1 }] });',
+    REFUSE,
+  ],
+  [
+    'export const b = ({ send }: SuiteContext) => send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });',
+    REFUSE,
+  ],
+  [
+    'export const c = (ctx: SuiteContext) => ctx.send(`Input.dispatchTouchEvent`, { type: "touchEnd", touchPoints: [] });',
+    REFUSE,
+  ],
+  ['const METHOD = "Input.dispatchTouchEvent"; export const d = (ctx: SuiteContext) => ctx.send(METHOD);', REFUSE],
+  ["// Input.dispatchTouchEvent, named in a comment, which touches nothing", PASS],
+  [
+    'export const e = (ctx: SuiteContext) => ctx.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });',
+    PASS,
+  ],
+  [
+    'export const f = (ctx: SuiteContext) => ctx.send("Input.synthesizeScrollGesture", { x: 1, y: 1, yDistance: -500, gestureSourceType: "touch" });',
+    PASS,
+  ],
+  ['export const g = (ctx: SuiteContext) => ctx.send("Input." + "dispatchTouchEvent", { type: "touchEnd" });', PASS],
+  [
+    "export const h = (ctx: SuiteContext) => ctx.evaluate('document.body.dispatchEvent(new TouchEvent(\"touchstart\"))');",
+    PASS,
+  ],
+];
+const TOUCH_BLIND_SPOT =
+  "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces (plant line 9); a tap or a pinch written by hand on top of sendTouch or the harness's touch; and a touch made inside the page through evaluate (plant line 10). The touch emulation switch and a synthesized gesture are no rows (plant lines 7 and 8)";
+
+test("no e2e file sends a touch event but through its one home, e2e/support/input.ts, the harness's touch included (Issue #1016)", async () => {
+  const refused = refusedOf(TOUCH_PLANT);
+  assert.ok(
+    refused.length > 0 && refused.length < TOUCH_PLANT.length,
+    "the plant cannot tell the rule from its negation",
+  );
+  assert.deepEqual(await linted(TOUCH_PLANT, "e2e/suites/cards/hold.ts"), refused, TOUCH_BLIND_SPOT);
+  assert.deepEqual(
+    await linted(TOUCH_PLANT, "e2e/harness.ts"),
+    refused,
+    "the harness touches through the home, never on a spelling of its own",
+  );
+  assert.deepEqual(await linted(TOUCH_PLANT, HOME), [], "the home itself is refused the method it exists to hold");
+});

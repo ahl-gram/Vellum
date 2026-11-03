@@ -4,31 +4,13 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy, stagePoint, stillCam } from "./reads.ts";
+import { mouseDown, mouseMove, mouseUp } from "../../support/input.ts";
 
 async function l9aMouseWitness({ send }: Pick<LandfallKit, "send">, stagePt9: Point | null): Promise<void> {
   if (stagePt9 !== null) {
-    await send("Input.dispatchMouseEvent", {
-      type: "mousePressed",
-      x: stagePt9.x,
-      y: stagePt9.y,
-      button: "left",
-      buttons: 1,
-      clickCount: 1,
-    });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseMoved",
-      x: stagePt9.x + 60,
-      y: stagePt9.y + 90,
-      button: "left",
-      buttons: 1,
-    });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: stagePt9.x + 60,
-      y: stagePt9.y + 90,
-      button: "left",
-      clickCount: 1,
-    });
+    await mouseDown(send, stagePt9.x, stagePt9.y);
+    await mouseMove(send, stagePt9.x + 60, stagePt9.y + 90, { buttons: 1 });
+    await mouseUp(send, stagePt9.x + 60, stagePt9.y + 90);
   }
 }
 

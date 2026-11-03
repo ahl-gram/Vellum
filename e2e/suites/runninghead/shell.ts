@@ -9,7 +9,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART, SHELLED } from "./reads.ts";
 import type { RunningHeadKit } from "./kit.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 
 export type Shell = {
   body: string;
@@ -291,12 +291,12 @@ async function focusWordmark(k: RunningHeadKit): Promise<string> {
 async function hoverWordmark(k: RunningHeadKit): Promise<string> {
   const at = await k.evaluate(WORDMARK);
   if (!at) throw new Error("no wordmark link");
-  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  await mouseMove(k.send, at.x, at.y);
   try {
     const rest = await makeSettle(k)(WORDMARK, (d) => d.hovered && d.moving === 0, "wordmark-hover", 40);
     return rest.transform;
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+    await mouseMove(k.send, 1, 700);
   }
 }
 

@@ -12,6 +12,7 @@ import { routesUnder } from "../corners/geometry.ts";
 import { switchFaults, withStyledBoot } from "./styled-boot.ts";
 import type { DeskSwitch } from "./styled-boot.ts";
 import { bounce } from "../../support/nav.ts";
+import { mouseMove, sendClick } from "../../support/input.ts";
 
 export const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = [
@@ -251,18 +252,11 @@ export async function fold(ctx: SuiteContext): Promise<void> {
   const sheetX: Payload<{ folded: boolean; x: number }> =
     `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
   const before = await ctx.evaluate(sheetX);
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
-  await ctx.send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  await ctx.send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: at.x,
-    y: at.y,
-    button: "left",
-    clickCount: 1,
-  });
+  await mouseMove(ctx.send, at.x, at.y);
+  await sendClick(ctx.send, at.x, at.y);
   // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(ctx.send, 1, 1);
   await ctx.evaluate("window.scrollTo(0, 0)");
 }
 
@@ -278,7 +272,7 @@ async function lifted(
     `(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`,
   );
   if (!press) return { at: `${page} ${how}, which shows no Press`, lifted: false, s: null };
-  if (how === "hover") await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: press.x, y: press.y });
+  if (how === "hover") await mouseMove(ctx.send, press.x, press.y);
   else
     await ctx.evaluate(
       `(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`,
@@ -287,7 +281,7 @@ async function lifted(
   const up = await makeSettle(ctx)(lift, (d) => d, `EA5 ${page} ${how} lifts a press`).catch(() => false);
   await size(ctx, DESK.w, DESK.h - 1);
   const s = await rest(ctx, DESK.w, DESK.h - 1, `EA5 ${page} ${how} relaid`);
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(ctx.send, 1, 1);
   await ctx.evaluate(
     `(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return true; })()`,
   );

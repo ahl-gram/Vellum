@@ -4,6 +4,7 @@ import type { Payload } from "../../types.ts";
 import { park, tabInto, type DragKit, type DrawerKit } from "./kit.ts";
 import { CARRY, DURATION, atRest, sameCam } from "./reads.ts";
 import type { Carry } from "./reads.ts";
+import { mouseMove } from "../../support/input.ts";
 
 function cd45FilesNothing(
   check: DragKit["check"],
@@ -232,7 +233,7 @@ export async function cd53Ceremony(k: DrawerKit): Promise<void> {
   try {
     const c = await evaluate(CEREMONY);
     const at = await evaluate(TILTS);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    await mouseMove(send, at.x, at.y);
     const hovered = await settle(
       TILTS,
       (d, last) => d.hover && d.running === 0 && !!last && d.li === last.li,

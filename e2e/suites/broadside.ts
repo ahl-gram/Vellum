@@ -9,7 +9,7 @@ import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
 import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
-import { sendKey } from "../support/input.ts";
+import { mouseMove, sendKey } from "../support/input.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
 type Room = {
@@ -255,9 +255,9 @@ async function br4Notes({ evaluate, send, check }: BroadsideKit): Promise<void> 
 export async function br5Hover({ evaluate, send, check }: BroadsideKit): Promise<void> {
   const rect = await evaluate<Point>(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
+  await mouseMove(send, rect.x, rect.y);
   const overOpen = await evaluate<boolean>(`document.getElementById("note-coast-warp").matches(":popover-open")`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 4, y: 4 });
+  await mouseMove(send, 4, 4);
   const awayClosed = await evaluate<boolean>(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
   check(
     "BR5 the note shows under a real hover and hides when the pointer leaves",

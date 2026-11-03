@@ -2,6 +2,7 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { lensRest } from "../print-room/print.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Bound = { vp: boolean; map: boolean; hooks: string[]; press: { x: number; y: number; hit: string | null } | null };
 const BOUND: Payload<Bound> = `(() => { const b = document.getElementById("zoom-in"), r = b && b.getBoundingClientRect(), x = r ? r.left + r.width / 2 : 0, y = r ? r.top + r.height / 2 : 0, e = r && document.elementFromPoint(x, y);
@@ -34,6 +35,6 @@ export async function hg5Bound(ctx: SuiteContext): Promise<void> {
     await evaluate(
       `(() => { if (window.__vellumZoomTo) window.__vellumZoomTo({ k: 1, x: 0, y: 0 }); document.activeElement && document.activeElement.blur(); return true; })()`,
     );
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await mouseMove(send, 1, 1);
   }
 }

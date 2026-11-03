@@ -17,6 +17,7 @@ import {
 import type { Sheets } from "./document-rooms/sheets.ts";
 import { ix8Landmark } from "./document-rooms/landmark.ts";
 import { bounce } from "../support/nav.ts";
+import { mouseMove, sendClick } from "../support/input.ts";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
@@ -291,9 +292,8 @@ export async function ix4FindBox({ evaluate, send, check, settle, goto }: DocRoo
 }
 
 async function pressAt({ send }: DocRoomsKit, x: number, y: number): Promise<void> {
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
-  await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
-  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  await mouseMove(send, x, y);
+  await sendClick(send, x, y);
 }
 
 const centreOf: (sel: string) => Payload<{ x: number; y: number } | null> = (sel) =>
