@@ -15,18 +15,11 @@ import {
 } from "../geometry.ts";
 import { interiorProbes } from "./label-probes.ts";
 import { largestBlob } from "../blobs.ts";
+import { namedForestBlob } from "../named-forest.ts";
 import type { RenderCtx } from "../context.ts";
 import { reachPlacements } from "./river-label-placement.ts";
 import { placeRealmLabel, type CloseUpRoom } from "./realm-label-placement.ts";
 import type { World } from "../../world/types.ts";
-
-const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
-  BIOMES.temperateForest,
-  BIOMES.rainforest,
-  BIOMES.tropicalForest,
-  BIOMES.jungle,
-  BIOMES.taiga,
-]);
 
 // Ink may graze another label by under this fraction of the smaller box; terrain glyphs reserve nothing, so this yields only to TEXT.
 const RIVER_MAX_OVERLAP = 0.15;
@@ -309,11 +302,10 @@ function lakeLabelNodes(ctx: RenderCtx): SvgNode[] {
 function forestLabelNodes(ctx: RenderCtx): SvgNode[] {
   const { world, proj, style, labels } = ctx;
   const forest = world.names.forest;
-  if (!forest) return [];
+  const blob = namedForestBlob(world);
+  if (!forest || blob === null) return [];
   const k = proj.widthPx / 1500;
-  const { w, h } = world.elev;
-  const blob = largestBlob(w, h, (i) => FOREST_BIOMES.has(world.biomes[i] as number));
-  if (blob.length < 25) return [];
+  const { w } = world.elev;
   const pts = blob.map((i) => ({
     x: proj.px(i % w),
     y: proj.py((i / w) | 0),
