@@ -6,7 +6,7 @@ import { TIPPED } from "./desk.ts";
 import { park, tabInto, type DrawerKit } from "./kit.ts";
 import { pressAtRest } from "./prospect.ts";
 import { CARD, DRESS, READ, type Card } from "./reads.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 
 type Press = {
   text: string;
@@ -61,7 +61,7 @@ async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Pre
   let hover: Press | null = null;
   for (let i = 0; i < 4 && hover === null; i++) {
     const at = await evaluate(PRESS);
-    if (at) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    if (at) await mouseMove(send, at.x, at.y);
     hover = await settle(
       PRESS,
       (d, last) => d.hover && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),

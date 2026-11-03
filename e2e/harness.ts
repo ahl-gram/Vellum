@@ -14,6 +14,7 @@ import { applyRunnerLayout } from "./support/runner-layout.ts";
 import { fixTheDay } from "./support/fixed-day.ts";
 import { serverState, startServer } from "./site-server.ts";
 import { ABOUT_BLANK } from "./support/nav.ts";
+import { mouseWheel, sendTouch } from "./support/input.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const httpGet = (url: string): Promise<string> =>
@@ -187,12 +188,12 @@ function armTurnWatch(): Promise<unknown> {
 
 // Negative deltaY zooms IN (d3's wheelDelta is -deltaY * 0.002 at deltaMode 0), matching a user scrolling up.
 function wheel(x: number, y: number, deltaY: number, deltaX = 0): Promise<unknown> {
-  return send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY });
+  return mouseWheel(send, x, y, deltaY, deltaX);
 }
 
 // Per CDP, touchStart/touchMove carry the currently-down points and touchEnd/touchCancel MUST pass [] (CDP diffs against the prior event to end every active point).
 function touch(type: string, points: readonly TouchPoint[]): Promise<unknown> {
-  return send("Input.dispatchTouchEvent", { type, touchPoints: points });
+  return sendTouch(send, type, points);
 }
 
 // d3 pans by the screen delta; at k=1 the constrain snaps it home, so the caller must be zoomed first.

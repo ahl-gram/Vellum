@@ -21,7 +21,7 @@ import {
   settleTy,
   travelsOf,
 } from "./slide-kit.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseDown, mouseMove, mouseUp, sendKey } from "../../support/input.ts";
 
 const EASE_WAIT = 340;
 const ROOM_BOX: Payload<number[]> =
@@ -144,11 +144,10 @@ export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
       );
     const [cx, cy] = await chartCentre(ctx);
     const line = await ctx.evaluate(lineAim("header.chrome .trail"));
-    const drag = { button: "left", clickCount: 1 };
-    await ctx.send("Input.dispatchMouseEvent", { type: "mousePressed", x: cx, y: cy, buttons: 1, ...drag });
-    await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: line.x, y: line.y, buttons: 1, ...drag });
+    await mouseDown(ctx.send, cx, cy);
+    await mouseMove(ctx.send, line.x, line.y, { buttons: 1 });
     const dragged = await readsFor(ctx, REST_MS + EASE_WAIT + 300);
-    await ctx.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: line.x, y: line.y, buttons: 0, ...drag });
+    await mouseUp(ctx.send, line.x, line.y);
     if (dragged.some((p) => !near(p.head.ty, up, 0.5)))
       faults.push(
         `a pan dragged across the thin line brought the head home: ${JSON.stringify(dragged.map((p) => p.head.ty.toFixed(1)))}`,

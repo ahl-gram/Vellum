@@ -6,7 +6,7 @@ import type { Payload } from "../../types.ts";
 import { glideLanded, homeCamera, LENS, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import type { RibbonKit } from "./kit.ts";
 import { pressAt } from "../print-room/kit.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 
 type Lean = {
   x: number;
@@ -41,9 +41,9 @@ export async function rb13RowHover(k: RibbonKit): Promise<void> {
   await opened("seed 42, for a row's hover");
   try {
     const atRest = await evaluate(LEAN);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: atRest.x, y: atRest.y });
+    await mouseMove(send, atRest.x, atRest.y);
     const hovered = await settle(LEAN, (d, last) => d.hover && still(d, last), "ribbon-row-hovered");
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await mouseMove(send, 1, 700);
     await evaluate(`(() => { document.querySelector("#itinerary .slip-fold").focus(); return true; })()`);
     await sendKey(send, "Tab", "Tab", 9);
     const keyed = await settle(LEAN, (d, last) => d.focus && !d.hover && still(d, last), "ribbon-row-keyed");
@@ -58,7 +58,7 @@ export async function rb13RowHover(k: RibbonKit): Promise<void> {
     );
   } finally {
     await mouse.release(1, 700);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await mouseMove(send, 1, 700);
     await evaluate(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
   }
 }
@@ -66,7 +66,7 @@ export async function rb13RowHover(k: RibbonKit): Promise<void> {
 export async function rb14Glass(k: RibbonKit): Promise<void> {
   const { evaluate, check, opened, send } = k;
   await opened("seed 42, for the Glass");
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   const press = await evaluate(ZOOM_IN);
   try {
     if (press) await pressAt({ send }, press.x, press.y);
@@ -79,7 +79,7 @@ export async function rb14Glass(k: RibbonKit): Promise<void> {
       JSON.stringify({ press, leaned, glide }),
     );
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await mouseMove(send, 1, 1);
     await evaluate(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
   }
 }
@@ -94,7 +94,7 @@ export async function rb15Paper(k: RibbonKit): Promise<void> {
   try {
     const row = await evaluate(LEAN);
     await pressAt({ send }, row.x, row.y);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await mouseMove(send, 1, 700);
     const screen = await lensRest({ evaluate, sleep }, "leaned", "ribbon-row-leaned");
     await send("Emulation.setEmulatedMedia", { media: "print" });
     const paper = await evaluate(PAPER);

@@ -6,7 +6,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import { glideLanded, homeCamera, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { STORE, type ProspectKit } from "./kit.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 
 type Paper = { map: string; plate: (string | number)[] };
 const PAPER: Payload<Paper> = `(() => { const p = document.getElementById("pp-plate"), r = p.getBoundingClientRect();
@@ -83,7 +83,7 @@ async function pb15Lay(k: ProspectKit): Promise<{ rest: Press; hover: Press; lai
   const hover = await held(k, "prospect-press-hovered", (p) => p.hover);
   await pressAt(atRest.x, atRest.y);
   const laid = await held(k, "prospect-press-laid", (p) => !!p.table);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: laid.x, y: laid.y });
+  await mouseMove(send, laid.x, laid.y);
   return { rest: atRest, hover, laid };
 }
 

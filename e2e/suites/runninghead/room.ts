@@ -6,6 +6,7 @@ import { SHELLED } from "./reads.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import { rh26Pill, rh27Roles, rh28Idiom } from "./dress.ts";
 import { PORTFOLIO, PRINTED_READ, rh29Printed, rh30Ring, rh31Raise } from "./gestures.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type Skeleton = { kids: string[] | null; leaf: boolean; face: number | null };
 export type Pill = { prop: string; ms: number; rest: string; faded: string; was: boolean; back: string } | null;
@@ -104,7 +105,7 @@ export const KIT_READ: Payload<string> = `(() => { const rgba = ${PAGE_RGBA}, cs
 
 export async function kitRead(k: RunningHeadKit, route: string): Promise<KitSample> {
   const { send, evaluate } = k;
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   const screen = JSON.parse(await evaluate(KIT_READ)) as KitSample;
   let printed: Printed | null = null;
   if (route !== "/") {

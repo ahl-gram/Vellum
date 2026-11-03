@@ -3,6 +3,7 @@ import { makeSettle } from "../../support/settle.ts";
 import { CEILING, home, press } from "./hold.ts";
 import { sheetAtRest } from "./hold-dress.ts";
 import type { ZoomKit } from "./kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type HamletWindow = { e: number; u0: number; v0: number; cx: number; cy: number };
 type Witness = { label: string; key: string; cu: number; cv: number; e: number };
@@ -49,7 +50,7 @@ export async function pollLast<T>(k: ZoomKit, payload: string, ok: (v: T) => boo
   return last;
 }
 
-const mouse = (k: ZoomKit, x: number, y: number) => k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+const mouse = (k: ZoomKit, x: number, y: number) => mouseMove(k.send, x, y);
 
 const WITNESSES = (glyphOf: string, keyOf: string): string =>
   `(()=>{const m=document.getElementById("map").getBoundingClientRect();const k=window.__vellumZoomState().k;const out=[];` +

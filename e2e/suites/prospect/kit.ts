@@ -3,6 +3,7 @@ import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { pressAt as press } from "../print-room/kit.ts";
+import { mouseMove } from "../../support/input.ts";
 
 export type Prospect = {
   seed: number;
@@ -71,7 +72,7 @@ export function prospectKit(ctx: SuiteContext) {
   };
   const svgOf = () => evaluate<string>(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
   const moveTo = async (x: number, y: number): Promise<void> => {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+    await mouseMove(send, x, y);
   };
   const pressAt = (x: number, y: number) => press(ctx, x, y);
   // Off the sheet, where `.plate:hover` cannot tip the full-sheet plate under a resting cursor (Issue #514).

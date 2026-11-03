@@ -5,6 +5,7 @@ import type { Rgba } from "../../support/pixel.ts";
 import { contrast } from "../cluster/trail.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
+import { mouseDown, mouseUp } from "../../support/input.ts";
 
 type Box = { x: number; y: number; w: number; h: number };
 const PANEL: readonly Rgba[] = [tokenRgba("--chart-ink", 0.85), tokenRgba("--chart-ink", 0.72)];
@@ -231,19 +232,13 @@ async function heldPip(k: LandfallKit): Promise<{ shift: number; gap: number }> 
   const { evaluate, send, sleep, shutSlips } = k;
   await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
   const rest = await evaluate(PIP_AT);
-  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: rest.x, y: rest.y, button: "left", clickCount: 1 });
+  await mouseDown(send, rest.x, rest.y);
   try {
     await sleep(300, "pace: the press is held for its duration");
     const held = await evaluate(PIP_AT);
     return { shift: Math.hypot((held.fx - rest.fx) * held.w, (held.fy - rest.fy) * held.h), gap: held.t - rest.t };
   } finally {
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: rest.x,
-      y: rest.y,
-      button: "left",
-      clickCount: 1,
-    });
+    await mouseUp(send, rest.x, rest.y);
     await sleep(300, "pace: the release lands before the key");
     await shutSlips("L20 the pip's slip set aside");
   }

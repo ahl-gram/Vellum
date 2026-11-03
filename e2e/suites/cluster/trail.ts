@@ -3,6 +3,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import { bounce } from "../../support/nav.ts";
+import { mouseMove, sendClick } from "../../support/input.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
@@ -125,8 +126,7 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
   const explorer = (await evaluate(READ)).links.find((l) => l.t === "The Explorer");
   if (explorer) {
     const at = centre(explorer);
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    await sendClick(send, at.x, at.y);
   }
   const landed = await arrived(k, "/explorer/");
   check(
@@ -232,12 +232,12 @@ const LINK = (selector: string): Payload<Link> =>
 async function hovered(k: TrailKit, selector: string): Promise<[number[], number[]]> {
   const at = await k.evaluate(LINK(selector));
   if (!at) throw new Error(`DR15: the Prospect carries no ${selector}`);
-  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  await mouseMove(k.send, at.x, at.y);
   try {
     const lit = await k.settle(LINK(selector), (d) => d.hovered && d.moving === 0, `hover ${selector}`, 40);
     return [at.colour, lit.colour];
   } finally {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+    await mouseMove(k.send, 1, 700);
   }
 }
 

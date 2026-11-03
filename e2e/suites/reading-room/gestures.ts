@@ -1,12 +1,12 @@
 // What a hover, a key, a press, a Read and print do in the Reading Room (Issue #779 part 2g): the revealed plate's unfurl and lift, the Glass, its silent refit and paper, and a counter Read refitting to the folio it writes.
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { clearMetrics, pressAt } from "../print-room/kit.ts";
 import { glideLanded, homeCamera, lensRest, midGlideRefit, ZOOM_IN } from "../print-room/print.ts";
 import { BAR, RR_LENS, scrubTo } from "./kit.ts";
 
-const park = (send: SuiteContext["send"]) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+const park = (send: SuiteContext["send"]) => mouseMove(send, 1, 1);
 
 type Unfurl = { name: string; fill: string; origin: string; half: number; open: number[] | null; end: number | null };
 const UNFURL: Payload<Unfurl | null> = `(async () => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"); if (!i) return null;
@@ -57,7 +57,7 @@ async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: P
   const { evaluate, send, sleep } = ctx;
   const settle = makeSettle({ evaluate, sleep });
   const at = await evaluate(PLATE);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+  await mouseMove(send, at.x, at.y);
   const hoverLanded = liftLanded();
   const hovered = await settle(
     PLATE,

@@ -3,6 +3,7 @@ import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { tabInto, type DrawerKit } from "./kit.ts";
 import { DEEP, DEEPEST, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
 import type { Read } from "./reads.ts";
+import { sendClick } from "../../support/input.ts";
 
 export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void> {
   await go(`${DRESS}&${DEEP}`);
@@ -181,20 +182,7 @@ export async function cd2bRealPointer(
   );
   if (dblAt) {
     for (const clickCount of [1, 2]) {
-      await send("Input.dispatchMouseEvent", {
-        type: "mousePressed",
-        x: dblAt.x,
-        y: dblAt.y,
-        button: "left",
-        clickCount,
-      });
-      await send("Input.dispatchMouseEvent", {
-        type: "mouseReleased",
-        x: dblAt.x,
-        y: dblAt.y,
-        button: "left",
-        clickCount,
-      });
+      await sendClick(send, dblAt.x, dblAt.y, { clickCount });
     }
   }
   await sleep(900, "window: a double click must not zoom in it");

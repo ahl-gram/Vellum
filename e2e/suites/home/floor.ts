@@ -3,6 +3,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { bounce } from "../../support/nav.ts";
+import { mouseMove, mouseWheel } from "../../support/input.ts";
 
 const W = 640;
 const H = 800;
@@ -58,8 +59,8 @@ async function scrolledTo(k: HomeKit, left: number): Promise<View> {
 
 async function wheelled(k: HomeKit, at: Point, dx: number, dy: number, before: View): Promise<View> {
   for (let i = 0; i < 3; i++) {
-    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
-    await k.send("Input.dispatchMouseEvent", { type: "mouseWheel", x: at.x, y: at.y, deltaX: dx, deltaY: dy });
+    await mouseMove(k.send, at.x, at.y);
+    await mouseWheel(k.send, at.x, at.y, dy, dx);
   }
   return makeSettle(k)(
     VIEW,

@@ -5,7 +5,7 @@ import { clearMetrics } from "../print-room/kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
-import { sendKey } from "../../support/input.ts";
+import { mouseMove, sendKey } from "../../support/input.ts";
 import { contrast } from "../cluster/trail.ts";
 import { FLOOR_PLAIN } from "../stage/stage.ts";
 import { FONTS_LOADED, INK_RGBA, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";
@@ -75,7 +75,7 @@ export async function br12Dress(k: BroadsideKit): Promise<void> {
   const { evaluate, check, sleep, send, goto, EXP } = k;
   await clearMetrics({ evaluate, send, sleep }, 1280, 800);
   await goto(EXP + "#seed=42&style=antique", "broadside-dress");
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   const d = await makeSettle({ evaluate, sleep })(
     DRESS,
     (x, last) => !x.moving && !!last && JSON.stringify(x.legend) === JSON.stringify(last.legend),
@@ -207,7 +207,7 @@ export async function br24Ink(k: BroadsideKit): Promise<void> {
   const { evaluate, send, sleep, check, goto, EXP } = k;
   await goto(EXP + "#seed=42&style=antique", "broadside-ink");
   await makeSettle({ evaluate, sleep })(FONTS_LOADED, (d) => d === "loaded", "BR24 fonts");
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   const opened = await evaluate(OPEN_NOTE);
   const reads = await slipInk(k, BR24_PIECES, "br24-hide");
   const heads = await evaluate(HEADS);

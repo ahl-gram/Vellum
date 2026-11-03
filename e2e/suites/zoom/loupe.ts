@@ -8,7 +8,7 @@ import { sheetAtRest } from "./hold-dress.ts";
 import { ensureHeldDeepInset, pollLast } from "./registration.ts";
 import type { HamletWindow } from "./registration.ts";
 import type { ZoomKit } from "./kit.ts";
-import { keyDown, keyUp } from "../../support/input.ts";
+import { keyDown, keyUp, mouseMove } from "../../support/input.ts";
 
 export type Point = { x: number; y: number };
 export type Centre = Point & { L: number; T: number; W: number; H: number; iw: number; ih: number };
@@ -55,8 +55,7 @@ const HAMLET_DOT = (box: Centre): string =>
   `.filter((p)=>p.x>=L+m&&p.x<=R-m&&p.y>=T+m&&p.y<=B-m&&p.x>=m&&p.x<=innerWidth-m&&p.y>=m&&p.y<=innerHeight-m);` +
   `hs.sort((a,b)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(b.x-cx,b.y-cy));return hs[0]||null;})()`;
 
-export const mouse = (k: ZoomKit, x: number, y: number) =>
-  k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+export const mouse = (k: ZoomKit, x: number, y: number) => mouseMove(k.send, x, y);
 const key = (k: ZoomKit, type: "keyDown" | "keyUp"): Promise<void> =>
   type === "keyDown" ? keyDown(k.send, "l", "KeyL", 76, { text: "l" }) : keyUp(k.send, "l", "KeyL", 76);
 const optionUp = (k: ZoomKit): Promise<void> => keyUp(k.send, "\u00ac", "KeyL", 76, { modifiers: 1 });

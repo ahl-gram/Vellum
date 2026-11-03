@@ -9,6 +9,7 @@ import { huntQuarry, type Frac } from "./hunt/quarry.ts";
 import { huntRoom } from "./hunt/room.ts";
 import { hd1Dispatch, h8Reload } from "./hunt/solved.ts";
 import { hg0Boots, hg1Zoom, hg2Taps, hg4Solves } from "./hunt/zoomed.ts";
+import { mouseDown, mouseMove, mouseUp, sendClick } from "../support/input.ts";
 
 export type Zoom = { k: number; x: number; y: number };
 export type HuntKit = ReturnType<typeof huntKit>;
@@ -60,33 +61,13 @@ function huntKit(ctx: SuiteContext) {
       `(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`,
     );
   const mouseTap = async (x: number, y: number) => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
+    await sendClick(send, x, y);
   };
   const mouseDrag = async (x0: number, y0: number, x1: number, y1: number) => {
-    await send("Input.dispatchMouseEvent", {
-      type: "mousePressed",
-      x: x0,
-      y: y0,
-      button: "left",
-      buttons: 1,
-      clickCount: 1,
-    });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseMoved",
-      x: Math.round((x0 + x1) / 2),
-      y: Math.round((y0 + y1) / 2),
-      buttons: 1,
-    });
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: x1,
-      y: y1,
-      button: "left",
-      buttons: 0,
-      clickCount: 1,
-    });
+    await mouseDown(send, x0, y0);
+    await mouseMove(send, Math.round((x0 + x1) / 2), Math.round((y0 + y1) / 2), { buttons: 1 });
+    await mouseMove(send, x1, y1, { buttons: 1 });
+    await mouseUp(send, x1, y1);
   };
   // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (Issue #304). Since Issue #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
   const framePoint = (k: number, fx: number, fy: number) =>

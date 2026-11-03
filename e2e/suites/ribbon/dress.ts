@@ -4,6 +4,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import type { RibbonKit } from "./kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -76,7 +77,7 @@ const dressFaults = (d: Dress, rem: number): string[] =>
 export async function rb12Dress(k: RibbonKit): Promise<void> {
   const { evaluate, check, sleep, opened, send } = k;
   await opened("seed 42, for its dress");
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await mouseMove(send, 1, 1);
   const d = await makeSettle({ evaluate, sleep })(
     DRESS,
     (x, last) => !x.moving && !!last && JSON.stringify(x.legend) === JSON.stringify(last.legend),
