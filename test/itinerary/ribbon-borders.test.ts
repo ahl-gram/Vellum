@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
-import { layoutRibbon, stripFor, type StripLayout } from "../../src/itinerary/dress/layout.ts";
+import { layoutRibbon, stripFor, stripPos, type StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { BAND, stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { textBox, WIDTH_FACTOR } from "../../src/render/geometry.ts";
 import { unescapeXml } from "../../src/render/svg.ts";
@@ -234,5 +234,20 @@ test("every drawn border is ruled across its strip in the dress's border ink, st
     assert.ok(drawnBorders >= 30, `${dress}: the sweep draws borders: ${drawnBorders}`);
     assert.ok(meetsRose >= 1, `${dress}: some line meets its strip's rose: ${meetsRose}`);
     assert.ok(onLine >= 20, `${dress}: some lettering stands on a line: ${onLine}`);
+  }
+});
+
+test("a border's caption block stands three units above its line, so the words stand in the realm they name", () => {
+  const layout = layoutRibbon(default42);
+  const border = bordersOf(default42)[0]!;
+  const sy = stripPos(stripFor(layout, border.dist)!, border.dist).sy;
+  for (const dress of ["antique", "ink"] as const) {
+    const caption = plateCaptions(ribbonSvgFor(default42, dress), layout.strips).find((c) =>
+      c.lines.some((l) => l.text.includes("Hauwaiwa")),
+    );
+    assert.ok(caption !== undefined, `${dress}: the border is captioned`);
+    assert.ok(!caption.lines.some((l) => l.backed), `${dress}: premise: it keeps the seat first wanted`);
+    const foot = caption.lines.at(-1)!.y + 1.2;
+    assert.ok(Math.abs(foot - (sy - 3)) <= 0.06, `${dress}: the block's foot ${foot} stands at the line ${sy} less 3`);
   }
 });
