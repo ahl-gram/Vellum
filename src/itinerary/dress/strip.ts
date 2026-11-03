@@ -159,7 +159,7 @@ function captionNodes(
       ),
     );
   }
-  return { nodes: [...laid.nodes, ...out], track: { ...laid.track, [key]: y - 4 } };
+  return { nodes: [...laid.nodes, el("g", { class: "caption" }, out)], track: { ...laid.track, [key]: y - 4 } };
 }
 
 function waypointLines(e: Extract<RibbonEvent, { kind: "waypoint" }>, caption: string): CaptionLine[] {

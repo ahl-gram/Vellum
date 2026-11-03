@@ -316,13 +316,18 @@ test("the realm names ride the outer bands, the departure's first and the arriva
 
 test("every caption is drawn above every strip", () => {
   for (const input of [road42, road15]) {
+    const lastEnd = layoutRibbon(input).strips.at(-1)!.d1;
+    const seated = input.events.filter((e) => e.dist < lastEnd).length;
     for (const dress of ["antique", "ink"] as const) {
       const svg = ribbonSvgFor(input, dress);
-      const lines = [...svg.matchAll(/<text [^>]*text-anchor="(?:start|end)"/g)];
+      const groups = [...svg.matchAll(/<g class="caption">/g)];
       const where = `${input.fromName} to ${input.toName}, ${dress}`;
-      assert.ok(lines.length >= input.events.length, `${where}: every event is captioned (${lines.length} lines)`);
       assert.ok(
-        (lines[0]?.index ?? -1) > svg.lastIndexOf('class="road"'),
+        groups.length >= seated,
+        `${where}: every event on a strip is captioned (${groups.length} groups, ${seated} events)`,
+      );
+      assert.ok(
+        (groups[0]?.index ?? -1) > svg.lastIndexOf('class="road"'),
         `${where}: every caption lies after the last strip's road, so no strip covers it`,
       );
     }
