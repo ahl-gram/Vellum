@@ -4,10 +4,10 @@ import type { SuiteContext } from "../types.ts";
 export const ABOUT_BLANK = "about:blank";
 
 export const leaveBlank = async (send: SuiteContext["send"]): Promise<void> => {
-  await send("Page.reload");
+  await send("Page.navigate", { url: ABOUT_BLANK });
 };
 
 export const bounce = async (send: SuiteContext["send"], url: string): Promise<void> => {
-  await send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(send);
   await send("Page.navigate", { url });
 };
