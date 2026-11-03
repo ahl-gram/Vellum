@@ -42,8 +42,8 @@ export function ribbonKit(ctx: SuiteContext) {
   };
   const STATE: Payload<Ribbon | null> = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,fromOptions:[...document.getElementById("rb-from").options].map((o)=>Number(o.value)),prospectShown:getComputedStyle(document.getElementById("rb-prospect-link")).display!=="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
-  const opened = (label: string) =>
-    settle(STATE, (s) => s.blob && s.status === "", `ribbon page never drew: ${label}`, 300);
+  const opened = (label: string, until: (s: Ribbon) => boolean = () => true) =>
+    settle(STATE, (s) => s.blob && s.status === "" && until(s), `ribbon page never drew: ${label}`, 300);
   const glassHome = async (): Promise<void> => {
     await evaluate(
       `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
