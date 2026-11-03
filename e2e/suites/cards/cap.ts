@@ -1,5 +1,5 @@
 import { makeSettle, makeStable } from "../../support/settle.ts";
-import { countEvents } from "../../support/witness.ts";
+import { CARD_CARRIER, countEvents } from "../../support/witness.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
@@ -275,6 +275,7 @@ async function p24PinKralgov(
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
   return stable(PINNED_AT_REST, "P24 Kralgov pinned and unrolled at 1280x800", {
     departed: (d) => d.name === "Kralgov" && d.pinned,
+    animated: CARD_CARRIER,
   });
 }
 
@@ -300,11 +301,11 @@ export async function p24NothingToScroll({
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.aim.x, y: card.aim.y });
   await sleep(120, "pace: the hover lands before the wheel");
   await evaluate(WHEELS.arm);
-  await wheel(at.x, at.y, -240);
+  await wheel(card.aim.x, card.aim.y, -240);
   const after = (await stable(WHEELED, "P24 the wheel handled", { departed: (d) => d.wheels > 0 })).k;
   check(
     "P24 a pinned card with nothing to scroll does NOT swallow the camera under it, the wheel aimed at the card's name once it has unrolled, clear of the card's actions (#633; Issue #1211)",
-    card.tail <= 1 && card.scrolls === false && card.pe === "none" && after > card.k + 0.05,
+    card.tail <= 1 && card.scrolls === false && card.pe === "none" && card.clear && after > card.k + 0.05,
     JSON.stringify({
       tail: card.tail,
       scrolls: card.scrolls,
