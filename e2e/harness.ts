@@ -13,6 +13,7 @@ import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
 import { applyRunnerLayout } from "./support/runner-layout.ts";
 import { fixTheDay } from "./support/fixed-day.ts";
 import { serverState, startServer } from "./site-server.ts";
+import { ABOUT_BLANK } from "./support/nav.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const httpGet = (url: string): Promise<string> =>
@@ -263,7 +264,7 @@ async function spawnBrowser(browser: string, DPORT: number): Promise<LaunchAttem
       "--hide-scrollbars",
       "--force-device-scale-factor=1",
       "--window-size=1280,2400",
-      "about:blank",
+      ABOUT_BLANK,
     ],
     { stdio: ["ignore", "pipe", "pipe"] },
   );

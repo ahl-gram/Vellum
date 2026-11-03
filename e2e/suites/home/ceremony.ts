@@ -8,6 +8,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { anchored, seatOk } from "./reads.ts";
 import type { Seat } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 export async function h7aVeil({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
   await evaluate(`sessionStorage.clear()`);
@@ -148,8 +149,7 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
 
 export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   // H9/H10 poll for the settled state rather than reading once after a fixed sleep (a one-shot read caught a still-loading page on a busy CI lane and saw transform none), and their teeth move to the invariant that NO sample ever sees the veil. The about:blank bounce (the suite-zoom Z13 idiom) keeps the first samples off the previous page, which already sits at the landfall scale.
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/`);
   let returning = null;
   let sawVeil9 = false;
   for (let i = 0; i < 200; i++) {
@@ -168,8 +168,7 @@ export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT 
 
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await evaluate(`sessionStorage.clear()`);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/`);
   let reduced10 = null;
   let sawVeil10 = false;
   for (let i = 0; i < 200; i++) {
@@ -192,8 +191,7 @@ export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT 
 const VEIL_WATCH = `window.__lfVeils = 0; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === "lf-veil") window.__lfVeils++; }).observe(document, { childList: true, subtree: true });`;
 
 async function veilsRaised({ evaluate, send, sleep, PORT }: SuiteContext): Promise<number> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/`);
   for (let i = 0; i < 200; i++) {
     const n = await evaluate<number | null>(
       `location.pathname === "/" && document.querySelector("#lf-stage.cam") ? window.__lfVeils : null`,
@@ -314,8 +312,7 @@ export async function h18CameraSeat(
   { evaluate, send, check, sleep, PORT, camSeat }: HomeKit,
   seat390: Seat | null,
 ): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/`);
   let seatWide: Seat | null = null;
   for (let i = 0; i < 120; i++) {
     try {

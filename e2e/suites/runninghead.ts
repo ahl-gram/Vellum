@@ -40,6 +40,7 @@ import {
   rh20TextSize,
   rh24TrailInks,
 } from "./runninghead/shell.ts";
+import { leaveBlank } from "../support/nav.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, consoleErrors, http4xx } = ctx;
@@ -84,7 +85,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
-  await send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(send);
   const galleryNarrow = await visit("/gallery/");
   await rh10cPrinted(k, galleryNarrow);
   await send("Emulation.clearDeviceMetricsOverride");

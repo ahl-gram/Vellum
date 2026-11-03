@@ -2,6 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce, leaveBlank } from "../../support/nav.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -93,8 +94,7 @@ export async function rr38Authored({ evaluate, send, check, sleep, PORT }: Suite
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
   try {
     const read = await withScriptsOff(send, async () => {
-      await send("Page.navigate", { url: "about:blank" });
-      await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/` });
+      await bounce(send, `http://127.0.0.1:${PORT}/reading-room/`);
       // A loaded page with no frame is the witness that its module never ran: with scripts on the frame mounts before the load event.
       await settle(
         LOADED,
@@ -111,6 +111,6 @@ export async function rr38Authored({ evaluate, send, check, sleep, PORT }: Suite
     );
   } finally {
     // A hash-only navigate from here would keep this scripts-off document, so the next load starts from a blank one.
-    await send("Page.navigate", { url: "about:blank" });
+    await leaveBlank(send);
   }
 }

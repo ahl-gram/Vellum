@@ -5,6 +5,8 @@ import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
 import { sendKey } from "../../support/input.ts";
+import { bounce } from "../../support/nav.ts";
+import { explorerUp } from "../../support/explorer.ts";
 
 type Pinned = Awaited<ReturnType<typeof p20PinnedTakesPointer>>;
 
@@ -283,9 +285,8 @@ export async function p24NothingToScroll({
 }: CardsKit): Promise<void> {
   const stable = makeStable(settle);
   await setNarrowViewport(1280, 800);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
-  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique`);
+  await explorerUp({ waitReady }, "P24 at 1280x800");
   const at = await evaluate<Point>(
     `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`,
   );
@@ -313,7 +314,6 @@ export async function p24NothingToScroll({
 export async function pRestore({ send, waitReady, clearMobile, PORT }: SuiteContext): Promise<void> {
   // settle-doctrine clause 14: the next suite starts on whatever page is current, and the runner resets the viewport only after a suite that did not run whole.
   await clearMobile();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
-  if (!(await waitReady())) throw new Error("P restore the explorer never drew again");
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/`);
+  await explorerUp({ waitReady }, "P restore");
 }

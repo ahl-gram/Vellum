@@ -38,6 +38,7 @@ import { l9aOneFinger, l9bPinch, l9cTwoFingerPan, l9iTouchOff, l9jBrowserPinch }
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
 import { l9fPipGestures, l9hControlTap, l23KitReach, l24CameraLeaks, l30Camera } from "./landfall/controls.ts";
 import { l10NoScriptGet, l11IgnoresQuery } from "./landfall/seed.ts";
+import { leaveBlank } from "../support/nav.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send } = ctx;
@@ -124,14 +125,14 @@ export async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>)
   const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
   // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
   await setMobileViewport(1024, 768);
-  await k.send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(k.send);
   const tablet = await settleHome();
   await step("L9i", async () => {
     landed(tablet, "L9i");
     await l9iTouchOff(k);
   });
   await step("L9j", () => l9jBrowserPinch(k));
-  await k.send("Page.navigate", { url: "about:blank" });
+  await leaveBlank(k.send);
   const reloaded = await settleHome();
   await step("L9 touch given", async () => {
     landed(reloaded, "L9 touch given");

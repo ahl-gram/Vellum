@@ -2,6 +2,7 @@ import { roman } from "../../../src/site/explorer/portfolio/folio-lines.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { CARD, DRAWN, DRESS, PP, type Card, type Pp } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 // The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
 export const pressAtRest = (d: Card, last: Card | null): boolean =>
@@ -170,8 +171,7 @@ async function cd29SecondYear(
 // The page's own capture point (seat C, ruled 2026-09-17): it files and STAYS, and the year is part of a sheet's identity.
 export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle, clickAt, forget }: DrawerKit) {
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3` });
+  await bounce(send, `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3`);
   for (let i = 0; i < 300; i++) {
     await sleep(100);
     if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break;
@@ -265,8 +265,7 @@ export async function cd34PageRefusals(
   );
   // A boot with the cap already spent: the same press, the OTHER refusal. The six come from the ADDRESS, so the device is cleared first or the two sources are indistinguishable here.
   await forget();
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}`);
   for (let i = 0; i < 300; i++) {
     await sleep(100);
     if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break;
@@ -292,10 +291,7 @@ export async function cd31RoundTrip(
   two: Awaited<ReturnType<typeof cd28PagePress>>,
 ): Promise<void> {
   // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", {
-    url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref!.slice(two.chartHref!.indexOf("#"))}`,
-  });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/${two.chartHref!.slice(two.chartHref!.indexOf("#"))}`);
   for (let i = 0; i < 200; i++) {
     await sleep(150);
     if (await evaluate<boolean>(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`))
@@ -338,8 +334,7 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
     "k-p.seed-42.style-ink.i-3.year-1059",
     "k-p.seed-42.style-antique.i-1.year-1059",
   ].join("_");
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${MIXED}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${MIXED}`);
   for (let i = 0; i < 200; i++) {
     await sleep(100);
     if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break;

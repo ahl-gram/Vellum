@@ -1,5 +1,6 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Clear = { title: string; lines: Box[]; legend: Box; left: string; moving: boolean };
@@ -159,8 +160,7 @@ export async function prcCarried({ evaluate, send, check, sleep, PORT }: SuiteCo
 }
 
 export async function prbBare({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/print-room/`);
   let bare = null;
   for (let i = 0; i < 160; i++) {
     let s = null;

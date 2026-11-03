@@ -3,6 +3,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import type { HuntKit } from "../hunt.ts";
 import { huntQuarry } from "./quarry.ts";
+import { bounce } from "../../support/nav.ts";
 
 // 2026-10-30: a day whose hunt quarry was renamed, Zodo once Tho (CI run 37379661660, and Issue #1084's dry run on the Mac's layout and on the runner's staged one), where HUNT_DAY's Xuacil never was.
 export const FORMER_DAY = Date.UTC(2026, 9, 5, 12);
@@ -18,8 +19,7 @@ const REVEAL: Payload<{ shown: boolean; text: string }> =
 export async function h5cFormerName(k: HuntKit): Promise<void> {
   const { evaluate, send, sleep, check, clickHunt, PORT } = k;
   await evaluate(`localStorage.removeItem("vellum.hunt.v1")`);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/seed-of-the-day/`);
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
   await settle(
     BOOTED,

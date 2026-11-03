@@ -2,6 +2,7 @@ import { DESK_FRAME } from "../../../src/site/shared/page-box.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { makeSettle, makeStable, STILL_ONLY } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 // The desk notice (Issue #761): a phone shrinks the fixed 1024 page and sees the Notice to Travellers, a tablet at 1024 and a narrow desktop window, which lays out the same 1024 page and scrolls sideways over it (Issue #762), never do, and Continue anyway is remembered.
 const KEY = "vellum.desk-notice.v1";
@@ -43,8 +44,7 @@ export function deskKit(ctx: SuiteContext) {
   const { send, evaluate, PORT } = ctx;
   const settle = makeSettle(ctx);
   const open = async (path: string): Promise<void> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${path}` });
+    await bounce(send, `http://127.0.0.1:${PORT}${path}`);
     await settle(`document.readyState`, (s) => s === "complete", `${path} loaded`);
   };
   const forget = async (): Promise<void> => {

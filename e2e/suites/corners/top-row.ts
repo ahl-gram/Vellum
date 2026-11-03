@@ -3,6 +3,7 @@ import { withScriptsOff } from "../../support/scripts-off.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { LANDED } from "../stage/stage.ts";
+import { bounce } from "../../support/nav.ts";
 
 const KIT = 304;
 const CAP = 480;
@@ -46,8 +47,7 @@ async function at(ctx: SuiteContext, w: number, label: string): Promise<Row> {
 async function open(ctx: SuiteContext, page: string, w: number): Promise<Row> {
   await ctx.setTouch(false);
   await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
   const up: Payload<string | null> =
     `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome nav.rooms") && ${LANDED} ? location.pathname : null`;
   await makeSettle(ctx)(up, (d) => d === page, `top-row-open-${page}-${w}`, 300);

@@ -12,6 +12,7 @@ import type { TouchRead } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import { CHART_ROOM_FLOOR } from "../stage/stage.ts";
 import type { GesturesKit } from "../zoom-gestures.ts";
+import { bounce } from "../../support/nav.ts";
 
 const BOX = "#map-viewport";
 const KEEP = (types: readonly string[]): boolean => types.includes("wheel") && types.includes("mousedown");
@@ -203,8 +204,7 @@ export async function zg9Rooms(k: GesturesKit): Promise<void> {
   const faults: string[] = [];
   const routes = ["/", ...CHART_ROOM_FLOOR.filter((r) => r !== "/explorer/")];
   for (const route of routes) {
-    await k.send("Page.navigate", { url: "about:blank" });
-    await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}${route}` });
+    await bounce(k.send, `http://127.0.0.1:${k.PORT}${route}`);
     const box = route === "/" ? "#lf-stage" : BOX;
     const r = await makeSettle(k)(touchRead(box), (d) => d.shown, `ZG9 ${route} shows the touch press`, 200);
     const types = route === "/" ? [] : await touchListeners(k, box);

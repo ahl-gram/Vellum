@@ -2,6 +2,7 @@ import { FIXED_SEED } from "../../support/fixed-day.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead, stripRead } from "./reads.ts";
+import { bounce } from "../../support/nav.ts";
 
 const PLACED: Payload<{ stamp: string | null; hash: string }> =
   `(() => { const s = document.querySelector(".rf-chart svg:not(.voyage-overlay)");
@@ -9,10 +10,10 @@ const PLACED: Payload<{ stamp: string | null; hash: string }> =
 
 export async function rr44PlaceLink(k: ReadingRoomKit): Promise<void> {
   const { evaluate, send, check, boot, settled, PORT } = k;
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", {
-    url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&type=island&outline=ne-1159315211`,
-  });
+  await bounce(
+    send,
+    `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&type=island&outline=ne-1159315211`,
+  );
   check("RR44a the place's address boots and settles", (await boot()) && (await settled()));
   const placed = await evaluate(PLACED);
   check(
@@ -31,8 +32,7 @@ export async function rr6Survey({
   plateShown,
   PORT,
 }: ReadingRoomKit): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&survey` });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=42&survey`);
   check("RR6a the survey address boots and settles", (await boot()) && (await settled()));
   const survey = await evaluate(agesRead);
   check(
@@ -72,8 +72,7 @@ export async function rr7Year({
   plateShown,
   PORT,
 }: ReadingRoomKit): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&year=650` });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/#seed=42&year=650`);
   check("RR7a the year address boots and settles", (await boot()) && (await settled()));
   const year = await evaluate(agesRead);
   check(
@@ -114,8 +113,7 @@ export async function rr7Year({
 }
 
 export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: ReadingRoomKit): Promise<void> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/` });
+  await bounce(send, `http://127.0.0.1:${PORT}/reading-room/`);
   let bare = null;
   if (await boot()) {
     for (let i = 0; i < 160; i++) {

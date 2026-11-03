@@ -5,6 +5,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { GLYPH_LINES_OVER_SHEET } from "./glyphs.ts";
 import type { Glyph } from "./glyphs.ts";
 import { CHART_ROOM_FLOOR, FLOOR_PLAIN, rest, stageFaults, withStyle } from "./stage.ts";
+import { bounce } from "../../support/nav.ts";
 
 const NAMED_WORLD = "/print-room/#seed=20261006";
 const SHORT: readonly (readonly [number, number])[] = [
@@ -130,8 +131,7 @@ async function ns1Sweep(ctx: SuiteContext) {
     for (const [i, [w, h]] of SHORT.entries()) {
       await size(ctx, w, h);
       if (i === 0) {
-        await ctx.send("Page.navigate", { url: "about:blank" });
-        await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+        await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
       }
       const s = await rest(ctx, w, h, `NS1 ${page} ${w}x${h}`);
       const b = await ctx.evaluate(BACKINGS);
@@ -189,8 +189,7 @@ async function na4PrintRoomSweep(ctx: SuiteContext) {
   const rows: string[] = [];
   for (const page of ["/print-room/", NAMED_WORLD]) {
     await size(ctx, 1024, LEAN_H);
-    await ctx.send("Page.navigate", { url: "about:blank" });
-    await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+    await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${page}`);
     const s = await rest(ctx, 1024, LEAN_H, `NA4 ${page}`);
     const leans: boolean[] = [];
     for (const w of [1024, 1025, 1024, 1025, 1024]) {
@@ -226,8 +225,7 @@ export async function na4Lean(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const { faults, rows } = await na4PrintRoomSweep(ctx);
   await size(ctx, 1024, REACH_H);
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}/seed-of-the-day/` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}/seed-of-the-day/`);
   const sd = await rest(ctx, 1024, REACH_H, "NA4 the Seed of the Day");
   const day = await ctx.evaluate(BACKINGS);
   if (!day.lean)
@@ -242,8 +240,7 @@ export async function na4Lean(ctx: SuiteContext): Promise<void> {
     );
   rows.push(`/seed-of-the-day/ at 1024x${REACH_H} lean ${day.lean}, Press top ${day.pressTop?.toFixed(1)}`);
   await size(ctx, 1024, 474);
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}/explorer/` });
+  await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}/explorer/`);
   await rest(ctx, 1024, 474, "NA4 the Explorer");
   const explorer = await ctx.evaluate(BACKINGS);
   if (!explorer.under) faults.push("the Explorer at 1024x474 is not floored, so the no-shed arm reads nothing");

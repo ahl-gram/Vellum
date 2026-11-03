@@ -6,6 +6,7 @@ import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload } from "../../types.ts";
 import { axName, STORE, type ProspectKit } from "./kit.ts";
 import { FETCHED_PLACES, PLACE_PATH } from "../render/place.ts";
+import { bounce } from "../../support/nav.ts";
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
 const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;
@@ -176,8 +177,7 @@ export async function pb16ScriptsOff(k: ProspectKit): Promise<void> {
   type Loaded = { ready: string; lay: boolean };
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
   const off = await withScriptsOff(send, async () => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: page("#seed=42&i=0") });
+    await bounce(send, page("#seed=42&i=0"));
     await settle<Loaded>(
       `({ ready: document.readyState, lay: !!document.getElementById("pp-lay") })`,
       (d) => d.ready === "complete" && d.lay,
@@ -306,8 +306,7 @@ export async function pb18TableHomes(k: ProspectKit): Promise<void> {
   const { evaluate, send, check, opened, page } = k;
   try {
     await evaluate(`localStorage.setItem(${STORE}, ${JSON.stringify(`${S1}_${S1}_${S2}`)})`);
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: page(`#seed=42&i=0&table=${CAP}_${CAP}`) });
+    await bounce(send, page(`#seed=42&i=0&table=${CAP}_${CAP}`));
     await opened("the capital, handed a table");
     const linked = await evaluate(HOME);
     const cached = await backHome(k, "warm", false);

@@ -1,6 +1,7 @@
 import { sendKey } from "../../support/input.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { bounce } from "../../support/nav.ts";
 
 export async function prlLink({ evaluate, send, check, sleep, PORT }: SuiteContext) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&legend=1` });
@@ -117,10 +118,9 @@ type Seen = {
 const SEEN = `(()=>{const svg=document.querySelector("#map > svg[data-vellum-style]"),a=document.getElementById("order-plates"),strip=(s)=>s.replace(/&table=[^&]*/,""),at=(n)=>svg?svg.getAttribute("data-vellum-"+n):null;
   return{drawn:!!svg&&document.getElementById("status").textContent==="",outline:at("outline"),looseness:at("looseness"),islands:at("islands"),isleSize:at("isle-size"),raggedness:at("raggedness"),hash:strip(location.hash),href:a?strip(a.getAttribute("href")):null};})()`;
 
-// Through about:blank, because a navigate that differs only in the hash is same-document and never re-boots the page (settle-doctrine clause 9); the poll keeps its last read and the check asserts on that.
+// The poll keeps its last read and the check asserts on that.
 async function explorerAt({ evaluate, send, sleep, PORT }: SuiteContext, hash: string): Promise<Seen | null> {
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${hash}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/explorer/${hash}`);
   let seen: Seen | null = null;
   for (let i = 0; i < 200; i++) {
     try {
@@ -149,8 +149,7 @@ export async function prwPlace(ctx: SuiteContext): Promise<void> {
     JSON.stringify(seen),
   );
   const hash = seen && seen.href && seen.href.includes("#") ? seen.href.slice(seen.href.indexOf("#")) : PLACE_HASH;
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/${hash}` });
+  await bounce(send, `http://127.0.0.1:${PORT}/print-room/${hash}`);
   let proof: { stamp: string | null; hash: string } | null = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
