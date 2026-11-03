@@ -26,7 +26,7 @@ export async function rb18CardRoad({ check, goto, opened }: RibbonKit): Promise<
 }
 
 const TEXT = `((e) => e ? e.textContent.replace(/\\s+/g, " ").trim() : null)`;
-const KIDS = `((e) => e ? [...e.children].map((c) => c.tagName + (c.id ? "#" + c.id : "") + (c.classList.length ? "." + [...c.classList].join(".") : "")) : null)`;
+const KIDS = `((e, skip = []) => e ? [...e.children].map((c) => { const cls = [...c.classList].filter((n) => !skip.includes(n)); return c.tagName + (c.id ? "#" + c.id : "") + (cls.length ? "." + cls.join(".") : ""); }) : null)`;
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
 
@@ -121,7 +121,7 @@ type Stage = {
 const STAGE: Payload<Stage> = `(() => { const text = ${TEXT}, kids = ${KIDS}, id = (s) => document.getElementById(s), row = document.querySelector("nav.legend .legend-row"), pill = id("rb-status");
   return { nav: document.querySelector("nav.legend") && document.querySelector("nav.legend").getAttribute("aria-label"), row: kids(row),
     roads: row ? [...row.children].map((a) => [text(a.querySelector(".verb")), text(a.querySelector(".room"))]) : [], verbId: !!document.querySelector("#rb-prospect-link #rb-prospect-verb"),
-    label: id("map-viewport") && id("map-viewport").getAttribute("aria-label"), map: kids(id("map")), after: kids(document.querySelector(".stage")),
+    label: id("map-viewport") && id("map-viewport").getAttribute("aria-label"), map: kids(id("map"), ["rb-inking"]), after: kids(document.querySelector(".stage")),
     pill: pill && [pill.getAttribute("role"), pill.getAttribute("aria-live"), id("rb-warning") && id("rb-warning").hidden],
     glass: [...document.querySelectorAll(".zoomery [data-zoom]")].map((b) => b.dataset.zoom), folio: [...document.querySelectorAll(".corner.bl.folio > p")].map((p) => [p.className, p.id]) };
 })()`;

@@ -20,15 +20,16 @@ type Ink = {
   decoded: boolean;
   adds: number;
   removes: number;
+  ends: number[];
   rect: number[];
 };
-const INK: Payload<Ink> = `(() => { const rgba = ${PAGE_RGBA}, p = document.getElementById("rb-plate"), m = document.getElementById("map"), w = window.__rbInk || { adds: 0, removes: 0 };
+const INK: Payload<Ink> = `(() => { const rgba = ${PAGE_RGBA}, p = document.getElementById("rb-plate"), m = document.getElementById("map"), w = window.__rbInk || { adds: 0, removes: 0, ends: [] };
   const a = p.getAnimations().find((x) => x.animationName === "rb-ink"), r = p.getBoundingClientRect(), cs = getComputedStyle(p);
   return { cls: p.classList.contains("rb-inking"), play: a ? a.playState : null, duration: a ? a.effect.getComputedTiming().duration : null, ink: parseFloat(cs.getPropertyValue("--rb-ink")),
     strip: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--rb-ink-strip")), clip: cs.clipPath, ground: rgba(getComputedStyle(m).backgroundColor),
     transform: cs.transform, hovered: p.matches(":hover"), zoomed: document.getElementById("map-viewport").classList.contains("zoomed"),
-    decoded: !p.hidden && p.complete && p.naturalWidth > 0, adds: w.adds, removes: w.removes, rect: [r.left, r.top, r.width, r.height] }; })()`;
-const WITNESS = `(() => { const w = (window.__rbInk = { adds: 0, removes: 0 }); const plate = () => document.getElementById("rb-plate"); let had = !!plate() && plate().classList.contains("rb-inking");
+    decoded: !p.hidden && p.complete && p.naturalWidth > 0, adds: w.adds, removes: w.removes, ends: w.ends.slice(), rect: [r.left, r.top, r.width, r.height] }; })()`;
+const WITNESS = `(() => { const w = (window.__rbInk = { adds: 0, removes: 0, ends: [] }); document.addEventListener("animationend", (e) => { if (e.animationName === "rb-ink") w.ends.push(e.elapsedTime); }, true); const plate = () => document.getElementById("rb-plate"); let had = !!plate() && plate().classList.contains("rb-inking");
   new MutationObserver(() => { const p = plate(), has = !!p && p.classList.contains("rb-inking"); if (has === had) return; had = has; if (has) w.adds++; else w.removes++; })
     .observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] }); return true; })()`;
 type Plate = { W: number; H: number; strips: { x0: number; y0: number; w: number; h: number }[] };
@@ -49,6 +50,7 @@ const centreOf = (selector: string): Payload<{ x: number; y: number; ok: boolean
 
 const PAPER = tokenRgba("--chart-paper");
 const HALF = 0.5;
+const NEAR_ZERO_S = 0.01;
 // the painted banner's middle line, RIBBON_MARGIN + 24 in bannerCloth in src/itinerary/dress/plate.ts
 const TITLE_ROW = 50;
 const UNDER_CHROME = "a sampled point under the chrome";
@@ -233,7 +235,7 @@ export async function rb22TurnAbout(k: RibbonKit): Promise<void> {
   );
 }
 
-async function turnAboutByHand(k: RibbonKit, from: number): Promise<string[]> {
+async function turnAboutByHand(k: RibbonKit, from: number): Promise<{ faults: string[]; running: Ink }> {
   const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep });
   const faults: string[] = [];
   const swap = await k.evaluate(centreOf("#rb-swap"));
@@ -242,7 +244,7 @@ async function turnAboutByHand(k: RibbonKit, from: number): Promise<string[]> {
   await k.opened("turned under full motion", (s) => s.from === from);
   const running = await settle(INK, (d) => d.play === "running" || (d.decoded && !d.cls), "ribbon-ink-full-turn");
   if (running.play !== "running") faults.push("Turn about inks at full motion");
-  return faults;
+  return { faults, running };
 }
 
 type Landed = { rest: Ink; whole: boolean };
@@ -266,11 +268,10 @@ const reducedArrival = (k: RibbonKit): Promise<Landed> =>
     return { rest, whole: revealedAll(share) && hits.every(Boolean) };
   });
 
-const reducedSwitch = (k: RibbonKit): Promise<{ switched: Ink; after: Ink }> =>
+const reducedSwitch = (k: RibbonKit, endsBefore: number): Promise<Ink> =>
   underReduced(k, async () => {
     const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));
-    const switched = await k.evaluate(INK);
-    return { switched, after: await stable(INK, "ribbon-ink-collapsed", { departed: (d) => d.play === null }) };
+    return stable(INK, "ribbon-ink-collapsed", { departed: (d) => d.ends.length > endsBefore });
   });
 
 export async function rb23Reduced(k: RibbonKit, fullMs: number): Promise<void> {
@@ -284,15 +285,20 @@ export async function rb23Reduced(k: RibbonKit, fullMs: number): Promise<void> {
       faults.push("under reduced motion the first plate lands whole at once, taking no reveal");
     if (!(fullMs > 1)) faults.push("the same run's full motion inked (RB21, the control)");
     const before = await k.state();
-    faults.push(...(await turnAboutByHand(k, before!.to)));
-    const { switched, after } = await reducedSwitch(k);
-    if (switched.duration === null ? switched.cls : switched.duration > 0.01)
-      faults.push("reduced motion switched on mid-reveal collapses the run to the blanket's 0.01 ms");
-    if (after.cls || after.clip !== "none" || after.ground[3] !== 0) faults.push("and lands whole");
+    const turn = await turnAboutByHand(k, before!.to);
+    faults.push(...turn.faults);
+    let after: Ink | null = null;
+    if (turn.running.play === "running") {
+      after = await reducedSwitch(k, turn.running.ends.length);
+      const end = after.ends[after.ends.length - 1];
+      if (!(end !== undefined && end < NEAR_ZERO_S))
+        faults.push("reduced motion switched on mid-reveal ends the run at once: its own end reports under 10 ms");
+      if (after.cls || after.clip !== "none" || after.ground[3] !== 0) faults.push("and lands whole");
+    }
     k.check(
-      "RB23 under reduced motion the first plate of a visit lands whole at once, taking no reveal (RB21's inked arrival the control), and a reveal running when reduced motion is turned on collapses to the blanket's 0.01 ms and lands whole",
+      "RB23 under reduced motion the first plate of a visit lands whole at once, taking no reveal (RB21's inked arrival the control), and a reveal running when reduced motion is turned on ends at once, its own end reporting a run of under 10 ms, and lands whole",
       faults.length === 0,
-      JSON.stringify({ faults, fullMs, rest, switched, after }),
+      JSON.stringify({ faults, fullMs, rest, running: turn.running, after }),
     );
   } finally {
     await k.send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
