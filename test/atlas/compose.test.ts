@@ -5,6 +5,7 @@ import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { serializableAtlas } from "../../src/site/explorer/serializable-atlas.ts";
 import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
@@ -160,6 +161,16 @@ test("#433 the road takes the proof's dress folded to the plate's two: an ink pr
 
   assert.equal(ribbonPlates(world, "ink")[0]!.svg, res("ink"));
   assert.equal(ribbonPlates(world, "nautical")[0]!.svg, res("antique"));
+});
+
+test("#433 the worker hand-off carries every part of the composition across but the world, the road included", () => {
+  const atlas = composeAtlas(generateWorld(defaultRecipe(42)));
+  assert.equal(atlas.ribbons.length, 1, "premise: the composition holds a road to lose");
+  const carried = serializableAtlas(atlas) as Record<string, unknown>;
+  for (const [key, value] of Object.entries(atlas)) {
+    if (key === "world") continue;
+    assert.deepEqual(carried[key], value, `${key} crosses the worker boundary`);
+  }
 });
 
 test("composeAtlas is deterministic for a seed", () => {
