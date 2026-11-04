@@ -32,6 +32,7 @@ function fixture(): AtlasDocumentData {
     themes: [plate("theme-vegetation", "Vegetation")],
     regions: [plate("region-1", "The Environs of Café")],
     prospects: [plate("prospect-capital", "The Prospect of Café")],
+    ribbons: [plate("ribbon-capital", "The Road from Café to Brie")],
     bannersHtml: '<section><h2>Banners of the Realms</h2><div class="banners"></div></section>',
     chronicleHtml: '<section><h2>Chronicle</h2><ol class="chronicle"></ol></section>',
     gazetteerHtml: "<section><h2>Gazetteer</h2><table></table></section>",
@@ -138,9 +139,9 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
   const data = fixture();
   const html = atlasDocument(data, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
-  // every plate inlined as a base64 data URI: 1 hero + 2 draughtings + 1 theme + 1 region + 1 prospect = 6
+  // every plate inlined as a base64 data URI: 1 hero + 2 draughtings + 1 theme + 1 region + 1 prospect + 1 road = 7
   const dataUris = (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length;
-  assert.equal(dataUris, 6, "each plate must be inlined exactly once (self-contained, no doubling)");
+  assert.equal(dataUris, 7, "each plate must be inlined exactly once (self-contained, no doubling)");
   assert.doesNotMatch(html, /<a href="data:/);
   assert.doesNotMatch(html, /<link\b[^>]*\brel="stylesheet"/);
   assert.doesNotMatch(html, /src="world-antique\.svg"/);
@@ -204,7 +205,7 @@ async function runPlateScript(html: string, plates: number) {
 
 test("data-URI mode: running the document's own script really links every plate (#368)", async () => {
   const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
-  const { imgs, queried } = await runPlateScript(html, 6);
+  const { imgs, queried } = await runPlateScript(html, 7);
 
   for (const img of imgs) {
     const a = img.parentNode;
@@ -226,11 +227,11 @@ test("data-URI mode: running the document's own script really links every plate 
     new RegExp(`<body class="[^"]*\\b${scope}\\b`),
     "the script's scope must be the class the document emits",
   );
-  assert.equal((html.match(/<figure><img /g) ?? []).length, 6, "every plate img is a direct figure child");
+  assert.equal((html.match(/<figure><img /g) ?? []).length, 7, "every plate img is a direct figure child");
 
   assert.equal(
     (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
-    6,
+    7,
     "linking the plates must not re-embed them: the file would double",
   );
   assert.doesNotMatch(html, /<a href="data:/);
@@ -244,6 +245,21 @@ test("#412 the prospect section sits between the regional surveys and the banner
   assert.ok(regions >= 0, "regional surveys present");
   assert.ok(prospect > regions, "the prospect follows the regional surveys");
   assert.ok(banners > prospect, "the banners follow the prospect");
+});
+
+test("#433 the road from the capital is shelved after the prospect and before the banners, under its own head, anchored like every plate", () => {
+  const html = atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  const road = html.indexOf("<h2>The Road from the Capital</h2>");
+  assert.notEqual(road, -1, "the road's shelf is present");
+  assert.ok(html.indexOf("<h2>The Prospect of the Capital</h2>") < road, "the road follows the prospect");
+  assert.ok(road < html.indexOf("Banners of the Realms"), "the banners follow the road");
+  assert.match(html, /<a href="ribbon-capital\.svg"><img src="ribbon-capital\.svg"/);
+
+  const none = atlasDocument({ ...fixture(), ribbons: [] }, (p, s) => atlasPlateFilename(p, s), {
+    anchor: true,
+    motion: true,
+  });
+  assert.doesNotMatch(none, /The Road from the Capital/, "no empty shelf");
 });
 
 test("#412 a composition with no prospect emits no prospect section", () => {
@@ -261,8 +277,8 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry, and 2026-10-18 for the fonts sheet's address in a comment the download ships (Issue #768).
-const DOWNLOAD_SHA256 = "abf91fba15d02ff611358fd4c365013cf6be12ffb2696720eabdec608eb9868c";
+// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry, and 2026-10-18 for the fonts sheet's address in a comment the download ships (Issue #768), and 2026-11-03 for the road's plate and shelf the fixture gained (Issue #433; with no ribbons the document still hashes to abf91fba).
+const DOWNLOAD_SHA256 = "98c986cdfafbeea2654b9d1f10479520d7afa4fceea84e68264a33c0a991e07b";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 

@@ -105,13 +105,16 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
 
   const prospectAt = bound ? bound.heads.indexOf("The Prospect of the Capital") : -1;
   const regionAt = bound ? bound.heads.indexOf("Regional Surveys") : -1;
+  const roadAt = bound ? bound.heads.indexOf("The Road from the Capital") : -1;
   check(
-    "PR20c the bound preview shelves the capital's prospect between the surveys and the banners (#412)",
+    "PR20c the bound preview shelves the capital's prospect between the surveys and the banners (#412), and the road from the capital after the prospect and before the banners (#433)",
     !!bound &&
       bound.prospectPlate === true &&
       regionAt >= 0 &&
       prospectAt > regionAt &&
-      prospectAt < bound.heads.indexOf("Banners of the Realms"),
+      prospectAt < bound.heads.indexOf("Banners of the Realms") &&
+      roadAt > prospectAt &&
+      roadAt < bound.heads.indexOf("Banners of the Realms"),
     JSON.stringify(bound && { heads: bound.heads, prospectPlate: bound.prospectPlate }),
   );
 }
@@ -184,8 +187,8 @@ async function pr33bBanners({ evaluate, check }: Pick<SuiteContext, "evaluate" |
   check(
     "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
     !!banners &&
-      banners.on === "ix" &&
-      /^plate ix of the bound atlas · the banners of every realm$/.test(banners.line) &&
+      banners.on === "x" &&
+      /^plate x of the bound atlas · the banners of every realm$/.test(banners.line) &&
       banners.arms > 0 &&
       banners.counted.includes(banners.arms + " arms"),
     JSON.stringify(banners),
@@ -209,7 +212,7 @@ export async function pr33BackMatter({ evaluate, check, shoot, sleep }: SuiteCon
   }
 
   check(
-    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row xi inked (#465 ruling 7), the page unscrolled",
+    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row xii inked (#465 ruling 7), the page unscrolled",
     !!matter &&
       matter.pageHidden === false &&
       matter.turnedHidden === true &&
@@ -217,9 +220,9 @@ export async function pr33BackMatter({ evaluate, check, shoot, sleep }: SuiteCon
       matter.aspect > 0 &&
       matter.aspect <= 0.75 &&
       Math.abs(matter.ratio - matter.aspect) < 0.01 &&
-      matter.on === "xi" &&
+      matter.on === "xii" &&
       matter.here === "gazetteer" &&
-      /^plate xi of the bound atlas · the gazetteer$/.test(matter.line) &&
+      /^plate xii of the bound atlas · the gazetteer$/.test(matter.line) &&
       /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
       matter.places > 0 &&
       matter.measureEmpty === true &&

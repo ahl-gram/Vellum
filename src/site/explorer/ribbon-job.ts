@@ -4,7 +4,7 @@ import { buildRibbonInput, type RibbonInput } from "../../itinerary/input.ts";
 import { ribbonSvgFor } from "../../itinerary/finished.ts";
 import { eventCaption } from "../../itinerary/prose.ts";
 import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W, type RibbonLayout } from "../../itinerary/dress/layout.ts";
-import { roadMask, roadReachable, roadWalk } from "../../itinerary/route.ts";
+import { farthestReachable, roadMask, roadReachable } from "../../itinerary/route.ts";
 import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import { STYLES } from "../../render/style.ts";
 import type { RibbonEvent } from "../../itinerary/events.ts";
@@ -79,24 +79,6 @@ function itineraryRows(input: RibbonInput, layout: RibbonLayout): ReadonlyArray<
 
 function validIndex(world: World, i: number | null): number | null {
   return i != null && Number.isInteger(i) && i >= 0 && i < world.settlements.length ? i : null;
-}
-
-function farthestReachable(
-  world: World,
-  mask: Uint8Array,
-  from: number,
-  reachable: ReadonlyArray<number>,
-): number | null {
-  let best: number | null = null;
-  let bestLen = -1;
-  for (const i of reachable) {
-    const chain = roadWalk(world, mask, from, i);
-    if (chain && chain.length > bestLen) {
-      bestLen = chain.length;
-      best = i;
-    }
-  }
-  return best;
 }
 
 export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData {

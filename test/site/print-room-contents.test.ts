@@ -19,19 +19,20 @@ const DATA: ContentsData = {
   ],
   regions: [ref("region-1", "The Environs of Laukuwelua"), ref("region-2", "The Environs of Toatauhe")],
   prospects: [ref("prospect-capital", "The Prospect of Laukuwelua")],
+  ribbons: [ref("ribbon-capital", "The Road from Laukuwelua to Homaitani")],
   counts: { arms: 6, entries: 41, places: 30 },
   here: "theme-vegetation",
 };
 
 const rows = (html: string): string[] => [...html.matchAll(/<li[\s\S]*?<\/li>/g)].map((m) => m[0]);
 
-test("unbound, the eleven rows stand in the mockup's words with no plates and no turns, each thematic survey its own row (#465 ruling 7)", () => {
+test("unbound, the twelve rows stand in the mockup's words with no plates and no turns, each thematic survey its own row (#465 ruling 7)", () => {
   const html = contentsRows(null);
   const li = rows(html);
-  assert.equal(li.length, 11, "eleven rows, i to xi");
+  assert.equal(li.length, 12, "twelve rows, i to xii");
   assert.deepEqual(
     li.map((r) => /<span class="cr-num">([ivx]+)<\/span>/.exec(r)?.[1]),
-    ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi"],
+    ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii"],
   );
   assert.deepEqual(
     li.slice(2, 6).map((r) => /A thematic survey of <em>([a-z]+)<\/em>/.exec(r)?.[1]),
@@ -46,6 +47,7 @@ test("unbound, the eleven rows stand in the mockup's words with no plates and no
   );
   assert.match(li[6]!, /Regional surveys, two close-ins/);
   assert.match(li[7]!, /The prospect of the capital/);
+  assert.match(li[8]!, /The road from the capital<\/span>/);
   assert.doesNotMatch(html, /class="plates"|class="turn"|data-plate=/, "nothing to turn to yet");
 });
 
@@ -88,14 +90,18 @@ function checkBoundBackRows(li: readonly string[]): void {
   );
   assert.match(
     li[8]!,
-    /<button class="turn" type="button" data-plate="banners">The banners of every realm<\/button> <span class="n">&middot; 6 arms<\/span>/,
+    /<span class="cr-num">ix<\/span><span class="cr-text"><button class="turn" type="button" data-plate="ribbon-capital">The road <em>from Laukuwelua to Homaitani<\/em><\/button><\/span><div class="plates"><figure data-plate="ribbon-capital">/,
   );
   assert.match(
     li[9]!,
-    /<button class="turn" type="button" data-plate="chronicle">The chronicle<\/button> <span class="n">&middot; 41 entries<\/span>/,
+    /<button class="turn" type="button" data-plate="banners">The banners of every realm<\/button> <span class="n">&middot; 6 arms<\/span>/,
   );
   assert.match(
     li[10]!,
+    /<button class="turn" type="button" data-plate="chronicle">The chronicle<\/button> <span class="n">&middot; 41 entries<\/span>/,
+  );
+  assert.match(
+    li[11]!,
     /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 30 places<\/span>/,
   );
 }
@@ -103,7 +109,7 @@ function checkBoundBackRows(li: readonly string[]): void {
 test("bound, every plate is a turn and a thumbnail, the regions and the prospect are named, the counts ride the last three rows", () => {
   const html = contentsRows(DATA);
   const li = rows(html);
-  assert.equal(li.length, 11);
+  assert.equal(li.length, 12);
   checkBoundPlateRows(li);
   checkBoundBackRows(li);
   const figures = [...html.matchAll(/<figure[^>]*data-plate="([^"]+)"/g)].map((m) => m[1]);
@@ -121,8 +127,9 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
       "region-1",
       "region-2",
       "prospect-capital",
+      "ribbon-capital",
     ],
-    "eleven thumbnails under their rows",
+    "twelve thumbnails under their rows",
   );
   assert.match(
     html,
@@ -141,23 +148,23 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
 test("the back matter rows turn (#497): the page on the stage inks its row alone, and no thumbnail rides the last three rows", () => {
   const html = contentsRows({ ...DATA, here: "gazetteer" });
   const li = rows(html);
-  assert.match(li[10]!, /^<li class="on">/, "the gazetteer's row is on while its page is on the sheet");
-  assert.match(li[10]!, /<button class="turn here" type="button" data-plate="gazetteer">The gazetteer<\/button>/);
+  assert.match(li[11]!, /^<li class="on">/, "the gazetteer's row is on while its page is on the sheet");
+  assert.match(li[11]!, /<button class="turn here" type="button" data-plate="gazetteer">The gazetteer<\/button>/);
   assert.equal((html.match(/class="turn here"/g) ?? []).length, 1, "one inked turn");
   assert.equal((html.match(/class="here"/g) ?? []).length, 0, "no thumbnail to ink (the #497 ruling)");
-  assert.match(li[8]!, /^<li>/, "the other matter rows are not on");
-  assert.doesNotMatch(li[8]! + li[9]! + li[10], /class="plates"|class="thumb"/);
+  assert.match(li[9]!, /^<li>/, "the other matter rows are not on");
+  assert.doesNotMatch(li[9]! + li[10]! + li[11], /class="plates"|class="thumb"/);
 });
 
-test("a matter section without content offers no turn: no arms and no history leave rows ix and x as counts alone; the gazetteer always turns", () => {
+test("a matter section without content offers no turn: no arms and no history leave rows x and xi as counts alone; the gazetteer always turns", () => {
   const html = contentsRows({ ...DATA, counts: { arms: 0, entries: 0, places: 0 }, here: null });
   const li = rows(html);
-  assert.doesNotMatch(li[8]!, /<button/);
   assert.doesNotMatch(li[9]!, /<button/);
-  assert.match(li[8]!, /The banners of every realm <span class="n">&middot; 0 arms<\/span>/);
-  assert.match(li[9]!, /The chronicle <span class="n">&middot; 0 entries<\/span>/);
+  assert.doesNotMatch(li[10]!, /<button/);
+  assert.match(li[9]!, /The banners of every realm <span class="n">&middot; 0 arms<\/span>/);
+  assert.match(li[10]!, /The chronicle <span class="n">&middot; 0 entries<\/span>/);
   assert.match(
-    li[10]!,
+    li[11]!,
     /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 0 places<\/span>/,
     "the gazetteer's table stands even with nothing in it",
   );
@@ -167,12 +174,19 @@ test("every value the host hands in is escaped: a title with markup stays text, 
   const html = contentsRows({
     ...DATA,
     regions: [{ key: "region-1", title: `The Environs of <script>`, href: `x" onerror="alert(1)` }],
+    ribbons: [{ key: "ribbon-capital", title: "The Road from <script> to X", href: "y" }],
     here: null,
   });
   assert.doesNotMatch(html, /<script>/);
   assert.doesNotMatch(html, /onerror="/);
   assert.match(html, /<em>The Environs of &lt;script&gt;<\/em>/);
   assert.doesNotMatch(html, /class="here"/, "nothing inked when nothing is on the sheet");
+});
+
+test("#433 a world whose capital has no road says so on the road's row and offers no turn", () => {
+  const li = rows(contentsRows({ ...DATA, ribbons: [], here: null }));
+  assert.match(li[8]!, /The road from the capital: none for this world/);
+  assert.doesNotMatch(li[8]!, /<button|class="plates"/);
 });
 
 test("the counts read the atlas's own html: banner figures, chronicle entries, gazetteer rows less the head", () => {
@@ -231,6 +245,10 @@ test("the folio's plate line names the plate by its row's numeral and reads the 
   assert.equal(
     plateLine("prospect", "The Prospect of Laukuwelua"),
     "plate viii of the bound atlas · the prospect of Laukuwelua",
+  );
+  assert.equal(
+    plateLine("ribbon", "The Road from Laukuwelua to Homaitani"),
+    "plate ix of the bound atlas · the road from Laukuwelua to Homaitani",
   );
   assert.throws(
     () => numeralOf(NUMERALS.length),

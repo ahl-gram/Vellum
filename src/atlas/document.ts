@@ -3,7 +3,7 @@ import { escapeXml } from "../render/svg.ts";
 import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
-export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect";
+export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect" | "ribbon";
 
 // Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts` produces; no `world` on purpose, since the worker strips it (Fields are not structured-cloneable).
 export type AtlasDocumentData = {
@@ -15,6 +15,7 @@ export type AtlasDocumentData = {
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
   readonly prospects: ReadonlyArray<AtlasPlate>;
+  readonly ribbons: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;
@@ -207,6 +208,16 @@ ${prospects}
 </section>
 
 `;
+  const ribbons = data.ribbons.map((p) => fig(p, "ribbon")).join("\n");
+  const ribbonSection =
+    data.ribbons.length === 0
+      ? ""
+      : `<section>
+<h2>The Road from the Capital</h2>
+${ribbons}
+</section>
+
+`;
 
   return `${fig(data.hero, "hero")}
 
@@ -229,7 +240,7 @@ ${themes}
 ${regions}
 </section>
 
-${prospectSection}`;
+${prospectSection}${ribbonSection}`;
 }
 
 /** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /shared/fonts.css and /shared/motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */

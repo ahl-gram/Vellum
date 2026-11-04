@@ -11,11 +11,12 @@ export const SECTION_ROW: Record<PlateSection, number> = {
   theme: FIRST_THEME,
   region: FIRST_THEME + THEMATIC.length,
   prospect: FIRST_THEME + THEMATIC.length + 1,
+  ribbon: FIRST_THEME + THEMATIC.length + 2,
 };
 export const MATTER_ROW = {
-  banners: SECTION_ROW.prospect + 1,
-  chronicle: SECTION_ROW.prospect + 2,
-  gazetteer: SECTION_ROW.prospect + 3,
+  banners: SECTION_ROW.ribbon + 1,
+  chronicle: SECTION_ROW.ribbon + 2,
+  gazetteer: SECTION_ROW.ribbon + 3,
 } as const;
 
 export const plateRow = (section: PlateSection, ordinal = 0): number =>

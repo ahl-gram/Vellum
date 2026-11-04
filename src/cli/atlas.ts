@@ -30,6 +30,9 @@ export async function buildAtlas(
   for (const p of atlas.prospects) {
     await writeFile(join(dir, atlasPlateFilename(p, "prospect")), p.svg, "utf8");
   }
+  for (const r of atlas.ribbons) {
+    await writeFile(join(dir, atlasPlateFilename(r, "ribbon")), r.svg, "utf8");
+  }
 
   const data: AtlasDocumentData = {
     title: world.title.title,
@@ -40,6 +43,7 @@ export async function buildAtlas(
     themes: atlas.themes,
     regions: atlas.regions,
     prospects: atlas.prospects,
+    ribbons: atlas.ribbons,
     bannersHtml: atlas.bannersHtml,
     chronicleHtml: atlas.chronicleHtml,
     gazetteerHtml: atlas.gazetteerHtml,

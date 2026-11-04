@@ -30,6 +30,7 @@ const atlasCss = (): string => {
     themes: [],
     regions: [],
     prospects: [],
+    ribbons: [],
     bannersHtml: "",
     chronicleHtml: "",
     gazetteerHtml: "",

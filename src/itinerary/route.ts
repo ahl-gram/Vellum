@@ -57,3 +57,34 @@ export function roadReachable(world: World, mask: Uint8Array, fromIdx: number): 
     .filter((e) => e.i !== fromIdx && seen[e.cell] === 1)
     .map((e) => e.i);
 }
+
+export function farthestReachable(
+  world: World,
+  mask: Uint8Array,
+  from: number,
+  reachable: ReadonlyArray<number>,
+): number | null {
+  let best: number | null = null;
+  let bestLen = -1;
+  for (const i of reachable) {
+    const chain = roadWalk(world, mask, from, i);
+    if (chain && chain.length > bestLen) {
+      bestLen = chain.length;
+      best = i;
+    }
+  }
+  return best;
+}
+
+export interface Journey {
+  readonly fromIdx: number;
+  readonly toIdx: number;
+}
+
+export function defaultJourney(world: World): Journey | null {
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  if (capital < 0) return null;
+  const mask = roadMask(world);
+  const best = farthestReachable(world, mask, capital, roadReachable(world, mask, capital));
+  return best === null ? null : { fromIdx: capital, toIdx: best };
+}

@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { buildAtlas } from "../../src/cli/atlas.ts";
@@ -122,6 +123,23 @@ test("the atlas joins the motion folio: links /shared/motion.css and its figures
       /<figure><a href="world-antique\.svg"><img/,
       "and the plate the lift fires on must be the link that earns it",
     );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("#433 the atlas carries the road from the capital, its plate written beside the others", async () => {
+  const dir = "out/test-atlas-road";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(42, { out: dir });
+    assert.ok(existsSync(join(dir, "ribbon-capital.svg")), "the road's plate is written beside the others");
+    const svg = await readFile(join(dir, "ribbon-capital.svg"), "utf8");
+    assert.match(svg, /^<svg/);
+    assert.match(svg, /viewBox="0 0 1060 740"/);
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    assert.match(html, /<h2>The Road from the Capital<\/h2>/);
+    assert.match(html, /<figure><a href="ribbon-capital\.svg"><img src="ribbon-capital\.svg"/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

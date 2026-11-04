@@ -97,6 +97,7 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
     themes: [plate],
     regions: [plate],
     prospects: [plate],
+    ribbons: [plate],
     bannersHtml: "",
     chronicleHtml: "",
     gazetteerHtml: "",

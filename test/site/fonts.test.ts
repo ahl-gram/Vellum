@@ -112,6 +112,7 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
     themes: [{ key: "theme-vegetation", title: "Vegetation", svg: "<svg></svg>" }],
     regions: [{ key: "region-1", title: "Environs", svg: "<svg></svg>" }],
     prospects: [{ key: "prospect-capital", title: "The Prospect of Café", svg: "<svg></svg>" }],
+    ribbons: [{ key: "ribbon-capital", title: "The Road from Café to Brie", svg: "<svg></svg>" }],
     bannersHtml: "<section></section>",
     chronicleHtml: "<section></section>",
     gazetteerHtml: "<section></section>",

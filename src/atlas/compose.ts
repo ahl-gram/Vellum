@@ -1,4 +1,6 @@
 import { createRng } from "../core/rng.ts";
+import { ribbonPlate } from "../itinerary/finished.ts";
+import { defaultJourney } from "../itinerary/route.ts";
 import { plateDressFor } from "../prospect/dress/context.ts";
 import { prospectPlate } from "../prospect/finished.ts";
 import { renderMap } from "../render/map-renderer.ts";
@@ -25,6 +27,7 @@ export type AtlasComposition = {
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
   readonly prospects: ReadonlyArray<AtlasPlate>;
+  readonly ribbons: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;
@@ -171,6 +174,20 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb
   ];
 }
 
+export function ribbonPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
+  const journey = defaultJourney(world);
+  if (journey === null) return [];
+  const svg = ribbonPlate(world, journey.fromIdx, journey.toIdx, plateDressFor(bannerStyle));
+  if (svg === null) return [];
+  return [
+    {
+      key: "ribbon-capital",
+      title: `The Road from ${world.settlements[journey.fromIdx]!.name} to ${world.settlements[journey.toIdx]!.name}`,
+      svg,
+    },
+  ];
+}
+
 export function composeAtlas(world: World, opts: { width?: number; bannerStyle?: StyleName } = {}): AtlasComposition {
   const width = opts.width ?? 1500;
   const bannerStyle = opts.bannerStyle ?? "antique";
@@ -208,6 +225,7 @@ export function composeAtlas(world: World, opts: { width?: number; bannerStyle?:
     themes,
     regions: regionPlates(world, width),
     prospects: prospectPlates(world, bannerStyle, width),
+    ribbons: ribbonPlates(world, bannerStyle),
     bannersHtml: bannersHtml(world, bannerStyle),
     chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),
