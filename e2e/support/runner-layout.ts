@@ -12,8 +12,8 @@ export const RUNNER_NUMERO_FAMILY = "IM Fell English SC";
 export const RUNNER_SELECTS: readonly RunnerSelect[] = [
   // 2026-10-24: 5 px shorter on the runner than the Mac harness browser's 34.21875, read as PR38's reserve 1 px under the Mac's, its select beside an input, RB12's 5 px under, two selects alone, and the fingerprint's own select, 29.22 px on the runner (CI run 40142127745).
   { selector: ".folio-controls select.control", px: 29.21875 },
-  // 2026-10-24: 4 px shorter on the runner than the Mac harness browser's 27.375, read as PR37's Press row 145.90625 px tall against the Mac's 149.90625.
-  { selector: ".legend-head select", px: 23.375 },
+  // 2026-11-04: 5 px shorter on the runner than the Mac harness browser's 30.375 at the 16px floor, read as PR37's Press row 147.90625 px tall against the Mac's 152.90625 (CI run 41782115623).
+  { selector: ".legend-head select", px: 25.375 },
 ];
 
 export function runnerLayoutCss(family: string, selects: readonly RunnerSelect[]): string {
