@@ -1,4 +1,6 @@
 import { createRng } from "../core/rng.ts";
+import { ribbonPlate } from "../itinerary/finished.ts";
+import { defaultJourney } from "../itinerary/route.ts";
 import { plateDressFor } from "../prospect/dress/context.ts";
 import { prospectPlate } from "../prospect/finished.ts";
 import { renderMap } from "../render/map-renderer.ts";
@@ -172,8 +174,18 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb
   ];
 }
 
-export function ribbonPlates(_world: World, _bannerStyle: StyleName): AtlasPlate[] {
-  return [{ key: "ribbon-capital", title: "The Road", svg: "<svg/>" }];
+export function ribbonPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
+  const journey = defaultJourney(world);
+  if (journey === null) return [];
+  const svg = ribbonPlate(world, journey.fromIdx, journey.toIdx, plateDressFor(bannerStyle));
+  if (svg === null) return [];
+  return [
+    {
+      key: "ribbon-capital",
+      title: `The Road from ${world.settlements[journey.fromIdx]!.name} to ${world.settlements[journey.toIdx]!.name}`,
+      svg,
+    },
+  ];
 }
 
 export function composeAtlas(world: World, opts: { width?: number; bannerStyle?: StyleName } = {}): AtlasComposition {
