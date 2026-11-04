@@ -5,7 +5,9 @@ import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import type { RibbonInput } from "../input.ts";
 import { tierTag } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
-import { stripPos, type StripLayout } from "./layout.ts";
+import { freeSideOf, stripPos, type StripLayout } from "./layout.ts";
+import { fifthNumeral, leaguesOn, PAINTED_ROAD_HALF, ROAD_HALF, townSpanEnds } from "./road.ts";
+import { summitMountain } from "./glyphs.ts";
 import type { RibbonContext } from "./context.ts";
 import type { StripBody } from "./cloth.ts";
 import { seatCaption, type Seat, type SeatKeep, type SeatLine, type SeatRoom, type SeatWant } from "./seats.ts";
@@ -14,7 +16,6 @@ import { seatCaption, type Seat, type SeatKeep, type SeatLine, type SeatRoom, ty
 export const CAPTION_EDGE = 9;
 
 const REWRAPPED: ReadonlySet<RibbonEvent["kind"]> = new Set(["crossing", "summit", "border", "forest"]);
-const CASING_HALF = { painted: 4.2, plain: 2.3 };
 const CLUSTER_BOX: Record<string, Box> = {
   capital: { x: -11.5, y: -11.6, w: 23, h: 14.8 },
   town: { x: -9, y: -9.6, w: 18.7, h: 11.1 },
@@ -91,13 +92,10 @@ export function captionRoom(c: RibbonContext, strip: StripLayout, body: StripBod
 }
 
 function townSpans(input: RibbonInput, strip: StripLayout, half: number): SeatKeep["lines"] {
-  const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
   return input.events.flatMap((e) => {
-    if (e.kind !== "waypoint" || e.dist < strip.d0 - 0.75 || e.dist > strip.d1 + 0.75) return [];
-    const a = stripPos(strip, Math.max(strip.d0, e.dist - solidSpan));
-    const b = stripPos(strip, Math.min(strip.d1, e.dist + solidSpan));
-    const len = Math.hypot(b.sx - a.sx, b.sy - a.sy);
-    if (len < 2) return [];
+    const span = e.kind === "waypoint" ? townSpanEnds(strip, e.dist) : null;
+    if (span === null) return [];
+    const { a, b, len } = span;
     return [-half, half].map((off) => {
       const nx = (-(b.sy - a.sy) / len) * off;
       const ny = ((b.sx - a.sx) / len) * off;
@@ -112,22 +110,16 @@ function townSpans(input: RibbonInput, strip: StripLayout, half: number): SeatKe
   });
 }
 
-function leagues(strip: StripLayout): number[] {
-  const first = Math.max(1, Math.ceil(strip.d0 / CELLS_PER_LEAGUE));
-  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
-  return Array.from({ length: Math.max(0, last - first + 1) }, (_, i) => first + i);
-}
-
 function leagueKeep(c: RibbonContext, strip: StripLayout): Pick<SeatKeep, "boxes" | "discs"> {
-  const discs = leagues(strip).map((l) => {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
-    return { x: p.sx, y: p.sy, r: c.paint !== null ? (l >= 100 ? 5.6 : 4.1) : 1.9 };
-  });
-  const fives = c.paint !== null ? [] : leagues(strip).filter((l) => l % 5 === 0);
-  const boxes = fives.map((l) => {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
-    return textBox(p.sx + 5.5, p.sy + 2.4, String(l), 7, "start", WIDTH_FACTOR.mixed);
-  });
+  const marks = leaguesOn(strip);
+  const discs = marks.map(({ l, p }) => ({ x: p.sx, y: p.sy, r: c.paint !== null ? (l >= 100 ? 5.6 : 4.1) : 1.9 }));
+  const boxes =
+    c.paint !== null
+      ? []
+      : marks.flatMap(({ l, p }) => {
+          const n = fifthNumeral(p, l);
+          return n === null ? [] : [textBox(n.x, n.y, n.text, n.size, "start", WIDTH_FACTOR.mixed)];
+        });
   return { boxes, discs };
 }
 
@@ -146,8 +138,7 @@ function eventKeep(input: RibbonInput, strip: StripLayout): Pick<SeatKeep, "boxe
         clear: 1.5,
       });
     } else if (e.kind === "summit") {
-      const freeSide = p.sx > strip.x0 + strip.w / 2 ? -1 : 1;
-      boxes.push({ x: p.sx + freeSide * 27 - 9.5, y: p.sy + 4 - 12.6, w: 19, h: 12.6 });
+      boxes.push(summitMountain(p, freeSideOf(strip, p.sx)).box);
     } else if (e.kind === "crossing") boxes.push({ x: p.sx - 7.5, y: p.sy - 5.5, w: 15, h: 11 });
   }
   return { boxes, lines };
@@ -161,7 +152,7 @@ export function captionKeep(
   isLast: boolean,
 ): SeatKeep {
   const painted = c.paint !== null;
-  const half = painted ? CASING_HALF.painted : CASING_HALF.plain;
+  const half = painted ? PAINTED_ROAD_HALF : ROAD_HALF;
   const t = (strip.needleDeg * Math.PI) / 180;
   const markReach = painted ? 20.5 : 17;
   const markRadius = painted ? 5 : 4.5;

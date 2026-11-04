@@ -5,6 +5,7 @@ import { layoutRibbon, stripPos, type StripLayout } from "../../src/itinerary/dr
 import { stripBody } from "../../src/itinerary/dress/cloth.ts";
 import { textBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
 import { STYLES } from "../../src/render/style.ts";
+import { PAINTED_ROAD_HALF, ROAD_HALF } from "../../src/itinerary/dress/road.ts";
 import { r1 } from "../../src/prospect/dress/context.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import type { RibbonInput } from "../../src/itinerary/input.ts";
@@ -132,14 +133,14 @@ test("every caption sits inside its own strip, nine inside its edge, on any jour
   }
 });
 
-// The houses' extents around (x, y - 1) by tier; the road's clearance is the casing's half-width plus 0.55 (the casing dot's half stroke) less 0.25, the most the keep's half-unit samples can miss a box by.
+// The houses' extents around (x, y - 1) by tier; the road's clearance is the casing's half-width, the road's own (Issue #1218), plus 0.55 (the casing dot's half stroke) less 0.25, the most the keep's half-unit samples can miss a box by.
 const HOUSES: Record<string, readonly number[]> = {
   capital: [-11.5, 11.5, -11.6, 3.2],
   town: [-9, 9.7, -9.6, 1.5],
   village: [-6.7, 6.6, -5.4, 0.5],
   hamlet: [-2.6, 2.6, -5.1, 0],
 };
-const ROAD_CLEAR = { antique: 4.2 + 0.55 - 0.25, ink: 2.3 + 0.55 - 0.25 };
+const ROAD_CLEAR = { antique: PAINTED_ROAD_HALF + 0.55 - 0.25, ink: ROAD_HALF + 0.55 - 0.25 };
 const ROSE_R = { antique: 15.45, ink: 13.85 };
 
 const overlaps = (a: Box, b: Box): boolean => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
