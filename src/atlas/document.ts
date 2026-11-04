@@ -3,7 +3,7 @@ import { escapeXml } from "../render/svg.ts";
 import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
-export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect";
+export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect" | "ribbon";
 
 // Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts` produces; no `world` on purpose, since the worker strips it (Fields are not structured-cloneable).
 export type AtlasDocumentData = {
@@ -15,6 +15,7 @@ export type AtlasDocumentData = {
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
   readonly prospects: ReadonlyArray<AtlasPlate>;
+  readonly ribbons: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;

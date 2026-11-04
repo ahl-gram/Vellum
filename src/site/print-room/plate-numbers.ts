@@ -11,6 +11,7 @@ export const SECTION_ROW: Record<PlateSection, number> = {
   theme: FIRST_THEME,
   region: FIRST_THEME + THEMATIC.length,
   prospect: FIRST_THEME + THEMATIC.length + 1,
+  ribbon: FIRST_THEME + THEMATIC.length + 2,
 };
 export const MATTER_ROW = {
   banners: SECTION_ROW.prospect + 1,

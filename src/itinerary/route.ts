@@ -57,3 +57,17 @@ export function roadReachable(world: World, mask: Uint8Array, fromIdx: number): 
     .filter((e) => e.i !== fromIdx && seen[e.cell] === 1)
     .map((e) => e.i);
 }
+
+export interface Journey {
+  readonly fromIdx: number;
+  readonly toIdx: number;
+}
+
+export function defaultJourney(world: World): Journey | null {
+  const capital = Math.max(
+    0,
+    world.settlements.findIndex((s) => s.kind === "capital"),
+  );
+  const reach = roadReachable(world, roadMask(world), capital);
+  return { fromIdx: capital, toIdx: reach[0] ?? capital };
+}

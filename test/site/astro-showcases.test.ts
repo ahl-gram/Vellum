@@ -48,10 +48,11 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
   assert.equal(
     atlasSvgs.length,
-    11,
-    "atlas should hold 11 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412)",
+    12,
+    "atlas should hold 12 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412, + the road from the capital, #433)",
   );
   assert.ok(atlasSvgs.includes("prospect-capital.svg"), "the capital's prospect plate is written (#412)");
+  assert.ok(atlasSvgs.includes("ribbon-capital.svg"), "the road from the capital is written (#433)");
   assert.ok(
     atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),
     "the atlas must be the seed-42 hero world's bound volume",

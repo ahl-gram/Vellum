@@ -107,6 +107,7 @@ function renderContents(): void {
     themes: refs(lastAtlas.themes),
     regions: refs(lastAtlas.regions),
     prospects: refs(lastAtlas.prospects),
+    ribbons: [],
     counts: plateCounts(lastAtlas),
     here,
   });

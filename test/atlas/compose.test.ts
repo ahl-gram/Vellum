@@ -1,8 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { composeAtlas, prospectPlates } from "../../src/atlas/compose.ts";
+import { composeAtlas, prospectPlates, ribbonPlates } from "../../src/atlas/compose.ts";
+import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { STYLES } from "../../src/render/style.ts";
+import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 test("composeAtlas yields the hero, the other draughtings, and the surveys", () => {
@@ -31,6 +34,8 @@ test("composeAtlas yields the hero, the other draughtings, and the surveys", () 
     assert.match(r.title, /^The Environs of /);
     assert.match(r.svg, /^<svg/);
   }
+
+  assert.deepEqual(atlas.ribbons, ribbonPlates(world, "antique"));
 });
 
 test("the gazetteer fragment has one row per settlement", () => {
@@ -136,6 +141,27 @@ test("#412 the composer reads the world's own present year, not a fixed one", ()
   );
 });
 
+test("#433 the atlas carries the road from the capital: the Ribbon's own plate for its bare-visit journey, at its own 1060 by 740", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const plates = ribbonPlates(world, "antique");
+  const res = ribbonResultFor(world, { from: null, to: null, dress: "antique" });
+
+  assert.equal(plates.length, 1);
+  assert.equal(plates[0]!.key, "ribbon-capital");
+  assert.equal(plates[0]!.title, `The Road from ${res.fromName} to ${res.toName}`);
+  assert.equal(plates[0]!.svg, res.svg);
+  assert.equal(plateAspect(plates[0]!.svg), RIBBON_W / RIBBON_H);
+});
+
+test("#433 the road takes the proof's dress folded to the plate's two: an ink proof draws the plain impression, a nautical one the painted", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const res = (dress: "ink" | "antique") => ribbonResultFor(world, { from: null, to: null, dress }).svg;
+  assert.notEqual(res("ink"), res("antique"), "premise: the two impressions differ, or this pin proves nothing");
+
+  assert.equal(ribbonPlates(world, "ink")[0]!.svg, res("ink"));
+  assert.equal(ribbonPlates(world, "nautical")[0]!.svg, res("antique"));
+});
+
 test("composeAtlas is deterministic for a seed", () => {
   const a = composeAtlas(generateWorld(defaultRecipe(7)));
   const b = composeAtlas(generateWorld(defaultRecipe(7)));
@@ -145,6 +171,7 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.deepEqual(a.themes, b.themes);
   assert.deepEqual(a.regions, b.regions);
   assert.deepEqual(a.prospects, b.prospects);
+  assert.deepEqual(a.ribbons, b.ribbons);
   assert.equal(a.gazetteerHtml, b.gazetteerHtml);
   assert.equal(a.bannersHtml, b.bannersHtml);
   assert.equal(a.chronicleHtml, b.chronicleHtml);

@@ -24,6 +24,7 @@ export interface ContentsData {
   readonly themes: readonly PlateRef[];
   readonly regions: readonly PlateRef[];
   readonly prospects: readonly PlateRef[];
+  readonly ribbons: readonly PlateRef[];
   readonly counts: ContentsCounts;
   readonly here: string | null;
 }
@@ -133,6 +134,7 @@ export function plateLine(section: PlateSection, title: string, ordinal = 0): st
     theme: `a thematic survey of ${title.toLowerCase()}`,
     region: `a regional survey, ${lowerNoun(title)}`,
     prospect: lowerNoun(title),
+    ribbon: "",
   };
   return `plate ${numeralOf(plateRow(section, ordinal))} of the bound atlas · ${what[section]}`;
 }

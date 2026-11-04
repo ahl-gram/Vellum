@@ -25,6 +25,7 @@ export type AtlasComposition = {
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
   readonly prospects: ReadonlyArray<AtlasPlate>;
+  readonly ribbons: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;
@@ -171,6 +172,10 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb
   ];
 }
 
+export function ribbonPlates(_world: World, _bannerStyle: StyleName): AtlasPlate[] {
+  return [{ key: "ribbon-capital", title: "The Road", svg: "<svg/>" }];
+}
+
 export function composeAtlas(world: World, opts: { width?: number; bannerStyle?: StyleName } = {}): AtlasComposition {
   const width = opts.width ?? 1500;
   const bannerStyle = opts.bannerStyle ?? "antique";
@@ -208,6 +213,7 @@ export function composeAtlas(world: World, opts: { width?: number; bannerStyle?:
     themes,
     regions: regionPlates(world, width),
     prospects: prospectPlates(world, bannerStyle, width),
+    ribbons: ribbonPlates(world, bannerStyle),
     bannersHtml: bannersHtml(world, bannerStyle),
     chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),

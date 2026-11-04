@@ -40,6 +40,7 @@ export async function buildAtlas(
     themes: atlas.themes,
     regions: atlas.regions,
     prospects: atlas.prospects,
+    ribbons: atlas.ribbons,
     bannersHtml: atlas.bannersHtml,
     chronicleHtml: atlas.chronicleHtml,
     gazetteerHtml: atlas.gazetteerHtml,
