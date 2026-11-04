@@ -312,14 +312,18 @@ function forestLabelNodes(ctx: RenderCtx): SvgNode[] {
   }));
   const c = centroidOf(pts);
   const fs = 12.5 * k;
-  const placedY = offsetCandidates(c.y, k).find((cy) => labels.tryClaim(textBox(c.x, cy, forest, fs, "middle"), 4));
-  if (placedY === undefined) return [];
+  const candidates: Pt[] = [
+    ...offsetCandidates(c.y, k).map((cy) => ({ x: c.x, y: cy })),
+    ...interiorProbes(blob, w, proj, c),
+  ];
+  const placed = candidates.find((p) => labels.tryClaim(textBox(p.x, p.y, forest, fs, "middle"), 4));
+  if (placed === undefined) return [];
   return [
     el(
       "text",
       {
-        x: c.x,
-        y: placedY,
+        x: placed.x,
+        y: placed.y,
         "text-anchor": "middle",
         "font-family": style.fontFamily,
         "font-size": fs.toFixed(1),
