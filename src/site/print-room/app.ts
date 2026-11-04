@@ -75,21 +75,21 @@ const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? turnedAs
 const face: SheetFace = {
   showProof: () => {
     showProof(furniture);
+    sheetShows("poster");
     sheet.rebase();
     sheet.room.layout();
-    sheetShows("poster");
   },
   showPlate: (plate) => {
     showPlate(furniture, plate);
+    sheetShows(plate.section === "ribbon" ? "road" : "poster");
     sheet.rebase();
     sheet.room.layout();
-    sheetShows(plate.section === "ribbon" ? "road" : "poster");
   },
   showMatter: (matter) => {
     showMatter(furniture, matter);
+    sheetShows("poster");
     sheet.rebase();
     sheet.room.layout();
-    sheetShows("poster");
   },
 };
 
