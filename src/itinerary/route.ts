@@ -64,10 +64,17 @@ export interface Journey {
 }
 
 export function defaultJourney(world: World): Journey | null {
-  const capital = Math.max(
-    0,
-    world.settlements.findIndex((s) => s.kind === "capital"),
-  );
-  const reach = roadReachable(world, roadMask(world), capital);
-  return { fromIdx: capital, toIdx: reach[0] ?? capital };
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  if (capital < 0) return null;
+  const mask = roadMask(world);
+  let best: number | null = null;
+  let bestLen = -1;
+  for (const i of roadReachable(world, mask, capital)) {
+    const chain = roadWalk(world, mask, capital, i);
+    if (chain && chain.length > bestLen) {
+      bestLen = chain.length;
+      best = i;
+    }
+  }
+  return best === null ? null : { fromIdx: capital, toIdx: best };
 }
