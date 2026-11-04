@@ -1,4 +1,4 @@
-// Poster plate presets for the Print Room: the same world as the on-screen proof, rendered wider, delivered as a download. Pure and DOM-free; app.ts does the worker and download wiring.
+// Poster plate presets for the Print Room: the same world as the on-screen proof, rendered wider, delivered as a download. Pure and DOM-free; src/site/print-room/order-counter.ts does the worker and download wiring.
 
 export interface PosterPreset {
   key: string;
