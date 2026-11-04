@@ -7,6 +7,7 @@ import {
   caveatTail,
   pressesFor,
   pressingLabel,
+  pressVerb,
   roadAtWidth,
   roadChoice,
   roadFilename,
@@ -50,6 +51,7 @@ test("the road's four presses are Ribbon 1060, Desk 2400, Wall 3300 and Grand 42
   assert.equal(pressesFor("road").length, 4);
   assert.equal(pressesFor("poster").length, 4);
   assert.ok(!POSTER_PRESETS.some((p) => p.key === "ribbon"));
+  assert.deepEqual(pressesFor("road").map(pressVerb), ["1060 px", "2400 px", "3300 px", "4200 px"]);
 });
 
 test("roadAtWidth leaves the plate byte for byte at its own 1060 and rewrites only the root's width and height above it", () => {
@@ -96,6 +98,12 @@ test("roadOnOffer offers the road only from a capital the roads leave, the atlas
   );
   assert.throws(() => ribbonResultFor(w1, bare), /no road leaves this place/);
   assert.equal(defaultJourney(w1), null);
+
+  // The seed-42 capital is settlement 0, so only a departure away from index 0 tells the departure's own kind from the first option's.
+  const kinds = (...k: string[]) => k.map((kind) => ({ kind }));
+  assert.equal(roadOnOffer({ fromIdx: 1, options: kinds("town", "capital") }), true);
+  assert.equal(roadOnOffer({ fromIdx: 0, options: kinds("capital", "town") }), true);
+  assert.equal(roadOnOffer({ fromIdx: 1, options: kinds("capital", "town") }), false);
 });
 
 test("the head's road option opens once the road is drawn, stays closed while the answer is out, and says why when the capital has none", () => {
