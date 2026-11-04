@@ -195,26 +195,63 @@ function orderShape(preset: Readonly<PosterPreset>): { isChart: boolean; format:
   return { isChart, format, width };
 }
 
-function pullSvg(
+interface Impression {
+  readonly svg: string;
+  readonly filename: string;
+  readonly pulled: string;
+  readonly pngFilename: (outWidth: number) => string;
+  readonly label: string;
+  readonly width: number;
+  readonly seed: number;
+  readonly style: StyleName;
+}
+
+function posterImpression(
   res: Readonly<DrawResult>,
   basis: Readonly<PosterBasis>,
+  preset: Readonly<PosterPreset>,
   isChart: boolean,
   width: number,
-  preset: Readonly<PosterPreset>,
-): void {
+): Impression {
   // The chart reuses the Explorer's exact artifact name (byte-parity by construction: same worker, same draw kind, same widthPx); the posters keep width-stamped names.
   const filename = isChart
     ? chartFilename(basis.seed, basis.style, res.title)
     : posterFilename(basis.seed, basis.style, width);
-  downloadSvg(res.svg, filename);
-  window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
-  posterStatus.textContent = isChart
-    ? `The chart is pulled as the engraving: ${filename}`
-    : `${preset.label} plate pulled: ${filename}`;
+  return {
+    svg: res.svg,
+    filename,
+    pulled: isChart ? `The chart is pulled as the engraving: ${filename}` : `${preset.label} plate pulled: ${filename}`,
+    pngFilename: (outWidth) => posterPngFilename(basis.seed, basis.style, outWidth),
+    label: preset.label,
+    width,
+    seed: basis.seed,
+    style: basis.style,
+  };
 }
 
-function pressPng(png: Readonly<RasterizeResult>, basis: Readonly<PosterBasis>, preset: Readonly<PosterPreset>): void {
-  const filename = posterPngFilename(basis.seed, basis.style, png.width);
+function roadImpression(held: Road, preset: Readonly<PosterPreset>): Impression {
+  const filename = roadFilename(held.seed, held.dress, preset.width);
+  return {
+    svg: roadAtWidth(held.svg, preset.width),
+    filename,
+    pulled: `${preset.label} plate pulled: ${filename}`,
+    pngFilename: (outWidth) => roadPngFilename(held.seed, held.dress, outWidth),
+    label: preset.label,
+    width: preset.width,
+    seed: held.seed,
+    style: held.dress,
+  };
+}
+
+function pullImpression(imp: Impression): void {
+  const { svg, filename } = imp;
+  downloadSvg(svg, filename);
+  window.__vellumLastPoster = { svg, filename, width: imp.width, seed: imp.seed, style: imp.style };
+  posterStatus.textContent = imp.pulled;
+}
+
+function pressImpression(png: Readonly<RasterizeResult>, imp: Impression): void {
+  const filename = imp.pngFilename(png.width);
   downloadBlob(png.blob, filename);
   window.__vellumLastPng = {
     filename,
@@ -224,18 +261,50 @@ function pressPng(png: Readonly<RasterizeResult>, basis: Readonly<PosterBasis>, 
     height: png.height,
     scale: png.scale,
     clamped: png.clamped,
-    seed: basis.seed,
-    style: basis.style,
+    seed: imp.seed,
+    style: imp.style,
   };
   posterStatus.textContent = png.clamped
-    ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
-    : `${preset.label} plate pressed: ${filename}`;
+    ? `${imp.label} plate pressed at reduced resolution to fit this browser: ${filename}`
+    : `${imp.label} plate pressed: ${filename}`;
 }
 
 function orderSettled(): void {
   // Re-open ONLY if no draw is now in flight; a redraw started while this order rolled must keep the plates closed until its own proof settles.
   ordering = false;
   refreshOrderControls();
+}
+
+function runOrder(width: number, format: string, impression: () => Promise<Impression>): void {
+  const myGen = ++posterGen;
+  ordering = true;
+  refreshOrderControls();
+  posterStatus.textContent = `The press is rolling at ${width}px…`;
+  impression()
+    .then(async (imp) => {
+      if (myGen !== posterGen) return;
+      if (format === "svg") {
+        pullImpression(imp);
+        return;
+      }
+      // PNG: rasterized client-side off a blob-URL Image, still never entering the DOM; failures reject with an in-voice full sentence, shown directly.
+      const scale = format === "png2" ? 2 : 1;
+      let png;
+      try {
+        png = await rasterizeSvg(imp.svg, { scale });
+      } catch (err) {
+        if (myGen !== posterGen) return;
+        posterStatus.textContent = errorText(err);
+        return;
+      }
+      if (myGen !== posterGen) return; // a newer order landed while rasterizing
+      pressImpression(png, imp);
+    })
+    .catch((err: unknown) => {
+      if (myGen !== posterGen) return;
+      posterStatus.textContent = "The press jammed: " + errorText(err);
+    })
+    .finally(() => orderSettled());
 }
 
 function orderPoster(key: string): void {
@@ -245,109 +314,31 @@ function orderPoster(key: string): void {
   // Snapshot synchronously: the preview controls stay live during a render, so a style change could redraw and reassign posterBasis mid-flight.
   const basis = host.basis()!;
   const { isChart, format, width } = orderShape(preset);
-  const myGen = ++posterGen;
-  ordering = true;
-  refreshOrderControls();
-  posterStatus.textContent = `The press is rolling at ${width}px…`;
-  runJob({
-    kind: "draw",
-    seed: basis.seed,
-    overrides: basis.overrides,
-    render: {
-      style: basis.style,
-      widthPx: width,
-      legend: basis.legend,
-      arms: basis.arms,
-      beasts: basis.beasts,
-      theme: basis.theme,
-    },
-  })
-    .then(async (res) => {
-      if (myGen !== posterGen) return;
-      if (format === "svg") {
-        pullSvg(res, basis, isChart, width, preset);
-        return;
-      }
-      // PNG: rasterized client-side off a blob-URL Image, still never entering the DOM; failures reject with an in-voice full sentence, shown directly.
-      const scale = format === "png2" ? 2 : 1;
-      let png;
-      try {
-        png = await rasterizeSvg(res.svg, { scale });
-      } catch (err) {
-        if (myGen !== posterGen) return;
-        posterStatus.textContent = errorText(err);
-        return;
-      }
-      if (myGen !== posterGen) return; // a newer order landed while rasterizing
-      pressPng(png, basis, preset);
-    })
-    .catch((err: unknown) => {
-      if (myGen !== posterGen) return;
-      posterStatus.textContent = "The press jammed: " + errorText(err);
-    })
-    .finally(() => orderSettled());
-}
-
-function pullRoad(svg: string, held: Road, preset: Readonly<PosterPreset>): void {
-  const filename = roadFilename(held.seed, held.dress, preset.width);
-  downloadSvg(svg, filename);
-  window.__vellumLastPoster = { svg, filename, width: preset.width, seed: held.seed, style: held.dress };
-  posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
-}
-
-function pressRoadPng(png: Readonly<RasterizeResult>, held: Road, preset: Readonly<PosterPreset>): void {
-  const filename = roadPngFilename(held.seed, held.dress, png.width);
-  downloadBlob(png.blob, filename);
-  window.__vellumLastPng = {
-    filename,
-    type: png.blob.type,
-    size: png.blob.size,
-    width: png.width,
-    height: png.height,
-    scale: png.scale,
-    clamped: png.clamped,
-    seed: held.seed,
-    style: held.dress,
-  };
-  posterStatus.textContent = png.clamped
-    ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
-    : `${preset.label} plate pressed: ${filename}`;
+  const impression = (): Promise<Impression> =>
+    runJob({
+      kind: "draw",
+      seed: basis.seed,
+      overrides: basis.overrides,
+      render: {
+        style: basis.style,
+        widthPx: width,
+        legend: basis.legend,
+        arms: basis.arms,
+        beasts: basis.beasts,
+        theme: basis.theme,
+      },
+    }).then((res) => posterImpression(res, basis, preset, isChart, width));
+  runOrder(width, format, impression);
 }
 
 function orderRoad(key: string): void {
   const preset = ROAD_PRESETS.find((p) => p.key === key);
   const held = road;
   if (!preset || !held || ordering || host.drawing() || !host.basis()) return;
+  const { width } = preset;
   const format = selectedFormat();
-  const myGen = ++posterGen;
-  ordering = true;
-  refreshOrderControls();
-  posterStatus.textContent = `The press is rolling at ${preset.width}px…`;
-  Promise.resolve()
-    .then(async () => {
-      const svg = roadAtWidth(held.svg, preset.width);
-      if (myGen !== posterGen) return;
-      if (format === "svg") {
-        pullRoad(svg, held, preset);
-        return;
-      }
-      const scale = format === "png2" ? 2 : 1;
-      let png;
-      try {
-        png = await rasterizeSvg(svg, { scale });
-      } catch (err) {
-        if (myGen !== posterGen) return;
-        posterStatus.textContent = errorText(err);
-        return;
-      }
-      if (myGen !== posterGen) return;
-      pressRoadPng(png, held, preset);
-    })
-    .catch((err: unknown) => {
-      if (myGen !== posterGen) return;
-      posterStatus.textContent = "The press jammed: " + errorText(err);
-    })
-    .finally(() => orderSettled());
+  const impression = (): Promise<Impression> => Promise.resolve().then(() => roadImpression(held, preset));
+  runOrder(width, format, impression);
 }
 
 function orderAt(key: string): void {
