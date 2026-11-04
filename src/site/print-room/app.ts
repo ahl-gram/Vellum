@@ -3,20 +3,14 @@ import { runJob, usesWorker, initWorker, type DrawResult } from "../explorer/wor
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { clampPosterWidth } from "./poster-presets.ts";
-import {
-  initBoundAtlas,
-  clearBoundAtlas,
-  enableBind,
-  sheetAspect,
-  type PosterBasis,
-  type SheetFace,
-} from "./bound-atlas.ts";
+import { initBoundAtlas, clearBoundAtlas, enableBind, type PosterBasis, type SheetFace } from "./bound-atlas.ts";
 import {
   bindPrintRoom,
   matterAspect,
   showMatter,
   showPlate,
   showProof,
+  turnedAspect,
   writeFolio,
   type RoomFurniture,
 } from "./seats.ts";
@@ -70,7 +64,7 @@ const furniture: RoomFurniture = {
   folioSub: $("folio-sub"),
   plateLine: $("pr-plate-line"),
 };
-const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? sheetAspect());
+const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? turnedAspect(furniture));
 
 // Recipe params with no visible control here: carried from a deep link and re-serialized on every draw, so the URL stays a shareable Explorer link (a warped world must print warped).
 const carried: {

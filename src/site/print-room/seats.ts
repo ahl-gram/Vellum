@@ -1,4 +1,5 @@
 // The Print Room's chart-room seats: the Glass on the sheet, the fit with the turned plate's own aspect, the folio's lines and the sheet's two faces (the proof, a bound plate turned onto it). app.ts stays the conductor.
+import type { PlateSection } from "../../atlas/document.ts";
 import type { Room } from "../shared/room.ts";
 import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { PAGE_MEASURE_WIDTH, pageAspect } from "./matter-markup.ts";
@@ -27,6 +28,8 @@ export interface Plate {
   readonly href: string;
   readonly title: string;
   readonly line: string;
+  readonly section: PlateSection;
+  readonly aspect: number | null;
 }
 
 // Re-laying the page out at the sheet's own font drifted 19px of per-line rounding at 390 (measured 2026-09-01), so the inner scales as a unit instead.
@@ -74,6 +77,7 @@ export function showProof(roomEls: RoomFurniture): void {
 }
 
 export function showPlate(roomEls: RoomFurniture, plate: Plate): void {
+  roomEls.turned.dataset.aspect = plate.aspect === null ? "" : String(plate.aspect);
   roomEls.turned.src = plate.href;
   roomEls.turned.alt = plate.title;
   roomEls.turned.hidden = false;
@@ -111,5 +115,11 @@ function restoreLabel(roomEls: RoomFurniture): void {
 export function matterAspect(roomEls: RoomFurniture): number | null {
   if (roomEls.page.hidden) return null;
   const a = Number(roomEls.page.dataset.aspect);
+  return Number.isFinite(a) && a > 0 ? a : null;
+}
+
+export function turnedAspect(roomEls: RoomFurniture): number | null {
+  if (roomEls.turned.hidden) return null;
+  const a = Number(roomEls.turned.dataset.aspect);
   return Number.isFinite(a) && a > 0 ? a : null;
 }
