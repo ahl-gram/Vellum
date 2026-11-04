@@ -9,7 +9,7 @@ import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { eventCaption } from "../prose.ts";
 import type { RibbonEvent } from "../events.ts";
-import { stripPos, type StripLayout } from "./layout.ts";
+import { freeSideOf, stripPos, type StripLayout } from "./layout.ts";
 import {
   bridgeMark,
   fordMark,
@@ -25,6 +25,7 @@ import {
   paintedTreeRound,
   settlementCluster,
   stipple,
+  summitMountain,
 } from "./glyphs.ts";
 import { paintedRiverBand, riverBand, seaWash } from "./water.ts";
 import { paintedCompass, stripCompass } from "./compass.ts";
@@ -153,12 +154,10 @@ function eventArt(
           "stroke-linecap": "round",
         }),
       ];
-    case "summit":
-      return [
-        c.paint
-          ? paintedMountain(c, c.paint, p.sx + freeSide * 27, p.sy + 4, 1.05)
-          : mountainProfile(c, p.sx + freeSide * 27, p.sy + 4, 1.05),
-      ];
+    case "summit": {
+      const m = summitMountain(p, freeSide);
+      return [c.paint ? paintedMountain(c, c.paint, m.x, m.y, m.s) : mountainProfile(c, m.x, m.y, m.s)];
+    }
   }
 }
 
@@ -178,7 +177,7 @@ function eventNodes(
   for (const e of input.events) {
     if (e.dist < strip.d0 || e.dist >= strip.d1) continue;
     const p = stripPos(strip, e.dist);
-    const freeSide: -1 | 1 = p.sx > strip.x0 + strip.w / 2 ? -1 : 1;
+    const freeSide = freeSideOf(strip, p.sx);
     const caption = eventCaption(e, rng);
     art.push(...eventArt(c, strip, body, e, p, freeSide, rng));
     laid = layCaption(laid, e, p, freeSide, caption, strip, room, keep);

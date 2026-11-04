@@ -5,8 +5,8 @@ import type { RibbonInput } from "../input.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 
-const ROAD_HALF = 2.3;
-const PAINTED_ROAD_HALF = 4.2;
+export const ROAD_HALF = 2.3;
+export const PAINTED_ROAD_HALF = 4.2;
 
 function offsetPath(pts: ReadonlyArray<StripPoint>, off: number): string {
   let d = "";
@@ -29,6 +29,38 @@ export function roadAngleDeg(strip: StripLayout, dist: number): number {
   return (Math.atan2(b.sy - a.sy, b.sx - a.sx) * 180) / Math.PI;
 }
 
+export type TownSpan = {
+  readonly a: { readonly sx: number; readonly sy: number };
+  readonly b: { readonly sx: number; readonly sy: number };
+  readonly len: number;
+};
+
+export function townSpanEnds(strip: StripLayout, dist: number): TownSpan | null {
+  if (dist < strip.d0 - 0.75 || dist > strip.d1 + 0.75) return null;
+  const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
+  const a = stripPos(strip, Math.max(strip.d0, dist - solidSpan));
+  const b = stripPos(strip, Math.min(strip.d1, dist + solidSpan));
+  const len = Math.hypot(b.sx - a.sx, b.sy - a.sy);
+  return len < 2 ? null : { a, b, len };
+}
+
+export type LeagueMark = { readonly l: number; readonly p: { readonly sx: number; readonly sy: number } };
+
+export function leaguesOn(strip: StripLayout): LeagueMark[] {
+  const first = Math.max(1, Math.ceil(strip.d0 / CELLS_PER_LEAGUE));
+  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
+  return Array.from({ length: Math.max(0, last - first + 1) }, (_, i) => {
+    const l = first + i;
+    return { l, p: stripPos(strip, l * CELLS_PER_LEAGUE) };
+  });
+}
+
+export type FifthNumeral = { readonly x: number; readonly y: number; readonly size: number; readonly text: string };
+
+export function fifthNumeral(p: { readonly sx: number; readonly sy: number }, l: number): FifthNumeral | null {
+  return l % 5 === 0 ? { x: p.sx + 5.5, y: p.sy + 2.4, size: 7, text: String(l) } : null;
+}
+
 export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
   const half = c.paint ? PAINTED_ROAD_HALF : ROAD_HALF;
   const ink = c.paint ? c.ink : c.style.road;
@@ -46,15 +78,12 @@ export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayo
       }),
     );
   }
-  const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
   for (const e of input.events) {
-    if (e.kind !== "waypoint" || e.dist < strip.d0 - 0.75 || e.dist > strip.d1 + 0.75) continue;
-    const a = stripPos(strip, Math.max(strip.d0, e.dist - solidSpan));
-    const b = stripPos(strip, Math.min(strip.d1, e.dist + solidSpan));
+    const span = e.kind === "waypoint" ? townSpanEnds(strip, e.dist) : null;
+    if (span === null) continue;
+    const { a, b, len } = span;
     const dx = b.sx - a.sx;
     const dy = b.sy - a.sy;
-    const len = Math.hypot(dx, dy);
-    if (len < 2) continue;
     for (const off of [-half, half]) {
       const nx = (-dy / len) * off;
       const ny = (dx / len) * off;
@@ -74,24 +103,14 @@ export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayo
 
 function leagueDots(c: RibbonContext, strip: StripLayout): SvgNode[] {
   const nodes: SvgNode[] = [];
-  const first = Math.ceil(strip.d0 / CELLS_PER_LEAGUE);
-  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
-  for (let l = Math.max(1, first); l <= last; l++) {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
+  for (const { l, p } of leaguesOn(strip)) {
     nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 1.4, fill: c.ink }));
-    if (l % 5 === 0) {
+    const n = fifthNumeral(p, l);
+    if (n !== null) {
       nodes.push(
-        el(
-          "text",
-          {
-            x: r1(p.sx + 5.5),
-            y: r1(p.sy + 2.4),
-            "font-family": c.style.fontFamily,
-            "font-size": 7,
-            fill: c.soft,
-          },
-          [String(l)],
-        ),
+        el("text", { x: r1(n.x), y: r1(n.y), "font-family": c.style.fontFamily, "font-size": n.size, fill: c.soft }, [
+          n.text,
+        ]),
       );
     }
   }
@@ -100,10 +119,7 @@ function leagueDots(c: RibbonContext, strip: StripLayout): SvgNode[] {
 
 function leagueNumerals(c: RibbonContext, paint: RibbonPaint, strip: StripLayout): SvgNode[] {
   const nodes: SvgNode[] = [];
-  const first = Math.max(1, Math.ceil(strip.d0 / CELLS_PER_LEAGUE));
-  const last = Math.floor(strip.d1 / CELLS_PER_LEAGUE);
-  for (let l = first; l <= last; l++) {
-    const p = stripPos(strip, l * CELLS_PER_LEAGUE);
+  for (const { l, p } of leaguesOn(strip)) {
     nodes.push(
       l >= 100
         ? el("ellipse", { cx: r1(p.sx), cy: r1(p.sy), rx: 5.1, ry: 3.6, fill: paint.landWash })

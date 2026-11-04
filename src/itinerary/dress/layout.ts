@@ -57,6 +57,8 @@ export function stripPos(strip: StripLayout, dist: number): { sx: number; sy: nu
   return { sx: lo.sx, sy: lo.sy };
 }
 
+export const freeSideOf = (strip: StripLayout, sx: number): -1 | 1 => (sx > strip.x0 + strip.w / 2 ? -1 : 1);
+
 export function stripFor(layout: RibbonLayout, dist: number): StripLayout | null {
   return layout.strips.find((s) => dist >= s.d0 && dist < s.d1) ?? null;
 }

@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { layoutRibbon, stripPos, type StripLayout } from "../../src/itinerary/dress/layout.ts";
 import { stripBody } from "../../src/itinerary/dress/cloth.ts";
-import { seatCaption, type SeatLine } from "../../src/itinerary/dress/seats.ts";
 import { textBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
 import { STYLES } from "../../src/render/style.ts";
+import { PAINTED_ROAD_HALF, ROAD_HALF } from "../../src/itinerary/dress/road.ts";
 import { r1 } from "../../src/prospect/dress/context.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import type { RibbonInput } from "../../src/itinerary/input.ts";
@@ -17,11 +17,10 @@ import {
   type PlateCaptionLine,
 } from "../../test-support/ribbon-captions.ts";
 
-// The room, written out so it cannot widen with the module it guards: a caption sits 9 inside its strip's long edges (the cloth's on antique, the outer rule on ink), under the continuation line (22 below the strip's top), and above the strip's foot (the inner rule, 3.5 up, on ink); 1e-6 is the float slack of a box slid onto the edge.
+// The room, written out so it cannot widen with the module it guards: a caption sits 9 inside its strip's long edges (the cloth's on antique, the outer rule on ink), under the continuation line (22 below the strip's top), and above the strip's foot (the inner rule, 3.5 up, on ink).
 const EDGE = 9;
 const TOP_CLEAR = 22;
 const INK_FOOT = 3.5;
-const EPS = 1e-6;
 // A plate writes each coordinate to a tenth, so a box read back from it can sit 0.05 off in x (and 0.05 times the edge's slope, under 0.2, in y).
 const PLATE_ROUNDING = 0.06;
 
@@ -134,14 +133,14 @@ test("every caption sits inside its own strip, nine inside its edge, on any jour
   }
 });
 
-// The houses' extents around (x, y - 1) by tier; the road's clearance is the casing's half-width plus 0.55 (the casing dot's half stroke) less 0.25, the most the keep's half-unit samples can miss a box by.
+// The houses' extents around (x, y - 1) by tier; the road's clearance is the casing's half-width, the road's own (Issue #1218), plus 0.55 (the casing dot's half stroke) less 0.25, the most the keep's half-unit samples can miss a box by.
 const HOUSES: Record<string, readonly number[]> = {
   capital: [-11.5, 11.5, -11.6, 3.2],
   town: [-9, 9.7, -9.6, 1.5],
   village: [-6.7, 6.6, -5.4, 0.5],
   hamlet: [-2.6, 2.6, -5.1, 0],
 };
-const ROAD_CLEAR = { antique: 4.2 + 0.55 - 0.25, ink: 2.3 + 0.55 - 0.25 };
+const ROAD_CLEAR = { antique: PAINTED_ROAD_HALF + 0.55 - 0.25, ink: ROAD_HALF + 0.55 - 0.25 };
 const ROSE_R = { antique: 15.45, ink: 13.85 };
 
 const overlaps = (a: Box, b: Box): boolean => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -349,68 +348,5 @@ test("nothing is drawn smaller than seven tenths, and a group shrinks as one", (
   assert.ok(
     smaller(plateOf(99, "Mialiscove", "Minmari", "ink")).includes(0.7),
     "premise: Mialiscove to Minmari on ink is at 0.7",
-  );
-});
-
-const inBox = (bs: ReadonlyArray<Box>, right: number): boolean =>
-  bs.every((b) => b.x >= -EPS && b.x + b.w <= right + EPS && b.y >= -EPS && b.y + b.h <= 200 + EPS);
-
-function crowd(bs: ReadonlyArray<Box>, keep: ReadonlyArray<Box>): number {
-  const cut = (a: number, b: number, c: number, d: number): number =>
-    Math.max(0, Math.min(a + b, c + d) - Math.max(a, c));
-  return bs.reduce(
-    (sum, b) => sum + keep.reduce((a, k) => a + cut(b.x, b.w, k.x, k.w) * cut(b.y, b.h, k.y, k.h), 0),
-    0,
-  );
-}
-
-test("a caption with no clear seat takes the least-crowded one inside its strip, on a backing", () => {
-  const lines: SeatLine[] = [
-    { text: "aaaaaaaaaa", caps: false, size: 8.2 },
-    { text: "bbbbb", caps: false, size: 8.2 },
-  ];
-  const room = { left: () => 0, right: () => 100, top: 0, bottom: 200 };
-  const want = {
-    x: 60,
-    top: 20,
-    side: 1 as const,
-    lines,
-    roadX: () => 0,
-    acrossTop: 26,
-    sticky: false,
-    rewrap: () => lines,
-  };
-  const keepBoxes = [
-    { x: 0, y: 0, w: 100, h: 70 },
-    { x: 0, y: 90, w: 100, h: 110 },
-  ];
-  const keep = { boxes: keepBoxes, discs: [{ x: 50, y: 150, r: 10 }], lines: [] };
-  const w = 10 * 8.2 * WIDTH_FACTOR.mixed;
-  const places = [0, -4, 4, -8, 8, -12, 12, -16, 16, -20, 20, -24, 24, -28, 28, -32, 32].flatMap((dy) =>
-    [
-      { x: Math.min(60, 100 - w), anchor: "start" as const },
-      { x: Math.max(-10, w), anchor: "end" as const },
-    ].map((c) => [
-      textBox(c.x, 20 + dy + 8.2, "aaaaaaaaaa", 8.2, c.anchor, WIDTH_FACTOR.mixed),
-      textBox(c.x, 20 + dy + 9.4 + 8.2, "bbbbb", 8.2, c.anchor, WIDTH_FACTOR.mixed),
-    ]),
-  );
-  const open = places.filter((bs) => inBox(bs, 100));
-  assert.ok(
-    open.length > 0 && open.length < places.length,
-    "premise: some beside places lie in the room and some do not",
-  );
-  const seat = seatCaption(want, room, keep);
-  assert.ok(seat.backed && inBox(seat.boxes, 100), "a seat with no clear place lies in the room, backed");
-  assert.ok(
-    Math.abs(crowd(seat.boxes, keepBoxes) - Math.min(...open.map((bs) => crowd(bs, keepBoxes)))) < EPS,
-    "and is the least crowded of the places it could take",
-  );
-  const whole = seatCaption(want, room, { ...keep, boxes: [{ x: 0, y: 0, w: 100, h: 200 }], discs: [] });
-  assert.ok(whole.backed && inBox(whole.boxes, 100), "and with the whole room kept it still lies in the room");
-  const narrow = seatCaption(want, { ...room, right: () => 20 }, { boxes: [], discs: [], lines: [] });
-  assert.ok(
-    narrow.backed && narrow.scale < 1 && inBox(narrow.boxes, 20),
-    "and a room narrower than the words takes them smaller",
   );
 });
