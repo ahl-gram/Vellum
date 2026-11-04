@@ -388,9 +388,11 @@ than inventing a seat.
 **A world can name a forest the chart never letters.** `names.forest` is minted on the share of
 forest in the land, the wood is the largest four-connected stand of the five forest biomes of 25
 cells or more (`namedForestBlob` in `src/render/named-forest.ts`), and `forestLabelNodes` in
-`src/render/layers/feature-labels.ts` drops the name when every height it tries is already claimed,
-which happens on five of 44 seeds swept 2026-11-03 (1, 9, 12, 15, 40). A surface that quotes the
-forest's name reads the wood from `namedForestBlob` and does not assume the chart prints it.
+`src/render/layers/feature-labels.ts` tries five heights at the wood's centroid, then the wood's own
+cells nearest the centroid first (`interiorProbes` in `src/render/layers/label-probes.ts`), and drops
+the name only when every one of them is already claimed. It still happens, rarely: seed 400's wood
+goes unlettered at 900, 1500 and 2400 wide (2026-11-03). A surface that quotes the forest's name
+reads the wood from `namedForestBlob` and does not assume the chart prints it.
 
 ## Measuring a world in a script
 
