@@ -340,7 +340,7 @@ body.has-atlas .slip .intro {
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  font-size: 0.86rem;
+  font-size: 1rem;
   color: var(--parchment-bright);
   border-radius: 0;
   background: rgb(from var(--chart-ink) r g b / 0.45);
@@ -358,6 +358,9 @@ body.has-atlas .slip .intro {
 .legend-head select option {
   color: var(--ink-dark);
   background: var(--parchment-panel);
+}
+#pr-pressing {
+  field-sizing: content;
 }
 .legend-note {
   font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
@@ -444,7 +447,8 @@ body.has-atlas .slip .intro {
     height: auto;
   }
   #pr-turned {
-    display: none;
+    position: static;
+    height: auto;
   }
   body.has-atlas .stage {
     display: none !important;

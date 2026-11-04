@@ -81,10 +81,6 @@ let here: string | null = null;
 let bindGen = 0;
 let binding = false;
 
-export function sheetAspect(): number | null {
-  return here === null ? null : (plates.get(here)?.aspect ?? null);
-}
-
 function setDeliveryEnabled(on: boolean): void {
   printBtn.disabled = !on;
   downloadBtn.disabled = !on;
@@ -189,7 +185,20 @@ function turnTo(key: string): void {
   if (!b) return;
   here = key;
   renderContents();
-  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title, b.ordinal) });
+  face.showPlate({
+    href: b.plate.href,
+    title: b.plate.title,
+    line: plateLine(b.section, b.plate.title, b.ordinal),
+    section: b.section,
+    aspect: b.aspect,
+  });
+}
+
+export function turnToSection(section: PlateSection): boolean {
+  const b = [...plates.values()].find((p) => p.section === section);
+  if (!b) return false;
+  turnTo(b.plate.key);
+  return true;
 }
 
 function bindAtlas(): void {

@@ -538,6 +538,20 @@ section points there rather than restating it.
   title's line, the Press row, the stage's reserves) are read against the CI run's the same way.
   What differs, and the run that showed it, is in
   `.claude/skills/vellum-footguns/references/scars.md`.
+- **A `select` restyled after its first layout measures differently from the same `select`
+  laid out that way from the start, so a probe stages a select's dress before the page's first
+  layout.** Measured 2026-11-04 in the harness browser on the Print Room's head, two dropdowns
+  dressed `appearance: none`: each read 30.375 px tall with 16px set from the start and 28.375
+  with 16px set on one first laid out at 13.76px (27.375 and 25.375 the other way); one load of
+  another world read 25.375 and 28.375 with the size set from the start; and the road dropdown
+  kept the 183.391 px of its first layout after the page rewrote its widest option to a longer
+  one, until a full-page capture re-measured it at 298.391 (cause unverified;
+  `handbook/plans/400/433/433-pr2-r1-plan.md`). So a probe stages a select's dress in a style
+  sheet the document adopts when it is created, as `applyRunnerLayout` in
+  `e2e/support/runner-layout.ts` stages the runner's, never in a style injected into a page
+  already laid out; a select's height is read on more than one load before it is quoted; and a
+  reading of a select whose words the page rewrites after load says whether anything
+  re-measured it.
 - **Fail a frame's document through `Fetch.failRequest`; a blocked-URL list does not stop it.** With
   `Network.setBlockedURLs` set, a page's frames still requested their documents (measured
   2026-10-08: ten Documents requested), while failing the request through `Fetch.failRequest` on a

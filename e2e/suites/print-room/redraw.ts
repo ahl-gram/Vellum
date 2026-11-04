@@ -1,9 +1,13 @@
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
+type RoadAt = { disabled: boolean; text: string } | null;
+type MidDraw = { bind: boolean; print: boolean; atlasEmpty: boolean; hasAtlas: boolean; road: RoadAt[] };
+
 export async function pr24Redraw({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  const midDraw = await evaluate<{ bind: boolean; print: boolean; atlasEmpty: boolean; hasAtlas: boolean }>(
-    `(()=>{const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas")};})()`,
+  // Wiring, not the claim: Draw is clicked as PR24 has always pressed it; PR51's claim is the road option read before and after that click, in the same task.
+  const midDraw = await evaluate<MidDraw>(
+    `(()=>{const o=document.querySelector('#pr-pressing option[value="road"]'),road=()=>o?{disabled:o.disabled,text:o.textContent}:null,before=road();const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),road:[before,road()]};})()`,
   );
   let reenabled = null;
   for (let i = 0; i < 160; i++) {
@@ -27,6 +31,17 @@ export async function pr24Redraw({ evaluate, check, sleep }: SuiteContext): Prom
       midDraw.hasAtlas === false &&
       !!reenabled,
     JSON.stringify({ midDraw, reenabled }),
+  );
+  const [before, after] = midDraw.road;
+  check(
+    "PR51 a redraw closes the road the old world offered the moment Draw is pressed (no stale-world road): with seed 42's road drawn, the road option is open before the click and closed after it, until the new world answers (Issue #433)",
+    !!before &&
+      !before.disabled &&
+      before.text === "The road from the capital" &&
+      !!after &&
+      after.disabled &&
+      after.text === "The road from the capital",
+    JSON.stringify(midDraw.road),
   );
 }
 

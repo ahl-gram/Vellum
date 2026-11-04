@@ -27,6 +27,7 @@ import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
 import { pr38BoundDress } from "./print-room/dress.ts";
 import { pr36Authored } from "./print-room/room.ts";
 import { pr40RunnerLayout } from "./print-room/runner-layout.ts";
+import { pr49NoRoad, pr50Refit, prRoadBound, prRoadUnbound } from "./print-room/road.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
@@ -60,6 +61,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr16Desk(ctx);
   await pr28ChartPlate(ctx);
   await pr17Png(k);
+  await step("PR41, PR42, PR43, PR44, PR45, PR46", () => prRoadUnbound(k));
   await boundAndPaper(ctx, k, step);
   await shoot("print-room.png");
   await pr26Redraw(ctx);
@@ -73,6 +75,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("PRW7", () => prwPlaceLand(ctx));
   await step("PRW5", () => prwCount(ctx));
   await step("PRW8", () => prwCountType(ctx));
+  await step("PR49", () => pr49NoRoad(ctx));
   await step("PR40", () => pr40RunnerLayout(ctx));
   // PR36 runs last so prlLink's start, print-room's NEEDS_PREDECESSOR entry and the PR #701 row's reasoning stay true; it leaves a scripts-off page, which the next suite's own navigation replaces.
   await step("PR36", () => pr36Authored(ctx));
@@ -85,6 +88,10 @@ async function boundAndPaper(ctx: SuiteContext, k: PrintRoomKit, step: ReturnTyp
   await step("PR31d", () => pr31dFocusKept(k));
   await pr33BackMatter(ctx);
   await pr34Leaned(ctx);
+  await step("PR47, PR48, PR50", async () => {
+    await prRoadBound(ctx);
+    await pr50Refit(ctx);
+  });
   await ctx.shoot("print-room-bound.png");
   await pr21BoundPrint(k);
   await pr23Download(ctx);

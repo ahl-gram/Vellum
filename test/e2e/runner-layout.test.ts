@@ -48,7 +48,7 @@ test("applyRunnerLayout registers one new-document script, which adopts the runn
 test("the runner's sheet draws the numero sign from Times New Roman in the house display face and sets each select at the height measured on the runner, and runnerLayoutCss writes any such sheet", () => {
   assert.equal(
     RUNNER_LAYOUT_CSS,
-    '@font-face { font-family: "IM Fell English SC"; src: local("Times New Roman"); unicode-range: U+2116; } .folio-controls select.control { height: 29.21875px; } .legend-head select { height: 23.375px; }',
+    '@font-face { font-family: "IM Fell English SC"; src: local("Times New Roman"); unicode-range: U+2116; } .folio-controls select.control { height: 29.21875px; } .legend-head select { height: 25.375px; }',
   );
   assert.equal(
     runnerLayoutCss("Face", [{ selector: ".a b", px: 1.5 }]),

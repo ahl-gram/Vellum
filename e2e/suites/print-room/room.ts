@@ -89,6 +89,10 @@ type Legend = {
   nav: string | null;
   kids: string[] | null;
   format: unknown[] | null;
+  pressing: unknown[] | null;
+  fonts: (string | null)[];
+  selects: string[];
+  tail: string | null;
   note: string | null;
   row: (string | null)[] | null;
   plates: unknown[];
@@ -97,10 +101,14 @@ type Legend = {
   status: unknown[] | null;
 };
 const LEGEND: Payload<Legend> = `(() => { const text = ${TEXT}, kids = ${KIDS};
-  const nav = document.querySelector("nav.legend"), row = nav && nav.querySelector(":scope > .legend-row"), fmt = document.querySelector(".legend-head #pr-format");
+  const nav = document.querySelector("nav.legend"), row = nav && nav.querySelector(":scope > .legend-row"), fmt = document.querySelector(".legend-head #pr-format"), p = document.querySelector(".legend-head #pr-pressing");
   const last = row && row.lastElementChild, st = document.getElementById("pr-poster-status");
   return { nav: nav && nav.getAttribute("aria-label"), kids: nav && [...nav.children].map((c) => c.className),
     format: fmt && [...fmt.options].map((o) => [o.value, text(o), o.defaultSelected]),
+    pressing: p && [p.getAttribute("aria-label"), [...p.options].map((o) => [o.value, text(o), o.defaultSelected, o.disabled])],
+    fonts: [p, fmt].map((s) => (s ? getComputedStyle(s).fontSize : null)),
+    selects: [...document.querySelectorAll(".legend-head select")].map((s) => s.id),
+    tail: text(document.getElementById("pr-note-tail")),
     note: text(nav && nav.querySelector(".legend-note")),
     row: row && [row.getAttribute("role"), row.getAttribute("aria-label"), row.getAttribute("aria-labelledby")],
     plates: row ? [...row.querySelectorAll("[data-poster]")].map((b) => [b.dataset.poster, b.className, b.getAttribute("type"), b.disabled, kids(b), text(b.querySelector(".verb")), text(b.querySelector(".room"))]) : [],
@@ -127,6 +135,16 @@ const legendFaults = (l: Legend): string[] =>
       ["png1", "An impression (PNG)", false],
       ["png2", "A finer impression (PNG ×2)", false],
     ]) || "Pressed-as in the head, its options and labels",
+    same(l.pressing, [
+      "What the presses pull",
+      [
+        ["poster", "A poster plate", true, false],
+        ["road", "The road from the capital", false, true],
+      ],
+    ]) || "the head's own dropdown, the poster chosen and the road closed until its answer",
+    same(l.selects, ["pr-pressing", "pr-format"]) || "the head's dropdown before Pressed-as",
+    same(l.fonts, ["16px", "16px"]) || "both dropdowns at the 16px floor",
+    l.tail === "The chart is pulled only as the engraving." || "the caveat's last sentence in its own span",
     l.note === NOTE || "the caveat",
     same(l.row, ["group", "A poster plate", null]) || "the row's role and label",
     same(l.plates, PLATES) || "the four plates ascending, closed, with their verb and room",
@@ -210,7 +228,7 @@ export async function pr36Authored({ evaluate, send, check, sleep, PORT }: Suite
     ...stageFaults(read.stage),
   ];
   check(
-    "PR36 the Print Room as authored: the folio's one h1 and its tagline with no retired furniture, the control row in order, the Bound Atlas slip (Bind closed, the kit's contents row, the three presses in the foot, the Portfolio road) before the chart folio, the legend row (Pressed-as, the caveat, four plates ascending and closed, the gold road last), the stage's one gesture box with the proof, the turned plate and the page, the pill, the warning and the notice, the Glass, the folio's lines, the hidden document and the measure box",
+    "PR36 the Print Room as authored: the folio's one h1 and its tagline with no retired furniture, the control row in order, the Bound Atlas slip (Bind closed, the kit's contents row, the three presses in the foot, the Portfolio road) before the chart folio, the legend row (the head's own dropdown before Pressed-as, both at 16px, the caveat, four plates ascending and closed, the gold road last), the stage's one gesture box with the proof, the turned plate and the page, the pill, the warning and the notice, the Glass, the folio's lines, the hidden document and the measure box",
     wrong.length === 0,
     JSON.stringify({ wrong, read }),
   );

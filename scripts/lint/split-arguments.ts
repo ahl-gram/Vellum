@@ -14,6 +14,7 @@ export const SPLIT_FILES: readonly string[] = [
   "src/site/home/input.ts",
   "src/site/home/veil.ts",
   "src/site/print-room/app.ts",
+  "src/site/print-room/order-counter.ts",
   "src/site/shared/reading-frame/dated-log.ts",
   "src/site/shared/reading-frame/index.ts",
   "src/site/reading-room/app.ts",
@@ -25,7 +26,6 @@ export const SPLIT_FILES: readonly string[] = [
 
 export const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
   "src/site/home/veil.ts": ["startSounding(veil.status, opts.random ?? Math.random)"],
-  "src/site/print-room/app.ts": ["downloadSvg(res.svg, filename)", "orderPoster(b.dataset.poster as string)"],
   "src/site/reading-room/app.ts": [
     "onTold(t)",
     "prospectHrefFor(forSeed, s)",
