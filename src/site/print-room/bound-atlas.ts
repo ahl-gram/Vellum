@@ -107,7 +107,7 @@ function renderContents(): void {
     themes: refs(lastAtlas.themes),
     regions: refs(lastAtlas.regions),
     prospects: refs(lastAtlas.prospects),
-    ribbons: [],
+    ribbons: refs(lastAtlas.ribbons),
     counts: plateCounts(lastAtlas),
     here,
   });
@@ -157,7 +157,10 @@ function renderBoundAtlas(atlas: AtlasDocumentData): void {
   const themes = atlas.themes.map((p, i) => mint(p, "theme", i));
   const regions = atlas.regions.map((p) => mint(p, "region", 0));
   const prospects = atlas.prospects.map((p) => mint(p, "prospect", 0));
-  plates = new Map([hero, ...draughtings, ...themes, ...regions, ...prospects].map((b) => [b.plate.key, b]));
+  const ribbons = atlas.ribbons.map((p) => mint(p, "ribbon", 0));
+  plates = new Map(
+    [hero, ...draughtings, ...themes, ...regions, ...prospects, ...ribbons].map((b) => [b.plate.key, b]),
+  );
   const fig = (b: Bound, cls = ""): string => plateFigure(b.plate.href, b.plate.title, cls);
   const figs = (bs: Bound[]): string => bs.map((b) => fig(b)).join("\n");
   atlasDiv.innerHTML = `${atlasHeadMarkup(atlas)}
@@ -166,6 +169,7 @@ ${fig(hero, "hero-plate print-only")}
 <section><h2>Thematic Surveys</h2><div class="themes">${figs(themes)}</div></section>
 ${regions.length > 0 ? `<section><h2>Regional Surveys</h2>${figs(regions)}</section>` : ""}
 ${prospects.length > 0 ? `<section><h2>The Prospect of the Capital</h2>${figs(prospects)}</section>` : ""}
+${ribbons.length > 0 ? `<section><h2>The Road from the Capital</h2>${figs(ribbons)}</section>` : ""}
 ${atlas.bannersHtml}
 ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;

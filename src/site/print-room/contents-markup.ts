@@ -73,6 +73,16 @@ function otherPlateRows(atlas: ContentsData, here: string | null, on: (ps: reado
         : "The prospect of the capital: none for this world",
       plates(atlas.prospects, here),
     ),
+    row(
+      SECTION_ROW.ribbon,
+      on(atlas.ribbons),
+      atlas.ribbons.length > 0
+        ? atlas.ribbons
+            .map((p) => turn(p, here, `The road <em>${escapeXml(p.title.replace(/^The Road /, ""))}</em>`))
+            .join(", ")
+        : "The road from the capital: none for this world",
+      plates(atlas.ribbons, here),
+    ),
   ];
 }
 
@@ -84,6 +94,7 @@ export function contentsRows(atlas: ContentsData | null): string {
       ...THEMATIC.map((t, i) => row(plateRow("theme", i), false, survey(t.title.toLowerCase()))),
       row(SECTION_ROW.region, false, "Regional surveys, two close-ins"),
       row(SECTION_ROW.prospect, false, "The prospect of the capital"),
+      row(SECTION_ROW.ribbon, false, "The road from the capital"),
       row(MATTER_ROW.banners, false, "The banners of every realm"),
       row(MATTER_ROW.chronicle, false, "The chronicle"),
       row(MATTER_ROW.gazetteer, false, "The gazetteer"),
@@ -134,7 +145,7 @@ export function plateLine(section: PlateSection, title: string, ordinal = 0): st
     theme: `a thematic survey of ${title.toLowerCase()}`,
     region: `a regional survey, ${lowerNoun(title)}`,
     prospect: lowerNoun(title),
-    ribbon: "",
+    ribbon: title.replace(/^The Road /, "the road "),
   };
   return `plate ${numeralOf(plateRow(section, ordinal))} of the bound atlas · ${what[section]}`;
 }
