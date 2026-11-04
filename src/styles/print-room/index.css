@@ -359,6 +359,9 @@ body.has-atlas .slip .intro {
   color: var(--ink-dark);
   background: var(--parchment-panel);
 }
+#pr-pressing {
+  field-sizing: content;
+}
 .legend-note {
   font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
   font-style: italic;

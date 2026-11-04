@@ -27,7 +27,7 @@ import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
 import { pr38BoundDress } from "./print-room/dress.ts";
 import { pr36Authored } from "./print-room/room.ts";
 import { pr40RunnerLayout } from "./print-room/runner-layout.ts";
-import { pr49NoRoad, prRoadBound, prRoadUnbound } from "./print-room/road.ts";
+import { pr49NoRoad, pr50Refit, prRoadBound, prRoadUnbound } from "./print-room/road.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
@@ -88,7 +88,10 @@ async function boundAndPaper(ctx: SuiteContext, k: PrintRoomKit, step: ReturnTyp
   await step("PR31d", () => pr31dFocusKept(k));
   await pr33BackMatter(ctx);
   await pr34Leaned(ctx);
-  await step("PR47, PR48", () => prRoadBound(ctx));
+  await step("PR47, PR48, PR50", async () => {
+    await prRoadBound(ctx);
+    await pr50Refit(ctx);
+  });
   await ctx.shoot("print-room-bound.png");
   await pr21BoundPrint(k);
   await pr23Download(ctx);

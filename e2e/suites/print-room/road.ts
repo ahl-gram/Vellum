@@ -2,7 +2,7 @@
 import { bounce } from "../../support/nav.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import type { PrintRoomKit } from "./kit.ts";
+import { clearMetrics, type PrintRoomKit } from "./kit.ts";
 
 const PLATE_ASPECT = 1060 / 740;
 const CHART_ASPECT = 1500 / 1157.931;
@@ -225,6 +225,44 @@ export async function prRoadBound({ evaluate, check }: SuiteContext): Promise<vo
       /^plate i of the bound atlas · /.test(d.line ?? ""),
     JSON.stringify({ c, d }),
   );
+}
+
+const REFIT_WINDOW = [1240, 800] as const;
+type Seat = { value: string | null; clear: number; headH: number; win: number[] };
+const SEAT: Payload<Seat> = `(() => { const L = document.querySelector(".legend").getBoundingClientRect(), S = document.getElementById("sheet").getBoundingClientRect(), sel = document.getElementById("pr-pressing"); return { value: sel ? sel.value : null, clear: L.top - S.bottom, headH: document.querySelector(".legend-head").getBoundingClientRect().height, win: [innerWidth, innerHeight] }; })()`;
+const TURN_SEAT = (selector: string): Payload<Seat | null> =>
+  String.raw`(() => { const b = document.querySelector(${JSON.stringify(selector)}); if (!b) return null; b.click(); return ${SEAT}; })()`;
+
+export async function pr50Refit(ctx: SuiteContext): Promise<void> {
+  const { evaluate, send, check, sleep } = ctx;
+  const settle = makeSettle({ evaluate, sleep });
+  const [w, h] = REFIT_WINDOW;
+  await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+  try {
+    await settle(
+      SEAT,
+      (d, last) => d.win[0] === w && d.win[1] === h && last !== null && d.clear === last.clear,
+      "print-room-refit-window",
+    );
+    // Wiring, not the claim: the contents' thumbnail and its turn button are clicked as PR31 does; the claim is where the sheet stands against the row the turn left.
+    const a = await evaluate(TURN_SEAT('#pr-contents .plates figure[data-plate="ribbon-capital"] .thumb'));
+    const b = await evaluate(TURN_SEAT('#pr-contents .turn[data-plate="theme-climate"]'));
+    check(
+      "PR50 a turned page that changes the head refits the sheet to the row it leaves: at 1240x800 the bound atlas's road page, its head on two lines, and the climate page, its head on one, each leave the sheet 14 px above the row (the refit runs after the head takes the page's words)",
+      !!a &&
+        !!b &&
+        a.value === "road" &&
+        b.value === "poster" &&
+        a.headH > 1.5 * b.headH &&
+        Math.abs(a.clear - 14) < 1 &&
+        Math.abs(b.clear - 14) < 1,
+      JSON.stringify({ a, b }),
+    );
+  } finally {
+    // Wiring, not the claim: the head's value is set and its change dispatched as a reader's choice fires it, to leave plate i turned as PR48 left it.
+    await evaluate(choose("poster"));
+    await clearMetrics(ctx, w, h);
+  }
 }
 
 export async function pr49NoRoad({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
