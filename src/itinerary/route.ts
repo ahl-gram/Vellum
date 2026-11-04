@@ -65,10 +65,10 @@ export function farthestReachable(
   reachable: ReadonlyArray<number>,
 ): number | null {
   let best: number | null = null;
-  let bestLen = Infinity;
+  let bestLen = -1;
   for (const i of reachable) {
     const chain = roadWalk(world, mask, from, i);
-    if (chain && chain.length <= bestLen) {
+    if (chain && chain.length > bestLen) {
       bestLen = chain.length;
       best = i;
     }
@@ -85,14 +85,6 @@ export function defaultJourney(world: World): Journey | null {
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   if (capital < 0) return null;
   const mask = roadMask(world);
-  let best: number | null = null;
-  let bestLen = -1;
-  for (const i of roadReachable(world, mask, capital)) {
-    const chain = roadWalk(world, mask, capital, i);
-    if (chain && chain.length > bestLen) {
-      bestLen = chain.length;
-      best = i;
-    }
-  }
+  const best = farthestReachable(world, mask, capital, roadReachable(world, mask, capital));
   return best === null ? null : { fromIdx: capital, toIdx: best };
 }
