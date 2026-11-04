@@ -3,6 +3,7 @@ import { r1, stroke, type DressContext } from "../../prospect/dress/context.ts";
 import { placed } from "../../prospect/dress/glyphs.ts";
 import type { XYS } from "../../prospect/geometry.ts";
 import type { Rng } from "../../core/rng.ts";
+import type { Box } from "../../render/geometry.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 
 export function hillProfile(c: DressContext, x: number, y: number, s: number): SvgNode {
@@ -27,6 +28,14 @@ export function mountainProfile(c: DressContext, x: number, y: number, s: number
       "stroke-width": 0.6,
     }),
   ]);
+}
+
+export type SummitMountain = { readonly x: number; readonly y: number; readonly s: number; readonly box: Box };
+
+export function summitMountain(p: { readonly sx: number; readonly sy: number }, freeSide: -1 | 1): SummitMountain {
+  const x = p.sx + freeSide * 27;
+  const y = p.sy + 4;
+  return { x, y, s: 1.05, box: { x: x - 9.5, y: y - 12.6, w: 19, h: 12.6 } };
 }
 
 function house(c: DressContext, dx: number, dy: number, s: number): SvgNode[] {
