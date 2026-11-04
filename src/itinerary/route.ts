@@ -58,6 +58,24 @@ export function roadReachable(world: World, mask: Uint8Array, fromIdx: number): 
     .map((e) => e.i);
 }
 
+export function farthestReachable(
+  world: World,
+  mask: Uint8Array,
+  from: number,
+  reachable: ReadonlyArray<number>,
+): number | null {
+  let best: number | null = null;
+  let bestLen = Infinity;
+  for (const i of reachable) {
+    const chain = roadWalk(world, mask, from, i);
+    if (chain && chain.length <= bestLen) {
+      bestLen = chain.length;
+      best = i;
+    }
+  }
+  return best;
+}
+
 export interface Journey {
   readonly fromIdx: number;
   readonly toIdx: number;

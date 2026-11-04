@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
+import { farthestReachable, roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 
 const world = generateWorld(defaultRecipe(42));
 const mask = roadMask(world);
@@ -73,4 +73,36 @@ test("roadReachable never lists the place you set out from, and is symmetric wit
 test("roadReachable from an index that is not a settlement is empty, not a crash", () => {
   assert.deepEqual(roadReachable(world, mask, world.settlements.length), []);
   assert.deepEqual(roadReachable(world, mask, -1), []);
+});
+
+test("farthestReachable keeps the place whose road is longest, wherever it stands in the list (Issue #433)", () => {
+  const reachable = roadReachable(world, mask, capital);
+  const lens = reachable.map((i) => roadWalk(world, mask, capital, i)?.length ?? -1);
+  const longest = lens.indexOf(Math.max(...lens));
+  assert.equal(
+    longest,
+    lens.lastIndexOf(Math.max(...lens)),
+    "the witness: one place alone ends seed 42's longest road from the capital",
+  );
+  assert.ok(
+    longest > 0 && longest < reachable.length - 1,
+    "and it stands neither first nor last in the list, so the walk is what picks it",
+  );
+  assert.equal(farthestReachable(world, mask, capital, reachable), reachable[longest]);
+});
+
+test("farthestReachable keeps the first listed of the places tied on the longest road (Issue #433)", () => {
+  const world40 = generateWorld(defaultRecipe(40));
+  const mask40 = roadMask(world40);
+  const capital40 = world40.settlements.findIndex((s) => s.kind === "capital");
+  const reachable = roadReachable(world40, mask40, capital40);
+  const lens = reachable.map((i) => roadWalk(world40, mask40, capital40, i)?.length ?? -1);
+  const max = Math.max(...lens);
+  const first = lens.indexOf(max);
+  assert.notEqual(
+    first,
+    lens.lastIndexOf(max),
+    "the witness, measured 2026-11-03: Togkuukhot (13) and Lulshootai (14) tie at 109 cells from seed 40's capital",
+  );
+  assert.equal(farthestReachable(world40, mask40, capital40, reachable), reachable[first]);
 });
