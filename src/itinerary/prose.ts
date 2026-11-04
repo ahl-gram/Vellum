@@ -3,10 +3,12 @@ import { CELLS_PER_LEAGUE } from "../render/layers/scalebar.ts";
 import type { RibbonEvent } from "./events.ts";
 import type { RibbonInput } from "./input.ts";
 
+const the = (r: string): string => (r.startsWith("The ") ? r : `the ${r}`);
+
 const NAMED_CROSSINGS = [
-  (r: string): string => `a bridge of stone over the ${r}`,
-  (r: string): string => `a timber bridge over the ${r}`,
-  (r: string): string => `here the ${r} is crossed by a bridge`,
+  (r: string): string => `a bridge of stone over ${the(r)}`,
+  (r: string): string => `a timber bridge over ${the(r)}`,
+  (r: string): string => `here ${the(r)} is crossed by a bridge`,
 ];
 
 const ENTERED_REALMS = [

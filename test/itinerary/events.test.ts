@@ -5,9 +5,11 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts";
 import { eventCaption, ribbonTitle, stagesLine } from "../../src/itinerary/prose.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
+import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
+import { layoutRibbon } from "../../src/itinerary/dress/layout.ts";
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import { capitalJourneys } from "../../test-support/ribbon-fixtures.ts";
-import { sweepJourneys } from "../../test-support/ribbon-captions.ts";
+import { plateCaptions, sweepJourneys } from "../../test-support/ribbon-captions.ts";
 
 // Issue #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
 
@@ -181,10 +183,62 @@ test("a border's and a wood's caption take one of three phrasings each, picked b
   assert.equal(once(), once(), "the same event on a fresh fork says the same words: the fork, not a draw, decides");
 });
 
+test("a named crossing's caption takes one of three phrasings, and a river whose name starts with The keeps that The as its only article", () => {
+  const told = (name: string): string[] =>
+    [...new Set(captionsAtEachStep((k) => ({ kind: "crossing", dist: 1, k, name, major: true })))].sort();
+  assert.deepEqual(
+    told("The Riothi Run"),
+    [
+      "a bridge of stone over The Riothi Run",
+      "a timber bridge over The Riothi Run",
+      "here The Riothi Run is crossed by a bridge",
+    ],
+    "The Riothi Run is written with its own The and no other article",
+  );
+  assert.deepEqual(
+    told("River Skuksvy"),
+    [
+      "a bridge of stone over the River Skuksvy",
+      "a timber bridge over the River Skuksvy",
+      "here the River Skuksvy is crossed by a bridge",
+    ],
+    "River Skuksvy keeps the phrasing's the",
+  );
+  assert.deepEqual(
+    told("Theodor Run"),
+    [
+      "a bridge of stone over the Theodor Run",
+      "a timber bridge over the Theodor Run",
+      "here the Theodor Run is crossed by a bridge",
+    ],
+    "a name that only begins with the letters The is not a The",
+  );
+});
+
 test("seed 42's default road says here begins The Hauwaiwa Atolls and the road enters The Ferns of Peroa", () => {
   const { input, rng } = journey(42, "Homaitani");
   assert.equal(eventCaption(only(input, "border")[0]!, rng), "here begins The Hauwaiwa Atolls");
   assert.equal(eventCaption(only(input, "forest")[0]!, rng), "the road enters The Ferns of Peroa");
+});
+
+test("seed 99's road from Mialiscove to Minmari reads a bridge of stone over The Lemarodorwater on the plate, in both dresses", () => {
+  const { input } = journey(99, "Minmari");
+  assert.equal(input.fromName, "Mialiscove", "premise: seed 99's capital is still Mialiscove");
+  assert.ok(
+    only(input, "crossing").some((c) => c.name === "The Lemarodorwater"),
+    "premise: the road still crosses The Lemarodorwater",
+  );
+  for (const dress of ["antique", "ink"] as const) {
+    const caption = plateCaptions(ribbonSvgFor(input, dress), layoutRibbon(input).strips)
+      .map((c) => c.lines.map((l) => l.text).join(" "))
+      .find((t) => t.includes("Lemarodorwater"));
+    assert.ok(caption !== undefined, `${dress}: premise: the plate captions the crossing`);
+    assert.equal(
+      caption,
+      "a bridge of stone over The Lemarodorwater",
+      `${dress}: the plate prints the river's own The alone`,
+    );
+  }
 });
 
 test("every phrasing is told on the sweep", () => {
