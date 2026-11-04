@@ -33,7 +33,8 @@
 
 :root {
   --folio-cap: 30rem;
-  --rb-ink-strip: 450ms;
+  --rb-ink-strip: 200ms;
+  --rb-ink-feather: 300;
 }
 .folio-controls {
   flex-wrap: wrap;
@@ -175,6 +176,6 @@
     position: static;
     width: 100%;
     height: auto;
-    clip-path: none !important;
+    mask: none !important;
   }
 }

@@ -1,4 +1,4 @@
-// The Wayfarer's Ribbon's ink-in (Issue #432): the plate's strips revealed one after another up the scroll by a CSS clip over the plate, played by begin and taken off by retire.
+// The Wayfarer's Ribbon's ink-in (Issue #432, its soft edge Issue #1229): the plate's strips revealed one after another up the scroll by a CSS mask over the plate, each strip's moving edge a soft band, played by begin and taken off by retire.
 import { RIBBON_H, RIBBON_W } from "../../itinerary/finished.ts";
 import type { StripBox } from "../explorer/ribbon-job.ts";
 
@@ -12,15 +12,20 @@ const REDUCE = "(prefers-reduced-motion: reduce)";
 
 const pct = (v: number): string => `${Number((v * 100).toFixed(4))}%`;
 
-export function inkClip(strips: ReadonlyArray<StripBox>): string {
+export function inkMask(strips: ReadonlyArray<StripBox>): string {
   const n = strips.length;
-  const holes = strips.map((s, i) => {
+  const layers = strips.map((s, i) => {
     const [L, R] = [(s.x0 - PAD_X) / RIBBON_W, (s.x0 + s.w + PAD_X) / RIBBON_W];
     const [T, B] = [(s.y0 - PAD_TOP) / RIBBON_H, (s.y0 + s.h + PAD_BOTTOM) / RIBBON_H];
-    const edge = `calc(${pct(B)} - ${pct(B - T)} * clamp(0, var(--rb-ink) * ${n} - ${i}, 1))`;
-    return `${pct(L)} ${pct(T)}, ${pct(R)} ${pct(T)}, ${pct(R)} ${edge}, ${pct(L)} ${edge}, ${pct(L)} ${pct(T)}`;
+    const hole = s.h + PAD_TOP + PAD_BOTTOM;
+    const per = `${Number((100 / hole).toFixed(6))}%`;
+    const p = `clamp(0, var(--rb-ink) * ${n} - ${i}, 1)`;
+    const lo = `calc((${hole} * ${p} + var(--rb-ink-feather) * (${p} - 1)) * ${per})`;
+    const hi = `calc((${hole} + var(--rb-ink-feather)) * ${p} * ${per})`;
+    const at = `${pct(L / (1 - (R - L)))} ${pct(T / (1 - (B - T)))} / ${pct(R - L)} ${pct(B - T)}`;
+    return `linear-gradient(to top, transparent ${lo}, #000 ${hi}) ${at} no-repeat`;
   });
-  return `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${holes.join(", 0 0, ")}, 0 0)`;
+  return ["linear-gradient(#000, #000) subtract", ...layers].join(", ");
 }
 
 export interface InkEls {
@@ -37,13 +42,13 @@ export interface Ink {
 
 function clear(els: InkEls): void {
   els.plate.classList.remove(INKING);
-  for (const p of ["clip-path", "--rb-strips", "animation-play-state"]) els.plate.style.removeProperty(p);
+  for (const p of ["mask", "--rb-strips", "animation-play-state"]) els.plate.style.removeProperty(p);
   els.ground.style.removeProperty("background-color");
 }
 
 function dress(els: InkEls, strips: ReadonlyArray<StripBox>, paper: string): void {
   els.plate.style.setProperty("--rb-strips", String(strips.length));
-  els.plate.style.setProperty("clip-path", inkClip(strips));
+  els.plate.style.setProperty("mask", inkMask(strips));
   els.plate.style.setProperty("animation-play-state", "paused");
   els.ground.style.setProperty("background-color", paper);
   void els.plate.getBoundingClientRect();
