@@ -208,6 +208,16 @@ ${prospects}
 </section>
 
 `;
+  const ribbons = data.ribbons.map((p) => fig(p, "ribbon")).join("\n");
+  const ribbonSection =
+    data.ribbons.length === 0
+      ? ""
+      : `<section>
+<h2>The Road from the Capital</h2>
+${ribbons}
+</section>
+
+`;
 
   return `${fig(data.hero, "hero")}
 
@@ -230,7 +240,7 @@ ${themes}
 ${regions}
 </section>
 
-${prospectSection}`;
+${prospectSection}${ribbonSection}`;
 }
 
 /** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /shared/fonts.css and /shared/motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */

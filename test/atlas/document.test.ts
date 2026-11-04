@@ -277,8 +277,8 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry, and 2026-10-18 for the fonts sheet's address in a comment the download ships (Issue #768).
-const DOWNLOAD_SHA256 = "abf91fba15d02ff611358fd4c365013cf6be12ffb2696720eabdec608eb9868c";
+// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry, and 2026-10-18 for the fonts sheet's address in a comment the download ships (Issue #768), and 2026-11-03 for the road's plate and shelf the fixture gained (Issue #433; with no ribbons the document still hashes to abf91fba).
+const DOWNLOAD_SHA256 = "98c986cdfafbeea2654b9d1f10479520d7afa4fceea84e68264a33c0a991e07b";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
