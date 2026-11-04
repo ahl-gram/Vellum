@@ -4,7 +4,7 @@ import { PAGE_RGBA, sampleRect, sampleRow, tokenRgba, type Rgb } from "../../sup
 import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
-import { partInkedRows } from "./edge.ts";
+import { partInkedRows, rowsPastHalfWay } from "./edge.ts";
 import type { RibbonKit } from "./kit.ts";
 
 type Ink = {
@@ -63,7 +63,7 @@ const COLOPHON_HALF_WIDTH = 130;
 const LAST_SEEK = 0.999;
 const FOOT_ROW = 0.98;
 const HEAD_ROW = 0.02;
-// 2026-11-03, seed 42's default road at the harness's window, the planned files built from 5ad7be3f: a hard edge reads 0 plate units part inked (a feather of 0) or 1.3 (one row, the clip it replaces), feathers of 75, 150 and 300 read 56.6 to 59.1, 114.4 to 117 and 235.2 to 241.7; read in plate units, so a layout a few pixels off scales out, 10 is under a fifth of the narrowest and over seven times the hard edge (Issue #1229 plan)
+// 2026-11-03, seed 42's default road at the harness's window, on a Mac and on the CI runner: the clip it replaced reads 1.3 plate units part inked (one row) on both, a feather of 75 reads 56.6 to 57.8 on the Mac and 63 to 64.3 on the runner, 300 reads 234 to 244.2 and 252 to 270, the runner painting the masked plate's band about a tenth wider on a plate laid out the same size (Issue #1229 revision 1 plan); 10 is under a fifth of the narrowest reading and over seven times the hard edge
 const BAND_FLOOR = 10;
 const UNDER_CHROME = "a sampled point under the chrome";
 const onGround = (p: readonly number[]): boolean => PAPER.every((v, i) => i === 3 || Math.abs(p[i]! - v) <= 2);
@@ -160,7 +160,7 @@ async function orderFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
     if (!(low < HALF && high > HALF)) faults.push(`foot to head: strip ${i}`);
   }
   const head = await seen(k, plate, LAST_SEEK, atHeight(plate, HEAD_ROW), faults);
-  if (!revealedAll(head.slice(0, -1))) faults.push("a strip whole to its head once its turn is over");
+  if (!revealedAll(head)) faults.push("a strip whole to its head once its turn is over");
   return faults;
 }
 
@@ -183,15 +183,23 @@ async function edgeFaults(k: RibbonKit, plate: Plate): Promise<{ faults: string[
   const { rect } = await k.evaluate(INK);
   const n = plate.strips.length;
   const edges: number[] = [];
+  const turns: string[] = [];
   for (let i = 0; i < n; i++) {
     const block = blockOf(rect, plate, i);
+    const first = await shotAt(k, 0, block);
     const bare = await shotAt(k, i / n, block);
     const band = await shotAt(k, (i + 0.5) / n, block);
     const whole = await shotAt(k, Math.min((i + 1) / n, LAST_SEEK), block);
+    const last = await shotAt(k, LAST_SEEK, block);
     const part = partInkedRows(band, bare, whole, INK_NOISE);
     edges.push(Number(((part * plate.H) / rect[3]!).toFixed(1)));
+    if (i > 0 && rowsPastHalfWay(bare, first, last, INK_NOISE) > 0)
+      turns.push(`no turn overlapping the next: strip ${i} bare until strip ${i - 1} is whole`);
+    if (i < n - 1 && rowsPastHalfWay(whole, last, first, INK_NOISE) > 0)
+      turns.push(`no turn overlapping the next: strip ${i} whole as strip ${i + 1} begins`);
   }
-  return { faults: edges.flatMap((e, i) => (e >= BAND_FLOOR ? [] : [`along a soft edge: strip ${i}`])), edges };
+  const soft = edges.flatMap((e, i) => (e >= BAND_FLOOR ? [] : [`along a soft edge: strip ${i}`]));
+  return { faults: [...turns, ...soft], edges };
 }
 
 async function heldFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
@@ -238,7 +246,7 @@ async function landingFaults(k: RibbonKit, plate: Plate): Promise<string[]> {
 export async function rb21InksIn(k: RibbonKit): Promise<number> {
   const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep });
   const label =
-    "RB21 the first plate of a visit inks in on seed 42's default road: it arrives on bare paper to every strip's foot with its title and colophon standing, its strips revealed one after another from the bottom-left, each from its foot to its head along a soft edge and whole to its head once its turn is over, over the strip token times the strip count, the plate standing still under a resting pointer and printing whole while it inks, and it lands whole with no mask and no ground, the house lift back once it has (the control)";
+    "RB21 the first plate of a visit inks in on seed 42's default road: it arrives on bare paper to every strip's foot with its title and colophon standing, its strips revealed one after another from the bottom-left, no strip's turn overlapping the next's, each from its foot to its head along a soft edge and whole to its head once its turn is over, over the strip token times the strip count, the plate standing still under a resting pointer and printing whole while it inks, and it lands whole with no mask and no ground, the house lift back once it has (the control)";
   await mouseMove(k.send, 1, 1);
   await k.goto("#seed=42");
   await k.opened("seed 42, inking in");
