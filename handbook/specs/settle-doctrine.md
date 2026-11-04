@@ -622,6 +622,10 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
   that reason; NS1's rows of 2026-10-06 in
   `.claude/skills/vellum-footguns/references/flake-record.md`; and, in `handbook/errata/guards.md`,
   the PR #777 row on `EA4`'s witnesses and the PR #307 row on screenshot goldens.
+- **Masks: the soft edge a CSS mask paints over the Ribbon's plate reads about a tenth wider on the
+  runner**, on a plate laid out the same size on both, where a plain element's mask ramp reads the
+  same on both. Home: `BAND_FLOOR` in `e2e/suites/ribbon/ink.ts`, a floor neither side's reading
+  comes near, and the readings in `handbook/plans/1200/1229/1229-r1-plan.md`.
 - **Gestures: CI's browser neither zooms the page under a synthesized pinch nor scrolls a chart
   room under a synthesized touch scroll**, where the Mac's does both. Home: the bullet above
   opening "CI's browser does not move the page", and `vellum-footguns` Gate 2 item 14.
