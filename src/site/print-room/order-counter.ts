@@ -10,7 +10,25 @@ import {
   type PosterPreset,
 } from "./poster-presets.ts";
 import { rasterizeSvg, type RasterizeResult } from "../shared/rasterize.ts";
-import type { PosterBasis, SheetFace } from "./bound-atlas.ts";
+import { plateDressFor, type ProspectDress } from "../../prospect/dress/context.ts";
+import { plateAspect } from "./plate-aspect.ts";
+import { turnToSection, type PosterBasis, type SheetFace } from "./bound-atlas.ts";
+import {
+  ROAD_PRESETS,
+  caveatTail,
+  pressVerb,
+  pressesFor,
+  pressingLabel,
+  roadAtWidth,
+  roadChoice,
+  roadFilename,
+  roadLine,
+  roadOnOffer,
+  roadPngFilename,
+  roadTitle,
+  type Pressing,
+  type RoadState,
+} from "./road-press.ts";
 import { errorText } from "../shared/error-text.ts";
 import { $ } from "../shared/by-id.ts";
 import { downloadBlob } from "../shared/object-url.ts";
@@ -39,11 +57,25 @@ export interface CounterHost {
   readonly face: SheetFace;
 }
 
+interface Road {
+  readonly svg: string;
+  readonly href: string;
+  readonly title: string;
+  readonly line: string;
+  readonly dress: ProspectDress;
+  readonly seed: number;
+}
+
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
 const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select; greyed out during a draw
 // The chart plate rides the same order path as the posters; its divergences branch inside orderPoster.
 const presetByKey = new Map([...POSTER_PRESETS, CHART_PRESET].map((p): [string, PosterPreset] => [p.key, p]));
+const pressingSel = $<HTMLSelectElement>("pr-pressing");
+const roadOption = pressingSel.querySelector<HTMLOptionElement>('option[value="road"]')!;
+const legendNav = document.querySelector<HTMLElement>("nav.legend")!;
+const legendRow = legendNav.querySelector<HTMLElement>(".legend-row")!;
+const noteTail = $("pr-note-tail");
 
 let host: CounterHost = {
   basis: () => null,
@@ -52,16 +84,96 @@ let host: CounterHost = {
 };
 let ordering = false; // an order is at the press; the plates are disabled meanwhile
 let posterGen = 0; // drawGen-style stale guard; the button-disable is the operative guard
+let roadGen = 0;
+let road: Road | null = null;
+let roadState: RoadState = "pending";
+let pressing: Pressing = "poster";
 
 // The single gate for the order surface: consulting BOTH `drawing` and `ordering` closes the race in both directions (a redraw finishing during an order, an order finishing during a redraw); the format select greys out for the draw round-trip only, its value snapshotted at order time.
 export function refreshOrderControls(): void {
   const platesReady = host.basis() != null && !host.drawing() && !ordering;
   for (const b of plateButtons) b.disabled = !platesReady;
   formatSel.disabled = host.drawing();
+  pressingSel.disabled = host.drawing();
 }
 
 export function clearPosterStatus(): void {
   posterStatus.textContent = "";
+}
+
+function paintRoadChoice(): void {
+  const choice = roadChoice(roadState);
+  roadOption.textContent = choice.text;
+  roadOption.disabled = choice.disabled;
+}
+
+export function dropRoad(): void {
+  roadGen++;
+  if (road !== null) URL.revokeObjectURL(road.href);
+  road = null;
+  roadState = "pending";
+  paintRoadChoice();
+}
+
+export function askRoad(basis: PosterBasis): void {
+  const myGen = ++roadGen;
+  const dress = plateDressFor(basis.style);
+  runJob({ kind: "ribbon", seed: basis.seed, overrides: basis.overrides, from: null, to: null, dress })
+    .then((res) => {
+      if (myGen !== roadGen) return;
+      if (roadOnOffer(res)) {
+        road = {
+          svg: res.svg,
+          href: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })),
+          title: roadTitle(res.fromName, res.toName),
+          line: roadLine(res.fromName, res.toName),
+          dress,
+          seed: basis.seed,
+        };
+      }
+      roadState = road === null ? "none" : "drawn";
+      paintRoadChoice();
+    })
+    .catch(() => {
+      if (myGen !== roadGen) return;
+      roadState = "none";
+      paintRoadChoice();
+    });
+}
+
+export function sheetShows(shown: Pressing): void {
+  pressing = shown === "road" && road !== null ? "road" : "poster";
+  pressingSel.value = pressing;
+  const presses = pressesFor(pressing);
+  for (const [i, b] of plateButtons.entries()) {
+    const preset = presses[i]!;
+    b.dataset.poster = preset.key;
+    b.querySelector(".verb")!.textContent = pressVerb(preset);
+    b.querySelector(".room")!.textContent = preset.label;
+  }
+  const label = pressingLabel(pressing);
+  legendNav.setAttribute("aria-label", label);
+  legendRow.setAttribute("aria-label", label);
+  noteTail.textContent = caveatTail(pressing);
+  refreshOrderControls();
+}
+
+function layRoad(): void {
+  if (road === null) return;
+  host.face.showPlate({
+    href: road.href,
+    title: road.title,
+    line: road.line,
+    section: "ribbon",
+    aspect: plateAspect(road.svg),
+  });
+}
+
+function choosePressing(): void {
+  if (!ordering) posterStatus.textContent = "";
+  if (pressingSel.value === "road") {
+    if (!turnToSection("ribbon")) layRoad();
+  } else if (!turnToSection("hero")) host.face.showProof();
 }
 
 // A wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the Issue #132 epic's one hard warning).
@@ -176,11 +288,83 @@ function orderPoster(key: string): void {
     .finally(() => orderSettled());
 }
 
+function pullRoad(svg: string, held: Road, preset: Readonly<PosterPreset>): void {
+  const filename = roadFilename(held.seed, held.dress, preset.width);
+  downloadSvg(svg, filename);
+  window.__vellumLastPoster = { svg, filename, width: preset.width, seed: held.seed, style: held.dress };
+  posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
+}
+
+function pressRoadPng(png: Readonly<RasterizeResult>, held: Road, preset: Readonly<PosterPreset>): void {
+  const filename = roadPngFilename(held.seed, held.dress, png.width);
+  downloadBlob(png.blob, filename);
+  window.__vellumLastPng = {
+    filename,
+    type: png.blob.type,
+    size: png.blob.size,
+    width: png.width,
+    height: png.height,
+    scale: png.scale,
+    clamped: png.clamped,
+    seed: held.seed,
+    style: held.dress,
+  };
+  posterStatus.textContent = png.clamped
+    ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
+    : `${preset.label} plate pressed: ${filename}`;
+}
+
+function orderRoad(key: string): void {
+  const preset = ROAD_PRESETS.find((p) => p.key === key);
+  const held = road;
+  if (!preset || !held || ordering || host.drawing() || !host.basis()) return;
+  const format = selectedFormat();
+  const myGen = ++posterGen;
+  ordering = true;
+  refreshOrderControls();
+  posterStatus.textContent = `The press is rolling at ${preset.width}px…`;
+  Promise.resolve()
+    .then(async () => {
+      const svg = roadAtWidth(held.svg, preset.width);
+      if (myGen !== posterGen) return;
+      if (format === "svg") {
+        pullRoad(svg, held, preset);
+        return;
+      }
+      const scale = format === "png2" ? 2 : 1;
+      let png;
+      try {
+        png = await rasterizeSvg(svg, { scale });
+      } catch (err) {
+        if (myGen !== posterGen) return;
+        posterStatus.textContent = errorText(err);
+        return;
+      }
+      if (myGen !== posterGen) return;
+      pressRoadPng(png, held, preset);
+    })
+    .catch((err: unknown) => {
+      if (myGen !== posterGen) return;
+      posterStatus.textContent = "The press jammed: " + errorText(err);
+    })
+    .finally(() => orderSettled());
+}
+
+function orderAt(key: string): void {
+  if (pressing === "road") orderRoad(key);
+  else orderPoster(key);
+}
+
 export function initOrderCounter(counterHost: CounterHost): void {
   host = counterHost;
   // A fresh Pressed-as choice makes a pulled plate's status stale, so dismiss it; an in-flight order keeps its line (its completion rewrites it either way).
   formatSel.addEventListener("change", () => {
     if (!ordering) posterStatus.textContent = "";
   });
-  for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster as string));
+  pressingSel.addEventListener("change", choosePressing);
+  for (const b of plateButtons)
+    b.addEventListener("click", () => {
+      const key = b.dataset.poster as string;
+      orderAt(key);
+    });
 }

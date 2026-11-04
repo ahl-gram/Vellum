@@ -82,7 +82,10 @@ const contents = contentsRows(null);
 <ChartFolio lines={[["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]]} />
 
 <LegendRow label="A poster plate" rowLabel="A poster plate">
-  <Fragment slot="head"><span class="pressed">A poster plate, pressed as
+  <Fragment slot="head"><span class="pressed"><select id="pr-pressing" aria-label="What the presses pull">
+      <option value="poster" selected>A poster plate</option>
+      <option value="road" disabled>The road from the capital</option>
+    </select> pressed as
     <select id="pr-format" aria-label="Pressed as">
       <option value="svg" selected>The engraving itself (SVG)</option>
       <option value="png1">An impression (PNG)</option>
@@ -90,7 +93,7 @@ const contents = contentsRows(null);
     </select></span></Fragment>
   <p class="legend-note" slot="note">The engraving is exact at any size; an impression is pressed with your
   device's fonts, and a large one is fitted to what your browser can hold.
-  The chart is pulled only as the engraving.</p>
+  <span id="pr-note-tail">The chart is pulled only as the engraving.</span></p>
   <button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px</span><span class="room">Chart</span></button>
   <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
   <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>

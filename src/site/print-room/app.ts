@@ -25,7 +25,14 @@ import {
   type LandKeys,
 } from "../shared/address-grammar.ts";
 import { errorText } from "../shared/error-text.ts";
-import { clearPosterStatus, initOrderCounter, refreshOrderControls } from "./order-counter.ts";
+import {
+  askRoad,
+  clearPosterStatus,
+  dropRoad,
+  initOrderCounter,
+  refreshOrderControls,
+  sheetShows,
+} from "./order-counter.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -65,6 +72,26 @@ const furniture: RoomFurniture = {
   plateLine: $("pr-plate-line"),
 };
 const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? turnedAspect(furniture));
+const face: SheetFace = {
+  showProof: () => {
+    showProof(furniture);
+    sheet.rebase();
+    sheet.room.layout();
+    sheetShows("poster");
+  },
+  showPlate: (plate) => {
+    showPlate(furniture, plate);
+    sheet.rebase();
+    sheet.room.layout();
+    sheetShows(plate.section === "ribbon" ? "road" : "poster");
+  },
+  showMatter: (matter) => {
+    showMatter(furniture, matter);
+    sheet.rebase();
+    sheet.room.layout();
+    sheetShows("poster");
+  },
+};
 
 // Recipe params with no visible control here: carried from a deep link and re-serialized on every draw, so the URL stays a shareable Explorer link (a warped world must print warped).
 const carried: {
@@ -150,6 +177,7 @@ function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: P
   drawing = false;
   refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
   enableBind();
+  askRoad(posterBasis);
 }
 
 function draw(): void {
@@ -159,6 +187,7 @@ function draw(): void {
   drawing = true;
   status.textContent = "Pulling a proof…";
   // A fresh proof supersedes any bound atlas AND any pending poster order; close the whole order surface SYNCHRONOUSLY before the async render, or a plate clicked mid-redraw presses the previous world's poster.
+  dropRoad();
   clearBoundAtlas();
   refreshOrderControls();
   clearPosterStatus(); // a new proof clears any stale poster-order status
@@ -195,6 +224,7 @@ function draw(): void {
       // The previous proof is still on the desk and posterBasis still matches it: re-open the order surface, or a worker crash mid-redraw would leave the plates and Bind stuck disabled.
       refreshOrderControls();
       enableBind();
+      if (posterBasis !== null) askRoad(posterBasis);
     });
 }
 
@@ -208,23 +238,6 @@ $("pr-random").addEventListener("click", () => {
   draw();
 });
 await initWorker();
-const face: SheetFace = {
-  showProof: () => {
-    showProof(furniture);
-    sheet.rebase();
-    sheet.room.layout();
-  },
-  showPlate: (plate) => {
-    showPlate(furniture, plate);
-    sheet.rebase();
-    sheet.room.layout();
-  },
-  showMatter: (matter) => {
-    showMatter(furniture, matter);
-    sheet.rebase();
-    sheet.room.layout();
-  },
-};
 initOrderCounter({ basis: () => posterBasis, drawing: () => drawing, face });
 // getBasis reads the LIVE posterBasis at click time, the same snapshot the poster order uses.
 initBoundAtlas(() => posterBasis, face);

@@ -194,6 +194,13 @@ function turnTo(key: string): void {
   });
 }
 
+export function turnToSection(section: PlateSection): boolean {
+  const b = [...plates.values()].find((p) => p.section === section);
+  if (!b) return false;
+  turnTo(b.plate.key);
+  return true;
+}
+
 function bindAtlas(): void {
   const basis = getBasis();
   if (!basis || binding) return;
