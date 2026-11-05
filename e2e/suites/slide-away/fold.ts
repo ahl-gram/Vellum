@@ -94,7 +94,7 @@ async function foldPast(ctx: SuiteContext, arm: Arm): Promise<Folded> {
   const point = await ctx.evaluate(GESTURE_POINT);
   if (!point.ok) faults.push(`${arm.id}: the gesture box's centre lies under a piece: ${JSON.stringify(point)}`);
   await mouseTo(ctx, point.x, point.y);
-  // Wiring, said at the call: the fold's class lands before the refit.
+  // Wiring, said at the call: the sheet slides to its folded box from the press, so the read waits for it to leave the open one.
   await makeSettle(ctx)(
     PIECES,
     (d) => d.slip?.open === false && d.sheet[2] !== a.sheet[2],

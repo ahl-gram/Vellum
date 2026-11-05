@@ -208,13 +208,16 @@ away states.
   past the sheet.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
-into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
+into a desk. It folds away to a bookmark tab on the right edge, and the chart slides with it from the
+press, at the slip's own pace and curve, the Glass and the legend row moving with them; under reduced
+motion the chart stands at its new fit at the press (Issue #1261). **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
 the chart folio; where its presses would stack down the page there (more than two lines, or two or
 more presses each alone on its line), it stands above the chart folio instead, from the chrome's
 inset to the Glass or the slip (`placeLegendRow` in `src/site/shared/room-seats.ts`). **A risen row
 that would come within the gap of the head cluster's foot sheds its note and every head line that
 holds no control** (Alex, 2026-10-06, Issue #762: lean), decided on the row as it stands unshed, so
-the shed never undoes itself. **Provisional until the post-use review:** where the risen row stands.
+the shed never undoes itself. **Provisional until the post-use review:** where the risen row stands,
+and the chart's slide with the fold.
 
 **On the Explorer the slip stands inboard of the Drawer tab**: its inset is a token only the Explorer's
 sheet changes (`--slip-right` in `src/styles/explorer/index.css`), and the room's fit and the Glass

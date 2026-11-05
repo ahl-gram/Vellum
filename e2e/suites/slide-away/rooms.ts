@@ -130,7 +130,7 @@ const ARMS: readonly ThirdArm[] = [
       await openAt(c, SEED_42, 1280, 640, "SW2 c");
       const open = await c.evaluate(PIECES);
       await pressSelector(c, ".slip-fold");
-      // Wiring, said at the check: the fold's class lands before the refit, so the read waits for the sheet to have moved to its folded box.
+      // Wiring, said at the check: the class says nothing of where the sheet stands, so the read waits for the sheet to have moved to its folded box.
       await makeSettle(c)(
         PIECES,
         (d) => d.slip?.open === false && d.sheet[2] !== open.sheet[2],

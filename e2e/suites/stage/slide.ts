@@ -134,7 +134,7 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
     await press(ctx, 2);
     await settleSlid(ctx, "head", "ES9 head away");
     await pressSelector(ctx, ".slip-fold");
-    // Wiring, said at the check: a regional survey landing in the folio mid-fold is a race, so the folio's growth by a line is made inside the fold's 340 ms by hand.
+    // Wiring, said at the check: a regional survey landing in the folio mid-fold is a race, so the folio's growth by a line is made inside the fold's slide by hand.
     await ctx.evaluate(
       `(() => { const p = document.createElement("p"); p.id = "es9-line"; p.textContent = "a line the survey adds"; document.querySelector(".corner.bl").append(p); return true; })()`,
     );

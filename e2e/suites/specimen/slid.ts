@@ -66,7 +66,7 @@ async function sb18SlidFromFolded(
   const open = await k.evaluate(PIECES);
   await k.setState("folded");
   await lensRest(k, "still", "SB18 folded", LENS);
-  // Wiring, said at the check: the fold's class lands before the refit, so the read waits for the sheet to have moved to its folded box.
+  // Wiring, said at the check: the class says nothing of where the sheet stands, so the read waits for the sheet to have moved to its folded box.
   await makeSettle(k)(PIECES, (d) => d.slip?.open === false && d.sheet[2] !== open.sheet[2], "SB18 folded sheet", 60);
   const folded = await still(k, "SB18 folded");
   const faults: string[] = [];

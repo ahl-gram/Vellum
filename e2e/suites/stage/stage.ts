@@ -254,7 +254,7 @@ export async function fold(ctx: SuiteContext): Promise<void> {
   const before = await ctx.evaluate(sheetX);
   await mouseMove(ctx.send, at.x, at.y);
   await sendClick(ctx.send, at.x, at.y);
-  // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
+  // The fold refits at its press and, with motion on, slides the sheet there (bindRoom in src/site/shared/room.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
   await mouseMove(ctx.send, 1, 1);
   await ctx.evaluate("window.scrollTo(0, 0)");
