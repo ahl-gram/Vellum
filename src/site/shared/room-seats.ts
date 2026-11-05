@@ -54,18 +54,28 @@ export function slipWidth(r: DOMRect | null): number {
   return parseFloat(rootStyle.getPropertyValue("--slip-w")) * parseFloat(rootStyle.fontSize) || 0;
 }
 
-// atelier.css seats the Glass beside an open slip at right: --slip-w + --slip-right + 1.4rem; computed here rather than read, because the Glass's right transitions with the fold and a rect read at the settle timer was 12px short (e2e Z13c).
+// atelier.css seats the Glass beside an open slip at right: --slip-w + --slip-right + 1.4rem; computed here rather than read, because the room lays out at the fold's press while the Glass's right is still in its transition (Issue #1261; a rect read at the old settle timer was 12px short, e2e Z13c).
 export const GLASS_BREATH_REM = 1.4;
 
+interface Keyframed {
+  getKeyframes(): ComputedKeyframe[];
+}
+
+const keyframed = (effect: AnimationEffect | null | undefined): effect is AnimationEffect & Keyframed =>
+  effect !== null && effect !== undefined && "getKeyframes" in effect;
+
 function restingRight(el: Element): number {
-  return parseFloat(getComputedStyle(el).right) || 0;
+  const running = el.getAnimations().find((a) => "transitionProperty" in a && a.transitionProperty === "right");
+  const last = keyframed(running?.effect) ? running.effect.getKeyframes().at(-1)?.["right"] : undefined;
+  const resting = parseFloat(typeof last === "string" ? last : "");
+  return Number.isFinite(resting) ? resting : parseFloat(getComputedStyle(el).right) || 0;
 }
 
 export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipReach: number): number | null {
   if (glass === null) return null;
   if (!slipOpen) {
     const r = rectOf(glass);
-    return r === null ? null : pageLeft(r) + (parseFloat(getComputedStyle(glass).right) || 0) - restingRight(glass);
+    return r === null ? null : pageLeft(r) + ((parseFloat(getComputedStyle(glass).right) || 0) - restingRight(glass));
   }
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
   return pageBox().w - slipReach - GLASS_BREATH_REM * rem - glass.offsetWidth;
