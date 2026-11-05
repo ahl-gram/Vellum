@@ -1,5 +1,4 @@
 // A fold of the side panel past the fill (Issue #1034, Alex's decisions 1 and 2): the head cluster and the chart folio creep part way back, as today's Explorer brings them, until the reader zooms past it, after which the folded room keeps its own rule.
-import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
@@ -9,6 +8,7 @@ import {
   awayFaults,
   fillOf,
   fillPressOf,
+  foldLanded,
   homeFaults,
   openRoom,
   PIECES,
@@ -94,13 +94,8 @@ async function foldPast(ctx: SuiteContext, arm: Arm): Promise<Folded> {
   const point = await ctx.evaluate(GESTURE_POINT);
   if (!point.ok) faults.push(`${arm.id}: the gesture box's centre lies under a piece: ${JSON.stringify(point)}`);
   await mouseTo(ctx, point.x, point.y);
-  // Wiring, said at the call: the sheet slides to its folded box from the press, so the read waits for it to leave the open one.
-  await makeSettle(ctx)(
-    PIECES,
-    (d) => d.slip?.open === false && d.sheet[2] !== a.sheet[2],
-    `SW7 ${arm.id} folded sheet`,
-    60,
-  );
+  // Wiring, said at the call: the read waits for the folded sheet's rest, not for the class.
+  await foldLanded(ctx, a, `SW7 ${arm.id} folded sheet`);
   const b = await still(ctx, `SW7 ${arm.id} after the fold`);
   const folded = fillOf(b, "sheet");
   if (fillPressOf(folded) !== 3)

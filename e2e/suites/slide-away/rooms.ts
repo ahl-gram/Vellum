@@ -1,5 +1,4 @@
 // The slide-away in the eight other zoom rooms, the follow and the lines left (Issue #1034): SW1 and SW4 visit each room at 1280x800, SW2 and SW3 are the windows where the chart fills only at the Glass's third or fourth press.
-import { makeSettle } from "../../support/settle.ts";
 import type { SuiteContext } from "../../types.ts";
 import { GLYPH_LINES } from "../stage/glyphs.ts";
 import { FLOOR_PLAIN, grounds, rest, size, withStyle, worstOf } from "../stage/stage.ts";
@@ -11,6 +10,7 @@ import {
   awayFaults,
   fillOf,
   fillPressOf,
+  foldLanded,
   homeFaults,
   openRoom,
   PIECES,
@@ -130,13 +130,8 @@ const ARMS: readonly ThirdArm[] = [
       await openAt(c, SEED_42, 1280, 640, "SW2 c");
       const open = await c.evaluate(PIECES);
       await pressSelector(c, ".slip-fold");
-      // Wiring, said at the check: the class says nothing of where the sheet stands, so the read waits for the sheet to have moved to its folded box.
-      await makeSettle(c)(
-        PIECES,
-        (d) => d.slip?.open === false && d.sheet[2] !== open.sheet[2],
-        "SW2 c folded sheet",
-        60,
-      );
+      // Wiring, said at the check: the read waits for the folded sheet's rest, not for the class.
+      await foldLanded(c, open, "SW2 c folded sheet");
       await rest(c, 1280, 640, "SW2 c folded");
       return c.evaluate(PIECES);
     },

@@ -1,6 +1,6 @@
 // The slide-away checks' shared reads and gestures in the eight other zoom rooms (Issue #1034): which rooms, what the head cluster and the chart folio stand at, the Glass's presses and the arithmetic written again, and a stillness that waits for nothing but rest.
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
-import { makeSettle } from "../../support/settle.ts";
+import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import type { Lens } from "../print-room/print.ts";
@@ -127,6 +127,22 @@ export function still(ctx: SuiteContext, label: string): Promise<Pieces> {
     `slide-away still ${label}`,
     120,
   );
+}
+
+const COUNTED: Payload<Pieces & { sheetAnims: number }> =
+  `(() => ({ ...(${PIECES}), sheetAnims: document.getElementById("sheet").getAnimations().length }))()`;
+
+// A fold slides the sheet from the frame after its press, pending at the old box through its first commit, so the folded sheet's rest is the slip moved, the sheet's right edge changed and #sheet listing no animation, across two equal reads (Issue #1261).
+export function foldLanded(ctx: SuiteContext, from: Pieces, label: string): Promise<Pieces> {
+  return makeStable(makeSettle(ctx))(COUNTED, label, {
+    departed: (d) =>
+      d.slip?.open === false &&
+      from.slip !== null &&
+      Math.abs(d.slip.left - from.slip.left) > 0.5 &&
+      d.sheet[2] !== from.sheet[2] &&
+      d.sheetAnims === 0,
+    tries: 60,
+  });
 }
 
 export async function gather(ctx: SuiteContext, ms: number): Promise<Pieces[]> {

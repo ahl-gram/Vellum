@@ -1,8 +1,16 @@
 // The Specimen Book's leaned and slid away states (Issue #1034, Alex's ruling 6 on Issue #997): leaned stands one press of the Glass in with the head cluster and the chart folio home on their panels, slid away arms the slide and leans to the press that fills, and the sheet's spill and the Glass's bare ground and the room folio's edge are read there.
-import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import { LENS, lensRest } from "../print-room/print.ts";
-import { awayFaults, fillOf, fillPressOf, PIECES, pressDepths, still, travelsOf } from "../slide-away/kit.ts";
+import {
+  awayFaults,
+  fillOf,
+  fillPressOf,
+  foldLanded,
+  PIECES,
+  pressDepths,
+  still,
+  travelsOf,
+} from "../slide-away/kit.ts";
 import type { Pieces } from "../slide-away/kit.ts";
 import { sb5dGlassBare, sb5eFolioPanel } from "./desktop.ts";
 import type { SpecimenKit } from "./kit.ts";
@@ -66,8 +74,8 @@ async function sb18SlidFromFolded(
   const open = await k.evaluate(PIECES);
   await k.setState("folded");
   await lensRest(k, "still", "SB18 folded", LENS);
-  // Wiring, said at the check: the class says nothing of where the sheet stands, so the read waits for the sheet to have moved to its folded box.
-  await makeSettle(k)(PIECES, (d) => d.slip?.open === false && d.sheet[2] !== open.sheet[2], "SB18 folded sheet", 60);
+  // Wiring, said at the check: the read waits for the folded sheet's rest, not for the class.
+  await foldLanded(k, open, "SB18 folded sheet");
   const folded = await still(k, "SB18 folded");
   const faults: string[] = [];
   if (folded.slip?.open !== false) faults.push("the slip is not folded before the choice (the precondition)");
