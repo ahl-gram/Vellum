@@ -228,6 +228,7 @@ test("#450 a regional plate carries its stamp, and the stamp alone redraws it by
     assert.ok(parsed, `${plate.title} carries its recipe`);
     const region = parsed.region;
     assert.ok(region, "and its region stamp");
+    const chained = region.detail > 0;
     assert.equal(region.detail, 2, "stamped at band 2's depth");
     const reworld = generateWorld(parsed.recipe);
     const redrawn = renderMap(
@@ -236,7 +237,7 @@ test("#450 a regional plate carries its stamp, and the stamp alone redraws it by
         gridW: parsed.recipe.gridW,
         gridH: parsed.recipe.gridH,
         title: regionTitle(reworld, region.window),
-        detail: region.detail > 0,
+        detail: chained,
       }),
       { style: parsed.style, widthPx: 1500, legend: true, regionRecipe: region },
     );
