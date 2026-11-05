@@ -98,7 +98,7 @@ export interface TableGroup {
   readonly entries: ReadonlyArray<{ readonly at: number; readonly item: TableItem }>;
 }
 
-// `beasts` rides though Issue #519 lists a four-field dress: it cannot change a survey today (`generateRegionWorld` sets `beasts: []`, measured byte-identical either way), and is encoded for the reason Issue #519 gives for encoding the style while the redraft is antique-only.
+// `beasts` rides though Issue #519 lists a four-field dress, because a survey whose window holds the world's beast haunt draws that beast when the seal is set (Issue #421).
 
 // undefined = not stated; null = stated and unreadable, which drops the whole ITEM rather than quietly drafting a different world. Continuous values clamp instead.
 type Field<T> = T | null | undefined;

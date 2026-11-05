@@ -30,8 +30,9 @@ about a rule, the rulebook wins.
   transient computed field rather than a stamped one, and the parent's in-window named lakes are
   projected with it.
 - **`region.seaGate` gates ALL region sea-furniture**, not the caption alone: the compass sea search,
-  the sea decor, the currents, the winds, the soundings and the feature labels each skip a gated
-  cell. It is absent on a world sheet, so the gate is inert there.
+  the sea decor, the sea beast's search for open water, the currents, the winds, the soundings and
+  the feature labels each skip a gated cell. It is absent on a world sheet, so the gate is inert
+  there.
 - **A region compass may sit on LAND.** Where no genuine sea qualifies, the rose falls back,
   region-only, to a shrunk rose on the most open land clearing rather than vanishing. A world compass
   is unchanged: full size, sea only.
@@ -66,6 +67,19 @@ about a rule, the rulebook wins.
   land is one realm's whole. The tint indices still come from the parent LABEL FIELD and not a
   tint index array, because the tint indices take the style and an index array would need one
   copy per style.
+- **Carry the parent's sea beast onto a close-up, and never conjure one there.** Where the window
+  holds the haunt, its edge included, the region world takes the parent's beast whole (its kind,
+  name, epithet, first sighting and tale) with the haunt projected through the window onto the
+  nearest cell of the close-up's grid; a window that misses the haunt carries none
+  (`regionBeasts` in `src/world/region.ts`). Draw it with the world sheet's own layer, at the
+  world sheet's size, but search only within 460 px of the haunt on a 1500 px sheet, every viable
+  spot in that reach and none beyond it; a close-up with no room there draws no beast and keeps
+  its decor serpent, where a world sheet goes on to search its whole sheet (`beastCandidates` in
+  `src/render/layers/beasts.ts`). Every band draws the same grid over the same width, so the
+  layer's clearances, counted in the close-up's own cells, and the reach are the world sheet's on
+  the sheet, and are never scaled by depth. With the seal off, or with no beast drawn, a close-up
+  draws exactly what it drew without one. **Provisional until the post-use review**
+  (Issue #421): the beast at the world sheet's size on every band, and the near reach.
 - **Borders are not stroked from the tint rings.** Per-realm rings traverse a shared seam twice
   and the coincident dash phases fill each other's gaps, so a dashed border paints solid. A
   region's borders are the chained land-to-land boundary of its own refined labels, its cell

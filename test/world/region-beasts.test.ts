@@ -20,8 +20,7 @@ test("a close-up whose window holds the haunt carries the parent's beast, whole,
   const region = regionOf(window);
   assert.equal(region.beasts.length, 1);
   const { x, y, ...carried } = region.beasts[0]!;
-  const { x: _x, y: _y, ...parent } = beast;
-  assert.deepEqual(carried, parent);
+  assert.deepEqual({ ...carried, x: beast.x, y: beast.y }, beast);
   assert.ok(Number.isInteger(x) && Number.isInteger(y), `the haunt (${x}, ${y}) is not a cell`);
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
