@@ -151,3 +151,26 @@ test("RP4 the Explorer's region job hands the card the main chart's numbers and 
     "the 20 places that follow are hamlets, farmsteads or mills",
   );
 });
+
+test("the Glass's region job over the beast's haunt draws the parent's beast when the seal is set (seed 2, band 2)", () => {
+  const beast = world.beasts[0]!;
+  const band = LOD_BANDS[2] as LodBand;
+  const q = quantizeCenter(beast.x / (world.recipe.gridW - 1), beast.y / (world.recipe.gridH - 1), band.sizeUV);
+  const job = {
+    kind: "region" as const,
+    seed: SEED,
+    overrides: {},
+    window: lodWindowFor(q.cx, q.cy, band.sizeUV),
+    gridW: band.gridW,
+    gridH: band.gridH,
+    band: band.index,
+    render: { ...RENDER, beasts: true },
+  };
+  const sealed = runInline(job).svg;
+  assert.ok(sealed.includes('id="layer-bestiary"'), "the Glass's close-up over the haunt drew no bestiary");
+  assert.ok(sealed.includes(beast.name), "and the beast it drew is not the parent's");
+  assert.ok(
+    !runInline({ ...job, render: RENDER }).svg.includes('id="layer-bestiary"'),
+    "with the seal off the close-up still drew the beast",
+  );
+});
