@@ -204,6 +204,25 @@ function regionLakes(g: RegionGrid, elev: Field, seaLevel: number): NamedLake[] 
   });
 }
 
+function regionBeasts(g: RegionGrid): World["beasts"] {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
+  const du = window.u1 - window.u0;
+  const dv = window.v1 - window.v0;
+  return world.beasts.flatMap((beast) => {
+    const u = beast.x / (recipe.gridW - 1);
+    const v = beast.y / (recipe.gridH - 1);
+    if (u < window.u0 || u > window.u1 || v < window.v0 || v > window.v1) return [];
+    return [
+      {
+        ...beast,
+        x: Math.round(((u - window.u0) / du) * (gridW - 1)),
+        y: Math.round(((v - window.v0) / dv) * (gridH - 1)),
+      },
+    ];
+  });
+}
+
 function regionTitleFor(world: World, spec: RegionSpec): World["title"] {
   return {
     title: spec.title,
@@ -313,7 +332,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     title: regionTitleFor(world, spec),
     names: regionNames(world, regionLakes(g, elev, seaLevel)),
     history: { events: [] },
-    beasts: [],
+    beasts: regionBeasts(g),
     oceanDist,
     region: regionCarry(g, { elev, seaLevel }, roadLabels, regionDetailLevel(spec), parentIdx),
   };
