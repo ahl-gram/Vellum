@@ -47,4 +47,6 @@ test("a close-up carries the beast exactly when the haunt lies inside its window
   assert.equal(missAbove.beasts.length, 0, "a window lying above the haunt carried the beast");
   assert.equal(missBelow.beasts.length, 0, "a window lying below the haunt carried the beast");
   assert.equal(hold.beasts.length, 1, "a window holding the haunt near its edge lost the beast");
+  const onEdge = regionOf({ u0: u - 0.25, u1: u, v0: 0.7, v1: 0.95 });
+  assert.equal(onEdge.beasts.length, 1, "a window with the haunt exactly on its edge lost the beast");
 });
