@@ -449,6 +449,23 @@ section points there rather than restating it.
   Chromium only (it drives the browser over the debug port, `e2e/harness.ts`), whose
   computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a
   number (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
+- **A fold's slide starts on the frame after its press and pends at the box it starts from.** The
+  room lays a fold out at its press and starts the sheet's slide on the next animation frame
+  (`createSheetSlide` in `src/site/shared/sheet-slide.ts`). So for one frame `#sheet` stands at its
+  new fit with no animation listed. After that it stands at the slide's first keyframe, the box it
+  stood in, and stays there, listed in `getAnimations()` as running and pending at current time 0.
+  Beside it the slip's, the Glass's and the Press row's transitions pend too, until that frame's
+  raster lands. A taller window pends longer, main's slip alone included, and the harness's CPU
+  throttle slows the main thread and not the raster, so a throttled run does not lengthen the stall.
+  A wait that departs on something the press changes at once and takes two equal reads can
+  therefore resolve on the old box: the slip's class, the stage's reserve, or a rect read in that
+  first frame. Z13c's wait did. A wait for the sheet's rest after a fold or an unfold keeps its
+  departure and also asks that `#sheet` list no animation, comparing that count in its equal reads.
+  One whose caller then counts out stillness on other pieces also departs on the slip having moved,
+  so the frame before the slide cannot pass for rest. `z13dFoldAndNoHash` in
+  `e2e/suites/zoom/resets.ts`, `foldLanded` in `e2e/suites/slide-away/kit.ts` and `toState` in
+  `e2e/suites/specimen/kit.ts` are the shape, and the readings are in
+  `handbook/plans/1200/1261/1261-r1-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
