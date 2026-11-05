@@ -51,8 +51,9 @@ function beastCandidates(
   const viable = open
     .filter((o) => frameViable(o) && clearOf(o.x, o.y, ext.halfW * 0.7))
     .sort((a, b) => fromHome(a) - fromHome(b));
-  const near = [home, ...viable.filter((o) => fromHome(o) < 460 * k)].slice(0, 140);
-  return { near, viable };
+  const withinReach = viable.filter((o) => fromHome(o) < 460 * k);
+  const near = [home, ...withinReach].slice(0, 140);
+  return { near, viable: world.region === undefined ? viable : withinReach };
 }
 
 function overWater(ctx: RenderCtx, box: Box, minD: number): boolean {
