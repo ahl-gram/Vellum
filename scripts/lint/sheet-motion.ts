@@ -33,6 +33,7 @@ export const TIPPING_LINKS: readonly string[] = [
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
   "shared/living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible, .pc-ribbon:hover, .pc-ribbon:focus-visible",
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
+  "shared/reading-frame.css :: .rf-log-strip li.prologue .cr-road:is(:hover, :focus-visible)",
 ];
 
 // Ratified 2026-08-24 (PR #468 live review): a station pip's grow opens its slip in place, and the slip's Enter link is what leaves the page.

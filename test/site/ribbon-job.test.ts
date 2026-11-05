@@ -5,6 +5,7 @@ import { buildRibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { errorText } from "../../src/site/shared/error-text.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { eventCaption } from "../../src/itinerary/prose.ts";
 import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
@@ -219,7 +220,7 @@ test("every road leg of the voyage the room builds draws in the Ribbon as the sa
         const res = ribbonResultFor(w, { from: leg.fromIdx, to: leg.toIdx, dress: "antique" });
         if (res.fromIdx !== leg.fromIdx || res.toIdx !== leg.toIdx) drawn = `drew ${res.fromIdx} to ${res.toIdx}`;
       } catch (e) {
-        drawn = `threw ${(e as Error).message}`;
+        drawn = `threw ${errorText(e)}`;
       }
       if (mode === "road" && drawn) failures.push(`seed ${seed} leg ${i} (${leg.fromIdx} to ${leg.toIdx}): ${drawn}`);
       if (mode !== "road" && drawn) nonRoadElsewhere++;
