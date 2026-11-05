@@ -148,7 +148,6 @@ function regionPlateAnchors(world: World): NamedSettlement[] {
   return [capital, far];
 }
 
-/** The Glass's second close-up over a town: the plate is the sheet the Glass draws there (Issue #450). */
 export function regionPlateSpec(
   world: World,
   anchor: { readonly x: number; readonly y: number },

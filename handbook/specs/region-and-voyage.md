@@ -140,8 +140,8 @@ about a rule, the rulebook wins.
   `src/world/region.ts`), so whatever draws it reads the depth from the world, never from a band index
   or a render option.
 - **A window off the band lattice gets none of a band-parameterized guard's coverage.** The bound
-  atlas's regional plates stand on it: each is the Glass's second close-up over its town, band 2's
-  window at band 2's grid, drawn from the chain, stamped, and titled from its window
+  atlas's regional plates are not such windows: each is the Glass's second close-up over its town,
+  band 2's window at band 2's grid, drawn from the chain, stamped, and titled from its window
   (`regionPlateSpec` in `src/atlas/compose.ts`), so it is the sheet the Glass draws there and the
   guards written in bands reach it.
 - **A parent is derived from the WINDOW alone**, never from the camera path taken to reach it and

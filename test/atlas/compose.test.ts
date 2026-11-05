@@ -13,7 +13,7 @@ import { runInline } from "../../src/site/explorer/worker-client.ts";
 import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
+import { decideSettle, FULL_WINDOW } from "../../src/world/lod.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
 import type { World } from "../../src/world/types.ts";
 
@@ -23,8 +23,11 @@ const PLATE_RENDER = { style: "antique", widthPx: 1500, legend: true } as const;
 function glassWindow(world: World, name: string): UvWindow {
   const s = world.settlements.find((t) => t.name === name);
   assert.ok(s, `${name} is a settlement of chart ${world.recipe.seed}`);
-  const q = quantizeCenter(s.x / (world.recipe.gridW - 1), s.y / (world.recipe.gridH - 1), 0.25);
-  return lodWindowFor(q.cx, q.cy, 0.25);
+  const camera = { cx: s.x / (world.recipe.gridW - 1), cy: s.y / (world.recipe.gridH - 1), k: 4 };
+  const settled = decideSettle({ camera, currentWindow: FULL_WINDOW, currentBand: 0 });
+  assert.equal(settled.action, "region", `a Glass centred on ${name} at k=4 settles onto a region`);
+  assert.equal(settled.band, 2, "k=4 is the second close-up");
+  return settled.window;
 }
 
 test("composeAtlas yields the hero, the other draughtings, and the surveys", () => {
