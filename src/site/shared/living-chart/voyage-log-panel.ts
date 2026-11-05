@@ -33,7 +33,52 @@ export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }
 
-function journalRow(e: Readonly<VoyageLogEntry>, i: number): HTMLLIElement {
+function roadPressParts(href: string) {
+  const press = document.createElement("a");
+  press.className = "cr-road";
+  press.setAttribute("href", href);
+  const label = document.createElement("span");
+  label.className = "cr-road-label";
+  label.textContent = ROAD_TAKE;
+  const note = document.createElement("span");
+  note.className = "cr-road-note";
+  note.textContent = ROAD_UNREACHED;
+  press.append(label, document.createTextNode(" "), note);
+  return { press, label, note };
+}
+
+type Seat = {
+  readonly press: HTMLAnchorElement;
+  readonly label: HTMLSpanElement;
+  readonly note: HTMLSpanElement;
+  readonly row: HTMLLIElement;
+};
+
+function createRoadAsk(_park: () => void) {
+  let seats: Seat[] = [];
+
+  function press(row: HTMLLIElement, href: string): HTMLAnchorElement {
+    const s: Seat = { ...roadPressParts(href), row };
+    seats.push(s);
+    return s.press;
+  }
+
+  function settle(): void {}
+
+  function forget(): void {
+    seats = [];
+  }
+
+  return { press, close: () => {}, settle, forget };
+}
+
+type RoadAsk = ReturnType<typeof createRoadAsk>;
+
+function journalRow(
+  e: Readonly<VoyageLogEntry>,
+  i: number,
+  road: ((row: HTMLLIElement) => HTMLAnchorElement) | null,
+): HTMLLIElement {
   const li = document.createElement("li");
   li.className = "prologue";
   const year = document.createElement("span");
@@ -47,6 +92,11 @@ function journalRow(e: Readonly<VoyageLogEntry>, i: number): HTMLLIElement {
     dc.className = "cr-dc";
     dc.textContent = body[0]!;
     text.append(dc, document.createTextNode(body.slice(1)));
+  } else if (road) {
+    const prose = document.createElement("span");
+    prose.className = "cr-prose";
+    prose.textContent = body;
+    text.append(prose, document.createTextNode(" "), road(li));
   } else {
     text.textContent = body;
   }
@@ -54,18 +104,44 @@ function journalRow(e: Readonly<VoyageLogEntry>, i: number): HTMLLIElement {
   return li;
 }
 
-export function createVoyageLogPanel(logEls: VoyageLogHost, _road?: RoadPressHost) {
+function rowLeg(
+  legs: ReadonlyArray<JournalLeg>,
+  i: number,
+  count: number,
+  homecoming: boolean,
+): JournalLeg | undefined {
+  return i === 0 || (homecoming && i === count - 1) ? undefined : legs[i - 1];
+}
+
+function roadFor(
+  road: Readonly<RoadPressHost> | undefined,
+  ask: RoadAsk,
+  seed: number,
+  leg: JournalLeg | undefined,
+): ((row: HTMLLIElement) => HTMLAnchorElement) | null {
+  return road && leg && leg.mode === "road"
+    ? (row) => ask.press(row, road.href(seed >>> 0, leg.fromIdx, leg.toIdx))
+    : null;
+}
+
+export function createVoyageLogPanel(logEls: VoyageLogHost, road?: RoadPressHost) {
+  const ask = createRoadAsk(road ? road.park : () => {});
+
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,
     presentYear: number,
     seed: number,
     subtitle: string,
     homecoming?: VoyageHomecoming | null,
-    _legs: ReadonlyArray<JournalLeg> = [],
+    legs: ReadonlyArray<JournalLeg> = [],
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, seed >>> 0, subtitle || "", homecoming);
     logEls.sig.textContent = log.attribution;
-    const rows = log.entries.map((e, i) => journalRow(e, i));
+    ask.forget();
+    const count = log.entries.length;
+    const rows = log.entries.map((e, i) =>
+      journalRow(e, i, roadFor(road, ask, seed, rowLeg(legs, i, count, homecoming != null))),
+    );
     logEls.strip.replaceChildren(...rows);
     logEls.panel.hidden = false;
     return { log, rows };
@@ -74,10 +150,12 @@ export function createVoyageLogPanel(logEls: VoyageLogHost, _road?: RoadPressHos
   /** Brighten rows [0, arrived), dim the rest. Idempotent and order-independent, so stepping backward un-brightens correctly. */
   function revealLog(rows: HTMLLIElement[], arrived: number): void {
     for (let i = 0; i < rows.length; i++) rows[i]!.classList.toggle("inked", i < arrived);
+    ask.settle();
   }
 
   /** Hide and empty the panel. It lives outside the chart mount, so nothing else clears it. */
   function hideLog(): void {
+    ask.forget();
     logEls.panel.hidden = true;
     logEls.strip.replaceChildren();
     logEls.sig.textContent = "";
@@ -95,7 +173,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost, _road?: RoadPressHos
     };
   }
 
-  return { buildLogPanel, revealLog, hideLog, logSnapshot, closeAsk: () => {} };
+  return { buildLogPanel, revealLog, hideLog, logSnapshot, closeAsk: ask.close };
 }
 
 export type VoyageLogPanel = ReturnType<typeof createVoyageLogPanel>;

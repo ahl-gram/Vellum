@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { VoyageLogPort } from "../../src/world/voyage-log.ts";
-import { El, el, installShim } from "../../test-support/element-shim.ts";
+import { El, el, installShim, walk } from "../../test-support/element-shim.ts";
 
 installShim();
 
@@ -153,7 +153,11 @@ const ev = (): { defaultPrevented: boolean; preventDefault(): void } => ({
 test("a road leg's journal row carries Take this road to the host's address for that leg; the departure, a sea row and the last entry carry none (#434)", async () => {
   const { log, rows } = await roadPanel();
   assert.equal(rows.length, 5, "a departure, three ports and the homecoming");
-  assert.equal(ROAD_LEGS[3].mode, "road", "witness: the homecoming's leg is a road, so only the rule withholds its press");
+  assert.equal(
+    ROAD_LEGS[3].mode,
+    "road",
+    "witness: the homecoming's leg is a road, so only the rule withholds its press",
+  );
   for (const i of [0, 1, 4]) assert.equal(pressOf(rows[i]!), undefined, `row ${i} carries no press`);
 
   const press = pressOf(rows[2]!);
@@ -175,5 +179,19 @@ test("a road leg's journal row carries Take this road to the host's address for 
     rows.map((li) => (li as unknown as El).children[0]!.textContent),
     log.entries.map((e) => `day ${e.day}`),
     "the gutters are the entries' own",
+  );
+});
+
+test("a host that hands the journal no road writer keeps today's rows (#434 ruling B)", async () => {
+  const { createVoyageLogPanel } = await import("../../src/site/shared/living-chart/voyage-log-panel.ts");
+  const strip = el();
+  const panel = createVoyageLogPanel({ panel: el(), sig: el(), strip });
+  panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
+  const nodes = walk(strip as unknown as El);
+  assert.ok(nodes.length > 10, "the strip was built and walked");
+  assert.deepEqual(
+    nodes.filter((n) => n.className === "cr-road" || n.className === "cr-prose"),
+    [],
+    "no press and no prose span on any row",
   );
 });
