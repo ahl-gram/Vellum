@@ -292,7 +292,7 @@ const CLOSERS: ReadonlyArray<[string, (r: Rig) => void]> = [
   ["the engine closes it", (r) => r.panel.closeAsk()],
 ];
 
-test("the question closes on any other action: focus leaving, Escape, another road asking, a pale press pressed, its row untold, the engine's closeAsk, and a rebuild (#434 M4)", async () => {
+test("the question closes on any other action: focus leaving, Escape, another road asking, a pale press pressed, its row untold, and the engine's closeAsk (#434 M4)", async () => {
   for (const [why, act] of CLOSERS) {
     const rig = await askingRig();
     act(rig);
@@ -307,9 +307,32 @@ test("the question closes on any other action: focus leaving, Escape, another ro
     "Leave the voyage?",
     "a paint that leaves the row told leaves the question standing",
   );
+});
 
-  const rig = await askingRig();
-  const { rows: fresh } = rig.panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
-  rig.panel.revealLog(fresh, 5);
-  assert.equal(click(press2(fresh)).defaultPrevented, true, "a rebuilt row asks before it goes");
+test("a rebuilt or hidden journal paints only the presses it shows, never the ones it let go (#434)", async () => {
+  const { panel, rows } = await roadPanel();
+  panel.revealLog(rows, 5);
+  const replaced = press2(rows);
+  assert.equal(replaced.getAttribute("aria-disabled"), "false", "the old row 2 is told, so its press works");
+
+  const { rows: fresh } = panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
+  assert.equal(press2(fresh).getAttribute("aria-disabled"), "true", "the new row 2 starts untold");
+  rows[2]!.classList.toggle("inked", false);
+  panel.revealLog(fresh, 5);
+  assert.equal(press2(fresh).getAttribute("aria-disabled"), "false", "witness: the paint ran, on the new rows");
+  assert.equal(
+    replaced.getAttribute("aria-disabled"),
+    "false",
+    "the replaced press is not repainted from its replaced row, so the rebuild let it go",
+  );
+
+  const hidden = press2(fresh);
+  panel.hideLog();
+  fresh[2]!.classList.toggle("inked", false);
+  panel.revealLog([], 0);
+  assert.equal(
+    hidden.getAttribute("aria-disabled"),
+    "false",
+    "the hidden press is not repainted from its hidden row, so hiding let it go",
+  );
 });

@@ -80,9 +80,6 @@ function createQuestion() {
     closeIfUntold(): void {
       if (asking && !asking.row.classList.contains("inked")) close();
     },
-    forget(): void {
-      asking = null;
-    },
   };
 }
 
@@ -129,7 +126,6 @@ function createRoadAsk(park: () => void) {
 
   function forget(): void {
     seats = [];
-    q.forget();
   }
 
   return { press, close: q.close, settle, forget };
