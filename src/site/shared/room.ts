@@ -1,6 +1,8 @@
 // The chart room (Issue #462, lifted into the Atelier Kit at its second use, Issue #463/Issue #487): the sheet fitted to what the chrome leaves on the room's page (at least 1024 wide, and 768 tall in the desk frame, page-box.ts), the slip's fold, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
 import { CHROME_GAP, fitStage, holdsSheet } from "./stage-fit.ts";
 import { bindSlip, type SlipFold } from "./slip.ts";
+import { createSheetSlide, type SheetSlide } from "./sheet-slide.ts";
+import { prefersReduce } from "./reduced-motion.ts";
 import { DESK_FRAME, deskFrameDue, pageBottom, pageBox, pageTop } from "./page-box.ts";
 import { glassLeft, placeLegendRow, placeSlip, rectOf, slipInset, slipWidth } from "./room-seats.ts";
 
@@ -36,6 +38,13 @@ interface FitParts {
   readonly glassL: number | null;
 }
 
+function heldStill(els: readonly HTMLElement[], write: () => void): void {
+  for (const el of els) el.style.transition = "none";
+  write();
+  els[0]?.getBoundingClientRect();
+  for (const el of els) el.style.transition = "";
+}
+
 function fitRoom({ frame, sheet: sheetEl, aspect, slipReach, glassL }: FitParts): boolean {
   const fit = fitStage({
     view: pageBox(),
@@ -47,11 +56,13 @@ function fitRoom({ frame, sheet: sheetEl, aspect, slipReach, glassL }: FitParts)
     gap: CHROME_GAP,
   });
   if (!holdsSheet(fit)) return false;
-  frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
-  frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
-  frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
-  sheetEl.style.width = `${fit.sheet.w}px`;
-  sheetEl.style.height = `${fit.sheet.h}px`;
+  heldStill([frame, sheetEl], () => {
+    frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
+    frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
+    frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
+    sheetEl.style.width = `${fit.sheet.w}px`;
+    sheetEl.style.height = `${fit.sheet.h}px`;
+  });
   document.body.classList.toggle("stage-under", fit.under);
   return true;
 }
@@ -66,10 +77,8 @@ function refitOnChrome(layout: () => void): void {
 const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [pageTop(r)]));
 const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [pageBottom(r)]));
 
-export function bindRoom<Held>(parts: RoomParts<Held>): Room {
-  document.documentElement.classList.toggle(DESK_FRAME, deskFrameDue(window.visualViewport?.scale ?? 1));
+function roomLayout<Held>(parts: RoomParts<Held>, slip: HTMLElement | null, slide: SheetSlide): () => void {
   const { frame, sheet, camera } = parts;
-  const slip = q(".slip");
   const legend = q(".legend");
 
   const svgAspect = () => {
@@ -80,7 +89,8 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
   };
   const aspect = () => parts.aspect?.() ?? svgAspect();
 
-  const layout = () => {
+  return () => {
+    slide.stop();
     const held = camera.hold();
     if (slip !== null) placeSlip(slip, q(".corner.tr"), q(".strip"));
     // A slip hidden with the engine's panel (the Reading Room's, between reads) has an all-zero rect, so its width is read from the token.
@@ -98,16 +108,24 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
       });
     if (fitRoom({ frame, sheet, aspect: aspect(), slipReach, glassL })) camera.restore(held);
   };
+}
 
-  let broadside: SlipFold | null = null;
-  if (slip !== null) {
-    broadside = bindSlip({
-      slip,
-      fold: slip.querySelector(".slip-fold"),
-      tab: q(".slip-tab"),
-      onFold: layout,
+export function bindRoom<Held>(parts: RoomParts<Held>): Room {
+  document.documentElement.classList.toggle(DESK_FRAME, deskFrameDue(window.visualViewport?.scale ?? 1));
+  const slide = createSheetSlide(parts.sheet);
+  const slip = q(".slip");
+  const layout = roomLayout(parts, slip, slide);
+  const fold = (): void => {
+    const from = parts.sheet.getBoundingClientRect();
+    layout();
+    void slide.slide(from, prefersReduce()).then((done) => {
+      if (done) layout();
     });
-  }
+  };
+  const broadside: SlipFold | null =
+    slip === null
+      ? null
+      : bindSlip({ slip, fold: slip.querySelector(".slip-fold"), tab: q(".slip-tab"), onFold: fold });
   window.addEventListener("resize", layout);
   refitOnChrome(layout);
   void document.fonts?.ready.then(layout); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
