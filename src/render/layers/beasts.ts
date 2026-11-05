@@ -14,11 +14,13 @@ type BeastPlace = { readonly spot: Spot; readonly text: string | null };
 function openBeastWater(ctx: RenderCtx): Spot[] {
   const { world, proj } = ctx;
   const { w, h } = world.elev;
+  const gate = world.region?.seaGate;
   const open: Spot[] = [];
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 8) continue;
+      if (gate && gate[gx + gy * w] === 0) continue;
       open.push({ x: proj.px(gx), y: proj.py(gy), d });
     }
   }
