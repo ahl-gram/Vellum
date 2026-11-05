@@ -40,5 +40,11 @@ test("a close-up carries the beast exactly when the haunt lies inside its window
   const far = regionOf(lodWindowFor(0.25, 0.25, 0.25));
   assert.equal(miss.beasts.length, 0, "a window that misses the haunt by a hair carried the beast");
   assert.equal(far.beasts.length, 0, "a window far from the haunt carried the beast");
+  const missLeft = regionOf({ u0: u + 0.002, u1: u + 0.152, v0: v - 0.075, v1: v + 0.075 });
+  const missAbove = regionOf({ u0: u - 0.075, u1: u + 0.075, v0: v - 0.152, v1: v - 0.002 });
+  const missBelow = regionOf({ u0: u - 0.075, u1: u + 0.075, v0: v + 0.002, v1: v + 0.1 });
+  assert.equal(missLeft.beasts.length, 0, "a window lying right of the haunt carried the beast");
+  assert.equal(missAbove.beasts.length, 0, "a window lying above the haunt carried the beast");
+  assert.equal(missBelow.beasts.length, 0, "a window lying below the haunt carried the beast");
   assert.equal(hold.beasts.length, 1, "a window holding the haunt near its edge lost the beast");
 });

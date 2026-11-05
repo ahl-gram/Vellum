@@ -71,6 +71,23 @@ test("a carried beast pushed off its haunt is drawn nudged within its near reach
   assert.ok(moved < 460, `the beast was drawn ${moved.toFixed(0)} px from its haunt, beyond the near reach`);
 });
 
+test("a carried beast may be drawn most of the near reach away from its haunt (seed 2, band 1)", () => {
+  const world2 = generateWorld(defaultRecipe(2));
+  const step = LOD_BANDS[1]!.sizeUV / 8;
+  const region = closeUpOf(world2, 7 * step, 6 * step, 1);
+  const svg = renderMap(region, ON);
+  assert.ok(svg.includes('id="beast-0"'), "a beast with room within the near reach was lost");
+  const home = region.beasts[0]!;
+  const spot = beastSpot(svg, home.kind);
+  assert.ok(spot !== null, "the beast was drawn with no label to read its place from");
+  const moved = Math.hypot(spot.x - proj.px(home.x), spot.y - proj.py(home.y));
+  assert.ok(
+    moved > 400,
+    `fixture drift: the beast is ${moved.toFixed(0)} px off its haunt, so the reach is not searched to its end`,
+  );
+  assert.ok(moved < 460, `the beast was drawn ${moved.toFixed(0)} px from its haunt, beyond the near reach`);
+});
+
 test("a close-up with no room near the haunt draws no beast and stays exactly as it was (seed 22, band 1, the haunt under the title)", () => {
   const world22 = generateWorld(defaultRecipe(22));
   const step = LOD_BANDS[1]!.sizeUV / 8;
