@@ -31,6 +31,7 @@ export function bindSlip(p: SlipParts): SlipFold {
   const setFolded = (folded: boolean): void => {
     p.slip.classList[folded ? "add" : "remove"]("folded");
     p.tab?.classList[folded ? "add" : "remove"]("shown");
+    p.onFold();
   };
   p.fold?.addEventListener("click", () => setFolded(true));
   p.tab?.addEventListener("click", () => setFolded(false));
