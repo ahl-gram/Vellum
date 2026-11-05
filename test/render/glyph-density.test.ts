@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { glyphDensity } from "../../src/render/layers/glyphs.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
+import { regionPlateSpec } from "../../src/atlas/compose.ts";
+import { generateRegionWorld } from "../../src/world/region.ts";
 
 const sized = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
 const BAND_3_ZOOM = Math.sqrt(319 / (0.125 * 319));
@@ -20,7 +21,7 @@ test("band 3's window, the atlas plate and a world sheet draw as before", () => 
   assert.deepEqual(glyphDensity(320, { window: sized(0.125), worldGridW: 320 }), { zoom: BAND_3_ZOOM, capScale: 1 });
   const world = generateWorld(defaultRecipe(42));
   const capital = world.settlements.find((s) => s.kind === "capital")!;
-  const plate = windowAround(world, capital, 0.38);
+  const plate = regionPlateSpec(world, capital).window;
   assert.deepEqual(glyphDensity(320, { window: plate, worldGridW: 320 }), {
     zoom: Math.sqrt(319 / ((plate.u1 - plate.u0) * 319)),
     capScale: 1,

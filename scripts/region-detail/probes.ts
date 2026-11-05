@@ -13,7 +13,7 @@ import { bandWindows } from "./sweep-windows.ts";
 
 const SEEDS = [42, 7, 2, 15, 23];
 const INSET = 0.02; // region.ts's own open-window inset
-const ATLAS_SIZE = 0.38; // `windowAround` in `src/atlas/compose.ts`
+const OFF_LATTICE_SIZE = 0.38;
 
 type CountWindow = (world: World, label: string, window: UvWindow, gridW: number, gridH: number) => void;
 
@@ -32,8 +32,8 @@ function sweepWindows(count: CountWindow): void {
     for (const anchor of [capital, far]) {
       count(
         world,
-        `atlas ${ATLAS_SIZE}`,
-        windowAround(world, anchor, ATLAS_SIZE),
+        `off-lattice ${OFF_LATTICE_SIZE}`,
+        windowAround(world, anchor, OFF_LATTICE_SIZE),
         world.recipe.gridW,
         world.recipe.gridH,
       );

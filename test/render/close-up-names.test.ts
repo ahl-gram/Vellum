@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
+import { regionPlateSpec } from "../../src/atlas/compose.ts";
+import { generateRegionWorld } from "../../src/world/region.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { minMax } from "../../src/core/grid.ts";
@@ -33,12 +34,7 @@ const STAL_PLATE = ((): World => {
   const world = generateWorld(defaultRecipe(15));
   const stal = world.settlements.find((s) => s.name === "Stal");
   assert.ok(stal, "Stal is a settlement of chart 15");
-  return generateRegionWorld(world, {
-    window: windowAround(world, stal, 0.38),
-    gridW: world.recipe.gridW,
-    gridH: world.recipe.gridH,
-    title: "The Environs of Stal",
-  });
+  return generateRegionWorld(world, regionPlateSpec(world, stal));
 })();
 
 const sheetOf = (region: World): string => renderMap(region, { style: "antique", widthPx: WIDTH, legend: true });

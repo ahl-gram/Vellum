@@ -160,25 +160,24 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   assertSameField(fc.data, fa.data, "a warmed cache changed the terrain for the same window");
 });
 
-test("the atlas window chains, at the depth its own size implies (#398)", () => {
-  // The atlas plate window (windowAround(world, anchor, 0.38) in src/atlas/compose.ts) is not a band, so only the window itself says how deep its ancestry runs.
-  const atlas = lodWindowFor(0.5, 0.5, 0.38);
-  const ancestry = ancestorWindows(atlas);
+test("an off-lattice window chains, at the depth its own size implies (#398)", () => {
+  const offLattice = lodWindowFor(0.5, 0.5, 0.38);
+  const ancestry = ancestorWindows(offLattice);
   assert.equal(ancestry.length, 2, "a 0.38 window doubles to 0.76 and then to the full sheet");
   assert.ok(windowsEqual(ancestry[1] as UvWindow, FULL_WINDOW), "the ancestry must end at the full window");
 
-  const field = buildChainedField(specFor(atlas));
-  const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, atlas, field.w, field.h);
-  const worldCells = parentCellsOnWindow(world, FULL_WINDOW, atlas, field.w, field.h);
+  const field = buildChainedField(specFor(offLattice));
+  const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, offLattice, field.w, field.h);
+  const worldCells = parentCellsOnWindow(world, FULL_WINDOW, offLattice, field.w, field.h);
   let land = 0;
   for (let i = 0; i < fromWorld.data.length; i++) {
     const pv = fromWorld.data[i] as number;
     if (!Number.isFinite(pv) || pv <= SEA) continue;
     if (!((worldCells.data[i] as number) > SEA)) continue;
     land++;
-    assert.ok((field.data[i] as number) > SEA, `world-chart land sank on the atlas window at cell ${i}`);
+    assert.ok((field.data[i] as number) > SEA, `world-chart land sank on the off-lattice window at cell ${i}`);
   }
-  assert.ok(land > 10000, `too little land checked on the atlas window: ${land}`);
+  assert.ok(land > 10000, `too little land checked on the off-lattice window: ${land}`);
 });
 
 test("the chain protects every link: no land sinks, band to band and end to end (#398, narrowed by #443)", () => {

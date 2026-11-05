@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
+import { regionPlateSpec } from "../../src/atlas/compose.ts";
+import { generateRegionWorld } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
 import { createChainCache, type ChainCache } from "../../src/world/detail-chain.ts";
 import { growRealmLabels, regionRealmBorders, regionRealmRings, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
@@ -326,7 +327,7 @@ function sweepWindows(): { windows: SweepWindow[]; borderWindows: number } {
       windows.push([seed, "b3border", border]);
       borderWindows++;
     }
-    windows.push([seed, "atlas", windowAround(world, capital, 0.38)]);
+    windows.push([seed, "atlas", regionPlateSpec(world, capital).window, createChainCache(16)]);
   }
   windows.push([42, "b2border", borderWindow(worldFor(42), 2)!]);
   windows.push([15, "b2", capitalWindow(worldFor(15), 2)]);
