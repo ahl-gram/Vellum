@@ -116,3 +116,64 @@ test("the log is a labeled region and its rows are plain text (accessibility car
   assert.equal(panel.getAttribute("role"), "region", "the log panel is a landmark a screen reader can jump to");
   assert.equal(panel.getAttribute("aria-label"), "The surveyor's log", "and it is named");
 });
+
+const ROAD_PORTS: VoyageLogPort[] = [
+  { idx: 0, name: "Aldmarch", kind: "capital", founded: 214, arrivalMode: null, inlandHandoff: false, legLength: 0 },
+  { idx: 4, name: "Kelder", kind: "town", founded: 402, arrivalMode: "sea", inlandHandoff: false, legLength: 28 },
+  { idx: 9, name: "Brenmoor", kind: "village", founded: 655, arrivalMode: "road", inlandHandoff: false, legLength: 14 },
+  { idx: 12, name: "Dunmere", kind: "village", founded: 700, arrivalMode: "road", inlandHandoff: false, legLength: 30 },
+];
+const HOME = { arrivalMode: "road", inlandHandoff: false, legLength: 14 } as const;
+const ROAD_LEGS = [
+  { fromIdx: 0, toIdx: 4, mode: "sea" },
+  { fromIdx: 4, toIdx: 9, mode: "road" },
+  { fromIdx: 9, toIdx: 12, mode: "road" },
+  { fromIdx: 12, toIdx: 0, mode: "road" },
+] as const;
+
+async function roadPanel(park: () => void = () => {}) {
+  const { createVoyageLogPanel } = await import("../../src/site/shared/living-chart/voyage-log-panel.ts");
+  const road = { href: (s: number, a: number, b: number) => `/ribbon/#seed=${s}&a=${a}&b=${b}`, park };
+  const panel = createVoyageLogPanel({ panel: el(), sig: el(), strip: el() }, road);
+  const { log, rows } = panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
+  return { panel, log, rows };
+}
+
+const textOf = (li: HTMLLIElement): El => (li as unknown as El).children[1]!;
+const pressOf = (li: HTMLLIElement): El | undefined => textOf(li).children.find((c) => c.className === "cr-road");
+const labelOf = (p: El): El => p.children.find((c) => c.className === "cr-road-label")!;
+const noteOf = (p: El): El => p.children.find((c) => c.className === "cr-road-note")!;
+const ev = (): { defaultPrevented: boolean; preventDefault(): void } => ({
+  defaultPrevented: false,
+  preventDefault() {
+    this.defaultPrevented = true;
+  },
+});
+
+test("a road leg's journal row carries Take this road to the host's address for that leg; the departure, a sea row and the last entry carry none (#434)", async () => {
+  const { log, rows } = await roadPanel();
+  assert.equal(rows.length, 5, "a departure, three ports and the homecoming");
+  assert.equal(ROAD_LEGS[3].mode, "road", "witness: the homecoming's leg is a road, so only the rule withholds its press");
+  for (const i of [0, 1, 4]) assert.equal(pressOf(rows[i]!), undefined, `row ${i} carries no press`);
+
+  const press = pressOf(rows[2]!);
+  assert.ok(press, "row 2 carries a press");
+  assert.equal(press.tagName, "A");
+  assert.equal(press.getAttribute("href"), "/ribbon/#seed=42&a=4&b=9");
+  assert.equal(labelOf(press).textContent, "Take this road");
+  assert.equal(noteOf(press).textContent, "Not reached yet");
+  const kids = textOf(rows[2]!).children;
+  assert.deepEqual(
+    kids.map((c) => c.className),
+    ["cr-prose", "", "cr-road"],
+    "the words in their own span, a space, then the press",
+  );
+  assert.equal(kids[1]!.tagName, "#TEXT");
+  assert.equal(kids[1]!.textContent, " ");
+  assert.equal(pressOf(rows[3]!)!.getAttribute("href"), "/ribbon/#seed=42&a=9&b=12");
+  assert.deepEqual(
+    rows.map((li) => (li as unknown as El).children[0]!.textContent),
+    log.entries.map((e) => `day ${e.day}`),
+    "the gutters are the entries' own",
+  );
+});

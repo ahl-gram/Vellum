@@ -1,4 +1,5 @@
 // Issue #121 the margin log: the surveyor's dated journal, the PROLOGUE block of the fused journal (the ages driver appends the annal rows after these); the host hands its three panel elements in, and the voyage overlay reads exactly one field back, `log.summary`.
+import type { LegMode } from "../../../render/voyage-route.ts";
 import {
   buildVoyageLog,
   type VoyageHomecoming,
@@ -12,6 +13,21 @@ export interface VoyageLogHost {
   readonly sig: HTMLElement;
   readonly strip: HTMLElement;
 }
+
+export interface JournalLeg {
+  readonly fromIdx: number;
+  readonly toIdx: number;
+  readonly mode: LegMode;
+}
+
+export interface RoadPressHost {
+  readonly href: (seed: number, fromIdx: number, toIdx: number) => string;
+  readonly park: () => void;
+}
+
+export const ROAD_TAKE = "Take this road";
+export const ROAD_ASK = "Leave the voyage?";
+export const ROAD_UNREACHED = "Not reached yet";
 
 export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
@@ -38,13 +54,14 @@ function journalRow(e: Readonly<VoyageLogEntry>, i: number): HTMLLIElement {
   return li;
 }
 
-export function createVoyageLogPanel(logEls: VoyageLogHost) {
+export function createVoyageLogPanel(logEls: VoyageLogHost, _road?: RoadPressHost) {
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,
     presentYear: number,
     seed: number,
     subtitle: string,
     homecoming?: VoyageHomecoming | null,
+    _legs: ReadonlyArray<JournalLeg> = [],
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, seed >>> 0, subtitle || "", homecoming);
     logEls.sig.textContent = log.attribution;
@@ -78,7 +95,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost) {
     };
   }
 
-  return { buildLogPanel, revealLog, hideLog, logSnapshot };
+  return { buildLogPanel, revealLog, hideLog, logSnapshot, closeAsk: () => {} };
 }
 
 export type VoyageLogPanel = ReturnType<typeof createVoyageLogPanel>;
