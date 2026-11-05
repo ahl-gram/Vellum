@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { foldTiming, slideStart, type SheetBox } from "../../src/site/shared/sheet-slide.ts";
+import { createSheetSlide, foldTiming, slideStart, type SheetBox } from "../../src/site/shared/sheet-slide.ts";
 
 const near = (actual: number, expected: number, what: string): void => {
   assert.ok(Math.abs(actual - expected) < 1e-9, `${what}: ${actual} against ${expected}`);
@@ -68,4 +68,98 @@ test("SS4 a page whose root carries no fold token takes no slide", () => {
       assert.equal(foldTiming(), null);
     },
   );
+});
+
+type FakeAnimation = { cancelled: boolean; finish: () => void; finished: Promise<void>; cancel: () => void };
+
+function fakeAnimation(): FakeAnimation {
+  let finish = (): void => {};
+  let reject = (): void => {};
+  const finished = new Promise<void>((res, rej) => {
+    finish = res;
+    reject = () => {
+      rej(new Error("cancelled"));
+    };
+  });
+  const a: FakeAnimation = {
+    cancelled: false,
+    finished,
+    cancel: () => {
+      a.cancelled = true;
+      reject();
+    },
+    finish: () => {
+      finish();
+    },
+  };
+  return a;
+}
+
+function stagePage() {
+  const g = globalThis as Record<string, unknown>;
+  const names = ["document", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"] as const;
+  const saved = names.map((n) => [n, n in g, g[n]] as const);
+  const frames = new Map<number, () => void>();
+  const cancelledFrames: number[] = [];
+  const animations: FakeAnimation[] = [];
+  let next = 1;
+  g.document = { documentElement: {} };
+  g.getComputedStyle = () => ({
+    width: "661.5px",
+    getPropertyValue: (p: string) => (p === "--fold" ? "320ms" : p === "--ease-fold" ? "ease" : ""),
+  });
+  g.requestAnimationFrame = (fn: () => void) => {
+    frames.set(next, fn);
+    return next++;
+  };
+  g.cancelAnimationFrame = (id: number) => {
+    cancelledFrames.push(id);
+    frames.delete(id);
+  };
+  const sheet = {
+    getBoundingClientRect: () => ({ left: 181.25, top: 144.734375, width: 661.5, height: 510.65625 }),
+    animate: () => {
+      const a = fakeAnimation();
+      animations.push(a);
+      return a;
+    },
+  } as unknown as HTMLElement;
+  const runFrame = (): void => {
+    const [id, fn] = [...frames.entries()][0]!;
+    frames.delete(id);
+    fn();
+  };
+  const restore = (): void => {
+    for (const [n, had, v] of saved) {
+      if (had) g[n] = v;
+      else delete g[n];
+    }
+  };
+  return { sheet, runFrame, restore, frames, cancelledFrames, animations };
+}
+
+test("SS5 a slide cut short by a later layout or slide resolves false and leaves nothing running, so the cut slide's end layout never runs (Issue #1261)", async () => {
+  const page = stagePage();
+  const from = { left: 0, top: 184.46875, width: 473.1875, height: 365.28125 };
+  try {
+    const slide = createSheetSlide(page.sheet);
+    const first = slide.slide(from, false);
+    assert.equal(page.frames.size, 1, "the first slide waits for its frame");
+    const second = slide.slide(from, false);
+    assert.equal(await first, false, "a second slide cuts a slide still waiting for its frame");
+    assert.deepEqual(page.cancelledFrames, [1], "and cancels its pending frame");
+    page.runFrame();
+    assert.equal(page.animations.length, 1, "the second slide plays once, on its own frame");
+    slide.stop();
+    assert.equal(await second, false, "a layout stops the slide mid-way");
+    assert.equal(page.animations[0]!.cancelled, true, "and cancels its running animation");
+    const third = slide.slide(from, false);
+    page.runFrame();
+    page.animations[1]!.finish();
+    assert.equal(await third, true, "a slide that runs its course resolves true");
+    slide.stop();
+    assert.equal(page.animations[1]!.cancelled, false, "and stopping afterwards touches nothing");
+  } finally {
+    page.restore();
+  }
 });
