@@ -2,13 +2,16 @@
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { rv7FullLog } from "./room-voyage-route/full-log.ts";
+import { rv8bRoadRows, rv8cAsksThenGoes } from "./room-voyage-route/road-press.ts";
 import { bounce } from "../support/nav.ts";
+import { makeStep } from "../support/step.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
+  const step = makeStep(ctx);
 
   await rv0Arms(ctx, room);
   await rv0bFirstTrack(ctx);
@@ -19,8 +22,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rv6Overlay(ctx);
   await rv7FullLog(ctx);
   await rv8LogMode(ctx);
+  await step("RV8b", () => rv8bRoadRows(ctx));
   await rv9Journal(ctx);
   await rv10Handoff(ctx);
+  await step("RV8c", () => rv8cAsksThenGoes(ctx));
   await rv11Seed39(ctx, room);
   await rv12Landmasses(ctx, room);
   gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
