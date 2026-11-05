@@ -66,3 +66,18 @@ test("a carried beast pushed off its haunt is drawn nudged within its near reach
   assert.ok(moved > 1, "fixture drift: the beast now fits at its haunt, so the search is never run");
   assert.ok(moved < 460, `the beast was drawn ${moved.toFixed(0)} px from its haunt, beyond the near reach`);
 });
+
+test("a close-up with no room near the haunt draws no beast and stays exactly as it was (seed 22, band 1, the haunt under the title)", () => {
+  const world22 = generateWorld(defaultRecipe(22));
+  const step = LOD_BANDS[1]!.sizeUV / 8;
+  const region = closeUpOf(world22, 7 * step, 5 * step, 1);
+  assert.equal(region.beasts.length, 1, "fixture drift: the window no longer carries the beast");
+  const svg = renderMap(region, ON);
+  assert.ok(!svg.includes('id="beast-0"'), "the close-up drew its beast beyond the near reach");
+  assert.equal(
+    digest(svg),
+    digest(renderMap({ ...region, beasts: [] }, ON)),
+    "a close-up that finds no room near the haunt is not the sheet it was",
+  );
+  assert.ok(svg.includes('id="sea-serpent"'), "the decor serpent did not keep its place");
+});
