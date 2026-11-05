@@ -9,8 +9,10 @@ import { STYLES, type StyleName } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
 import { THEMATIC } from "./thematic.ts";
 import { createLoreWriter } from "../society/lore.ts";
-import { generateRegionWorld, windowAround } from "../world/region.ts";
-import type { World } from "../world/types.ts";
+import { createChainCache, type ChainCache } from "../world/detail-chain.ts";
+import { LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "../world/lod.ts";
+import { generateRegionWorld, regionDetailLevel, regionTitle, type RegionSpec } from "../world/region.ts";
+import type { NamedSettlement, World } from "../world/types.ts";
 
 /** key is a stable identifier (the CLI derives filenames from it, the Explorer uses it as a list key); svg is the single source of truth for the drawing. */
 export type AtlasPlate = {
@@ -133,31 +135,51 @@ ${items}
 </section>`;
 }
 
-function regionPlates(world: World, width: number): AtlasPlate[] {
-  const { recipe } = world;
+const REGION_PLATE_BAND = LOD_BANDS[2] as LodBand;
+
+function regionPlateAnchors(world: World): NamedSettlement[] {
   const capital = world.settlements.find((s) => s.kind === "capital");
   if (!capital) return [];
-
-  const targets = [{ anchor: capital, label: `The Environs of ${capital.name}` }];
   const towns = world.settlements.filter((s) => s.kind === "town");
-  if (towns.length > 0) {
-    const far = towns.reduce((a, b) =>
-      Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
-    );
-    targets.push({ anchor: far, label: `The Environs of ${far.name}` });
-  }
+  if (towns.length === 0) return [capital];
+  const far = towns.reduce((a, b) =>
+    Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
+  );
+  return [capital, far];
+}
 
-  return targets.map((t, i) => {
-    const region = generateRegionWorld(world, {
-      window: windowAround(world, t.anchor, 0.38),
-      gridW: recipe.gridW,
-      gridH: recipe.gridH,
-      title: t.label,
-    });
+export function regionPlateSpec(
+  world: World,
+  anchor: { readonly x: number; readonly y: number },
+  chainCache?: ChainCache,
+): RegionSpec {
+  const size = REGION_PLATE_BAND.sizeUV;
+  const q = quantizeCenter(anchor.x / (world.recipe.gridW - 1), anchor.y / (world.recipe.gridH - 1), size);
+  const window = lodWindowFor(q.cx, q.cy, size);
+  return {
+    window,
+    gridW: REGION_PLATE_BAND.gridW,
+    gridH: REGION_PLATE_BAND.gridH,
+    title: regionTitle(world, window),
+    detail: true,
+    chainCache,
+  };
+}
+
+function regionPlates(world: World, width: number): AtlasPlate[] {
+  const chainCache = createChainCache();
+  return regionPlateAnchors(world).map((anchor, i) => {
+    const spec = regionPlateSpec(world, anchor, chainCache);
+    const regionRecipe = { window: spec.window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
     return {
       key: `region-${i + 1}`,
-      title: t.label,
-      svg: renderMap(region, { style: "antique", widthPx: width, legend: true }),
+      title: spec.title,
+      svg: renderMap(generateRegionWorld(world, spec), {
+        style: "antique",
+        widthPx: width,
+        legend: true,
+        regionRecipe,
+      }),
     };
   });
 }
