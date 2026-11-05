@@ -151,9 +151,10 @@ stand of trees costs a river nothing at all. A residual graze just under the bar
 **A sea beast is drawn last and yields to everything.** `beastsLayer`
 (`src/render/layers/beasts.ts`) claims the arena after the settlements and the feature labels, keeps
 its ink off the land, and escalates as the sheet fills: the full label, then the name alone, then the
-glyph alone. It searches near its haunt first and then the whole sheet before it drops, so a legend
-drawn over the haunt moves the beast rather than losing it. What a beast is, and what it does to the
-anonymous sea decor, is `handbook/specs/engine-invariants.md`'s.
+glyph alone. On a world sheet it searches near its haunt first and then the whole sheet before it
+drops, so a legend drawn over the haunt moves the beast rather than losing it; a close-up searches
+only near the haunt, and what it carries is `handbook/specs/region-and-voyage.md`'s. What a beast
+is, and what it does to the anonymous sea decor, is `handbook/specs/engine-invariants.md`'s.
 
 ---
 

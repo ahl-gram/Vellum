@@ -14,11 +14,13 @@ type BeastPlace = { readonly spot: Spot; readonly text: string | null };
 function openBeastWater(ctx: RenderCtx): Spot[] {
   const { world, proj } = ctx;
   const { w, h } = world.elev;
+  const gate = world.region?.seaGate;
   const open: Spot[] = [];
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 8) continue;
+      if (gate && gate[gx + gy * w] === 0) continue;
       open.push({ x: proj.px(gx), y: proj.py(gy), d });
     }
   }
@@ -49,8 +51,9 @@ function beastCandidates(
   const viable = open
     .filter((o) => frameViable(o) && clearOf(o.x, o.y, ext.halfW * 0.7))
     .sort((a, b) => fromHome(a) - fromHome(b));
-  const near = [home, ...viable.filter((o) => fromHome(o) < 460 * k)].slice(0, 140);
-  return { near, viable };
+  const withinReach = viable.filter((o) => fromHome(o) < 460 * k);
+  const near = [home, ...withinReach].slice(0, 140);
+  return { near, viable: world.region === undefined ? viable : withinReach };
 }
 
 function overWater(ctx: RenderCtx, box: Box, minD: number): boolean {

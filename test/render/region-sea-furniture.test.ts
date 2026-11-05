@@ -12,6 +12,7 @@ import { planScalebar } from "../../src/render/layers/scalebar.ts";
 import { planLegend } from "../../src/render/layers/legend.ts";
 import { planCompass, type CompassPlan } from "../../src/render/layers/compass.ts";
 import { seaDecorLayer } from "../../src/render/layers/sea-decor.ts";
+import { beastsLayer } from "../../src/render/layers/beasts.ts";
 import { soundingsLayer } from "../../src/render/layers/soundings.ts";
 import { currentsLayer } from "../../src/render/layers/currents.ts";
 import { windsLayer } from "../../src/render/layers/winds.ts";
@@ -180,4 +181,26 @@ test("#251 guard: the world sheet compass is unchanged (sea, full size, no seaGa
   const { compass } = planFurniture(ctx);
   assert.ok(compass, "seed 42 world has open sea for a rose");
   assert.equal(compass.r, FULL_R, "world rose keeps full radius");
+});
+
+test("#421: a beast with no open sea near its haunt never inks the lake the close-up floods as sea (lake plate)", () => {
+  const home = { x: 4, y: 0 };
+  const plate = { ...lakePlate, beasts: [{ ...world.beasts[0]!, ...home }] };
+  const { w } = plate.elev;
+  const gate = lakePlate.region!.seaGate!;
+  assert.equal(gate[home.x + home.y * w], 1, "fixture drift: the home is no longer on the parent's sea");
+  const ctx = ctxFor(plate, "antique");
+  const hx = ctx.proj.px(home.x);
+  const hy = ctx.proj.py(home.y);
+  let openLake = 0;
+  for (let gy = 4; gy < plate.elev.h - 4; gy += 2) {
+    for (let gx = 4; gx < w - 4; gx += 2) {
+      const i = gx + gy * w;
+      const inReach = Math.hypot(ctx.proj.px(gx) - hx, ctx.proj.py(gy) - hy) < 460;
+      if ((plate.oceanDist[i] as number) >= 8 && gate[i] === 0 && inReach) openLake++;
+    }
+  }
+  assert.ok(openLake > 0, "fixture drift: no lake water open enough for an ungated search lies within the reach");
+  const { compass, cart } = planFurniture(ctx);
+  assertNoneInLake(lakePlate, collectPoints(beastsLayer(ctx, cart, compass)), "beast");
 });

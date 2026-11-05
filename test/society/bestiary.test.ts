@@ -7,6 +7,8 @@ import { worldNameSet } from "../../src/society/hamlets.ts";
 import { CULTURES } from "../../src/society/names.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { createProjection, marginFor } from "../../src/render/transform.ts";
+import { beastSpot } from "../../test-support/beast-spot.ts";
 
 const world = generateWorld(defaultRecipe(42));
 
@@ -132,4 +134,18 @@ test("the bestiary layer appears only when summoned", () => {
   const withBeasts = renderMap(world, { style: "antique", beasts: true });
   assert.ok(withBeasts.includes("layer-bestiary"), "no beast surfaced on seed 42 antique");
   assert.ok(withBeasts.includes("beast-0"));
+});
+
+test("a world sheet still searches its whole sheet for room when none is near the haunt (seed 31)", () => {
+  const w31 = generateWorld(defaultRecipe(31));
+  const haunt = w31.beasts[0]!;
+  const svg = renderMap(w31, { style: "antique", legend: true, beasts: true });
+  const spot = beastSpot(svg, haunt.kind);
+  assert.ok(svg.includes('id="beast-0"'), "the world sheet lost a beast it used to carry across the sheet");
+  assert.ok(spot !== null, "the beast was drawn with no label to read its place from");
+  const proj = createProjection(w31.elev.w, w31.elev.h, 1500, marginFor(1500));
+  assert.ok(
+    Math.hypot(spot.x - proj.px(haunt.x), spot.y - proj.py(haunt.y)) > 460,
+    "fixture drift: seed 31's beast now fits within its near reach, so this no longer holds the whole-sheet search",
+  );
 });
