@@ -5,6 +5,7 @@ import { buildRibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { errorText } from "../../src/site/shared/error-text.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { eventCaption } from "../../src/itinerary/prose.ts";
 import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
@@ -191,4 +192,43 @@ test("the job sends the strip boxes the plate is drawn in and the paper it is pr
       assert.equal(res.paper, STYLES[dress].paper, `${label}: the paper is the dress's own`);
     }
   }
+});
+
+test("every road leg of the voyage the room builds draws in the Ribbon as the same from and to pair (#434 ruling D)", async () => {
+  const { El, installShim } = await import("../../test-support/element-shim.ts");
+  const { buildPlaceManifest } = await import("../../src/render/place-manifest.ts");
+  const { buildSurvey } = await import("../../src/render/survey.ts");
+  const { createSessionBuilder } = await import("../../src/site/shared/living-chart/voyage-session.ts");
+  const { barlessLogPanel } = await import("../../src/site/shared/living-chart/no-bar.ts");
+  installShim();
+
+  const failures: string[] = [];
+  let nonRoadElsewhere = 0;
+  for (const seed of [1, 2, 5, 42, 526413615]) {
+    const w = generateWorld(defaultRecipe(seed));
+    const manifest = buildPlaceManifest(w, 1500);
+    const survey = buildSurvey(w.elev, w.seaLevel, w.roads);
+    const mapEl = new El("div") as unknown as HTMLElement;
+    const session = createSessionBuilder({ mapEl, logPanel: barlessLogPanel() }).build(manifest, survey, seed, "");
+    assert.ok(session, `seed ${seed}: the room builds a voyage`);
+    const roadLegs = session.plan.legs.filter((_, i) => session.legs[i]!.mode === "road");
+    assert.ok(roadLegs.length > 0, `seed ${seed}: witness, the voyage holds a road leg`);
+    session.plan.legs.forEach((leg, i) => {
+      const mode = session.legs[i]!.mode;
+      let drawn = "";
+      try {
+        const res = ribbonResultFor(w, { from: leg.fromIdx, to: leg.toIdx, dress: "antique" });
+        if (res.fromIdx !== leg.fromIdx || res.toIdx !== leg.toIdx) drawn = `drew ${res.fromIdx} to ${res.toIdx}`;
+      } catch (e) {
+        drawn = `threw ${errorText(e)}`;
+      }
+      if (mode === "road" && drawn) failures.push(`seed ${seed} leg ${i} (${leg.fromIdx} to ${leg.toIdx}): ${drawn}`);
+      if (mode !== "road" && drawn) nonRoadElsewhere++;
+    });
+  }
+  assert.deepEqual(failures, [], "a road leg the journal offers draws as another pair, or is refused");
+  assert.ok(
+    nonRoadElsewhere > 0,
+    "witness: some non-road leg does NOT draw the same pair, so the road filter carries the test",
+  );
 });

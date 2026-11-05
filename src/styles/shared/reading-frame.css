@@ -234,3 +234,51 @@
 .rf-log-strip .cr-text {
   color: var(--ink-annals);
 }
+.rf-log-strip li.prologue .cr-road {
+  display: block;
+  width: fit-content;
+  margin-top: 0.3rem;
+  padding: 0.16rem 0.55rem;
+  font-style: normal;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  border-radius: 4px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+.rf-log-strip li.prologue .cr-road:is(:hover, :focus-visible) {
+  border-color: var(--ink-brown);
+  transform: translateY(var(--raise)) rotate(-0.6deg);
+}
+.rf-log-strip li.prologue:not(.inked):has(.cr-road) {
+  opacity: 1;
+}
+.rf-log-strip li.prologue:not(.inked):has(.cr-road) > .cr-year,
+.rf-log-strip li.prologue:not(.inked) .cr-prose {
+  opacity: 0.4;
+}
+.rf-log-strip li.prologue:not(.inked) .cr-road {
+  background: var(--control-cream);
+  border-color: var(--line-faint);
+}
+.rf-log-strip li.prologue:not(.inked) .cr-road:is(:hover, :focus-visible) {
+  border-color: var(--line-faint);
+  transform: none;
+}
+.rf-log-strip li.prologue:has(.cr-road) > .cr-year,
+.rf-log-strip .cr-prose {
+  transition: opacity 0.18s;
+}
+.rf-log-strip .cr-road-note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

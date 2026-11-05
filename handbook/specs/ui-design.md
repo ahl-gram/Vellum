@@ -353,7 +353,14 @@ Vellum speaks in a period register, and the copy is designed, not written afterw
 **A road out of a room is two lines: a verb, then a place.** "Take to / The Print Room". "Read the
 journal in / The Reading Room". "See the road's end in / The Prospect". The verb line and the room
 line wear different faces and different inks, and the pair is one component. A press that acts on the
-sheet itself rather than going anywhere wears the same dress as a button.
+sheet itself rather than going anywhere wears the same dress as a button. **A road out of a row or a
+card that already names its places is one line, a verb on the thing**: the place card's "Take the
+road" (Issue #428), and the journal's "Take this road" on a road leg's row, which stands pale and says
+"Not reached yet" to a screen reader until the voyage reaches its row, and asks "Leave the voyage?"
+before it goes (Alex, 2026-11-04, Issue #434 comments 6643897113, 6643975537, 6645742777 and
+6645788043). **Provisional until the post-use review:** the journal press's gold dress, its own line
+under the entry, its pale wait and its spoken note, the last entry standing plain, and when its
+question closes.
 
 **A slip introduces itself the same way**: a verb, a title, and a "where" line that says what is
 inside. "Make one / The Broadside / the land, the strand, and the hand that dresses it". "Watch one / The
@@ -432,7 +439,11 @@ that footing.
 **A refusing press dims by swapping its ground, never by opacity.** Opacity takes the face under the
 floor, where a cream ground under full-strength ink keeps it far above it (`.pc-lay.dim` in
 `src/styles/shared/living-chart.css` carries the measurement). The press stays pressable rather than
-`disabled`, so a keyboard reader still reaches it and hears why it refuses.
+`disabled`, so a keyboard reader still reaches it and hears why it refuses. **The one ruled
+exception is the journal's pale "Take this road"**, which carries no address until the voyage
+reaches its row, so no click of any kind leaves the room early and Tab passes over it until then
+(Alex, 2026-11-05, Issue #434 comments 6647404370 and 6647997725; `paintSeat` in
+`src/site/shared/living-chart/voyage-log-panel.ts`).
 
 **Controls sit in three radius families, descending**: panels, then slips and controls, then chips.
 Warnings are panels, not slips. Beside them: one standard control in the cream fill, one dark primary

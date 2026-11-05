@@ -46,6 +46,7 @@ export function barlessLogPanel(): VoyageLogPanel {
       log: buildVoyageLog(logPorts, presentYear, seed >>> 0, subtitle || "", homecoming),
       rows: [],
     }),
+    closeAsk: () => {},
     revealLog: () => {},
     hideLog: () => {},
     logSnapshot: (log) => ({

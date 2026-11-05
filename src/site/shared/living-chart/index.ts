@@ -8,7 +8,7 @@ import {
 import { createChronicle, type Chronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink, type Voyage } from "./voyage.ts";
 import type { TourOrderSource } from "./voyage-session.ts";
-import { createVoyageLogPanel } from "./voyage-log-panel.ts";
+import { createVoyageLogPanel, type VoyageLogPanel } from "./voyage-log-panel.ts";
 import { createAges, type Ages } from "./ages.ts";
 import { barlessAges, barlessLogPanel } from "./no-bar.ts";
 import type { AgesPos } from "../../../render/ages-track.ts";
@@ -30,6 +30,7 @@ export interface ScrubberRefs {
   /** Invoked when Play parks, the one rest no input event announces. */
   onPark?: () => void;
   onAgesTold?: (told: ToldEntry | null) => void;
+  roadHref?: (seed: number, fromIdx: number, toIdx: number) => string;
 }
 
 export interface LivingChartHost {
@@ -46,11 +47,18 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
+function journalFor(bar: Readonly<ScrubberRefs> | undefined, park: () => void): VoyageLogPanel {
+  if (!bar) return barlessLogPanel();
+  const road = bar.roadHref ? { href: bar.roadHref, park } : undefined;
+  return createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip }, road);
+}
+
 function agesFor(
   bar: Readonly<ScrubberRefs> | undefined,
   overlay: Readonly<PlaceOverlay>,
   chronicle: Readonly<Chronicle>,
   voyage: Readonly<Voyage>,
+  logPanel: Readonly<VoyageLogPanel>,
 ): Ages {
   return bar
     ? createAges({
@@ -60,7 +68,10 @@ function agesFor(
         readout: bar.year,
         strip: bar.strip,
         onPark: bar.onPark,
-        onAgesTold: bar.onAgesTold,
+        onAgesTold: (told: ToldEntry | null) => {
+          logPanel.closeAsk();
+          bar.onAgesTold?.(told);
+        },
         overlay: { data: () => overlay.data() },
         chronicle,
         voyage,
@@ -153,7 +164,7 @@ export function createLivingChart(host: LivingChartHost) {
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
   const bar = host.scrubber;
-  const logPanel = bar ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip }) : barlessLogPanel();
+  const logPanel = journalFor(bar, () => parkForRoad());
   const voyage = createVoyage({
     mapEl: host.mapEl,
     statusEl: host.statusEl,
@@ -161,7 +172,11 @@ export function createLivingChart(host: LivingChartHost) {
     restingTrackSink: host.restingTrackSink,
     ...(host.tourOrder ? { tourOrder: host.tourOrder } : {}),
   });
-  const ages = agesFor(bar, overlay, chronicle, voyage);
+  const ages = agesFor(bar, overlay, chronicle, voyage, logPanel);
+
+  function parkForRoad(): void {
+    if (ages.isPlaying()) ages.togglePlay();
+  }
 
   function destroy(): void {
     ages.exitAges();

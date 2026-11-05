@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseReadingRoomAddress } from "../../src/site/reading-room/address.ts";
+import { parseReadingRoomAddress, roadHrefFor } from "../../src/site/reading-room/address.ts";
+import { parseRibbonAddress } from "../../src/site/ribbon/address.ts";
 import { NOT_A_SEED } from "../../test-support/hash-grammar-fixtures.ts";
 
 const NONE = {
@@ -101,4 +102,34 @@ test("the Reading Room address reads the shape keys", () => {
     islands: 12,
     isleSize: "varied",
   });
+});
+
+const ROAD_WORLD = {
+  style: "ink",
+  type: "citystate",
+  band: "polar",
+  keys: { land: 0.35, coast: 0.55, shape: {} },
+  table: "k-p.seed-42.style-ink.i-3.year-814",
+  written: null,
+} as const;
+
+test("roadHrefFor writes the world, the Chart Table and the leg, and none of the look or live keys (#434 ruling C)", () => {
+  const href = roadHrefFor(ROAD_WORLD, 42, 3, 7);
+  assert.ok(href.startsWith("/ribbon/#"));
+  assert.deepEqual(
+    [...new URLSearchParams(href.slice(9)).keys()],
+    ["seed", "style", "type", "band", "land", "coast", "table", "a", "b"],
+  );
+  const r = parseRibbonAddress(href.slice(8));
+  assert.deepEqual(
+    { seed: r.seed, style: r.style, type: r.type, band: r.band, land: r.land, coast: r.coast, from: r.from, to: r.to },
+    { seed: 42, style: "ink", type: "citystate", band: "polar", land: 0.35, coast: 0.55, from: 3, to: 7 },
+  );
+});
+
+test("roadHrefFor lets a written world's sentence speak for it: found and v ride, no identity key beside them (#434 ruling C)", () => {
+  const href = roadHrefFor({ ...ROAD_WORLD, written: { sentence: "A cold isle of two towns", version: 1 } }, 42, 3, 7);
+  const p = new URLSearchParams(href.slice(9));
+  assert.deepEqual([...p.keys()], ["found", "v", "style", "table", "a", "b"]);
+  assert.equal(p.get("found"), "A cold isle of two towns");
 });

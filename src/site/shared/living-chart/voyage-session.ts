@@ -151,6 +151,7 @@ function sessionLog(
           legLength: buildLegGeometry(closing.points).total,
         }
       : null,
+    plan.legs.map((leg, i) => ({ fromIdx: leg.fromIdx, toIdx: leg.toIdx, mode: routed[i]!.mode })),
   );
 }
 

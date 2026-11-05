@@ -69,6 +69,15 @@ test("#402/#442 the frame forwards onAgesTold to the scrubber host beside onPark
   assert.equal(frame.host.scrubber.onPark, onPark, "onPark still rides beside it");
 });
 
+test("#434 the frame forwards roadHref to the scrubber host beside onPark", async () => {
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
+  const roadHref = (): string => "";
+  const onPark = (): void => {};
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement, { onPark, roadHref });
+  assert.equal(frame.host.scrubber.roadHref, roadHref, "the road writer reaches the engine's deps");
+  assert.equal(frame.host.scrubber.onPark, onPark, "onPark still rides beside it");
+});
+
 test("#442 the bar and the live row share ONE wrapper, inside the panel, above the journal", async () => {
   const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
