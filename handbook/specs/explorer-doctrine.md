@@ -69,6 +69,12 @@ make an unqualified rule false. Read the surface, not just the rule.
   - **A host that DOES supply a scrubber declares the intersection type** (`LivingChartHost & {
     scrubber: ScrubberRefs }`, as `src/site/shared/reading-frame/index.ts` does), or dropping its scrubber
     block type-checks clean and silently takes the stand-ins.
+- **A scrubber host may give the journal its way into the Ribbon, and one that gives none keeps
+  today's rows** (Alex, 2026-11-04, Issue #434 ruling B). `roadHref` on `ScrubberRefs` hands back an
+  address for a road leg's two settlements on the world the engine armed; the engine seats the press
+  on that leg's row, positionally, and pauses through the reader's own Pause, so the park writes the
+  address (`createVoyageLogPanel` in `src/site/shared/living-chart/voyage-log-panel.ts`). The host
+  returns a string and never an element, as for the place card's `ribbonHref`.
 - **The instrument-less arm-at-rest entry is `rearmVoyage`.** `applyVoyage` is the wrong static
   entry: it posts to the status line and hangs the settle.
 - **The two hosts differ on purpose; do not re-unify them.** The Explorer keeps SPACE: it is static,

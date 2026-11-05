@@ -353,7 +353,14 @@ Vellum speaks in a period register, and the copy is designed, not written afterw
 **A road out of a room is two lines: a verb, then a place.** "Take to / The Print Room". "Read the
 journal in / The Reading Room". "See the road's end in / The Prospect". The verb line and the room
 line wear different faces and different inks, and the pair is one component. A press that acts on the
-sheet itself rather than going anywhere wears the same dress as a button.
+sheet itself rather than going anywhere wears the same dress as a button. **A road out of a row or a
+card that already names its places is one line, a verb on the thing**: the place card's "Take the
+road" (Issue #428), and the journal's "Take this road" on a road leg's row, which stands pale and says
+"Not reached yet" to a screen reader until the voyage reaches its row, and asks "Leave the voyage?"
+before it goes (Alex, 2026-11-04, Issue #434 comments 6643897113, 6643975537, 6645742777 and
+6645788043). **Provisional until the post-use review:** the journal press's gold dress, its own line
+under the entry, its pale wait and its spoken note, the last entry standing plain, and when its
+question closes.
 
 **A slip introduces itself the same way**: a verb, a title, and a "where" line that says what is
 inside. "Make one / The Broadside / the land, the strand, and the hand that dresses it". "Watch one / The
