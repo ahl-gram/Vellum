@@ -105,10 +105,7 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: q(".slip-tab"),
-      onLayout: layout,
-      after: (run, ms) => {
-        window.setTimeout(run, ms);
-      },
+      onFold: layout,
     });
   }
   window.addEventListener("resize", layout);

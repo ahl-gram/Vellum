@@ -43,8 +43,7 @@ const { sections, kind } = Astro.props;
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: document.querySelector(".slip-tab"),
-      onLayout: place,
-      after: (run, ms) => { window.setTimeout(run, ms); },
+      onFold: place,
     });
     const byData = (sel: string, key: string) =>
       new Map([...slip.querySelectorAll<HTMLElement>(sel)].map((el) => [el.dataset[key] ?? "", el]));

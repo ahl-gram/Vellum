@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FOLD_SETTLE_MS, bindSlip, type Listens } from "../../src/site/shared/slip.ts";
+import { bindSlip, type Listens } from "../../src/site/shared/slip.ts";
 
 // Issue #462 chart-room ruling 3: the slip folds to a bookmark tab and comes back from it.
 
@@ -37,20 +37,16 @@ const fixture = () => {
   const tabEvents = listener();
   const tab = { ...classed(), ...tabEvents.on };
   const fold = listener();
-  const layouts: number[] = [];
-  const pending: Array<{ run: () => void; ms: number }> = [];
+  const folds: boolean[] = [];
   bindSlip({
     slip,
     fold: fold.on,
     tab,
-    onLayout: () => {
-      layouts.push(Date.now());
-    },
-    after: (run, ms) => {
-      pending.push({ run, ms });
+    onFold: () => {
+      folds.push(slip.has("folded"));
     },
   });
-  return { slip, tab, tabEvents, fold, layouts, pending };
+  return { slip, tab, tabEvents, fold, folds };
 };
 
 test("the fold button folds the slip away and shows the tab; the tab brings it back and hides itself", () => {
@@ -61,12 +57,10 @@ test("the fold button folds the slip away and shows the tab; the tab brings it b
   assert.ok(!f.slip.has("folded") && !f.tab.has("shown"), "back, tab gone");
 });
 
-test("a fold relays the room's layout only after the transition has settled", () => {
+test("a fold lays the room out at its press, once, with the slip's class already landed, and so does the tab (Issue #1261)", () => {
   const f = fixture();
   f.fold.fire("click");
-  assert.equal(f.layouts.length, 0, "nothing measured mid-transition (the slip is still where it was)");
-  assert.equal(f.pending.length, 1);
-  assert.equal(f.pending[0]!.ms, FOLD_SETTLE_MS, "the wait is the sheet's transition plus a beat");
-  f.pending[0]!.run();
-  assert.equal(f.layouts.length, 1, "then the room re-measures once");
+  assert.deepEqual(f.folds, [true], "one layout at the press, the slip already folded");
+  f.tabEvents.fire("click");
+  assert.deepEqual(f.folds, [true, false], "one more at the tab's press, the slip already open");
 });
