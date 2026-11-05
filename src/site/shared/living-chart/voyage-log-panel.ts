@@ -54,22 +54,85 @@ type Seat = {
   readonly row: HTMLLIElement;
 };
 
-function createRoadAsk(_park: () => void) {
+function paintSeat(s: Seat): void {
+  const { press, note, row } = s;
+  const told = row.classList.contains("inked");
+  press.setAttribute("aria-disabled", String(!told));
+  note.hidden = told;
+}
+
+function createQuestion() {
+  let asking: Seat | null = null;
+
+  function close(): void {
+    if (asking) asking.label.textContent = ROAD_TAKE;
+    asking = null;
+  }
+
+  return {
+    asks: (s: Seat): boolean => asking === s,
+    open(s: Seat): void {
+      const { label } = s;
+      label.textContent = ROAD_ASK;
+      asking = s;
+    },
+    close,
+    closeIfUntold(): void {
+      if (asking && !asking.row.classList.contains("inked")) close();
+    },
+    forget(): void {
+      asking = null;
+    },
+  };
+}
+
+type Question = ReturnType<typeof createQuestion>;
+
+function onPress(s: Seat, e: MouseEvent, q: Question, park: () => void): void {
+  if (!s.row.classList.contains("inked")) {
+    e.preventDefault();
+    q.close();
+    return;
+  }
+  if (q.asks(s)) {
+    q.close();
+    return;
+  }
+  e.preventDefault();
+  q.close();
+  park();
+  q.open(s);
+}
+
+function createRoadAsk(park: () => void) {
+  const q = createQuestion();
   let seats: Seat[] = [];
 
   function press(row: HTMLLIElement, href: string): HTMLAnchorElement {
     const s: Seat = { ...roadPressParts(href), row };
     seats.push(s);
+    paintSeat(s);
+    s.press.addEventListener("click", (e) => onPress(s, e, q, park));
+    s.press.addEventListener("focusout", () => {
+      if (q.asks(s)) q.close();
+    });
+    s.press.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && q.asks(s)) q.close();
+    });
     return s.press;
   }
 
-  function settle(): void {}
+  function settle(): void {
+    seats.forEach(paintSeat);
+    q.closeIfUntold();
+  }
 
   function forget(): void {
     seats = [];
+    q.forget();
   }
 
-  return { press, close: () => {}, settle, forget };
+  return { press, close: q.close, settle, forget };
 }
 
 type RoadAsk = ReturnType<typeof createRoadAsk>;

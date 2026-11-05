@@ -195,3 +195,113 @@ test("a host that hands the journal no road writer keeps today's rows (#434 ruli
     "no press and no prose span on any row",
   );
 });
+
+const click = (p: El): { defaultPrevented: boolean } => {
+  const e = ev();
+  p.fire("click", e);
+  return e;
+};
+const press2 = (rows: HTMLLIElement[]): El => pressOf(rows[2]!)!;
+const press3 = (rows: HTMLLIElement[]): El => pressOf(rows[3]!)!;
+
+test("the press stands pale until the voyage reaches its row: it refuses, pauses nothing, and says Not reached yet; told, it works and the note goes (#434 M2)", async () => {
+  const parks: number[] = [];
+  const { panel, rows } = await roadPanel(() => parks.push(1));
+  const p2 = press2(rows);
+  const p3 = press3(rows);
+  assert.equal(p2.getAttribute("aria-disabled"), "true", "at build no row is told");
+  assert.equal(noteOf(p2).hidden, false);
+
+  panel.revealLog(rows, 2);
+  assert.equal(p2.getAttribute("aria-disabled"), "true", "row 2 is still untold");
+  assert.equal(noteOf(p2).hidden, false);
+  assert.equal(click(p2).defaultPrevented, true, "a pale press goes nowhere");
+  assert.equal(parks.length, 0, "and pauses nothing");
+  assert.equal(labelOf(p2).textContent, "Take this road", "and asks nothing");
+
+  panel.revealLog(rows, 3);
+  assert.equal(p2.getAttribute("aria-disabled"), "false", "told, it works");
+  assert.equal(noteOf(p2).hidden, true, "and the note goes");
+  assert.equal(p3.getAttribute("aria-disabled"), "true", "the next row's press is still pale");
+  assert.equal(noteOf(p3).hidden, false);
+
+  panel.revealLog(rows, 2);
+  assert.equal(p2.getAttribute("aria-disabled"), "true", "scrubbed back, it is pale again");
+  assert.equal(noteOf(p2).hidden, false);
+});
+
+test("the first press on a told row pauses the voyage and asks Leave the voyage?; the second lets the Ribbon open (#434 ruling A)", async () => {
+  const parks: number[] = [];
+  const { panel, rows } = await roadPanel(() => parks.push(1));
+  panel.revealLog(rows, 5);
+  const p2 = press2(rows);
+
+  assert.equal(click(p2).defaultPrevented, true, "the first press goes nowhere");
+  assert.equal(parks.length, 1, "it pauses the voyage once");
+  assert.equal(labelOf(p2).textContent, "Leave the voyage?");
+
+  assert.equal(click(p2).defaultPrevented, false, "the second press lets the anchor's own navigation through");
+  assert.equal(parks.length, 1, "and pauses nothing more");
+  assert.equal(labelOf(p2).textContent, "Take this road", "the question closes as the reader leaves");
+  assert.equal(noteOf(p2).hidden, true, "the note stays gone on a told row");
+});
+
+type Rig = Awaited<ReturnType<typeof roadPanel>> & { parks: number[] };
+
+async function askingRig(): Promise<Rig> {
+  const parks: number[] = [];
+  const rig = await roadPanel(() => parks.push(1));
+  rig.panel.revealLog(rig.rows, 5);
+  assert.equal(click(press2(rig.rows)).defaultPrevented, true);
+  assert.equal(labelOf(press2(rig.rows)).textContent, "Leave the voyage?", "the precondition: row 2 asks");
+  return { ...rig, parks };
+}
+
+function assertClosedNotRelabelled(rig: Rig, why: string): void {
+  rig.panel.revealLog(rig.rows, 5);
+  assert.equal(labelOf(press2(rig.rows)).textContent, "Take this road", `${why}: the label is back`);
+  const before = rig.parks.length;
+  assert.equal(click(press2(rig.rows)).defaultPrevented, true, `${why}: a fresh first press asks again`);
+  assert.equal(
+    rig.parks.length,
+    before + 1,
+    `${why}: and pauses again, so the question closed and did not merely relabel`,
+  );
+}
+
+const CLOSERS: ReadonlyArray<[string, (r: Rig) => void]> = [
+  ["focus leaves the press", (r) => press2(r.rows).fire("focusout")],
+  ["Escape is pressed on it", (r) => press2(r.rows).fire("keydown", { key: "Escape" })],
+  [
+    "another road press asks",
+    (r) => {
+      assert.equal(click(press3(r.rows)).defaultPrevented, true);
+      assert.equal(labelOf(press3(r.rows)).textContent, "Leave the voyage?", "row 3 asks in its turn");
+    },
+  ],
+  [
+    "a pale press is pressed",
+    (r) => {
+      r.panel.revealLog(r.rows, 3);
+      const parked = r.parks.length;
+      assert.equal(click(press3(r.rows)).defaultPrevented, true);
+      assert.equal(r.parks.length, parked, "the pale press paused nothing");
+    },
+  ],
+  ["its row goes untold", (r) => r.panel.revealLog(r.rows, 2)],
+  ["the engine closes it", (r) => r.panel.closeAsk()],
+];
+
+test("the question closes on any other action: focus leaving, Escape, another road asking, a pale press pressed, its row untold, the engine's closeAsk, and a rebuild (#434 M4)", async () => {
+  for (const [why, act] of CLOSERS) {
+    const rig = await askingRig();
+    act(rig);
+    assert.equal(labelOf(press2(rig.rows)).textContent, "Take this road", `${why}: row 2 closed`);
+    assertClosedNotRelabelled(rig, why);
+  }
+
+  const rig = await askingRig();
+  const { rows: fresh } = rig.panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
+  rig.panel.revealLog(fresh, 5);
+  assert.equal(click(press2(fresh)).defaultPrevented, true, "a rebuilt row asks before it goes");
+});
