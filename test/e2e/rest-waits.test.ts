@@ -9,7 +9,17 @@ import { makeSettle } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 import { count, lastOf, recording, type Said } from "../../test-support/recording-ctx.ts";
 
-const AT_REST = { sheet: 792.6, fx: 0.5, fy: 0.5, sk: 4, cx: "0.5000", cy: "0.5000", k: "4.0000", folded: false };
+const AT_REST = {
+  sheet: 792.6,
+  fx: 0.5,
+  fy: 0.5,
+  sk: 4,
+  cx: "0.5000",
+  cy: "0.5000",
+  k: "4.0000",
+  folded: false,
+  sheetAnims: 0,
+};
 const overridden = (said: readonly Said[]) =>
   count(said, "setDeviceMetricsOverride") > count(said, "clearDeviceMetricsOverride");
 const REFITS = [
@@ -125,17 +135,40 @@ for (const { stuck, label, answer } of REFITS) {
   });
 }
 
+// Two equal reads inside the stall are what a wait without the sheetAnims term hands back on, so the stall outlasts that pair by one read (Issue #1261).
+const STALL_READS = 3;
+const readsSince = (said: readonly Said[], press: string): number =>
+  count(said.slice(said.findLastIndex((s) => s.what.includes(press))), "--reserve-right");
 const refitFlow = (
   walksAt: "resize" | "back" | "fold" | "unfold" | null,
   moved: { fx: number } | { fy: number } | { sk: number } = { fx: 0.5005 },
+  stallsAt: "fold" | "unfold" | null = null,
 ) =>
   recording((expression, so) => {
     if (!expression.includes("--reserve-right")) return {};
     const walk = (at: "resize" | "back" | "fold" | "unfold") => (walksAt === at ? moved : {});
+    const stall = (at: "fold" | "unfold", press: string, sheet: number) =>
+      stallsAt === at && readsSince(so, press) <= STALL_READS ? { sheet, sheetAnims: 1 } : {};
     if (count(so, '.slip-tab").click()') > 0)
-      return { ...AT_REST, reserve: "487.4px", resizes: 2, ih: 2263, ...walk("unfold") };
+      return {
+        ...AT_REST,
+        reserve: "487.4px",
+        resizes: 2,
+        ih: 2263,
+        ...walk("unfold"),
+        ...stall("unfold", '.slip-tab").click()', 1280),
+      };
     if (count(so, ".slip-fold") > 0)
-      return { ...AT_REST, reserve: "0px", resizes: 2, ih: 2263, sheet: 1280, folded: true, ...walk("fold") };
+      return {
+        ...AT_REST,
+        reserve: "0px",
+        resizes: 2,
+        ih: 2263,
+        sheet: 1280,
+        folded: true,
+        ...walk("fold"),
+        ...stall("fold", ".slip-fold", AT_REST.sheet),
+      };
     if (overridden(so)) return { ...AT_REST, reserve: "487.4px", resizes: 1, ih: 600, sheet: 443.9, ...walk("resize") };
     const cleared = count(so, "clearDeviceMetricsOverride") > 0;
     return { ...AT_REST, reserve: "487.4px", resizes: cleared ? 2 : 0, ih: 2263, ...(cleared ? walk("back") : {}) };
@@ -208,6 +241,20 @@ test("Z13b and Z13c take the sheet before the resize at rest, not while the page
     ],
   );
 });
+
+for (const at of ["fold", "unfold"] as const) {
+  test(`Z13c reads true when the ${at}'s slide pends at the box the sheet stood in, listed on #sheet, for ${STALL_READS} reads after the press`, async () => {
+    const { ctx, checked } = refitFlow(null, undefined, at);
+    await z13dRefitHolds(ctx);
+    assert.deepEqual(
+      checked.filter((c) => c.code === "Z13b" || c.code === "Z13c"),
+      [
+        { code: "Z13c", ok: true },
+        { code: "Z13b", ok: true },
+      ],
+    );
+  });
+}
 
 for (const [freeMs, perfMs, offMain] of [
   [366, 364, true],
