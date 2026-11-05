@@ -37,9 +37,13 @@ const closeUp2 = closeUpOf(world42, q2.cx, q2.cy, 2);
 
 test("with the beasts seal off, a close-up carrying a beast draws exactly what one carrying none draws", () => {
   assert.equal(closeUp2.beasts.length, 1, "fixture drift: the window no longer carries the beast");
-  const off = renderMap(closeUp2, OFF);
-  assert.ok(off.includes('id="sea-serpent"'), "fixture drift: no decor serpent for a leak to remove");
-  assert.equal(digest(off), digest(renderMap({ ...closeUp2, beasts: [] }, OFF)));
+  const bare = renderMap({ ...closeUp2, beasts: [] }, OFF);
+  assert.equal(
+    digest(renderMap(closeUp2, OFF)),
+    digest(bare),
+    "a carried beast changed a sheet drawn without the seal",
+  );
+  assert.ok(bare.includes('id="sea-serpent"'), "fixture drift: no decor serpent for a leak to remove");
 });
 
 test("a carried beast is drawn on the close-up, and the decor serpent stands down for it (seed 42, band 2)", () => {
