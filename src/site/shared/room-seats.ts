@@ -57,11 +57,15 @@ export function slipWidth(r: DOMRect | null): number {
 // atelier.css seats the Glass beside an open slip at right: --slip-w + --slip-right + 1.4rem; computed here rather than read, because the Glass's right transitions with the fold and a rect read at the settle timer was 12px short (e2e Z13c).
 export const GLASS_BREATH_REM = 1.4;
 
+function restingRight(el: Element): number {
+  return parseFloat(getComputedStyle(el).right) || 0;
+}
+
 export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipReach: number): number | null {
   if (glass === null) return null;
   if (!slipOpen) {
     const r = rectOf(glass);
-    return r === null ? null : pageLeft(r);
+    return r === null ? null : pageLeft(r) + (parseFloat(getComputedStyle(glass).right) || 0) - restingRight(glass);
   }
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
   return pageBox().w - slipReach - GLASS_BREATH_REM * rem - glass.offsetWidth;
