@@ -8,6 +8,8 @@ export interface ReadingFrameOpts {
   readonly onPark?: () => void;
   /** Forwarded to the instrument's one told signal, so a host can decorate the entry the story is on. */
   readonly onAgesTold?: (told: ToldEntry | null) => void;
+  /** Forwarded to the journal, so a host can give each road leg's row its way into the Ribbon. */
+  readonly roadHref?: (seed: number, fromIdx: number, toIdx: number) => string;
 }
 
 function frameMount() {
@@ -115,6 +117,7 @@ function frameHost(
       strip: log.strip,
       onPark: opts.onPark,
       onAgesTold: opts.onAgesTold,
+      roadHref: opts.roadHref,
     },
   };
   return host;

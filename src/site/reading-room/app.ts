@@ -14,7 +14,7 @@ import { TABLE_KEY, type TableOverrides } from "../shared/table-address.ts";
 import { NO_LAND_KEYS, emitLandKeys, overridesOfLand, type LandKeys } from "../shared/address-grammar.ts";
 import { errorText } from "../shared/error-text.ts";
 import { emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
-import { parseReadingRoomAddress } from "./address.ts";
+import { parseReadingRoomAddress, roadHrefFor } from "./address.ts";
 import { createReadingFrame } from "../shared/reading-frame/index.ts";
 import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
 import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../shared/living-chart/index.ts";
@@ -57,7 +57,24 @@ const furniture = {
 const ROOM_TOUR_TIMEOUT_MS = 6000;
 
 // onPark: Play's parks are the one rest no input event announces; onAgesTold: the entry the story is telling in EITHER half.
-const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesTold: (t) => onTold(t) });
+const frame = createReadingFrame(mount, {
+  onPark: () => syncHash(),
+  onAgesTold: (t) => onTold(t),
+  roadHref: (forSeed, from, to) =>
+    roadHrefFor(
+      {
+        style,
+        type: carried.type,
+        band: carried.band,
+        keys: carried.keys,
+        table: carried.table,
+        written: heldFor(written, forSeed),
+      },
+      forSeed,
+      from,
+      to,
+    ),
+});
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
 // The plate stage and the frame's log are seated on the journal's slip by seats.ts, inside the panel the engine hides (its teardowns reach them on purpose).
