@@ -151,7 +151,8 @@ const ev = (): { defaultPrevented: boolean; preventDefault(): void } => ({
 });
 
 test("a road leg's journal row carries Take this road to the host's address for that leg; the departure, a sea row and the last entry carry none (#434)", async () => {
-  const { log, rows } = await roadPanel();
+  const { panel, log, rows } = await roadPanel();
+  panel.revealLog(rows, 5);
   assert.equal(rows.length, 5, "a departure, three ports and the homecoming");
   assert.equal(
     ROAD_LEGS[3].mode,
@@ -204,17 +205,23 @@ const click = (p: El): { defaultPrevented: boolean } => {
 const press2 = (rows: HTMLLIElement[]): El => pressOf(rows[2]!)!;
 const press3 = (rows: HTMLLIElement[]): El => pressOf(rows[3]!)!;
 
-test("the press stands pale until the voyage reaches its row: it refuses, pauses nothing, and says Not reached yet; told, it works and the note goes (#434 M2)", async () => {
+test("the press stands pale and carries no address until the voyage reaches its row: it refuses, pauses nothing, and says Not reached yet; told, it takes its address and works, and the note goes (#434 M2)", async () => {
   const parks: number[] = [];
   const { panel, rows } = await roadPanel(() => parks.push(1));
   const p2 = press2(rows);
   const p3 = press3(rows);
   assert.equal(p2.getAttribute("aria-disabled"), "true", "at build no row is told");
   assert.equal(noteOf(p2).hidden, false);
+  assert.equal(
+    p2.getAttribute("href"),
+    null,
+    "a pale press carries no address, so no click of any kind opens the Ribbon",
+  );
 
   panel.revealLog(rows, 2);
   assert.equal(p2.getAttribute("aria-disabled"), "true", "row 2 is still untold");
   assert.equal(noteOf(p2).hidden, false);
+  assert.equal(p2.getAttribute("href"), null, "nor while its row is still untold");
   assert.equal(click(p2).defaultPrevented, true, "a pale press goes nowhere");
   assert.equal(parks.length, 0, "and pauses nothing");
   assert.equal(labelOf(p2).textContent, "Take this road", "and asks nothing");
@@ -222,12 +229,15 @@ test("the press stands pale until the voyage reaches its row: it refuses, pauses
   panel.revealLog(rows, 3);
   assert.equal(p2.getAttribute("aria-disabled"), "false", "told, it works");
   assert.equal(noteOf(p2).hidden, true, "and the note goes");
+  assert.equal(p2.getAttribute("href"), "/ribbon/#seed=42&a=4&b=9", "and it takes its leg's address");
   assert.equal(p3.getAttribute("aria-disabled"), "true", "the next row's press is still pale");
   assert.equal(noteOf(p3).hidden, false);
+  assert.equal(p3.getAttribute("href"), null, "and carries none");
 
   panel.revealLog(rows, 2);
   assert.equal(p2.getAttribute("aria-disabled"), "true", "scrubbed back, it is pale again");
   assert.equal(noteOf(p2).hidden, false);
+  assert.equal(p2.getAttribute("href"), null, "and gives its address up");
 });
 
 test("the first press on a told row pauses the voyage and asks Leave the voyage?; the second lets the Ribbon open (#434 ruling A)", async () => {

@@ -17,7 +17,7 @@ type Leg = {
   last: boolean;
   press: {
     label: string | null;
-    path: string;
+    path: string | null;
     a: string | null;
     b: string | null;
     seed: string | null;
@@ -25,7 +25,7 @@ type Leg = {
     dropped: string[];
   } | null;
 };
-type Pale = { bg: string; press: string; li: string; prose: string | null; gutter: string | null };
+type Pale = { href: string | null; bg: string; press: string; li: string; prose: string | null; gutter: string | null };
 type Rv8bRead = { rows: number; legs: Leg[]; pale: Pale[]; told: string[]; restored: boolean };
 
 const rowOk = (l: Leg): boolean =>
@@ -40,32 +40,33 @@ const rowOk = (l: Leg): boolean =>
       l.press.dropped.length === 0
     : l.press === null;
 const paleOk = (p: Pale): boolean =>
-  p.bg === CREAM && p.press === "1" && p.li === "1" && p.prose === "0.4" && p.gutter === "0.4";
+  p.href === null && p.bg === CREAM && p.press === "1" && p.li === "1" && p.prose === "0.4" && p.gutter === "0.4";
 
 // The finish() calls are an artificial instrument: the rows ink in over 0.18s, and a read taken at once returns the starting opacity, so the transition is run to its end before the computed style is read (measured: without it the pale-rule mutation read the row at 1).
 const RV8B_READ = `(()=>{
-  const plan=window.__vellumVoyagePlan();const rows=[...document.querySelectorAll(".rf-log-strip li.prologue")];
-  const legs=plan.legs.map((l,i)=>{const p=rows[i+1]?rows[i+1].querySelector(".cr-road"):null;let press=null;
-    if(p){const u=new URL(p.href);const q=new URLSearchParams(u.hash.slice(1));const lab=p.querySelector(".cr-road-label");
-      press={label:lab?lab.textContent:null,path:u.pathname,a:q.get("a"),b:q.get("b"),seed:q.get("seed"),target:p.target,
+  const plan=window.__vellumVoyagePlan();const rows=()=>[...document.querySelectorAll(".rf-log-strip li.prologue")];
+  const done=()=>document.querySelectorAll(".rf-log-strip li").forEach((li)=>li.getAnimations({subtree:true}).forEach((a)=>a.finish()));
+  const cs=(el,k)=>el?getComputedStyle(el)[k]:null;
+  window.__vellumVoyageStepTo(0);done();
+  const pale=rows().filter((r)=>!r.classList.contains("inked")&&r.querySelector(".cr-road")).map((r)=>{const p=r.querySelector(".cr-road");
+    return{href:p.getAttribute("href"),bg:cs(p,"backgroundColor"),press:cs(p,"opacity"),li:cs(r,"opacity"),prose:cs(r.querySelector(".cr-prose"),"opacity"),gutter:cs(r.querySelector(".cr-year"),"opacity")};});
+  window.__vellumVoyageStepTo(999);done();
+  const rs=rows();
+  const legs=plan.legs.map((l,i)=>{const p=rs[i+1]?rs[i+1].querySelector(".cr-road"):null;let press=null;
+    if(p){const h=p.getAttribute("href");const u=h===null?null:new URL(h,location.href);const q=new URLSearchParams(u?u.hash.slice(1):"");const lab=p.querySelector(".cr-road-label");
+      press={label:lab?lab.textContent:null,path:u?u.pathname:null,a:q.get("a"),b:q.get("b"),seed:q.get("seed"),target:p.target,
         dropped:["theme","legend","arms","beasts","survey","year"].filter((k)=>q.has(k))};}
     return{i,mode:l.mode,from:l.fromIdx,to:l.toIdx,last:i===plan.legs.length-1,press};});
-  window.__vellumVoyageStepTo(0);
-  const done=()=>document.querySelectorAll(".rf-log-strip li").forEach((li)=>li.getAnimations({subtree:true}).forEach((a)=>a.finish()));done();
-  const cs=(el,k)=>el?getComputedStyle(el)[k]:null;
-  const pale=[...document.querySelectorAll(".rf-log-strip li.prologue")].filter((r)=>!r.classList.contains("inked")&&r.querySelector(".cr-road")).map((r)=>{const p=r.querySelector(".cr-road");
-    return{bg:cs(p,"backgroundColor"),press:cs(p,"opacity"),li:cs(r,"opacity"),prose:cs(r.querySelector(".cr-prose"),"opacity"),gutter:cs(r.querySelector(".cr-year"),"opacity")};});
-  window.__vellumVoyageStepTo(999);done();
   const told=[...document.querySelectorAll(".rf-log-strip li.prologue.inked .cr-road")].map((p)=>cs(p,"backgroundColor"));
   const status=document.querySelector(".rf-status").textContent,summary=window.__vellumVoyageLog().summary;
-  return{rows:rows.length,legs,pale,told,restored:status===summary&&summary!==""};})()`;
+  return{rows:rs.length,legs,pale,told,restored:status===summary&&summary!==""};})()`;
 
 export async function rv8bRoadRows({ evaluate, check }: SuiteContext): Promise<void> {
   const r = await evaluate<Rv8bRead>(RV8B_READ);
   const last = r.legs[r.legs.length - 1];
   const failing = r.legs.filter((l) => !rowOk(l));
   check(
-    "RV8b the journal's road rows carry Take this road to the Ribbon at that leg's two towns, its sea rows and its last entry carry none, and a press stands pale and unfaded on a row the voyage has not reached, gold once it has (#434)",
+    "RV8b the journal's road rows carry Take this road to the Ribbon at that leg's two towns, its sea rows and its last entry carry none, and a press stands pale, unfaded and with no address on a row the voyage has not reached, gold once it has (#434)",
     r.rows === r.legs.length + 1 &&
       r.legs.some((l) => l.mode === "road" && !l.last) &&
       r.legs.some((l) => l.mode === "sea") &&

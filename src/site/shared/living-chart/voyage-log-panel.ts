@@ -33,10 +33,9 @@ export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }
 
-function roadPressParts(href: string) {
+function roadPressParts() {
   const press = document.createElement("a");
   press.className = "cr-road";
-  press.setAttribute("href", href);
   const label = document.createElement("span");
   label.className = "cr-road-label";
   label.textContent = ROAD_TAKE;
@@ -52,11 +51,14 @@ type Seat = {
   readonly label: HTMLSpanElement;
   readonly note: HTMLSpanElement;
   readonly row: HTMLLIElement;
+  readonly href: string;
 };
 
 function paintSeat(s: Seat): void {
-  const { press, note, row } = s;
+  const { press, note, row, href } = s;
   const told = row.classList.contains("inked");
+  if (told) press.setAttribute("href", href);
+  else press.removeAttribute("href");
   press.setAttribute("aria-disabled", String(!told));
   note.hidden = told;
 }
@@ -106,7 +108,7 @@ function createRoadAsk(park: () => void) {
   let seats: Seat[] = [];
 
   function press(row: HTMLLIElement, href: string): HTMLAnchorElement {
-    const s: Seat = { ...roadPressParts(href), row };
+    const s: Seat = { ...roadPressParts(), row, href };
     seats.push(s);
     paintSeat(s);
     s.press.addEventListener("click", (e) => onPress(s, e, q, park));

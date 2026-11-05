@@ -439,7 +439,11 @@ that footing.
 **A refusing press dims by swapping its ground, never by opacity.** Opacity takes the face under the
 floor, where a cream ground under full-strength ink keeps it far above it (`.pc-lay.dim` in
 `src/styles/shared/living-chart.css` carries the measurement). The press stays pressable rather than
-`disabled`, so a keyboard reader still reaches it and hears why it refuses.
+`disabled`, so a keyboard reader still reaches it and hears why it refuses. **The one ruled
+exception is the journal's pale "Take this road"**, which carries no address until the voyage
+reaches its row, so no click of any kind leaves the room early and Tab passes over it until then
+(Alex, 2026-11-05, Issue #434 comments 6647404370 and 6647997725; `paintSeat` in
+`src/site/shared/living-chart/voyage-log-panel.ts`).
 
 **Controls sit in three radius families, descending**: panels, then slips and controls, then chips.
 Warnings are panels, not slips. Beside them: one standard control in the cream fill, one dark primary
