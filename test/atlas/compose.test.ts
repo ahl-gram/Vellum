@@ -1,13 +1,34 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { composeAtlas, prospectPlates, ribbonPlates } from "../../src/atlas/compose.ts";
 import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
+import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
 import { serializableAtlas } from "../../src/site/explorer/serializable-atlas.ts";
+import { runInline } from "../../src/site/explorer/worker-client.ts";
 import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { decideSettle, FULL_WINDOW } from "../../src/world/lod.ts";
+import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
+import type { World } from "../../src/world/types.ts";
+
+const digest = (svg: string): string => `${createHash("sha256").update(svg).digest("hex").slice(0, 16)}/${svg.length}`;
+const PLATE_RENDER = { style: "antique", widthPx: 1500, legend: true } as const;
+
+function glassWindow(world: World, name: string): UvWindow {
+  const s = world.settlements.find((t) => t.name === name);
+  assert.ok(s, `${name} is a settlement of chart ${world.recipe.seed}`);
+  const camera = { cx: s.x / (world.recipe.gridW - 1), cy: s.y / (world.recipe.gridH - 1), k: 4 };
+  const settled = decideSettle({ camera, currentWindow: FULL_WINDOW, currentBand: 0 });
+  assert.equal(settled.action, "region", `a Glass centred on ${name} at k=4 settles onto a region`);
+  assert.equal(settled.band, 2, "k=4 is the second close-up");
+  return settled.window;
+}
 
 test("composeAtlas yields the hero, the other draughtings, and the surveys", () => {
   const world = generateWorld(defaultRecipe(42));
@@ -170,6 +191,60 @@ test("#433 the worker hand-off carries every part of the composition across but 
   for (const [key, value] of Object.entries(atlas)) {
     if (key === "world") continue;
     assert.deepEqual(carried[key], value, `${key} crosses the worker boundary`);
+  }
+});
+
+test("#450 each regional plate is the Glass's second close-up over its town, drawn as the Glass's own region job draws it", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const plates = composeAtlas(world).regions;
+  const towns = ["Laukuwelua", "Toatauhe"];
+  assert.equal(plates.length, towns.length);
+  plates.forEach((plate, i) => {
+    const town = towns[i]!;
+    const window = glassWindow(world, town);
+    const glass = runInline({
+      kind: "region",
+      seed: 42,
+      overrides: {},
+      window,
+      gridW: 320,
+      gridH: 240,
+      band: 2,
+      render: PLATE_RENDER,
+    });
+    assert.equal(digest(plate.svg), digest(glass.svg), `${town}'s plate is the Glass's band-2 sheet, cell for cell`);
+    assert.equal(plate.title, glass.title, "and carries the Glass's own title");
+  });
+});
+
+test("#450 a regional plate carries its stamp, and the stamp alone redraws it byte for byte, its title derived from its window", () => {
+  const world = generateWorld(defaultRecipe(2));
+  assert.notEqual(
+    regionTitle(world, glassWindow(world, "Nydstagrad")),
+    "The Environs of Nydstagrad",
+    "premise: chart 2's far-town plate is named for the town nearest its window's centre, or this pin cannot see a plate named for its anchor",
+  );
+  const plates = composeAtlas(world).regions;
+  assert.equal(plates.length, 2);
+  for (const plate of plates) {
+    const parsed = recipeFromSvg(plate.svg);
+    assert.ok(parsed, `${plate.title} carries its recipe`);
+    const region = parsed.region;
+    assert.ok(region, "and its region stamp");
+    const chained = region.detail > 0;
+    assert.equal(region.detail, 2, "stamped at band 2's depth");
+    const reworld = generateWorld(parsed.recipe);
+    const redrawn = renderMap(
+      generateRegionWorld(reworld, {
+        window: region.window,
+        gridW: parsed.recipe.gridW,
+        gridH: parsed.recipe.gridH,
+        title: regionTitle(reworld, region.window),
+        detail: chained,
+      }),
+      { style: parsed.style, widthPx: 1500, legend: true, regionRecipe: region },
+    );
+    assert.equal(digest(redrawn), digest(plate.svg), `${plate.title} redraws from its stamp alone`);
   }
 });
 

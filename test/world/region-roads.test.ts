@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { windowAround } from "../../src/world/region.ts";
+import { regionPlateSpec } from "../../src/atlas/compose.ts";
 import { corridorRadius } from "../../src/world/river-route.ts";
 import { riverReachCells } from "../../src/world/seat-settlements.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
@@ -39,7 +39,7 @@ function sheets(): Array<{ readonly name: string; readonly region: World }> {
   return [
     { name: "Won band 3", region: closeUp(HERO, WON_BAND_3) },
     ...CAPITAL_WINDOWS.map((window, i) => ({ name: `the capital's band ${i + 1}`, region: closeUp(HERO, window) })),
-    { name: "the atlas plate", region: closeUp(HERO, windowAround(HERO, capital, 0.38), false) },
+    { name: "the atlas plate", region: closeUp(HERO, regionPlateSpec(HERO, capital).window) },
   ];
 }
 
