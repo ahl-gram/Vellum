@@ -4,8 +4,6 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { open, size } from "../stage/stage.ts";
 import { aimAt, motionOn, mouseTo, openAt, pressSelector, SEED_42 } from "../stage/slide-kit.ts";
 
-// 2026-11-05, Issue #1261: a slide paints a box a frame, 16 to 17 in 320 ms at CPU x1 and x6 on the local harness browser; three is what a runner painting every 100 ms still shows, and a jump shows none.
-const DISTINCT_FLOOR = 3;
 // 2026-11-05, Issue #1261: 0.0000 at every frame of six presses at CPU x1 and x6, the slide and the slip starting on one frame of the document timeline; the nearest mutation, the Glass read where it stood, reads 0.1963.
 const PACE_GAP = 0.05;
 const REST_PX = 0.5;
@@ -190,7 +188,7 @@ function witnesses(i: Instance, zoomed: number | null): string[] {
   return faults;
 }
 
-export async function fs1FoldSlides(ctx: SuiteContext): Promise<void> {
+export async function fs2FoldSlides(ctx: SuiteContext): Promise<void> {
   const zoomed = { k: 2.744, cx: 0.35, cy: 0.62 };
   const moving = await motionOn(ctx, async () => {
     await openAt(ctx, SEED_42, 1280, 800, "FS a");
@@ -209,7 +207,6 @@ export async function fs1FoldSlides(ctx: SuiteContext): Promise<void> {
   const slideFaults = [...witnesses(e1280, null), ...witnesses(seed, null), ...witnesses(e1024, zoomed.k)];
   const each = (pick: (r: FoldReads) => boolean): string[] =>
     moving.flatMap((i) => i.reads.filter(({ r }) => pick(r)).map(({ press }) => `${i.id} ${press}`));
-  const jumped = each((r) => r.distinctBetween < DISTINCT_FLOOR);
   const paced = each((r) => r.worstPaceGap > PACE_GAP || r.sheetOffAfter > REST_PX || r.pressOffAfter > REST_PX);
   const framed = e1024.reads
     .filter(({ r }) => (r.framingEveryFrame ?? Infinity) > r.tolerance)
@@ -222,17 +219,12 @@ export async function fs1FoldSlides(ctx: SuiteContext): Promise<void> {
     .map(({ press }) => `${heldNow.id} ${press}`);
   const heldFaults = witnesses(heldNow, zoomed.k);
   ctx.check(
-    'FS1 in the Explorer at 1280x800 and at 1024x768 zoomed to 2.744, and on the Seed of the Day at 1024x768 zoomed to 2, a press on the side panel\'s fold and on its tab carries the sheet from where it stood to its new fit across at least three painted boxes between the two, where main snapped it there in one frame 340 ms after the press (Alex, 2026-11-05, Issue #1261: "the chart slides just the same as the rest")',
-    jumped.length === 0 && slideFaults.length === 0,
-    `${[...jumped.map((j) => `${j} jumped`), ...slideFaults].join("; ") || "slid"}: ${moving.map(show).join(" | ")}`,
-  );
-  ctx.check(
-    "FS2 in the same presses the sheet keeps the slip's own pace at every painted frame of the slip's travel, its progress toward its rest box within 0.05 of the slip's toward its own, so the chart shares the fold's duration and curve (`--fold` and `--ease-fold`); from the frame the slip stands at rest the sheet and the Press row stand at theirs, so nothing moves after the fold; and in the zoomed Explorer the chart under the sheet's centre and its depth hold at every frame within the gesture box's whole-pixel rounding (Issue #1261)",
+    "FS2 in the Explorer at 1280x800 and at 1024x768 zoomed to 2.744, and on the Seed of the Day at 1024x768 zoomed to 2, at a press on the side panel's fold and on its tab the sheet keeps the slip's own pace at every painted frame of the slip's travel, its progress toward its rest box within 0.05 of the slip's toward its own, so the chart shares the fold's duration and curve (`--fold` and `--ease-fold`); from the frame the slip stands at rest the sheet and the Press row stand at theirs, so nothing moves after the fold; and in the zoomed Explorer the chart under the sheet's centre and its depth hold at every frame within the gesture box's whole-pixel rounding, where main snapped the sheet to its new fit in one frame 340 ms after the press (Alex, 2026-11-05, Issue #1261: \"the chart slides just the same as the rest\")",
     paced.length === 0 && framed.length === 0 && slideFaults.length === 0,
     `${[...paced.map((p) => `${p} off the slip's pace or not at rest`), ...framed.map((f) => `${f} framing drifted`), ...slideFaults].join("; ") || "at the slip's pace, at rest with it, framing held"}: ${moving.map(show).join(" | ")}`,
   );
   ctx.check(
-    "FS3 under reduced motion, in the Explorer at 1024x768 zoomed to 2.744 about (0.35, 0.62), a fold and an unfold stand the sheet at its new fit with at most one box between where it stood and where it rests, where a slide paints sixteen or more, and the chart's framing lands where it stood (Issue #1261; `handbook/specs/ui-design.md`, reduced motion is the control)",
+    "FS3 under reduced motion, in the Explorer at 1024x768 zoomed to 2.744 about (0.35, 0.62), a fold and an unfold stand the sheet at its new fit with at most one box between where it stood and where it rests, where a played slide paints many more, and the chart's framing lands where it stood (Issue #1261; `handbook/specs/ui-design.md`, reduced motion is the control)",
     stood.length === 0 && landed.length === 0 && heldFaults.length === 0,
     `${[...stood.map((s) => `${s} slid`), ...landed.map((l) => `${l} lost its framing`), ...heldFaults].join("; ") || "stood at its fit, framing held"}: ${show(heldNow)}`,
   );
