@@ -300,6 +300,14 @@ test("the question closes on any other action: focus leaving, Escape, another ro
     assertClosedNotRelabelled(rig, why);
   }
 
+  const standing = await askingRig();
+  standing.panel.revealLog(standing.rows, 5);
+  assert.equal(
+    labelOf(press2(standing.rows)).textContent,
+    "Leave the voyage?",
+    "a paint that leaves the row told leaves the question standing",
+  );
+
   const rig = await askingRig();
   const { rows: fresh } = rig.panel.buildLogPanel(ROAD_PORTS, 1200, 42, "x", HOME, ROAD_LEGS);
   rig.panel.revealLog(fresh, 5);
