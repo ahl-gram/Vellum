@@ -4,7 +4,7 @@ import { sendClick, sendKey } from "../../support/input.ts";
 import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
-import type { BroadsideKit } from "./kit.ts";
+import { onSlipFloor, type BroadsideKit } from "./kit.ts";
 
 // 2026-11-05: Alex's rulings 2 and 3, Issue #1260 comment 6666875967: the bill starts growing above a 768 page, takes two pixels per pixel, and stops opening at twice its own width.
 const START = 768;
@@ -75,7 +75,8 @@ const FRAMES_OFF: Payload<Frame[]> =
   `(()=>{window.__billFramesOn=false;window.__billWatch.disconnect();return window.__billFrames;})()`;
 export type Landing = { k: number; x: number; y: number; writes: number; frame: number };
 const LANDING: Payload<Landing> = `(()=>{const s=window.__vellumZoomState();return{k:+s.k.toFixed(4),x:+s.x.toFixed(2),y:+s.y.toFixed(2),writes:window.__billWrites,frame:window.__billFrames.length};})()`;
-export const landed = (d: Landing, last: Landing): boolean => d.k === last.k && d.x === last.x && d.y === last.y;
+export const landed = (d: Landing, last: Landing): boolean =>
+  d.k === last.k && d.x === last.x && d.y === last.y && d.writes === last.writes && d.frame > last.frame;
 // The wheel is dispatched in the page in the task that presses The whole sheet, so it lands before the glide's first frame however slow the runner: only so is an interrupted home glide reached every run (Issue #1260 plan revision 4).
 const HOME_THEN_WHEEL: Payload<boolean> = `(()=>{const v=document.getElementById("map-viewport"),r=document.getElementById("sheet").getBoundingClientRect();document.getElementById("zoom-reset").click();v.dispatchEvent(new WheelEvent("wheel",{deltaY:100,clientX:r.left+r.width/2,clientY:r.top+r.height/2,bubbles:true,cancelable:true}));return true;})()`;
 const ADDRESS: Payload<string> = `(()=>location.hash)()`;
@@ -88,7 +89,7 @@ const win = (k: BroadsideKit, w: number, h: number): Promise<unknown> =>
 export const laidOut =
   (w: number, h: number, also: (d: Bill) => boolean = () => true) =>
   (d: Bill): boolean =>
-    d.w === w && d.h === h && d.fonts === "loaded" && d.anims === 0 && also(d);
+    d.w === w && d.h === h && d.fonts === "loaded" && d.anims === 0 && onSlipFloor(d.floor, h) && also(d);
 
 function reader(k: BroadsideKit) {
   const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));

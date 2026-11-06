@@ -9,7 +9,7 @@ import { br13Tip, br14Paper } from "./broadside/gestures.ts";
 import { br25Grows, br25dZoomed } from "./broadside/grow.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
-import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
+import { broadsideKit, onSlipFloor, type BroadsideKit } from "./broadside/kit.ts";
 import { mouseMove, sendKey } from "../support/input.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
@@ -286,7 +286,7 @@ async function narrowTaps(k: BroadsideKit, before: Narrow) {
   const settle = makeSettle({ evaluate, sleep });
   const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
   await makeStable(settle)(NARROW, "BR6 the room laid out at 1024x700", {
-    departed: (d) => d.iw === 1024 && d.ih === 700 && !sameBox(d.sheet, before.sheet),
+    departed: (d) => d.iw === 1024 && d.ih === 700 && !sameBox(d.sheet, before.sheet) && onSlipFloor(d.floor, d.ih),
   });
   await evaluate(COUNT_CLICKS);
   const tapped1 = await tapAt(k, settle);
