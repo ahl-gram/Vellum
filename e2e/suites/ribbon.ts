@@ -36,12 +36,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RB18", () => rb18CardRoad(k));
   await step("RB19", () => rb19Refused(k));
   await step("RB20", () => rb20RowProspects(k));
-  let fullMs = 0;
   await step("RB21, RB22", async () => {
-    fullMs = await rb21InksIn(k);
+    await rb21InksIn(k);
     await rb22TurnAbout(k);
   });
-  await step("RB23", () => rb23Reduced(k, fullMs));
+  await step("RB23", () => rb23Reduced(k));
   rb9NoErrors(ctx, errBase, httpBase);
 }
 
