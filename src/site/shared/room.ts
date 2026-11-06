@@ -20,6 +20,7 @@ interface RoomParts<Held> {
   readonly sheet: HTMLElement;
   readonly camera: RoomCamera<Held>;
   readonly aspect?: () => number | null;
+  readonly onLayout?: () => void;
 }
 
 export interface Room {
