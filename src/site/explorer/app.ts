@@ -24,7 +24,7 @@ import {
   type FilingSheet,
 } from "./chart-drawer.ts";
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
-import { draftDress, draftOverrides, pageGlass, wirePageControls, type DrawOverrides } from "./app-wiring.ts";
+import { draftDress, draftOverrides, pageGlass, pageRoom, wirePageControls, type DrawOverrides } from "./app-wiring.ts";
 import { createMotion } from "./world-motion.ts";
 import { forwardTarget, prospectTarget, ribbonTarget } from "./address.ts";
 import { wireFootnotes } from "./footnotes.ts";
@@ -32,7 +32,6 @@ import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../shared/living-chart/index.ts";
-import { bindRoom } from "../shared/room.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { errorText } from "../shared/error-text.ts";
 import { $ } from "../shared/by-id.ts";
@@ -230,11 +229,7 @@ const glass = pageGlass({
   buttons,
 });
 
-const room = bindRoom({
-  frame: stageEl,
-  sheet: sheetEl,
-  camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) },
-});
+const room = pageRoom(glass);
 
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
 function writeFolio(res: { title: string; subtitle: string }, seed: number): void {

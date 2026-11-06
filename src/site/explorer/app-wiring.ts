@@ -1,4 +1,6 @@
 import { runJob } from "./worker-client.ts";
+import { bindRoom, type Room } from "../shared/room.ts";
+import { growBill, zoomBill } from "./bill-grow.ts";
 import { updateLandReadout, syncAutoSlider } from "./sea-level.ts";
 import { updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { landKeysNow } from "./hash-sync.ts";
@@ -139,6 +141,7 @@ export function pageGlass({
     onView: (k) => {
       loupe.follow();
       slide.follow(k);
+      zoomBill(k);
     },
     decorateInset: (el: HTMLElement) => {
       insetDogEar(el, glass, chartTable, earLabel, prefersReduce, token, tokenMs);
@@ -146,6 +149,15 @@ export function pageGlass({
     buttons,
   });
   return glass;
+}
+
+export function pageRoom(glass: Glass): Room {
+  return bindRoom({
+    frame: stageEl,
+    sheet: sheetEl,
+    camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) },
+    onLayout: growBill,
+  });
 }
 
 export type DrawOverrides = { mapType?: MapType; band?: ClimateBand } & LandOverrides;

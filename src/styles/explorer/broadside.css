@@ -5,11 +5,12 @@
   grid-template-columns: auto 1fr;
   column-gap: 0.7rem;
   align-items: baseline;
-  padding: 0.35rem 0 0.55rem;
+  padding: calc(0.35rem + var(--bill-group, 0px)) 0 0.55rem;
   min-width: 0;
+  transition-property: none;
 }
 .broadside .panel + .panel {
-  margin-top: 0.1rem;
+  margin-top: calc(0.1rem + var(--bill-group, 0px));
   padding-top: 0.1rem;
   padding-bottom: 0.3rem;
 }
@@ -24,15 +25,18 @@
   font-style: italic;
   font-size: 0.85rem;
   color: var(--ink-brown);
-  margin: 0 0 0.4rem;
+  margin: 0 0 calc(0.4rem + var(--bill-row, 0px));
+  transition-property: none;
 }
 
 /* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `e2e/suites/broadside.ts`). */
 .broadside .ledger {
   display: grid;
   grid-template-columns: auto auto 1fr auto auto;
-  gap: 0.15rem 0.6rem;
+  --ledger-gap: 0.15rem;
+  gap: calc(var(--ledger-gap) + var(--bill-row, 0px)) 0.6rem;
   align-items: center;
+  transition-property: none;
 }
 .broadside .l-row {
   display: contents;
@@ -170,11 +174,18 @@
   display: grid;
   grid-template-columns: subgrid;
   gap: inherit;
+  row-gap: var(--ledger-gap);
   align-items: center;
   padding: 0.15rem 0.5rem;
   background: var(--control-cream);
   border: 1px dashed var(--line-tan);
   border-radius: 4px;
+}
+.broadside .held > .l-row > * {
+  transition-property: none;
+}
+.broadside .held > .l-row:not([hidden]) ~ .l-row:not([hidden]) > * {
+  margin-top: var(--bill-row, 0px);
 }
 .broadside .held-note {
   grid-column: 1 / -1;
