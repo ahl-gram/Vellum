@@ -116,18 +116,23 @@ export async function ea7Scrolled(ctx: SuiteContext): Promise<void> {
   );
 }
 
-async function uprightReads(ctx: SuiteContext): Promise<Read[]> {
+const BILL_OPENED: Payload<string[] | null> =
+  `(() => { const s = document.getElementById("broadside"); return s ? ["--bill-row", "--bill-group", "--bill-head", "--bill-paper"].map((p) => s.style.getPropertyValue(p)) : null; })()`;
+
+async function uprightReads(ctx: SuiteContext): Promise<{ reads: Read[]; bill: string[] | null }> {
   const reads: Read[] = [];
+  let bill: string[] | null = null;
   for (const page of CHART_ROOM_FLOOR) {
     const s = await open(ctx, page, UPRIGHT.w, UPRIGHT.h, UPRIGHT.laidOut, "EA6");
     if (s) reads.push({ page, size: "390x844 phone", s });
+    if (page === "/explorer/") bill = await ctx.evaluate(BILL_OPENED);
   }
-  return reads;
+  return { reads, bill };
 }
 
 export async function ea6Upright(ctx: SuiteContext): Promise<void> {
   await ctx.setMobileViewport(UPRIGHT.w, UPRIGHT.h);
-  const reads = await withStyledBoot(ctx, () => uprightReads(ctx));
+  const { reads, bill } = await withStyledBoot(ctx, () => uprightReads(ctx));
   const switched = switchFaults(reads, DESK_FRAME_H);
   const missing = CHART_ROOM_FLOOR.filter((p) => !reads.some((r) => r.page === p));
   const faults = [
@@ -145,14 +150,16 @@ export async function ea6Upright(ctx: SuiteContext): Promise<void> {
     : null;
   const onInk = desk.every((p) => nearRgba([...p, 255], ink));
   ctx.check(
-    "EA6 on a phone held upright (390x844, laid out 1024x2217) every chart room keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, and the desk below the frame reads chart ink where a row through a sheet does not (Issue #778 ruling 9)",
+    "EA6 on a phone held upright (390x844, laid out 1024x2217) every chart room keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, the desk below the frame reads chart ink where a row through a sheet does not (Issue #778 ruling 9), and the Explorer's Broadside opens none of its gaps, its page being 768 tall (Issue #1260)",
     missing.length === 0 &&
       switched.length === 0 &&
       faults.length === 0 &&
       onInk &&
       control !== null &&
-      !nearRgba([...control, 255], ink),
-    `${reads.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; desk rows ${DESK_ROWS.map((y, i) => `${y}: ${desk[i]?.join(",")}`).join("; ")}, a row through the sheet ${control?.join(",")}; the switch ${switched.join("; ") || "768 at once in every room"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
+      !nearRgba([...control, 255], ink) &&
+      bill !== null &&
+      bill.every((v) => v === "0px"),
+    `${reads.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; the Broadside's gaps ${JSON.stringify(bill)}; desk rows ${DESK_ROWS.map((y, i) => `${y}: ${desk[i]?.join(",")}`).join("; ")}, a row through the sheet ${control?.join(",")}; the switch ${switched.join("; ") || "768 at once in every room"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
 }
 

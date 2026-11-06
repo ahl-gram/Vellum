@@ -466,6 +466,24 @@ section points there rather than restating it.
   `e2e/suites/zoom/resets.ts`, `foldLanded` in `e2e/suites/slide-away/kit.ts` and `toState` in
   `e2e/suites/specimen/kit.ts` are the shape, and the readings are in
   `handbook/plans/1200/1261/1261-r1-plan.md`.
+- **A room's own layout lands after a window's change, and a camera's glide stands still while no
+  frame runs.** After `Emulation.setDeviceMetricsOverride`, `innerWidth`, `innerHeight` and every
+  box the stylesheet places read the new window at once, the sheet's place among them, while
+  everything the room's layout writes (the slip's inline `top` and `max-height`, the stage's
+  reserves, the sheet's inline size, the Explorer's `--bill-*` spacings) stands at the old window
+  until the room's `resize` listener or its chrome's `ResizeObserver` runs (`bindRoom` in
+  `src/site/shared/room.ts`): on the Mac by the next poll, on the runner after two polls or more. A
+  camera's glide steps only when `requestAnimationFrame` runs, since d3's timer rides it, and the
+  runner has recorded one to three frames over a glide of a third of a second. So a wait that takes
+  two equal reads for rest can hand over a page that has not moved yet: after a window change, when
+  it departs on the window's size or on a box the stylesheet places; after a press, when it departs
+  on the camera having left where it began. A wait for a room laid out at a new window departs on
+  something the room's layout writes for that window, such as the slip's floor standing at that
+  window's floor (`onSlipFloor` in `e2e/suites/broadside/kit.ts`, as `narrowTaps` in
+  `e2e/suites/broadside.ts` and `laidOut` in `e2e/suites/broadside/grow.ts` ask). A wait for a
+  camera to land counts the camera's writes to its target and asks for a frame between its two reads
+  (`landed` in `e2e/suites/broadside/grow.ts`), the shape `h15dFlightStops` in
+  `e2e/suites/home/drift.ts` keeps. The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
@@ -675,6 +693,9 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
   next one, so a wait that takes two equal reads of the style for rest passes on a Mac and fails
   on CI. Home: the bullet above opening "A sleep past an animation's nominal duration", and the
   readings in `handbook/plans/400/432/432-r2-plan.md`.
+- **Layouts and glides: on the runner a room's layout after a window change, and a camera's glide,
+  can stand still through two of a wait's polls, where on a Mac the next poll finds them moved.**
+  Home: the bullet above opening "A room's own layout lands after a window's change".
 - **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
   session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
   above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.

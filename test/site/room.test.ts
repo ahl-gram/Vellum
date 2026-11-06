@@ -316,6 +316,30 @@ test("UD3 a head cluster slid up and a chart folio slid down by their own transl
   });
 });
 
+test("UD4 bindRoom runs the room's onLayout once at the end of every layout, after the slip's floor is written (Issue #1260)", () => {
+  withRoomGlobals(() => {
+    const els = deskEls();
+    installDesk(els);
+    const calls: (string | null)[] = [];
+    const { layout } = bindRoom({
+      frame: new El("div") as unknown as HTMLElement,
+      sheet: new El("div") as unknown as HTMLElement,
+      camera: { hold: () => null, restore: () => {} },
+      aspect: () => 1.5,
+      onLayout: () => {
+        calls.push(els.get(".slip")?.style.maxHeight ?? null);
+      },
+    });
+    layout();
+    layout();
+    assert.deepEqual(
+      calls,
+      ["576px", "576px"],
+      "each layout runs onLayout once, after placeSlip has written the slip's floor",
+    );
+  });
+});
+
 test("SA6 a computed translate reads as px, x first, and none as nothing", () => {
   assert.deepEqual(translateOf("none"), { x: 0, y: 0 });
   assert.deepEqual(translateOf(""), { x: 0, y: 0 });

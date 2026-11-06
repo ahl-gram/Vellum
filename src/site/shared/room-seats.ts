@@ -2,7 +2,7 @@
 import { pageBottom, pageBox, pageLeft, pageRight, pageTop } from "./page-box.ts";
 
 const SLIP_TOP_GAP = 16;
-const SLIP_FLOOR = 22;
+export const SLIP_FLOOR = 22;
 const STRIP_GAP = 12;
 const LEGEND_CLEAR = 32;
 const LEGEND_GAP = 16;

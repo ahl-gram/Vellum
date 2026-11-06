@@ -28,7 +28,7 @@ interface GlassDeps {
   regionEligible: () => boolean;
   syncHash: () => void;
   busy: () => boolean;
-  onView: (k: number) => void;
+  onView: (k: number, heading: number | null) => void;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
   buttons: { touch: HTMLElement; hold: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
@@ -36,7 +36,23 @@ interface GlassDeps {
 
 type LodController = ReturnType<typeof createLodController>;
 
-function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
+function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>, zoomController: ZoomController) {
+  let homing = false;
+  const heading = (k: number): number | null => {
+    const target = zoomController.glideTarget();
+    if (target !== null || k === 1) homing = false;
+    return target ?? (homing ? 1 : null);
+  };
+  const home = {
+    start: (): void => {
+      homing = true;
+    },
+    settled: (): boolean => {
+      const was = homing;
+      homing = false;
+      return was;
+    },
+  };
   // Issue #164/Issue #331: publish k onto the card and the .place-overlay, both LEAF siblings of the chart svg, never the mount: a per-frame non-transform style write on an svg ancestor re-rasterizes the baked labels and they visibly jiggle.
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
@@ -50,9 +66,9 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
     }
     // Issue #387/Issue #388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
-    deps.onView(k);
+    deps.onView(k, heading(k));
   }
-  return { setCardZoom };
+  return { setCardZoom, home };
 }
 
 function glassLod(
@@ -84,6 +100,7 @@ function glassCamera(
   lodController: LodController,
   setCardZoom: (k: number) => void,
   hold: Hold,
+  home: ReturnType<typeof glassCard>["home"],
 ) {
   // Issue #165/Issue #169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
   function cameraNow(): Camera {
@@ -93,6 +110,7 @@ function glassCamera(
   }
 
   function onCameraSettle(): void {
+    if (home.settled()) setCardZoom(zoomController.getState().k);
     deps.syncHash();
     if (deps.regionEligible() && !hold.held()) lodController.onSettle(cameraNow());
   }
@@ -119,6 +137,7 @@ function glassCamera(
   function goHomeVoiced(): void {
     hold.release();
     lodController.easeHome();
+    home.start();
     zoomController.glideHome(deps.syncHash);
   }
   return { cameraNow, cameraForAddress, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced };
@@ -155,7 +174,6 @@ function glassApi(zoomController: ZoomController, lodController: LodController, 
 
 export function createGlass(deps: GlassDeps) {
   const { mapViewport, mapDiv, buttons } = deps;
-  const { setCardZoom } = glassCard(mapDiv, deps);
 
   // reducedMotion is left unset so the controller reads the OS setting LIVE.
   const zoomController = createZoomController({
@@ -166,6 +184,7 @@ export function createGlass(deps: GlassDeps) {
     onSettle: () => onCameraSettle(),
     glideMs,
   });
+  const { setCardZoom, home } = glassCard(mapDiv, deps, zoomController);
 
   const lodController = glassLod(mapDiv, deps, setCardZoom, zoomController);
   const hold = createHold({
@@ -192,6 +211,7 @@ export function createGlass(deps: GlassDeps) {
     lodController,
     setCardZoom,
     hold,
+    home,
   );
   bindZoomKeys(mapViewport, zoomController, goHomeVoiced);
   glassPresses(buttons, zoomController, goHomeVoiced);
