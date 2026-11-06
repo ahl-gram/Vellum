@@ -52,8 +52,14 @@ export interface Closing {
   readonly to: number | null;
 }
 
-export function closingOf({ k }: Closing): number {
-  return Math.min(1, Math.max(0, (k - 1) / (ZOOM_STEP - 1)));
+export function closingOf({ was, from, k, to }: Closing): number {
+  if (to === null) return k > 1 ? 1 : 0;
+  if (to > 1) {
+    const reach = Math.min(to, ZOOM_STEP);
+    return k >= reach ? 1 : 1 - ((1 - was) * (reach - k)) / (reach - from);
+  }
+  const reach = Math.min(from, ZOOM_STEP);
+  return k <= 1 || reach <= 1 ? 0 : Math.min(was, (was * (k - 1)) / (reach - 1));
 }
 
 export function spreadOf(b: BillRoom): BillSpread {
