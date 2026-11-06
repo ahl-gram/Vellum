@@ -359,7 +359,17 @@ const reducedSwitch = (k: RibbonKit, endsBefore: number): Promise<Ink> =>
     return stable(INK, "ribbon-ink-collapsed", { departed: (d) => d.ends.length > endsBefore && d.groundAnims === 0 });
   });
 
-export async function rb23Reduced(k: RibbonKit, fullMs: number): Promise<void> {
+async function fullMotionMs(k: RibbonKit): Promise<number> {
+  const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep });
+  await mouseMove(k.send, 1, 1);
+  await k.goto("#seed=42");
+  await k.opened("seed 42, inking in");
+  const arriving = await settle(INK, (d) => d.play === "running" || (d.decoded && !d.cls), "ribbon-ink-starts");
+  return arriving.play === "running" ? arriving.duration! : 0;
+}
+
+export async function rb23Reduced(k: RibbonKit): Promise<void> {
+  const fullMs = await fullMotionMs(k);
   const faults: string[] = [];
   const { identifier } = await k.send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
     source: WITNESS,

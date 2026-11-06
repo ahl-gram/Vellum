@@ -31,8 +31,9 @@
 }
 
 #broadside .slip-head {
-  padding: 0.45rem 1.6rem 0.3rem;
+  padding: calc(0.45rem + var(--bill-head, 0px)) 1.6rem calc(0.3rem + var(--bill-head, 0px));
   text-align: center;
+  transition-property: none;
 }
 #broadside .slip-head .card-verb {
   display: flex;
@@ -109,8 +110,40 @@
   border-top: 3px double var(--chart-ink);
 }
 
-#broadside .imprint {
+#broadside .bill-paper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  height: var(--bill-paper, 0px);
   margin: 0;
+  overflow: hidden;
+  transition-property: none;
+}
+#broadside .bill-paper::before,
+#broadside .bill-paper::after {
+  content: "";
+  flex: none;
+  width: 4.5rem;
+  height: 6px;
+  border-top: 3px double var(--chart-ink);
+}
+#broadside .bill-flower {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: var(--chart-ink);
+  stroke: var(--chart-ink);
+}
+#broadside:not(.flowered) .bill-paper > *,
+#broadside:not(.flowered) .bill-paper::before,
+#broadside:not(.flowered) .bill-paper::after {
+  visibility: hidden;
+}
+
+#broadside .imprint {
+  margin: var(--bill-group, 0px) 0 0;
+  transition-property: none;
   padding-top: 0.2rem;
   border-top: 1px solid var(--chart-ink);
   text-align: center;

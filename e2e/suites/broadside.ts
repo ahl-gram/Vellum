@@ -1,4 +1,4 @@
-// Broadside e2e (BR1-BR24, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
+// Broadside e2e (BR1-BR25, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
@@ -6,9 +6,10 @@ import { makeStep } from "../support/step.ts";
 import { br9Authored, br10Terms, br11Allowlist } from "./broadside/room.ts";
 import { br12Dress, br21Fields, br22Bill, br23Imprint, br24Ink } from "./broadside/dress.ts";
 import { br13Tip, br14Paper } from "./broadside/gestures.ts";
+import { br25Grows, br25dZoomed } from "./broadside/grow.ts";
 import { br15TabClear } from "./broadside/tab.ts";
 import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
-import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
+import { broadsideKit, onSlipFloor, type BroadsideKit } from "./broadside/kit.ts";
 import { mouseMove, sendKey } from "../support/input.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
@@ -43,8 +44,8 @@ const laidOutAt =
   (d: Room): boolean =>
     d.w === w && d.h === h && !sameBox(d.sh, from.sh) && !d.moving;
 
-type Narrow = { iw: number; ih: number; sheet: Box };
-export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)}};})()`;
+type Narrow = { iw: number; ih: number; sheet: Box; floor: number | null };
+export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet"),s=document.querySelector(".slip");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)},floor:s?+(parseFloat(s.style.top)+parseFloat(s.style.maxHeight)).toFixed(2):null};})()`;
 // Counted on the window, after the mark's own handler has run, so a count that rose means the page has handled the tap's click.
 const COUNT_CLICKS = `(()=>{if(window.__br6Clicks===undefined){window.__br6Clicks=0;addEventListener("click",()=>{window.__br6Clicks++;});}return true;})()`;
 export const CLICKS: Payload<{ n: number }> = `({ n: window.__br6Clicks })`;
@@ -89,6 +90,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("BR22", () => br22Bill(k));
   await step("BR23", () => br23Imprint(k));
   await step("BR24", () => br24Ink(k));
+  await step("BR25 to BR25c", () => br25Grows(k));
+  await step("BR25d to BR25i", () => br25dZoomed(k));
   br8Clean(ctx, errBase, httpBase);
 }
 
@@ -283,7 +286,7 @@ async function narrowTaps(k: BroadsideKit, before: Narrow) {
   const settle = makeSettle({ evaluate, sleep });
   const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
   await makeStable(settle)(NARROW, "BR6 the room laid out at 1024x700", {
-    departed: (d) => d.iw === 1024 && d.ih === 700 && !sameBox(d.sheet, before.sheet),
+    departed: (d) => d.iw === 1024 && d.ih === 700 && !sameBox(d.sheet, before.sheet) && onSlipFloor(d.floor, d.ih),
   });
   await evaluate(COUNT_CLICKS);
   const tapped1 = await tapAt(k, settle);

@@ -13,6 +13,7 @@ import {
   type ShapeEdit,
 } from "./land-rows.ts";
 import { fillTrack, fillTracks, refuses, seatLand } from "./land-seat.ts";
+import { growBill } from "./bill-grow.ts";
 import { showPlace } from "./place-picker.ts";
 import { chooseShape, shapeChoice } from "./shape-choice.ts";
 import { writtenNow } from "./written-hold.ts";
@@ -90,4 +91,5 @@ export function refreshLand(): void {
   showPlace(choice.outline);
   seatLand(seatOf(typeSel.value, choice, writtenNow()));
   fillTracks();
+  growBill();
 }
