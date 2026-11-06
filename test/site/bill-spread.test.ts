@@ -68,10 +68,14 @@ test("SP4 it stops opening at twice its own width and lays the rest as blank pap
 
 test("SP5 zoomed in it opens nothing and lays no paper; part way through the first press it opens that part", () => {
   const whole = spreadOf(room(DEFAULT_SEAT, 1200));
-  assert.ok(whole.row > 0 && whole.group > 0 && whole.head > 0 && whole.paper > 0, "the witness: an open bill, so half of it is not half of nothing");
+  assert.ok(
+    whole.row > 0 && whole.group > 0 && whole.head > 0 && whole.paper > 0,
+    "the witness: an open bill, so half of it is not half of nothing",
+  );
   assert.deepEqual(spreadOf(room(DEFAULT_SEAT, 1200, 1)), NO_SPREAD);
   const half = spreadOf(room(DEFAULT_SEAT, 1200, 0.5));
-  for (const key of ["row", "group", "head", "paper"] as const) near(half[key], whole[key] / 2, `${key} at half closed`);
+  for (const key of ["row", "group", "head", "paper"] as const)
+    near(half[key], whole[key] / 2, `${key} at half closed`);
 });
 
 test("SP6 a bill taller than its room, or a slip not yet seated, opens nothing", () => {
@@ -101,7 +105,11 @@ test("SP7 rowGapsOf counts each ledger's rows but one and each shown held box's 
 test("SP8 the bill is wholly closed at the first press's depth and wholly open at the whole sheet, and half closed half way", () => {
   assert.equal(closedAt(1), 0);
   assert.equal(closedAt(ZOOM_STEP), 1, "exactly 1 at the first press's depth");
-  assert.equal(closedAt(ZOOM_STEP * (1 - 1e-15)), 1, "a camera depth a rounding short of it still reads wholly closed, not 0.9999999999999967");
+  assert.equal(
+    closedAt(ZOOM_STEP * (1 - 1e-15)),
+    1,
+    "a camera depth a rounding short of it still reads wholly closed, not 0.9999999999999967",
+  );
   assert.equal(closedAt(3), 1);
   assert.equal(closedAt(0.9), 0);
   near(closedAt(1.2), 0.5, "half way between the two");

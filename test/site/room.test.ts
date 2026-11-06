@@ -332,7 +332,11 @@ test("UD4 bindRoom runs the room's onLayout once at the end of every layout, aft
     });
     layout();
     layout();
-    assert.deepEqual(calls, ["576px", "576px"], "each layout runs onLayout once, after placeSlip has written the slip's floor");
+    assert.deepEqual(
+      calls,
+      ["576px", "576px"],
+      "each layout runs onLayout once, after placeSlip has written the slip's floor",
+    );
   });
 });
 
