@@ -149,7 +149,12 @@ make an unqualified rule false. Read the surface, not just the rule.
   restore recomputes the transform from the held uv camera against the current gesture box. Every
   other chart room takes that pair from `framingCamera` in `src/site/shared/camera.ts`, through
   `bindZoomRoom` in `src/site/shared/zoom-room.ts`, or directly on the Daily Hunt, whose controller
-  is its own.
+  is its own. **A fold refits at its press and slides the sheet there.** The room lays out at once
+  and the sheet is carried from the box it stood in to its new fit by its own `translate` and
+  `scale`, one composited move on the fold's pace and curve that scales the chart and its camera
+  together, so the framing the refit restored holds at every frame; no other layout slides, and a
+  layout made during a slide stands the sheet at its fit (`createSheetSlide` in
+  `src/site/shared/sheet-slide.ts`; Issue #1261).
 - **A refit re-seats the camera WITHOUT re-entering the zoom pipeline**: no zoom event, no settle, no
   address write, no redraft. A glide in flight is stopped and restarted toward its pending target,
   because the tween rewrites the stored transform every frame and would discard the refit. A refit
@@ -162,8 +167,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   (`vellum/hunt-fixed-world`), the controller's depth read on every write of its target's transform
   (`pageSlideAway` in `src/site/shared/slide-away-page.ts`). It reads the fill depth off the sheet's
   resting box, the box with the camera taken off where the sheet rides inside the transform, so a pan
-  never moves it, and measures again when the room lays out, never on a fold's class, which lands
-  before the refit. It also measures on every apply that leaves the depth at or under the start, where
+  never moves it, and measures again when the room lays out, never on a fold's class: a fold lays
+  the room out at its press, before the chart's slide starts on the next frame, and again when the
+  slide ends (Issue #1261). It also measures on every apply that leaves the depth at or under the start, where
   both pieces stand home, since a room can lay out with no change it watches (the Reading Room's strip
   height, written on the body, moves its chart folio; Issue #1034). A measure taken while the depth
   stands past the start and short of the fill keeps that start (`keptStart` in

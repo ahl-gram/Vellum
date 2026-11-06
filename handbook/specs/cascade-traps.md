@@ -83,7 +83,9 @@ declaration you write to get there. The checklist form of the same lines is `vel
   the change. What stops it on one element is `transition-property: none`, since the blanket's
   `!important` forces only the duration and the delay, so a `transition-duration: 0s` there
   loses. The desk frame's body rule in `src/styles/shared/atelier.css` carries `transition: none` for this
-  (Issue #778), as `placeLegendRow` in `src/site/shared/room-seats.ts` and `layRow` in
+  (Issue #778), as `placeLegendRow` in `src/site/shared/room-seats.ts`, `fitRoom` in
+  `src/site/shared/room.ts` (Issue #1261: the camera's refit read the sheet's old size through the lag,
+  and the Explorer's framing moved across a fold) and `layRow` in
   `src/site/shared/shell/top-row.ts` hold the transition off while they write and read; the cases still
   open are Issue #868's.
 - **An absolutely positioned box with no positioned ancestor lays out against the window, not the

@@ -18,6 +18,8 @@
   --redraft-dry-wait-village: 500ms;
   --redraft-dry-wait-hamlet: 740ms;
   --glide: 300ms; /* the zoom glide, read per glide by `glideMs` in `src/site/shared/zoom-keys.ts` for the Explorer and every chart room, bypassed under reduced motion */
+  --fold: 320ms; /* the side panel's fold, the Glass and the Press row beside it, and the chart's slide with them, read by `foldTiming` in `src/site/shared/sheet-slide.ts`, so the unit stays ms */
+  --ease-fold: cubic-bezier(0.2, 0.7, 0.3, 1);
 
   --ease-paper: cubic-bezier(
     0.22,

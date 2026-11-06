@@ -134,11 +134,12 @@ type Refit = {
   cy: string | null;
   k: string | null;
   folded: boolean;
+  sheetAnims: number;
 };
 
 // Added after the room's own resize listener, and listeners run in the order they were added, so a count that rose means the room has laid out for that resize.
 const COUNT_RESIZES = `(()=>{if(window.__z13Resizes===undefined){window.__z13Resizes=0;addEventListener("resize",()=>{window.__z13Resizes++;});}return true;})()`;
-const REFIT: Payload<Refit> = `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");const W=vp.clientWidth||1,H=vp.clientHeight||1;return{resizes:window.__z13Resizes,ih:innerHeight,reserve:document.querySelector(".stage").style.getPropertyValue("--reserve-right"),sheet:document.getElementById("sheet").getBoundingClientRect().width,fx:(W/2-s.x)/(s.k*W),fy:(H/2-s.y)/(s.k*H),sk:s.k,cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),folded:document.getElementById("broadside").classList.contains("folded")};})()`;
+const REFIT: Payload<Refit> = `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");const W=vp.clientWidth||1,H=vp.clientHeight||1;return{resizes:window.__z13Resizes,ih:innerHeight,reserve:document.querySelector(".stage").style.getPropertyValue("--reserve-right"),sheet:document.getElementById("sheet").getBoundingClientRect().width,fx:(W/2-s.x)/(s.k*W),fy:(H/2-s.y)/(s.k*H),sk:s.k,cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),folded:document.getElementById("broadside").classList.contains("folded"),sheetAnims:document.getElementById("sheet").getAnimations().length};})()`;
 const SHORT_H = 600;
 const UNFOLD = `(()=>{if(document.getElementById("broadside").classList.contains("folded"))document.querySelector(".slip-tab").click();return true;})()`;
 const still = (d: Refit, last: Refit | null): boolean => last !== null && JSON.stringify(d) === JSON.stringify(last);
@@ -158,15 +159,16 @@ async function z13dFoldAndNoHash(
   open: Refit,
 ): Promise<{ z13d: Refit; z13e: Refit }> {
   await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
+  // The fold slides the sheet from the frame after its press, pending at the old box through its first commit, so rest also asks #sheet to list no animation across the two equal reads (Issue #1261; handbook/specs/settle-doctrine.md, the environment bullet on a fold's slide).
   const z13d = await settle(
     REFIT,
-    (d, last) => d.folded && d.reserve !== open.reserve && still(d, last),
+    (d, last) => d.folded && d.reserve !== open.reserve && d.sheetAnims === 0 && still(d, last),
     "Z13c the fold's refit",
   );
   await evaluate(`document.querySelector(".slip-tab").click()`);
   const z13e = await settle(
     REFIT,
-    (d, last) => !d.folded && d.reserve !== z13d.reserve && still(d, last),
+    (d, last) => !d.folded && d.reserve !== z13d.reserve && d.sheetAnims === 0 && still(d, last),
     "Z13c the unfold's refit",
   );
   // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.

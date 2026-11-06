@@ -211,7 +211,7 @@ export const atRest = (d: Carry, last: Carry | null) =>
 // The settle's declared duration, read the CD23 way: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
 export const DURATION: Payload<string | null> =
   `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
-// The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended and the room layout it schedules has had its 340ms.
+// The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended, and with it the chart's slide and the room's layout at its end.
 export const FOLDREST: Payload<{ folded: boolean; open: boolean; slipX: number; anims: string[] }> =
   `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
 

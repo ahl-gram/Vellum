@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { instrumentKit, type Facts } from "../../e2e/suites/room-instrument/kit.ts";
 import { rs29Pace, rs30Rate } from "../../e2e/suites/room-instrument/pace.ts";
 import { rs10Drag, rs12Pause } from "../../e2e/suites/room-instrument/sweep.ts";
+import { foldLanded, type Pieces } from "../../e2e/suites/slide-away/kit.ts";
 import { READ, type Specimen } from "../../e2e/suites/specimen/reads.ts";
 import { specimenKit } from "../../e2e/suites/specimen/kit.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
@@ -173,7 +174,7 @@ const moving = (from: Specimen, frames: Specimen[]) => {
   let n = 0;
   return specimen((e) => {
     if (e.includes("sb-state")) return void (set = true);
-    if (e !== READ) return null;
+    if (!e.includes(READ)) return null;
     return set ? (frames[Math.min(n++, frames.length - 1)] ?? from) : from;
   });
 };
@@ -181,7 +182,7 @@ const moving = (from: Specimen, frames: Specimen[]) => {
 test("toState waits for the map to leave where it stood and come to rest", async () => {
   const [m0, m1, m2] = [MAPS[0]!, MAPS[1]!, MAPS[2]!];
   const from = book({ map: m0 });
-  const frames = [m0, m0, m1, m2, m2].map((map) => book({ map }));
+  const frames = [m0, m0, m1, m2, m2].map((map) => book({ map, sheetAnims: 0 }));
   assert.deepEqual(await moving(from, frames).toState("rest", "SB6 at rest again"), frames[4]);
 });
 
@@ -195,13 +196,40 @@ test("toState from folded waits for the sheet's refit as well as the glide", asy
     [2, 0],
     [3, 1],
     [3, 1],
-  ].map(([m, s]) => book({ map: MAPS[m!], sheet: SHEETS[s!] }));
+  ].map(([m, s]) => book({ map: MAPS[m!], sheet: SHEETS[s!], sheetAnims: 0 }));
   assert.deepEqual(await moving(from, frames).toState("leaned", "SB5 leaned"), frames[5]);
+});
+
+test("toState from folded waits out the sheet's slide while #sheet lists it, pending at the folded box with the map moved and still", async () => {
+  const folded = { state: "folded", folded: true, zoomed: false, pill: "" };
+  const from = book({ st: folded, map: MAPS[0], sheet: SHEETS[0] });
+  // The slide's first keyframe reads the folded box back through a transform, off by float noise, so the departure holds through the stall; a pending box equal to SHEETS[0] leaves this test green with the sheetAnims term gone (Issue #1261).
+  const pending = book({ map: MAPS[2], sheet: box(1e-4, 918), sheetAnims: 1 });
+  const landed = book({ map: MAPS[3], sheet: SHEETS[1], sheetAnims: 0 });
+  const frames = [pending, pending, pending, landed, landed];
+  assert.deepEqual(await moving(from, frames).toState("leaned", "SB5 leaned"), landed);
 });
 
 test("toState times out naming its label", async () => {
   const from = book({ map: MAPS[0] });
-  await assert.rejects(moving(from, [from]).toState("rest", "SB6 at rest again"), (err: Error) =>
-    err.message.startsWith("settle timeout SB6 at rest again: "),
+  await assert.rejects(
+    moving(from, [book({ map: MAPS[0], sheetAnims: 0 })]).toState("rest", "SB6 at rest again"),
+    (err: Error) => err.message.startsWith("settle timeout SB6 at rest again: "),
   );
+});
+
+const slid = (left: number, right: number, sheetAnims: number) =>
+  ({ slip: { open: false, left }, sheet: [0, 0, right, 800], sheetAnims }) as unknown as Pieces;
+
+test("foldLanded hands back the folded sheet at rest, not the frame laid out before the slide starts nor a frame the slide stalls in mid-way", async () => {
+  const from = { slip: { open: true, left: 900 }, sheet: [0, 0, 900, 800] } as unknown as Pieces;
+  // The frame laid out at the press before the slide exists, held across two polls as a throttled main thread holds it (handbook/plans/1200/1261/1261-r1-plan.md, "What was measured"), which only the slip term refuses.
+  const before = slid(900, 1280, 0);
+  // The slip moved with #sheet still listing its slide is the state the r1 plan's staged stall produced, which only the sheetAnims term refuses.
+  const stalled = slid(1100, 1100, 1);
+  const landed = slid(1240, 1280, 0);
+  const frames = [before, before, stalled, stalled, landed, landed];
+  let n = 0;
+  const w = world((e) => (e.includes("sheetAnims") ? frames[Math.min(n++, frames.length - 1)] : null));
+  assert.deepEqual(await foldLanded(w.ctx, from, "SW7 folded sheet"), landed);
 });

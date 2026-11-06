@@ -296,7 +296,7 @@ body.chart-room .stage .status a {
   flex-direction: column;
   gap: 0.4rem;
   align-items: flex-end;
-  transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition: right var(--fold) var(--ease-fold);
 }
 .corner.br.zoomery {
   right: calc(var(--slip-w) + var(--slip-right) + 1.4rem);
@@ -344,7 +344,7 @@ body:has(.slip.folded) .corner.br.zoomery {
   transform: translateX(-50%);
   z-index: 10;
   text-align: center;
-  transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition: left var(--fold) var(--ease-fold);
 }
 body:has(.slip.folded) .legend {
   left: 50%;
@@ -445,8 +445,8 @@ body:has(.slip.folded) .legend {
   outline-offset: 6px;
   box-shadow: var(--sheet-shadow);
   transition:
-    transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
-    opacity 0.32s,
+    transform var(--fold) var(--ease-fold),
+    opacity var(--fold),
     visibility 0s;
 }
 .slip.folded {
@@ -454,9 +454,9 @@ body:has(.slip.folded) .legend {
   opacity: 0;
   visibility: hidden;
   transition:
-    transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
-    opacity 0.32s,
-    visibility 0s linear 0.32s;
+    transform var(--fold) var(--ease-fold),
+    opacity var(--fold),
+    visibility 0s linear var(--fold);
 }
 .slip-head {
   padding: 1.3rem 1.6rem 0.75rem;

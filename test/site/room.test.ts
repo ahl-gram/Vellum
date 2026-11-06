@@ -3,7 +3,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DESK_FRAME } from "../../src/site/shared/page-box.ts";
-import { GLASS_BREATH_REM, pressRowStacks, rowSheds, translateOf } from "../../src/site/shared/room-seats.ts";
+import {
+  GLASS_BREATH_REM,
+  glassLeft,
+  pressRowStacks,
+  rowSheds,
+  translateOf,
+} from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
 import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
@@ -316,4 +322,51 @@ test("SA6 a computed translate reads as px, x first, and none as nothing", () =>
   assert.deepEqual(translateOf("12px"), { x: 12, y: 0 });
   assert.deepEqual(translateOf("0px -105px"), { x: 0, y: -105 });
   assert.deepEqual(translateOf("3px 4px 5px"), { x: 3, y: 4 });
+});
+
+test("UG1 the Glass folded away is read where its transition is taking it, not where it stands at the press (Issue #1261)", () => {
+  withRoomGlobals(() => {
+    const g = globalThis as Record<string, unknown>;
+    g.window = { scrollX: 0, scrollY: 0 };
+    g.document = { documentElement: { clientWidth: 1024, clientHeight: 768, classList: new El("html").classList } };
+    g.getComputedStyle = (el: unknown) =>
+      el === glass ? { right: "501.8px", translate: "none" } : { fontSize: "16px", getPropertyValue: () => "" };
+    const running = (): unknown[] => [
+      {
+        transitionProperty: "right",
+        effect: {
+          getKeyframes: () => [
+            { offset: 0, right: "501.8px" },
+            { offset: 1, right: "80px" },
+          ],
+        },
+      },
+    ];
+    const glass = {
+      getBoundingClientRect: () => ({
+        left: 487.015625,
+        top: 700,
+        right: 522.203125,
+        bottom: 790,
+        width: 35.1875,
+        height: 90,
+      }),
+      getAnimations: running,
+      offsetWidth: 35,
+    };
+    const seat = (animations: () => unknown[]): number | null => {
+      glass.getAnimations = animations;
+      return glassLeft(glass as unknown as HTMLElement, false, 0);
+    };
+    const resting = seat(running) ?? NaN;
+    assert.ok(
+      Math.abs(resting - 908.815625) < 1e-9,
+      `the Explorer's Glass folding at 1024x768 is read at its rest, 80px in from the edge: ${resting} against 908.815625`,
+    );
+    assert.equal(
+      seat(() => []),
+      487.015625,
+      "with no transition running the rect is the seat, as before",
+    );
+  });
 });
