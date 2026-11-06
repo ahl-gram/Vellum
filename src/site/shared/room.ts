@@ -108,6 +108,7 @@ function roomLayout<Held>(parts: RoomParts<Held>, slip: HTMLElement | null, slid
         slip: slipOpen ? slipRect : null,
       });
     if (fitRoom({ frame, sheet, aspect: aspect(), slipReach, glassL })) camera.restore(held);
+    parts.onLayout?.();
   };
 }
 
