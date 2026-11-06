@@ -32,14 +32,34 @@ export interface BillSpread {
 
 export const NO_SPREAD: BillSpread = { row: 0, group: 0, head: 0, paper: 0 };
 
-export function rowGapsOf(_ledgers: readonly Ledger[]): number {
-  return 0;
+export function rowGapsOf(ledgers: readonly Ledger[]): number {
+  let gaps = 0;
+  for (const l of ledgers) {
+    gaps += Math.max(0, l.tracks - 1);
+    for (const h of l.held) gaps += Math.max(0, h - 1);
+  }
+  return gaps;
 }
 
 export function closedAt(k: number): number {
-  return Math.min(1, Math.max(0, (k - 1) / (ZOOM_STEP - 1)));
+  const raw = (k - 1) / (ZOOM_STEP - 1);
+  if (raw >= 1 - 1e-9) return 1;
+  if (raw <= 1e-9) return 0;
+  return raw;
 }
 
-export function spreadOf(_b: BillRoom): BillSpread {
-  return NO_SPREAD;
+export function spreadOf(b: BillRoom): BillSpread {
+  if (!(b.room > 0)) return NO_SPREAD;
+  const allow = Math.max(0, SPREAD_PACE * (b.page - SPREAD_START));
+  const opened = Math.max(0, Math.min(b.room - b.natural, allow, SPREAD_STOP * b.width - b.natural));
+  const units = (b.rows + b.groups) * ROW_SHARE + (b.groups + 1) * GROUP_SHARE + 2 * HEAD_SHARE;
+  const d = units > 0 ? opened / units : 0;
+  const frame = Math.max(b.natural + opened, Math.min(b.room, b.natural + allow));
+  const open = 1 - Math.min(1, Math.max(0, b.closed));
+  return {
+    row: d * ROW_SHARE * open,
+    group: d * GROUP_SHARE * open,
+    head: d * HEAD_SHARE * open,
+    paper: (frame - b.natural - opened) * open,
+  };
 }
