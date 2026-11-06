@@ -114,3 +114,12 @@ test("SP8 the bill is wholly closed at the first press's depth and wholly open a
   assert.equal(closedAt(0.9), 0);
   near(closedAt(1.2), 0.5, "half way between the two");
 });
+
+test("SP9 the blank paper is never a rounding below zero, which a stylesheet reads as no height at all and lays at the flower's", () => {
+  const witness: BillRoom = { natural: 500.002, room: 614.002, page: 800, width: WIDTH, rows: 6, groups: 3, closed: 0 };
+  assert.equal(
+    spreadOf(witness).paper,
+    0,
+    "the pace leaves no paper here, and the subtraction that finds it rounds below zero",
+  );
+});

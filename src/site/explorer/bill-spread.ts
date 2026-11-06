@@ -60,6 +60,6 @@ export function spreadOf(b: BillRoom): BillSpread {
     row: d * ROW_SHARE * open,
     group: d * GROUP_SHARE * open,
     head: d * HEAD_SHARE * open,
-    paper: Math.max(0, frame - b.natural - opened) * open,
+    paper: (frame - b.natural - opened) * open,
   };
 }
