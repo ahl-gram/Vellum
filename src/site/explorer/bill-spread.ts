@@ -7,6 +7,10 @@ export const SPREAD_STOP = 2;
 export const ROW_SHARE = 1;
 export const GROUP_SHARE = 2;
 export const HEAD_SHARE = 1;
+// 2026-11-06: Chromium lays every length out truncated to 1/64 px, at every pixel ratio the harness emulates (Issue #1260 plan revision 3), so a share on that grid lays out at exactly its value.
+export const LAYOUT_UNITS_PER_PX = 64;
+
+const onGrid = (px: number): number => px;
 
 export interface Ledger {
   readonly tracks: number;
@@ -53,13 +57,13 @@ export function spreadOf(b: BillRoom): BillSpread {
   const allow = Math.max(0, SPREAD_PACE * (b.page - SPREAD_START));
   const opened = Math.max(0, Math.min(b.room - b.natural, allow, SPREAD_STOP * b.width - b.natural));
   const units = (b.rows + b.groups) * ROW_SHARE + (b.groups + 1) * GROUP_SHARE + 2 * HEAD_SHARE;
-  const d = units > 0 ? opened / units : 0;
   const frame = Math.max(b.natural + opened, Math.min(b.room, b.natural + allow));
   const open = 1 - Math.min(1, Math.max(0, b.closed));
+  const share = units > 0 ? onGrid((opened / units) * open) : 0;
   return {
-    row: d * ROW_SHARE * open,
-    group: d * GROUP_SHARE * open,
-    head: d * HEAD_SHARE * open,
-    paper: Math.max(0, frame - b.natural - opened) * open,
+    row: share * ROW_SHARE,
+    group: share * GROUP_SHARE,
+    head: share * HEAD_SHARE,
+    paper: onGrid(Math.max(0, frame - b.natural - opened) * open),
   };
 }

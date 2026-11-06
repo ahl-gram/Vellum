@@ -1,4 +1,4 @@
-// The Broadside grown into a tall window's free height (BR25 to BR25e, Issue #1260): every box is read from the run, and the literals are the ruled start, pace and stop.
+// The Broadside grown into a tall window's free height (BR25 to BR25f, Issue #1260): every box is read from the run, and the literals are the ruled start, pace and stop.
 import { sendClick, sendKey } from "../../support/input.ts";
 import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
@@ -11,8 +11,12 @@ const PACE = 2;
 const STOP = 2;
 // 2026-11-05: a relation over at most eight rect edges, laid out in 1/64 px units, drifts at most 0.125 px; headroom 0.075, the largest read 0.03.
 const NEAR = 0.2;
-// 2026-11-05: the house's half-pixel relation for a foot against its floor; two edges drift at most 1/32 px, the largest read 0.02.
+// 2026-11-06: the house's half-pixel relation for a foot against its floor; the foot stands short of it by under a 64th for each share the room is divided into and one for the paper (22 held, 0.34 px) and two edges drift at most 1/32 px, the largest read 0.31 (Issue #1260 plan revision 3).
 const ON = 0.5;
+// 2026-11-06: half the 1/64 px a browser lays a box out in; the body's foot and the printer's line's both stand on that grid, so the gap between them moves in whole 64ths and less than half of one is none (Issue #1260 plan revision 3).
+const HALF_UNIT = 1 / 128;
+// 2026-11-06: the rounding repeats once every as many pixels of window height as the shares the bill divides its room into, 19 in the default seat and 21 held (SP2, rowGapsOf), so 21 heights from 882 are one whole turn of it for either seat (Issue #1260 plan revision 3).
+const TURN = Array.from({ length: 21 }, (_, i) => 882 + i);
 
 const DEFAULT = "#seed=20261105&style=antique";
 const HELD = "#seed=20261105&style=antique&type=archipelago&islands=20";
@@ -34,6 +38,8 @@ type Bill = {
   groupGap: number;
   headTop: number;
   noteGap: number | null;
+  bodyFoot: number;
+  tracks: number;
   opened: string[];
   zoomed: boolean;
   anims: number;
@@ -53,11 +59,14 @@ return{w:innerWidth,h:innerHeight,fonts:document.fonts.status,
  rowGap:+(r(q("band")).t-r(q("type")).b).toFixed(2),groupGap:+(r(q("grp-strand")).t-r(land).b).toFixed(2),
  headTop:+(r(s.querySelector(".slip-head .card-verb")).t-sb.top).toFixed(2),
  noteGap:lastRow!==null&&note&&note.getClientRects().length&&note.textContent?+(note.getBoundingClientRect().top-lastRow).toFixed(2):null,
+ bodyFoot:b.getBoundingClientRect().bottom-s.querySelector(".imprint").getBoundingClientRect().bottom,tracks:getComputedStyle(land).gridTemplateRows.split(" ").filter(Boolean).length,
  opened:["--bill-row","--bill-group","--bill-head","--bill-paper"].map((k)=>s.style.getPropertyValue(k)),
  zoomed:!!document.querySelector("#map-viewport.zoomed"),anims:s.getAnimations({subtree:true}).filter((a)=>a.playState==="running").length};})()`;
 
 const CAMERA: Payload<{ k: number; x: number; y: number }> =
   `(()=>{const s=window.__vellumZoomState();return{k:+s.k.toFixed(4),x:+s.x.toFixed(2),y:+s.y.toFixed(2)};})()`;
+// A change made in the page, not a press of the select: only so do its handler and the read share one task, and the draw's landing lays the room out again and would hide refreshLand's own call (Issue #1260 plan revision 3).
+const CHOOSE_ARCHIPELAGO: Payload<Bill> = `(()=>{const e=document.getElementById("type");e.value="archipelago";e.dispatchEvent(new Event("change",{bubbles:true}));return ${BILL};})()`;
 const CENTRE = (id: string): Payload<Point> =>
   `(()=>{const r=document.getElementById("${id}").getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`;
 
@@ -113,14 +122,10 @@ export async function br25Grows(k: BroadsideKit): Promise<void> {
     seats["default"] = await seatReads(k, "default", [
       [1024, 768],
       [1280, 800],
-      [1512, 882],
+      ...TURN.map((h) => [1512, h] as const),
       [1280, 1200],
     ]);
-    seats["held"] = await seatReads(k, "held", [
-      [1024, 768],
-      [1512, 882],
-      [1280, 1200],
-    ]);
+    seats["held"] = await seatReads(k, "held", [[1024, 768], ...TURN.map((h) => [1512, h] as const), [1280, 1200]]);
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
@@ -132,9 +137,9 @@ export async function br25Grows(k: BroadsideKit): Promise<void> {
     JSON.stringify({ at768: Object.values(seats).map((s) => s["1024x768"]), pace }),
   );
   check(
-    "BR25b on a window past the fill the Broadside's foot stands on its floor and nothing in it scrolls, a gap between the groups opens twice what a gap between rows opens, the masthead takes a row's share above it, and a held box's note stays tucked under its row, in both seats (rulings 1, 2 and 6)",
-    Object.values(seats).every((s) => br25bHolds(s["1024x768"]!, s["1512x882"]!)),
-    JSON.stringify(Object.values(seats).map((s) => s["1512x882"])),
+    "BR25b on every window height through one whole turn of its rounding past the fill (21 heights from 882) the Broadside's foot stands on its floor, it passes its room by no part of a layout unit and nothing in it scrolls, and at 882 a gap between the groups opens twice what a gap between rows opens, the masthead takes a row's share above it, and a held box's note stays tucked under its row, in both seats (rulings 1, 2 and 6)",
+    Object.values(seats).every((s) => br25bHolds(s["1024x768"]!, s["1512x882"]!) && turnHolds(s)),
+    JSON.stringify({ at882: Object.values(seats).map((s) => s["1512x882"]), turns: Object.values(seats).map(turnOf) }),
   );
   check(
     "BR25c on a window past the stop the rows open no further than twice the Broadside's width, its border runs on to the floor, and the flower stands centred in the blank paper between the Hand and the printer's line, in both seats (rulings 3 and 4)",
@@ -156,6 +161,18 @@ function br25bHolds(at768: Bill, at882: Bill): boolean {
     Math.abs(note) <= NEAR
   );
 }
+
+const passed = (at768: Bill, g: Bill): number => at768.bodyFoot - g.bodyFoot;
+
+function turnHolds(s: Record<string, Bill>): boolean {
+  return TURN.every((h) => onFloor(s[`1512x${h}`]!) && passed(s["1024x768"]!, s[`1512x${h}`]!) < HALF_UNIT);
+}
+
+const turnOf = (s: Record<string, Bill>): string[] =>
+  TURN.map((h) => {
+    const g = s[`1512x${h}`]!;
+    return `${h}: foot ${(g.slip.b - g.floor).toFixed(2)}, past ${(passed(s["1024x768"]!, g) * 64).toFixed(2)}/64${g.scrolls ? ", scrolls" : ""}`;
+  });
 
 function br25cHolds(g: Bill): boolean {
   const { paper: p, flower: f } = g;
@@ -202,6 +219,13 @@ async function br25dZoom(k: BroadsideKit): Promise<void> {
       "BR25d zoomed in, the Broadside stands at its content's height, as at 1024 by 768, and at the whole sheet it grows back to its floor (ruling 5)",
       Math.abs(zoomed.slip.h - h0) <= ON && zoomed.opened.every((v) => v === "0px") && onFloor(rest) && onFloor(home),
       JSON.stringify({ h0, rest, zoomed, home }),
+    );
+    const chosen = await k.evaluate(CHOOSE_ARCHIPELAGO);
+    await k.waitSettled("BR25f the archipelago's draw lands");
+    check(
+      "BR25f a choice that adds rows to the Land lays the Broadside back on its floor in the task that makes it, before its draw lands, with nothing in it scrolling (Alex, 2026-11-05, Issue #1260 comment 6668005484, P6)",
+      chosen.tracks > home.tracks && onFloor(chosen),
+      JSON.stringify({ home, chosen }),
     );
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
