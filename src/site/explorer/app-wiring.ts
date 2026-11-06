@@ -1,5 +1,6 @@
 import { runJob } from "./worker-client.ts";
-import { bindRoom, type Room } from "../shared/room.ts";
+import type { RoomParts } from "../shared/room.ts";
+import type { Camera } from "../shared/camera.ts";
 import { growBill, zoomBill } from "./bill-grow.ts";
 import { updateLandReadout, syncAutoSlider } from "./sea-level.ts";
 import { updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
@@ -11,7 +12,8 @@ import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { createGlass, type Glass } from "./glass.ts";
 import { ZOOM_STEP } from "../shared/zoom-keys.ts";
 import { pageLoupe } from "./loupe-page.ts";
-import { pageSlideAway } from "../shared/slide-away-page.ts";
+import type { LoupeBinding } from "./loupe-bind.ts";
+import { pageSlideAway, type RoomSlide } from "../shared/slide-away-page.ts";
 import type { Motion } from "./world-motion.ts";
 import { wireControls, type TouchedGates } from "./controls.ts";
 import { refreshLand, wireShapeControls } from "./shape-controls.ts";
@@ -84,6 +86,14 @@ function insetDogEar(
   });
 }
 
+function followView(loupe: LoupeBinding, slide: RoomSlide): (k: number) => void {
+  return (k) => {
+    loupe.follow();
+    slide.follow(k);
+    zoomBill(k);
+  };
+}
+
 interface PageGlassDeps {
   readonly lc: LivingChart;
   readonly chartTable: ReturnType<typeof bindChartDrawer>;
@@ -138,11 +148,7 @@ export function pageGlass({
     regionEligible,
     syncHash,
     busy: motion.busy,
-    onView: (k) => {
-      loupe.follow();
-      slide.follow(k);
-      zoomBill(k);
-    },
+    onView: followView(loupe, slide),
     decorateInset: (el: HTMLElement) => {
       insetDogEar(el, glass, chartTable, earLabel, prefersReduce, token, tokenMs);
     },
@@ -151,13 +157,13 @@ export function pageGlass({
   return glass;
 }
 
-export function pageRoom(glass: Glass): Room {
-  return bindRoom({
+export function roomFor(glass: Glass): RoomParts<Camera> {
+  return {
     frame: stageEl,
     sheet: sheetEl,
     camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) },
     onLayout: growBill,
-  });
+  };
 }
 
 export type DrawOverrides = { mapType?: MapType; band?: ClimateBand } & LandOverrides;

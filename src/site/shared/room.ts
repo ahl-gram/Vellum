@@ -14,7 +14,7 @@ export interface RoomCamera<Held> {
   readonly restore: (held: Held) => void;
 }
 
-interface RoomParts<Held> {
+export interface RoomParts<Held> {
   /** The element that reserves the chrome's edges as padding (Today: #map, the transform target; the Explorer: the stage round its sheet). */
   readonly frame: HTMLElement;
   readonly sheet: HTMLElement;
