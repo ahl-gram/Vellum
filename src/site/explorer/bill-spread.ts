@@ -45,11 +45,15 @@ export function rowGapsOf(ledgers: readonly Ledger[]): number {
   return gaps;
 }
 
-export function closedAt(k: number): number {
-  const raw = (k - 1) / (ZOOM_STEP - 1);
-  if (raw >= 1 - 1e-9) return 1;
-  if (raw <= 1e-9) return 0;
-  return raw;
+export interface Closing {
+  readonly was: number;
+  readonly from: number;
+  readonly k: number;
+  readonly to: number | null;
+}
+
+export function closingOf({ k }: Closing): number {
+  return Math.min(1, Math.max(0, (k - 1) / (ZOOM_STEP - 1)));
 }
 
 export function spreadOf(b: BillRoom): BillSpread {

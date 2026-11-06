@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   LAYOUT_UNITS_PER_PX,
   NO_SPREAD,
-  closedAt,
+  closingOf,
   rowGapsOf,
   spreadOf,
   type BillRoom,
@@ -11,7 +11,7 @@ import {
 } from "../../src/site/explorer/bill-spread.ts";
 import { ZOOM_STEP } from "../../src/site/shared/zoom-keys.ts";
 
-// 2026-11-05: the Broadside's measures in the probe's two seats at 416 px wide (Issue #1260 plan, `last` in 1260-r1-planned.log); room is the page less the 168.734 px placeSlip keeps above and below it.
+// 2026-11-05: the Broadside's measures in the probe's two seats at 416 px wide (Issue #1260, Tests section 1 of `handbook/plans/1200/1260/1260-plan.md`); room is the page less the 168.734 px placeSlip keeps above and below it.
 const WIDTH = 416;
 const ROOM_LESS = 168.734;
 const DEFAULT_SEAT = { natural: 510.484375, rows: 6, groups: 3, width: WIDTH };
@@ -34,6 +34,17 @@ function within(actual: number, expected: number, message: string, units = 1): v
 
 function unitsOf(seat: typeof DEFAULT_SEAT): number {
   return seat.rows + seat.groups + (seat.groups + 1) * 2 + 2;
+}
+
+function glide(was: number, path: readonly number[], to: number | null): number[] {
+  const out: number[] = [];
+  for (let i = 1; i < path.length; i++)
+    out.push(closingOf({ was: out.at(-1) ?? was, from: path[i - 1]!, k: path[i]!, to }));
+  return out;
+}
+
+function steps(from: number, to: number, n = 24): number[] {
+  return Array.from({ length: n + 1 }, (_, i) => (i === n ? to : from + ((to - from) * i) / n));
 }
 
 function grown(seat: typeof DEFAULT_SEAT, s: BillSpread): number {
@@ -110,17 +121,19 @@ test("SP7 rowGapsOf counts each ledger's rows but one and each shown held box's 
   );
 });
 
-test("SP8 the bill is wholly closed at the first press's depth and wholly open at the whole sheet, and half closed half way", () => {
-  assert.equal(closedAt(1), 0);
-  assert.equal(closedAt(ZOOM_STEP), 1, "exactly 1 at the first press's depth");
-  assert.equal(
-    closedAt(ZOOM_STEP * (1 - 1e-15)),
-    1,
-    "a camera depth a rounding short of it still reads wholly closed, not 0.9999999999999967",
-  );
-  assert.equal(closedAt(3), 1);
-  assert.equal(closedAt(0.9), 0);
-  near(closedAt(1.2), 0.5, "half way between the two");
+test("SP8 the first press closes the bill in step with the camera's depth, finishing exactly as it lands, and The whole sheet opens it the same way, from that depth or deeper, finishing exactly at the whole sheet", () => {
+  const press = steps(1, ZOOM_STEP);
+  const closing = glide(0, press, ZOOM_STEP);
+  press.slice(1).forEach((k, i) => near(closing[i]!, (k - 1) / (ZOOM_STEP - 1), `closing at k ${k}`));
+  assert.equal(closing.at(-1), 1, "wholly closed as the press lands");
+  for (const deep of [ZOOM_STEP, 3]) {
+    const home = steps(deep, 1, 40);
+    const opening = glide(1, home, 1);
+    home
+      .slice(1)
+      .forEach((k, i) => near(opening[i]!, Math.min(1, (k - 1) / (ZOOM_STEP - 1)), `opening at k ${k} from ${deep}`));
+    assert.equal(opening.at(-1), 0, `wholly open on the whole sheet, from ${deep}`);
+  }
 });
 
 test("SP9 the blank paper is never a rounding below zero, which a stylesheet reads as no height at all and lays at the flower's", () => {
@@ -150,4 +163,40 @@ test("SP10 every length the bill writes is a whole number of the 64ths of a pixe
         if (s.paper > 0) papered++;
       }
   assert.ok(opened > 0 && papered > 0, "the witness: the sweep opens the gaps and lays paper");
+});
+
+test("SP11 at any depth past the whole sheet that no press is gliding through, the bill is wholly closed whatever it was, and on the whole sheet wholly open", () => {
+  const shallow = [1.0000000000000002, 2 ** 0.2, 1.2, 2 ** 0.4, ZOOM_STEP * (1 - 1e-15)];
+  assert.ok(
+    shallow.every((k) => k > 1 && k < ZOOM_STEP),
+    "the witness: every depth lies short of the first press's",
+  );
+  for (const k of [...shallow, ZOOM_STEP, 2])
+    for (const was of [0, 0.37, 1]) assert.equal(closingOf({ was, from: 1, k, to: null }), 1, `k ${k}, was ${was}`);
+  for (const was of [0, 0.37, 1])
+    assert.equal(closingOf({ was, from: 2 ** 0.2, k: 1, to: null }), 0, `home, was ${was}`);
+});
+
+test("SP12 a press that sets out from a zoomed rest, or lands on one short of the first press's depth, keeps the bill wholly closed, and The whole sheet from such a rest opens it in step from closed", () => {
+  for (const [from, to] of [
+    [1.741, 1.741 / ZOOM_STEP],
+    [2 ** 0.2, 2 ** 0.2 * ZOOM_STEP],
+    [ZOOM_STEP, ZOOM_STEP * ZOOM_STEP],
+  ] as const)
+    assert.ok(
+      glide(1, steps(from, to), to).every((c) => c === 1),
+      `a press from ${from} to ${to}: ${glide(1, steps(from, to), to).join(", ")}`,
+    );
+  const home = steps(2 ** 0.2, 1);
+  const opening = glide(1, home, 1);
+  home.slice(1).forEach((k, i) => near(opening[i]!, (k - 1) / (2 ** 0.2 - 1), `opening at k ${k}`));
+  assert.equal(opening.at(-1), 0, "wholly open on the whole sheet");
+  const twice = [
+    ...glide(0, steps(1, 1.2, 8), ZOOM_STEP),
+    ...glide(0.5, steps(1.2, ZOOM_STEP * ZOOM_STEP, 16), ZOOM_STEP * ZOOM_STEP),
+  ];
+  steps(1, 1.2, 8)
+    .slice(1)
+    .concat(steps(1.2, ZOOM_STEP * ZOOM_STEP, 16).slice(1))
+    .forEach((k, i) => near(twice[i]!, Math.min(1, (k - 1) / (ZOOM_STEP - 1)), `a second press taken at 1.2, k ${k}`));
 });

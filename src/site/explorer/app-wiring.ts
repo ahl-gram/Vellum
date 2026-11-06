@@ -86,11 +86,11 @@ function insetDogEar(
   });
 }
 
-function followView(loupe: LoupeBinding, slide: RoomSlide): (k: number) => void {
-  return (k) => {
+function followView(loupe: LoupeBinding, slide: RoomSlide): (k: number, heading: number | null) => void {
+  return (k, heading) => {
     loupe.follow();
     slide.follow(k);
-    zoomBill(k);
+    zoomBill(k, heading);
   };
 }
 

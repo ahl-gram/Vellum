@@ -3,7 +3,7 @@ import { $ } from "../shared/by-id.ts";
 import { pageBox } from "../shared/page-box.ts";
 import {
   NO_SPREAD,
-  closedAt,
+  closingOf,
   rowGapsOf,
   spreadOf,
   type BillRoom,
@@ -25,6 +25,7 @@ const PROPS = { row: "--bill-row", group: "--bill-group", head: "--bill-head", p
 type Measured = Omit<BillRoom, "closed"> & { readonly need: number };
 let measured: Measured | null = null;
 let closed = 0;
+let depth = 1;
 
 function write(s: BillSpread, need: number): void {
   for (const key of Object.keys(PROPS) as (keyof typeof PROPS)[]) bill.style.setProperty(PROPS[key], `${s[key]}px`);
@@ -64,8 +65,9 @@ export function growBill(): void {
   write(measured === null ? NO_SPREAD : spreadOf({ ...measured, closed }), measured?.need ?? Infinity);
 }
 
-export function zoomBill(k: number): void {
-  const next = closedAt(k);
+export function zoomBill(k: number, heading: number | null): void {
+  const next = closingOf({ was: closed, from: depth, k, to: heading });
+  depth = k;
   if (next === closed) return;
   closed = next;
   if (measured !== null) write(spreadOf({ ...measured, closed }), measured.need);
