@@ -10,7 +10,7 @@ export const HEAD_SHARE = 1;
 // 2026-11-06: Chromium lays every length out truncated to 1/64 px, at every pixel ratio the harness emulates (Issue #1260 plan revision 3), so a share on that grid lays out at exactly its value.
 export const LAYOUT_UNITS_PER_PX = 64;
 
-const onGrid = (px: number): number => px;
+const onGrid = (px: number): number => Math.floor(px * LAYOUT_UNITS_PER_PX) / LAYOUT_UNITS_PER_PX;
 
 export interface Ledger {
   readonly tracks: number;
