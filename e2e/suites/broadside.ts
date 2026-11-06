@@ -91,7 +91,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("BR23", () => br23Imprint(k));
   await step("BR24", () => br24Ink(k));
   await step("BR25 to BR25c", () => br25Grows(k));
-  await step("BR25d to BR25f", () => br25dZoomed(k));
+  await step("BR25d to BR25i", () => br25dZoomed(k));
   br8Clean(ctx, errBase, httpBase);
 }
 

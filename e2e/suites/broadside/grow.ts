@@ -1,4 +1,5 @@
-// The Broadside grown into a tall window's free height (BR25 to BR25f, Issue #1260): every box is read from the run, and the literals are the ruled start, pace and stop.
+// The Broadside grown into a tall window's free height (BR25 to BR25i, Issue #1260): every box is read from the run, and the literals are the ruled start, pace and stop.
+import { ZOOM_STEP } from "../../../src/site/shared/zoom-keys.ts";
 import { sendClick, sendKey } from "../../support/input.ts";
 import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
@@ -19,6 +20,7 @@ const HALF_UNIT = 1 / 128;
 const TURN = Array.from({ length: 21 }, (_, i) => 882 + i);
 
 const DEFAULT = "#seed=20261105&style=antique";
+const LINKED = `${DEFAULT}&cx=0.5&cy=0.5&k=1.2`;
 const HELD = "#seed=20261105&style=antique&type=archipelago&islands=20";
 const TEXAS = "ne-1159315211";
 
@@ -67,6 +69,12 @@ const CAMERA: Payload<{ k: number; x: number; y: number }> =
   `(()=>{const s=window.__vellumZoomState();return{k:+s.k.toFixed(4),x:+s.x.toFixed(2),y:+s.y.toFixed(2)};})()`;
 // A change made in the page, not a press of the select: only so do its handler and the read share one task, and the draw's landing lays the room out again and would hide refreshLand's own call (Issue #1260 plan revision 3).
 const CHOOSE_ARCHIPELAGO: Payload<Bill> = `(()=>{const e=document.getElementById("type");e.value="archipelago";e.dispatchEvent(new Event("change",{bubbles:true}));return ${BILL};})()`;
+type Frame = { k: number; h: number };
+const FRAMES_ON: Payload<boolean> = `(()=>{const s=document.getElementById("broadside"),f=[];window.__billFrames=f;window.__billFramesOn=true;const tick=()=>{if(!window.__billFramesOn)return;f.push({k:window.__vellumZoomState().k,h:s.getBoundingClientRect().height});requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
+const FRAMES_OFF: Payload<Frame[]> = `(()=>{window.__billFramesOn=false;return window.__billFrames;})()`;
+// The wheel is dispatched in the page in the task that presses The whole sheet, so it lands before the glide's first frame however slow the runner: only so is an interrupted home glide reached every run (Issue #1260 plan revision 4).
+const HOME_THEN_WHEEL: Payload<boolean> = `(()=>{const v=document.getElementById("map-viewport"),r=document.getElementById("sheet").getBoundingClientRect();document.getElementById("zoom-reset").click();v.dispatchEvent(new WheelEvent("wheel",{deltaY:100,clientX:r.left+r.width/2,clientY:r.top+r.height/2,bubbles:true,cancelable:true}));return true;})()`;
+const ADDRESS: Payload<string> = `(()=>location.hash)()`;
 const CENTRE = (id: string): Payload<Point> =>
   `(()=>{const r=document.getElementById("${id}").getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`;
 
@@ -189,20 +197,39 @@ function br25cHolds(g: Bill): boolean {
   );
 }
 
-async function pressAndRest(k: BroadsideKit, id: string, label: string): Promise<void> {
+async function moveAndRest(k: BroadsideKit, move: () => Promise<unknown>, label: string): Promise<Frame[]> {
   const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));
   const from = JSON.stringify(await k.evaluate(CAMERA));
-  const c = await k.evaluate(CENTRE(id));
-  await sendClick(k.send, c.x, c.y);
+  await k.evaluate(FRAMES_ON);
+  await move();
   await stable(CAMERA, label, { departed: (d) => JSON.stringify(d) !== from });
+  return k.evaluate(FRAMES_OFF);
 }
 
+const pressing = (k: BroadsideKit, id: string) => async (): Promise<void> => {
+  const c = await k.evaluate(CENTRE(id));
+  await sendClick(k.send, c.x, c.y);
+};
+
+const wheeling = (k: BroadsideKit, notches: number) => async (): Promise<void> => {
+  const c = await k.evaluate(CENTRE("sheet"));
+  for (let i = 0; i < Math.abs(notches); i++) await k.wheel(c.x, c.y, -100 * Math.sign(notches));
+};
+
+const partway = (frames: readonly Frame[], natural: number, grown: number): boolean =>
+  frames.some((f) => f.k > 1 && f.k < ZOOM_STEP && f.h > natural + ON && f.h < grown - ON);
+const shut = (frames: readonly Frame[], natural: number): boolean =>
+  frames.some((f) => f.k > 1) && frames.every((f) => f.k === 1 || Math.abs(f.h - natural) <= ON);
+const shallow = (g: Bill, cam: { k: number }, natural: number): boolean =>
+  cam.k > 1 && cam.k < ZOOM_STEP && Math.abs(g.slip.h - natural) <= ON && g.opened.every((v) => v === "0px");
+
 export async function br25dZoomed(k: BroadsideKit): Promise<void> {
-  await br25dZoom(k);
+  const shallowRests = await br25dZoom(k);
+  await br25gLinked(k, shallowRests);
   await br25eReduced(k);
 }
 
-async function br25dZoom(k: BroadsideKit): Promise<void> {
+async function br25dZoom(k: BroadsideKit) {
   const { send, check, goto, EXP } = k;
   const read = reader(k);
   try {
@@ -211,15 +238,16 @@ async function br25dZoom(k: BroadsideKit): Promise<void> {
     const h0 = (await read(1024, 768, "BR25d the bill at 1024x768")).slip.h;
     await win(k, 1512, 882);
     const rest = await read(1512, 882, "BR25d the bill at rest at 1512x882");
-    await pressAndRest(k, "zoom-in", "BR25d the camera at rest after the first press");
+    const pressed = await moveAndRest(k, pressing(k, "zoom-in"), "BR25d the camera at rest after the first press");
     const zoomed = await read(1512, 882, "BR25d the bill zoomed", (d) => d.zoomed);
-    await pressAndRest(k, "zoom-reset", "BR25d the camera at rest on the whole sheet");
+    const homed = await moveAndRest(k, pressing(k, "zoom-reset"), "BR25d the camera at rest on the whole sheet");
     const home = await read(1512, 882, "BR25d the bill back on the whole sheet", (d) => !d.zoomed);
     check(
       "BR25d zoomed in, the Broadside stands at its content's height, as at 1024 by 768, and at the whole sheet it grows back to its floor (ruling 5)",
       Math.abs(zoomed.slip.h - h0) <= ON && zoomed.opened.every((v) => v === "0px") && onFloor(rest) && onFloor(home),
       JSON.stringify({ h0, rest, zoomed, home }),
     );
+    const wheeled = await br25hGlides(k, { h0, grown: rest.slip.h, pressed, homed });
     const chosen = await k.evaluate(CHOOSE_ARCHIPELAGO);
     await k.waitSettled("BR25f the archipelago's draw lands");
     check(
@@ -227,9 +255,93 @@ async function br25dZoom(k: BroadsideKit): Promise<void> {
       chosen.tracks > home.tracks && onFloor(chosen),
       JSON.stringify({ home, chosen }),
     );
+    return { h0, wheeled };
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
+}
+
+async function br25hGlides(
+  k: BroadsideKit,
+  { h0, grown, pressed, homed }: { h0: number; grown: number; pressed: Frame[]; homed: Frame[] },
+) {
+  const wheeled = await br25gRests(k);
+  const interrupted = await br25iInterrupted(k);
+  k.check(
+    "BR25h the first press closes the Broadside, and The whole sheet opens it, part way on a frame of their glide, in step with the chart, where a wheel closes it in the frame the chart first zooms and a press of Draw back from a deeper rest keeps it closed throughout (Alex, 2026-11-05, Issue #1260 comment 6668005484, P5, and 2026-11-06, comment 6684513791)",
+    partway(pressed, h0, grown) &&
+      partway(homed, h0, grown) &&
+      shut(wheeled.inFrames, h0) &&
+      shut(wheeled.backFrames, h0),
+    JSON.stringify({ h0, grown, pressed, homed, wheel: wheeled.inFrames, drawBack: wheeled.backFrames }),
+  );
+  k.check(
+    "BR25i a wheel that interrupts The whole sheet's glide and comes to rest short of the first press's depth leaves the Broadside at its content's height with nothing opened once the camera settles (Alex, 2026-11-06, Issue #1260 comment 6684513791)",
+    shallow(interrupted.bill, interrupted.at, h0),
+    JSON.stringify({ h0, ...interrupted }),
+  );
+  return wheeled;
+}
+
+async function br25gLinked(k: BroadsideKit, { h0, wheeled }: Awaited<ReturnType<typeof br25dZoom>>): Promise<void> {
+  const read = reader(k);
+  try {
+    await win(k, 1512, 882);
+    await k.goto(k.EXP + LINKED, "broadside-grow-linked");
+    const linked = await read(1512, 882, "BR25g the bill under a link that opens at 1.2", (d) => d.zoomed);
+    const linkedAt = await k.evaluate(CAMERA);
+    k.check(
+      "BR25g zoomed in short of the first press's depth, by a wheel, by a press of Draw back from a wheel's deeper rest and by a link that opens at 1.2, the Broadside stands at its content's height with nothing opened, and wheeled back to the whole sheet it stands on its floor again (Alex, 2026-11-06, Issue #1260 comment 6684513791)",
+      shallow(wheeled.in, wheeled.inAt, h0) &&
+        shallow(wheeled.back, wheeled.backAt, h0) &&
+        shallow(linked, linkedAt, h0) &&
+        wheeled.homeAt.k === 1 &&
+        onFloor(wheeled.home),
+      JSON.stringify({ h0, ...wheeled, linked, linkedAt }),
+    );
+  } finally {
+    await k.send("Emulation.clearDeviceMetricsOverride");
+  }
+}
+
+async function br25gRests(k: BroadsideKit) {
+  const read = reader(k);
+  const inFrames = await moveAndRest(k, wheeling(k, 1), "BR25g the camera at rest a wheel's notch in");
+  const inRead = await read(1512, 882, "BR25g the bill a wheel's notch in", (d) => d.zoomed);
+  const inAt = await k.evaluate(CAMERA);
+  await moveAndRest(k, wheeling(k, -1), "BR25g the camera wheeled back to the whole sheet");
+  const home = await read(1512, 882, "BR25g the bill wheeled back to the whole sheet");
+  const homeAt = await k.evaluate(CAMERA);
+  await moveAndRest(k, wheeling(k, 4), "BR25g the camera four notches in");
+  await read(1512, 882, "BR25g the bill four notches in", (d) => d.zoomed);
+  const backFrames = await moveAndRest(k, pressing(k, "zoom-out"), "BR25g the camera drawn back from four notches in");
+  const back = await read(1512, 882, "BR25g the bill drawn back short of the first press's depth", (d) => d.zoomed);
+  const backAt = await k.evaluate(CAMERA);
+  await moveAndRest(k, pressing(k, "zoom-reset"), "BR25g the camera home again");
+  await read(1512, 882, "BR25g the bill home again", (d) => !d.zoomed);
+  return { inFrames, in: inRead, inAt, home, homeAt, backFrames, back, backAt };
+}
+
+async function br25iInterrupted(k: BroadsideKit) {
+  const read = reader(k);
+  const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep });
+  await moveAndRest(k, pressing(k, "zoom-in"), "BR25i the camera at the first press's depth");
+  await read(1512, 882, "BR25i the bill at the first press's depth", (d) => d.zoomed);
+  await moveAndRest(
+    k,
+    () => k.evaluate(HOME_THEN_WHEEL),
+    "BR25i the camera at rest after a wheel interrupts The whole sheet",
+  );
+  const at = await k.evaluate(CAMERA);
+  await settle(
+    ADDRESS,
+    (h) => h.includes(`k=${at.k.toFixed(4)}`),
+    "BR25i the camera's settle writes its depth to the address",
+  );
+  const bill = await read(1512, 882, "BR25i the bill once the camera settles", (d) => d.zoomed);
+  await moveAndRest(k, pressing(k, "zoom-reset"), "BR25i the camera home again");
+  await read(1512, 882, "BR25i the bill home again", (d) => !d.zoomed);
+  return { at, bill };
 }
 
 async function br25eReduced(k: BroadsideKit): Promise<void> {
