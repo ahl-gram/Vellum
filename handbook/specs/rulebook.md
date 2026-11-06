@@ -348,6 +348,12 @@ comment. This is a convenience index, not their home.
   clicked navigation wins bandwidth. The home style grid that consumed the priority half retired at
   #470, so this line is the rule's durable home until a lazy heavyweight embed returns; the atlas
   keeps reserved frames plus `loading="lazy"` in `src/atlas/document.ts`.
+- **A box a script grows to fill a room (#1260):** Chromium lays every length out cut down to a
+  64th of a pixel, the base and the share it is grown by together, so a grown box can lay out a
+  fraction of a 64th past its share, and gaps grown to fill a room exactly pass it by a rounding,
+  which a scroll container shows as a pixel's scroll. Write each share as a whole number of 64ths
+  (`LAYOUT_UNITS_PER_PX` in `src/site/explorer/bill-spread.ts`, held by `SP10` in
+  `test/site/bill-spread.test.ts` and `BR25b` in `e2e/suites/broadside/grow.ts`).
 
 ## What `src/` holds, and what runs around it
 
