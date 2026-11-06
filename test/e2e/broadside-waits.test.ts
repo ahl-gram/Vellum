@@ -11,6 +11,7 @@ import {
   TAPPED,
 } from "../../e2e/suites/broadside.ts";
 import type { BroadsideKit } from "../../e2e/suites/broadside/kit.ts";
+import { laidOut, landed, type Bill, type Landing } from "../../e2e/suites/broadside/grow.ts";
 import { emulations, lastSent, recordingSuite, timeline, type Stage } from "../../test-support/recording-suite.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number };
@@ -120,19 +121,23 @@ test("BR5 reads the note straight after each real mouse move and pauses for noth
   assert.deepEqual(run.slept, [], "BR5 paused after a mouse move");
 });
 
-type Narrow = { iw: number; ih: number; sheet: Box };
-const HARNESS_NARROW: Narrow = { iw: 1280, ih: 2263, sheet: box(40, 700, 40, 2063) };
-const TABLET: Narrow = { iw: 1024, ih: 700, sheet: box(30, 520, 40, 500) };
+type Narrow = { iw: number; ih: number; sheet: Box; floor: number | null };
+const HARNESS_NARROW: Narrow = { iw: 1280, ih: 2263, sheet: box(40, 700, 40, 2063), floor: 2241 };
+const TABLET: Narrow = { iw: 1024, ih: 700, sheet: box(30, 520, 40, 500), floor: 678 };
+const UNMOVED: Narrow = { ...TABLET, sheet: HARNESS_NARROW.sheet, floor: HARNESS_NARROW.floor };
+const STALE: Narrow = { ...TABLET, sheet: box(-128, 601, 85, 648), floor: HARNESS_NARROW.floor };
 const SEATED = { x: 400, y: 300 };
-const tabletRun = ({ laysOut = true, clicks = true }: { laysOut?: boolean; clicks?: boolean } = {}) => {
+type TabletRun = { laysOut?: boolean; clicks?: boolean; staleFor?: number; floorMoves?: boolean };
+const tabletRun = ({ laysOut = true, clicks = true, staleFor = 0, floorMoves = true }: TabletRun = {}) => {
   const room = timeline<Narrow>([
     { phases: [], rest: HARNESS_NARROW },
     {
       phases: [
         [2, { ...HARNESS_NARROW, sheet: box(5, 5, 5, 5) }],
-        [2, { ...TABLET, sheet: HARNESS_NARROW.sheet }],
+        [2, UNMOVED],
+        [staleFor, STALE],
       ],
-      rest: laysOut ? TABLET : { ...TABLET, sheet: HARNESS_NARROW.sheet },
+      rest: !floorMoves ? STALE : laysOut ? TABLET : UNMOVED,
     },
   ]);
   const page = { clicks: 0, pending: Infinity, hit: false, open: false };
@@ -179,4 +184,56 @@ test("BR6 times out naming the tap's click when no click reaches the page, and g
   const { br6, sent } = tabletRun({ clicks: false });
   await assert.rejects(br6(), (err: Error) => err.message.startsWith("settle timeout BR6 the tap's click: "));
   assert.equal(lastSent(sent)?.method, "Emulation.clearDeviceMetricsOverride");
+});
+
+test("BR6 taps only once the slip stands on the tablet's floor, never on a sheet the stylesheet alone has moved while the slip stands on the harness's floor, the runner's stale read (Issue #1260 plan revision 5)", async () => {
+  const { br6, checked } = tabletRun({ staleFor: 4 });
+  await br6();
+  assert.deepEqual(checked, [{ code: "BR6", ok: true }]);
+});
+
+test("BR6 times out naming the tablet's layout when the slip never leaves the harness's floor, and gives the window back", async () => {
+  const { br6, sent } = tabletRun({ floorMoves: false });
+  await assert.rejects(br6(), (err: Error) =>
+    err.message.startsWith("settle timeout BR6 the room laid out at 1024x700: "),
+  );
+  assert.equal(lastSent(sent)?.method, "Emulation.clearDeviceMetricsOverride");
+});
+
+const bill = (over: Partial<Bill>): Bill => ({
+  w: 1512,
+  h: 882,
+  fonts: "loaded",
+  floor: 860,
+  slip: { t: 146.73, b: 860, h: 713.27, w: 416 },
+  scrolls: false,
+  paper: null,
+  flower: null,
+  hand: null,
+  imprint: null,
+  rowGap: 8.37,
+  groupGap: 23.95,
+  headTop: 15.18,
+  noteGap: 2.39,
+  bodyFoot: 6.390625,
+  tracks: 4,
+  opened: ["5.984375px", "11.96875px", "5.984375px", "0px"],
+  zoomed: false,
+  anims: 0,
+  ...over,
+});
+
+test("BR25's reader takes a window's read only once the slip stands on that window's floor: the runner's 882 read in the 800 layout, and a read a pixel short, are refused (Issue #1260 plan revision 5)", () => {
+  assert.equal(laidOut(1512, 882)(bill({})), true);
+  assert.equal(laidOut(1512, 882)(bill({ floor: 778 })), false, "the read laid out at 1280x800");
+  assert.equal(laidOut(1512, 883)(bill({ h: 883 })), false, "the read laid out at 1512x882");
+  assert.equal(laidOut(1512, 882, (d) => d.zoomed)(bill({})), false);
+});
+
+test("moveAndRest takes the camera for landed only across a frame with no write: the runner's stall mid-glide and a write the camera's rounding hides are refused (Issue #1260 plan revision 5)", () => {
+  const stalled: Landing = { k: 1.7403, x: -296.54, y: -229.21, writes: 5, frame: 17 };
+  assert.equal(landed(stalled, stalled), false, "two equal reads with no frame between");
+  assert.equal(landed({ ...stalled, writes: 6, frame: 18 }, stalled), false, "a write the rounding hides");
+  const home: Landing = { k: 1.2436, x: -98.29, y: -76.01, writes: 6, frame: 21 };
+  assert.equal(landed({ ...home, frame: 24 }, home), true);
 });

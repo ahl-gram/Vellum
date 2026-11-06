@@ -25,7 +25,7 @@ const HELD = "#seed=20261105&style=antique&type=archipelago&islands=20";
 const TEXAS = "ne-1159315211";
 
 type Box = { t: number; b: number; h: number } | null;
-type Bill = {
+export type Bill = {
   w: number;
   h: number;
   fonts: string;
@@ -70,8 +70,12 @@ const CAMERA: Payload<{ k: number; x: number; y: number }> =
 // A change made in the page, not a press of the select: only so do its handler and the read share one task, and the draw's landing lays the room out again and would hide refreshLand's own call (Issue #1260 plan revision 3).
 const CHOOSE_ARCHIPELAGO: Payload<Bill> = `(()=>{const e=document.getElementById("type");e.value="archipelago";e.dispatchEvent(new Event("change",{bubbles:true}));return ${BILL};})()`;
 type Frame = { k: number; h: number };
-const FRAMES_ON: Payload<boolean> = `(()=>{const s=document.getElementById("broadside"),f=[];window.__billFrames=f;window.__billFramesOn=true;const tick=()=>{if(!window.__billFramesOn)return;f.push({k:window.__vellumZoomState().k,h:s.getBoundingClientRect().height});requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
-const FRAMES_OFF: Payload<Frame[]> = `(()=>{window.__billFramesOn=false;return window.__billFrames;})()`;
+const FRAMES_ON: Payload<boolean> = `(()=>{const s=document.getElementById("broadside"),f=[];window.__billFrames=f;window.__billFramesOn=true;window.__billWrites=0;window.__billWatch=new MutationObserver((rs)=>{window.__billWrites+=rs.length;});window.__billWatch.observe(document.getElementById("map"),{attributes:true,attributeFilter:["style"]});const tick=()=>{if(!window.__billFramesOn)return;f.push({k:window.__vellumZoomState().k,h:s.getBoundingClientRect().height});requestAnimationFrame(tick);};requestAnimationFrame(tick);return true;})()`;
+const FRAMES_OFF: Payload<Frame[]> =
+  `(()=>{window.__billFramesOn=false;window.__billWatch.disconnect();return window.__billFrames;})()`;
+export type Landing = { k: number; x: number; y: number; writes: number; frame: number };
+const LANDING: Payload<Landing> = `(()=>{const s=window.__vellumZoomState();return{k:+s.k.toFixed(4),x:+s.x.toFixed(2),y:+s.y.toFixed(2),writes:window.__billWrites,frame:window.__billFrames.length};})()`;
+export const landed = (d: Landing, last: Landing): boolean => d.k === last.k && d.x === last.x && d.y === last.y;
 // The wheel is dispatched in the page in the task that presses The whole sheet, so it lands before the glide's first frame however slow the runner: only so is an interrupted home glide reached every run (Issue #1260 plan revision 4).
 const HOME_THEN_WHEEL: Payload<boolean> = `(()=>{const v=document.getElementById("map-viewport"),r=document.getElementById("sheet").getBoundingClientRect();document.getElementById("zoom-reset").click();v.dispatchEvent(new WheelEvent("wheel",{deltaY:100,clientX:r.left+r.width/2,clientY:r.top+r.height/2,bubbles:true,cancelable:true}));return true;})()`;
 const ADDRESS: Payload<string> = `(()=>location.hash)()`;
@@ -81,12 +85,15 @@ const CENTRE = (id: string): Payload<Point> =>
 const win = (k: BroadsideKit, w: number, h: number): Promise<unknown> =>
   k.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
+export const laidOut =
+  (w: number, h: number, also: (d: Bill) => boolean = () => true) =>
+  (d: Bill): boolean =>
+    d.w === w && d.h === h && d.fonts === "loaded" && d.anims === 0 && also(d);
+
 function reader(k: BroadsideKit) {
   const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));
   return (w: number, h: number, label: string, also: (d: Bill) => boolean = () => true): Promise<Bill> =>
-    stable(BILL, label, {
-      departed: (d) => d.w === w && d.h === h && d.fonts === "loaded" && d.anims === 0 && also(d),
-    });
+    stable(BILL, label, { departed: laidOut(w, h, also) });
 }
 
 async function pickTexas(k: BroadsideKit): Promise<void> {
@@ -199,10 +206,13 @@ function br25cHolds(g: Bill): boolean {
 
 async function moveAndRest(k: BroadsideKit, move: () => Promise<unknown>, label: string): Promise<Frame[]> {
   const stable = makeStable(makeSettle({ evaluate: k.evaluate, sleep: k.sleep }));
-  const from = JSON.stringify(await k.evaluate(CAMERA));
   await k.evaluate(FRAMES_ON);
+  const from = await k.evaluate(LANDING);
   await move();
-  await stable(CAMERA, label, { departed: (d) => JSON.stringify(d) !== from });
+  await stable(LANDING, label, {
+    departed: (d) => d.k !== from.k || d.x !== from.x || d.y !== from.y,
+    same: landed,
+  });
   return k.evaluate(FRAMES_OFF);
 }
 

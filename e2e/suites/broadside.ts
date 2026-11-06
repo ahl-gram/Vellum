@@ -44,8 +44,8 @@ const laidOutAt =
   (d: Room): boolean =>
     d.w === w && d.h === h && !sameBox(d.sh, from.sh) && !d.moving;
 
-type Narrow = { iw: number; ih: number; sheet: Box };
-export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)}};})()`;
+type Narrow = { iw: number; ih: number; sheet: Box; floor: number | null };
+export const NARROW: Payload<Narrow> = `(()=>{const e=document.getElementById("sheet"),s=document.querySelector(".slip");const b=e?e.getBoundingClientRect():null;return{iw:innerWidth,ih:innerHeight,sheet:b&&{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)},floor:s?+(parseFloat(s.style.top)+parseFloat(s.style.maxHeight)).toFixed(2):null};})()`;
 // Counted on the window, after the mark's own handler has run, so a count that rose means the page has handled the tap's click.
 const COUNT_CLICKS = `(()=>{if(window.__br6Clicks===undefined){window.__br6Clicks=0;addEventListener("click",()=>{window.__br6Clicks++;});}return true;})()`;
 export const CLICKS: Payload<{ n: number }> = `({ n: window.__br6Clicks })`;
