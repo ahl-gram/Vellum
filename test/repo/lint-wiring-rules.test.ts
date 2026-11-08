@@ -145,10 +145,10 @@ function checkCoreAndHouseRules(
     [2, { max: 400, skipBlankLines: true, skipComments: true }],
     `${file}: max-lines does not resolve at error with the ruled ceiling of 400 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
   );
-  assert.deepEqual(
+  assert.equal(
     rules["max-lines-per-function"],
-    [2, { max: 50, skipBlankLines: true, skipComments: true }],
-    `${file}: max-lines-per-function does not resolve at error with the ruled ceiling of 50 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
+    undefined,
+    `${file}: max-lines-per-function resolves to a setting, but Alex removed the function-length ceiling (Issue #1272)`,
   );
   assert.deepEqual(
     rules["max-depth"],

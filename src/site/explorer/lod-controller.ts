@@ -81,7 +81,6 @@ function retireOldInset(el: HTMLDivElement, old: HTMLDivElement | null): void {
   }
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function createLodController(deps: Deps) {
   const { mapDiv, runJob, buildPlaceOverlay, setCaption, getZoomK, prefersReduce } = deps;
 

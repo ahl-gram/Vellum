@@ -97,7 +97,6 @@ function placeHit(place: PlaceMark, idx: number, at: PlaceAnchor): HTMLButtonEle
   return hit;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, ribbonHref, layProspect, clampBox } = deps;
 

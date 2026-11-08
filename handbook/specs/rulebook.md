@@ -420,12 +420,6 @@ line yourself. A type-check skip passes only where the "Not skips" line below na
   generated assets and runs one full build that most of its tests read; split into two files, each
   would need that build and race the other on its output folder under `node --test`'s parallel
   files.
-- **`max-lines-per-function` on `createVoyage` (`src/site/shared/living-chart/voyage.ts`), `createAges`
-  (`src/site/shared/living-chart/ages.ts`), `createPlaceOverlay` (`src/site/shared/living-chart/place-overlay.ts`)
-  and `createLodController` (`src/site/explorer/lod-controller.ts`).** Each builder's functions read
-  one shared live record after a guard; split into parts, each such read would carry a hand-written
-  non-null mark the checker cannot tie to its guard, so an edit deleting the guard would still
-  compile.
 
 **Not skips:** the `@ts-expect-error` lines in `test/repo/e2e-read-types.test.ts`, each a negative
 type test asserting the checker rejects a shape; directive text inside a string in a test fixture;
