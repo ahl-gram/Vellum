@@ -308,6 +308,13 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
   );
 });
 
+test("no block sets max-lines-per-function at all, so the function-length ceiling Alex removed cannot come back for a subtree no witness reaches (Issue #1272)", () => {
+  const setters = blocks
+    .filter((b) => Object.hasOwn(b.rules ?? {}, "max-lines-per-function"))
+    .map((b) => b.name ?? "(unnamed)");
+  assert.deepEqual(setters, [], "a block of the house config sets max-lines-per-function, which Alex removed");
+});
+
 test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {
   const setters = blocks
     .filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty"))
