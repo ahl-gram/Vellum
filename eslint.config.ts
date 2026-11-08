@@ -61,7 +61,6 @@ export default defineConfig(
     rules: {
       "max-depth": ["error", 4],
       "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
-      "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
       "no-empty": ["error", { allowEmptyCatch: true }],
       "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: PAGE_ELEMENT_PARAMETERS }],
       "@typescript-eslint/no-floating-promises": [

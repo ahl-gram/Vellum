@@ -55,7 +55,6 @@ export interface AgesDeps {
   voyage: Voyage;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function createAges(deps: AgesDeps) {
   const {
     panel,
