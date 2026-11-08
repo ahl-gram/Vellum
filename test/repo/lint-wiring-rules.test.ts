@@ -145,10 +145,10 @@ function checkCoreAndHouseRules(
     [2, { max: 400, skipBlankLines: true, skipComments: true }],
     `${file}: max-lines does not resolve at error with the ruled ceiling of 400 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
   );
-  assert.deepEqual(
+  assert.equal(
     rules["max-lines-per-function"],
-    [2, { max: 50, skipBlankLines: true, skipComments: true }],
-    `${file}: max-lines-per-function does not resolve at error with the ruled ceiling of 50 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
+    undefined,
+    `${file}: max-lines-per-function resolves to a setting, but Alex removed the function-length ceiling (Issue #1272)`,
   );
   assert.deepEqual(
     rules["max-depth"],
@@ -306,6 +306,13 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
     "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON, no-empty and no-param-reassign here and test/repo/lint-strict.test.ts's for the rules Issue #779 adopted see in every block, while the witness test pins the size rules, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
   );
+});
+
+test("no block sets max-lines-per-function at all, so the function-length ceiling Alex removed cannot come back for a subtree no witness reaches (Issue #1272)", () => {
+  const setters = blocks
+    .filter((b) => Object.hasOwn(b.rules ?? {}, "max-lines-per-function"))
+    .map((b) => b.name ?? "(unnamed)");
+  assert.deepEqual(setters, [], "a block of the house config sets max-lines-per-function, which Alex removed");
 });
 
 test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {

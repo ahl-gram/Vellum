@@ -33,7 +33,6 @@ export interface VoyageDeps {
 
 const fmt = (p: Pt) => `${p.x},${p.y}`;
 
-// eslint-disable-next-line max-lines-per-function
 export function createVoyage(deps: VoyageDeps) {
   const { mapEl, statusEl, logPanel, restingTrackSink } = deps;
   const sessions = createSessionBuilder({
