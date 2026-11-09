@@ -95,7 +95,7 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
     JSON.stringify(bound),
   );
 
-  // The running head is read off the page after a real bind, against the text the shared atlasHeadMarkup gives for this world, so a renderBoundAtlas that stops calling it reds here (RH7 runs the markup module itself and cannot see that).
+  // The running head is read off the page after a real bind, against the text the shared atlasHeadMarkup gives for this world, so a renderBoundAtlas that stops calling it reds here.
   const expected = atlasHeadMarkup({ title: "T", subtitle: "S", seed: 42 }).match(/class="chartno">([^<]*)</)?.[1];
   check(
     "PR20d the bound atlas's running head, written by renderBoundAtlas, is the shared markup's: the heading is the world's title and the chart number line is the one atlasHeadMarkup writes",

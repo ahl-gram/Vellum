@@ -240,7 +240,7 @@ AND underlined, never colour alone; on a top-level room the trail's last segment
 dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
 so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
 a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
-controls. **Ratified at the post-use review (Issue #736):** the trail's size step under the nav, its separator glyph, the margins that clear the targets' spacing, the Gallery's first row given back its gap, and the alias link's strengthened underline. The cluster suite's DR16 holds the size step, the margins, the trail's line and the underline's strength, and DR13 holds the Gallery's clearance against a change to the trail's line; no check reads the separator glyph, and the Gallery's other spacing is not pinned (`handbook/errata/site.md`). **Still provisional:** the alias line's wording and whether it earns its place. The trail and the nav sharing one ink stays as `handbook/errata/site.md` records it.
+controls. **Ratified at the post-use review (Issue #736):** the trail's size step under the nav, its separator glyph, the margins that clear the targets' spacing, the Gallery's first row given back its gap, and the alias link's strengthened underline. They are checked by eye since Issue #1273 deleted the cluster suite's DR13 and DR16, which held the size step, the margins, the trail's line, the underline's strength and the Gallery's clearance; the Gallery's spacing is not pinned (`handbook/errata/site.md`). **Still provisional:** the alias line's wording and whether it earns its place. The trail and the nav sharing one ink stays as `handbook/errata/site.md` records it.
 
 **The chart of the atelier is the listing, laid over the trail as a layer.** Its press opens a small
 chart of the site's own shape: every route in the tree is a place and the atlas an isle off home
@@ -389,8 +389,9 @@ Rules that catch drift:
   templates, or no world can print it.
 - **A glossed section runs to a small band of terms**, and a section that runs over is named as an
   exception rather than left to look like drift. A section under the floor is fine: the floor binds
-  only the sections that introduced it. IX12 in `e2e/suites/document-rooms/sheets.ts` holds the cap
-  and the named exceptions, read on the served page.
+  only the sections that introduced it. The test "the Glossary keeps its #353 shape in
+  the built page" in `test/site/built-pages.test.ts` holds the cap and the named exceptions, read on
+  the built page.
 - **A homograph takes the period form**: one headword whose senses run together, rather than a second
   entry under the same word.
 - **Culture sections are ordered alphabetically**, not in the order of the roster that generates
@@ -465,8 +466,8 @@ and a phone get is `handbook/specs/site-architecture.md`'s, and a room's half is
 furniture" above.
 **The head cluster and the room's right-hand corner never overlap, at any width from 1024 up:** a
 room folio line, a control or a widened corner is written to fit beside the cluster rather than
-accepted as a squeeze, the top row holds it by script, and the sweep in `e2e/suites/corners.ts`
-holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not
+accepted as a squeeze, the top row holds it by script, and `CO1` in `e2e/suites/corners.ts`
+holds the Print Room, whose corner comes nearest, to it. A deviation that is knowingly shipped is recorded with its measurement, not
 left silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.
 **A panel that quotes generated prose is sized for no copy in particular, because generated prose
 has no length and a panel sized for the copy you measured overflows on the next seed**: give it a

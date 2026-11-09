@@ -528,8 +528,7 @@ section points there rather than restating it.
   window's floor (`onSlipFloor` in `e2e/suites/broadside/kit.ts`, as `narrowTaps` in
   `e2e/suites/broadside.ts` and `laidOut` in `e2e/suites/broadside/grow.ts` ask). A wait for a
   camera to land counts the camera's writes to its target and asks for a frame between its two reads
-  (`landed` in `e2e/suites/broadside/grow.ts`), the shape `h15dFlightStops` in
-  `e2e/suites/home/drift.ts` keeps. The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
+  (`landed` in `e2e/suites/broadside/grow.ts`). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
@@ -566,8 +565,8 @@ section points there rather than restating it.
   is 0.01 px, and the station flight's last printed step can land after two equal reads 50 ms apart
   (measured 2026-10-30 on the local harness browser: a wait on the printed matrix handed over before
   it in 2 of 36 flights, Issue #1124). A wait for a tween to land counts the page's writes, as the
-  bullet above counts them, and asks for a frame between its two reads, as `h15dFlightStops` in
-  `e2e/suites/home/drift.ts` does.
+  bullet above counts them, and asks for a frame between its two reads, as `landed` in
+  `e2e/suites/broadside/grow.ts` does.
 - **A helper that scrolls before it reads cannot see a scrolled page.** `buttonPoint` in
   `e2e/support/home.ts` scrolls the stage into view before it reads a point, un-scrolling the page as
   it does, so a check about anything at its scrolled position reads raw viewport rects instead, as
@@ -674,8 +673,8 @@ section points there rather than restating it.
   scroll never reaches its own fixture, because the late section it meant to bring up to the reading
   line was on screen the whole time, so it passes having exercised nothing. A suite that depends on
   scrolling sizes its OWN viewport with `Emulation.setDeviceMetricsOverride`, at whatever its
-  fixture needs and with the reason at the line; `e2e/suites/document-rooms.ts` and
-  `e2e/suites/reading-room.ts` both do, at different sizes, which is why the rule is size
+  fixture needs and with the reason at the line; `e2e/suites/reading-room.ts` does,
+  at the size its fixture needs, which is why the rule is size
   your own fixture and not any one figure. It is the raw call rather than `setMobileViewport`
   because that wrapper sets `mobile: true`, which changes layout semantics as well as size. **This
   is not the case clause 14 governs**: there the runner rescues the VIEWPORT because its reset after

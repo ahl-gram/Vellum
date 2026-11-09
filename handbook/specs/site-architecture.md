@@ -117,12 +117,11 @@ symbol and path so the reader goes and looks.
   small that way also keeps a height, the desk frame's 768 (`handbook/specs/ui-design.md`, the room
   and its furniture). It is keyed on the page's own shrink, which the desk notice already reads,
   never on the window's width, and the layout stays 1024 wide, so the rule below does not reach it.
-  `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
-  `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
+  `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag. **No rule switches the layout at
   a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`
   refuses one in a sheet under `src/styles/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
-  (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
-  page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
+  (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet the Print
+  Room loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
 - **The shell dresses once.** Every shared shell rule lives in `src/styles/shared/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `src/styles/shared/chart-of-the-atelier.css`); a page's own
   sheet carries page-specific rules only. Home's scripts-off rules are `src/styles/home-noscript.css`,
