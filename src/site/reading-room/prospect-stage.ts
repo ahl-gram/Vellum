@@ -159,7 +159,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     revokePrior(prior, revokeUrl);
   }
 
-  return { root, link, img, setWorld, prefetch, show, shown: (): string | null => null };
+  return { root, link, img, setWorld, prefetch, show, shown };
 }
 
 export type ProspectStage = ReturnType<typeof createProspectStage>;
