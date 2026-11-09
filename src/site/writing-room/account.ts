@@ -2,6 +2,7 @@ import type { Founding } from "../../world/founding/found.ts";
 import { MAX_SENTENCE_CODE_POINTS, type Steer } from "../../world/founding/lexicon.ts";
 import type { OutlineId } from "../../world/outline-ids.ts";
 import type { RoomReason } from "../shared/founding.ts";
+import { MAP_WORDS } from "../shared/map-words.ts";
 
 export type AccountLine = { readonly phrase: string; readonly set: string };
 export type Account = {
@@ -14,12 +15,6 @@ export type Account = {
 
 export const QUIET_LINE = "None of these words steered the world; its chart number alone drew it.";
 
-export const MAP_WORDS = {
-  island: "an island",
-  archipelago: "an archipelago",
-  continent: "a continent",
-  citystate: "a city-state",
-} as const;
 const BAND_WORDS = { polar: "a cold climate", tropical: "a warm climate", temperate: "a temperate climate" } as const;
 
 export function refusalWords(reason: RoomReason, length: number): string {
