@@ -156,3 +156,10 @@ Each is a stand-in the designer picked to make the picture, listed in `notes.md`
 ## What the round found that bears on the subs
 
 The subs, Issue #1248 to Issue #1258, were written after the last ruling from `notes.md`'s readings of the rulings together, and each carries what it needs; this README does not restate them. `notes.md` lists the defects the round found and did not cause; its out-of-date FAQ answer is Issue #1259.
+
+## Reading notes from the review
+
+What the plate reader of Issue #1247's pull request saw in the kept stills, recorded as it saw it. No still is edited.
+
+- `shots/stills/home-pip-poalo-1280.png` and `shots/stills/home-pip-poalo-legend-1024.png`: the pip's diamond covers the first letter of the town label Poalo, so "oalo" shows.
+- `shots/stills/home-pip-poalo-legend-1024.png`: the legend row with the fifth press, "Learn one / The Primer", sits at the panel's right edge against the "A Gallery of Worlds" label, which `measure/home-pip.md` already records as the row over the gallery, 1108 square px at 1024.
