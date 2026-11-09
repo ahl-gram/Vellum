@@ -119,7 +119,7 @@ export type Pp = {
   chartHref: string | null;
   hashTable: string | null;
 };
-export type Stored = { stored: string | null };
+type Stored = { stored: string | null };
 export type Back = Read & Stored & { marker: string | null; navType: string | null };
 
 const SEED = 42;
@@ -207,7 +207,6 @@ export const sameCam = (a: Cam | null, b: Cam | null) =>
   !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
 export const atRest = (d: Carry, last: Carry | null) =>
   !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
-// The settle's declared duration: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
 export const DURATION: Payload<string | null> =
   `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
 // The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended, and with it the chart's slide and the room's layout at its end.

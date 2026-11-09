@@ -353,8 +353,8 @@ comment. This is a convenience index, not their home.
   fraction of a 64th past its share, and gaps grown to fill a room exactly pass it by a rounding,
   which a scroll container shows as a pixel's scroll. Write each share as a whole number of 64ths
   (`LAYOUT_UNITS_PER_PX` in `src/site/explorer/bill-spread.ts`, held by `SP10` in
-  `test/site/bill-spread.test.ts`; since Issue #1273 no browser check reads the page's rounding
-  across a turn of window heights).
+  `test/site/bill-spread.test.ts`; since Issue #1273 no browser check reads the gap between the
+  page's foot and its room to a layout unit, at one window height or across a turn of them).
 
 ## What `src/` holds, and what runs around it
 

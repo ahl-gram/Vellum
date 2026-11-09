@@ -254,7 +254,7 @@ async function linksAtRest(
   return { links: rest.links, media: rest.media };
 }
 
-// Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin, and CD50, read the Portfolio's).
+// Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin read the Portfolio's).
 async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
   const unswept = DISCOVERY_ROUTES.filter((route) => !swept.some((r) => r.page === route));
   const read: { page: string; links: readonly string[] }[] = [...swept];
