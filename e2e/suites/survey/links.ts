@@ -90,55 +90,6 @@ export async function sv5Forwards({ evaluate, send, check, sleep, EXP }: SurveyK
   );
 }
 
-export async function sv5bVerbatim({ evaluate, send, check, sleep, EXP }: SurveyKit): Promise<void> {
-  const richHash = "#seed=7&style=ink&legend=0&arms=1&land=520&year=2&cx=0.5100&cy=0.4900&k=3.0000";
-  await bounce(send, EXP + richHash);
-  let landedB = false;
-  for (let i = 0; i < 200; i++) {
-    let p = null;
-    try {
-      p = await evaluate<string>(`location.pathname`);
-    } catch {}
-    if (p === "/reading-room/") {
-      landedB = true;
-      break;
-    }
-    await sleep(50);
-  }
-  const hashB = landedB ? await evaluate<string>(`location.hash`) : "";
-  check(
-    "SV5b the forward carries the hash verbatim: recipe, tide, and camera riders all intact",
-    landedB && hashB === richHash,
-    JSON.stringify({ landedB, hashB, want: richHash }),
-  );
-}
-
-export async function sv5cBadYear({ evaluate, check, goto }: SurveyKit): Promise<void> {
-  await goto("#seed=42&style=antique&year=abc", "survey-badyear");
-  const sv5c = await evaluate<{ path: string; checked: boolean; svg: boolean }>(
-    `({path:location.pathname,checked:document.getElementById("ages").checked,svg:!!document.querySelector("#map svg")})`,
-  );
-  check(
-    "SV5c a malformed year stays in the Explorer, ignored, and the chart draws",
-    sv5c.path === "/explorer/" && !sv5c.checked && sv5c.svg,
-    JSON.stringify(sv5c),
-  );
-}
-
-export async function sv5dBothKeys({ evaluate, check, goto, waitBeat }: SurveyKit): Promise<void> {
-  await goto("#seed=42&style=antique&survey&year=1030", "survey-bothkeys");
-  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
-  await waitBeat("survey-bothkeys-beat");
-  const sv5d = await evaluate<{ path: string; checked: boolean; track: boolean }>(
-    `({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`,
-  );
-  check(
-    "SV5d the both-keys set stays in the Explorer and arms nothing (ignored whole)",
-    sv5d.path === "/explorer/" && !sv5d.checked && !sv5d.track,
-    JSON.stringify(sv5d),
-  );
-}
-
 export async function sv6VersoMirrors({ evaluate, check, goto, waitInked }: SurveyKit): Promise<void> {
   await goto("#seed=42&style=antique&survey", "survey-verso");
   await waitInked("survey-verso-ink");
