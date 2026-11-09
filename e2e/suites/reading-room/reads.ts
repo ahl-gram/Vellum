@@ -37,6 +37,8 @@ export type Desk = { iw: number; ih: number; sheet: number[] | null };
 export const DESK: Payload<Desk> = `(() => { const e = document.getElementById("sheet"); const b = e ? e.getBoundingClientRect() : null; return { iw: innerWidth, ih: innerHeight, sheet: b && [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
 export const atDesk = (d: Desk): boolean => d.iw === 1440 && d.ih === 900;
 export const sameSheet = (a: Desk, b: Desk): boolean => JSON.stringify(a.sheet) === JSON.stringify(b.sheet);
+export const sameSize = (a: Desk, b: Desk): boolean =>
+  JSON.stringify(a.sheet?.slice(2)) === JSON.stringify(b.sheet?.slice(2));
 
 export const agesRead: Payload<AgesRead> = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
 // Issue #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the sticky strip (Issue #442 wrapped the bar in one), above the journal.
