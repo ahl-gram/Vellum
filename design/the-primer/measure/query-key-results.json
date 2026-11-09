@@ -1,0 +1,110 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-0.png",
+  "url": "http://127.0.0.1:63087/explorer/?step=explorer-islands#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/?step=explorer-islands#seed=42&style=antique&type=archipelago&legend=1&arms=0&beas\",\"roads\":[\"../print-room/#seed=42&style=antique&type=archipelago&legend=1&arms=0&\",\"/reading-room/#seed=42&style=antique&type=archipelago&legend=1&arms=0&\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-1.png",
+  "url": "http://127.0.0.1:63087/reading-room/?step=explorer-islands#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/?step=explorer-islands#seed=42&style=antique&legend=1&arms=0&beasts=0&survey\",\"roads\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-2.png",
+  "url": "http://127.0.0.1:63087/print-room/?step=explorer-islands",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/?step=explorer-islands#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"roads\":[\"../explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-3.png",
+  "url": "http://127.0.0.1:63087/prospect/?step=explorer-islands#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/prospect/?step=explorer-islands#seed=42&i=0&year=300\",\"roads\":[\"/explorer/#seed=42\",\"/ribbon/#seed=42&a=0\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-4.png",
+  "url": "http://127.0.0.1:63087/ribbon/?step=explorer-islands#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/?step=explorer-islands#seed=42&a=22&b=0\",\"roads\":[\"/prospect/#seed=42&i=22\",\"/prospect/#seed=42&i=17\",\"/prospect/#seed=42&i=7\",\"/prospect/#seed=42&i=0\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-5.png",
+  "url": "http://127.0.0.1:63087/writing-room/?step=explorer-islands",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/?step=explorer-islands#found=a+polar+archipelago+of+twenty+islands&v=1\",\"roads\":[\"../explorer/#found=a+polar+archipelago+of+twenty+islands&v=1\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-6.png",
+  "url": "http://127.0.0.1:63087/explorer/portfolio/?step=explorer-islands#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/portfolio/?step=explorer-islands#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.ru\",\"roads\":[\"../#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-7.png",
+  "url": "http://127.0.0.1:63087/seed-of-the-day/?step=explorer-islands",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/?step=explorer-islands\",\"roads\":[\"../explorer/#seed=20261005&style=antique&legend=1\",\"../reading-room/#seed=20261005\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/query-8.png",
+  "url": "http://127.0.0.1:63087/gallery/?step=explorer-islands",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/gallery/?step=explorer-islands\",\"roads\":[\"/explorer/\"]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

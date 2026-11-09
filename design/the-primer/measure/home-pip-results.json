@@ -1,0 +1,170 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":1147.228515625,\"t\":634.0299072265625,\"r\":1164.228515625,\"b\":651.0299072265625},\"inWindow\":true,\"nearestStation\":64.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":251,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":2695,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-nailo-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":268.02325439453125,\"t\":367.2042236328125,\"r\":292.06488037109375,\"b\":391.245849609375},\"inWindow\":true,\"nearestStation\":130.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":251,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":2695,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":183.89344787597656,\"t\":255.0425262451172,\"r\":207.93507385253906,\"b\":279.08416748046875},\"inWindow\":true,\"nearestStation\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":251,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":2695,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-card-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":183.89344787597656,\"t\":255.0425262451172,\"r\":207.93507385253906,\"b\":279.08416748046875},\"inWindow\":true,\"nearestStation\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":251,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":2695,\"cardInWindow\":true,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-legend-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":183.89344787597656,\"t\":255.0425262451172,\"r\":207.93507385253906,\"b\":279.08416748046875},\"inWindow\":true,\"nearestStation\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":5,\"legendToGlass\":189,\"legendWidth\":781,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"how\":0,\"primer\":0},\"legendOverStations\":3105,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-card-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":1147.228515625,\"t\":634.0299072265625,\"r\":1164.228515625,\"b\":651.0299072265625},\"inWindow\":true,\"nearestStation\":64.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":251,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":2695,\"cardInWindow\":true,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-legend-1280.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":1147.228515625,\"t\":634.0299072265625,\"r\":1164.228515625,\"b\":651.0299072265625},\"inWindow\":true,\"nearestStation\":64.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":5,\"legendToGlass\":189,\"legendWidth\":781,\"legendOverEach\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"how\":0,\"primer\":0},\"legendOverStations\":3105,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":998.599365234375,\"t\":608.3287353515625,\"r\":1015.599365234375,\"b\":625.3286743164062},\"inWindow\":true,\"nearestStation\":60.7,\"slipOverOthers\":0,\"overGlass\":1337,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":123,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":3481,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-nailo-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":154.42147827148438,\"t\":352.03515625,\"r\":178.46310424804688,\"b\":376.0767822265625},\"inWindow\":true,\"nearestStation\":124.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":4182,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":123,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":3481,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":73.6568603515625,\"t\":244.3599853515625,\"r\":97.698486328125,\"b\":268.401611328125},\"inWindow\":true,\"nearestStation\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":123,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":3481,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-card-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":73.6568603515625,\"t\":244.3599853515625,\"r\":97.698486328125,\"b\":268.401611328125},\"inWindow\":true,\"nearestStation\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":123,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":3481,\"cardInWindow\":true,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-poalo-legend-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":73.6568603515625,\"t\":244.3599853515625,\"r\":97.698486328125,\"b\":268.401611328125},\"inWindow\":true,\"nearestStation\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":5,\"legendToGlass\":61,\"legendWidth\":781,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"how\":0,\"primer\":0},\"legendOverStations\":4589,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-card-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":998.599365234375,\"t\":608.3287353515625,\"r\":1015.599365234375,\"b\":625.3286743164062},\"inWindow\":true,\"nearestStation\":60.7,\"slipOverOthers\":0,\"overGlass\":1337,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"legendToGlass\":123,\"legendWidth\":656,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0,\"primer\":0},\"legendOverStations\":3481,\"cardInWindow\":true,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/home-pip-key-legend-1024.png",
+  "url": "http://127.0.0.1:64234/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":998.599365234375,\"t\":608.3287353515625,\"r\":1015.599365234375,\"b\":625.3286743164062},\"inWindow\":true,\"nearestStation\":60.7,\"slipOverOthers\":0,\"overGlass\":1337,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":5,\"legendToGlass\":61,\"legendWidth\":781,\"legendOverEach\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"how\":0,\"primer\":0},\"legendOverStations\":4589,\"cardInWindow\":null,\"cardOverGlass\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

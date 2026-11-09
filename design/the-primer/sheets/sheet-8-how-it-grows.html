@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=2200">
+<link rel="stylesheet" href="/design/kit/fonts.css"><title>How the guide grows with the site, and how it fails a check when a room changes</title><style>
+body{margin:0;padding:28px 32px 40px;background:#2b2118;color:#efe6cf;font-family:"EB Garamond",Georgia,serif;width:2136px}
+h1{font-family:"IM Fell English SC",Georgia,serif;font-weight:400;font-size:32px;letter-spacing:.06em;margin:0 0 6px}
+h2{font-family:"IM Fell English SC",Georgia,serif;font-weight:400;font-size:22px;letter-spacing:.06em;margin:26px 0 10px;border-bottom:1px solid #6b5a40;padding-bottom:4px}
+p.intro{font-family:"IM Fell English",Georgia,serif;font-style:italic;font-size:19px;margin:0 0 20px;max-width:1700px;line-height:1.4}
+.row{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-bottom:22px}
+figure{margin:0}img{display:block;border:1px solid #6b5a40}
+figcaption{font-size:16px;line-height:1.38;margin-top:7px;color:#efe6cf}figcaption .m{color:#e6d9b8}figcaption code,code{font-size:12.5px;color:#cdbd97}
+table{border-collapse:collapse;font-size:16px}td,th{border:1px solid #6b5a40;padding:4px 9px;text-align:left;vertical-align:top}th{font-family:"IM Fell English SC",Georgia,serif;font-weight:400;letter-spacing:.05em}
+</style></head><body><h1>How the guide grows with the site, and how it fails a check when a room changes</h1><p class="intro">What a contributor writes, copied from the round's own data files, and what the round's prototype checks did on the built site. Motion-only steps are held to "hidden" in this run, since reduced motion stands their controls down, and are read with motion on in measure/check-motion.md; the touch-only step is held to "hidden" on a desktop, and a touch run was not made (UNVERIFIABLE here). Each step's own address opened on the design tree's built site at 089881ad, 1280 by 800, reduced motion, one browser (node out/1155/mock/check.ts). A step passes when every control it quotes is there, reachable (shown, not held, not covered at its centre) and carries exactly the quoted words, with no 4xx and no console error. 81 of 81 pass. A read of the built HTML alone, with no browser, finds 89 of the 110 quoted controls with their words, and every control of 62 of the 81 steps: the rest are built by the room's script after load, or carry words a script writes. The same check as measure/check.md, run on the steps below with the live page changed under each step before the read (node out/1155/mock/check.ts shots mutate). Each change is one a room could make tomorrow. 6 of 6 went red.</p><style>pre{background:#f4ecd8;color:#3d2f1f;font-size:15px;line-height:1.35;padding:14px 16px;border:1px solid #b9a77f;margin:0;white-space:pre-wrap;width:1020px;box-sizing:border-box}.box{width:1040px}.box h3{font-family:"IM Fell English SC";font-weight:400;font-size:20px;letter-spacing:.05em;margin:0 0 6px}.box p{font-size:17px;line-height:1.4;margin:6px 0 10px}</style>
+<div class="row"><div class="box"><h3>One more step: one entry in a lesson</h3><p>The braces are the control's own words; each must have its Words entry, and the browser check holds the two to the room.</p><pre>        {
+          id: "islands",
+          act: "A new row has come: drag {islands} from {few} toward {many}, then let go.",
+          see: "The sea fills with isles, and the readout says about how many. A few may touch or sink, so the count is never exact.",
+          at: "/explorer/#seed=42&amp;type=archipelago",
+          words: [label("islands", "islands"), end("islands", "min", "few"), end("islands", "max", "many")],
+          provisional: BROADSIDE,
+        },
+        {</pre></div>
+<div class="box"><h3>One more room: one ladder, one line in the list</h3><p>A subroom needs nothing more: the route tree already seats it under the room it opens from (<code>seatOf</code> in <code>src/layouts/nav.ts</code>), and the guide reads that seat. A room with no ladder fails a unit check over the route tree (<code>untaught</code> below), the way a route with no place fails the chart of the atelier's test today. Run, not described (measure/growth.md): with the Ribbon's ladder taken away, untaught names /ribbon/; with a new subroom of the Explorer in the tree and no ladder, it names that route; given its ladder, the subroom is seated under the Explorer by its place in the tree alone.</p><pre>export const LADDERS: readonly Ladder[] = [EXPLORER, PROSPECT, RIBBON, PORTFOLIO, WRITING_ROOM, READING_ROOM, PRINT_ROOM, TODAY, GALLERY];
+
+/** The routes the guide leans on rather than teaches, Alex's ruling of 2026-11-05 (Issue #1155 comment 6660218955). */
+export const LEANED_ON: readonly string[] = ["/faq/", "/glossary/"];
+
+export function untaught(ladders: readonly Ladder[] = LADDERS, names: Readonly&lt;Record&lt;string, string>> = ROUTE_NAMES, seat: (route: string) => string | null | undefined = seatOf): readonly string[] {
+  const taught = new Set([...ladders.map((l) => l.route), ...LEANED_ON]);
+  return Object.keys(names).filter((r) => r !== "/" &amp;&amp; seat(r) !== undefined &amp;&amp; !taught.has(r));
+}</pre></div></div>
+<div class="row"><div class="box"><h3>The words a step quotes, and how a check finds them</h3><pre>/** A control a step names, found the way a reader's assistive technology names it, and the words the step quotes for it. */
+export interface Words {
+  readonly css: string;
+  /** Exactly the words in braces in the step's sentence. */
+  readonly says: string;
+  /** How the words are read off the control: its visible text, its accessible name, a select's option, a two-line road's verb and place, or its placeholder. */
+  readonly read: "text" | "aria" | "title" | "attr" | "option" | "road" | "placeholder" | "label";
+  /** The attribute an "attr" read takes, such as a chart stamp (data-vellum-map-type) or a press state (aria-pressed). */
+  readonly attr?: string;
+  /** "markup" when the control is in the built page's own HTML, "script" when the room's code builds it after load. */
+  readonly from: "markup" | "script";
+  /** "starts" where the control's words run on past what the step quotes (a place's name before its rank). */
+  readonly match?: "starts" | "contains";
+  /** Where the step teaches a control that is not yet to hand: "held" in a held box, or "hidden" until the reader has done the thing the step names (a hunt won, a tablet). */
+  readonly state?: "held" | "hidden";
+  /** Some words are a room's own on-screen constant, which a build can import rather than retype. */
+  readonly constant?: string;
+}
+
+export interface Step {
+  /** The anchor: stable, never reused, so a link to a step keeps working. */</pre></div><div class="box"><h3>What the check reads on the live page</h3><p>Every step's own address opened, what the reader did first done, then each quoted control found, asked whether a reader could reach it (shown, not held, not covered at its centre) and whether it carries exactly the quoted words; and the address checked for every key it carried. Motion-only steps are held to "hidden" in this run, since reduced motion stands their controls down, and are read with motion on in measure/check-motion.md; the touch-only step is held to "hidden" on a desktop, and a touch run was not made (UNVERIFIABLE here). Each step's own address opened on the design tree's built site at 089881ad, 1280 by 800, reduced motion, one browser (node out/1155/mock/check.ts). A step passes when every control it quotes is there, reachable (shown, not held, not covered at its centre) and carries exactly the quoted words, with no 4xx and no console error. 81 of 81 pass. A read of the built HTML alone, with no browser, finds 89 of the 110 quoted controls with their words, and every control of 62 of the 81 steps: the rest are built by the room's script after load, or carry words a script writes.</p><p>The same check as measure/check.md, run on the steps below with the live page changed under each step before the read (node out/1155/mock/check.ts shots mutate). Each change is one a room could make tomorrow. 6 of 6 went red. The six changes: a row's label renamed, a press removed from the Glass, an option taken out of a list, a press renamed, a held note reworded, a press folded out of sight (measure/check-mutate.md).</p></div></div></body></html>

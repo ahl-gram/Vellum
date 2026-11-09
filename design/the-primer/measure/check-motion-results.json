@@ -1,0 +1,14 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-motion/_reading-room_pace.png",
+  "url": "http://127.0.0.1:59095/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rf-pace button:nth-child(2)\",\"says\":\"2×\",\"state\":\"reachable\",\"got\":\"2×\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\".rf-pace button:nth-child(3)\",\"says\":\"4×\",\"state\":\"reachable\",\"got\":\"4×\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

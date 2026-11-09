@@ -1,0 +1,74 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_explorer_archipelago.png",
+  "url": "http://127.0.0.1:59126/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=type]\",\"says\":\"type\",\"state\":\"reachable\",\"got\":\"type\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#type\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"no such option\",\"ok\":false,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_explorer_held.png",
+  "url": "http://127.0.0.1:59126/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"reads\":[{\"css\":\"#type\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"label[for=type]\",\"says\":\"type\",\"state\":\"reachable\",\"got\":\"type\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"label[for=islands]\",\"says\":\"islands\",\"state\":\"held\",\"got\":\"islands\",\"ok\":true,\"expect\":\"held\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#land-held-note\",\"says\":\"the outline holds the count; clear the place to free the islands\",\"state\":\"held\",\"got\":\"the shape keeps the count\",\"ok\":false,\"expect\":\"held\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_explorer_sea-level.png",
+  "url": "http://127.0.0.1:59126/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=land]\",\"says\":\"sea level\",\"state\":\"reachable\",\"got\":\"tide\",\"ok\":false,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=land] .land-end-min\",\"says\":\"more sea\",\"state\":\"reachable\",\"got\":\"more sea\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_explorer_loupe.png",
+  "url": "http://127.0.0.1:59126/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-loupe\",\"says\":\"The loupe\",\"state\":\"absent\",\"got\":null,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_reading-room_play.png",
+  "url": "http://127.0.0.1:59126/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rf-play\",\"says\":\"Play\",\"state\":\"reachable\",\"got\":\"Begin\",\"ok\":false,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check-mutate/_print-room_bind.png",
+  "url": "http://127.0.0.1:59126/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-bind\",\"says\":\"Bind the atlas\",\"state\":\"hidden\",\"got\":\"Bind the atlas\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

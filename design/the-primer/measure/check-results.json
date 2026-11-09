@@ -1,0 +1,974 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_dice.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#random\",\"says\":\"⚄\",\"state\":\"reachable\",\"got\":\"⚄\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_draw.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=7",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=7&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#draw\",\"says\":\"Draw\",\"state\":\"reachable\",\"got\":\"Draw\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_enter.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#seed\",\"says\":\"seed\",\"state\":\"reachable\",\"got\":\"seed\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_archipelago.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=type]\",\"says\":\"type\",\"state\":\"reachable\",\"got\":\"type\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#type\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_islands.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=islands]\",\"says\":\"islands\",\"state\":\"reachable\",\"got\":\"islands\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=islands] .land-end-min\",\"says\":\"few\",\"state\":\"reachable\",\"got\":\"few\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=islands] .land-end-max\",\"says\":\"many\",\"state\":\"reachable\",\"got\":\"many\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_sizes.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&type=archipelago&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20\",\"reads\":[{\"css\":\"#sizes-label\",\"says\":\"sizes\",\"state\":\"reachable\",\"got\":\"sizes\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#isle-varied\",\"says\":\"of every size\",\"state\":\"reachable\",\"got\":\"of every size\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_climate.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=band]\",\"says\":\"climate\",\"state\":\"reachable\",\"got\":\"climate\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#band\",\"says\":\"polar\",\"state\":\"reachable\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_shape.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=place]\",\"says\":\"shape\",\"state\":\"reachable\",\"got\":\"shape\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#place\",\"says\":\"seed's choice\",\"state\":\"reachable\",\"got\":\"seed's choice\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_held.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"reads\":[{\"css\":\"#type\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"label[for=type]\",\"says\":\"type\",\"state\":\"reachable\",\"got\":\"type\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"label[for=islands]\",\"says\":\"islands\",\"state\":\"held\",\"got\":\"islands\",\"ok\":true,\"expect\":\"held\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#land-held-note\",\"says\":\"the outline holds the count; clear the place to free the islands\",\"state\":\"held\",\"got\":\"the outline holds the count; clear the place to free the islands\",\"ok\":true,\"expect\":\"held\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_sea-level.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=land]\",\"says\":\"sea level\",\"state\":\"reachable\",\"got\":\"sea level\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=land] .land-end-min\",\"says\":\"more sea\",\"state\":\"reachable\",\"got\":\"more sea\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_coast.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=coast]\",\"says\":\"coast\",\"state\":\"reachable\",\"got\":\"coast\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=coast] .land-end-min\",\"says\":\"calm\",\"state\":\"reachable\",\"got\":\"calm\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=coast] .land-end-max\",\"says\":\"lobed\",\"state\":\"reachable\",\"got\":\"lobed\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_ragged.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&type=archipelago&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20\",\"reads\":[{\"css\":\"[data-row=ragged] .land-end-min\",\"says\":\"round\",\"state\":\"reachable\",\"got\":\"round\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=ragged] .land-end-max\",\"says\":\"ragged\",\"state\":\"reachable\",\"got\":\"ragged\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"label[for=ragged]\",\"says\":\"coast\",\"state\":\"reachable\",\"got\":\"coast\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_looseness.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"reads\":[{\"css\":\"label[for=looseness]\",\"says\":\"looseness\",\"state\":\"reachable\",\"got\":\"looseness\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=looseness] .land-end-min\",\"says\":\"exact\",\"state\":\"reachable\",\"got\":\"exact\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-row=looseness] .land-end-max\",\"says\":\"loose\",\"state\":\"reachable\",\"got\":\"loose\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_style.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=style]\",\"says\":\"style\",\"state\":\"reachable\",\"got\":\"style\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#style\",\"says\":\"ink\",\"state\":\"reachable\",\"got\":\"ink\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_theme.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"label[for=theme]\",\"says\":\"theme\",\"state\":\"reachable\",\"got\":\"theme\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#theme\",\"says\":\"rainfall\",\"state\":\"reachable\",\"got\":\"rainfall\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_arms.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#arms\",\"says\":\"arms\",\"state\":\"reachable\",\"got\":\"arms\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_beasts.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#beasts\",\"says\":\"beasts\",\"state\":\"reachable\",\"got\":\"beasts\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_survey.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#ages\",\"says\":\"survey\",\"state\":\"reachable\",\"got\":\"survey\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_legend.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#legend\",\"says\":\"legend\",\"state\":\"reachable\",\"got\":\"legend\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_nearer.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#zoom-in\",\"says\":\"Draw nearer\",\"state\":\"reachable\",\"got\":\"Draw nearer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_look-about.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map-viewport\",\"says\":\"Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets, hold L for the loupe.\",\"state\":\"reachable\",\"got\":\"Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets, hold L for the loupe.\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_anew.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#zoom-in\",\"says\":\"Draw nearer\",\"state\":\"reachable\",\"got\":\"Draw nearer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_hold.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-hold\",\"says\":\"Hold the sheet\",\"state\":\"reachable\",\"got\":\"Hold the sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_loupe.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-loupe\",\"says\":\"The loupe\",\"state\":\"reachable\",\"got\":\"The loupe\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_stand-off.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-out\",\"says\":\"Stand off\",\"state\":\"reachable\",\"got\":\"Stand off\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#zoom-reset\",\"says\":\"The whole sheet\",\"state\":\"reachable\",\"got\":\"The whole sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_in-hand.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#zoom-touch\",\"says\":\"The chart in hand\",\"state\":\"hidden\",\"got\":\"The chart in hand\",\"ok\":true,\"expect\":\"hidden\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_card.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\".place-hit[data-idx=\\\"0\\\"]\",\"says\":\"Laukuwelua\",\"state\":\"reachable\",\"got\":\"Laukuwelua, Capital\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_view-prospect.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-prospect\",\"says\":\"View the prospect\",\"state\":\"reachable\",\"got\":\"View the prospect\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_take-road.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-ribbon\",\"says\":\"Take the road\",\"state\":\"reachable\",\"got\":\"Take the road\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_lay-prospect.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-lay\",\"says\":\"Lay the prospect on the table\",\"state\":\"reachable\",\"got\":\"Lay the prospect on the table\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_verso.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#verso-turn\",\"says\":\"Turn The Sheet\",\"state\":\"reachable\",\"got\":\"Turn The Sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_to-print.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#order-plates\",\"says\":\"Take to The Print Room\",\"state\":\"reachable\",\"got\":\"Take to The Print Room\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_to-journal.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#journal-link\",\"says\":\"Read the journal in The Reading Room\",\"state\":\"reachable\",\"got\":\"Read the journal in The Reading Room\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_dog-ear.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#map .region-inset .dog-ear\",\"says\":\"lay this survey on the table\",\"state\":\"reachable\",\"got\":\"lay this survey on the table\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_drawer.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#chart-drawer-tab\",\"says\":\"The Drawer\",\"state\":\"reachable\",\"got\":\"The Drawer · one sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_to-portfolio.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#table-road\",\"says\":\"Take the table to The Portfolio\",\"state\":\"reachable\",\"got\":\"Take the table to The Portfolio\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_commission.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&style=nautical&type=archipelago&band=polar&arms=1&islands=40&isleSize=varied",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=nautical&type=archipelago&band=polar&legend=1&arms=1&beasts=0&islands=40&isleSize=varied\",\"reads\":[{\"css\":\"#type\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#band\",\"says\":\"polar\",\"state\":\"reachable\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#style\",\"says\":\"nautical\",\"state\":\"reachable\",\"got\":\"nautical\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_prospect_enter.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-prospect\",\"says\":\"View the prospect\",\"state\":\"reachable\",\"got\":\"View the prospect\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_prospect_note.png",
+  "url": "http://127.0.0.1:60467/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/prospect/#seed=42&i=0\",\"reads\":[{\"css\":\"#note .card-verb\",\"says\":\"The engraver's note\",\"state\":\"reachable\",\"got\":\"The engraver's note\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_prospect_year.png",
+  "url": "http://127.0.0.1:60467/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/prospect/#seed=42&i=0\",\"reads\":[{\"css\":\".year-label\",\"says\":\"viewed in the year\",\"state\":\"reachable\",\"got\":\"viewed in the year\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#pp-engrave\",\"says\":\"Engrave\",\"state\":\"reachable\",\"got\":\"Engrave\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_prospect_lay.png",
+  "url": "http://127.0.0.1:60467/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/prospect/#seed=42&i=0\",\"reads\":[{\"css\":\"#pp-lay\",\"says\":\"Lay this prospect on the table\",\"state\":\"reachable\",\"got\":\"Lay this prospect on the table\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_prospect_road.png",
+  "url": "http://127.0.0.1:60467/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/prospect/#seed=42&i=0\",\"reads\":[{\"css\":\"#pp-ribbon-link\",\"says\":\"Take the road from Laukuwelua in The Wayfarer's Ribbon\",\"state\":\"reachable\",\"got\":\"Take the road from Laukuwelua in The Wayfarer's Ribbon\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_enter.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-ribbon\",\"says\":\"Take the road\",\"state\":\"reachable\",\"got\":\"Take the road\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_bound-for.png",
+  "url": "http://127.0.0.1:60467/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[{\"css\":\"#rb-to\",\"says\":\"bound for\",\"state\":\"reachable\",\"got\":\"bound for\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_turn-about.png",
+  "url": "http://127.0.0.1:60467/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[{\"css\":\"#rb-swap\",\"says\":\"Turn about\",\"state\":\"reachable\",\"got\":\"Turn about\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_lean.png",
+  "url": "http://127.0.0.1:60467/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[{\"css\":\"#itinerary .row-gloss\",\"says\":\"A row leans the Glass on that stretch of the road.\",\"state\":\"reachable\",\"got\":\"A row leans the Glass on that stretch of the road.\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#rb-itinerary .lean\",\"says\":\"Lean the Glass on this stretch\",\"state\":\"reachable\",\"got\":\"Lean the Glass on this stretch\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_pill.png",
+  "url": "http://127.0.0.1:60467/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[{\"css\":\"#rb-itinerary .row-prospect\",\"says\":\"prospect\",\"state\":\"reachable\",\"got\":\"prospect\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_ribbon_end.png",
+  "url": "http://127.0.0.1:60467/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[{\"css\":\"#rb-prospect-link\",\"says\":\"See Homaitani in The Prospect\",\"state\":\"reachable\",\"got\":\"See Homaitani in The Prospect\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_bare.png",
+  "url": "http://127.0.0.1:60467/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/portfolio/\",\"reads\":[{\"css\":\"#pf-sheet .how-plate .p-head, #pf-sheet .p-head\",\"says\":\"i · At the Explorer\",\"state\":\"reachable\",\"got\":\"i · At the Explorer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_turn-down.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#map .region-inset .dog-ear\",\"says\":\"lay this survey on the table\",\"state\":\"reachable\",\"got\":\"lay this survey on the table\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_take.png",
+  "url": "http://127.0.0.1:60467/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#table-road\",\"says\":\"Take the table to The Portfolio\",\"state\":\"reachable\",\"got\":\"Take the table to The Portfolio\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_next.png",
+  "url": "http://127.0.0.1:60467/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique\",\"reads\":[{\"css\":\"#pf-next\",\"says\":\"Bring up The Next Sheet\",\"state\":\"reachable\",\"got\":\"Bring up The Next Sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_download.png",
+  "url": "http://127.0.0.1:60467/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique\",\"reads\":[{\"css\":\"#pf-download\",\"says\":\"Download The Engraving\",\"state\":\"reachable\",\"got\":\"Download The Engraving\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_explorer_portfolio_keep.png",
+  "url": "http://127.0.0.1:60467/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique\",\"reads\":[{\"css\":\"#pf-explorer\",\"says\":\"Back to The Explorer\",\"state\":\"reachable\",\"got\":\"Back to The Explorer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_write.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/\",\"reads\":[{\"css\":\"#wr-line\",\"says\":\"the founding sentence\",\"state\":\"reachable\",\"got\":\"the founding sentence\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#wr-form button[type=submit]\",\"says\":\"Found\",\"state\":\"reachable\",\"got\":\"Found\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_your-word.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"reads\":[{\"css\":\"#wr-form button[type=submit]\",\"says\":\"Found\",\"state\":\"reachable\",\"got\":\"Found\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_shape-of.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/\",\"reads\":[{\"css\":\"#wr-form button[type=submit]\",\"says\":\"Found\",\"state\":\"reachable\",\"got\":\"Found\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_plate.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"reads\":[{\"css\":\"#wr-plate\",\"says\":\"Lay on The Vegetation Plate\",\"state\":\"reachable\",\"got\":\"Lay on The Vegetation Plate\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_explore-it.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"reads\":[{\"css\":\"#wr-explorer\",\"says\":\"Explore it in The Explorer\",\"state\":\"reachable\",\"got\":\"Explore it in The Explorer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_writing-room_commission.png",
+  "url": "http://127.0.0.1:60467/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/writing-room/\",\"reads\":[{\"css\":\"#wr-line\",\"says\":\"the founding sentence\",\"state\":\"reachable\",\"got\":\"the founding sentence\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_play.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rf-play\",\"says\":\"Play\",\"state\":\"reachable\",\"got\":\"Play\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_pace.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rf-pace button:nth-child(2)\",\"says\":\"2×\",\"state\":\"no box\",\"got\":\"2×\",\"ok\":true,\"expect\":\"hidden\",\"fits\":true,\"inMarkup\":false},{\"css\":\".rf-pace button:nth-child(3)\",\"says\":\"4×\",\"state\":\"no box\",\"got\":\"4×\",\"ok\":true,\"expect\":\"hidden\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_ages.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rf-range\",\"says\":\"The ages\",\"state\":\"reachable\",\"got\":\"The ages\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_journal.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\"#journal-title\",\"says\":\"The Journal\",\"state\":\"reachable\",\"got\":\"The Journal\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_this-road.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".journal-dock .cr-road .cr-road-label\",\"says\":\"Take this road\",\"state\":\"reachable\",\"got\":\"Take this road\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_reading-room_read.png",
+  "url": "http://127.0.0.1:60467/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[{\"css\":\".rr-read\",\"says\":\"Read\",\"state\":\"reachable\",\"got\":\"Read\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\".rr-dice\",\"says\":\"⚄\",\"state\":\"reachable\",\"got\":\"⚄\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_pull.png",
+  "url": "http://127.0.0.1:60467/print-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=20261005&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-draw\",\"says\":\"Pull a proof\",\"state\":\"reachable\",\"got\":\"Pull a proof\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_style.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-style\",\"says\":\"ink\",\"state\":\"reachable\",\"got\":\"ink\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_bind.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-bind\",\"says\":\"Bind the atlas\",\"state\":\"reachable\",\"got\":\"Bind the atlas\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_turn.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\".turn-gloss\",\"says\":\"a thumbnail turns the sheet\",\"state\":\"reachable\",\"got\":\"a thumbnail turns the sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_keep.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-print\",\"says\":\"Print\",\"state\":\"reachable\",\"got\":\"Print\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"#pr-download\",\"says\":\"Download\",\"state\":\"reachable\",\"got\":\"Download\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_impression.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-format\",\"says\":\"An impression (PNG)\",\"state\":\"reachable\",\"got\":\"An impression (PNG)\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true},{\"css\":\"[data-poster=\\\"desk\\\"] .room\",\"says\":\"Desk\",\"state\":\"reachable\",\"got\":\"Desk\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_road-plate.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-pressing\",\"says\":\"The road from the capital\",\"state\":\"reachable\",\"got\":\"The road from the capital\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"[data-poster=\\\"ribbon\\\"] .room\",\"says\":\"Ribbon\",\"state\":\"reachable\",\"got\":\"Ribbon\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_print-room_back.png",
+  "url": "http://127.0.0.1:60467/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-explorer\",\"says\":\"Back to The Explorer\",\"state\":\"reachable\",\"got\":\"Back to The Explorer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_seed-of-the-day_notes.png",
+  "url": "http://127.0.0.1:60467/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"#hunt-title\",\"says\":\"The Daily Hunt\",\"state\":\"reachable\",\"got\":\"The Daily Hunt\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_seed-of-the-day_sound.png",
+  "url": "http://127.0.0.1:60467/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"#hunt .hunt-intro\",\"says\":\"One forgotten place hides on today's chart. Read the survey notes, then click the map to find it. Everyone hunting today's seed is looking for the same place.\",\"state\":\"reachable\",\"got\":\"One forgotten place hides on today's chart. Read the survey notes, then click the map to find it. Everyone hunting today's seed is looking for the same place.\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_seed-of-the-day_share.png",
+  "url": "http://127.0.0.1:60467/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"#share\",\"says\":\"Share your find\",\"state\":\"hidden\",\"got\":\"Share your find\",\"ok\":true,\"expect\":\"hidden\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_seed-of-the-day_dispatch.png",
+  "url": "http://127.0.0.1:60467/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"#dispatch\",\"says\":\"Draft dispatch\",\"state\":\"hidden\",\"got\":\"Draft dispatch\",\"ok\":true,\"expect\":\"hidden\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_seed-of-the-day_to-explorer.png",
+  "url": "http://127.0.0.1:60467/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"[data-road=\\\"explorer\\\"], .legend-btn[href*=\\\"explorer\\\"]\",\"says\":\"Open today's seed in The Explorer\",\"state\":\"reachable\",\"got\":\"Open today's seed in The Explorer\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_gallery_look.png",
+  "url": "http://127.0.0.1:60467/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/gallery/\",\"reads\":[{\"css\":\".grid figure figcaption span\",\"says\":\"seed 100\",\"state\":\"reachable\",\"got\":\"seed 100 · continent · temperate\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/check/_gallery_open.png",
+  "url": "http://127.0.0.1:60467/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/gallery/\",\"reads\":[{\"css\":\".legend .legend-head, .legend-head\",\"says\":\"every plate is a road into its own world\",\"state\":\"reachable\",\"got\":\"every plate is a road into its own world\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
