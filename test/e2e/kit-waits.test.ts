@@ -132,7 +132,7 @@ const deskRun = (never: "laid out" | "laid out again" | null) => {
   });
   const stray = (inner: readonly [number, number]): Room => ({ inner, sheet: [5, 5, 5, 5] });
   const wide: Room = { inner: [1440, 900], sheet: [80, 112.19, 824.59, 636.55] };
-  const narrow: Room = { ...DESK, inner: [1280, 2263] };
+  const narrow: Room = { inner: [1280, 2263], sheet: [42.17, 826.23, 740.27, 571.45] };
   let phase = 0;
   const { ctx } = ctxOn(page.evaluate, ({ method, params }) => {
     if (phase === 0 && method === "Emulation.setDeviceMetricsOverride" && params?.["width"] === 1440) {
