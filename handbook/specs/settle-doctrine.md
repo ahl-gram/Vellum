@@ -143,8 +143,8 @@ headless browser actually do, so a green run can be believed.
     returns (a row that expects it beside another reads IMPRECISE), and CI fails while any entry names an
     issue that is not open. A skipped body leaves nothing behind, so before the entry lands,
     every state the body sets or waits for that a later check in the suite reads is set or awaited by that
-    later check itself (Issue #873: RS31 read the pace RS30's last press restored, and RR40 the window RR42
-    waited back). The issue stays open as the restore, and fixing the flake deletes the entry, as
+    later check itself (Issue #873: a pace check read the pace the press before it restored, and RR40 the window
+    the check before it waited back). The issue stays open as the restore, and fixing the flake deletes the entry, as
     deleting the check does where "When a check leaves the run" below allows it. The issue names each
     claim the check held and each proof row that named it, and those claims count as unprotected
     until the check returns, or, where it is deleted instead, until each is moved or listed as that
