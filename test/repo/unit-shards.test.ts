@@ -52,11 +52,11 @@ test("every UNIT_SECONDS entry names a unit file that exists, so a renamed or de
 });
 
 test("shardOf refuses a shard outside 1 to its total, and a shard left with no file, rather than handing node no path", () => {
-  assert.throws(() => shardOf(SEVEN, 0, 2), RangeError);
-  assert.throws(() => shardOf(SEVEN, 3, 2), RangeError);
+  assert.throws(() => shardOf(SEVEN, 0, 2), { name: "RangeError", message: /names no shard/ });
+  assert.throws(() => shardOf(SEVEN, 3, 2), { name: "RangeError", message: /names no shard/ });
   assert.throws(
     () => shardOf(["test/a.test.ts"], 2, 2),
-    RangeError,
+    { name: "RangeError", message: /holds no file/ },
     "a shard with no file came back, so npm test hands node no path and node collects the whole checkout",
   );
 });
