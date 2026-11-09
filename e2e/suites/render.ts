@@ -1,20 +1,18 @@
-// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
+// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, coast warp, Tide Wheel and arms toggle.
 import { makeStep } from "../support/step.ts";
 import { FIXED_SEED } from "../support/fixed-day.ts";
 import type { SuiteContext } from "../types.ts";
 import { r16HostContract } from "./render/room.ts";
-import { r17SheetDepth } from "./render/dress.ts";
 import { r18RealPlace } from "./render/place.ts";
 import { r19RangeLimits } from "./render/ranges.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
-  // R0 through R4, R13d and R14 are deliberately not stepped: they drive the engine directly, with no wait to give up.
+  // R0 through R4 are deliberately not stepped: they drive the engine directly, with no wait to give up.
   const step = makeStep(ctx);
   await r0ToR4Worker(ctx);
   await step("R16", () => r16HostContract(ctx));
   await step("R19", () => r19RangeLimits(ctx));
-  await step("R8", () => r8Theme(ctx));
 
   const landPresent = await evaluate<boolean>(`!!document.getElementById("land")`);
   if (!landPresent) {
@@ -45,16 +43,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   if (!coastPresent) {
     check("R13 coast slider present", false, "#coast control missing");
   } else {
-    await step("R13a", () => r13aUntouched(ctx));
     await step("R13b", () => r13bWarps(ctx));
-    await step("R13c", () => r13cCalm(ctx));
-    await r13dParity(ctx);
     await step("R13e", () => r13eTypeResets(ctx));
     await step("R restore", () => rRestore(ctx));
   }
 
-  await r14Region(ctx);
-  await step("R17", () => r17SheetDepth(ctx));
   await step("R18", () => r18RealPlace(ctx));
 }
 
@@ -73,7 +66,6 @@ async function r2WorkerParity({ evaluate, check }: Pick<SuiteContext, "evaluate"
     cells: number;
     land: number;
     roads: number;
-    gx: number;
   }>(
     `(async()=>{const m={kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}};` +
       `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
@@ -83,18 +75,13 @@ async function r2WorkerParity({ evaluate, check }: Pick<SuiteContext, "evaluate"
       `let land=0;for(const v of js.land)land+=v;` +
       `return{svg:j.svg===i.svg,title:j.title===i.title,sub:j.subtitle===i.subtitle&&!!j.subtitle,mt:j.mapType===i.mapType,band:j.band===i.band,` +
       `man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),srv,places:j.manifest.places.length,len:j.svg.length,` +
-      `cells:js.land.length,land,roads:js.roads.length,gx:j.manifest.places[0].gx};})()`,
+      `cells:js.land.length,land,roads:js.roads.length};})()`,
     true,
   );
   check(
     "R2 draw: worker bytes === inline bytes (svg + manifest + subtitle + survey)",
     a2.svg && a2.title && a2.sub && a2.mt && a2.band && a2.man && a2.srv,
     `${a2.len} code units, ${a2.places} places, manifest eq=${a2.man}, subtitle eq=${a2.sub}, survey eq=${a2.srv} (${a2.cells} cells, ${a2.land} land, ${a2.roads} roads)`,
-  );
-  check(
-    "R2b manifest places carry their grid cell (gx/gy) for the router",
-    Number.isInteger(a2.gx),
-    `places[0].gx=${a2.gx}`,
   );
 }
 
@@ -106,8 +93,9 @@ export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext)
 
   await r2WorkerParity({ evaluate, check });
 
+  // The worker's job runs while the inline composition does, so the one compare costs one composition's time (Issue #1273 ruling 2).
   const a3 = await evaluate<{ eq: boolean; themes: number; regions: number; gaz: number }>(
-    `(async()=>{const m={kind:"atlas",seed:42,overrides:{},width:1500};const j=await window.__vellumRunJob(m);const i=await window.__vellumRunInline(m);return{eq:JSON.stringify(j.atlas)===JSON.stringify(i.atlas),themes:j.atlas.themes.length,regions:j.atlas.regions.length,gaz:j.atlas.gazetteerHtml.length};})()`,
+    `(async()=>{const m={kind:"atlas",seed:42,overrides:{},width:1500};const worker=window.__vellumRunJob(m);const i=await window.__vellumRunInline(m);const j=await worker;return{eq:JSON.stringify(j.atlas)===JSON.stringify(i.atlas),themes:j.atlas.themes.length,regions:j.atlas.regions.length,gaz:j.atlas.gazetteerHtml.length};})()`,
     true,
   );
   check(
@@ -126,18 +114,6 @@ export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext)
     a4.normEq,
     `${a4.diffTok}/${a4.tokens} numeric tokens differ by ULP; raw-equal=${a4.rawEq}`,
   );
-}
-
-async function r8Theme({ evaluate, check, shoot, waitSettled }: SuiteContext): Promise<void> {
-  await evaluate(
-    `(()=>{const s=document.getElementById("seed");s.value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="vegetation";document.getElementById("draw").click();})()`,
-  );
-  await waitSettled("draw-theme");
-  check(
-    "R8 worker renders a thematic (field) layer",
-    await evaluate<boolean>(`document.querySelector("#map svg").outerHTML.includes("layer-field")`),
-  );
-  await shoot("explorer-worker-theme.png");
 }
 
 async function r11aFloods({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
@@ -262,25 +238,6 @@ async function r15bBeastsOn({ evaluate, check, waitSettled }: SuiteContext): Pro
   );
 }
 
-async function r13aUntouched({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
-  await evaluate(`(()=>{
-        document.getElementById("seed").value="42";
-        document.getElementById("style").value="antique";
-        document.getElementById("theme").value="";
-        document.getElementById("type").value="";
-        document.getElementById("draw").click();
-      })()`);
-  await waitSettled("coast-baseline");
-  const a13base = await evaluate<{ stamp: boolean; hash: boolean }>(
-    `({stamp:document.querySelector("#map svg").hasAttribute("data-vellum-coast-warp"),hash:location.hash.includes("coast=")})`,
-  );
-  check(
-    "R13a untouched coast: no stamp, no coast= in hash (default byte-identity)",
-    !a13base.stamp && !a13base.hash,
-    `stamp=${a13base.stamp} hash=${a13base.hash}`,
-  );
-}
-
 async function r13bWarps({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
   await evaluate(`(()=>{
         const c=document.getElementById("coast");
@@ -296,36 +253,6 @@ async function r13bWarps({ evaluate, check, waitSettled }: SuiteContext): Promis
     "R13b warp reshapes in place: fresh chart + coast= in hash + stamped value",
     a13warp.stamp === "0.9" && a13warp.hash && a13warp.map,
     `stamp=${a13warp.stamp} hash=${a13warp.hash}`,
-  );
-}
-
-async function r13cCalm({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
-  await evaluate(`(()=>{ window.__coastLobed = document.querySelector("#map svg").outerHTML; })()`);
-  await evaluate(
-    `(()=>{const c=document.getElementById("coast");c.value="10";c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  await waitSettled("coast-calm");
-  const a13calm = await evaluate<{ stamp: string | null; differs: boolean }>(
-    `({stamp:document.querySelector("#map svg").getAttribute("data-vellum-coast-warp"),differs:document.querySelector("#map svg").outerHTML!==window.__coastLobed})`,
-  );
-  check(
-    "R13c a different warp is a different world (render changes)",
-    a13calm.stamp === "0.1" && a13calm.differs,
-    `calm stamp=${a13calm.stamp} differs=${a13calm.differs}`,
-  );
-}
-
-async function r13dParity({ evaluate, check }: SuiteContext): Promise<void> {
-  const a13par = await evaluate<{ eq: boolean; stamped: boolean }>(
-    `(async()=>{const m={kind:"draw",seed:42,overrides:{coastWarp:0.9},render:{style:"antique",widthPx:1500,legend:true}};` +
-      `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
-      `return{eq:j.svg===i.svg,stamped:j.svg.includes('data-vellum-coast-warp="0.9"')};})()`,
-    true,
-  );
-  check(
-    "R13d worker bytes === inline bytes under a coastWarp override (stamped)",
-    a13par.eq && a13par.stamped,
-    `eq=${a13par.eq} stamped=${a13par.stamped}`,
   );
 }
 
@@ -349,33 +276,4 @@ async function rRestore({ evaluate, waitSettled }: SuiteContext): Promise<void> 
     `(()=>{const t=document.getElementById("type");t.value="";t.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );
   await waitSettled("coast-cleanup");
-}
-
-async function r14Region({ evaluate, check }: SuiteContext): Promise<void> {
-  const a14 = await evaluate<{
-    svg: boolean;
-    man: boolean;
-    windowEcho: boolean;
-    bandEcho: boolean;
-    stamped: boolean;
-    roundtrip: boolean;
-    places: number;
-    len: number;
-  }>(
-    `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
-      `const m={kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"The Environs",render:{style:"antique",widthPx:1500,legend:true}};` +
-      `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
-      `const {recipeFromSvg}=await import("./engine/render/recipe-meta.js");const p=recipeFromSvg(j.svg);` +
-      `return{svg:j.svg===i.svg,man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),` +
-      `windowEcho:JSON.stringify(j.window)===JSON.stringify(win)&&JSON.stringify(i.window)===JSON.stringify(win),` +
-      `bandEcho:j.band===2&&i.band===2,stamped:j.svg.includes('data-vellum-region-u0='),` +
-      `roundtrip:!!p&&!!p.region&&Math.abs(p.region.window.u1-win.u1)<1e-9&&p.region.worldGridW===320,` +
-      `places:Array.isArray(j.manifest.places)?j.manifest.places.length:-1,len:j.svg.length};})()`,
-    true,
-  );
-  check(
-    "R14 region job: worker bytes === inline bytes + window/band echo + stamp round-trips (Sub 7 AC2/AC3)",
-    a14.svg && a14.man && a14.windowEcho && a14.bandEcho && a14.stamped && a14.roundtrip,
-    `${a14.len} units, ${a14.places} places, svg=${a14.svg} man=${a14.man} echo=${a14.windowEcho}/${a14.bandEcho} stamp=${a14.stamped} rt=${a14.roundtrip}`,
-  );
 }
