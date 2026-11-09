@@ -299,7 +299,7 @@ pass, and a guard proved unable to bite is deleted rather than shipped.
 (`.github/workflows/proof-runner.yml`); a local proof stays valid, and the runner only runs many at
 once on GitHub's runners. The orchestrator and a lane send a list with `npm run proof -- send
 <list>` from a tree whose commit is pushed, and read the ledger back with `npm run proof -- read
-<run>`, which deletes the throwaway `proof/` branch; a review agent hands its list to whoever
+<run>`, which deletes the throwaway `proof/` branch by default (a second read of a run whose branch is gone still returns the ledger's verdict; `--keep` leaves the branch for a second reader); a review agent hands its list to whoever
 dispatched it, since its definition does not let it create a branch. Each entry is one patch, or
 the find-and-replace or by-line edits `send` compiles into one against the commit, with the unit
 files, lint files and suite selection it must turn red, each named exactly: a red that was not named
