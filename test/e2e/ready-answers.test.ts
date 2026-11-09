@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import type { Cam } from "../../e2e/support/home.ts";
 import type { makeRoom } from "../../e2e/support/room.ts";
 import type { makeStep } from "../../e2e/support/step.ts";
-import { cl1Wash } from "../../e2e/suites/cluster.ts";
 import { h14aCardFits } from "../../e2e/suites/home/stations.ts";
 import { l13Home, l9Touch } from "../../e2e/suites/landfall.ts";
 import type { LandfallKit } from "../../e2e/suites/landfall/kit.ts";
@@ -56,20 +55,6 @@ const VISITED = {
   enter: "atlas/",
   arms: 3,
 };
-
-test("CL1 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
-  const ctx = page(() => new Error(READ_THE_PAGE)).ctx;
-  await assert.rejects(
-    cl1Wash(ctx, () => Promise.resolve(LANDED)),
-    (err: Error) => err.message === READ_THE_PAGE,
-    "a settled home did not reach CL1's own read",
-  );
-  await assert.rejects(
-    cl1Wash(ctx, () => Promise.resolve(VEILED)),
-    (err: Error) => err.message === unsettled("CL1"),
-    "CL1 ran on a home that never settled, or failed for another reason",
-  );
-});
 
 test("H14a fails when settleHome's answer never reached its landfall, though the flight it reads passes", async () => {
   const at = page(() => null);

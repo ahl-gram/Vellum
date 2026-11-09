@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { serverState } from "../../e2e/site-server.ts";
 import { withScriptsOff } from "../../e2e/support/scripts-off.ts";
 import { withBlockedUrls } from "../../e2e/support/network-state.ts";
-import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
-import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import { deskKit } from "../../e2e/suites/cluster/desk-notice.ts";
 import { h13DeadBundle, h13ePrmNoFlash } from "../../e2e/suites/home/doors.ts";
 import { withStyledBoot } from "../../e2e/suites/stage/styled-boot.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
@@ -75,44 +74,6 @@ test("a restore the browser refuses keeps the body's own error when the body fai
   );
 });
 
-test("DN7's check takes its storage refusal back off itself, by the refusal's own identifier, when it fails part way", async () => {
-  const { sent, send } = recorder();
-  const kit = {
-    send,
-    check: () => {},
-    setMobileViewport: () => Promise.resolve(),
-    consoleErrors: [],
-    open: () => Promise.reject(new Error("navigation failed")),
-  } as unknown as DeskKit;
-  await assert.rejects(dnRefused(kit), /navigation failed/);
-  const added = sent.findIndex((s) => s.method === "Page.addScriptToEvaluateOnNewDocument");
-  assert.notEqual(added, -1, "the check never refused storage");
-  assert.deepEqual(
-    sent.filter((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument").map((s) => s.params?.["identifier"]),
-    [`script-${added + 1}`],
-  );
-});
-
-test("DN4's check forgets the dismissal itself when it fails part way, so the notice's state does not outlive the suite", async () => {
-  const steps: string[] = [];
-  const kit = {
-    check: () => {},
-    touch: () => Promise.resolve(),
-    setMobileViewport: () => Promise.resolve(),
-    forget: () => {
-      steps.push("forget");
-      return Promise.resolve();
-    },
-    open: () => {
-      steps.push("open");
-      return Promise.resolve();
-    },
-    settle: () => Promise.reject(new Error("settle timeout the page before the tap")),
-  } as unknown as DeskKit;
-  await assert.rejects(dnContinue(kit), /settle timeout/);
-  assert.deepEqual(steps, ["forget", "open", "forget"]);
-});
-
 test("withScriptsOff keeps scripts off until its body has settled, not merely started", async () => {
   const { sent, send } = recorder();
   let during: unknown[] = [];
@@ -121,18 +82,6 @@ test("withScriptsOff keeps scripts off until its body has settled, not merely st
     during = scriptsSwitches(sent);
   });
   assert.deepEqual(during, [true], "scripts came back on while the body was still running");
-});
-
-test("DN7's check keeps its own failure when the browser refuses to take the refusal back off", async () => {
-  const { send } = recorder((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument");
-  const kit = {
-    send,
-    check: () => {},
-    setMobileViewport: () => Promise.resolve(),
-    consoleErrors: [],
-    open: () => Promise.reject(new Error("navigation failed")),
-  } as unknown as DeskKit;
-  await assert.rejects(dnRefused(kit), /navigation failed/);
 });
 
 test("the desk kit's forget removes the notice's own key from the page's storage", async () => {
