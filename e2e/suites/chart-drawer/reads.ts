@@ -123,7 +123,7 @@ export type Stored = { stored: string | null };
 export type Back = Read & Stored & { marker: string | null; navType: string | null };
 
 const SEED = 42;
-// A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
+// A camera settled deep enough to commit a band-3 inset.
 export const DEEP = "cx=0.5625&cy=0.4375&k=8";
 export const DEEPEST = "cx=0.5625&cy=0.4375&k=32";
 export const DRESS = `seed=${SEED}&style=antique&legend=1&arms=0&beasts=0`;
@@ -155,7 +155,7 @@ export const READ: Payload<Read> = `(() => {
     roadDisabled: (() => { const b = document.getElementById("table-road"); return !!b && b.disabled; })(),
     ear: ear ? { label: ear.getAttribute("aria-label"), rect: r("#map .region-inset .dog-ear") } : null,
     insetRect: r("#map .region-inset"),
-    // The constraint the handle's markup is decided by: suite-region-detail reads the survey as the LAST svg in the inset.
+    // The constraint the handle's markup is decided by: the zoom suite (Z21c, Z21d) reads the survey as the LAST svg in the inset.
     insetSvgs: document.querySelectorAll("#map .region-inset svg").length,
     lastSvgIsSurvey: (() => { const s = [...document.querySelectorAll("#map .region-inset svg")].pop(); return !!s && s.hasAttribute("data-vellum-region-u0"); })(),
     status: (document.getElementById("status") || {}).textContent || "",

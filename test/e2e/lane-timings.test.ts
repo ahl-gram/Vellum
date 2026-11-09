@@ -34,7 +34,6 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   cluster: 62.9,
   "chart-drawer": 210.8,
   "document-rooms": 16.7,
-  "region-detail": 61.0,
   specimen: 15.3,
   "writing-room": 44.0,
   corners: 156.2,

@@ -316,7 +316,7 @@ body.sheet-drag :is(#map-viewport, *) {
   }
 }
 
-/* No element inside the dog-ear: `LAST_INSET` in `e2e/suites/region-detail.ts` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
+/* No element inside the dog-ear: `z21dInsetCards` in `e2e/suites/zoom/inset-cards.ts` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
 .dog-ear {
   position: absolute;
   left: calc(var(--ix) * -100cqw);
