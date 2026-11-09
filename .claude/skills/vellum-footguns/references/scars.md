@@ -168,7 +168,7 @@ left open and the session failed to write down).
   a browser check reads a number the room's layout decides from the layout in the run.
 - Later, PR #1058 (Issue #1048): a re-run of one failed job on an older head cancelled the newer
   head's whole run. Lane C of run 40173993060 failed on head `09fb4eb0`; the lane pushed `a9cb1aac`,
-  whose run 40174696546 started its seven jobs at 07:56:45 on 2026-10-25, and the failed job was
+  whose run 40174696546 had its seven jobs started by 07:56:46 on 2026-10-25, and the failed job was
   re-run at 07:56:54 as the older run's second attempt. By 07:56:58 every job of the newer run was
   cancelled, each annotated "Canceling since a higher priority waiting request for
   ci-pull_request-1058 exists", and the newer run's own re-run, started at 07:57:33, cancelled the
