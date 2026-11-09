@@ -143,3 +143,20 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
   assert.equal(stage.root.hidden, true, "the superseded world's plate never reaches the screen");
   assert.deepEqual(revoked, ["url:svg-old"], "its blob is revoked instead of leaking");
 });
+
+test("#1285 the stage names the plate it was asked for at the ask, before that plate lands, and nothing once it is bare", async () => {
+  const { stage, fetchPlate, hrefFor } = harness();
+  assert.equal(stage.shown(), null, "a stage with no world was asked for nothing");
+  stage.setWorld(fetchPlate, hrefFor);
+  stage.show(BEAT);
+  assert.equal(stage.root.hidden, true, "the plate has not landed yet");
+  assert.equal(stage.shown(), "0:451", "the ask is named at once");
+  await tick();
+  assert.equal(stage.root.hidden, false);
+  assert.equal(stage.shown(), "0:451", "and still once the plate is up");
+  stage.show(null);
+  assert.equal(stage.shown(), null, "show(null) withdraws the ask");
+  stage.show(LATER);
+  stage.setWorld(fetchPlate, hrefFor);
+  assert.equal(stage.shown(), null, "a new world withdraws the old world's ask");
+});
