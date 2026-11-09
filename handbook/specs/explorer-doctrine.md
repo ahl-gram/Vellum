@@ -324,8 +324,8 @@ make an unqualified rule false. Read the surface, not just the rule.
   someone else's folio replaces it with the reader's own sheets and rewrites that page's address, so
   the sender's link leaves that tab and cannot be recovered there. The two rulings collide in that
   one cell and only one of them can be obeyed; **do not quietly restore the other on finding this
-  surprising**, because it is pinned deliberately (`TS15` in `test/site/table-store.test.ts` and
-  `CD42`, whose fixture is a folio holding none of the sheets this device does). **A page whose
+  surprising**, because it is pinned deliberately (`TS15` in `test/site/table-store.test.ts`, whose
+  fixture is a folio holding none of the sheets this device does). **A page whose
   address IS its content takes no traversal term at all**: the Portfolio shows the folio its address names, else
   what the device holds. It has no restore arm either, so a cached Back into it shows the pile the
   reader left, which is the folio they were looking at; the one cell where that differs from a fresh
