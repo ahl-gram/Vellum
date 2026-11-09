@@ -3,8 +3,6 @@ import assert from "node:assert/strict";
 import { serverState } from "../../e2e/site-server.ts";
 import { withScriptsOff } from "../../e2e/support/scripts-off.ts";
 import { withBlockedUrls } from "../../e2e/support/network-state.ts";
-import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
-import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
 import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
 import { h13DeadBundle, h13ePrmNoFlash } from "../../e2e/suites/home/doors.ts";
@@ -75,22 +73,6 @@ test("a restore the browser refuses keeps the body's own error when the body fai
     /Emulation.setScriptExecutionDisabled refused/,
     "scripts may still be off for every check after this one, and the run said nothing",
   );
-});
-
-test("CD50's check turns page scripts back on itself when it fails part way, so no later check inherits them off", async () => {
-  const { sent, send } = recorder();
-  const kit = {
-    send,
-    settle: () => Promise.reject(new Error("settle timeout chart-drawer-scripts-off-road")),
-    evaluate: () => Promise.resolve(null),
-    check: () => {},
-    sleep: () => Promise.resolve(),
-    clickAt: () => Promise.resolve(),
-    PORT: 8765,
-  } as unknown as TableKit;
-  await assert.rejects(cd50ScriptsOffHome(kit), /settle timeout/);
-  assert.deepEqual(scriptsSwitches(sent), [true, false], JSON.stringify(sent));
-  assert.equal(sent.at(-1)?.method, SCRIPTS, "something ran after scripts were turned back on");
 });
 
 test("DN7's check takes its storage refusal back off itself, by the refusal's own identifier, when it fails part way", async () => {

@@ -125,7 +125,6 @@ export type Back = Read & Stored & { marker: string | null; navType: string | nu
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset.
 export const DEEP = "cx=0.5625&cy=0.4375&k=8";
-export const DEEPEST = "cx=0.5625&cy=0.4375&k=32";
 export const DRESS = `seed=${SEED}&style=antique&legend=1&arms=0&beasts=0`;
 
 export const READ: Payload<Read> = `(() => {

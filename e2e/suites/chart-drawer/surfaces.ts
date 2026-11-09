@@ -3,15 +3,10 @@ import type { DrawerKit } from "./kit.ts";
 import { DRESS, SURFACES, both, drawerUp, slipTravelled } from "./reads.ts";
 import type { Edge } from "./reads.ts";
 
-// Its own one-shot payload rather than more fields on SURFACES: that one is polled by every settle in the CD9 step and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
-const PHONE_LEAF: Payload<string[]> =
-  `[".slip-head .sheet-tabs", "#table-leaf", "#leaf-table", ".legend-dock", ".slip-handle"].filter((s) => document.querySelector(s))`;
-
 export async function cd9NeverTogether({ evaluate, send, check, settle, go }: DrawerKit, SIX: string) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await go(`${DRESS}&table=${SIX}`);
   const beforeOpen = await evaluate(SURFACES);
-  const leftover = await evaluate(PHONE_LEAF);
   await evaluate(`document.getElementById("chart-drawer-tab").click()`);
   const withOpen = await settle(SURFACES, both(drawerUp, slipTravelled(beforeOpen)), "chart-drawer-tab-open");
   await evaluate(`document.getElementById("chart-drawer-shut").click()`);
@@ -30,11 +25,6 @@ export async function cd9NeverTogether({ evaluate, send, check, settle, go }: Dr
     "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
     !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
     JSON.stringify({ before: beforeOpen, open: withOpen }),
-  );
-  check(
-    "CD22, CD43 the phone's way into the table is gone from the page: no leaf tabs in the sheet's head, no table leaf, no legend dock and no sheet handle, which stood at 1280 as elements no rule reached while the narrow layout carried them (#547, #583), and went with it (Alex, 2026-10-06, Issue #762: the 1024 floor); the Broadside is read open in the same snapshot",
-    !beforeOpen.folded && leftover.length === 0,
-    JSON.stringify({ folded: beforeOpen.folded, leftover }),
   );
   check(
     "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",

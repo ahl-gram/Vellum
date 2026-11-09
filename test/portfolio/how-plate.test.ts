@@ -93,7 +93,11 @@ test("PL2 the plate writes no colour and no face of its own, so the page's token
     for (const [, attr] of t.attrs.matchAll(/([\w:-]+)=/g))
       assert.ok(geometry.has(attr!), `${t.tag} carries ${attr}, a mark the page's sheet has to dress`);
   for (const t of tags.filter((t) => t.name === "text"))
-    assert.doesNotMatch(t.attrs, /\btransform=/, `${t.tag} is scaled by a transform CD62 does not read`);
+    assert.doesNotMatch(
+      t.attrs,
+      /\btransform=/,
+      `${t.tag} is scaled by a transform, so the size it paints is not its font size`,
+    );
 });
 
 test("PL3 the plate's one picture is the committed antique chart, reached from the Portfolio's own address (Issue #670)", () => {

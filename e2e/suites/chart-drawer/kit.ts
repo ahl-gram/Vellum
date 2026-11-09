@@ -6,7 +6,7 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";
 import type { Back, Card } from "./reads.ts";
-import { mouseMove, sendKey } from "../../support/input.ts";
+import { mouseMove } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
 type Mouse = Pick<ReturnType<typeof makeMouse>, "press" | "moveTo" | "release">;
@@ -183,29 +183,6 @@ export function tableKit(kd: DragKit) {
     return at;
   };
   return { ...kd, STORE, reachedExplorer, atExplorer, openDrawer, restedAtExplorer, pressById };
-}
-
-type Keys = Pick<SuiteContext, "evaluate" | "send" | "sleep">;
-const key = (send: SuiteContext["send"], modifiers = 0): Promise<void> => sendKey(send, "Tab", "Tab", 9, { modifiers });
-
-// A keyboard's focus, so :focus-visible holds: a Tab from the element before it, or out and back with Shift; the answer is a premise the caller reads, never a throw.
-export async function tabInto({ evaluate, send, sleep }: Keys, selector: string, from?: string): Promise<boolean> {
-  const sel = JSON.stringify(selector);
-  await evaluate<boolean>(
-    `(() => { const e = document.querySelector(${JSON.stringify(from ?? selector)}); if (e) e.focus({ preventScroll: true }); return !!e; })()`,
-  );
-  await key(send);
-  if (from === undefined) await key(send, 8);
-  for (let i = 0; i < 20; i++) {
-    if (
-      await evaluate<boolean>(
-        `(() => { const e = document.querySelector(${sel}); return !!e && document.activeElement === e && e.matches(":focus-visible"); })()`,
-      )
-    )
-      return true;
-    await sleep(50);
-  }
-  return false;
 }
 
 export const park = (send: SuiteContext["send"]): Promise<unknown> => mouseMove(send, 1, 700);

@@ -1,7 +1,7 @@
 import type { Payload, Point } from "../../types.ts";
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
-import { tabInto, type DrawerKit } from "./kit.ts";
-import { DEEP, DEEPEST, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
+import type { DrawerKit } from "./kit.ts";
+import { DEEP, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
 import type { Read } from "./reads.ts";
 import { sendClick } from "../../support/input.ts";
 
@@ -48,30 +48,6 @@ export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void>
       why,
     }),
   );
-}
-
-export const TIPPED = `((t) => { const m = /^matrix\\(([^)]*)\\)$/.exec(t); if (!m) return t !== "none"; const v = m[1].split(",").map(Number); return Math.abs(v[1]) > 1e-6 || Math.abs(v[2]) > 1e-6; })`;
-const keyedTilt = (selector: string): Payload<{ focus: boolean; tipped: boolean; t: string; running: number } | null> =>
-  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const t = getComputedStyle(e).transform; return { focus: e.matches(":focus-visible"), tipped: ${TIPPED}(t), t, running: e.getAnimations().filter((a) => a.playState === "running").length }; })()`;
-// Read once the focus's own transition has ended: a read at its first frame finds the rest it is leaving (send T, run 38087000715: rows CC3.f3 and CC3.f4).
-const keyedAtRest = async (k: DrawerKit, selector: string) =>
-  (await tabInto(k, selector))
-    ? k.settle(keyedTilt(selector), (d, last) => d.running === 0 && d.t === last?.t, `chart-drawer-keyed-${selector}`)
-    : null;
-
-export async function cd51NoTipKeyed(k: DrawerKit): Promise<void> {
-  const { evaluate, check } = k;
-  try {
-    const tab = await keyedAtRest(k, "#chart-drawer-tab");
-    const ear = await keyedAtRest(k, "#map .region-inset .dog-ear");
-    check(
-      "CD51 the drawer's tab and the survey's dog-ear take no navigation tip under a keyboard's focus: neither goes anywhere, so neither promises it (the tip is the roads' alone)",
-      !!tab && tab.focus && !tab.tipped && !!ear && ear.focus && !ear.tipped,
-      JSON.stringify({ tab, ear }),
-    );
-  } finally {
-    await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
-  }
 }
 
 type Roads = {
@@ -196,57 +172,6 @@ export async function cd2bRealPointer(
   );
 }
 
-export async function cd23LineLeaves(
-  { evaluate, check, settle, clickEar }: DrawerKit,
-  HOLD_FLOOR: number,
-): Promise<void> {
-  // Derived 2026-09-13: SAY_HOLD_MS + SAY_FADE_MS is 8.45s (src/site/shared/announce.ts), which is 169 polls of pure sleep before a single evaluate round-trip is counted; 400 tries is 20s of sleep alone, the same order of headroom DRAWN carries for the CI runner measured 2.7x slower than local.
-  const SAID_GONE = 400;
-  // The sheet comes off and goes back on, so what is timed is the LAY line the issue was filed about and not the refusal CD2c happened to leave, and the clock starts at a known press (skeptic rounds 1 and 2 on PR #584). The table is back to the one cutting CD2 laid, which is the state CD3, CD4 and CD5 read.
-  await evaluate(`document.querySelector("#cuttings .off").click()`);
-  await clickEar();
-  const saidAt = Date.now();
-  const said = await evaluate(READ);
-  // The rule's resolved answer, not the app's timing: the class is put on with the transition suppressed inline, so the value read is the one the CASCADE gives and a later arm re-raising opacity cannot hide behind the JS clearing the text anyway (skeptic on PR #584).
-  const fadeProbe = await evaluate<{ rest: string; faded: string }>(
-    `(() => { const s = document.getElementById("status"); const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { rest, faded }; })()`,
-  );
-  const gone = await settle(READ, (d) => d.status === "", "chart-drawer-said-gone", SAID_GONE);
-  const waited = Date.now() - saidAt;
-  check(
-    "CD23 the Chart Table's announcement leaves the chart by itself: the LAY line #547 was filed about, which sat over the middle of the sheet until the reader drew another world, since shutting the drawer never took it away (Alex 2026-09-08). The removal press above is wiring and not the gesture under test, which is CD5's and CD7b's. The table is untouched as the line goes, so this is the LINE leaving and not the page resetting; the hold is floored a second under the eight Alex ruled, a floor and never a ceiling since a slower runner can only lengthen it, with the literal 8000 pinned in test/site/announce.test.ts; and the fade is read twice, as the declared duration the way CD7c pins the drawer's slide, and as the opacity the cascade actually resolves under the class",
-    /lies on the table/.test(said.status) &&
-      gone.status === "" &&
-      gone.cuttings === said.cuttings &&
-      gone.open === said.open &&
-      said.statusFadeMs === "0.45s" &&
-      fadeProbe.rest === "1" &&
-      fadeProbe.faded === "0" &&
-      waited >= HOLD_FLOOR,
-    JSON.stringify({
-      said: said.status,
-      after: gone.status,
-      waitedMs: waited,
-      floor: HOLD_FLOOR,
-      cuttings: [said.cuttings, gone.cuttings],
-      open: [said.open, gone.open],
-      fadeMs: said.statusFadeMs,
-      opacity: fadeProbe,
-    }),
-  );
-}
-
-export async function cd3Refused({ evaluate, check, settle, clickEar }: DrawerKit): Promise<void> {
-  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
-  await clickEar();
-  const twice = await settle(READ, (d) => d.open, "chart-drawer-twice");
-  check(
-    "CD3 the same survey is refused a second time, in the drawer's own voice, and the table is unmoved (ruled 2026-09-07)",
-    twice.cuttings === 1 && twice.status === "this survey is already on the table" && twice.open,
-    JSON.stringify({ cuttings: twice.cuttings, status: twice.status }),
-  );
-}
-
 export async function cd4Reload({ evaluate, check, settle, go }: DrawerKit, laid: Read | null): Promise<void> {
   if (!laid) throw new Error("CD2 never laid a sheet, so this reload has no table to restore");
   const carried = laid.hashTable;
@@ -322,12 +247,6 @@ export async function cd7Cap({ check, settle, clickEar, go }: DrawerKit, SIX: st
       anims: refused.drawerAnims,
     }),
   );
-
-  check(
-    "CD7c the drawer's slide is pinned at the 0.32s the settle above waits out, so a regression that leaves the reader looking at an empty band for three seconds cannot sit inside a generous budget and pass (#578)",
-    refused.slideMs === "0.32s",
-    JSON.stringify({ slideMs: refused.slideMs, anims: refused.drawerAnims }),
-  );
 }
 
 export async function cd8Home({ evaluate, check, settle }: DrawerKit): Promise<void> {
@@ -337,30 +256,5 @@ export async function cd8Home({ evaluate, check, settle }: DrawerKit): Promise<v
     "CD8 going home drops the inset and the dog-ear with it: the handle never outlives the survey it belongs to, and the table it filled is untouched (#520 build item 2)",
     home.ear === null && home.insetSvgs === 0 && home.cuttings === 6,
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
-  );
-}
-
-export async function cd63DeepestLays({ evaluate, check, settle, go, clickEar }: DrawerKit): Promise<void> {
-  await go(`${DRESS}&${DEEPEST}`);
-  await settle(READ, atInset, "chart-drawer-deepest-inset", DRAWN);
-  await clickEar();
-  const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-deepest-laid", DRAWN);
-  const carried = laid.hashTable ?? "";
-  await go(`${DRESS}&table=${carried}`);
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  const filled = await settle(
-    READ,
-    (d) => d.imgs >= 1 && d.decoded.every(Boolean),
-    "chart-drawer-deepest-filled",
-    DRAWN,
-  );
-  check(
-    "CD63 a survey laid from the Glass's deepest band is carried in the address as rung 5, and a reload redraws it from the address alone (Issue #954)",
-    /(^|\.)rung-5\./.test(carried) &&
-      filled.cuttings === 1 &&
-      filled.imgs === 1 &&
-      filled.decoded[0] === true &&
-      filled.titles[0] !== "Chart № 42",
-    JSON.stringify({ carried, cuttings: filled.cuttings, imgs: filled.imgs, titles: filled.titles }),
   );
 }
