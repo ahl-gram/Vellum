@@ -1,37 +1,9 @@
-// The Portfolio as written and as it loads (Issue #779 part 2g): its where-line as authored, and a load whose worker never starts.
+// The Portfolio loading with a worker that never starts (Issue #779 part 2g).
 import { makeSettle } from "../../support/settle.ts";
-import { withScriptsOff } from "../../support/scripts-off.ts";
-import type { Payload, SuiteContext } from "../../types.ts";
+import type { Payload } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
-import { bounce, leaveBlank } from "../../support/nav.ts";
-
-const WHERE: Payload<{ where: string | null; app: boolean; ready: string }> =
-  `(() => ({ where: (document.querySelector("#portfolio .card-where") || {}).textContent || null, app: typeof window.__vellumPortfolio === "function", ready: document.readyState }))()`;
-
-export async function cd55WhereAuthored({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  const control = await evaluate(WHERE);
-  try {
-    const off = await withScriptsOff(send, async () => {
-      await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/`);
-      return makeSettle({ evaluate, sleep, tolerant: true })(
-        WHERE,
-        (d) => d.ready === "complete",
-        "portfolio-scripts-off",
-      );
-    });
-    check(
-      "CD55 the Portfolio's where-line ships promising the sheets gathered at the Explorer, and the script writes the bare voice over it when nothing was gathered (scripts on the control)",
-      control.app &&
-        control.where === "no sheets gathered at the Explorer" &&
-        !off.app &&
-        off.where === "the sheets gathered at the Explorer",
-      JSON.stringify({ control, off }),
-    );
-  } finally {
-    await leaveBlank(send);
-  }
-}
+import { bounce } from "../../support/nav.ts";
 
 // The pill's first written line is read off the mutation itself, since the drafting writes it and clears it in one task.
 const FIRST = `(() => { window.__cd56 = null; const W = window.Worker; window.Worker = class extends W { constructor(...a) { super(...a); this.addEventListener("error", () => { window.__cd56Failed = true; }); } };

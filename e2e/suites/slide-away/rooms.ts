@@ -1,24 +1,10 @@
-// The slide-away in the eight other zoom rooms, the follow and the lines left (Issue #1034): SW1 and SW4 visit each room at 1280x800, SW2 and SW3 are the windows where the chart fills only at the Glass's third or fourth press.
+// The slide-away beyond the Explorer, the follow (Issue #1034): SW1 visits the Prospect at 1280x800; SW2 and SW3 are the windows where the chart fills only at the Glass's third or fourth press.
 import type { SuiteContext } from "../../types.ts";
-import { GLYPH_LINES } from "../stage/glyphs.ts";
-import { FLOOR_PLAIN, grounds, rest, size, withStyle, worstOf } from "../stage/stage.ts";
-import { motionOn, openAt, pressSelector, SEED_42 } from "../stage/slide-kit.ts";
-import { BARE } from "../stage/zoomed.ts";
+import { rest, size } from "../stage/stage.ts";
+import { motionOn } from "../stage/slide-kit.ts";
 import { LENS } from "../print-room/print.ts";
 import type { Room } from "./kit.ts";
-import {
-  awayFaults,
-  fillOf,
-  fillPressOf,
-  foldLanded,
-  homeFaults,
-  openRoom,
-  PIECES,
-  pressGlass,
-  ROOMS,
-  still,
-  travelsOf,
-} from "./kit.ts";
+import { awayFaults, fillOf, fillPressOf, homeFaults, openRoom, pressGlass, ROOMS, still, travelsOf } from "./kit.ts";
 import type { Pieces } from "./kit.ts";
 
 const roomNamed = (id: string): Room => ROOMS.find((r) => r.id === id)!;
@@ -57,84 +43,22 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   return { faults, detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}` };
 }
 
-async function sw4Visit(
-  ctx: SuiteContext,
-  room: Room,
-): Promise<{ faults: string[]; detail: string; folioBare: number | null }> {
-  const a = await still(ctx, `SW4 ${room.id}`);
-  const keep = ["cluster", ...(room.id === "Reading Room" ? [] : ["chart folio"])];
-  const seen = await ctx.evaluate(GLYPH_LINES);
-  const lines = seen.filter((g) => keep.includes(g.piece) && g.row >= 0 && g.row < a.innerH);
-  const read = await grounds(ctx, lines);
-  const bare = await withStyle(ctx, "sw-bare", BARE, () => grounds(ctx, lines));
-  const faults: string[] = [];
-  for (const p of keep) if (!lines.some((g) => g.piece === p)) faults.push(`${room.id}: no ${p} line is on screen`);
-  if (!(worstOf(bare, "cluster") < FLOOR_PLAIN))
-    faults.push(
-      `${room.id}: the cluster reads ${worstOf(bare, "cluster").toFixed(2)} with the panels taken away, so the read cannot see its panel fail`,
-    );
-  for (const g of read.filter((x) => x.ratio < FLOOR_PLAIN))
-    faults.push(`${room.id}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
-  return {
-    faults,
-    detail: `${room.id} worst ${worstOf(read).toFixed(2)}, bare ${keep.map((p) => `${p} ${worstOf(bare, p).toFixed(2)}`).join(" and ")} (${bare.map((g) => `${g.piece} ${g.t.slice(0, 12)} ${g.ratio.toFixed(2)}`).join(", ")})`,
-    folioBare: keep.includes("chart folio") ? worstOf(bare, "chart folio") : null,
-  };
-}
-
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
-  const one: { faults: string[]; detail: string }[] = [];
-  const four: { faults: string[]; detail: string; folioBare: number | null }[] = [];
-  for (const room of ROOMS) {
-    one.push(await sw1Visit(ctx, room));
-    four.push(await sw4Visit(ctx, room));
-  }
-  const f1 = one.flatMap((r) => r.faults);
-  const folioBare = four.flatMap((r) => (r.folioBare === null ? [] : [r.folioBare]));
-  const f4 = [
-    ...four.flatMap((r) => r.faults),
-    ...(folioBare.some((v) => v < FLOOR_PLAIN)
-      ? []
-      : [
-          `no room's chart folio reads under ${FLOOR_PLAIN}:1 with the panels taken away (${folioBare.map((v) => v.toFixed(2)).join(", ")}), so the read cannot see its panel fail`,
-        ]),
-  ];
+  const r = await sw1Visit(ctx, roomNamed("Prospect"));
   ctx.check(
-    "SW1 in each of the eight other zoom rooms at 1280x800, the Print Room, the Portfolio, the Prospect, the Reading Room, the Ribbon, the Seed of the Day, the Specimen Book and the Writing Room, the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, on the Prospect its second line kept under the trail, the folio's title 2 px above the foot and its other lines below it, on the Reading Room under the strip (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996)",
-    f1.length === 0,
-    one.map((r) => r.detail).join("; ") + (f1.length ? `; ${f1.length} faults: ${f1.slice(0, 6).join("; ")}` : ""),
-  );
-  ctx.check(
-    "SW4 in the same visits, every line of the head cluster and of the chart folio left on screen at the press that fills reads at 4.5:1 or better on the zoomed panels, the Reading Room's folio under its strip unread; in the same run with the panels taken away the head cluster reads under 4.5:1 in every room and the chart folio in at least one, so the read can see each panel fail (Alex, 2026-10-22, Issue #988 and Issue #989 ruling 3; Alex, 2026-10-23, Issue #997)",
-    f4.length === 0,
-    four.map((r) => r.detail).join("; ") + (f4.length ? `; ${f4.length} faults: ${f4.slice(0, 6).join("; ")}` : ""),
+    "SW1 on the Prospect at 1280x800, whose zoom room takes the slide-away from the binder `scripts/lint/shared-bindings.ts` holds every zoom room to (`bindZoomRoom`), the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, the Prospect's second line kept under the trail, the folio's title 2 px above the foot and its other lines below it (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996; one room since Issue #1273)",
+    r.faults.length === 0,
+    r.detail + (r.faults.length ? `; ${r.faults.length} faults: ${r.faults.slice(0, 6).join("; ")}` : ""),
   );
 }
 
 type ThirdArm = { id: string; open: (ctx: SuiteContext) => Promise<Pieces>; lens: Room["lens"] };
 
+// 2026-11-08: the Print Room at 1024x768 filled at 2.2320 (press 3) on the Mac harness browser and at 3.0106 (press 4) on lane D of CI runs 42264204026, 42262162471 and 42258912829, 0.272 and 1.051 past the second press's 1.96.
 const ARMS: readonly ThirdArm[] = [
   {
     id: "the Print Room at 1024x768",
     open: (c) => openRoom(c, roomNamed("Print Room"), 1024, 768, "SW2 a"),
-    lens: LENS,
-  },
-  {
-    id: "the Specimen Book at 1024x768",
-    open: (c) => openRoom(c, roomNamed("Specimen Book"), 1024, 768, "SW2 b"),
-    lens: LENS,
-  },
-  {
-    id: "the Explorer at 1280x640 with the Broadside folded",
-    open: async (c) => {
-      await openAt(c, SEED_42, 1280, 640, "SW2 c");
-      const open = await c.evaluate(PIECES);
-      await pressSelector(c, ".slip-fold");
-      // Wiring, said at the check: the read waits for the folded sheet's rest, not for the class.
-      await foldLanded(c, open, "SW2 c folded sheet");
-      await rest(c, 1280, 640, "SW2 c folded");
-      return c.evaluate(PIECES);
-    },
     lens: LENS,
   },
 ];
@@ -168,7 +92,7 @@ export async function sw2ThirdPress(ctx: SuiteContext): Promise<void> {
   for (const arm of ARMS) arms.push(await thirdPress(ctx, arm));
   const faults = arms.flatMap((a) => a.faults);
   ctx.check(
-    "SW2 where the chart fills the screen only at the Glass's third press or later, the Print Room and the Specimen Book at 1024x768 and the Explorer at 1280x640 with the Broadside folded, the head cluster and the chart folio stand home after the press before the one that fills and at their thin lines after it: nothing moves until the press that fills (Alex, 2026-10-23, Issue #997 ruling 5)",
+    "SW2 where the chart fills the screen only at the Glass's third press or later, on the Print Room at 1024x768, the head cluster and the chart folio stand home after the press before the one that fills and at their thin lines after it: nothing moves until the press that fills (Alex, 2026-10-23, Issue #997 ruling 5)",
     faults.length === 0,
     arms.map((a) => a.detail).join("; ") + (faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""),
   );

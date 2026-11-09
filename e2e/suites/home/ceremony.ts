@@ -2,12 +2,10 @@ import { LANDFALL_HOLD_MS } from "../../../src/site/home/ceremony.ts";
 import { veilMarkup } from "../../../src/site/home/veil.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { readCam, atLandfall } from "../../support/home.ts";
-import type { Cam } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
-import { anchored, seatOk } from "./reads.ts";
-import type { Seat } from "./reads.ts";
+import { anchored } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
 
 export async function h7aVeil({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
@@ -221,120 +219,6 @@ export async function h10bInlinePredicate(ctx: SuiteContext): Promise<void> {
     "H10b the pre-paint script raises its veil on a first arrival alone: a return within the sitting and a reduced-motion first arrival each raise none, counted by an observer installed before the page, the plain first arrival raising one, the same run's control (#457)",
     JSON.stringify(counts) === JSON.stringify([1, 0, 0]),
     JSON.stringify({ first: counts[0], returning: counts[1], reduced: counts[2] }),
-  );
-}
-
-export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
-  await evaluate(`sessionStorage.clear()`);
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let narrow12 = null;
-  for (let i = 0; i < 100; i++) {
-    try {
-      narrow12 = await evaluate<{
-        w: number;
-        h: number;
-        x: number;
-        y: number;
-        corners: boolean;
-        innerWidth: number;
-        scrollW: number;
-      } | null>(`(() => {
-        const v = document.getElementById("lf-veil");
-        if (!v) return null;
-        const r = v.getBoundingClientRect();
-        const corners = [[1, 1], [389, 1], [1, 843], [389, 843], [195, 422]]
-          .every(([x, y]) => { const el = document.elementFromPoint(x, y); return el !== null && v.contains(el); });
-        return { w: r.width, h: r.height, x: r.x, y: r.y, corners,
-          innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth };
-      })()`);
-      if (narrow12 !== null) break;
-    } catch {}
-    await sleep(60);
-  }
-  check(
-    "H12a at 390px the veil covers the whole window, corners included, over the 1024 page that lies beneath it (Issue #762)",
-    narrow12 !== null &&
-      narrow12.corners &&
-      narrow12.x === 0 &&
-      narrow12.y === 0 &&
-      Math.abs(narrow12.w - 390) < 0.5 &&
-      Math.abs(narrow12.h - 844) < 0.5 &&
-      narrow12.innerWidth === 390 &&
-      narrow12.scrollW === 1024,
-    JSON.stringify(narrow12),
-  );
-  await shoot("home-veil-390.png");
-}
-
-const ABOVE: Payload<{ veil: boolean; hit: string | null } | null> = `(() => {
-  const v = document.getElementById("lf-veil"), a = document.querySelector("header.chrome .wordmark a");
-  if (!v || !a) return null;
-  const r = a.getBoundingClientRect(), h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-  return { veil: !!h && v.contains(h), hit: h ? h.tagName + "." + h.className : null };
-})()`;
-
-export async function h12cVeilAbove({ evaluate, check }: SuiteContext): Promise<void> {
-  const above = await evaluate(ABOVE);
-  check(
-    "H12c the veil rides above the running head: the wordmark's own link, which takes the hand above the stage, lies under the veil while it stands (#457, ratified 3)",
-    !!above && above.veil,
-    JSON.stringify(above),
-  );
-}
-
-export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
-  let armed12 = null;
-  for (let i = 0; i < 150; i++) {
-    try {
-      armed12 = await evaluate(readCam);
-    } catch {}
-    if (anchored(armed12)) break;
-    await sleep(60);
-  }
-  await pressKey("Escape", "Escape", 27);
-  let land: Cam | null = null;
-  for (let i = 0; i < 40; i++) {
-    try {
-      land = await evaluate(readCam);
-    } catch {}
-    if (atLandfall(land)) break;
-    await sleep(60);
-  }
-  const stageW = await evaluate<number>(`document.getElementById("lf-stage").getBoundingClientRect().width`);
-  check(
-    "H12b at 390px the skip lands at the landfall framing of the 1024 stage, 1.72 of its fit (Issue #762)",
-    anchored(armed12) && atLandfall(land) && stageW === 1024,
-    JSON.stringify({ armed12, land, stageW }),
-  );
-}
-
-export async function h18CameraSeat(
-  { evaluate, send, check, sleep, PORT, camSeat }: HomeKit,
-  seat390: Seat | null,
-): Promise<void> {
-  await bounce(send, `http://127.0.0.1:${PORT}/`);
-  let seatWide: Seat | null = null;
-  for (let i = 0; i < 120; i++) {
-    try {
-      seatWide = await camSeat();
-    } catch {}
-    if (seatWide) break;
-    await sleep(50);
-  }
-  await evaluate(`window.scrollTo(0, 600)`);
-  const camScrolled = await evaluate<{ top: number; y: number }>(
-    `(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`,
-  );
-  await evaluate(`window.scrollTo(0, 0)`);
-  check(
-    "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
-    seatOk(seatWide) &&
-      seatOk(seat390) &&
-      seatWide!.vw >= 1024 &&
-      seat390!.vw === 390 &&
-      camScrolled.y > 0 &&
-      Math.abs(seatWide!.top - camScrolled.top - camScrolled.y) < 2,
-    JSON.stringify({ seatWide, seat390, camScrolled }),
   );
 }
 

@@ -49,7 +49,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
 - **An absolutely positioned box wider than the 1024 page fails two ways, by the body it lands in.**
   On a page that scrolls, a phone's or a tablet's browser shrinks the whole page further to fit it,
   and clipping overflow at the root does not stop that, while a desktop window scrolls sideways past
-  the page (`FL1` in `e2e/suites/corners/floor.ts` refuses that on a page at rest). In a staged chart
+  the page. In a staged chart
   room, whose body clips (the `contain: layout` trap below), it is cut off at the body's edge in
   silence: the root's overflow read does not see it, so read the box's own rect against the body's.
   Cap the box.
@@ -92,7 +92,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   floored page.** Its containing block is the initial one, the window's size, so under the 1024
   floor a shrink-to-fit box there wraps at a narrow window while every piece around it keeps its
   1024 seat. Home's riding head cluster is one; its body is made its containing block
-  (`position: relative`), and `FL1` in `e2e/suites/corners/floor.ts` reads it at a 400 window.
+  (`position: relative`).
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
   wherever it is asked, which today is a `matchMedia` call rather than a sheet, written once
   (`TOUCH_PRIMARY` in `src/site/shared/chart-touch.ts`, read by the footnotes and by the Glass's

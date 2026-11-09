@@ -1,121 +1,24 @@
-// Running Head e2e (RH0-RH8, Issue #295; reshaped for the Issue #461 head cluster): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (Issue #288); self-contained, restores the Explorer base.
+// Running Head e2e (Issue #295; reshaped for the Issue #461 head cluster; cut to its sweep at Issue #1273): every shelled page and the Portfolio visited once with their scripts on, the kit's lifted shapes judged across them (RH32), the nav links' rise under a real pointer (RH31), and the sweep's console and 4xx gate (RH8); restores the Explorer base.
 import { dropExpectedCancellations } from "../support/console.ts";
 import { makeStep } from "../support/step.ts";
-import { atlasHeadMarkup } from "../../src/site/print-room/atlas-head-markup.ts";
 import type { SuiteContext } from "../types.ts";
 import { runningHeadKit } from "./runninghead/kit.ts";
-import type { RunningHeadKit } from "./runninghead/kit.ts";
-import { DISPLAY_FACE, near, SHELLED } from "./runninghead/reads.ts";
-import type { Head } from "./runninghead/reads.ts";
-import {
-  rh0OneH1,
-  rh1NamesPage,
-  rh2Members,
-  rh3Fixed,
-  rh4OneDress,
-  rh5Leading,
-  rh6Differ,
-  rh9ContrastPins,
-  rhSweep,
-} from "./runninghead/heads.ts";
-import {
-  rh10cPrinted,
-  rh10GalleryScrolled,
-  rh21Room,
-  rh22CornerAndRoad,
-  rh23Dress,
-  rh33ClusterReads,
-} from "./runninghead/gallery.ts";
-import { kitChecks } from "./runninghead/room.ts";
-import {
-  rh11Deep,
-  rh12FocusRing,
-  rh13WordmarkTip,
-  rh14Faces,
-  rh15BodyFace,
-  rh16Prefetch,
-  rh17ShellOnce,
-  rh18HouseSheet,
-  rh19MarksAndRobots,
-  rh20TextSize,
-  rh24TrailInks,
-} from "./runninghead/shell.ts";
-import { leaveBlank } from "../support/nav.ts";
+import { SHELLED } from "./runninghead/reads.ts";
+import { PORTFOLIO, rh31Raise } from "./runninghead/gestures.ts";
+import { kitRead, rh32Kit } from "./runninghead/room.ts";
+import type { KitSample } from "./runninghead/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, consoleErrors, http4xx } = ctx;
+  const { consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   const step = makeStep(ctx);
   const k = runningHeadKit(ctx);
-  const { visit } = k;
-
-  const { heads, shells, unreachable, kits } = await rhSweep(k);
-  const bad = (pred: (h: Head, r: string) => boolean) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
-  rh0OneH1(ctx, heads, unreachable, bad);
-  rh1NamesPage(ctx, heads, bad);
-  rh2Members(ctx, heads);
-  rh3Fixed(ctx, heads, bad);
-  const prose = rh4OneDress(ctx, heads);
-  rh5Leading(ctx, heads);
-  rh6Differ(ctx, heads, prose);
-  await rh7AtlasTitle(k);
-  rh9ContrastPins(ctx, heads, bad);
-  const now = (read: (c: typeof ctx.check) => void) => () => Promise.resolve(ctx.check).then(read);
-  for (const [name, read] of [
-    ["RH11", (c) => rh11Deep(c, shells)],
-    ["RH15", (c) => rh15BodyFace(c, shells)],
-    ["RH16", (c) => rh16Prefetch(c, shells)],
-    ["RH18", (c) => rh18HouseSheet(c, shells)],
-    ["RH19", (c) => rh19MarksAndRobots(c, shells)],
-    ["RH20", (c) => rh20TextSize(c, shells)],
-    ["RH24", (c) => rh24TrailInks(c, shells)],
-  ] as const satisfies readonly (readonly [string, (c: typeof ctx.check) => void])[])
-    await step(name, now(read));
-  await kitChecks(ctx, step, k, kits);
-  await step("RH12", () => rh12FocusRing(k));
-  await step("RH13", () => rh13WordmarkTip(k));
-  await step("RH14", () => rh14Faces(k, shells));
-  await step("RH17", () => rh17ShellOnce(k, shells));
-  await step("RH10", () => rh10GalleryScrolled(k));
-  await step("RH21", () => rh21Room(k));
-  await step("RH22", () => rh22CornerAndRoad(k));
-  await step("RH23", () => rh23Dress(k));
-  await step("RH33", () => rh33ClusterReads(k));
-  // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
-  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
-  // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
-  await leaveBlank(send);
-  const galleryNarrow = await visit("/gallery/");
-  await rh10cPrinted(k, galleryNarrow);
-  await send("Emulation.clearDeviceMetricsOverride");
-
+  const kits: Record<string, KitSample | undefined> = {};
+  for (const route of [...SHELLED, PORTFOLIO]) kits[route] = (await k.visit(route)) ? await kitRead(k) : undefined;
+  await step("RH32", () => Promise.resolve(ctx.check).then((check) => rh32Kit(check, kits)));
+  await step("RH31", () => rh31Raise(k));
   await rh8Clean(ctx, errBase, httpBase);
-}
-
-async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promise<void> {
-  // .print-only is display:none on screen so no screenshot can reach this, but computed style resolves through display:none; a probe showed a bare h1 in the same container resolves to the BODY face, so the assertion discriminates.
-  type AtlasRead = { family: string; size: number; hidden: boolean } | null;
-  let atlas: AtlasRead = null;
-  if (await visit("/print-room/")) {
-    atlas = JSON.parse(
-      await evaluate<string>(`(() => {
-      const d = document.getElementById("pr-atlas");
-      if (!d) return JSON.stringify(null);
-      d.innerHTML = ${JSON.stringify(atlasHeadMarkup({ title: "The Isle of Rahai", subtitle: "An atlas", seed: 42 }))};
-      const h1 = d.querySelector(".atlas-head h1");
-      if (!h1) return JSON.stringify(null);
-      const cs = getComputedStyle(h1);
-      return JSON.stringify({ family: cs.fontFamily, size: parseFloat(cs.fontSize),
-        hidden: getComputedStyle(h1.parentElement).display === "none" });
-    })()`),
-    ) as AtlasRead;
-  }
-  check(
-    "RH7 the Print Room's bound-atlas title, written by the producer's own markup, resolves to the display face (unreachable by any screenshot)",
-    !!atlas && DISPLAY_FACE.test(atlas.family) && near(atlas.size, 35.2) && atlas.hidden,
-    `injected twin: ${JSON.stringify(atlas)}`,
-  );
 }
 
 async function rh8Clean(ctx: SuiteContext, errBase: number, httpBase: number): Promise<void> {

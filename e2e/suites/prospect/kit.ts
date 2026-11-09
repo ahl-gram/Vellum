@@ -84,18 +84,3 @@ export function prospectKit(ctx: SuiteContext) {
   };
   return { ...ctx, page, goto, state, opened, glassHome, svgOf, moveTo, pressAt, parkMouse, forget };
 }
-
-export async function axName({ send }: Pick<SuiteContext, "send">, selector: string): Promise<string | null> {
-  const doc = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: -1 });
-  const { nodeId } = await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
-  if (!nodeId) return null;
-  const ax = await send<{ nodes: { name?: { value: string }; ignored?: boolean }[] }>(
-    "Accessibility.getPartialAXTree",
-    {
-      nodeId,
-      fetchRelatives: false,
-    },
-  );
-  const node = ax.nodes.find((n) => !n.ignored);
-  return node?.name ? node.name.value : null;
-}

@@ -7,7 +7,7 @@ import { rb12Dress } from "./ribbon/dress.ts";
 import { rb15Paper } from "./ribbon/gestures.ts";
 import { rb21InksIn, rb22TurnAbout, rb23Reduced } from "./ribbon/ink.ts";
 import { ribbonKit, type Ribbon, type RibbonKit, type Row } from "./ribbon/kit.ts";
-import { rb11Markup, rb16RoadStandsDown, rb17PlaceLink, rb18CardRoad } from "./ribbon/room.ts";
+import { rb16RoadStandsDown, rb17PlaceLink, rb18CardRoad } from "./ribbon/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -23,7 +23,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await rb5bTheSlip(k, first);
   });
   await rb6PickedDestination(k);
-  await step("RB11", () => rb11Markup(k));
   await step("RB12", () => rb12Dress(k));
   await step("RB15", () => rb15Paper(k));
   await step("RB16", () => rb16RoadStandsDown(k));

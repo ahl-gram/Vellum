@@ -1,10 +1,9 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
-import { atLandfall, buttonPoint, readCam, readXform } from "../../support/home.ts";
+import { atLandfall, buttonPoint, readXform } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
-import { mouseMove } from "../../support/input.ts";
 
 type Flight = Awaited<ReturnType<typeof h14aFlight>>;
 
@@ -112,47 +111,8 @@ export async function h14bEscape({ evaluate, check, sleep, pressKey }: HomeKit):
   check("H14b a real Escape sets the slip aside", closed14 === true, `hidden=${closed14}`);
 }
 
-type PipBox = { cx: number; cy: number; w: number; glyphW: number; btnBg: string; hover: boolean };
-const PIP_BOX: Payload<PipBox> = `(() => {
-  const btn = document.querySelector('.lf-station[data-station="atlas"]');
-  const b = btn.getBoundingClientRect();
-  const g = btn.querySelector(".lf-station-glyph").getBoundingClientRect();
-  return { cx: b.x + b.width / 2, cy: b.y + b.height / 2, w: b.width, glyphW: g.width,
-    btnBg: getComputedStyle(btn).backgroundColor, hover: btn.matches(":hover") };
-})()`;
-const HOMED: Payload<{ cam: Cam | null; pip: PipBox }> = `({ cam: ${readCam}, pip: ${PIP_BOX} })`;
 const ASIDE: Payload<{ hidden: boolean; xform: string | null }> =
   `(() => { const card = document.getElementById("lf-card-reading-room"); return { hidden: !!card && card.hidden, xform: ${readXform} }; })()`;
-const movedFrom = (a: Cam | null, b: Cam | null): boolean =>
-  a !== null && b !== null && (a.scale !== b.scale || a.x !== b.x || a.y !== b.y);
-
-export async function h14dPipHover({ evaluate, send, check, sleep, pressKey }: HomeKit): Promise<void> {
-  // The house button lift must never reach a station (its anchor transform IS its position and counter-scale): a real hover once shifted the pip 17px and shrank it to the raw camera scale.
-  // A real 0 flies the camera home first so the pip sits at a deterministic on-screen spot: one CI lane caught the camera slid to its left clamp edge here (x-only, cause unrecorded), and a hover dispatched at an off-viewport pip proves nothing. The Escape above also refocused its opener, so the hover claim needs a bare rest state.
-  const stable = makeStable(makeSettle({ evaluate, sleep }));
-  const before = await evaluate(readCam);
-  await evaluate(`document.getElementById("lf-stage").focus()`);
-  await pressKey("0", "Digit0", 48);
-  await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-  await mouseMove(send, 20, 20);
-  await stable(HOMED, "H14d the camera flown home", { departed: (d) => movedFrom(d.cam, before) });
-  const pipRest = await evaluate(PIP_BOX);
-  await mouseMove(send, Math.round(pipRest.cx), Math.round(pipRest.cy));
-  await stable(PIP_BOX, "H14d the pip took the hover", { departed: (d) => d.hover });
-  const pipHover = await evaluate(PIP_BOX);
-  await mouseMove(send, 20, 20);
-  check(
-    "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
-    Math.abs(pipHover.cx - pipRest.cx) < 0.5 &&
-      Math.abs(pipHover.cy - pipRest.cy) < 0.5 &&
-      Math.abs(pipHover.w - pipRest.w) < 0.5 &&
-      Math.abs(pipRest.w - 34) < 0.5 &&
-      Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02 &&
-      pipHover.btnBg === "rgba(0, 0, 0, 0)",
-    JSON.stringify({ pipRest, pipHover }),
-  );
-}
-
 export async function h14cLegend({ evaluate, check, sleep, pressKey, clickAt }: HomeKit): Promise<void> {
   const legendPt = await evaluate(buttonPoint('.lf-legend-btn[data-station="reading-room"]'));
   if (legendPt !== null) await clickAt(Math.round(legendPt.x), Math.round(legendPt.y));

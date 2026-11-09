@@ -1,4 +1,4 @@
-// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup at rest, its corner and legend passing the hand through, its stations, hint and camera (L13 to L20, L27, L28 and L30, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
+// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's corner and legend passing the hand through, its stations, hint and camera (L18 to L20, L27, L28 and L30, Issue #779 part 2f; its markup is test/site/built-pages.test.ts's since Issue #1273). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { forgetChartTouch, takeChartTouch } from "../support/chart-touch.ts";
 import { landed } from "../support/home.ts";
 import type { Cam } from "../support/home.ts";
@@ -6,7 +6,6 @@ import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { l13Stations, l14Legend, l15Shelf, l16NoticeAndPanel, l17Hook } from "./landfall/markup.ts";
 import { l18Corner, l19Legend, l20Stations } from "./landfall/dress.ts";
 import { stageKit, gestureKit, entersKit } from "./landfall/kit.ts";
 import type { LandfallKit } from "./landfall/kit.ts";
@@ -85,15 +84,10 @@ async function l1Desktop(k: LandfallKit, step: ReturnType<typeof makeStep>): Pro
 
 export async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   const home = await k.settleHome();
-  await step("L13", async () => {
-    landed(home, "L13");
-    await l13Stations(k);
+  await step("L18", async () => {
+    landed(home, "L18");
+    await l18Corner(k);
   });
-  await step("L14", () => l14Legend(k));
-  await step("L15", () => l15Shelf(k));
-  await step("L16", () => l16NoticeAndPanel(k));
-  await step("L17", () => l17Hook(k));
-  await step("L18", () => l18Corner(k));
   await step("L19", () => l19Legend(k));
   await step("L27", () => l27HintPlace(k));
   await step("L30", () => l30Camera(k));

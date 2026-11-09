@@ -19,9 +19,6 @@ const VIEW: Payload<View> = `(() => {
   return { sx: scrollX, sy: scrollY, scale: w ? w.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && laidOut };
 })()`;
 
-const centreOf = (selector: string): Payload<Point | null> =>
-  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()`;
-
 async function landHome(k: HomeKit, w: number): Promise<View> {
   await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
   await bounce(k.send, `http://127.0.0.1:${k.PORT}/`);
@@ -98,27 +95,6 @@ export async function h19Sideways(k: HomeKit): Promise<void> {
   );
 }
 
-type Slip = { open: boolean; overflows: boolean };
-const SLIP = (id: string): Payload<Slip> =>
-  `(() => { const c = document.getElementById("lf-card-${id}"); const s = c ? c.querySelector(".lf-card-scroll") : null; return { open: !!c && !c.hidden && Number(getComputedStyle(c).opacity) === 1, overflows: !!s && s.scrollHeight > s.clientHeight }; })()`;
-
-async function openSlip(k: HomeKit, id: string): Promise<Slip> {
-  const pip = `.lf-station[data-station="${id}"]`;
-  const left = await k.evaluate<number>(
-    `(() => { const r = document.querySelector('${pip}').getBoundingClientRect(), root = document.documentElement; return Math.min(root.scrollWidth - root.clientWidth, Math.max(0, Math.round(r.left + r.width / 2 + scrollX - ${W / 2}))); })()`,
-  );
-  await scrolledTo(k, left);
-  const at = await k.evaluate(centreOf(pip));
-  const hit =
-    at !== null &&
-    (await k.evaluate<boolean>(
-      `(() => { const e = document.elementFromPoint(${at.x}, ${at.y}); return !!e && !!e.closest('${pip}'); })()`,
-    ));
-  if (at === null || !hit) throw new Error(`the ${id} pip takes no hit at ${JSON.stringify(at)}`);
-  await k.clickAt(at.x, at.y);
-  return makeSettle(k)(SLIP(id), (d) => d.open, `home floor ${id} slip open`);
-}
-
 type Shown = { open: boolean; sx: number; sy: number; cw: number; slip: [number, number]; pip: number };
 const SHOWN = (id: string): Payload<Shown> => `(() => {
   const c = document.getElementById("lf-card-${id}");
@@ -156,9 +132,6 @@ export async function h20Reveal(k: HomeKit): Promise<void> {
   const faults: string[] = [];
   const rows: string[] = [];
   const arms: readonly (readonly [number, string, boolean])[] = [
-    [560, "reduce", false],
-    [640, "reduce", false],
-    [900, "reduce", false],
     [640, "no-preference", false],
     [640, "no-preference", true],
     [1280, "reduce", false],
@@ -181,31 +154,8 @@ export async function h20Reveal(k: HomeKit): Promise<void> {
     await k.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   }
   k.check(
-    "H20 a station's slip opened on a window narrower than the page brings itself wholly into the window by a sideways scroll, at 560, 640 and 900 with motion reduced and at 640 with motion on, there also after the reader had scrolled down, the window ending at the stage's top; the station clicked stays in the window from about 593 wide; at 1280 nothing scrolls (Alex, 2026-10-06, Issue #762)",
+    "H20 a station's slip opened on a window narrower than the page brings itself wholly into the window by a sideways scroll, at 640 with motion on, there also after the reader had scrolled down, the window ending at the stage's top, and the station clicked stays in the window; at 1280 nothing scrolls (Alex, 2026-10-06, Issue #762)",
     faults.length === 0,
     `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
-  );
-}
-
-type Back = { id: string; overflows: boolean; from: number; to: number };
-
-async function backOverSlip(k: HomeKit, id: string, over: string): Promise<Back> {
-  await openHome(k);
-  const slip = await openSlip(k, id);
-  const before = await scrolledTo(k, 346);
-  const at = await k.evaluate(centreOf(over));
-  if (at === null) throw new Error(`no ${over} on the ${id} slip`);
-  const after = await wheelled(k, at, -120, 0, before);
-  await k.pressKey("Escape", "Escape", 27);
-  return { id, overflows: slip.overflows, from: before.sx, to: after.sx };
-}
-
-export async function h19bOverSlips(k: HomeKit): Promise<void> {
-  const explorer = await backOverSlip(k, "explorer", "#lf-card-explorer .lf-card-prose");
-  const how = await backOverSlip(k, "how", "#lf-card-how .lf-card-scroll");
-  k.check(
-    "H19b at a 640 window, a leftward wheel over an open slip scrolls the page back, over the Explorer's slip and over the How It Works slip's own scrolling text, whose body overflows at this window, so the wheel reaches the page past both the slips' guard and that body's vertical-only containment (Issue #762)",
-    explorer.to < explorer.from && how.to < how.from && how.overflows,
-    JSON.stringify({ explorer, how }),
   );
 }

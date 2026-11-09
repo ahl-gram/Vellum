@@ -1,7 +1,7 @@
-// The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), and the stations, cards, and idle drift (H14-H17, Issue #458): the homepage frame at desktop and on a 390px window that lays out the 1024 page (Issue #762), the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
+// The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), the stations, cards and idle drift (H14, H15a, H15b, H17, Issue #458; the drift's own rules are test/site/home-drift.test.ts's since Issue #1273), and the 640 window (H19, H20, Issue #762): the homepage frame at desktop, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { h19Sideways, h19bOverSlips, h20Reveal } from "./home/floor.ts";
+import { h19Sideways, h20Reveal } from "./home/floor.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
 import { h0Frame, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
@@ -13,10 +13,6 @@ import {
   h8KeySkip,
   h8bHoldSkip,
   h9CeremonyStandsDown,
-  h12aVeilCovers,
-  h12cVeilAbove,
-  h12bSkipOnFloor,
-  h18CameraSeat,
   h11Clean,
 } from "./home/ceremony.ts";
 import {
@@ -28,8 +24,8 @@ import {
   h13fNoScript,
   h13hShelf,
 } from "./home/doors.ts";
-import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h17Clean } from "./home/stations.ts";
-import { h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops, h16NoDrift } from "./home/drift.ts";
+import { h14aFlight, h14aCardFits, h14bEscape, h14cLegend, h17Clean } from "./home/stations.ts";
+import { h15aDrift, h15bWheelStops } from "./home/drift.ts";
 import { homeGestures } from "./home/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -55,7 +51,6 @@ async function h19Floor(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   try {
     await step("H19", () => h19Sideways(k));
-    await step("H19b", () => h19bOverSlips(k));
     await step("H20", () => h20Reveal(k));
   } finally {
     await ctx.send("Emulation.setEmulatedMedia", { features: [] });
@@ -64,8 +59,7 @@ async function h19Floor(ctx: SuiteContext, k: HomeKit): Promise<void> {
 }
 
 async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
-  const { send, setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
-  const { camSeat } = k;
+  const { send, consoleErrors, http4xx } = ctx;
   const errBase2 = consoleErrors.length;
   const httpBase2 = http4xx.length;
   const step = makeStep(ctx);
@@ -76,13 +70,6 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await step("H8b", () => h8bHoldSkip(k));
   await h9CeremonyStandsDown(ctx);
   await step("H10b", () => h10bInlinePredicate(ctx));
-  await setNarrowViewport(390, 844);
-  await h12aVeilCovers(ctx);
-  await step("H12c", () => h12cVeilAbove(ctx));
-  await h12bSkipOnFloor(k);
-  const seat390 = await camSeat();
-  await clearMobile();
-  await h18CameraSeat(k, seat390);
   h11Clean(ctx, errBase2, httpBase2);
   // H13 runs AFTER the clean check on purpose: blocking the bundle logs an expected load error. It proves the pre-paint story (Issue #457, the incognito flash): the inline script dresses first paint without the module, and an unadopted veil releases itself rather than trapping the page.
   const doors = await h13DeadBundle(ctx, step);
@@ -111,12 +98,8 @@ async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   const { atlasPt, visited } = await h14aFlight(k);
   await h14aCardFits(ctx, settled14, atlasPt, visited);
   await h14bEscape(k);
-  await step("H14d", () => h14dPipHover(k));
   await step("H14c", () => h14cLegend(k));
   await step("H15a", () => h15aDrift(ctx));
   await step("H15b", () => h15bWheelStops(ctx));
-  await step("H15c", () => h15cRearmed(ctx));
-  await step("H15d", () => h15dFlightStops(k));
-  await h16NoDrift(k);
   h17Clean(ctx, errBase3, httpBase3);
 }

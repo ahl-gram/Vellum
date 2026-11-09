@@ -1,8 +1,7 @@
 import { DRIFT_SCALE, IDLE_DELAY_MS } from "../../../src/site/home/drift.ts";
-import { atLandfall, buttonPoint, readCam, readXform } from "../../support/home.ts";
+import { readCam, readXform } from "../../support/home.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import type { HomeKit } from "./kit.ts";
 import { mouseWheel } from "../../support/input.ts";
 
 // 2026-10-26: the sine.inOut start moves the printed transform about 0.25 s in; 3000 ms is runner-stall headroom, unswept (no browser reading when set); lane C CI read H15a at 9.2 s.
@@ -20,14 +19,6 @@ const BREATH: Payload<{ xform: string | null; clampHeld: boolean }> = `({ xform:
   const cx = m.e + (1500 * m.a) / 2, cy = m.f + (1157.931 * m.a) / 2;
   return m.a >= fit * 0.65 - 1e-6 && m.a <= 7 + 1e-6 && cx >= -1 && cx <= r.width + 1 && cy >= -1 && cy <= r.height + 1;
 })() })`;
-
-type Landing = { open: boolean; writes: number; frame: number };
-
-const FRAMES: Payload<boolean> = `(() => { const s = document.getElementById("lf-sheet"); if (s && window.__h15d === undefined) { const h = (window.__h15d = { frame: 0, writes: 0 }); const tick = () => { h.frame++; requestAnimationFrame(tick); }; requestAnimationFrame(tick); new MutationObserver((records) => { h.writes += records.length; }).observe(s, { attributes: true, attributeFilter: ["style"] }); } return window.__h15d !== undefined; })()`;
-
-const FLIGHT: Payload<Landing> = `(() => { const card = document.getElementById("lf-card-reading-room"); const cs = card ? getComputedStyle(card) : null; const h = window.__h15d; return { open: !!card && !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95, writes: h.writes, frame: h.frame }; })()`;
-
-const stoppedWriting = (d: Landing, last: Landing): boolean => d.writes === last.writes && d.frame > last.frame;
 
 async function breathes({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">, label: string) {
   const settle = makeSettle({ evaluate, sleep });
@@ -67,52 +58,5 @@ export async function h15bWheelStops({ evaluate, send, check, sleep }: SuiteCont
     "H15b a real wheel stops the drift at once: the zoom lands and the transform holds still through three samples",
     still1 !== null && still1 === still2 && still2 === still3,
     JSON.stringify({ still1, still2, still3 }),
-  );
-}
-
-export async function h15cRearmed({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  const { rest, first, second } = await breathes({ evaluate, sleep }, "H15c the drift started again");
-  check(
-    "H15c the stop re-armed the idle timer: once the idle delay has run again, the sheet breathes again",
-    rest !== null && second.xform !== null && first.xform !== second.xform,
-    JSON.stringify({ rest, first, second }),
-  );
-}
-
-export async function h15dFlightStops({ evaluate, check, sleep, pressKey, clickAt }: HomeKit): Promise<void> {
-  // The Reading Room station, not the Explorer: H14c framed it at 0.4 of the stage and the wheel zoomed at center, so it is the one icon this history provably keeps inside the 800-tall stage clip.
-  const flightPt = await evaluate(buttonPoint('.lf-station[data-station="reading-room"]'));
-  let landing: Landing | null = null;
-  if (flightPt !== null) {
-    await evaluate(FRAMES);
-    await clickAt(Math.round(flightPt.x), Math.round(flightPt.y));
-    landing = await makeStable(makeSettle({ evaluate, sleep }))(FLIGHT, "H15d the station flight landed", {
-      departed: (d) => d.open,
-      same: stoppedWriting,
-    });
-  }
-  const flight1 = await evaluate(readXform);
-  await sleep(900, "window: the transform must hold still across it");
-  const flight2 = await evaluate(readXform);
-  check(
-    "H15d this sub's own station flight stops the drift too: after the flight settles the transform holds still",
-    flightPt !== null && flight1 !== null && flight1 === flight2,
-    JSON.stringify({ flightPt, landing, flight1, flight2 }),
-  );
-  await pressKey("Escape", "Escape", 27);
-}
-
-export async function h16NoDrift({ evaluate, send, check, sleep, settleHome }: HomeKit): Promise<void> {
-  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const settled16 = await settleHome();
-  await sleep(IDLE_DELAY_MS + 800, "window: past the idle delay, where a drift would begin");
-  const calm1 = await evaluate(readXform);
-  await sleep(900, "window: the transform must hold still across it");
-  const calm2 = await evaluate(readXform);
-  await send("Emulation.setEmulatedMedia", { features: [] });
-  check(
-    "H16 reduced motion gets no drift at all: nine-plus seconds of stillness stay still",
-    atLandfall(settled16) && calm1 !== null && calm1 === calm2,
-    JSON.stringify({ calm1, calm2 }),
   );
 }

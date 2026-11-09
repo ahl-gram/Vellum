@@ -1,47 +1,17 @@
-// The head cluster against the right-hand corner on every page (Issue #638; Issue #762 pull request B): each page is resized while loaded, at a stride and at every media edge from 1024 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
+// The head cluster against the right-hand corner on the Print Room, the page whose corner comes nearest (Issue #638; Issue #762 pull request B; one room since Issue #1273 ruling 2): resized while loaded, at a stride and at every media edge from 1024 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
+import { ATLAS_ROUTE } from "../../scripts/generate-discovery.ts";
 import { PAGE_FLOOR as FLOOR_WIDTH } from "../../src/site/shared/page-box.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { withReducedMotion } from "../support/reduced-motion.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import {
-  fillBetween,
-  mediaEdges,
-  meetings,
-  nearest,
-  pageFaults,
-  routesUnder,
-  strideWidths,
-  squeezes,
-} from "./corners/geometry.ts";
-import type { Control, CornerRead, Row } from "./corners/geometry.ts";
-import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
-import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl7Degenerate } from "./corners/floor.ts";
-import { fl6Paper, fl8ChartOnPaper } from "./corners/floor-paper.ts";
+import { fillBetween, mediaEdges, meetings, nearest, pageFaults, strideWidths } from "./corners/geometry.ts";
+import type { CornerRead, Row } from "./corners/geometry.ts";
+import { fl2Reach, fl5KeyboardDrawer, fl7Degenerate } from "./corners/floor.ts";
+import { fl8ChartOnPaper } from "./corners/floor-paper.ts";
 import { bounce } from "../support/nav.ts";
 
-const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
-const PAGE_FLOOR = [
-  "/",
-  "/explorer/",
-  "/explorer/portfolio/",
-  "/faq/",
-  "/gallery/",
-  "/glossary/",
-  "/print-room/",
-  "/prospect/",
-  "/reading-room/",
-  "/ribbon/",
-  "/seed-of-the-day/",
-  "/specimen/",
-  "/writing-room/",
-];
-const YIELD_TOP = 1040;
-const YIELD_MID = 1032;
-// A page narrower than this lays out its 1024 layout (Alex, 2026-10-06, Issue #762), which FL1 holds piece for piece, so the sweeps read every page from here up.
+// A page narrower than this lays out its 1024 layout (Alex, 2026-10-06, Issue #762), so the sweep reads from here up.
 const ROOM_FLOOR = FLOOR_WIDTH;
 const WIDE = 1280;
 const STRIDE = 32;
@@ -52,7 +22,6 @@ type PageResult = {
   readonly page: string;
   readonly stretches: readonly (readonly Row[])[];
   readonly media: readonly string[];
-  readonly dateline: string | null;
   readonly links: readonly string[];
   readonly error: string | null;
 };
@@ -106,23 +75,7 @@ const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject
 const MEDIA: Payload<string[]> =
   `(() => { const out = []; const sheet = (s) => { if (s.media.mediaText) out.push(s.media.mediaText); try { walk(s.cssRules); } catch {} }; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r instanceof CSSImportRule) { if (r.media.mediaText) out.push(r.media.mediaText); if (r.styleSheet) sheet(r.styleSheet); } if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) sheet(s); return out; })()`;
 
-// The page's own dateline must be datelineFor's for today (or yesterday, across a UTC midnight) before the sweep swaps in the widest one.
-const WIDEST_DATELINE: Payload<string> = `(async () => {
-  const { datelineFor } = await import("/explorer/engine/world/seed-of-the-day.js");
-  const el = document.getElementById("dateline");
-  const booted = el.textContent, now = Date.now();
-  if (booted !== datelineFor(new Date(now)) && booted !== datelineFor(new Date(now - 86400000))) throw new Error("the page wrote its own dateline: " + JSON.stringify(booted));
-  let best = "", widest = -1;
-  for (let t = Date.UTC(2026, 0, 1); t < Date.UTC(2126, 0, 1); t += 86400000) {
-    el.textContent = datelineFor(new Date(t));
-    const rg = new Range(); rg.selectNodeContents(el);
-    for (const b of rg.getClientRects()) if (b.width > widest) { widest = b.width; best = el.textContent; }
-  }
-  el.textContent = best;
-  return best;
-})()`;
-
-async function load(ctx: SuiteContext, page: string, w: number): Promise<string | null> {
+async function load(ctx: SuiteContext, page: string, w: number): Promise<void> {
   const { send, evaluate, sleep, PORT } = ctx;
   await ctx.setTouch(false);
   await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
@@ -138,7 +91,6 @@ async function load(ctx: SuiteContext, page: string, w: number): Promise<string 
   await evaluate(
     `(() => { const s = document.createElement("div"); s.id = "co-vw"; s.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:0;visibility:hidden;pointer-events:none"; document.body.appendChild(s); return true; })()`,
   );
-  return page === "/seed-of-the-day/" ? evaluate(WIDEST_DATELINE, true) : null;
 }
 
 async function readAt(ctx: SuiteContext, w: number): Promise<Row> {
@@ -167,22 +119,20 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   const stretches: Row[][] = [];
   const media: string[] = [];
   const links: string[] = [];
-  let dateline: string | null = null;
   try {
-    dateline = await load(ctx, page, WIDE);
+    await load(ctx, page, WIDE);
     media.push(...(await ctx.evaluate(MEDIA)));
     stretches.push(
       await readStretch(ctx, strideWidths(WIDE, ROOM_FLOOR, STRIDE, mediaEdges(media, ROOM_FLOOR - 1, WIDE))),
     );
     // Read at the END of the stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
     links.push(...(await ctx.evaluate(LINKS)));
-    return { page, stretches, media, dateline, links, error: null };
+    return { page, stretches, media, links, error: null };
   } catch (err) {
     return {
       page,
       stretches,
       media,
-      dateline,
       links,
       error: err instanceof Error ? err.message.slice(0, 400) : String(err),
     };
@@ -190,48 +140,6 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
 }
 
 const PLANTED = "@media (max-width: 900px) { .co-witness { color: red; } }";
-async function floorControl(ctx: SuiteContext): Promise<{ clean: readonly string[]; planted: readonly string[] }> {
-  await load(ctx, "/faq/", WIDE);
-  const clean = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
-  await ctx.evaluate(
-    `(() => { const s = document.createElement("style"); s.id = "co-floor-control"; s.textContent = ${JSON.stringify(PLANTED)}; document.head.appendChild(s); return true; })()`,
-  );
-  const planted = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
-  await ctx.evaluate(`(() => { document.getElementById("co-floor-control").remove(); return true; })()`);
-  return { clean, planted };
-}
-
-async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
-  const pages = routesUnder(resolve(REPO, "src/pages"));
-  const missing = PAGE_FLOOR.filter((p) => !pages.includes(p));
-  const results: PageResult[] = [];
-  for (const page of pages) results.push(await sweepPage(ctx, page));
-  const lines = results.map((r) => {
-    const rows = r.stretches.flat();
-    const faults = pageFaults(r.media, rows, ROOM_FLOOR);
-    const close = rows.reduce<{ d: number; w: number }>(
-      (best, row) => {
-        const d = nearest(row.read.left, row.read.right);
-        return d < best.d ? { d, w: row.w } : best;
-      },
-      { d: Infinity, w: 0 },
-    );
-    return {
-      ok: r.error === null && faults.length === 0,
-      text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}`,
-    };
-  });
-  const control = await floorControl(ctx);
-  ctx.check(
-    "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, every page from 1024, below which a page lays out its 1024 layout (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 1024, the motto kept everywhere); and no sheet any page loads, its own media list included, carries a width condition that switches at or below the 1024 floor, which a rule planted at 900 on the FAQ shows the same fault list naming (Issue #763 ruling 2A)",
-    missing.length === 0 &&
-      lines.every((l) => l.ok) &&
-      control.clean.length === 0 &&
-      control.planted.some((f) => f.includes("(max-width: 900px)")),
-    `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")} | control: clean ${JSON.stringify(control.clean)}, planted ${JSON.stringify(control.planted)}`,
-  );
-  return results;
-}
 
 /** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
 async function linksAtRest(
@@ -254,16 +162,44 @@ async function linksAtRest(
   return { links: rest.links, media: rest.media };
 }
 
-// Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin read the Portfolio's).
-async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
-  const unswept = DISCOVERY_ROUTES.filter((route) => !swept.some((r) => r.page === route));
-  const read: { page: string; links: readonly string[] }[] = [...swept];
-  const floorFaults: string[] = [];
-  for (const page of unswept) {
-    const { links, media } = await linksAtRest(ctx, page);
-    read.push({ page, links });
-    floorFaults.push(...pageFaults(media, [], ROOM_FLOOR).map((f) => `${page}: ${f}`));
-  }
+// Blind spots, each erring toward a miss: a link a script writes later than the Print Room's sweep is read in its authored form, and with scripts on a link inside <noscript> is not an element at all.
+const CO1_PAGE = "/print-room/";
+
+async function co1PrintRoom(ctx: SuiteContext): Promise<PageResult> {
+  const r = await sweepPage(ctx, CO1_PAGE);
+  const rows = r.stretches.flat();
+  const faults = pageFaults(r.media, rows, ROOM_FLOOR);
+  const close = rows.reduce<{ d: number; w: number }>(
+    (best, row) => {
+      const d = nearest(row.read.left, row.read.right);
+      return d < best.d ? { d, w: row.w } : best;
+    },
+    { d: Infinity, w: 0 },
+  );
+  const clean = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
+  await ctx.evaluate(
+    `(() => { const s = document.createElement("style"); s.id = "co-floor-control"; s.textContent = ${JSON.stringify(PLANTED)}; document.head.appendChild(s); return true; })()`,
+  );
+  const planted = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
+  await ctx.evaluate(`(() => { document.getElementById("co-floor-control").remove(); return true; })()`);
+  ctx.check(
+    "CO1 on the Print Room, whose corner comes nearest the head cluster of any page, resized while loaded to 1280 at a 32px stride from the 1024 floor and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, the motto stays, the band covers the cluster, and nothing lays out wider than set or scrolls sideways (Issue #638; Issue #762); and no sheet the page loads, its own media list included, carries a width condition that switches at or below the 1024 floor, which a rule planted at 900 on the same page shows the same fault list naming (Issue #763 ruling 2A; one room since Issue #1273 ruling 2)",
+    r.error === null &&
+      faults.length === 0 &&
+      clean.length === 0 &&
+      planted.some((f) => f.includes("(max-width: 900px)")),
+    `${CO1_PAGE} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""} | control: clean ${JSON.stringify(clean)}, planted ${JSON.stringify(planted)}`,
+  );
+  return r;
+}
+
+async function co4PrintRoomAndAtlas(ctx: SuiteContext, printRoom: PageResult): Promise<void> {
+  const atlas = await linksAtRest(ctx, ATLAS_ROUTE);
+  const read = [
+    { page: printRoom.page, links: printRoom.links },
+    { page: ATLAS_ROUTE, links: atlas.links },
+  ];
+  const floorFaults = pageFaults(atlas.media, [], ROOM_FLOOR).map((f) => `${ATLAS_ROUTE}: ${f}`);
   const from = new Map<string, string[]>();
   for (const r of read) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);
   const bare = read.filter((r) => r.links.length === 0).map((r) => r.page);
@@ -273,53 +209,9 @@ async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promis
     if (status !== 200) dead.push(`${path} answers ${status}, linked from ${[...new Set(pages)].join(", ")}`);
   }
   ctx.check(
-    "CO4 every link on every page the site serves, the tree's and every discovery route's (the atlas among them), read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04); and no sheet a discovery route beyond the sweep loads carries a width condition that switches at or below the 1024 floor, or one CO1's reader cannot parse (Issue #763 ruling 2A)",
-    swept.length > 0 && unswept.length > 0 && bare.length === 0 && dead.length === 0 && floorFaults.length === 0,
-    `${read.length} pages (${unswept.join(", ")} beyond the sweep), ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}${floorFaults.length ? `; ${floorFaults.join("; ")}` : ""}`,
-  );
-}
-
-// Each control's own width, read by lifting its flex-shrink for one read and putting it back, its transition held off since under reduced motion the read otherwise returns the 0.01ms transition's start value: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
-const CONTROLS: Payload<Control[]> = `(() => {
-  const out = [];
-  const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
-  if (!corner) return out;
-  for (const c of corner.querySelectorAll("input, button, select, textarea")) {
-    const w = c.getBoundingClientRect().width;
-    if (!w) continue;
-    const kept = c.style.flexShrink, held = c.style.transition;
-    c.style.transition = "none";
-    c.style.flexShrink = "0";
-    const natural = c.getBoundingClientRect().width;
-    c.style.flexShrink = kept;
-    c.style.transition = held;
-    out.push({ t: c.tagName.toLowerCase() + (c.id ? "#" + c.id : "." + String(c.className).split(" ")[0]), w, natural });
-  }
-  return out;
-})()`;
-
-async function co3Wraps(ctx: SuiteContext): Promise<void> {
-  const rows: string[] = [];
-  const faults: string[] = [];
-  let read = 0;
-  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
-    await load(ctx, page, page === "/" ? ROOM_FLOOR : YIELD_TOP);
-    const yields = await ctx.evaluate<boolean>(
-      `getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`,
-    );
-    const widths = [...(yields ? [YIELD_TOP, YIELD_MID] : []), ...(page === "/" ? [ROOM_FLOOR] : [])];
-    for (const w of widths) {
-      await readAt(ctx, w);
-      const controls = await ctx.evaluate(CONTROLS);
-      read += controls.length;
-      faults.push(...squeezes(w, controls).map((f) => `${page} ${f}`));
-    }
-    if (widths.length) rows.push(page);
-  }
-  ctx.check(
-    "CO3 no control in a right-hand corner is squeezed below its own width, the row wrapping onto another line instead: on home at 1024, and on a page whose corner carries its own cap and so gives way toward the kit's width, at 1032 and 1040 (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638); a page below 1024 lays out its 1024 layout (FL1), and the Print Room's and the Specimen's corners from 1024 up are Issue #741's (Alex, 2026-10-06, on Issue #762) (Issue #638)",
-    faults.length === 0 && read > 0,
-    `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
+    "CO4 every link on the Print Room, read at the end of CO1's sweep once its script has written its road on to the Portfolio, and every link on the served atlas, outside the tree, read once the document is complete and its links stop changing, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04); and no sheet the atlas loads carries a width condition that switches at or below the 1024 floor, or one CO1's reader cannot parse (Issue #763 ruling 2A)",
+    bare.length === 0 && dead.length === 0 && floorFaults.length === 0,
+    `${from.size} distinct paths from ${read.map((r) => `${r.page} (${r.links.length})`).join(", ")}${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}${floorFaults.length ? `; ${floorFaults.join("; ")}` : ""}`,
   );
 }
 
@@ -353,22 +245,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   try {
     await withReducedMotion(ctx, async () => {
-      let swept: readonly PageResult[] = [];
+      let printRoom: PageResult | null = null;
       await step("CO1", async () => {
-        swept = await co1Sweep(ctx);
+        printRoom = await co1PrintRoom(ctx);
       });
-      await step("CO4", () => co4Roads(ctx, swept));
+      await step("CO4", () => co4PrintRoomAndAtlas(ctx, printRoom!));
       await step("CO2", () => co2Control(ctx));
-      await step("CO3", () => co3Wraps(ctx));
-      await step("CO5", () => co5Yields(ctx));
-      await step("CO6", () => co6Follows(ctx));
-      await step("CO7", () => co7Band(ctx));
-      await step("FL1", () => fl1Floor(ctx));
       await step("FL2", () => fl2Reach(ctx));
-      await step("FL3", () => fl3Relayout(ctx));
-      await step("FL4", () => fl4Read(ctx));
       await step("FL5", () => fl5KeyboardDrawer(ctx));
-      await step("FL6", () => fl6Paper(ctx));
       await step("FL7", () => fl7Degenerate(ctx));
       await step("FL8", () => fl8ChartOnPaper(ctx));
     });

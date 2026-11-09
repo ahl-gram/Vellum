@@ -19,7 +19,7 @@ import {
   cd52LayWrites,
 } from "./chart-drawer/desk.ts";
 import { cd45SnapBack, cd46ReducedCarry } from "./chart-drawer/drag.ts";
-import { cd55WhereAuthored, cd56WorkerBlocked } from "./chart-drawer/room.ts";
+import { cd56WorkerBlocked } from "./chart-drawer/room.ts";
 import { cd58TurnFiles, cd59AbortedTurn } from "./chart-drawer/gestures.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
 import {
@@ -53,7 +53,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { clickEar, forget } = k;
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await step("CD1", () => cd1DogEar(k));
-  // The one value a step hands another: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled. Several later checks read the page an earlier step left (CD52 and CD60 the sheets CD2 and CD32 laid, CD55 the bare Portfolio the CD21 step left, CD59 the page CD58 loaded).
+  // The one value a step hands another: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled. Several later checks read the page an earlier step left (CD52 and CD60 the sheets CD2 and CD32 laid, CD59 the page CD58 loaded).
   let laid: Read | null = null;
   await step("CD2, CD2b, CD2c", async () => {
     const earAt = await clickEar();
@@ -115,7 +115,6 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
     await cd21PortfolioGlass(kd);
   });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await step("CD55", () => cd55WhereAuthored(kd));
   await step("CD56", () => cd56WorkerBlocked(kd));
   await step("CD64", () => cd64PlaceSheet(kd));
   await step("CD48", () => cd48TouchHandle(kd));

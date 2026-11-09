@@ -1,13 +1,10 @@
-import { DESK_FRAME } from "../../../src/site/shared/page-box.ts";
-import { dropExpectedCancellations } from "../../support/console.ts";
 import { makeSettle, makeStable, STILL_ONLY } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { bounce } from "../../support/nav.ts";
 
-// The desk notice (Issue #761): a phone shrinks the fixed 1024 page and sees the Notice to Travellers, a tablet at 1024 and a narrow desktop window, which lays out the same 1024 page and scrolls sideways over it (Issue #762), never do, and Continue anyway is remembered.
+// The desk notice (Issue #761): a tablet at the 1024 floor lays the page out at scale 1 and never sees the Notice to Travellers, upright or level.
 const KEY = "vellum.desk-notice.v1";
 const PAGE = "/faq/";
-const ELSEWHERE = "/glossary/";
 
 type Notice = {
   ready: string;
@@ -59,57 +56,6 @@ export function deskKit(ctx: SuiteContext) {
 const readSettled = (k: DeskKit, label: string) =>
   makeStable(k.settle)(READ, label, { departed: STILL_ONLY.deskNotice });
 
-export async function dnPhone(k: DeskKit): Promise<void> {
-  const { check, send, setMobileViewport } = k;
-  await setMobileViewport(390, 844);
-  await k.forget();
-  await k.open(PAGE);
-  const phone = await readSettled(k, "the page on a phone");
-  check(
-    "DN1 a phone lays the page out at the fixed 1024 and shrinks it to fit: no narrow rule applies",
-    phone.width === 1024 && phone.scale < 1 && !phone.narrow,
-    JSON.stringify(phone),
-  );
-  check(
-    "DN2 the Notice to Travellers shows on a phone, its button reachable where it stands",
-    phone.shown && phone.w > 0 && phone.hitsButton && phone.key === null,
-    JSON.stringify(phone),
-  );
-  check(
-    "DN3 it reads at its own size on the phone's screen: body text 16 on-screen pixels, a button over the house's 24px thumb floor",
-    phone.bodyPx >= 15.9 && phone.buttonPx >= 24,
-    JSON.stringify({ bodyPx: phone.bodyPx, buttonPx: phone.buttonPx }),
-  );
-  const paper = await printedWidth(k);
-  const screen = await readSettled(k, "the page back on screen");
-  check(
-    "DN9 the notice prints as nothing (print is paper), and the same run's screen read shows it",
-    paper === 0 && screen.w > 0,
-    JSON.stringify({ paper, screen: screen.w }),
-  );
-  await send("Emulation.setDeviceMetricsOverride", { width: 844, height: 390, deviceScaleFactor: 1, mobile: true });
-  const turned = await k.settle(
-    READ,
-    (d, last) =>
-      Math.abs(d.scale - phone.scale) > 0.1 && last !== null && last.scale === d.scale && last.bodyPx === d.bodyPx,
-    "the phone turned",
-  );
-  check(
-    "DN3r turned sideways with no reload, the notice re-fits: its text still reads at 16 on-screen pixels",
-    turned.bodyPx >= 15.9 && turned.bodyPx <= 16.1,
-    JSON.stringify({ before: phone.scale, after: turned.scale, bodyPx: turned.bodyPx }),
-  );
-}
-
-async function printedWidth({ send, evaluate }: DeskKit): Promise<number> {
-  await send("Emulation.setEmulatedMedia", { media: "print" });
-  try {
-    return await evaluate<number>(`document.querySelector(".desk-notice").getBoundingClientRect().width`);
-  } finally {
-    await send("Emulation.setEmulatedMedia", { media: "", features: [] });
-  }
-}
-
 export async function dnTablet(k: DeskKit): Promise<void> {
   const { check, setMobileViewport } = k;
   await setMobileViewport(1024, 768);
@@ -128,121 +74,4 @@ export async function dnTablet(k: DeskKit): Promise<void> {
     upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null,
     JSON.stringify(upright),
   );
-}
-
-export async function dnNarrow(k: DeskKit): Promise<void> {
-  const { check, setNarrowViewport } = k;
-  await setNarrowViewport(390, 844);
-  await k.open(PAGE);
-  const narrow = await readSettled(k, "the page in a narrow desktop window");
-  const pageW = await k.evaluate<number>(`document.body.getBoundingClientRect().width`);
-  check(
-    "DN6 a desktop window narrowed to 390, a touchscreen's included, lays out the 1024 page at its own size, scrolling sideways over it rather than shrinking it, and never sees the notice (Issue #762: the 1024 floor)",
-    narrow.width === 390 &&
-      pageW === 1024 &&
-      narrow.scale === 1 &&
-      !narrow.shown &&
-      narrow.w === 0 &&
-      narrow.key === null,
-    JSON.stringify({ ...narrow, pageW }),
-  );
-}
-
-export async function withStorageRefused<T>({ send }: Pick<SuiteContext, "send">, body: () => Promise<T>): Promise<T> {
-  const { identifier } = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
-    source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
-  });
-  try {
-    return await body();
-  } finally {
-    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier }).catch(() => undefined);
-  }
-}
-
-export async function dnRefused(k: DeskKit): Promise<void> {
-  const { check, setMobileViewport, consoleErrors } = k;
-  await setMobileViewport(390, 844);
-  await withStorageRefused(k, async () => {
-    const errors = consoleErrors.length;
-    await k.open(PAGE);
-    const refused = await readSettled(k, "the page with storage refused");
-    const logged = dropExpectedCancellations(consoleErrors.slice(errors));
-    check(
-      "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
-      refused.shown && refused.key === "unreadable" && logged.length === 0,
-      JSON.stringify({ refused, logged }),
-    );
-  });
-}
-
-export async function dnContinue(k: DeskKit): Promise<void> {
-  const { check, touch, setMobileViewport } = k;
-  await setMobileViewport(390, 844);
-  await k.forget();
-  try {
-    await k.open(PAGE);
-    const before = await readSettled(k, "the page before the tap");
-    await touch("touchStart", [{ x: before.tap.x, y: before.tap.y, id: 0 }]);
-    await touch("touchEnd", []);
-    const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
-    await k.open(ELSEWHERE);
-    const next = await readSettled(k, "the next page after Continue anyway");
-    check(
-      "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
-      after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
-      JSON.stringify({
-        tap: before.tap,
-        after: { w: after.w, key: after.key },
-        next: { shown: next.shown, key: next.key },
-      }),
-    );
-  } finally {
-    await k.forget();
-  }
-}
-
-type FramedNotice = {
-  ready: string;
-  framed: boolean;
-  shown: boolean;
-  top: number;
-  bottom: number;
-  inner: number;
-  hits: boolean;
-};
-
-const FRAMED_NOTICE: Payload<FramedNotice> = `(() => {
-  const n = document.querySelector(".desk-notice");
-  const r = n.getBoundingClientRect();
-  const b = n.querySelector("button").getBoundingClientRect();
-  return { ready: document.readyState, framed: document.documentElement.classList.contains(${JSON.stringify(DESK_FRAME)}), shown: n.classList.contains("on"),
-    top: r.top, bottom: r.bottom, inner: innerHeight, hits: document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) === n.querySelector("button") };
-})()`;
-
-const inWindow = (d: FramedNotice): boolean => d.framed && d.shown && d.top >= 0 && d.bottom <= d.inner && d.hits;
-
-export async function dnFramed(k: DeskKit): Promise<void> {
-  const { check, setMobileViewport } = k;
-  const read = (label: string) =>
-    k.settle(
-      FRAMED_NOTICE,
-      (d, last) => d.ready === "complete" && last !== null && JSON.stringify(d) === JSON.stringify(last),
-      label,
-    );
-  try {
-    await setMobileViewport(844, 390);
-    await k.forget();
-    await k.open("/explorer/");
-    const side = await read("DN10 the framed room sideways");
-    await setMobileViewport(390, 844);
-    await k.open("/explorer/");
-    const up = await read("DN10 the framed room upright");
-    check(
-      "DN10 on a chart room's desk frame the Notice to Travellers stands wholly inside the window at first sight, held sideways and upright, and its button is reachable where it stands (Issue #778)",
-      inWindow(side) && inWindow(up),
-      JSON.stringify({ side, up }),
-    );
-  } finally {
-    await k.forget();
-  }
 }

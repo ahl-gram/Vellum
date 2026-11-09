@@ -189,7 +189,7 @@
   background: var(--parchment);
   border-radius: 50%;
 }
-/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `e2e/suites/landfall/page.ts` reads the ride, `CL1` in `e2e/suites/cluster.ts` the panel); body-child specificity because the layout's inline global sheet renders after the page css. */
+/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `e2e/suites/landfall/page.ts` reads the ride); body-child specificity because the layout's inline global sheet renders after the page css. */
 body {
   position: relative;
 }

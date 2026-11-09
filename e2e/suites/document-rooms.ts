@@ -1,26 +1,12 @@
-// The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, stands beside the 1024 page in a narrower window (Issue #762), and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
-import { explorerUp } from "../support/explorer.ts";
+// The Q & A's index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 3), the thin reading-page suite the Primer joins (Issue #1273 ruling 5): the index stands open beside the sheet with a row for every section, folds to hand the sheet the width and comes back from its tab, and the room's name stands in a region landmark. Every geometry is MEASURED.
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
-import { withScriptsOff } from "../support/scripts-off.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import {
-  ix9SurveySheet,
-  ix10ColumnsFold,
-  ix11Intro,
-  ix12GlossaryShape,
-  ix13Cultures,
-  ix14Anchors,
-  readSheets,
-} from "./document-rooms/sheets.ts";
-import type { Sheets } from "./document-rooms/sheets.ts";
 import { ix8Landmark } from "./document-rooms/landmark.ts";
 import { bounce } from "../support/nav.ts";
-import { mouseMove, sendClick } from "../support/input.ts";
 
 const FAQ = "/faq/";
-const GLOSSARY = "/glossary/";
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
 type Index = {
   innerW: number;
@@ -92,67 +78,27 @@ const READ: Payload<Index> = `(() => {
   };
 })()`;
 
-const SCROLLS: Payload<{ n: number }> =
-  `(() => { if (window.__ixScrolls === undefined) { window.__ixScrolls = 0; addEventListener("scroll", () => { window.__ixScrolls++; }, { passive: true }); } return { n: window.__ixScrolls }; })()`;
-const INPUTS: Payload<{ n: number; value: string | null }> =
-  `(() => { if (window.__ixInputs === undefined) { window.__ixInputs = 0; addEventListener("input", () => { window.__ixInputs++; }); } return { n: window.__ixInputs, value: document.querySelector(".find input")?.value ?? null }; })()`;
-
 const LANDING: Payload<{ sheet: number[] | null; slip: number[] | null }> =
   `(() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)); }; return { sheet: r(".sheet"), slip: r("#index") }; })()`;
 
 export type DocRoomsKit = ReturnType<typeof docRoomsKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setTouch, PORT } = ctx;
+  const { send } = ctx;
   const settle = makeSettle(ctx);
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = docRoomsKit({ ...ctx, settle });
 
-  // The desktop arm at the sibling suites' 1280x800: the harness window is taller, and a tall viewport cannot scroll a late section up to the reading line.
+  // IX1's geometry is read at the sibling suites' 1280x800, never the harness's taller window.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   let faq: Index | undefined;
   await step("IX1", async () => {
     faq = await ix1QaStands(k);
   });
-  await step("IX2", () => ix2InksRow(k, faq!));
   await step("IX3", () => ix3Folds(k, faq!));
-  await step("IX4", () => ix4FindBox(k));
-  await setTouch(false);
-  await step("NA3", () => na3Floor(k));
-  await step("IX6", () => ix6NoScript(k));
   await step("IX8", () => ix8Landmark(k));
-
-  let sheets: Sheets | undefined;
-  await step("IX9", async () => {
-    sheets = await readSheets(k);
-    ix9SurveySheet(k, sheets);
-  });
-  await step("IX10", () => ix10ColumnsFold(k, sheets!));
-  const read = (fn: (s: Sheets) => void) => () => Promise.resolve(sheets).then((s) => fn(s!));
-  await step(
-    "IX11",
-    read((s) => ix11Intro(k, s)),
-  );
-  await step(
-    "IX12",
-    read((s) => ix12GlossaryShape(k, s)),
-  );
-  await step(
-    "IX13",
-    read((s) => ix13Cultures(k, s)),
-  );
-  await step(
-    "IX14",
-    read((s) => ix14Anchors(k, s)),
-  );
-
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");
-  await step("IX restore", async () => {
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
-    await explorerUp(ctx, "IX restore");
-  });
+  gate.check("IX7 the document-room suite drove the Q & A with no console error and no 4xx");
 }
 
 export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
@@ -197,30 +143,6 @@ async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Inde
   return faq;
 }
 
-export async function ix2InksRow({ evaluate, check, settle }: DocRoomsKit, faq: Index): Promise<void> {
-  const target = faq.h2s[2];
-  const firstEntryOf = await evaluate<string | null>(
-    `(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`,
-  );
-  const s0 = await evaluate(SCROLLS);
-  await evaluate(`document.getElementById(${JSON.stringify(target)}).scrollIntoView()`);
-  await settle(SCROLLS, (d) => d.n > s0.n, "IX2 the page scrolled to the section's head");
-  const atHead = await evaluate(READ);
-  const s1 = await evaluate(SCROLLS);
-  await evaluate(`document.getElementById(${JSON.stringify(firstEntryOf)}).scrollIntoView()`);
-  await settle(SCROLLS, (d) => d.n > s1.n, "IX2 the page scrolled to its first question");
-  const atEntry = await evaluate(READ);
-  check(
-    "IX2 following a section's head inks that row alone with no question marked yet (never the section above's last one); reaching its first question marks that one, the reader's place kept as the page moves (#462 ruling 1)",
-    atHead.scrollY > 0 &&
-      JSON.stringify(atHead.inked) === JSON.stringify([target]) &&
-      atHead.now.length === 0 &&
-      JSON.stringify(atEntry.inked) === JSON.stringify([target]) &&
-      JSON.stringify(atEntry.now) === JSON.stringify([firstEntryOf]),
-    `at the head #${target}: inked ${JSON.stringify(atHead.inked)}, now ${JSON.stringify(atHead.now)}; at its first question #${firstEntryOf}: inked ${JSON.stringify(atEntry.inked)}, now ${JSON.stringify(atEntry.now)}`,
-  );
-}
-
 async function ix3Folds({ evaluate, check, settle }: DocRoomsKit, faq: Index): Promise<void> {
   await evaluate(`document.querySelector("#index .slip-fold").click()`);
   const folded = await settle(READ, atFolded(faq), "index-folded");
@@ -243,150 +165,5 @@ async function ix3Folds({ evaluate, check, settle }: DocRoomsKit, faq: Index): P
     )} -> ${back.main!.right.toFixed(1)}, sheet right ${faq.sheet!.right.toFixed(1)} -> ${folded.sheet!.right.toFixed(
       1,
     )}`,
-  );
-}
-
-export async function ix4FindBox({ evaluate, send, check, settle, goto }: DocRoomsKit): Promise<void> {
-  await goto(GLOSSARY);
-  const glossary = await evaluate(READ);
-  const typed = await evaluate(INPUTS);
-  await evaluate(`document.querySelector(".find input").focus()`);
-  await send("Input.insertText", { text: "glass" });
-  await settle(INPUTS, (d) => d.n > typed.n && d.value === "glass", "IX4 the find box took the query");
-  const found = await evaluate<{
-    hits: string[];
-    shown: number;
-    total: number;
-    empty: number;
-    rows: number;
-    defsMatch: number;
-  }>(`(() => {
-    const links = [...document.querySelectorAll("#index .terms a")];
-    const hits = links.filter((a) => a.classList.contains("hit"));
-    const shown = links.filter((a) => getComputedStyle(a).display !== "none");
-    const rows = [...document.querySelectorAll("#index .index > li")];
-    return { hits: hits.map((a) => a.textContent), shown: shown.length, total: links.length,
-      empty: rows.filter((li) => getComputedStyle(li).display === "none").length, rows: rows.length,
-      defsMatch: [...document.querySelectorAll(".sheet .def")].filter((d) => /glass/i.test(d.textContent)).length };
-  })()`);
-  await evaluate(
-    `(() => { const i = document.querySelector(".find input"); i.value = ""; i.dispatchEvent(new Event("input", { bubbles: true })); })()`,
-  );
-  const cleared = await evaluate<{ shown: number; total: number; hits: number; empty: number }>(
-    `(() => { const links = [...document.querySelectorAll("#index .terms a")]; return { shown: links.filter((a) => getComputedStyle(a).display !== "none").length, total: links.length, hits: links.filter((a) => a.classList.contains("hit")).length, empty: [...document.querySelectorAll("#index .index > li")].filter((li) => getComputedStyle(li).display === "none").length }; })()`,
-  );
-  check(
-    "IX4 the Glossary's find box narrows the index to the term NAMES typed (every shown term carries the query, sections with none fold away, and definitions that merely mention it do not count), and clearing it restores the whole index (#462 ruling 4)",
-    glossary.count === `${glossary.entries} terms in ${glossary.h2s.length} sections` &&
-      found.hits.length >= 2 &&
-      found.hits.every((t) => /glass/i.test(t)) &&
-      found.shown === found.hits.length &&
-      found.empty > 0 &&
-      found.empty < found.rows &&
-      found.defsMatch > found.hits.length &&
-      cleared.shown === cleared.total &&
-      cleared.hits === 0 &&
-      cleared.empty === 0,
-    `count "${glossary.count}"; "glass": hits ${JSON.stringify(found.hits)} shown ${found.shown}/${found.total}, sections folded ${found.empty}/${found.rows}, definitions mentioning it ${found.defsMatch}; cleared: shown ${cleared.shown}/${cleared.total}, folded ${cleared.empty}`,
-  );
-}
-
-async function pressAt({ send }: DocRoomsKit, x: number, y: number): Promise<void> {
-  await mouseMove(send, x, y);
-  await sendClick(send, x, y);
-}
-
-const centreOf: (sel: string) => Payload<{ x: number; y: number } | null> = (sel) =>
-  `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } : null; })()`;
-
-async function na3Presses(k: DocRoomsKit, scrolled: Index) {
-  const { evaluate, settle } = k;
-  const fold = await evaluate(centreOf("#index .slip-fold"));
-  if (fold) await pressAt(k, fold.x, fold.y);
-  const folded = await settle(READ, atFolded(scrolled), "na3-folded");
-  const tab = await evaluate(centreOf(".slip-tab"));
-  if (tab) await pressAt(k, tab.x, tab.y);
-  const back = await settle(READ, atUnfolded(folded), "na3-unfolded");
-  const entry = await evaluate<{ href: string | null; x: number; y: number } | null>(
-    `(() => { const a = document.querySelector("#index .entries li:nth-child(2) a"); if (!a) return null; const r = a.getBoundingClientRect(); return { href: a.getAttribute("href"), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`,
-  );
-  if (entry) await pressAt(k, entry.x, entry.y);
-  const landed = await settle<{
-    top: number;
-    hash: string;
-    band: number;
-    rem: number;
-    folded: boolean;
-    visibility: string;
-  }>(
-    `(() => { const t = document.querySelector(${JSON.stringify(entry?.href ?? "#")}); const s = document.getElementById("index"); const root = getComputedStyle(document.documentElement); return { top: t ? Math.round(t.getBoundingClientRect().top) : NaN, hash: location.hash, band: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize), rem: parseFloat(root.fontSize), folded: s.classList.contains("folded"), visibility: getComputedStyle(s).visibility }; })()`,
-    (d, last) => d.hash === entry?.href && last !== null && last.top === d.top,
-    "na3-jumped",
-  );
-  return { fold, folded, tab, back, entry, landed };
-}
-
-// At a 640 window the page is the 1024 one, so the index stands past the window's right edge until the window scrolls to it; every press here is a real one at the element's own centre.
-async function na3Floor(k: DocRoomsKit): Promise<void> {
-  const { evaluate, send, check, goto } = k;
-  await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 800, deviceScaleFactor: 1, mobile: false });
-  await goto(FAQ);
-  const wide = await evaluate(READ);
-  await send("Emulation.setDeviceMetricsOverride", { width: 640, height: 800, deviceScaleFactor: 1, mobile: false });
-  await goto(FAQ);
-  const at = await evaluate(READ);
-  await evaluate("window.scrollTo(document.documentElement.scrollWidth, 0)");
-  const scrolled = await evaluate(READ);
-  const { fold, folded, tab, back, entry, landed } = await na3Presses(k, scrolled);
-  const sameAsWide = Math.abs(at.slip!.x - wide.slip!.x) < 0.5 && Math.abs(at.sheet!.right - wide.sheet!.right) < 0.5;
-  check(
-    "NA3 at a 640x800 window the Q & A lays out its 1024 page: the index stands beside the sheet where it stands at 1024 and the window scrolls sideways to it; scrolled there, a real press folds it and hands the sheet the width, its tab brings it back, and a followed question lands at its own scroll margin, a rem under the band, with the index left open (Alex, 2026-10-06, Issue #762: the 1024 floor; the phone's bottom sheet went with the narrow layout)",
-    at.innerW === 640 &&
-      at.scrollW === 1024 &&
-      !at.folded &&
-      at.slipVisibility === "visible" &&
-      sameAsWide &&
-      !!fold &&
-      folded.folded &&
-      folded.main!.right > scrolled.main!.right + 200 &&
-      !!tab &&
-      !back.folded &&
-      back.slipVisibility === "visible" &&
-      Math.abs(back.main!.right - scrolled.main!.right) < 1 &&
-      !!entry &&
-      landed.hash === entry.href &&
-      Math.abs(landed.top - (landed.band + landed.rem)) <= 1 &&
-      !landed.folded &&
-      landed.visibility === "visible",
-    JSON.stringify({
-      innerW: at.innerW,
-      scrollW: at.scrollW,
-      slipX: [at.slip?.x, wide.slip?.x],
-      sheetRight: [at.sheet?.right, wide.sheet?.right],
-      fold,
-      foldedMain: [scrolled.main?.right, folded.main?.right, back.main?.right],
-      tab,
-      entry,
-      landed,
-    }),
-  );
-}
-
-async function ix6NoScript({ evaluate, send, check, goto }: DocRoomsKit): Promise<void> {
-  const { noJs, noJsLink } = await withScriptsOff(send, async () => {
-    await goto(GLOSSARY);
-    const read = await evaluate(READ);
-    const link = await evaluate<{ href: string | null; target: boolean }>(
-      `(() => { const a = document.querySelector("#index .terms a"); return { href: a.getAttribute("href"), target: !!document.querySelector(a.getAttribute("href")) }; })()`,
-    );
-    return { noJs: read, noJsLink: link };
-  });
-  check(
-    "IX6 with SCRIPT EXECUTION DISABLED the index still stands, every section and term server-rendered with a real anchor, and NO row is inked: the ink is the control, since the binder alone sets it and every other term here is equally true with scripts on (#462 ruling 1, the no-JS floor)",
-    JSON.stringify(noJs.rows) === JSON.stringify(noJs.h2s) &&
-      noJs.rowEntries.reduce((a, b) => a + b, 0) === noJs.entries &&
-      noJsLink.target &&
-      noJs.inked.length === 0,
-    `rows ${noJs.rows.length}/${noJs.h2s.length}, entries ${noJs.rowEntries.reduce((a, b) => a + b, 0)}/${noJs.entries}, first term ${noJsLink.href} resolves=${noJsLink.target}, inked ${JSON.stringify(noJs.inked)} (the CONTROL: empty says script really was off)`,
   );
 }

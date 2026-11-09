@@ -1,4 +1,4 @@
-// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts) and over a zoomed one (EZ1 and EZ2 in zoomed.ts), and home's and the Gallery's clusters (CL1, RH33).
+// The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts) and over a zoomed one (EZ1 and EZ2 in zoomed.ts).
 import type { Payload } from "../../types.ts";
 
 export type Glyph = {
@@ -45,5 +45,5 @@ const glyphsOver = (perLine: boolean, sheetOnly: boolean): Payload<Glyph[]> => `
   return out;
 })()`;
 export const GLYPHS_OVER_SHEET = glyphsOver(false, true);
-// Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`), and on home and in the Gallery, which have no #sheet (CL1 in `e2e/suites/cluster.ts`, RH33 in `e2e/suites/runninghead/gallery.ts`).
+// Every chrome line wherever it stands, one entry per line box, for the zoomed reads, where the chart runs under the chrome past the sheet's fitted box (EZ1 and EZ2 in `e2e/suites/stage/zoomed.ts`).
 export const GLYPH_LINES = glyphsOver(true, false);

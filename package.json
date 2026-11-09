@@ -48,6 +48,7 @@
     "astro": "^7.4.5",
     "eslint": "^10.11.0",
     "fontkit": "^2.0.4",
+    "linkedom": "0.18.15",
     "prettier": "3.9.9",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.70.1",

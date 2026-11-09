@@ -3,9 +3,6 @@ import assert from "node:assert/strict";
 import type { Cam } from "../../e2e/support/home.ts";
 import type { makeRoom } from "../../e2e/support/room.ts";
 import type { makeStep } from "../../e2e/support/step.ts";
-import { cl1Wash } from "../../e2e/suites/cluster.ts";
-import { h0Frame } from "../../e2e/suites/home/frame.ts";
-import { homeKit } from "../../e2e/suites/home/kit.ts";
 import { h14aCardFits } from "../../e2e/suites/home/stations.ts";
 import { l13Home, l9Touch } from "../../e2e/suites/landfall.ts";
 import type { LandfallKit } from "../../e2e/suites/landfall/kit.ts";
@@ -41,55 +38,6 @@ function page(answer: (expression: string) => unknown) {
   return { checked, ctx };
 }
 
-const LOADED = `document.readyState === "complete" && !!document.getElementById("seed-form")`;
-const VEIL = `!!document.getElementById("lf-veil")`;
-const FRAME = {
-  pos: "absolute",
-  right: 30,
-  top: 30,
-  inside: true,
-  gold: "rgb(240, 227, 189)",
-  doorsHidden: true,
-};
-const HERO = { hook: "Give Vellum a number.\nIt gives you back a world.", seed: "42", lineStyle: "italic" };
-const homePage = (veilUp: boolean) =>
-  page((expression) =>
-    expression === LOADED
-      ? true
-      : expression === VEIL
-        ? veilUp
-        : expression.includes(`getElementById("seed-form")`)
-          ? FRAME
-          : expression.includes(".seed-hook")
-            ? HERO
-            : null,
-  );
-
-test("H1 and H2 read the corner chrome only once home's first veil is down, so a veil that never lifts reds them though their own reads pass", async () => {
-  const lifted = homePage(false);
-  await h0Frame(homeKit(lifted.ctx));
-  assert.deepEqual(
-    lifted.checked,
-    [
-      { code: "H0", ok: true },
-      { code: "H1", ok: true },
-      { code: "H2", ok: true },
-    ],
-    "the frame's own reads do not pass, so this test proves nothing",
-  );
-  const stuck = homePage(true);
-  await h0Frame(homeKit(stuck.ctx));
-  assert.deepEqual(
-    stuck.checked,
-    [
-      { code: "H0", ok: true },
-      { code: "H1", ok: false },
-      { code: "H2", ok: false },
-    ],
-    "H1 or H2 passed on a page whose veil never lifted",
-  );
-});
-
 const VISITED = {
   scale: 2.6,
   fit: 1,
@@ -107,20 +55,6 @@ const VISITED = {
   enter: "atlas/",
   arms: 3,
 };
-
-test("CL1 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
-  const ctx = page(() => new Error(READ_THE_PAGE)).ctx;
-  await assert.rejects(
-    cl1Wash(ctx, () => Promise.resolve(LANDED)),
-    (err: Error) => err.message === READ_THE_PAGE,
-    "a settled home did not reach CL1's own read",
-  );
-  await assert.rejects(
-    cl1Wash(ctx, () => Promise.resolve(VEILED)),
-    (err: Error) => err.message === unsettled("CL1"),
-    "CL1 ran on a home that never settled, or failed for another reason",
-  );
-});
 
 test("H14a fails when settleHome's answer never reached its landfall, though the flight it reads passes", async () => {
   const at = page(() => null);
@@ -173,18 +107,19 @@ const landfallKit = (cam: Cam | null): LandfallKit =>
   ({
     ...page(() => new Error(READ_THE_PAGE)).ctx,
     settleHome: (): Promise<Cam | null> => Promise.resolve(cam),
+    scrollToTop: (): Promise<void> => Promise.resolve(),
   }) as unknown as LandfallKit;
 
-test("L13 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
-  const at = stepper(["L13"]);
+test("L18 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
+  const at = stepper(["L18"]);
   await l13Home(landfallKit(LANDED), at.step);
-  const never = stepper(["L13"]);
+  const never = stepper(["L18"]);
   await l13Home(landfallKit(VEILED), never.step);
-  assert.equal(at.failed["L13"], READ_THE_PAGE, "a settled home did not reach L13's own read");
+  assert.equal(at.failed["L18"], READ_THE_PAGE, "a settled home did not reach L18's own read");
   assert.equal(
-    never.failed["L13"],
-    unsettled("L13"),
-    "L13 ran on a home that never settled, or failed for another reason",
+    never.failed["L18"],
+    unsettled("L18"),
+    "L18 ran on a home that never settled, or failed for another reason",
   );
 });
 

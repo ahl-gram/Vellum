@@ -1,16 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { broadsideKit } from "../../e2e/suites/broadside/kit.ts";
-import { br9Authored } from "../../e2e/suites/broadside/room.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { bareArrived, cd20PlatePortfolio } from "../../e2e/suites/chart-drawer/portfolio.ts";
-import { cd55WhereAuthored, cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
-import { pr36Authored } from "../../e2e/suites/print-room/room.ts";
+import { cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
 import { pr40RunnerLayout } from "../../e2e/suites/print-room/runner-layout.ts";
 import { pb3fGlassLeans } from "../../e2e/suites/prospect.ts";
 import { prospectKit } from "../../e2e/suites/prospect/kit.ts";
-import { backHome, pb16ScriptsOff } from "../../e2e/suites/prospect/room.ts";
-import { rr38Authored } from "../../e2e/suites/reading-room/room.ts";
+import { backHome } from "../../e2e/suites/prospect/room.ts";
 import { rb5cLeans } from "../../e2e/suites/ribbon.ts";
 import { ROOMS } from "../../e2e/suites/slide-away/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
@@ -78,12 +74,6 @@ const throwsOn =
   (expression: string): unknown =>
     expression.includes(marker) ? new Error(GONE) : null;
 
-const answersThenThrows = (marker: string, answer: unknown, times: number) => {
-  let seen = 0;
-  return (expression: string): unknown =>
-    expression.includes(marker) ? (++seen <= times ? answer : new Error(GONE)) : null;
-};
-
 const drawer = (ctx: SuiteContext): TableKit =>
   ({
     ...ctx,
@@ -106,24 +96,11 @@ type Site = {
 };
 
 const SITES: readonly Site[] = [
-  { site: "PR36", label: "print-room-scripts-off", answer: throwsOn(".stage noscript .status"), run: pr36Authored },
   {
     site: "PR40",
     label: `PR40 ${ROOMS[0]!.id} staged`,
     answer: throwsOn("document.fonts.status"),
     run: pr40RunnerLayout,
-  },
-  {
-    site: "BR9",
-    label: "explorer-scripts-off",
-    answer: throwsOn(".stage noscript .status"),
-    run: (ctx) => br9Authored(broadsideKit(ctx)),
-  },
-  {
-    site: "PB16",
-    label: "prospect-scripts-off",
-    answer: throwsOn('lay: !!document.getElementById("pp-lay")'),
-    run: (ctx) => pb16ScriptsOff(prospectKit(ctx)),
   },
   {
     site: "PB18's hop to the Q & A",
@@ -137,12 +114,6 @@ const SITES: readonly Site[] = [
     answer: (expression) =>
       expression === AWAY ? { path: "/faq/", ready: "complete" } : throwsOn("marker: window.__pb18")(expression),
     run: (ctx) => backHome(prospectKit(ctx), "warm", false),
-  },
-  {
-    site: "RR38",
-    label: "reading-room-scripts-off",
-    answer: throwsOn('frame: !!document.querySelector(".rf")'),
-    run: rr38Authored,
   },
   {
     site: "the bare Portfolio's arrival",
@@ -160,16 +131,6 @@ const SITES: readonly Site[] = [
           ? { path: "/explorer/", ready: "complete", table: null, seed: null, items: null, room: null }
           : throwsOn(`verb: (document.querySelector("#table-road .verb")`)(expression),
     run: (ctx) => cd20PlatePortfolio(drawer(ctx)),
-  },
-  {
-    site: "CD55",
-    label: "portfolio-scripts-off",
-    answer: answersThenThrows(
-      `where: (document.querySelector("#portfolio .card-where")`,
-      { where: "no sheets gathered at the Explorer", app: true, ready: "complete" },
-      1,
-    ),
-    run: cd55WhereAuthored,
   },
   {
     site: "CD56",

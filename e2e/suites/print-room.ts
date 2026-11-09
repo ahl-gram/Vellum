@@ -18,7 +18,6 @@ import {
 } from "./print-room/redraw.ts";
 import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
 import { pr38BoundDress } from "./print-room/dress.ts";
-import { pr36Authored } from "./print-room/room.ts";
 import { pr40RunnerLayout } from "./print-room/runner-layout.ts";
 import { pr49NoRoad, pr50Refit, prRoadBound, prRoadUnbound } from "./print-room/road.ts";
 
@@ -68,8 +67,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("PRW8", () => prwCountType(ctx));
   await step("PR49", () => pr49NoRoad(ctx));
   await step("PR40", () => pr40RunnerLayout(ctx));
-  // PR36 runs last so prlLink's start, print-room's NEEDS_PREDECESSOR entry and the PR #701 row's reasoning stay true; it leaves a scripts-off page, which the next suite's own navigation replaces.
-  await step("PR36", () => pr36Authored(ctx));
 }
 
 async function boundAndPaper(ctx: SuiteContext, k: PrintRoomKit, step: ReturnType<typeof makeStep>): Promise<void> {

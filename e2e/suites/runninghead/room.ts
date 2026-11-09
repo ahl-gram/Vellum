@@ -1,31 +1,10 @@
-// The kit's shapes across the shelled rooms (Issue #779 part 2h): the sweep gathers one KIT_READ per route, and RH25 and RH32 judge it.
-import { PAGE_RGBA } from "../../support/pixel.ts";
-import type { makeStep } from "../../support/step.ts";
+// The kit's shapes across the shelled rooms and the Portfolio (Issue #779 part 2h): the sweep gathers one KIT_READ per route, and RH32 judges it.
 import type { Payload, SuiteContext } from "../../types.ts";
 import { SHELLED } from "./reads.ts";
 import type { RunningHeadKit } from "./kit.ts";
-import { rh26Pill, rh27Roles, rh28Idiom } from "./dress.ts";
-import { PORTFOLIO, PRINTED_READ, rh29Printed, rh30Ring, rh31Raise } from "./gestures.ts";
+import { PORTFOLIO } from "./gestures.ts";
 import { mouseMove } from "../../support/input.ts";
 
-export type Skeleton = { kids: string[] | null; leaf: boolean; face: number | null };
-export type Pill = { prop: string; ms: number; rest: string; faded: string; was: boolean; back: string } | null;
-export type Role = {
-  family: string;
-  style: string;
-  size: number;
-  caps: string;
-  spacing: number | null;
-  weight: string;
-  transform: string;
-  color: number[];
-  bg: number[];
-  bw: string;
-  bs: string;
-  bc: number[];
-  radius: string;
-  width: number;
-};
 export type Kit = {
   fog: { items: (string | null | number)[][]; adjacent: boolean };
   vignettes: { items: (string | null | number)[][]; adjacent: boolean };
@@ -41,56 +20,15 @@ export type Kit = {
   noscript: boolean;
   roads: (string | null | (string | null)[][])[][];
 };
-export type Printed = {
-  dom: { offenders: string[][] } | null;
-  walk: { sheets: number; unreadable: number; kitArms: number; offenders: string[][] };
-};
-export type KitSample = {
-  skeleton: Skeleton;
-  pill: Pill;
-  roles: Record<string, Role>;
-  rem: number;
-  before: string | null;
-  kit: Kit;
-  printed: Printed | null;
-};
+export type KitSample = { kit: Kit };
 
-const ROLE_SELECTORS = [
-  "#seed-form button[type=submit]",
-  "#seed-input",
-  ".hunt-intro",
-  "#dateline",
-  ".folio-room .dateline",
-  "#grp-land",
-  "#grp-strand",
-  "#grp-hand",
-  ".find input[type=search]",
-  "#type",
-  "#sb-report",
-];
-
-export const KIT_READ: Payload<string> = `(() => { const rgba = ${PAGE_RGBA}, cs = (e) => getComputedStyle(e);
-  const stage = document.querySelector(".stage"), map = document.querySelector(".stage > #sheet.sheet > #map-viewport > #map");
-  const pillEl = document.querySelector(".stage > p.status"); let pill = null;
-  if (pillEl) { const st = cs(pillEl), prop = st.transitionProperty, ms = parseFloat(st.transitionDuration) * 1000, was = pillEl.classList.contains("fading");
-    pillEl.style.transition = "none"; const rest = cs(pillEl).opacity; pillEl.classList.add("fading"); const faded = cs(pillEl).opacity;
-    pillEl.classList.toggle("fading", was); const back = cs(pillEl).opacity; pillEl.style.transition = ""; pill = { prop, ms, rest, faded, was, back }; }
-  const roles = {};
-  for (const sel of ${JSON.stringify(ROLE_SELECTORS)}) { const el = document.querySelector(sel); if (!el) continue; const st = cs(el);
-    roles[sel] = { family: st.fontFamily, style: st.fontStyle, size: parseFloat(st.fontSize), caps: st.fontVariantCaps,
-      spacing: st.letterSpacing === "normal" ? null : parseFloat(st.letterSpacing), weight: st.fontWeight, transform: st.textTransform,
-      color: rgba(st.color), bg: rgba(st.backgroundColor), bw: st.borderTopWidth, bs: st.borderTopStyle, bc: rgba(st.borderTopColor),
-      radius: st.borderTopLeftRadius, width: parseFloat(st.width) }; }
+export const KIT_READ: Payload<string> = `(() => {
   const list = (sel) => [...document.querySelectorAll(sel)];
   const pair = (sel) => { const els = list(sel); return { items: els.map((e) => [e.tagName, e.className, e.getAttribute("aria-hidden"), e.childNodes.length]),
     adjacent: els.length === 2 && els[0].nextElementSibling === els[1] }; };
-  const glassEl = document.querySelector(".zoomery"), folioEl = document.querySelector(".corner.bl"), corner = document.querySelector(".corner.tr");
+  const glassEl = document.querySelector(".zoomery"), folioEl = document.querySelector(".corner.bl");
   const vp = document.querySelector(".stage > #sheet.sheet > #map-viewport");
   return JSON.stringify({
-    skeleton: stage ? { kids: [...stage.children].map((c) => c.tagName + (c.id ? "#" + c.id : "")),
-      leaf: !!stage.querySelector("#sheet.sheet > #sheet-inner.sheet-inner > #map-viewport > #map"), face: map ? map.childElementCount : null }
-      : { kids: null, leaf: false, face: null },
-    pill, roles, rem: parseFloat(cs(document.documentElement).fontSize), before: corner ? getComputedStyle(corner, "::before").content : null,
     kit: { fog: pair(".fog"), vignettes: pair(".vignette"),
       glass: glassEl ? { classes: [...glassEl.classList], id: glassEl.id, role: glassEl.getAttribute("role"), label: glassEl.getAttribute("aria-label"),
         presses: [...glassEl.children].map((b) => [b.tagName, b.id, b.className, b.getAttribute("type"), b.getAttribute("data-zoom"),
@@ -103,89 +41,9 @@ export const KIT_READ: Payload<string> = `(() => { const rgba = ${PAGE_RGBA}, cs
         new URL(a.getAttribute("href") || "", location.href).pathname, [...a.children].map((s) => [s.tagName, s.className, s.id])]) } });
 })()`;
 
-export async function kitRead(k: RunningHeadKit, route: string): Promise<KitSample> {
-  const { send, evaluate } = k;
-  await mouseMove(send, 1, 1);
-  const screen = JSON.parse(await evaluate(KIT_READ)) as KitSample;
-  let printed: Printed | null = null;
-  if (route !== "/") {
-    await send("Emulation.setEmulatedMedia", { media: "print" });
-    try {
-      printed = JSON.parse(await evaluate(PRINTED_READ)) as Printed;
-    } finally {
-      await send("Emulation.setEmulatedMedia", { media: "" });
-    }
-  }
-  return { ...screen, printed };
-}
-
-export async function kitChecks(
-  ctx: SuiteContext,
-  step: ReturnType<typeof makeStep>,
-  k: RunningHeadKit,
-  kits: Record<string, KitSample | undefined>,
-): Promise<void> {
-  const { check } = ctx;
-  const samples = { ...kits };
-  samples[PORTFOLIO] = (await k.visit(PORTFOLIO)) ? await kitRead(k, PORTFOLIO) : undefined;
-  const judge = (read: (c: SuiteContext["check"]) => void) => () => Promise.resolve(check).then(read);
-  await step(
-    "RH25",
-    judge((c) => rh25Skeleton(c, samples)),
-  );
-  await step(
-    "RH26",
-    judge((c) => rh26Pill(c, samples)),
-  );
-  await step(
-    "RH27",
-    judge((c) => rh27Roles(c, samples)),
-  );
-  await step(
-    "RH28",
-    judge((c) => rh28Idiom(c, samples)),
-  );
-  await step(
-    "RH29",
-    judge((c) => rh29Printed(c, samples)),
-  );
-  await step("RH30", () => rh30Ring(k));
-  await step("RH31", () => rh31Raise(k));
-  await step(
-    "RH32",
-    judge((c) => rh32Kit(c, samples)),
-  );
-}
-
-const PILLS: Record<string, string> = {
-  "/print-room/": "P#pr-status",
-  "/prospect/": "P#pp-status",
-  "/ribbon/": "P#rb-status",
-  "/specimen/": "P#sb-status",
-  "/writing-room/": "P#status",
-  [PORTFOLIO]: "P#pf-status",
-};
-
-export function rh25Skeleton(check: SuiteContext["check"], kits: Record<string, KitSample | undefined>): void {
-  const wrong: string[] = [];
-  const ex = kits["/explorer/"];
-  if (!ex) wrong.push("/explorer/: unreachable");
-  else if (!ex.skeleton.leaf) wrong.push("/explorer/: the sheet's leaf is gone");
-  for (const [route, pill] of Object.entries(PILLS)) {
-    const s = kits[route];
-    if (!s) {
-      wrong.push(`${route}: unreachable`);
-      continue;
-    }
-    if (s.skeleton.face === null || s.skeleton.face < 1) wrong.push(`${route}: face ${s.skeleton.face}`);
-    if (s.skeleton.kids?.[0] !== "DIV#sheet") wrong.push(`${route}: first child ${s.skeleton.kids?.[0]}`);
-    if (s.skeleton.kids?.[1] !== pill) wrong.push(`${route}: second child ${s.skeleton.kids?.[1]}, want ${pill}`);
-  }
-  check(
-    "RH25 the kit's stage stands one shape where a room takes it, and the Explorer's sheet keeps its leaf",
-    wrong.length === 0,
-    JSON.stringify(wrong),
-  );
+export async function kitRead(k: RunningHeadKit): Promise<KitSample> {
+  await mouseMove(k.send, 1, 1);
+  return JSON.parse(await k.evaluate(KIT_READ)) as KitSample;
 }
 
 export const FOG_ROOMS = [...SHELLED.filter((r) => r !== "/"), PORTFOLIO];

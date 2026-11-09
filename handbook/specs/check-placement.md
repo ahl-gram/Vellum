@@ -121,9 +121,7 @@ belongs in.
   off what the run lays out, the room's own fit (`fillOf` and `fillPressOf` in
   `e2e/suites/slide-away/kit.ts`, `fillOf` in `e2e/suites/stage/slide-kit.ts`) or the measured box,
   and assert the relation the rule names: SW2's `thirdPress` in `e2e/suites/slide-away/rooms.ts`
-  presses up to the press that fills, whichever it is, never a count written in advance, and SW4's
-  chart folio clause in `sw1Rooms` in `e2e/suites/slide-away/rooms.ts` asks that some room's folio
-  read under the floor with its panel taken away, never a room named in advance. A witness that the
+  presses up to the press that fills, whichever it is, never a count written in advance. A witness that the
   fixture reaches its case asserts that relation too, never the count one machine gave. The window a
   check opens is its own input, but whether the layout there reaches the case is a reading: a
   witness names an instance when it faults because that one room or window misses its case, and
@@ -133,8 +131,7 @@ belongs in.
   the next bullet says. `ARMS` in `e2e/suites/slide-away/rooms.ts`, the windows `thirdPress` asks to
   fill at the third press or later, owes that line. The one exception is a witness that a read can
   see its panel fail, by reading under the contrast floor with the panel taken away, over more than
-  one room: it may instead ask at least one of them and carry no line, as SW4's chart folio clause
-  does. A plan prints a browser check's reading on its fixture and its reading under the mutation,
+  one room: it may instead ask at least one of them and carry no line. A plan prints a browser check's reading on its fixture and its reading under the mutation,
   both off the plan's own build on one machine, before the check is built (the Tests line of
   `.claude/agents/vellum-planner.md`); neither is the second layout's reading a dated line carries.
 - **A ruled number may stay a literal; a measured one is read, or bounded on both layouts.** Ruled
