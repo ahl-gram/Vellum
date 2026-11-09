@@ -205,13 +205,16 @@ export async function runSelected<C extends object>(
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
 
-export function formatSuiteTimings(timings: readonly E2eSuiteTiming[]): readonly string[] {
+export function formatSuiteTimings(
+  timings: readonly { readonly name: string; readonly ms: number }[],
+  noun = "suite",
+): readonly string[] {
   if (timings.length === 0) return [];
   const total = timings.reduce((sum, t) => sum + t.ms, 0);
   const ranked = timings.slice().sort((a, b) => b.ms - a.ms);
   const width = Math.max(...ranked.map((t) => t.name.length));
   return [
-    `per-suite wall clock (${timings.length} suites, ${seconds(total)} total):`,
+    `per-${noun} wall clock (${timings.length} ${noun}s, ${seconds(total)} total):`,
     ...ranked.map((t) => {
       const share = total === 0 ? 0 : (t.ms / total) * 100;
       return `  ${t.name.padEnd(width)}  ${seconds(t.ms).padStart(6)}  ${share.toFixed(1).padStart(5)}%`;
