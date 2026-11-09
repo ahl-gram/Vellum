@@ -1,14 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
+import { Readable } from "node:stream";
 import unitFileClock, { fileClockLines } from "../../scripts/unit-file-clock.ts";
 
 type Events = Parameters<typeof unitFileClock>[0];
 type Event = Events extends AsyncIterable<infer E> ? E : never;
 
-const stream = async function* (...events: Event[]): Events {
-  yield* events;
-};
+const stream = (...events: Event[]): Events => Readable.from(events);
 
 const collect = async (events: Events): Promise<string> => {
   const out: string[] = [];
