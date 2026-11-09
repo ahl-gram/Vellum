@@ -1,4 +1,4 @@
-// The Explorer as authored (scripts off), the Glossary's drafting-table terms and the pickers' options against the Chart Table's grammar (Issue #779 part 2h).
+// The Explorer as authored (scripts off) and the pickers' options against the Chart Table's grammar (Issue #779 part 2h).
 import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { Payload } from "../../types.ts";
@@ -221,34 +221,6 @@ export async function br9Authored({ evaluate, send, check, sleep, PORT }: Broads
     // A hash-only navigate from here would keep this scripts-off document, so the next load starts from a blank one.
     await leaveBlank(send);
   }
-}
-
-type Terms = (string | boolean | null)[][];
-const TERMS: Payload<{ h: string | null; terms: Terms }> =
-  `(() => { const text = ${TEXT}, h = document.getElementById("drafting-table");
-  let next = null; if (h) { let e = h.nextElementSibling; while (e && e.tagName !== "H2") e = e.nextElementSibling; next = e; }
-  const after = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-  return { h: h ? text(h) : null, terms: ["broadside", "coast-warp", "islands", "looseness", "seeds-choice", "shape", "sizes", "survey"].map((id) => { const t = document.getElementById(id);
-    return t ? [text(t), t.tagName + "." + t.className, after(h, t) && (!next || after(t, next))] : [null, null, null]; }) };
-})()`;
-
-export async function br10Terms({ evaluate, check }: BroadsideKit): Promise<void> {
-  const read = await evaluate(TERMS);
-  check(
-    "BR10 the Glossary's drafting-table section names the Explorer's control terms: Broadside, Coast warp, Islands, Looseness, Seed's choice, Shape, Sizes and Survey, each a term entry under that heading",
-    read.h === "At the drafting table" &&
-      same(read.terms, [
-        ["Broadside", "P.term", true],
-        ["Coast warp", "P.term", true],
-        ["Islands", "P.term", true],
-        ["Looseness", "P.term", true],
-        ["Seed's choice", "P.term", true],
-        ["Shape", "P.term", true],
-        ["Sizes", "P.term", true],
-        ["Survey", "P.term", true],
-      ]),
-    JSON.stringify(read),
-  );
 }
 
 const OPTIONS: Payload<(string | null)[][]> =

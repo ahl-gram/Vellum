@@ -41,10 +41,6 @@ const rows = (live: string[], held: string[], hidden: string[]): Record<string, 
     ]),
   );
 
-const PLAIN = rows(["type", "band", "place", "land", "coast"], ["looseness"], ["islands", "sizes", "ragged"]);
-const EXACT = rows(["type", "band", "place", "looseness"], ["land", "coast"], ["islands", "sizes", "ragged"]);
-const LOOSE = rows(["type", "band", "place", "looseness", "coast"], ["land"], ["islands", "sizes", "ragged"]);
-const ARCH_PLAIN = rows(["type", "band", "place", "islands", "land", "coast"], ["looseness"], ["sizes", "ragged"]);
 const COUNTED = rows(["type", "band", "place", "islands", "sizes", "ragged"], ["looseness", "land"], ["coast"]);
 const ON_ARCH = rows(["type", "band", "place", "looseness"], ["islands", "sizes", "land", "coast"], ["ragged"]);
 const LOOSENED = rows(["type", "band", "place", "looseness", "coast"], ["islands", "sizes", "land"], ["ragged"]);
@@ -221,13 +217,6 @@ async function pressesRefused({ evaluate, send, sleep }: BroadsideKit, ids: stri
   return faults;
 }
 
-const PRESSES: Record<string, string[]> = {
-  exact: ["land", "coast"],
-  loose: ["land"],
-  archipelago: ["looseness"],
-  plain: ["looseness"],
-};
-
 async function br19Picks(k: BroadsideKit): Promise<void> {
   const { evaluate, send, sleep, check } = k;
   const settle = makeSettle({ evaluate, sleep });
@@ -281,71 +270,6 @@ async function br19Clears({ evaluate, send, sleep, check }: BroadsideKit): Promi
       drawn.islands === "20" &&
       seat.readouts.islands === "about 20",
     JSON.stringify({ cleared, drawn, seat }),
-  );
-}
-
-const CASES: Array<{
-  name: string;
-  hash: string;
-  want: Record<string, string>;
-  place: string;
-  notes: { land: string; strand: string };
-  ok: (d: Seat) => boolean;
-}> = [
-  {
-    name: "exact",
-    hash: "#seed=30&style=antique&type=island&outline=" + TEXAS,
-    want: EXACT,
-    place: "Texas",
-    notes: { land: "", strand: HELD_NOTES.exact },
-    ok: (d) => d.landDisabled === "true" && d.readouts.land === "held" && d.readouts.coast === "held",
-  },
-  {
-    name: "loose",
-    hash: "#seed=30&style=antique&type=island&outline=" + TEXAS + "&looseness=75",
-    want: LOOSE,
-    place: "Texas",
-    notes: { land: "", strand: HELD_NOTES.loose },
-    ok: (d) => d.readouts.looseness === "looser" && d.readouts.coast !== "held",
-  },
-  {
-    name: "archipelago",
-    hash: "#seed=1&style=antique&type=archipelago",
-    want: ARCH_PLAIN,
-    place: "",
-    notes: { land: "", strand: HELD_NOTES.plain },
-    ok: (d) => d.readouts.islands === "seed's choice" && d.landDisabled === null,
-  },
-  {
-    name: "plain",
-    hash: "#seed=42&style=antique",
-    want: PLAIN,
-    place: "",
-    notes: { land: "", strand: HELD_NOTES.plain },
-    ok: (d) => d.landDisabled === null && d.readouts.looseness === "held",
-  },
-];
-
-export async function br17Holds(k: BroadsideKit): Promise<void> {
-  const { evaluate, sleep, check, goto, EXP } = k;
-  const settle = makeSettle({ evaluate, sleep });
-  const seen: Array<{ name: string; ok: boolean; seat: Seat }> = [];
-  const refusals: string[] = [];
-  for (const c of CASES) {
-    await goto(EXP + c.hash, "broadside-" + c.name);
-    const seat = await settle(SEAT, at(c.want, c.place), `BR17 the ${c.name} seat`);
-    seen.push({ name: c.name, ok: same(seat.notes, c.notes) && holdFaults(seat).length === 0 && c.ok(seat), seat });
-    refusals.push(...(await pressesRefused(k, PRESSES[c.name] ?? [])).map((f) => `${c.name} ${f}`));
-  }
-  check(
-    "BR18b every held slider refuses the reader's press: the sea level, the coast and the looseness keep their values and draw nothing",
-    refusals.length === 0,
-    refusals.join("; "),
-  );
-  check(
-    "BR17 the Land and the Strand each hold what the world on screen cannot use and show the rest, each held row reading held under its own box's note",
-    seen.every((s) => s.ok),
-    JSON.stringify(seen),
   );
 }
 

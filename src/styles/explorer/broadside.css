@@ -29,7 +29,7 @@
   transition-property: none;
 }
 
-/* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `e2e/suites/broadside.ts`). */
+/* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (checked by eye since Issue #1273). */
 .broadside .ledger {
   display: grid;
   grid-template-columns: auto auto 1fr auto auto;

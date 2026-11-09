@@ -1,4 +1,4 @@
-// The slip's own lines read for contrast as EA4 reads the chrome's: each line's computed ink against the ground painted under it with the slip's and the footnotes' text hidden, for SB20 here and BR24 on the Broadside (Issue #1160).
+// The slip's own lines read for contrast as EA4 reads the chrome's: each line's computed ink against the ground painted under it with the slip's and the footnotes' text hidden, for SB20 here (Issue #1160).
 import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba, type Rgb } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
