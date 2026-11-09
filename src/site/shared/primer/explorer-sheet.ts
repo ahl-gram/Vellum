@@ -1,13 +1,26 @@
-import { LAY_ON_CARD } from "../../explorer/chart-drawer.ts";
-import { TABLE_CAP } from "../table-address.ts";
+import { ROUTE_NAMES } from "../../../layouts/nav.ts";
+import { countLine, LAY_ON_CARD, tabLine } from "../../explorer/chart-drawer.ts";
+import { PLATE_TAB, PLATE_VERB } from "../../explorer/portfolio/how-plate.ts";
+import { parseTableValue, TABLE_CAP } from "../table-address.ts";
 import { aria, click, option, road, text, wait, type Act, type Lesson, type Words } from "./shape.ts";
 
 export const AT = "/explorer/#seed=42";
 const SURVEYED = "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600";
-const LAID = `${SURVEYED}&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8`;
+const ONE_SHEET = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8";
+const LAID = `${SURVEYED}&table=${ONE_SHEET}`;
+const LAID_ITEMS = parseTableValue(ONE_SHEET);
 const DOG_EAR = "#map .region-inset .dog-ear";
 const COUNT = ["no", "one", "two", "three", "four", "five", "six"] as const;
 const countWord = (n: number): string => COUNT[n] ?? String(n);
+
+const roomOf = (route: string): string => {
+  const name = ROUTE_NAMES[route];
+  if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${route}`);
+  return name;
+};
+const TO_PRINT = `Take to ${roomOf("/print-room/")}`;
+const TO_JOURNAL = `Read the journal in ${roomOf("/reading-room/")}`;
+const TO_PORTFOLIO = `${PLATE_VERB} ${roomOf("/explorer/portfolio/")}`;
 
 export const chart = (attr: string, says: string): Words => ({
   css: "#map > svg[data-vellum-style]",
@@ -146,17 +159,17 @@ export const SHEET_LESSONS: readonly Lesson[] = [
       },
       {
         id: "explorer-to-print",
-        act: "Press {Take to The Print Room} to take this world home.",
+        act: `Press {${TO_PRINT}} to take this world home.`,
         see: "The Print Room opens with your world on its desk.",
         at: AT,
-        words: [road("#order-plates", "Take to The Print Room")],
+        words: [road("#order-plates", TO_PRINT)],
       },
       {
         id: "explorer-to-journal",
-        act: "Press {Read the journal in The Reading Room} to watch it live.",
+        act: `Press {${TO_JOURNAL}} to watch it live.`,
         see: "The Reading Room opens on the same world.",
         at: AT,
-        words: [road("#journal-link", "Read the journal in The Reading Room")],
+        words: [road("#journal-link", TO_JOURNAL)],
       },
     ],
   },
@@ -174,24 +187,24 @@ export const SHEET_LESSONS: readonly Lesson[] = [
         words: [],
         relies: [aria(DOG_EAR, "lay this survey on the table")],
         do: [click(DOG_EAR)],
-        then: [text("#chart-drawer-tab", "The Drawer · one sheet", "starts")],
+        then: [text("#chart-drawer-tab", tabLine(LAID_ITEMS))],
       },
       {
         id: "explorer-drawer",
-        act: "Press {The Drawer} at the right edge.",
+        act: `Press {${PLATE_TAB}} at the right edge.`,
         see: `The Chart Table slides out with your sheets on it. It holds up to ${countWord(TABLE_CAP)}.`,
         at: LAID,
-        words: [text("#chart-drawer-tab", "The Drawer", "starts")],
+        words: [text("#chart-drawer-tab", PLATE_TAB, "starts")],
         do: [click("#chart-drawer-tab")],
-        then: [text("#chart-drawer-count", "one sheet laid", "starts")],
+        then: [text("#chart-drawer-count", countLine(LAID_ITEMS))],
       },
       {
         id: "explorer-to-portfolio",
-        act: "Press {Take the table to The Portfolio}.",
+        act: `Press {${TO_PORTFOLIO}}.`,
         see: "The Portfolio opens with every sheet you laid, ready to take home.",
         at: LAID,
         first: [click("#chart-drawer-tab")],
-        words: [road("#table-road", "Take the table to The Portfolio")],
+        words: [road("#table-road", TO_PORTFOLIO)],
       },
       {
         id: "explorer-commission",

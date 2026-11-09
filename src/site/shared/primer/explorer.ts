@@ -1,8 +1,11 @@
-import { HELD_NOTES } from "../../explorer/land-rows.ts";
+import { HELD_NOTES, islandsWord, looseWord, raggedWord } from "../../explorer/land-rows.ts";
 import { AT, chart, SHEET_LESSONS } from "./explorer-sheet.ts";
 import { aria, choose, click, labelled, option, set, text, wait, type Ladder, type Words } from "./shape.ts";
 
 const ICELAND = "ne-1159320917";
+const ISLANDS = 20;
+const RAGGED = 70;
+const LOOSENESS = 70;
 
 const label = (id: string, says: string): Words => text(`label[for=${id}]`, says);
 const end = (row: string, side: "min" | "max", says: string): Words =>
@@ -72,8 +75,8 @@ export const EXPLORER: Ladder = {
           see: "The sea fills with isles, and the readout says about how many. A few may touch or sink, so the count is never exact.",
           at: "/explorer/#seed=42&type=archipelago",
           words: [label("islands", "islands"), end("islands", "min", "few"), end("islands", "max", "many")],
-          do: [set("#islands", "20")],
-          then: [text("#islands-readout", "about 20"), chart("data-vellum-islands", "20")],
+          do: [set("#islands", String(ISLANDS))],
+          then: [text("#islands-readout", islandsWord(ISLANDS)), chart("data-vellum-islands", String(ISLANDS))],
         },
         {
           id: "explorer-sizes",
@@ -149,8 +152,11 @@ export const EXPLORER: Ladder = {
           at: "/explorer/#seed=42&type=archipelago&islands=20",
           words: [end("ragged", "min", "round"), end("ragged", "max", "ragged")],
           relies: [label("ragged", "coast")],
-          do: [set("#ragged", "70")],
-          then: [text("#ragged-readout", "ragged 0.70"), chart("data-vellum-raggedness", "0.7")],
+          do: [set("#ragged", String(RAGGED))],
+          then: [
+            text("#ragged-readout", raggedWord(RAGGED / 100)),
+            chart("data-vellum-raggedness", String(RAGGED / 100)),
+          ],
         },
         {
           id: "explorer-looseness",
@@ -158,8 +164,8 @@ export const EXPLORER: Ladder = {
           see: "The land slips its outline toward the seed's own island, and the coast row comes free.",
           at: `/explorer/#seed=42&outline=${ICELAND}`,
           words: [label("looseness", "looseness"), end("looseness", "min", "exact"), end("looseness", "max", "loose")],
-          do: [set("#looseness", "70")],
-          then: [text("#looseness-readout", "looser"), label("coast", "coast")],
+          do: [set("#looseness", String(LOOSENESS))],
+          then: [text("#looseness-readout", looseWord(LOOSENESS / 100)), label("coast", "coast")],
         },
       ],
     },
