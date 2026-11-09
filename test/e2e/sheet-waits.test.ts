@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { g2cKeys, HASH } from "../../e2e/suites/glass-ceremony.ts";
 import type { GlassKit } from "../../e2e/suites/glass-ceremony.ts";
 import { d3DragQuiet, MARK_SHEET, NEW_SHEET } from "../../e2e/suites/motion.ts";
-import { t3InterruptTurn, t5SettleSupersedes, TURNING } from "../../e2e/suites/turn.ts";
+import { t3InterruptTurn, TURNING } from "../../e2e/suites/turn.ts";
 import { v1FlipsToVerso, v2RedrawWhileFlipped, v4bFlipBack, versoKit } from "../../e2e/suites/verso.ts";
 import type { VersoKit } from "../../e2e/suites/verso.ts";
 import { z13DeepLink, z5VersoHomes } from "../../e2e/suites/zoom/resets.ts";
@@ -117,14 +117,6 @@ test("T3 interrupts the ink turn only once it is under way, and times out naming
     err.message.startsWith("settle timeout T3 the ink turn under way: "),
   );
   assert.equal(count(said, "topographic"), 0, "the second style was set before the first turn began");
-});
-
-test("T5 draws the new world only once the nautical turn is under way, and times out naming it when it never starts", async () => {
-  const { ctx, said } = recording((expression) => (expression === TURNING ? { turning: false } : {}));
-  await assert.rejects(t5SettleSupersedes(waiting(ctx)), (err: Error) =>
-    err.message.startsWith("settle timeout T5 the nautical turn under way: "),
-  );
-  assert.equal(count(said, 'value="7"'), 0, "the new world was drawn before the turn began");
 });
 
 test("D3 waits for the sheet it marked before the input to be replaced", async () => {

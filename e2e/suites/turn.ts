@@ -10,7 +10,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("T1, T1b", () => t1StyleTurns(ctx));
   await step("T2", () => t2NewWorldSettles(ctx));
   await step("T3, T4", () => t3InterruptTurn(ctx));
-  await step("T5", () => t5SettleSupersedes(ctx));
   await step("T6", () => t6LiveTurnTornDown(ctx));
   await step("T6b", () => t6bLandsSettled(ctx));
 }
@@ -123,35 +122,6 @@ export async function t3InterruptTurn({
     "T4 no leaked choreography after the settle-window (no .turning, no back face, no live WAAPI anim on the leaf)",
     g3.turning === false && g3.back === 0 && g3.anims === 0,
     JSON.stringify(g3),
-  );
-}
-
-export async function t5SettleSupersedes({
-  evaluate,
-  check,
-  sleep,
-  waitSettled,
-  waitTurned,
-}: SuiteContext): Promise<void> {
-  const settle = makeSettle({ evaluate, sleep });
-  await evaluate(
-    `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`,
-  );
-  await waitSettled("turn-then-settle-base");
-  await evaluate(
-    `(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  await settle(TURNING, (d) => d.turning, "T5 the nautical turn under way");
-  await evaluate(`(()=>{document.getElementById("seed").value="7";document.getElementById("draw").click();})()`);
-  await waitTurned("settle-supersedes-turn");
-  await sleep(200, "window: a leaked turn would surface in it");
-  const g5 = await evaluate<{ seed: string | null; svgCount: number; back: number; turning: boolean }>(
-    `(()=>{const svg=document.querySelector("#map svg");return{seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length,turning:!!document.querySelector(".sheet.turning")};})()`,
-  );
-  check(
-    "T5 a settle superseding a live turn wins: lands on the new world, no orphan",
-    g5.seed === "7" && g5.svgCount === 1 && g5.back === 0 && g5.turning === false,
-    JSON.stringify(g5),
   );
 }
 

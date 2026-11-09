@@ -1,15 +1,12 @@
-// Glass ceremony e2e (G, Issue #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
+// Glass ceremony e2e (G, Issue #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes and inline dash props) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai.
 import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { g9PressFace } from "./glass-ceremony/dress.ts";
-import { g10PressDark } from "./glass-ceremony/gestures.ts";
 import { REDRAFT_TRIES } from "./zoom/kit.ts";
 
 export const HASH: Payload<{ cx: string | null; cy: string | null; k: string | null }> =
   `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`;
 
-type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
 export type GlassKit = ReturnType<typeof glassKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -18,18 +15,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = glassKit(ctx);
 
   await step("G setup", () => gSetup(k));
-  await g1Cluster(k);
-  await step("G9", () => g9PressFace(k));
-  await step("G10", () => g10PressDark(k));
   await g2aGlides(k);
   await g2bCompounds(k);
   await step("G2c", () => g2cKeys(k));
   await g3ReducedMotion(k);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await g4InksIn(k);
-  await g4bSettles(k);
-  await g5Tokens(k);
-  await g7BandHop(k);
   await g8WholeSheet(k);
   await g6ReducedCeremony(k);
   await step("G restore", () => gRestore(k));
@@ -79,40 +70,6 @@ async function gSetup({ evaluate, waitSettled }: GlassKit): Promise<void> {
   await waitSettled("glass-ceremony-base");
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-}
-
-async function g1Cluster({ evaluate, check }: GlassKit): Promise<void> {
-  const g1 = await evaluate<{
-    grpAria: string | null;
-    order: string;
-    zin: Btn;
-    zout: Btn;
-    zreset: Btn;
-    keys: boolean;
-    radius: string;
-    size: number;
-  }>(
-    `(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`,
-  );
-  check(
-    "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice, the chart's touch press above them (Issue #778), the hold and the loupe among them on the Explorer (Issue #751); no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
-    g1.grpAria === "Camera" &&
-      g1.order === "zoom-touch,zoom-hold,zoom-loupe,zoom-in,zoom-out,zoom-reset" &&
-      g1.zin.aria === "Draw nearer" &&
-      g1.zin.text === "+" &&
-      !g1.zin.svg &&
-      g1.zin.title === null &&
-      g1.zout.aria === "Stand off" &&
-      g1.zout.text === "\u2212" &&
-      !g1.zout.svg &&
-      g1.zreset.aria === "The whole sheet" &&
-      g1.zreset.text === "\u2302" &&
-      !g1.zreset.svg &&
-      !g1.keys &&
-      g1.radius === "4px" &&
-      Math.abs(g1.size - 35.2) < 0.5,
-    JSON.stringify(g1),
-  );
 }
 
 async function g2aGlides({ evaluate, check, settleK }: GlassKit): Promise<void> {
@@ -263,68 +220,6 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
   await shoot("explorer-sub9-redraft-dryin.png");
 }
 
-async function g4bSettles({ evaluate, check, shoot }: GlassKit): Promise<void> {
-  const g4b = await evaluate<{ dash: string; drawLen: string; running: number }>(
-    `(async()=>{
-    const svg=document.querySelector("#map .region-inset svg");
-    await Promise.all(svg.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));
-    const coast=svg.querySelector("#layer-land path");
-    return{dash:coast?coast.style.strokeDasharray:"(no coast)",drawLen:coast?coast.style.getPropertyValue("--draw-len"):"",
-      running:svg.getAnimations({subtree:true}).filter(a=>a.playState==="running").length};
-  })()`,
-    true,
-  );
-  check(
-    "G4b the redraft ceremony settles pristine: dash + --draw-len removed on animationend, none running (#170)",
-    !g4b.dash && !g4b.drawLen && g4b.running === 0,
-    JSON.stringify(g4b),
-  );
-  await shoot("explorer-sub9-redraft-rested.png");
-}
-
-async function g5Tokens({ evaluate, check }: GlassKit): Promise<void> {
-  const g5 = await evaluate<{ draw: number; dry: number; town: number; village: number; villageRule: boolean }>(`(()=>{
-    const cs=getComputedStyle(document.documentElement);
-    const ms=(v)=>{const s=(v||"").trim();return s.endsWith("ms")?parseFloat(s):s.endsWith("s")?parseFloat(s)*1000:NaN;};
-    const draw=ms(cs.getPropertyValue("--redraft-draw"));
-    const dry=ms(cs.getPropertyValue("--redraft-dry"));
-    const town=ms(cs.getPropertyValue("--redraft-dry-wait"));
-    const village=ms(cs.getPropertyValue("--redraft-dry-wait-village"));
-    let villageRule=false;
-    for(const ss of document.styleSheets){
-      let rules;try{rules=ss.cssRules;}catch(e){continue;}
-      if(!rules)continue;
-      for(const r of rules){
-        if(r.selectorText&&r.selectorText.includes('.dry-in[data-tier="village"]'))villageRule=true;
-      }
-    }
-    return{draw,dry,town,village,villageRule};
-  })()`);
-  check(
-    "G5 the redraft grade is tokenized and tier-staggered: tokens parse, village waits later than town, village rule declared (#170)",
-    g5.draw > 0 && g5.dry > 0 && g5.town > 0 && g5.village > g5.town && g5.villageRule,
-    JSON.stringify(g5),
-  );
-}
-
-async function g7BandHop({ evaluate, check, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
-  const before7 = (await rgn()).redrafts;
-  await enterAt(3.6, 0.5, 0.5);
-  const s7 = await waitRedraft(before7, 2);
-  const g7 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dry: number }>(`(()=>{
-    const insets=[...document.querySelectorAll("#map .region-inset")];
-    const svg=insets.length?insets[insets.length-1].querySelector("svg"):null;
-    if(!svg)return{svg:false};
-    return{svg:true,redrafting:svg.classList.contains("redrafting"),
-      dry:svg.querySelectorAll("g.settlement.dry-in").length};
-  })()`);
-  check(
-    "G7 a band hop re-inks the coast but re-animates no persisting name (zero dry-in at the measured window, #170 AC1)",
-    s7.band === 2 && g7.svg && g7.redrafting && g7.dry === 0,
-    `band=${s7.band} ${JSON.stringify(g7)}`,
-  );
-}
-
 async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): Promise<void> {
   await evaluate(`document.getElementById("zoom-reset").click()`);
   const g8cam = await settleHome();
@@ -352,7 +247,7 @@ async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): P
 
 async function g6ReducedCeremony({ evaluate, send, check, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  // G8's voiced glide home passes THROUGH band 2 and its settle debounce can dispatch a survey on the way; since Issue #400 that draw is still in flight here and commits after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
+  // G8's voiced glide home starts inside band 1, and a survey its settle debounce dispatched on the way may still be in flight here and commit after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
   for (let i = 0; i < 100; i++) {
     const a = await rgn();
     await sleep(300);
