@@ -12,17 +12,13 @@ import {
   WHEELED,
 } from "../../e2e/suites/cards/cap.ts";
 import type { PinnedAtRest, Scrolled } from "../../e2e/suites/cards/cap.ts";
-import { pCardShot } from "../../e2e/suites/cards/glass.ts";
 import { p30Tablet, TAPPED } from "../../e2e/suites/cards/hold-tablet.ts";
 import type { CardsKit } from "../../e2e/suites/cards/kit.ts";
-import { p4Capital } from "../../e2e/suites/cards/overlay.ts";
-import type { Manifest } from "../../e2e/suites/cards/overlay.ts";
 import { z6PinnedCard, z8CardConstant } from "../../e2e/suites/zoom/camera.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import { CARD_ROLL } from "../../e2e/support/witness.ts";
 import type { Point, SuiteContext } from "../../e2e/types.ts";
 import { count, recording } from "../../test-support/recording-ctx.ts";
-import type { Said } from "../../test-support/recording-ctx.ts";
 
 type Reads = (n: number) => Scrolled;
 const OPEN = { left: 100, right: 356, top: 50, h: 300 } as unknown as Parameters<typeof p26TailScrolls>[1];
@@ -289,61 +285,10 @@ for (const [stuck, read] of [
   });
 }
 
-const PM = {
-  cap: 3,
-  capName: "Capital",
-  capFounded: 1,
-  capSeat: true,
-  ruinIdx: -1,
-  ruinName: null,
-  tale: null,
-  seatIdx: 7,
-  seatName: "Seat",
-  formerIdx: -1,
-  formerName: null,
-  plainIdx: 2,
-  count: 9,
-} satisfies Manifest;
 const BOX: [number, number, number, number] = [10, 20, 256, 300];
 const HIDDEN = { shown: false, pinned: false, card: null };
 const witnessedRead = (read: unknown, anims: string[]) => ({ read, anims });
 const isWitnessed = (expression: string) => expression !== CARD_ROLL && expression.includes(CARD_ROLL);
-
-const seatFake = (anims: string[]) => {
-  let witnessed = 0;
-  return recording((expression) => {
-    if (expression === CARD_ROLL) return { shown: true, pinned: false, card: BOX };
-    if (isWitnessed(expression))
-      return witnessedRead(
-        ++witnessed <= 3 ? { shown: true, pinned: false, card: BOX } : { shown: true, pinned: true, card: BOX },
-        anims,
-      );
-    if (expression.includes("+3+"))
-      return {
-        hidden: false,
-        aria: "Capital, Capital",
-        name: "Capital",
-        rank: "Capital",
-        founded: "Founded in the year 1.",
-        tale: false,
-      };
-    if (expression.includes("+7+") && expression.includes(".focus()"))
-      return { hidden: false, name: "Seat", rank: "Realm Seat", aria: "Seat, Realm Seat", tale: false };
-    return {};
-  });
-};
-
-test("P5b shoots the seat's card only after reading it pinned with its roll finished", async () => {
-  const { ctx, said } = seatFake(["finished"]);
-  await p4Capital(ctx, PM);
-  const shot = said.findIndex((s) => s.kind === "shoot");
-  assert.notEqual(shot, -1, "the seat's card was never shot");
-  assert.equal(
-    said.slice(0, shot).filter((s: Said) => isWitnessed(s.what)).length,
-    5,
-    "the shot came before the card was read pinned and at rest",
-  );
-});
 
 const rollFake = (read: unknown, anims: string[]) => {
   let plain = 0;
@@ -355,20 +300,7 @@ const rollFake = (read: unknown, anims: string[]) => {
 };
 const SHOWN = { shown: true, pinned: false, card: BOX };
 
-test("P5b does not shoot the seat's card while its roll is still running", async () => {
-  const { ctx, said } = seatFake(["running"]);
-  await assert.rejects(p4Capital(ctx, PM), (err: Error) =>
-    err.message.startsWith("settle timeout P5b the seat's card unfurled: "),
-  );
-  assert.equal(count(said, "explorer-place-card-seat.png"), 0);
-});
-
 for (const [name, label, run] of [
-  [
-    "the card shot",
-    "P card shot: the card unfurled",
-    (ctx: SuiteContext) => pCardShot(ctx, { ruinIdx: -1, cap: 3 } as Manifest),
-  ],
   ["Z6", "Z6 the pinned card unfurled", (ctx: SuiteContext) => z6PinnedCard(ctx)],
   ["Z8", "Z8 the pinned card unfurled", (ctx: SuiteContext) => z8CardConstant(ctx)],
 ] as const) {

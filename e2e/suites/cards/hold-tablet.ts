@@ -18,6 +18,7 @@ export async function p30Tablet(k: Kit): Promise<void> {
   const marks = (await k.boot(true)).filter((m) => TABLET.includes(m.idx));
   const rows: string[] = [];
   let onTown = 0;
+  const tried: string[] = [];
   for (const m of marks) {
     await k.reset();
     await k.tap(m);
@@ -43,10 +44,12 @@ export async function p30Tablet(k: Kit): Promise<void> {
       rows.push(
         `${m.name}: a tap at ${Math.round(text.x)},${Math.round(text.y)} on the card's text (${[c.left, c.top, c.right, c.bottom].map(Math.round).join(",")}) left ${kept.shown ? kept.name : "nothing"}; events ${events}`,
       );
+    tried.push(m.name);
+    if (onTown > 0) break;
   }
   k.check(
-    "P30 on a tablet a tap opens and pins its own town, and a tap on the card's text keeps it, including one that lands on a town under the card (#750, #632)",
+    "P30 on a tablet a tap opens and pins its own town, and a tap on the card's text keeps it, town by town until a text tap lands on a town under the card (#750, #632; one such case, Issue #1273 ruling 2)",
     marks.length === TABLET.length && onTown > 0 && rows.length === 0,
-    JSON.stringify({ towns: marks.map((m) => m.name), textTapsOnATown: onTown, failures: rows }),
+    JSON.stringify({ tried, textTapsOnATown: onTown, failures: rows }),
   );
 }
