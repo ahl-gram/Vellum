@@ -24,11 +24,12 @@ export const fileClockLines = (timings: readonly FileTiming[]): readonly string[
 };
 
 export default async function* unitFileClock(source: AsyncIterable<FileEvent>): AsyncGenerator<string> {
-  const timings: FileTiming[] = [];
+  const longest = new Map<string, number>();
   for await (const { type, data } of source) {
     if (type !== "test:complete" || data.nesting !== 0 || data.file === undefined || data.name === undefined) continue;
     if (resolve(data.name) !== data.file) continue;
-    timings.push({ file: relative(process.cwd(), data.file), ms: data.details?.duration_ms ?? 0 });
+    const file = relative(process.cwd(), data.file);
+    longest.set(file, Math.max(longest.get(file) ?? 0, data.details?.duration_ms ?? 0));
   }
-  for (const line of fileClockLines(timings)) yield `${line}\n`;
+  for (const line of fileClockLines([...longest].map(([file, ms]) => ({ file, ms })))) yield `${line}\n`;
 }

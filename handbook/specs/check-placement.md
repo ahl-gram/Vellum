@@ -77,8 +77,9 @@ belongs in.
   `--flag=value`, since a value written as its own word reads as a path and the run falls back to
   `node --test`'s own collection of the whole checkout. The one flag that does not reach it is
   `--test-shard=<k>/<n>` with no path beside it: the launcher runs the `k`th of `n` parts that
-  `shardOf` in `scripts/unit-shards.ts` deals by measured seconds (`handbook/specs/site-architecture.md`,
-  the bullet opening "`UNIT_SECONDS` is read from CI's own unit logs"). A suite outside `test/`, or under it under
+  `shardOf` in `scripts/unit-shards.ts` deals by measured seconds
+  (`handbook/specs/site-architecture.md`, the bullet opening "`UNIT_SECONDS` is read from CI's own
+  unit logs"). A suite outside `test/`, or under it under
   another name, never runs, and `test/repo/test-collection.test.ts` reds one whose name is in
   `node --test`'s own family.
 - **A unit test runs the code and asserts what it does.** Assert the outcome, never the declaration

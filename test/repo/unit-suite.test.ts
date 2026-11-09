@@ -162,9 +162,7 @@ test("the shard flag splits the suites under test/ by UNIT_SECONDS, not by count
 });
 
 test("a sharded run of the whole suite prints each file's seconds under a per-file wall clock head", () => {
-  const paths = Object.keys(FOUR_SUITES).filter((p) => p.startsWith("test/"));
-  const renamed = Object.fromEntries(paths.map((p) => [p, suite(`a test of ${p}`)]));
-  const run = runIn(renamed, [LAUNCHER, "--test-shard=1/1"]);
+  const run = runIn(FOUR_SUITES, [LAUNCHER, "--test-shard=1/1"]);
   assert.equal(run.status, 0, run.output);
   const lines = run.output.split("\n");
   const head = lines.findIndex((l) => l.startsWith("per-file wall clock (4 files, "));

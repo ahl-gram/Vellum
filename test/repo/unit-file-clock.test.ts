@@ -23,7 +23,7 @@ const complete = (name: string, path: string, nesting: number, ms: number) => ({
 test("the clock lists each file the run reports once, slowest first, with its seconds and its share, under one head line", async () => {
   const out = await collect(
     stream(
-      complete("a one", "test/a.test.ts", 0, 900),
+      complete("a one", "test/a.test.ts", 0, 1500),
       complete("test/a.test.ts", "test/a.test.ts", 0, 1000),
       complete("inner", "test/b.test.ts", 1, 5),
       complete("test/b.test.ts", "test/b.test.ts", 0, 2500),
@@ -42,6 +42,21 @@ test("the clock lists each file the run reports once, slowest first, with its se
       "",
     ],
     "the clock counts a test inside a file, a nested event or a non-final event as a file, or drops a file",
+  );
+});
+
+test("a top-level test named like its own file's path does not give the file a second row: the file keeps its longest event", async () => {
+  const out = await collect(
+    stream(
+      complete("test/c.test.ts", "test/c.test.ts", 0, 400),
+      complete("test/c.test.ts", "test/c.test.ts", 0, 900),
+      complete("test/c.test.ts", "test/c.test.ts", 0, 300),
+    ),
+  );
+  assert.deepEqual(
+    out.split("\n"),
+    ["per-file wall clock (1 files, 0.9s total):", "  test/c.test.ts    0.9s  100.0%", ""],
+    "a file reported by more than one event is listed twice, or at a shorter event's seconds",
   );
 });
 
