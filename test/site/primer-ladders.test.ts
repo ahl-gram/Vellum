@@ -116,6 +116,6 @@ test("every step id is unique across the guide", () => {
 });
 
 test("the guide opens on the Explorer, at the dice (Issue #1155 ruling 16)", () => {
-  assert.equal(LADDERS[0]?.route, "/explorer/");
-  assert.equal(LADDERS[0]?.lessons[0]?.steps[0]?.id, "explorer-dice");
+  const opening = [LADDERS[0]?.route, LADDERS[0]?.lessons[0]?.steps[0]?.id];
+  assert.deepEqual(opening, ["/explorer/", "explorer-dice"]);
 });
