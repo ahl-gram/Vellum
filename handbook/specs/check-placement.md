@@ -85,7 +85,8 @@ belongs in.
   harness's (`handbook/specs/settle-doctrine.md`, The environment, the bullet opening "Every page the
   harness opens").
 - **A unit test does not open a source file and search its text.** Where the rule under test is about
-  how code is written, write it as a lint rule; where it is about what a page shows, write it as a
+  how code is written, write it as a lint rule; where it is about what a built page carries, read the
+  built page as the next bullet says; where it is about what the browser computes, write it as a
   browser check. A text search over source passes when the string sits in a comment, reds when a
   harmless rewrite moves it, and over CSS passes on a declaration that is present and loses
   (`handbook/specs/cascade-traps.md`).
@@ -93,7 +94,15 @@ belongs in.
   file (a chart, a face table), a config the house reads (`eslint.config.ts`, a workflow), or a
   stylesheet value the code's own arithmetic must match (the Glass's seat beside the slip in
   `test/site/room.test.ts`). The test checks what the file holds: a value against the code that must
-  agree with it, or a config's shape. Finding the anchor first (`vellum-footguns` Gate 1) is part of
+  agree with it, or a config's shape. **A new claim about what a built page carries is read in
+  `test/site/built-pages.test.ts`** (Alex, 2026-11-08, Issue #1273): its markup and attributes, the
+  names it gives its controls, its links, the files it names, and what it serves with scripts off.
+  That file builds the site once and reads each page as text or as the document `documentOf` in
+  `test-support/built-dom.ts` parses with `linkedom`, a development dependency only the tests use,
+  with its longer reads kept under `test-support/built-reads/`. A new claim is a test in
+  `test/site/built-pages.test.ts` rather than in a file that builds the site again, and a page joins
+  the rosters `test/site/astro-scaffold.test.ts` keeps where `handbook/specs/site-architecture.md`
+  says (How a page is authored). Finding the anchor first (`vellum-footguns` Gate 1) is part of
   reading the file, not the check, and how such a reader goes blind is `vellum-footguns` Gate 7's.
 - **A lint rule's witness may read the source the rule keys on**, to show the rule still has
   something to hold where the rule cannot say so itself.
@@ -111,7 +120,14 @@ belongs in.
 
 - **What the browser computes is read in a browser**: a resolved style, a box, an overlap, a contrast,
   a motion. Neither the lint nor a unit test can see the cascade, so a rule about how a page looks is
-  pinned here or by `vellum-plate-reader`, whose measurements decide an appearance.
+  pinned here or by `vellum-plate-reader`, whose measurements decide an appearance. A claim of dress
+  alone (a colour, a size, a rounding, a shadow, a hover or focus colour, how a motion is staged) is
+  not written as a browser check: `vellum-plate-reader` measures it when it is built or changed, and
+  it is checked by eye (Alex, 2026-11-09, Issue #1273). It is written as one only where a reader must
+  reach a press or see it answer the hand, where a ruling sets a floor for reading or typing (4.5:1
+  over the chart, the 16 px a typing field takes), and in the Specimen Book's own suite, `specimen`,
+  which holds every piece of the kit in each state so the Book does not go stale (Alex, 2026-11-08,
+  Issue #1273).
 - **A number the room's layout decides is read from the layout in the run, never copied from one
   machine's.** Which press of the Glass fills the screen, a fill depth, a clearance between two
   pieces, a contrast over a ground and a piece's travel all move when a browser lays a room out a
@@ -154,17 +170,25 @@ belongs in.
   a size in pixels, as the clearances `travelsOf` in `e2e/suites/slide-away/kit.ts` writes again
   are, is ruled, and one a ruling sets as a duration is neither. A tolerance around a relation, a
   window a check holds a ruled clearance within among them, is a bound, derived as `CLAUDE.md` says.
-- **A browser check is kept for what it holds against what it costs.** How what it holds is
-  counted, when a slow one is pulled out of the run, and when one is deleted, is
-  `handbook/specs/settle-doctrine.md`'s (When a check leaves the run).
-- **A claim a deleted browser check held moves to a unit test wherever one can hold it alone
-  (Alex, 2026-11-08, Issue #1273).** The test checks that one claim and nothing beside it, runs
-  fast, and gives the same answer on every run: no browser, no wall clock, no dependence on the
-  order tests run in. It keeps the rules of "The unit suite" above, and it is written before the
-  check is deleted, with the mutation that reds it named, and proven as any new guard is
-  (`handbook/specs/development-workflow.md` step 11). Where page code has to change for a unit
-  test to hold the claim, the change is source work written test first, and the function it makes
-  takes its inputs (a clock, a reduced-motion flag, a measured box) as arguments and returns its
+- **A browser check is written, and kept, for what it holds against what it costs.** Each one a
+  change adds or makes longer carries its ledger line (Alex, 2026-11-08, Issue #1273), in the plan
+  that adds it and in the pull request body: the critical journey it serves; why no unit test can
+  hold each of its claims (the bullet below); and, for each room, window, page, seed or path it reads
+  past the first, what that one alone runs. What it holds and what it costs are counted as
+  `handbook/specs/settle-doctrine.md` says (What a step holds, Who finds a slow step). A check whose
+  coverage would be needless on a ground that file names is not written, and a page whose journey
+  Alex has not ruled goes on the plan's menu before a check is written there. When a slow one is
+  pulled out of the run, and when one is deleted, is `handbook/specs/settle-doctrine.md`'s (When a
+  check leaves the run).
+- **A claim goes to a unit test wherever one can hold it alone, a new claim as well as one a
+  deleted browser check held (Alex, 2026-11-08, Issue #1273).** The test checks that one claim and
+  nothing beside it, runs fast, and gives the same answer on every run: no browser, no wall clock,
+  no dependence on the order tests run in. It keeps the rules of "The unit suite" above, it is
+  proven as any new guard is (`handbook/specs/development-workflow.md` step 11), and a moved claim's
+  test is written before the check is deleted, with the mutation that reds it named. Where page
+  code has to change for a unit test to hold the claim, the change is source work written test
+  first, and new page code is shaped the same way from the start: the function takes its inputs (a
+  clock, a reduced-motion flag, a measured box) as arguments and returns its
   result, so one test can drive it and read the answer. A move never adds a browser check: a claim
   that only a real browser's layout or paint, a real pointer or a real clock shows stays in a
   check that stays, or is listed as lost coverage as `handbook/specs/settle-doctrine.md` says
