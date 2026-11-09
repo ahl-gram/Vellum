@@ -1,0 +1,326 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/d-explorer-1024.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"strip\":{\"l\":167,\"t\":277,\"r\":519,\"b\":487},\"overChart\":37,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/d-explorer-done-1024.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"strip\":{\"l\":167,\"t\":276,\"r\":519,\"b\":489},\"overChart\":38,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/c-explorer-1024.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"strip\":{\"l\":167,\"t\":183,\"r\":519,\"b\":393},\"overChart\":37,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/d-explorer-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":277,\"r\":775,\"b\":487},\"overChart\":18,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/d-explorer-done-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":276,\"r\":775,\"b\":489},\"overChart\":18,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/c-explorer-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":183,\"r\":775,\"b\":393},\"overChart\":16,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/d-explorer-ink-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago&style=ink",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":277,\"r\":775,\"b\":487},\"overChart\":18,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/d-explorer-topographic-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago&style=topographic",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":277,\"r\":775,\"b\":487},\"overChart\":18,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/stills/d-explorer-nautical-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42&type=archipelago&style=nautical",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"strip\":{\"l\":423,\"t\":277,\"r\":775,\"b\":487},\"overChart\":18,\"overGlass\":0,\"overSlip\":0,\"overLegend\":0,\"overRing\":0,\"inWindow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-explorer-1024.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":445,\"cornerLeft\":736,\"toCorner\":291,\"sameRow\":true,\"nearest\":{\"name\":\"Reading Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-explorer-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":445,\"cornerLeft\":992,\"toCorner\":547,\"sameRow\":true,\"nearest\":{\"name\":\"Reading Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-writing-room-1024.png",
+  "url": "http://127.0.0.1:61285/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":472,\"cornerLeft\":777,\"toCorner\":305,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-writing-room-1280.png",
+  "url": "http://127.0.0.1:61285/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":472,\"cornerLeft\":1033,\"toCorner\":561,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-reading-room-1024.png",
+  "url": "http://127.0.0.1:61285/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":471,\"cornerLeft\":738,\"toCorner\":266,\"sameRow\":true,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-reading-room-1280.png",
+  "url": "http://127.0.0.1:61285/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":471,\"cornerLeft\":994,\"toCorner\":522,\"sameRow\":true,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-print-room-1024.png",
+  "url": "http://127.0.0.1:61285/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":459,\"cornerLeft\":640,\"toCorner\":182,\"sameRow\":true,\"nearest\":{\"name\":\"Gallery\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-print-room-1280.png",
+  "url": "http://127.0.0.1:61285/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":459,\"cornerLeft\":854,\"toCorner\":396,\"sameRow\":true,\"nearest\":{\"name\":\"Gallery\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-prospect-1024.png",
+  "url": "http://127.0.0.1:61285/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":133,\"cornerLeft\":702,\"toCorner\":569,\"sameRow\":false,\"nearest\":{\"name\":\"The Reading Room\",\"d\":0},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-prospect-1280.png",
+  "url": "http://127.0.0.1:61285/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":133,\"cornerLeft\":958,\"toCorner\":825,\"sameRow\":false,\"nearest\":{\"name\":\"The Reading Room\",\"d\":0},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-ribbon-1024.png",
+  "url": "http://127.0.0.1:61285/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":578,\"cornerLeft\":640,\"toCorner\":62,\"sameRow\":true,\"nearest\":{\"name\":\"Gallery\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-ribbon-1280.png",
+  "url": "http://127.0.0.1:61285/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":578,\"cornerLeft\":774,\"toCorner\":196,\"sameRow\":true,\"nearest\":{\"name\":\"Gallery\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-explorer-portfolio-1024.png",
+  "url": "http://127.0.0.1:61285/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":535,\"cornerLeft\":694,\"toCorner\":159,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-explorer-portfolio-1280.png",
+  "url": "http://127.0.0.1:61285/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":535,\"cornerLeft\":950,\"toCorner\":415,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-seed-of-the-day-1024.png",
+  "url": "http://127.0.0.1:61285/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":479,\"cornerLeft\":729,\"toCorner\":250,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-seed-of-the-day-1280.png",
+  "url": "http://127.0.0.1:61285/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":479,\"cornerLeft\":985,\"toCorner\":506,\"sameRow\":false,\"nearest\":{\"name\":\"Print Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-gallery-1024.png",
+  "url": "http://127.0.0.1:61285/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pressRight\":439,\"cornerLeft\":826,\"toCorner\":387,\"sameRow\":false,\"nearest\":{\"name\":\"Reading Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-gallery-1280.png",
+  "url": "http://127.0.0.1:61285/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pressRight\":439,\"cornerLeft\":1082,\"toCorner\":643,\"sameRow\":false,\"nearest\":{\"name\":\"Reading Room\",\"d\":3.1},\"wrapped\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

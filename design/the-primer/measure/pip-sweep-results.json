@@ -1,0 +1,506 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Paukilua-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":360.8016357421875,\"t\":616.8446655273438,\"r\":384.84326171875,\"b\":640.8862915039062},\"inWindow\":true,\"nearestStation\":177.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":1425,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Paukilua-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":483.00262451171875,\"t\":643.0474243164062,\"r\":507.0443115234375,\"b\":667.089111328125},\"inWindow\":true,\"nearestStation\":185.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":875,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Naukoa-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":849.931884765625,\"t\":248.85330200195312,\"r\":873.973388671875,\"b\":272.8949279785156},\"inWindow\":true,\"nearestStation\":237.8,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Naukoa-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":992.51318359375,\"t\":259.7230224609375,\"r\":1016.5548095703125,\"b\":283.7646484375},\"inWindow\":true,\"nearestStation\":248.8,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nailo-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":154.42147827148438,\"t\":352.03515625,\"r\":178.46310424804688,\"b\":376.0767822265625},\"inWindow\":true,\"nearestStation\":124.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":4182,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nailo-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":268.02325439453125,\"t\":367.2042236328125,\"r\":292.06488037109375,\"b\":391.245849609375},\"inWindow\":true,\"nearestStation\":130.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Loatunui-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":585.138671875,\"t\":316.18719482421875,\"r\":609.1802978515625,\"b\":340.2288818359375},\"inWindow\":true,\"nearestStation\":62.3,\"slipOverOthers\":35,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Loatunui-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":716.68701171875,\"t\":329.862548828125,\"r\":740.7286987304688,\"b\":353.9041748046875},\"inWindow\":true,\"nearestStation\":66,\"slipOverOthers\":7,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Noloatatani-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":522.3308715820312,\"t\":580.865478515625,\"r\":546.3724975585938,\"b\":604.9071044921875},\"inWindow\":true,\"nearestStation\":29.5,\"slipOverOthers\":263,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Noloatatani-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":651.2622680664062,\"t\":605.5691528320312,\"r\":675.3038940429688,\"b\":629.6107788085938},\"inWindow\":true,\"nearestStation\":32.2,\"slipOverOthers\":206,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Toatauhe-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":598.6841430664062,\"t\":670.6823120117188,\"r\":622.7257690429688,\"b\":694.7239379882812},\"inWindow\":true,\"nearestStation\":22.1,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":4182,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Toatauhe-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":730.7969360351562,\"t\":699.1282958984375,\"r\":754.8385620117188,\"b\":723.169921875},\"inWindow\":true,\"nearestStation\":24.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":4182,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Waun-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":710.9346923828125,\"t\":118.6951904296875,\"r\":734.976318359375,\"b\":142.73681640625},\"inWindow\":true,\"nearestStation\":224.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":1905,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Waun-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":847.7244873046875,\"t\":124.14167785644531,\"r\":871.7662353515625,\"b\":148.1833038330078},\"inWindow\":true,\"nearestStation\":234.7,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Lokai-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":612.065673828125,\"t\":302.6908874511719,\"r\":636.1072998046875,\"b\":326.7325439453125},\"inWindow\":true,\"nearestStation\":88,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Lokai-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":744.7360229492188,\"t\":315.80389404296875,\"r\":768.7776489257812,\"b\":339.84552001953125},\"inWindow\":true,\"nearestStation\":92.7,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Rauhelunui-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":190.30227661132812,\"t\":598.8551025390625,\"r\":214.34390258789062,\"b\":622.896728515625},\"inWindow\":true,\"nearestStation\":74.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Rauhelunui-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":305.39910888671875,\"t\":624.3082885742188,\"r\":329.44073486328125,\"b\":648.3499145507812},\"inWindow\":true,\"nearestStation\":78.7,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Kai-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":508.9493408203125,\"t\":6.52667236328125,\"r\":532.990966796875,\"b\":30.56829833984375},\"inWindow\":true,\"nearestStation\":249.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":3801}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Kai-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":637.3231811523438,\"t\":7.2994842529296875,\"r\":661.3648071289062,\"b\":31.341094970703125},\"inWindow\":true,\"nearestStation\":261,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":481}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pong-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":423.6258544921875,\"t\":136.68478393554688,\"r\":447.66748046875,\"b\":160.72640991210938},\"inWindow\":true,\"nearestStation\":130.4,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pong-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":548.4445190429688,\"t\":142.88084411621094,\"r\":572.4862060546875,\"b\":166.92247009277344},\"inWindow\":true,\"nearestStation\":137.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nanawotani-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":374.34716796875,\"t\":396.88616943359375,\"r\":398.3887939453125,\"b\":420.92779541015625},\"inWindow\":true,\"nearestStation\":137.5,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nanawotani-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":497.112548828125,\"t\":413.92401123046875,\"r\":521.1541748046875,\"b\":437.96563720703125},\"inWindow\":true,\"nearestStation\":144.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Poalo-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":73.6568603515625,\"t\":244.3599853515625,\"r\":97.698486328125,\"b\":268.401611328125},\"inWindow\":true,\"nearestStation\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Poalo-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":183.89344787597656,\"t\":255.0425262451172,\"r\":207.93507385253906,\"b\":279.08416748046875},\"inWindow\":true,\"nearestStation\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pelo-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":814.03466796875,\"t\":127.69818115234375,\"r\":838.076171875,\"b\":151.73980712890625},\"inWindow\":true,\"nearestStation\":146.1,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":3250,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pelo-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":955.1202392578125,\"t\":133.5198211669922,\"r\":979.161865234375,\"b\":157.56141662597656},\"inWindow\":true,\"nearestStation\":153.4,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":742,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Won-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":827.5802001953125,\"t\":576.3721923828125,\"r\":851.6217041015625,\"b\":600.413818359375},\"inWindow\":true,\"nearestStation\":117.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Won-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":969.2301025390625,\"t\":600.8886108398438,\"r\":993.271728515625,\"b\":624.9302368164062},\"inWindow\":true,\"nearestStation\":124,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nurunui-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":181.33206176757812,\"t\":91.718994140625,\"r\":205.37368774414062,\"b\":115.7606201171875},\"inWindow\":true,\"nearestStation\":337.4,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":1456}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Nurunui-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":296.05511474609375,\"t\":96.04148864746094,\"r\":320.09674072265625,\"b\":120.08311462402344},\"inWindow\":true,\"nearestStation\":352.8,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":1046}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Kehenainui-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":365.376953125,\"t\":-29.436126708984375,\"r\":389.4185791015625,\"b\":-5.394500732421875},\"inWindow\":false,\"nearestStation\":306.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":1062}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Kehenainui-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":487.7685546875,\"t\":-30.161773681640625,\"r\":511.81024169921875,\"b\":-6.120147705078125},\"inWindow\":false,\"nearestStation\":320.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":993}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pale-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":594.10888671875,\"t\":11.036376953125,\"r\":618.1505126953125,\"b\":35.0780029296875},\"inWindow\":true,\"nearestStation\":255,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":2383}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Pale-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":726.031005859375,\"t\":11.997085571289062,\"r\":750.0726318359375,\"b\":36.0386962890625},\"inWindow\":true,\"nearestStation\":266.8,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Wuwatau-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":540.271240234375,\"t\":271.2214050292969,\"r\":564.3128662109375,\"b\":295.2630310058594},\"inWindow\":true,\"nearestStation\":16.3,\"slipOverOthers\":1960,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Wuwatau-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":669.9501342773438,\"t\":283.02313232421875,\"r\":693.9918212890625,\"b\":307.0648193359375},\"inWindow\":true,\"nearestStation\":17.9,\"slipOverOthers\":1882,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Tewetulua-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":-141.8739471435547,\"t\":293.70428466796875,\"r\":-117.83232116699219,\"b\":317.74591064453125},\"inWindow\":false,\"nearestStation\":354.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Tewetulua-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":-40.61781311035156,\"t\":306.44287109375,\"r\":-16.576202392578125,\"b\":330.4844970703125},\"inWindow\":false,\"nearestStation\":370.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Haireno-1024.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"pip\":{\"l\":387.7286376953125,\"t\":280.2080078125,\"r\":411.770263671875,\"b\":304.2496337890625},\"inWindow\":true,\"nearestStation\":88.2,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/pip-sweep/Haireno-1280.png",
+  "url": "http://127.0.0.1:63602/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"pip\":{\"l\":511.0516357421875,\"t\":292.38421630859375,\"r\":535.09326171875,\"b\":316.42584228515625},\"inWindow\":true,\"nearestStation\":92.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeedCard\":0,\"overLegend\":0,\"overNotice\":0,\"legendLines\":1,\"legendPresses\":4,\"cardInWindow\":null,\"cardOverGlass\":0,\"overCluster\":0}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

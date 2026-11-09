@@ -1,0 +1,101 @@
+seed	type	band	culture	title	capital	settlements	roads	realms	arms	beasts	beast	placesWithRoad	capitalRoad	ruins	rivers	lakes	range	forest
+1	island	temperate	tezcal	Tzatlua, the Whispering Isle	Chua	26	25	3	3	1	Tluapo the Eater of Anchors	26	yes	2	30	2	Mount Tlechua	The Jungle of Elua
+2	archipelago	temperate	zoryan	The Scattered Isles of Bru	Vunsvyov	26	22	4	4	1	Zvyl the Eater of Anchors	24	yes	2	26	2	Mount Skar	The Murles
+3	citystate	temperate	veshari	The Free City of Zaa	Zaa	21	20	0	1	1	Sahuzar the Knot in the Tide	21	yes	2	16	2	The Zikha Heights	Maanmai Thicket
+4	island	temperate	oromi	The Mistbound Isle of Monai	Koang	26	24	3	3	1	Loake the Lord of the Under-Currents	26	yes	2	26	0	The Smoking Noakau	The Mauhe Groves
+5	archipelago	polar	zoryan	The Sundered Isles of Brelde	Stil	26	21	3	3	1	Vylpy the Long Coil	24	yes	2	20	0	Mount Trekdruk	The Brulbrales
+6	continent	temperate	sylvan	The Realm of Farilwei	Feniwenbrook	26	25	4	4	1	Laen the Long Coil	26	yes	2	28	1	The Sleeping Gwewen	The Heart of Fena
+7	island	tropical	oromi	The Isle of Retu	Numowopua	26	25	3	3	1	Kaipu the Weed That Wakes	26	yes	2	30	1	The Smoking Toa	Deep Railo
+8	island	temperate	thalassic	The Isle of Thio	Rial	26	25	3	3	1	Via Old Winding	26	yes	2	26	2	Mount Meara	Vais Forest
+9	archipelago	temperate	veshari	The Zizar Archipelago	Sarar	26	24	3	3	1	Khin Old Winding	26	yes	2	18	1	Mount Fari	The Palms of Saa
+10	island	temperate	zoryan	Ger, the Sundered Isle	Syrzvi	26	24	3	3	1	Kri the Breath of the Deep	25	yes	2	24	2	The Zydre Planina	The Birch of Biksvy
+11	continent	temperate	oromi	The Realm of Tuko	Laihe	26	25	4	4	1	Tokakai the Lord of the Under-Currents	26	yes	2	23	0	The Smoking Koawupau	Deep Wewotoa
+12	archipelago	tropical	oromi	The Scattered Isles of Poamokau	Hotepua	26	24	2	2	1	Koki the Thousand Arms	25	yes	2	23	1	Mount Woarapo	Deep Moawuha
+13	citystate	tropical	sylvan	The City-State of Bramere	Bramere	21	19	0	1	1	Braewi the Breath of the Deep	21	yes	2	18	2	Tha Tor	The Heart of Werillori
+14	archipelago	tropical	ordai	The Scattered Isles of Shei	Lekebulak	26	25	2	2	1	Sorke the Drowned Hill	26	yes	2	27	2	The Boonkhor Uul	The Larch of Kong
+15	archipelago	temperate	zoryan	The Quiet Isles of Tri	Stanbyl	26	23	3	3	1	Pekma the Weed That Wakes	25	yes	2	32	2	The Peaks of Ser	The Drukles
+16	archipelago	temperate	sylvan	The Lorele Archipelago	Aeleiglade	26	25	2	2	1	Brifeni the Breath of the Deep	26	yes	2	31	2	The Loralelae Downs	The Lorielorewold
+17	archipelago	polar	draket	The Zagat Archipelago	Vororg	26	21	2	2	1	Skarokdre the Knot in the Tide	24	yes	2	27	1	The Throne of Skaruth	Gurggyak Forest
+18	citystate	temperate	draket	The Free City of Vorokzak	Vorokzak	21	19	0	1	1	Voromar the Island that Swims	21	yes	2	11	0	The Dakrod Fangs	Damar Forest
+19	island	temperate	sylvan	Fenein, the Verdant Isle	Wimir	26	25	3	3	1	Wae the Lord of the Under-Currents	26	yes	2	18	1	Thil Tor	The Thewold
+20	continent	temperate	tezcal	The Realm of Mualial	Lipo	26	25	4	4	1	Mua the Thousand Arms	26	yes	2	21	0	Mount Nepe	Deep Minia
+21	island	temperate	norden	Hju, the Mistbound Isle	Gru	26	24	4	4	1	Skukkalau the Breath of the Deep	25	yes	2	29	1	The Teeth of Kalarnvuk	Skethrurk Wilds
+22	island	polar	veshari	The Amber Isle of Qish	Farai	26	25	3	3	1	Farisaha the Grey Titan	26	yes	2	24	1	The Dunespires of Zaraazi	The Palms of Saralaza
+23	archipelago	temperate	tezcal	The Tze Archipelago	Uatzuaxcan	26	22	3	3	1	Huicho the Ship-Taker	26	yes	2	28	1	The Smoking Altar of Cuatlo	The Nen Jungle
+24	island	temperate	tsuren	Wunaiza, the Verdant Isle	Doun	26	25	3	3	1	Totsewei the Island that Swims	26	yes	2	24	2	The Guchei Heights	The Doutsoumori
+25	continent	temperate	norden	The Mistbound Reaches of Throrg	Guldkorg	26	24	4	4	1	Brau the Lord of the Under-Currents	26	yes	2	17	0	Horkkale Fell	Thregbre Wilds
+26	continent	tropical	thalassic	The Realm of Seatheas	Nonraihaven	26	25	4	4	1	Marora the Ship-Taker	26	yes	2	21	0	The Spires of Nini	The Groves of Riocia
+27	island	temperate	thalassic	The Isle of Mea	Maselio	26	25	3	3	1	Lomador the Bearer of Storms	26	yes	2	19	2	The Spires of Violiol	Talair Forest
+28	archipelago	tropical	norden	The Skostkalo Archipelago	Hevogfell	26	21	3	3	1	Skald the Thousand Arms	23	yes	2	23	0	The Threirn Crags	Vargku Wilds
+29	island	temperate	norden	The Storm-Held Isle of Vaustbru	Thrugvik	26	25	3	3	1	Skarkge the Weed That Wakes	26	yes	2	21	2	The Teeth of Kalaldgau	The Gendskamark
+30	archipelago	temperate	draket	The Verdant Isles of Kre	Grurgthohold	26	21	3	3	1	Vorurggra the Grey Titan	26	yes	2	23	2	Zekthemar Spire	Vorurgze Forest
+31	continent	temperate	tezcal	Terra Tia	Piaxuaco	26	25	4	4	1	Miachi the Long Coil	26	yes	2	38	2	The Tliapi Tepetl	Deep Xialua
+32	continent	tropical	norden	Terra Hjo	Ska	26	25	4	4	1	Braukhjok the Thousand Arms	26	yes	2	19	0	Threi Fell	The Hjondmark
+33	continent	tropical	zoryan	Terra Sinzen	Zve	26	23	5	5	1	Zardy the Bearer of Storms	25	yes	2	24	2	The Brykzvu Planina	The Gelunles
+34	continent	polar	ordai	The Realm of Googdush	Sheigan	26	25	3	3	1	Nelchir the Lord of the Under-Currents	26	yes	2	25	0	Mount Ghonnai	The Kuugsair Woods
+35	continent	temperate	tsuren	The Shining Reaches of Hain	Heweikawa	26	22	5	5	1	Boshiyi the Thousand Arms	26	yes	2	24	1	Mount Che	The Notasai Forest
+36	island	temperate	sylvan	The Isle of Felore	Elie	26	24	3	3	1	Brielas the Bearer of Storms	26	yes	2	25	1	Loreith Tor	The Heart of Brielas
+37	island	tropical	oromi	The Isle of Lowa	Laikoa	26	23	4	4	1	Moaki the Thousand Arms	26	yes	2	26	2	The Fire Peaks of Paipa	The Tairai Groves
+38	island	temperate	thalassic	Rairtalia, the Gilded Isle	Tali	26	24	3	3	1	Seliselo the Long Coil	26	yes	2	21	2	Mount Meamare	Orenmio Forest
+39	archipelago	polar	sylvan	The Shining Isles of Gwithie	Brie	26	20	2	2	1	Lelaelei the Reaching Dark	23	yes	2	22	1	The Brilas Downs	Old Elefei
+40	archipelago	tropical	ordai	The Scattered Isles of Rool	Ghul	26	23	3	3	1	Choo the Knot in the Tide	25	yes	2	31	2	The Yonkaig Dag	Deep Kuunnoo
+41	archipelago	tropical	norden	The Amber Isles of Ske	Grei	26	23	3	3	1	Hjei the Grey Titan	26	yes	2	25	0	The Thrau Crags	The Pines of Drundhjo
+42	island	temperate	oromi	The Isle of Rahai	Laukuwelua	26	24	3	3	1	Rauhoahai the Eater of Anchors	25	yes	2	28	2	Mount Tauwau	The Ferns of Peroa
+43	island	temperate	tsuren	The Mistbound Isle of Tsozoutu	Shewu	26	25	3	3	1	Kuberi the Bearer of Storms	26	yes	2	19	0	The Tsougitsi Heights	The Zamemori
+44	island	tropical	draket	The Salt-Worn Isle of Daktha	Thyadvoru	26	25	3	3	1	Zodra the Reaching Dark	26	yes	2	29	2	Barekgra Spire	The Dark of Dred
+45	continent	temperate	tezcal	The Mistbound Reaches of Nachia	Tzapan	26	25	4	4	1	Locui Old Winding	26	yes	2	31	1	Mount Iapua	The Jungle of Chiamua
+46	continent	tropical	zoryan	Terra Svy	Vangrad	26	25	3	3	1	Dri the Island that Swims	26	yes	2	29	1	The Pad Planina	The Zurvenles
+47	archipelago	tropical	zoryan	The Mongo Archipelago	Zve	26	24	2	2	1	Tro the Eater of Anchors	26	yes	2	29	0	Mount Zvukdi	The Vlodles
+48	archipelago	temperate	tsuren	The Scattered Isles of Kai	Saigoushima	26	25	2	2	1	Tsineri the Knot in the Tide	26	yes	2	34	2	The Roreite Heights	The Sugumori
+49	archipelago	temperate	draket	The Sundered Isles of Gru	Dathgate	26	24	2	2	1	Malorg the Lord of the Under-Currents	26	yes	2	24	2	The Dru Fangs	The Zoth Thorns
+50	island	temperate	ordai	The Storm-Held Isle of Khuushba	Aish	26	24	4	4	1	Noshga the Eater of Anchors	26	yes	2	26	0	The Ulrai Uul	Deep Gangoog
+51	archipelago	temperate	tsuren	The Meimou Archipelago	Yare	26	25	2	2	1	Kami the Lord of the Under-Currents	26	yes	2	22	0	Mount Nuhatsei	Deep Bushaitou
+52	island	tropical	draket	The Verdant Isle of Thaththu	Voredkeep	26	24	4	4	1	Dathdra the Drowned Hill	26	yes	2	21	1	The Thargdre Fangs	Zebaryath Forest
+53	archipelago	temperate	thalassic	The Quiet Isles of Cecia	Niodor	26	24	2	2	1	Rotale the Long Coil	26	yes	2	20	0	The Selaithio Peaks	Sovelos Forest
+54	archipelago	temperate	thalassic	The Scattered Isles of Veleth	Talailio	26	21	3	3	1	Viaraidor the Long Coil	24	yes	2	21	2	The Sio Peaks	Lia Forest
+55	island	temperate	ordai	Gete, the Gilded Isle	Khaibulak	26	24	3	3	1	Roog the Ship-Taker	26	yes	2	24	1	Mount Chikor	The Larch of Sar
+56	island	polar	sylvan	The Mistbound Isle of Aela	Aelegwei	26	23	3	3	1	Wel the Weed That Wakes	25	yes	2	25	1	The Fenaelei Downs	The Heart of Gwi
+57	island	temperate	thalassic	The Isle of Selavelen	Cintalihaven	26	25	3	3	1	Ororsea the Deep Worm	26	yes	2	22	1	The Vaithi Peaks	The Vimarawood
+58	citystate	temperate	tsuren	The Free City of Chouwaisaki	Chouwaisaki	21	19	0	1	1	Nein the Weed That Wakes	21	yes	2	11	0	Mount Cheiru	Deep Souho
+59	archipelago	temperate	oromi	The Wewe Archipelago	Lehoawau	26	24	2	2	1	Woalo the Ship-Taker	26	yes	2	25	1	The Smoking Lemainau	Deep Waute
+60	archipelago	temperate	ordai	The Scattered Isles of Luu	Yoolro	26	25	2	2	1	Aishsuul the Thousand Arms	26	yes	2	25	0	Mount Ghungshoo	Deep Ingkuush
+61	continent	temperate	veshari	The Gilded Reaches of Mai	Mam	26	25	4	4	1	Farimazai the Weed That Wakes	26	yes	2	21	1	The Khuzar Heights	Nusu Thicket
+62	island	tropical	veshari	The Storm-Held Isle of Sahi	Sahai	26	23	3	3	1	Maifaru the Grey Titan	26	yes	2	27	1	Mount Zaram	Sushsara Thicket
+63	island	tropical	oromi	The Mistbound Isle of Nomailo	Peta	26	23	3	3	1	Nelau the Breath of the Deep	25	yes	2	15	1	Mount Pang	The Ferns of Haung
+64	island	polar	draket	The Isle of Demar	Kragatgru	26	22	3	3	1	Dadgrya the Ship-Taker	24	yes	2	23	1	The Throne of Malo	The Baruk Thorns
+65	island	tropical	tsuren	Zourou, the Gilded Isle	Tsicheiyama	26	25	3	3	1	Daisou the Breath of the Deep	26	yes	2	25	2	The Peak of Nare	Deep Chaiwuhou
+66	continent	temperate	tezcal	The Realm of Nicho	Tliapan	26	24	4	4	1	Tlinia Old Winding	25	yes	2	25	1	The Smoking Altar of Miacue	The Jungle of Tacia
+67	archipelago	polar	tezcal	The Scattered Isles of Nel	Nex	26	21	2	2	1	Xicuex the Breath of the Deep	23	yes	2	18	1	The Cuic Tepetl	Deep Chiaxe
+68	island	temperate	ordai	The Storm-Held Isle of Chuu	Tuugme	26	25	3	3	1	Rei the Thousand Arms	26	yes	2	24	2	The Chor Dag	The Larch of Khotuu
+69	island	temperate	zoryan	The Isle of Lelvan	Dyl	26	24	3	3	1	Kri the Lord of the Under-Currents	25	yes	2	26	1	The Pedmur Planina	The Rerdod Taiga
+70	citystate	polar	veshari	The City-State of Ishunsara	Ishunsara	21	19	0	1	1	Farami the Drowned Hill	20	yes	2	14	0	The Dunespires of Ishaisara	The Zaishu Oasis
+71	archipelago	temperate	draket	The Drokgro Archipelago	Thedvoraburg	26	24	3	3	1	Krya the Lord of the Under-Currents	25	yes	2	25	0	The Skarek Fangs	Guk Forest
+72	archipelago	temperate	sylvan	The Aeleela Archipelago	Aelaehollow	26	24	3	3	1	Thilasli the Thousand Arms	25	yes	2	28	1	Feniegwe Tor	The Aeliethwold
+73	continent	temperate	draket	The Realm of Guthvora	Zethgro	26	24	4	4	1	Thozo the Knot in the Tide	26	yes	2	35	2	Dathkrorg Spire	The Dark of Grazu
+74	island	temperate	norden	The Isle of Skeist	Hjostvaustad	26	23	3	3	1	Heindkau the Island that Swims	24	yes	2	22	2	The Teeth of Kest	The Pines of Grauldko
+75	continent	tropical	sylvan	Terra Wanthi	Braelehollow	26	25	4	4	1	Walorae the Lord of the Under-Currents	26	yes	2	26	2	The Lorewa Downs	The Heart of Gwaefena
+76	archipelago	temperate	veshari	The Saral Archipelago	Sahaashara	26	24	3	3	1	Maran the Drowned Hill	25	yes	2	25	2	The Dunespires of Zaasa	Qara Thicket
+77	continent	temperate	tezcal	The Salt-Worn Reaches of Ial	Coa	26	24	4	4	1	Huen the Weed That Wakes	26	yes	2	34	0	The Smoking Altar of Tziato	The Cuime Jungle
+78	archipelago	tropical	sylvan	The Scattered Isles of Aelathi	Gwiehollow	26	24	2	2	1	Aelirilli the Long Coil	25	yes	2	23	2	Thiewie Tor	The Loririlwold
+79	island	tropical	draket	The Quiet Isle of Barudda	Gemargya	26	24	3	3	1	Voryarg the Bearer of Storms	26	yes	2	26	1	The Throne of Thuthge	Groththya Forest
+80	archipelago	tropical	zoryan	The Scattered Isles of Min	Zyrgril	26	23	3	3	1	Grarvu the Island that Swims	26	yes	2	18	0	The Peaks of Zvy	The Birch of Tru
+81	island	polar	draket	The Amber Isle of Gruth	Thuthekeep	26	25	3	3	1	Kred the Island that Swims	26	yes	2	24	1	The Throne of Dakgrurg	The Skaruthde Thorns
+82	archipelago	temperate	sylvan	The Untamed Isles of Faerilfe	Wiwimere	26	24	2	2	1	Eliemir Old Winding	26	yes	2	21	0	Loren Tor	The Heart of Gwiethae
+83	island	temperate	oromi	The Isle of Rolo	Maulaipanui	26	25	3	3	1	Loang the Reaching Dark	26	yes	2	15	1	The Smoking Koapopoa	The Kauki Groves
+84	continent	tropical	thalassic	The Whispering Reaches of Oraicioth	Leal	26	25	3	3	1	Talamare Old Winding	26	yes	2	23	2	The Spires of Taleratha	The Groves of Orai
+85	island	temperate	norden	Brandhu, the Verdant Isle	Thrond	26	24	4	4	1	Grauldge the Reaching Dark	25	yes	2	22	2	The Teeth of Kagdrurg	The Pines of Skahast
+86	archipelago	polar	zoryan	The Scattered Isles of Lonrin	Trisk	26	23	2	2	1	Ski the Drowned Hill	24	yes	2	25	2	The Peaks of Zvanstir	The Drul Taiga
+87	island	tropical	tsuren	The Whispering Isle of Nuko	Dodai	26	25	3	3	1	Mabi the Lord of the Under-Currents	26	yes	2	23	0	The Peak of Haiwei	The Rachemori
+88	island	temperate	veshari	The Shining Isle of Khadin	Sahaimabad	26	25	3	3	1	Naa the Ship-Taker	26	yes	2	26	0	Mount Sahumnu	The Palms of Zil
+89	continent	tropical	sylvan	Terra Feil	Gwiemere	26	25	4	4	1	Gwelei the Island that Swims	26	yes	2	29	2	The Laenlorei Downs	The Gwibraewold
+90	continent	temperate	zoryan	The Shining Reaches of Skik	Trursk	26	25	4	4	1	Pakgra the Drowned Hill	26	yes	2	35	0	The Peaks of Mongra	The Trekskeles
+91	island	temperate	tezcal	The Untamed Isle of Yina	Ecuel	26	25	3	3	1	Cixa the Eater of Anchors	26	yes	2	28	2	The Smoking Altar of Patza	The Tuaxil Jungle
+92	continent	temperate	oromi	The Untamed Reaches of Kolaure	Lau	26	24	4	4	1	Koalu the Ship-Taker	26	yes	2	26	1	Mount Palu	Deep Moala
+93	island	temperate	ordai	The Salt-Worn Isle of Taitnair	Ureingtai	26	24	4	4	1	Uungshe Old Winding	25	yes	2	19	2	Mount Shingde	Deep Togna
+94	continent	temperate	zoryan	The Realm of Kril	Skadsvin	26	25	4	4	1	Molsyl the Breath of the Deep	26	yes	2	20	1	The Stolkri Planina	The Brertrunles
+95	continent	temperate	oromi	The Realm of Welo	Moapua	26	25	4	4	1	Laulame the Thousand Arms	26	yes	2	28	1	The Smoking Tema	The Hailo Groves
+96	archipelago	polar	veshari	The Zusaa Archipelago	Saakhu	26	25	2	2	1	Maramaa the Deep Worm	26	yes	2	32	1	The Dunespires of Khul	The Palms of Khi
+97	continent	tropical	thalassic	The Salt-Worn Reaches of Taliaca	Selair	26	24	3	3	1	Velainiar the Deep Worm	25	yes	2	21	2	The Lamarea Peaks	The Mariowood
+98	island	temperate	tsuren	The Isle of Bai	Baimo	26	25	3	3	1	Shechagi the Reaching Dark	26	yes	2	21	1	The Peak of Kanamei	Deep Takeku
+99	island	temperate	thalassic	The Verdant Isle of Oreassela	Mialiscove	26	25	3	3	1	Selolvio the Island that Swims	26	yes	2	22	2	The Nitha Peaks	Mesele Forest
+100	continent	temperate	draket	The Realm of Zamar	Dugat	26	23	3	3	1	Barugat the Grey Titan	25	yes	2	27	2	Daga Spire	The Demargya Thorns

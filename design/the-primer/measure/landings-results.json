@@ -1,0 +1,602 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--dice.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=338018366&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=338018366&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The City-State of Donlakin · Chart № 338018366\",\"lines\":[\"The City-State of Donlakin · Chart № 338018366\",\"surveyed in the year 1066 of the Cedar Age\",\"citystate · temperate · drawn in 317ms\"],\"stamp\":{\"seed\":\"338018366\",\"map-type\":\"citystate\",\"band\":\"temperate\",\"land-fraction\":\"0.3\",\"style\":\"antique\"},\"readouts\":[\"land=30% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--draw.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=7",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#folio-title\",\"says\":\"The Isle of Rahai\",\"state\":\"covered by stage\",\"got\":\"The Isle of Rahai · Chart № 42\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 376ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--enter.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=1155&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"1155\",\"state\":\"reachable\",\"got\":\"1155\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=1155&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Vauldgrei Archipelago · Chart № 1155\",\"lines\":[\"The Vauldgrei Archipelago · Chart № 1155\",\"surveyed in the year 1108 of the Tide Age\",\"archipelago · temperate · drawn in 334ms\"],\"stamp\":{\"seed\":\"1155\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\"},\"readouts\":[\"land=24% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--archipelago.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#folio-title\",\"says\":\"The Rahai Archipelago\",\"state\":\"covered by stage\",\"got\":\"The Rahai Archipelago · Chart № 42\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · temperate · drawn in 341ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\"},\"readouts\":[\"islands=seed's choice\",\"land=24% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--islands.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20\",\"reads\":[{\"css\":\"#islands-readout\",\"says\":\"about 20\",\"state\":\"reachable\",\"got\":\"about 20\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"20\",\"state\":\"reachable\",\"got\":\"20\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · temperate · drawn in 302ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"islands\":\"20\"},\"readouts\":[\"islands=about 20\",\"ragged=round\",\"land=held\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--sizes.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&type=archipelago&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&isleSize=varied\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"varied\",\"state\":\"reachable\",\"got\":\"varied\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&isleSize=varied\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · temperate · drawn in 306ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"islands\":\"20\",\"isle-size\":\"varied\"},\"readouts\":[\"islands=about 20\",\"ragged=round\",\"land=held\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--climate.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&band=polar&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"polar\",\"state\":\"reachable\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&band=polar&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · polar · drawn in 348ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"polar\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--shape.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"ne-1159320917\",\"state\":\"reachable\",\"got\":\"ne-1159320917\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 384ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\",\"outline\":\"ne-1159320917\"},\"readouts\":[\"looseness=exact\",\"land=held\",\"coast=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--held.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"reads\":[{\"css\":\"#land-held-note\",\"says\":\"the outline holds the count; clear the place to free the islands\",\"state\":\"held\",\"got\":\"the outline holds the count; clear the place to free the islands\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · temperate · drawn in 342ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"outline\":\"ne-1159320917\"},\"readouts\":[\"islands=held\",\"looseness=exact\",\"land=held\",\"coast=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--sea-level.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&land=100\",\"reads\":[{\"css\":\"#land-readout\",\"says\":\"% land\",\"state\":\"reachable\",\"got\":\"10% land\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&land=100\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 319ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.1\",\"style\":\"antique\"},\"readouts\":[\"land=10% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--coast.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&coast=95\",\"reads\":[{\"css\":\"#coast-readout\",\"says\":\"warp 0.95\",\"state\":\"reachable\",\"got\":\"warp 0.95\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&coast=95\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 354ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\",\"coast-warp\":\"0.95\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.95\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--ragged.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&type=archipelago&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&raggedness=70\",\"reads\":[{\"css\":\"#ragged-readout\",\"says\":\"ragged 0.70\",\"state\":\"reachable\",\"got\":\"ragged 0.70\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"0.7\",\"state\":\"reachable\",\"got\":\"0.7\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&raggedness=70\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · temperate · drawn in 363ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"temperate\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"islands\":\"20\",\"raggedness\":\"0.7\"},\"readouts\":[\"islands=about 20\",\"ragged=ragged 0.70\",\"land=held\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--looseness.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917&looseness=70\",\"reads\":[{\"css\":\"#looseness-readout\",\"says\":\"looser\",\"state\":\"reachable\",\"got\":\"looser\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"label[for=coast]\",\"says\":\"coast\",\"state\":\"reachable\",\"got\":\"coast\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":true}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917&looseness=70\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 430ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\",\"outline\":\"ne-1159320917\",\"looseness\":\"0.7\"},\"readouts\":[\"coast=warp 0.55\",\"looseness=looser\",\"land=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--style.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=ink&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"ink\",\"state\":\"reachable\",\"got\":\"ink\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=ink&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 34ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"ink\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--theme.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&theme=moisture&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&theme=moisture&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 149ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--arms.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=1&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=1&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 41ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--beasts.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=1\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style]\",\"says\":\"Rauhoahai\",\"state\":\"reachable\",\"got\":\"The Isle of RahaiAntique chart of The Isle of Rahai, an island in a temperate climate.Vellum chart. Recipe: seed=42 type=island band=temperate land=0.34 grid=320x240 style=antique engine=0.1.0Rauhoahai, the Eater of Anchors. Pilots of Won swear the water darkens a league around it; so it has been since the year 985.RauhoahaiLAUKUWELUAWEKITOATAUHEPaukiluaNaukoaNailoLoatunuiLamahaiNoloatataniWaunRauhelunuiKaiPongNanawotaniPoaloPeloWonNurunuiLaihoanuiKehenainuiPaleHomaitaniWuwatauTewetuluaHairenoThe Great WoakuMOUNT TAUWAUTHE CHIEFDOM OF REKEKOATHE HAUWAIWA ATOLLSTHE RATOA ATOLLSRiver NaikanaThe Waters of NuloRiver NoaThe Roki FallsRiver NaikaiRiver PotauleThe Roanono FallsThe Waters of LaloRiver RenThe Mairoa PoolThe Ferns of PeroaNLeagues01020The Isle of RahaiBeing a true & faithful chart of these waters, as surveyedby Taiki the Wayfarer in the year 1059 of the Cedar AgeCHART № 42KEYCapitalRealm seatTownVillageRuinsMountainsHillsForestMarshRiverRoadTrackRealm & borderitalic = water · SPACED CAPS = realmVELLUM · CHART № 42 · ANTIQUE\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=1\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 43ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--survey.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&survey\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&survey\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 399ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--legend.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=0&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=0&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 39ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--nearer.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.4000\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.4000\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 404ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--look-about.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.6429&cy=0.5000&k=1.4000\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.6429&cy=0.5000&k=1.4000\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 394ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--anew.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#map .region-inset .dog-ear\",\"says\":\"lay this survey on the table\",\"state\":\"reachable\",\"got\":\"lay this survey on the table\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"The Environs of Nanawotani · regional survey · band 1 · drawn in 626ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--hold.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-hold\",\"says\":\"true\",\"state\":\"reachable\",\"got\":\"true\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#caption\",\"says\":\"held\",\"state\":\"covered by [object SVGAnimatedString]\",\"got\":\"The Environs of Nanawotani · regional survey · band 1 · drawn in 615ms · held\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"The Environs of Nanawotani · regional survey · band 1 · drawn in 615ms · held\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--loupe.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"reads\":[{\"css\":\"#zoom-loupe\",\"says\":\"true\",\"state\":\"reachable\",\"got\":\"true\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"The Environs of Nanawotani · regional survey · band 1 · drawn in 602ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":true,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--stand-off.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 395ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--card.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#place-card .pc-name\",\"says\":\"Laukuwelua\",\"state\":\"covered by [object SVGAnimatedString]\",\"got\":\"Laukuwelua\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 394ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--verso.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"island · temperate · drawn in 396ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"the table is bare\"]],\"drawer\":\"The Drawer · the table is bare\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--dog-ear.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#chart-drawer-tab\",\"says\":\"The Drawer · one sheet\",\"state\":\"no box\",\"got\":\"The Drawer · one sheet\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"The Environs of Nanawotani · regional survey · band 1 · drawn in 605ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"one sheet laid · room for five more\"]],\"drawer\":\"The Drawer · one sheet\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--drawer.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#chart-drawer-count\",\"says\":\"one sheet laid\",\"state\":\"reachable\",\"got\":\"one sheet laid · room for five more\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5000&cy=0.5000&k=1.9600&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"The Environs of Nanawotani · regional survey · band 1 · drawn in 783ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[\"land=34% land\",\"coast=warp 0.55\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"one sheet laid · room for five more\"]],\"drawer\":\"The Drawer · one sheet\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer--commission.png",
+  "url": "http://127.0.0.1:59303/explorer/#seed=42&style=nautical&type=archipelago&band=polar&arms=1&islands=40&isleSize=varied",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/#seed=42&style=nautical&type=archipelago&band=polar&legend=1&arms=1&beasts=0&islands=40&isleSize=varied&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"archipelago\",\"state\":\"covered by place-hit\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"polar\",\"state\":\"covered by place-hit\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"nautical\",\"state\":\"covered by place-hit\",\"got\":\"nautical\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"40\",\"state\":\"covered by place-hit\",\"got\":\"40\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/explorer/#seed=42&style=nautical&type=archipelago&band=polar&legend=1&arms=1&beasts=0&islands=40&isleSize=varied&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8\",\"title\":\"The Rahai Archipelago · Chart № 42\",\"lines\":[\"The Rahai Archipelago · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\",\"archipelago · polar · drawn in 342ms\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"archipelago\",\"band\":\"polar\",\"land-fraction\":\"0.24\",\"style\":\"nautical\",\"islands\":\"40\",\"isle-size\":\"varied\"},\"readouts\":[\"islands=about 40\",\"ragged=round\",\"land=held\",\"looseness=held\"],\"status\":[[\"#chart-drawer-count\",\"one sheet laid · room for five more\"]],\"drawer\":\"The Drawer · one sheet\",\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/prospect--year.png",
+  "url": "http://127.0.0.1:59303/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/prospect/#seed=42&i=0&year=300\",\"reads\":[]},\"room\":{\"href\":\"/prospect/#seed=42&i=0&year=300\",\"title\":\"The Prospect of Laukuwelua · Chart № 42\",\"lines\":[\"The Prospect of Laukuwelua · Chart № 42\",\"The Isle of Rahai · once called Haitani\",\"pressed in 4ms · antique\"],\"stamp\":{},\"readouts\":[],\"status\":[[\"#pp-era\",\"Before the founding · An. 300\"],[\"#pp-lay-count\",\"one sheet laid · room for five more\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/prospect--lay.png",
+  "url": "http://127.0.0.1:59303/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/prospect/#seed=42&i=0&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.style-antique.i-0.year-1059\",\"reads\":[{\"css\":\"#pp-lay-count\",\"says\":\"laid\",\"state\":\"reachable\",\"got\":\"two sheets laid · room for four more\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/prospect/#seed=42&i=0&table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.style-antique.i-0.year-1059\",\"title\":\"The Prospect of Laukuwelua · Chart № 42\",\"lines\":[\"The Prospect of Laukuwelua · Chart № 42\",\"The Isle of Rahai · once called Haitani\",\"pressed in 353ms · antique\"],\"stamp\":{},\"readouts\":[],\"status\":[[\"#pp-era\",\"Standing · An. 1059\"],[\"#pp-lay-count\",\"two sheets laid · room for four more\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/ribbon--bound-for.png",
+  "url": "http://127.0.0.1:59303/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/ribbon/#seed=42&a=0&b=8\",\"reads\":[{\"css\":\"#folio-title\",\"says\":\"Laukuwelua to Toatauhe\",\"state\":\"covered by stage\",\"got\":\"Laukuwelua to Toatauhe · Chart № 42\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/ribbon/#seed=42&a=0&b=8\",\"title\":\"Laukuwelua to Toatauhe · Chart № 42\",\"lines\":[\"Laukuwelua to Toatauhe · Chart № 42\",\"The Isle of Rahai · the road as the wayfarers' chain measured it, An. 1059\",\"unrolled in 6ms · 45 leagues · antique\"],\"stamp\":{},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/ribbon--turn-about.png",
+  "url": "http://127.0.0.1:59303/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/ribbon/#seed=42&a=22&b=0\",\"reads\":[{\"css\":\"#folio-title\",\"says\":\"Homaitani to Laukuwelua\",\"state\":\"covered by stage\",\"got\":\"Homaitani to Laukuwelua · Chart № 42\",\"ok\":true,\"expect\":\"reachable\",\"fits\":false,\"inMarkup\":false}]},\"room\":{\"href\":\"/ribbon/#seed=42&a=22&b=0\",\"title\":\"Homaitani to Laukuwelua · Chart № 42\",\"lines\":[\"Homaitani to Laukuwelua · Chart № 42\",\"The Isle of Rahai · the road as the wayfarers' chain measured it, An. 1059\",\"unrolled in 7ms · 83 leagues · antique\"],\"stamp\":{},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/ribbon--lean.png",
+  "url": "http://127.0.0.1:59303/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"reads\":[]},\"room\":{\"href\":\"/ribbon/#seed=42&a=0&b=22\",\"title\":\"Laukuwelua to Homaitani · Chart № 42\",\"lines\":[\"Laukuwelua to Homaitani · Chart № 42\",\"The Isle of Rahai · the road as the wayfarers' chain measured it, An. 1059\",\"unrolled in 353ms · 83 leagues · antique\"],\"stamp\":{},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/explorer-portfolio--next.png",
+  "url": "http://127.0.0.1:59303/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique\",\"reads\":[]},\"room\":{\"href\":\"/explorer/portfolio/#table=k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8_k-p.seed-42.i-0.style-antique\",\"title\":\"The Prospect of Laukuwelua · Sheet ii of ii\",\"lines\":[\"The Prospect of Laukuwelua · Sheet ii of ii\",\"a prospect, antique · from The Isle of Rahai, chart № 42\",\"the last of them\"],\"stamp\":{},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/writing-room--write.png",
+  "url": "http://127.0.0.1:59303/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"polar\",\"state\":\"reachable\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"archipelago\",\"state\":\"reachable\",\"got\":\"archipelago\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"20\",\"state\":\"reachable\",\"got\":\"20\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"title\":\"The Gorngrald Archipelago\",\"lines\":[\"The Gorngrald Archipelago\",\"Being a true & faithful chart of these waters, as surveyed by Greik the Wayfarer in the year 1068 of the Lantern Age\",\"Chart № 2166136261 · an archipelago, polar\"],\"stamp\":{\"seed\":\"2166136261\",\"map-type\":\"archipelago\",\"band\":\"polar\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"culture\":\"norden\",\"islands\":\"20\",\"founding-text\":\"a polar archipelago of twenty islands\"},\"readouts\":[],\"status\":[[\".wr-account\",\"The words that steeredpolar set a cold climatearchipelago set an archipelagotwenty islands set about 20 islands and an archipelagoThe chart number№ 2166136261, from no words at all\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/writing-room--your-word.png",
+  "url": "http://127.0.0.1:59303/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands+alex&v=1\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"polar\",\"state\":\"reachable\",\"got\":\"polar\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false},{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"20\",\"state\":\"reachable\",\"got\":\"20\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands+alex&v=1\",\"title\":\"The Vauksku Archipelago\",\"lines\":[\"The Vauksku Archipelago\",\"Being a true & faithful chart of these waters, as surveyed by Veikalag the Wayfarer in the year 532 of the Iron Age\",\"Chart № 3852794181 · an archipelago, polar\"],\"stamp\":{\"seed\":\"3852794181\",\"map-type\":\"archipelago\",\"band\":\"polar\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"culture\":\"norden\",\"islands\":\"20\",\"founding-text\":\"a polar archipelago of twenty islands alex\"},\"readouts\":[],\"status\":[[\".wr-account\",\"The words that steeredpolar set a cold climatearchipelago set an archipelagotwenty islands set about 20 islands and an archipelagoThe chart number№ 3852794181, from “alex”\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/writing-room--shape-of.png",
+  "url": "http://127.0.0.1:59303/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/writing-room/#found=an+island+in+the+shape+of+Japan&v=1\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"ne-1159320937\",\"state\":\"reachable\",\"got\":\"ne-1159320937\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/writing-room/#found=an+island+in+the+shape+of+Japan&v=1\",\"title\":\"The Isle of Bre\",\"lines\":[\"The Isle of Bre\",\"Being a true & faithful chart of these waters, as surveyed by Thie the Wayfarer in the year 1068 of the Lantern Age\",\"Chart № 2166136261 · an island, tropical\"],\"stamp\":{\"seed\":\"2166136261\",\"map-type\":\"island\",\"band\":\"tropical\",\"land-fraction\":\"0.34\",\"style\":\"antique\",\"outline\":\"ne-1159320937\",\"founding-text\":\"an island in the shape of Japan\"},\"readouts\":[],\"status\":[[\".wr-account\",\"The words that steeredisland set an islandin the shape of japan set the shape of JapanThe chart number№ 2166136261, from no words at all\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/writing-room--plate.png",
+  "url": "http://127.0.0.1:59303/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"reads\":[{\"css\":\"#wr-plate-verb\",\"says\":\"Lift\",\"state\":\"reachable\",\"got\":\"Lift\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1\",\"title\":\"The Gorngrald Archipelago\",\"lines\":[\"The Gorngrald Archipelago\",\"Being a true & faithful chart of these waters, as surveyed by Greik the Wayfarer in the year 1068 of the Lantern Age\",\"Chart № 2166136261 · an archipelago, polar\"],\"stamp\":{\"seed\":\"2166136261\",\"map-type\":\"archipelago\",\"band\":\"polar\",\"land-fraction\":\"0.24\",\"style\":\"antique\",\"culture\":\"norden\",\"islands\":\"20\",\"founding-text\":\"a polar archipelago of twenty islands\"},\"readouts\":[],\"status\":[[\".wr-account\",\"The words that steeredpolar set a cold climatearchipelago set an archipelagotwenty islands set about 20 islands and an archipelagoThe chart number№ 2166136261, from no words at all\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/reading-room--play.png",
+  "url": "http://127.0.0.1:59303/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"reads\":[]},\"room\":{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=1059\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"Being a true & faithful chart of these waters, as surveyed by Taiki the Wayfarer in the year 1059 of the Cedar Age\"],\"stamp\":{},\"readouts\":[],\"status\":[[\".rf-year\",\"year 1059\"],[\".rf-told\",\"1039Homaitani was abandoned, and is now a haunt of gulls and ghosts.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/reading-room--ages.png",
+  "url": "http://127.0.0.1:59303/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=597\",\"reads\":[]},\"room\":{\"href\":\"/reading-room/#seed=42&style=antique&legend=1&arms=0&beasts=0&year=597\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"Being a true & faithful chart of these waters, as surveyed by Taiki the Wayfarer in the year 1059 of the Cedar Age\"],\"stamp\":{},\"readouts\":[],\"status\":[[\".rf-year\",\"year 597\"],[\".rf-told\",\"597Lamahai grew from a lone anchorage to a seat of some note.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/reading-room--read.png",
+  "url": "http://127.0.0.1:59303/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/reading-room/#seed=1155&style=antique&legend=1&arms=0&beasts=0&year=1108\",\"reads\":[]},\"room\":{\"href\":\"/reading-room/#seed=1155&style=antique&legend=1&arms=0&beasts=0&year=1108\",\"title\":\"The Vauldgrei Archipelago · Chart № 1155\",\"lines\":[\"The Vauldgrei Archipelago · Chart № 1155\",\"Being a true & faithful chart of these waters, as surveyed by Geist the Wayfarer in the year 1108 of the Tide Age\"],\"stamp\":{},\"readouts\":[],\"status\":[[\".rf-year\",\"year 1108\"],[\".rf-told\",\"1007Plague and poor harvests emptied Geig; its roofs have since fallen.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--pull.png",
+  "url": "http://127.0.0.1:59303/print-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"42\",\"state\":\"reachable\",\"got\":\"42\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--style.png",
+  "url": "http://127.0.0.1:59303/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=ink&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#map > svg[data-vellum-style], #wr-chart svg, #pr-preview svg\",\"says\":\"ink\",\"state\":\"reachable\",\"got\":\"ink\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/print-room/#seed=42&style=ink&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"ink\"},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--bind.png",
+  "url": "http://127.0.0.1:59303/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[{\"css\":\"#pr-bind\",\"says\":\"Bind it again\",\"state\":\"reachable\",\"got\":\"Bind it again\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"plate i of the bound atlas · the world chart, drawn in the antique manner\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[],\"status\":[[\"#pr-bound-status\",\"The atlas of The Isle of Rahai is bound: 12 plates, the chronicle and the gazetteer, from the proof on the desk.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--turn.png",
+  "url": "http://127.0.0.1:59303/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"plate ii of the bound atlas · drawn in the topographic manner\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[],\"status\":[[\"#pr-bound-status\",\"The atlas of The Isle of Rahai is bound: 12 plates, the chronicle and the gazetteer, from the proof on the desk.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--impression.png",
+  "url": "http://127.0.0.1:59303/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/print-room--road-plate.png",
+  "url": "http://127.0.0.1:59303/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"reads\":[]},\"room\":{\"href\":\"/print-room/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"title\":\"The Isle of Rahai · Chart № 42\",\"lines\":[\"The Isle of Rahai · Chart № 42\",\"the road from Laukuwelua to Homaitani\",\"surveyed in the year 1059 of the Cedar Age\"],\"stamp\":{\"seed\":\"42\",\"map-type\":\"island\",\"band\":\"temperate\",\"land-fraction\":\"0.34\",\"style\":\"antique\"},\"readouts\":[],\"status\":[],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/shots/landings/seed-of-the-day--sound.png",
+  "url": "http://127.0.0.1:59303/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"then\":{\"href\":\"/seed-of-the-day/\",\"reads\":[{\"css\":\"#hunt-status\",\"says\":\".\",\"state\":\"reachable\",\"got\":\"Cold. It lies well away. You mark Krukzu.\",\"ok\":true,\"expect\":\"reachable\",\"fits\":true,\"inMarkup\":false}]},\"room\":{\"href\":\"/seed-of-the-day/\",\"title\":\"The Druthzyak Archipelago\",\"lines\":[\"The Druthzyak Archipelago\",\"Being a true & faithful chart of these waters, as surveyed by Krukthu the Wayfarer in the year 574 of the Iron Age\",\"Chart № 20261005 · an archipelago, temperate\",\"Drodgate, the capital. Here the court keeps its ledgers, levies, and grudges. Guildhalls crowd the square below the citadel. Its founding is set down in the year 282.\"],\"stamp\":{},\"readouts\":[],\"status\":[[\"#hunt-status\",\"Cold. It lies well away. You mark Krukzu.\"]],\"drawer\":null,\"loupe\":false,\"verso\":false,\"track\":false}}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
