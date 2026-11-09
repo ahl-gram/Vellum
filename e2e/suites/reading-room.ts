@@ -3,7 +3,7 @@ import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
-import { DESK, atDesk, sameSheet } from "./reading-room/reads.ts";
+import { DESK, atDesk, sameSize } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks, rr44PlaceLink } from "./reading-room/addresses.ts";
@@ -54,8 +54,9 @@ export async function atTheDesk(ctx: SuiteContext, step: Step, k: ReadingRoomKit
   const harness = await evaluate(DESK);
   // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  // 2026-11-09: rewritten for a red on CI: RR36, run 42683815779, Issue #1285: the desk wait departed on the sheet's box, which the stylesheet re-places at a new window at once, so two equal reads of the old fit re-placed passed it before the room's layout ran; it departs on the sheet's size, which only the room's layout writes
   await step("RR31, RR35, RR36", async () => {
-    await stable(DESK, "the room laid out at 1440x900", { departed: (d) => atDesk(d) && !sameSheet(d, harness) });
+    await stable(DESK, "the room laid out at 1440x900", { departed: (d) => atDesk(d) && !sameSize(d, harness) });
     await rrDeskReads(ctx);
   });
   await step("RR39", () => rr39AtRest(ctx));
@@ -65,7 +66,7 @@ export async function atTheDesk(ctx: SuiteContext, step: Step, k: ReadingRoomKit
   await send("Emulation.clearDeviceMetricsOverride");
   await step("RR29", async () => {
     await stable(DESK, "the room laid out again after the 1440x900 override", {
-      departed: (d) => !atDesk(d) && !sameSheet(d, desk),
+      departed: (d) => !atDesk(d) && !sameSize(d, desk),
     });
     await rr29Play(k);
   });

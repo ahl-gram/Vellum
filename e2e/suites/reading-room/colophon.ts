@@ -40,20 +40,23 @@ export async function rr17CounterRead({
   check,
   sleep,
   plateShown,
-  plateStaysHidden,
+  plateBare,
 }: ReadingRoomKit): Promise<void> {
   await rr17DrawsTyped({ evaluate, check, sleep });
-  const restaged = await plateStaysHidden();
+  const bare = await plateBare();
   check(
-    "RR28 the counter draw clears the old world's plate and stages no new one unasked (#442)",
-    restaged === null,
-    restaged === null ? "stayed hidden" : JSON.stringify(restaged),
+    "RR28 the counter draw stages no plate unasked (#442)",
+    bare === null,
+    bare === null ? "hidden, and the stage asked for no plate" : JSON.stringify(bare),
   );
   await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
   const restagedByPlay = await plateShown();
   check(
-    "RR28b and the control: Play on the counter-drawn world does bring one, so RR28 is a choice and not a corpse (#442)",
-    !!restagedByPlay && restagedByPlay.inSlip === true && /(^|#|&)seed=42(&|$)/.test(restagedByPlay.href || ""),
+    "RR28b and the control: Play on the counter-drawn world does bring one, the stage saying it was asked for it, so RR28 is a choice and not a corpse (#442)",
+    !!restagedByPlay &&
+      restagedByPlay.inSlip === true &&
+      /(^|#|&)seed=42(&|$)/.test(restagedByPlay.href || "") &&
+      restagedByPlay.asked !== null,
     JSON.stringify(restagedByPlay),
   );
 }
@@ -92,9 +95,8 @@ export async function rr18Park({ evaluate, check }: SuiteContext): Promise<void>
 }
 
 export async function rr20Superseded({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // The worker is FIFO, so the stale seed-7 settle always resolves FIRST; the hold-only form was blind (guard-prover: guard deleted, 304/304 stayed green) and sawForeign is the clause that discriminates.
   await evaluate(
-    `(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");i.value="7";r.click();i.value="42";r.click();})()`,
+    `(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");const lands={n:0};window.__rr20Lands=lands;window.__rr20Watch=new MutationObserver((rs)=>{for(const m of rs)for(const n of m.addedNodes)if(n.nodeName.toLowerCase()==="svg"&&!n.classList.contains("voyage-overlay"))lands.n++;});window.__rr20Watch.observe(document.querySelector(".rf-chart"),{childList:true});i.value="7";r.click();i.value="42";r.click();})()`,
   );
   let raced = null;
   let sawForeign = false;
@@ -112,14 +114,14 @@ export async function rr20Superseded({ evaluate, check, sleep }: SuiteContext): 
     }
     await sleep(50);
   }
-  await sleep(2000, "window: a superseded draw must not land in it");
-  const held = await evaluate<{ seed: number; title: string; hash: string }>(
-    `(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`,
+  const held = await evaluate<{ seed: number; title: string; hash: string; lands: number }>(
+    `(()=>{window.__rr20Watch.disconnect();const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash,lands:window.__rr20Lands.n};})()`,
   );
   check(
     "RR20 a superseded draw can never land over a newer one: the stale settle is dropped, the latest holds",
     !!raced &&
       !sawForeign &&
+      held.lands === 1 &&
       held.seed === 42 &&
       held.title === "The Isle of Rahai" &&
       /(^|#|&)seed=42(&|$)/.test(held.hash),

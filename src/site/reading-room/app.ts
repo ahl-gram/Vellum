@@ -29,7 +29,7 @@ import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } 
 declare global {
   interface Window {
     __vellumReadingRoomUsesWorker?: typeof usesWorker;
-    __vellumReadingRoomState?: () => { seed: number; title: string };
+    __vellumReadingRoomState?: () => { seed: number; title: string; plate: string | null };
     __vellumReadingRoomAges?: LivingChart["agesState"];
   }
 }
@@ -383,7 +383,7 @@ document.addEventListener("click", lc.onDocClick);
 
 await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
-window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
+window.__vellumReadingRoomState = () => ({ seed, title: lastTitle, plate: stage.shown() });
 // Published whole, never narrowed; both names below are the same function object, so they cannot disagree.
 window.__vellumReadingRoomAges = lc.agesState;
 installHostHooks({ livingChart: lc, runInline });
