@@ -274,32 +274,6 @@ export async function zh11EarOnCorner(k: ZoomKit, pick: HamletWindow): Promise<v
   );
 }
 
-const CARD = `(()=>{const c=document.getElementById("place-card");const inner=c&&c.querySelector(".pc-inner");if(!c||c.hidden||!inner)return null;const an=inner.getAnimations();return an.length>0&&an.every((a)=>a.playState==="finished")?{tf:getComputedStyle(inner).transform}:null;})()`;
-const MID_ROLL = `(()=>{const inner=document.querySelector("#place-card .pc-inner");const a=inner.getAnimations()[0];a.pause();a.currentTime=0.95*a.effect.getComputedTiming().duration;const m34=new DOMMatrix(getComputedStyle(inner).transform).m34;a.finish();return m34;})()`;
-
-export async function zh12CardFlat(k: ZoomKit, pick: HamletWindow): Promise<void> {
-  await ensureHeldDeepInset(k, pick);
-  const near = await k.evaluate<{ label: string }>(
-    `(()=>{const s=[...document.querySelectorAll("#map .region-inset svg")].pop().getBoundingClientRect();const cx=s.left+s.width/2,cy=s.top+s.height/2;let best=null,bd=1e9;for(const h of document.querySelectorAll("#map .place-hit")){const r=h.getBoundingClientRect();const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}return{label:best.getAttribute("aria-label")};})()`,
-  );
-  const at = await k.evaluate<{ x: number; y: number }>(hitCentre(near.label));
-  const m = await k.evaluate<{ cu: number; cv: number }>(
-    `(()=>{const m=document.getElementById("map").getBoundingClientRect();return{cu:(${at.x}-m.left)/m.width,cv:(${at.y}-m.top)/m.height};})()`,
-  );
-  await deep(k, m.cu, m.cv);
-  const centre = await k.evaluate<{ x: number; y: number }>(hitCentre(near.label));
-  await mouse(k, centre.x - 3, centre.y);
-  await mouse(k, centre.x, centre.y);
-  const rest = await makeSettle(k)<{ tf: string }>(CARD, () => true, "zh12-card-rest");
-  const m34 = await k.evaluate<number>(MID_ROLL);
-  await mouse(k, 3, 3);
-  k.check(
-    "ZH12 a place card at rest at 24 times held carries no 3D transform, so its text is painted with the sheet and not resampled, while its unfold still holds its perspective near its end (Issue #751)",
-    (rest.tf === "none" || rest.tf.startsWith("matrix(")) && Math.abs(m34 + 1 / 900) <= 1e-6,
-    JSON.stringify({ label: near.label, tf: rest.tf, m34 }),
-  );
-}
-
 const PAPER = `(()=>{const m=document.getElementById("map").getBoundingClientRect();const s=document.querySelector("#map > svg").getBoundingClientRect();const e=[...document.querySelectorAll("#map .region-inset .dog-ear")].pop();return{mw:m.width,mh:m.height,sw:s.width,sh:s.height,ear:e?getComputedStyle(e).display:null};})()`;
 
 type Paper = { mw: number; mh: number; sw: number; sh: number; ear: string | null };

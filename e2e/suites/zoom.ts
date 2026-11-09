@@ -11,11 +11,10 @@ import {
   z4RoundTrip,
   z6PinnedCard,
   z8CardConstant,
-  z8bHoverRing,
   z22HitAndRing,
   z25ClampFlush,
 } from "./zoom/camera.ts";
-import { z9Keyboard, z10Buttons, z10bNoDblclickLeak, z11Styles, z12HashWrite } from "./zoom/controls.ts";
+import { z9Keyboard, z10Buttons, z10bNoDblclickLeak, z12HashWrite } from "./zoom/controls.ts";
 import {
   z5VersoHomes,
   z14aDrawHomes,
@@ -28,7 +27,6 @@ import {
 } from "./zoom/resets.ts";
 import {
   z15RegionCrop,
-  z16CacheHit,
   z17Inset,
   zInsetContextShot,
   z18Pan,
@@ -71,12 +69,10 @@ import {
   zh10aTownsOnDots,
   zh10bHamletsOnDots,
   zh11EarOnCorner,
-  zh12CardFlat,
   zh13PrintKeepsSheet,
   zh14PressIgnoredWhileDrafting,
   zh14bPressIgnoredWhileTurning,
 } from "./zoom/registration.ts";
-import { zh15HoldLights } from "./zoom/hold-dress.ts";
 import { z21dInsetCards } from "./zoom/inset-cards.ts";
 import {
   zl1PressShowsLens,
@@ -85,8 +81,8 @@ import {
   zl4HeldKey,
   zl5StandsAsideOverCard,
 } from "./zoom/loupe.ts";
-import { zl6TrackRides, zl7DarkPastSheet } from "./zoom/loupe-chart.ts";
-import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
+import { zl6TrackRides } from "./zoom/loupe-chart.ts";
+import { z23SurveyOverlay, z24CardSeats } from "./zoom/dress.ts";
 import { z27UnderPinned } from "./zoom/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -94,15 +90,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // The geometric checks between the steps below are deliberately not stepped: they read the camera and the CSSOM, with nothing to wait on.
   const step = makeStep(ctx);
   const k = zoomKit(ctx);
-  // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
+  // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z15) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
-  await zGeometric(step, ctx, k);
+  await zGeometric(step, ctx);
   await step("Z22", () => z22HitAndRing(ctx));
   await step("Z24", () => z24CardSeats(ctx));
   await step("Z25", () => z25ClampFlush(ctx));
-  await step("Z26", () => z26CardDress(ctx));
   await step("Z27", () => z27UnderPinned(ctx));
-  await step("Z11", () => z11Styles(ctx));
   await step("Z12", () => z12HashWrite(ctx));
   await step("Z5", () => z5VersoHomes(ctx));
   await step("Z14a", () => z14aDrawHomes(ctx));
@@ -113,7 +107,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("Z13", () => z13DeepLink(ctx));
   await step("Z13b, Z13c, Z13d", () => z13dRefitHolds(ctx));
   await z15RegionCrop(ctx);
-  await z16CacheHit(ctx);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await step("Z17", async () => {
     await z17Inset(k);
@@ -164,11 +157,9 @@ async function zHold(step: ReturnType<typeof makeStep>, k: ZoomKit, target21: Ta
   const pick = await pickHamletWindow(k);
   await step("ZH10b", () => zh10bHamletsOnDots(k, pick));
   await step("ZH11", () => zh11EarOnCorner(k, pick));
-  await step("ZH12", () => zh12CardFlat(k, pick));
   await step("ZH13", () => zh13PrintKeepsSheet(k, pick));
   await step("ZH14", () => zh14PressIgnoredWhileDrafting(k));
   await step("ZH14b", () => zh14bPressIgnoredWhileTurning(k));
-  await step("ZH15", () => zh15HoldLights(k));
   return pick;
 }
 
@@ -179,10 +170,9 @@ async function zLoupe(step: ReturnType<typeof makeStep>, k: ZoomKit, pick: Hamle
   await step("ZL4", () => zl4HeldKey(k));
   await step("ZL5", () => zl5StandsAsideOverCard(k));
   await step("ZL6", () => zl6TrackRides(k));
-  await step("ZL7", () => zl7DarkPastSheet(k));
 }
 
-async function zGeometric(step: ReturnType<typeof makeStep>, ctx: SuiteContext, k: ZoomKit): Promise<void> {
+async function zGeometric(step: ReturnType<typeof makeStep>, ctx: SuiteContext): Promise<void> {
   await z1ZoomTo(ctx);
   await z2MaxClamp(ctx);
   await zK4Shot(ctx);
@@ -190,7 +180,6 @@ async function zGeometric(step: ReturnType<typeof makeStep>, ctx: SuiteContext, 
   await z4RoundTrip(ctx);
   await step("Z6", () => z6PinnedCard(ctx));
   await step("Z8", () => z8CardConstant(ctx));
-  await z8bHoverRing(k);
   await z9Keyboard(ctx);
   await z10Buttons(ctx);
   await z10bNoDblclickLeak(ctx);

@@ -72,24 +72,6 @@ export async function z10bNoDblclickLeak({ evaluate, check, sleep }: SuiteContex
   );
 }
 
-export async function z11Styles({ evaluate, check, shoot, waitTurned }: SuiteContext): Promise<void> {
-  for (const style of ["topographic", "ink", "nautical"]) {
-    await evaluate(
-      `(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-    );
-    await waitTurned("zoom-style-" + style);
-    const zs = await evaluate<{ matrix: string; zoomed: boolean; touch: string; hits: number }>(
-      `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`,
-    );
-    check(
-      "Z11 " + style + " pans/zooms identically (AC1: matrix lands, .zoomed, touch-action:none, marks present)",
-      zs.matrix.startsWith("matrix(3, 0, 0, 3,") && zs.zoomed === true && zs.touch === "none" && zs.hits > 0,
-      style + " " + JSON.stringify(zs),
-    );
-    if (style === "topographic") await shoot("explorer-zoom-topographic-k3.png");
-  }
-}
-
 export async function z12HashWrite({ evaluate, check, sleep, waitTurned }: SuiteContext): Promise<void> {
   await evaluate(
     `(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,

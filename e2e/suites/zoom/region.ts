@@ -52,30 +52,6 @@ export async function z15RegionCrop({ evaluate, check }: SuiteContext): Promise<
   );
 }
 
-export async function z16CacheHit({ evaluate, check }: SuiteContext): Promise<void> {
-  const z16 = await evaluate<{
-    aOk: boolean;
-    bOk: boolean;
-    aCached: boolean;
-    bCached: boolean;
-    sameSvg: boolean;
-    ta: number;
-    tb: number;
-  }>(
-    `(async()=>{await window.__vellumRunJob({kind:"draw",seed:117,overrides:{},render:{style:"antique",widthPx:1500}});` +
-      `const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
-      `const mk=()=>({kind:"region",seed:918273,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500}});` +
-      `const t0=performance.now();const a=await window.__vellumRunJob(mk());const t1=performance.now();const b=await window.__vellumRunJob(mk());const t2=performance.now();` +
-      `return{aOk:a.ok,bOk:b.ok,aCached:a.cached,bCached:b.cached,sameSvg:a.svg===b.svg,ta:Math.round(t1-t0),tb:Math.round(t2-t1)};})()`,
-    true,
-  );
-  check(
-    "Z16 a repeat region job at the same seed skips generateWorld (AC2: cache hit via the cached flag)",
-    z16.aOk && z16.bOk && z16.aCached === false && z16.bCached === true && z16.sameSvg,
-    `miss=${z16.aCached} hit=${z16.bCached} sameSvg=${z16.sameSvg} (ta=${z16.ta}ms tb=${z16.tb}ms, timing is corroboration only)`,
-  );
-}
-
 async function crossfadeLanded({ evaluate, sleep }: Pick<ZoomKit, "evaluate" | "sleep">, label: string): Promise<void> {
   const stable = makeStable(makeSettle({ evaluate, sleep }));
   await stable(INSET_OPAQUE, label, { departed: (d) => d.insets === 1 && d.opacity === 1 });

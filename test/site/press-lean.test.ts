@@ -31,7 +31,9 @@ function leansAt(rowTop: number, poolTop = ""): boolean {
       top: pseudo === "::before" ? poolTop : "",
       getPropertyValue: () => "",
     });
-    g.DOMRect = class {};
+    g.DOMRect = class {
+      readonly stub = true;
+    };
     const row = Object.assign(new StackedRow("nav"), {
       rect: { left: 340, top: rowTop, right: 640, bottom: rowTop + 108 },
     });
@@ -56,6 +58,14 @@ test("a risen Press whose top comes within the gap of the head cluster's foot sh
 });
 
 test("a risen Press clear of the gap whose soft pool would reach the head cluster's foot sheds its note (Issue #1273, from e2e NA4)", () => {
-  assert.equal(leansAt(CLUSTER_FOOT + 18), false, "18px under the foot, past the 16px gap, with no pool, keeps its note");
-  assert.equal(leansAt(CLUSTER_FOOT + 18, "-20.8px"), true, "the same row whose 1.3rem pool reaches over the foot leans");
+  assert.equal(
+    leansAt(CLUSTER_FOOT + 18),
+    false,
+    "18px under the foot, past the 16px gap, with no pool, keeps its note",
+  );
+  assert.equal(
+    leansAt(CLUSTER_FOOT + 18, "-20.8px"),
+    true,
+    "the same row whose 1.3rem pool reaches over the foot leans",
+  );
 });
