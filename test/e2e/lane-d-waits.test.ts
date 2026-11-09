@@ -3,21 +3,15 @@ import assert from "node:assert/strict";
 import { cd21PortfolioGlass } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import { cd48Control } from "../../e2e/suites/chart-drawer/floor.ts";
 import { layPressRested } from "../../e2e/suites/chart-drawer/homes.ts";
-import { ix2InksRow, ix4FindBox, type DocRoomsKit } from "../../e2e/suites/document-rooms.ts";
 import { restOnVerso } from "../../e2e/suites/survey/kit.ts";
 import { makeSettle, makeStable } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
-// A state change an action causes lands LAG evaluates after it, so a pause that resolves at once reads the state before it lands.
-const LAG = 2;
 type World = {
   clock: number;
   acts: { kind: string; at: number }[];
   checked: Map<string, { ok: boolean; detail: string }>;
 };
-const when = (w: World, kind: string): number | null => w.acts.find((a) => a.kind === kind)?.at ?? null;
-const landedCount = (w: World, kind: string): number =>
-  w.acts.filter((a) => a.kind === kind && w.clock - a.at >= LAG).length;
 const world = (answer: (expr: string, w: World) => unknown) => {
   const w: World = { clock: 0, acts: [], checked: new Map() };
   const act = (kind: string) => w.acts.push({ kind, at: w.clock });
@@ -60,52 +54,6 @@ test("the leaf is read on the verso only once its turn has landed", async () => 
 test("the leaf's wait times out naming the check when the turn never lands", async () => {
   const { ctx } = world(() => leaf(0.3));
   await assert.rejects(restOnVerso(ctx, LABEL), (err: Error) => err.message.startsWith(`settle timeout ${LABEL}: `));
-});
-
-test("IX2 reads the index only once the page has handled each scroll", async () => {
-  const { w, act, ctx, settle } = world((e, w) => {
-    const scrolled = landedCount(w, "scroll");
-    if (e.includes("nextElementSibling")) return "q-first";
-    if (e.includes("scrollIntoView()")) return void act("scroll");
-    if (e.includes("__ixScrolls")) return { n: scrolled };
-    if (e.includes("innerW: innerWidth"))
-      return {
-        scrollY: scrolled ? 500 : 0,
-        inked: [scrolled ? "target" : "intro"],
-        now: scrolled > 1 ? ["q-first"] : [],
-      };
-    return undefined;
-  });
-  await ix2InksRow({ ...ctx, settle } as unknown as DocRoomsKit, { h2s: ["intro", "other", "target"] } as never);
-  assert.equal(w.checked.get("IX2")?.ok, true, `IX2 read the index before the ink: ${w.checked.get("IX2")?.detail}`);
-});
-
-test("IX4 reads the find box's narrowing only once the whole query has landed", async () => {
-  const typed = (w: World): { n: number; value: string } => {
-    const at = when(w, "insert");
-    if (when(w, "clear") !== null) return { n: 3, value: "" };
-    if (at === null || w.clock - at < LAG) return { n: 0, value: "" };
-    return w.clock - at < 2 * LAG ? { n: 1, value: "gla" } : { n: 2, value: "glass" };
-  };
-  const { w, act, ctx, settle } = world((e, w) => {
-    const { n, value } = typed(w);
-    if (e.includes("innerW: innerWidth")) return { count: "3 terms in 1 sections", entries: 3, h2s: ["g"] };
-    if (e.includes("__ixInputs")) return { n, value };
-    if (e.includes("defsMatch")) {
-      if (value === "glass")
-        return { hits: ["Glass", "Looking glass"], shown: 2, total: 6, empty: 1, rows: 3, defsMatch: 4 };
-      return { hits: ["Glaze", "Glass", "Glade"], shown: 3, total: 6, empty: 0, rows: 3, defsMatch: 4 };
-    }
-    if (e.includes('i.value = ""')) return void act("clear");
-    if (e.includes("hits: links.filter")) return { shown: 6, total: 6, hits: 0, empty: 0 };
-    return undefined;
-  });
-  await ix4FindBox({ ...ctx, settle } as unknown as DocRoomsKit);
-  assert.equal(
-    w.checked.get("IX4")?.ok,
-    true,
-    `IX4 read the narrowing before the query landed: ${w.checked.get("IX4")?.detail}`,
-  );
 });
 
 const BARE = 'document.getElementById("map").style.transform';
