@@ -65,7 +65,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  await step("BR1c", () => br1cLegendClears(k));
+  await step("BR1c", async () => {
+    await k.goto(k.EXP + "#seed=42&style=antique", "broadside-base");
+    await br1cLegendClears(k);
+  });
   await step("BR12", () => br12Dress(k));
   await step("BR21", () => br21Fields(k));
   await step("BR2", () => br2JournalPeer(k));
