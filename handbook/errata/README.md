@@ -28,6 +28,7 @@ Write `Issue #N` and `PR #N`, never a bare number; no em-dash outside inline bac
 - **Fixed.** The pull request that fixes it deletes the row in the same diff. A fix that lands without deleting its row is incomplete.
 - **Promoted.** When a row grows into work that needs a body, a menu or a sub, it is filed as an issue and the row is replaced by a pointer: `- PR #N: promoted to Issue #M.` The pointer leaves when the issue closes.
 - **Ruled.** When Alex rules a row the accepted form (a DOM host write, an engine out-parameter, a cost taken with numbers in front of him), the ruling is a dated comment on the pointer issue, and the row moves to the file's `## Ruled and left` section with the ruling quoted. A ruled row is not open work; it is there so nobody re-files it, and it reopens only by a later dated ruling.
+- **Its check deleted.** A pull request that deletes a browser check edits, or deletes, each open row that names the check or a file the pull request deletes or empties, in the same diff, on the terms `handbook/specs/settle-doctrine.md` sets (When a check leaves the run).
 
 ## Where this sits in the house
 

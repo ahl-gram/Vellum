@@ -328,14 +328,19 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   deletes or empties, and in the same pull request edits each hit that states a rule or depends on
   the check, a spec, gate or agent line, a code or stylesheet comment, a roster or a test: a line
   naming the check as a rule's holder names what holds the rule now, or drops the holder where
-  nothing does. A dated record stays as written, an archived plan under `handbook/plans/` or a row
-  in `handbook/errata/` or `.claude/skills/vellum-footguns/references/scars.md`, save that the
-  check's rows in `.claude/skills/vellum-footguns/references/flake-record.md` take the disposition
-  *deleted*. The check's entry in `E2E_SKIPS` goes with it, and a step that keeps another check is
-  renamed to what it keeps, entry and all; the issue an entry named is closed by that pull
-  request's closing reference once no entry names it, since CI fails while an entry names an issue
-  that is not open (`scripts/e2e-skips-open.ts`). A suite left with no check leaves every roster it
-  joined, found the way `vellum-footguns` Gate 4 finds them.
+  nothing does. An open row in `handbook/errata/` is live work, not a record: a row there that a
+  grep hits is edited to say what still stands once the check or the file is gone, or deleted
+  where nothing does, and any gap the row recorded that the edit takes out is listed with the
+  check's lost coverage, where the bullet above lists it, naming the row's file and the pull
+  request that left it. A closed or archived record stays as written: an archived plan under
+  `handbook/plans/`, a row in an errata file's Ruled and left section, or a row in
+  `.claude/skills/vellum-footguns/references/scars.md`, save that the check's rows in
+  `.claude/skills/vellum-footguns/references/flake-record.md` take the disposition *deleted*. The
+  check's entry in `E2E_SKIPS` goes with it, and a step that keeps another check is renamed to what
+  it keeps, entry and all; the issue an entry named is closed by that pull request's closing
+  reference once no entry names it, since CI fails while an entry names an issue that is not open
+  (`scripts/e2e-skips-open.ts`). A suite left with no check leaves every roster it joined, found
+  the way `vellum-footguns` Gate 4 finds them.
 
 ## The environment
 
