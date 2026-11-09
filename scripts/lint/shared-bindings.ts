@@ -7,6 +7,7 @@ const ZOOM_ROOM: SharedBinding = ["bindZoomRoom", "../shared/zoom-room.ts"];
 const ANNOUNCER: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
 const ITEM: SharedBinding = ["prospectItemFrom", "../shared/table-address.ts"];
+const TOUCH: SharedBinding = ["bindChartTouch", "../shared/chart-touch.ts"];
 
 export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>> = {
   "src/site/shared/zoom-room.ts": [
@@ -15,6 +16,7 @@ export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>>
     ["bindGlassKeys", "./glass-keys.ts"],
     ["framingCamera", "./camera.ts"],
   ],
+  "src/site/shared/glass-keys.ts": [["bindChartTouch", "./chart-touch.ts"]],
   "src/site/print-room/seats.ts": [ZOOM_ROOM],
   "src/site/prospect/seats.ts": [ZOOM_ROOM],
   "src/site/ribbon/seats.ts": [ZOOM_ROOM],
@@ -27,7 +29,9 @@ export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>>
     ["bindGlassKeys", "../shared/glass-keys.ts"],
     ["framingCamera", "../shared/camera.ts"],
   ],
+  "src/site/home/app.ts": [TOUCH],
   "src/site/explorer/app.ts": [["bindRoom", "../shared/room.ts"], ANNOUNCER, STORE, ["filingAt", "./chart-drawer.ts"]],
+  "src/site/explorer/glass.ts": [TOUCH],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
     ["usesWorker", "../worker-client.ts"],

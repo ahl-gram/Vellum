@@ -120,6 +120,8 @@ const ROOM_BINDING: SharedBinding = ["bindRoom", "../shared/room.ts"];
 const ZOOM_BINDING: SharedBinding = ["createZoomController", "../shared/zoom-controller.ts"];
 const GLASS_BINDING: SharedBinding = ["bindGlassKeys", "../shared/glass-keys.ts"];
 const FRAMING_BINDING: SharedBinding = ["framingCamera", "../shared/camera.ts"];
+const TOUCH_BINDING: SharedBinding = ["bindChartTouch", "../shared/chart-touch.ts"];
+const KIT_TOUCH: SharedBinding = ["bindChartTouch", "./chart-touch.ts"];
 const ZOOM_ROOM: SharedBinding = ["bindZoomRoom", "../shared/zoom-room.ts"];
 const ANNOUNCE: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
@@ -132,6 +134,7 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
     GLASS_KEYS,
     ["framingCamera", "./camera.ts"],
   ],
+  "src/site/shared/glass-keys.ts": [KIT_TOUCH],
   "src/site/print-room/seats.ts": [ZOOM_ROOM],
   "src/site/prospect/seats.ts": [ZOOM_ROOM],
   "src/site/ribbon/seats.ts": [ZOOM_ROOM],
@@ -139,7 +142,9 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/specimen/app.ts": [ZOOM_ROOM],
   "src/site/writing-room/app.ts": [ZOOM_ROOM],
   "src/site/seed-of-the-day/app.ts": [ROOM_BINDING, ZOOM_BINDING, GLASS_BINDING, FRAMING_BINDING],
+  "src/site/home/app.ts": [TOUCH_BINDING],
   "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
+  "src/site/explorer/glass.ts": [TOUCH_BINDING],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
     ["usesWorker", "../worker-client.ts"],
@@ -150,11 +155,11 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };
 
-test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, the Seed of the Day's room and keys added by Issue #1284, and every file and module it names exists", () => {
+test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, the Seed of the Day's room and keys added by Issue #1284, the touch press's three binders added by Issue #1288, and every file and module it names exists", () => {
   assert.deepEqual(
     SHARED_BINDINGS,
     ROSTER,
-    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them and Issue #1284 added to them",
+    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them and Issue #1284 and Issue #1288 added to them",
   );
   for (const [file, bindings] of Object.entries(SHARED_BINDINGS)) {
     assert.ok(existsSync(join(ROOT, file)), `${file} does not exist`);
@@ -212,6 +217,46 @@ test("the Seed of the Day, which binds its room, its zoom and the Glass's keys i
     "the plants cannot tell the rule from its negation",
   );
   for (const [name, lines, want] of SEED_PLANTS) assert.deepEqual(await reported(lines, SEED), want, name);
+});
+
+const HOME = "src/site/home/app.ts";
+const KIT_GLASS = "src/site/shared/glass-keys.ts";
+const EXPLORER_GLASS = "src/site/explorer/glass.ts";
+const TAKES_TOUCH = 'import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";';
+const ENV_ONLY = 'import { pageTouchEnv } from "../shared/chart-touch.ts";';
+const USES_BOTH = "export const t = [bindChartTouch, pageTouchEnv];";
+const USES_ENV = "export const t = [pageTouchEnv];";
+
+const TOUCH_PLANTS: ReadonlyArray<readonly [string, string, readonly string[], Array<[string, string]>]> = [
+  [
+    "(t1) the kit's Glass keys take and use it",
+    KIT_GLASS,
+    ['import { bindChartTouch, pageTouchEnv } from "./chart-touch.ts";', USES_BOTH],
+    [],
+  ],
+  [
+    "(t2) the kit's Glass keys with its import and use deleted",
+    KIT_GLASS,
+    ['import { pageTouchEnv } from "./chart-touch.ts";', USES_ENV],
+    [[...KIT_TOUCH]],
+  ],
+  ["(t3) home takes and uses it", HOME, [TAKES_TOUCH, USES_BOTH], []],
+  ["(t4) home with its import and use deleted", HOME, [ENV_ONLY, USES_ENV], [[...TOUCH_BINDING]]],
+  ["(t5) the Explorer's Glass takes and uses it", EXPLORER_GLASS, [TAKES_TOUCH, USES_BOTH], []],
+  [
+    "(t6) the Explorer's Glass with its import and use deleted",
+    EXPLORER_GLASS,
+    [ENV_ONLY, USES_ENV],
+    [[...TOUCH_BINDING]],
+  ],
+];
+
+test("home, the Explorer's Glass and the kit's Glass keys, each binding the chart's touch press itself, are each held to bindChartTouch from the shared module (Issue #1288)", async () => {
+  assert.ok(
+    TOUCH_PLANTS.some(([, , , want]) => want.length === 0) && TOUCH_PLANTS.some(([, , , want]) => want.length > 0),
+    "the plants cannot tell the rule from its negation",
+  );
+  for (const [name, path, lines, want] of TOUCH_PLANTS) assert.deepEqual(await reported(lines, path), want, name);
 });
 
 const resolvedRule = async (file: string): Promise<unknown> =>
