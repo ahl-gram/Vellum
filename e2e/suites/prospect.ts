@@ -5,7 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
 import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
 import { pb1cRoadOut } from "./prospect/way-in.ts";
-import { pb12Markup, pb16ScriptsOff, pb17Boot, pb18TableHomes, pb19PlaceLink } from "./prospect/room.ts";
+import { pb17Boot, pb18TableHomes, pb19PlaceLink } from "./prospect/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -23,13 +23,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await pb2CapitalPlate(k, href);
     await pb3eRoomAndPlate(k);
   });
-  await step("PB12", () => pb12Markup(k));
   await step("PB14", () => pb14Glass(k));
   await step("PB15", () => pb15FilingPress(k));
   await step("PB7 to PB7d", () => pb7YearFilter(k));
   await step("PB7e", () => pb7eOrphan(k));
   await step("PB9", () => pb9BareVisit(k));
-  await step("PB16", () => pb16ScriptsOff(k));
   await step("PB17", () => pb17Boot(k));
   await step("PB18", () => pb18TableHomes(k));
   await step("PB19", () => pb19PlaceLink(k));

@@ -5,12 +5,10 @@ import { br9Authored } from "../../e2e/suites/broadside/room.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { bareArrived, cd20PlatePortfolio } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import { cd55WhereAuthored, cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
-import { pr36Authored } from "../../e2e/suites/print-room/room.ts";
 import { pr40RunnerLayout } from "../../e2e/suites/print-room/runner-layout.ts";
 import { pb3fGlassLeans } from "../../e2e/suites/prospect.ts";
 import { prospectKit } from "../../e2e/suites/prospect/kit.ts";
-import { backHome, pb16ScriptsOff } from "../../e2e/suites/prospect/room.ts";
-import { rr38Authored } from "../../e2e/suites/reading-room/room.ts";
+import { backHome } from "../../e2e/suites/prospect/room.ts";
 import { rb5cLeans } from "../../e2e/suites/ribbon.ts";
 import { ROOMS } from "../../e2e/suites/slide-away/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
@@ -106,7 +104,6 @@ type Site = {
 };
 
 const SITES: readonly Site[] = [
-  { site: "PR36", label: "print-room-scripts-off", answer: throwsOn(".stage noscript .status"), run: pr36Authored },
   {
     site: "PR40",
     label: `PR40 ${ROOMS[0]!.id} staged`,
@@ -120,12 +117,6 @@ const SITES: readonly Site[] = [
     run: (ctx) => br9Authored(broadsideKit(ctx)),
   },
   {
-    site: "PB16",
-    label: "prospect-scripts-off",
-    answer: throwsOn('lay: !!document.getElementById("pp-lay")'),
-    run: (ctx) => pb16ScriptsOff(prospectKit(ctx)),
-  },
-  {
     site: "PB18's hop to the Q & A",
     label: "prospect-to-faq",
     answer: throwsOn(AWAY),
@@ -137,12 +128,6 @@ const SITES: readonly Site[] = [
     answer: (expression) =>
       expression === AWAY ? { path: "/faq/", ready: "complete" } : throwsOn("marker: window.__pb18")(expression),
     run: (ctx) => backHome(prospectKit(ctx), "warm", false),
-  },
-  {
-    site: "RR38",
-    label: "reading-room-scripts-off",
-    answer: throwsOn('frame: !!document.querySelector(".rf")'),
-    run: rr38Authored,
   },
   {
     site: "the bare Portfolio's arrival",

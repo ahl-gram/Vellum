@@ -457,7 +457,7 @@ Glass, whose translucency is load-bearing over a chart.
 
 **A control a reader types into, a field or a select, does not go below a 16px font in the corner chrome, in the legend row's head or on the Broadside's slip** (Alex,
 2026-11-01, Issue #1140 comment 6551936310; the legend row's head, 2026-11-03, Issue #433 comments 6620144566 and 6623587000), because a smaller input font makes iOS Safari zoom the page on focus; the Broadside's
-dropdowns and shape box are held to it by `BR21` in `e2e/suites/broadside/dress.ts`, and the Print Room's two dropdowns by `PR36` in `e2e/suites/print-room/room.ts`. A press takes no typing and keeps the size of the line it rides, as the chart of the atelier's does.
+dropdowns and shape box are held to it by `BR21` in `e2e/suites/broadside/dress.ts`; the Print Room's two dropdowns are checked by eye since Issue #1273 moved PR36 to a unit test, which reads no resolved size. A press takes no typing and keeps the size of the line it rides, as the chart of the atelier's does.
 
 **On screen every page is laid out for 1024 wide and up, and nothing is designed for a narrower
 window**, a desktop window zoomed until it is narrower than 1024 included: what a narrower window

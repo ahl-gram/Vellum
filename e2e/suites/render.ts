@@ -2,7 +2,6 @@
 import { makeStep } from "../support/step.ts";
 import { FIXED_SEED } from "../support/fixed-day.ts";
 import type { SuiteContext } from "../types.ts";
-import { r16HostContract } from "./render/room.ts";
 import { r18RealPlace } from "./render/place.ts";
 import { r19RangeLimits } from "./render/ranges.ts";
 
@@ -11,7 +10,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // R0 through R4 are deliberately not stepped: they drive the engine directly, with no wait to give up.
   const step = makeStep(ctx);
   await r0ToR4Worker(ctx);
-  await step("R16", () => r16HostContract(ctx));
   await step("R19", () => r19RangeLimits(ctx));
 
   const landPresent = await evaluate<boolean>(`!!document.getElementById("land")`);

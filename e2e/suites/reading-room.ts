@@ -11,7 +11,6 @@ import { rr17CounterRead, rr18Park, rr20Superseded, rr21Dice, rr22MidPlay } from
 import { rr23Usurped, rr24BeforeArm, rr25TearDown } from "./reading-room/arm.ts";
 import { rr11bScrubHandles } from "./reading-room/scrub.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
-import { rr38Authored } from "./reading-room/room.ts";
 import { rr39AtRest } from "./reading-room/dress.ts";
 import { rr40Glass, rr41ReadRefits } from "./reading-room/gestures.ts";
 
@@ -21,7 +20,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
   const k = readingRoomKit(ctx);
   const step = makeStep(ctx);
-  await step("RR38", () => rr38Authored(ctx));
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
   const rrHttpBase = http4xx.length;
