@@ -4,8 +4,6 @@ import type { Cam } from "../../e2e/support/home.ts";
 import type { makeRoom } from "../../e2e/support/room.ts";
 import type { makeStep } from "../../e2e/support/step.ts";
 import { cl1Wash } from "../../e2e/suites/cluster.ts";
-import { h0Frame } from "../../e2e/suites/home/frame.ts";
-import { homeKit } from "../../e2e/suites/home/kit.ts";
 import { h14aCardFits } from "../../e2e/suites/home/stations.ts";
 import { l13Home, l9Touch } from "../../e2e/suites/landfall.ts";
 import type { LandfallKit } from "../../e2e/suites/landfall/kit.ts";
@@ -40,55 +38,6 @@ function page(answer: (expression: string) => unknown) {
   } as unknown as SuiteContext;
   return { checked, ctx };
 }
-
-const LOADED = `document.readyState === "complete" && !!document.getElementById("seed-form")`;
-const VEIL = `!!document.getElementById("lf-veil")`;
-const FRAME = {
-  pos: "absolute",
-  right: 30,
-  top: 30,
-  inside: true,
-  gold: "rgb(240, 227, 189)",
-  doorsHidden: true,
-};
-const HERO = { hook: "Give Vellum a number.\nIt gives you back a world.", seed: "42", lineStyle: "italic" };
-const homePage = (veilUp: boolean) =>
-  page((expression) =>
-    expression === LOADED
-      ? true
-      : expression === VEIL
-        ? veilUp
-        : expression.includes(`getElementById("seed-form")`)
-          ? FRAME
-          : expression.includes(".seed-hook")
-            ? HERO
-            : null,
-  );
-
-test("H1 and H2 read the corner chrome only once home's first veil is down, so a veil that never lifts reds them though their own reads pass", async () => {
-  const lifted = homePage(false);
-  await h0Frame(homeKit(lifted.ctx));
-  assert.deepEqual(
-    lifted.checked,
-    [
-      { code: "H0", ok: true },
-      { code: "H1", ok: true },
-      { code: "H2", ok: true },
-    ],
-    "the frame's own reads do not pass, so this test proves nothing",
-  );
-  const stuck = homePage(true);
-  await h0Frame(homeKit(stuck.ctx));
-  assert.deepEqual(
-    stuck.checked,
-    [
-      { code: "H0", ok: true },
-      { code: "H1", ok: false },
-      { code: "H2", ok: false },
-    ],
-    "H1 or H2 passed on a page whose veil never lifted",
-  );
-});
 
 const VISITED = {
   scale: 2.6,

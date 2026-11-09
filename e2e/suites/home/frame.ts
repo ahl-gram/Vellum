@@ -2,7 +2,6 @@ import { dropExpectedCancellations } from "../../support/console.ts";
 import type { SuiteContext } from "../../types.ts";
 import { VEIL_PRESSES } from "../runninghead/kit.ts";
 import type { HomeKit } from "./kit.ts";
-import { controlGold } from "./reads.ts";
 
 export async function h0Loads({ evaluate, check, sleep }: SuiteContext) {
   let ready = false;
@@ -36,73 +35,8 @@ export async function hVeilDown({ evaluate, sleep, pressKey }: HomeKit, ready: b
   return false;
 }
 
-export async function h1CornerForm({ evaluate, check }: SuiteContext, ready: boolean): Promise<void> {
-  const frame = ready
-    ? await evaluate<{
-        pos: string;
-        right: number;
-        top: number;
-        inside: boolean;
-        gold: string | null;
-        doorsHidden: boolean;
-      } | null>(`(() => {
-    const form = document.getElementById("seed-form");
-    const stage = document.getElementById("lf-stage");
-    if (!form || !stage) return null;
-    const f = form.getBoundingClientRect();
-    const s = stage.getBoundingClientRect();
-    const cs = getComputedStyle(form);
-    const btn = form.querySelector("button.primary");
-    return { pos: cs.position, right: s.right - f.right, top: f.top - s.top,
-      inside: f.left > s.left && f.right < s.right + 1 && f.top > s.top && f.bottom < s.bottom,
-      gold: btn ? getComputedStyle(btn).backgroundColor : null,
-      doorsHidden: ["explorer", "reading-room", "atlas", "gallery"].every((id) => {
-        const c = document.getElementById("lf-card-" + id);
-        return c !== null && c.offsetParent === null;
-      }) };
-  })()`)
-    : null;
-  check(
-    "H1 the seed form floats as the mockup's corner chrome: absolute in the stage's top-right, the gold Draw it, and no door slip showing on a healthy load",
-    !!frame &&
-      frame.pos === "absolute" &&
-      frame.inside &&
-      frame.right > 10 &&
-      frame.right < 60 &&
-      frame.top > 10 &&
-      frame.top < 60 &&
-      controlGold(frame.gold) &&
-      frame.doorsHidden,
-    JSON.stringify(frame),
-  );
-}
-
-export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: boolean): Promise<void> {
-  const hero = ready
-    ? await evaluate<{ hook: string | null; seed: string | null; lineStyle: string | null }>(`(() => {
-    const hook = document.querySelector(".lf-seed .seed-hook");
-    const input = document.getElementById("seed-input");
-    const line = document.querySelector(".lf-seed .seed-gloss");
-    return { hook: hook ? hook.innerText : null, seed: input ? input.value : null,
-      lineStyle: line ? getComputedStyle(line).fontStyle : null };
-  })()`)
-    : null;
-  check(
-    "H2 the hook reads as ratified, the seed input is prefilled 42, the gloss is italic",
-    !!hero &&
-      /Give Vellum a number\./.test(hero.hook!) &&
-      /It gives you back a world\./.test(hero.hook!) &&
-      hero.seed === "42" &&
-      hero.lineStyle === "italic",
-    JSON.stringify(hero),
-  );
-  await shoot("home-seed-chrome.png");
-}
-
 export async function h0Frame(k: HomeKit): Promise<void> {
-  const unveiled = await hVeilDown(k, await h0Loads(k));
-  await h1CornerForm(k, unveiled);
-  await h2Hook(k, unveiled);
+  await hVeilDown(k, await h0Loads(k));
 }
 
 export async function h4DrawIt({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {

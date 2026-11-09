@@ -14,7 +14,7 @@ import {
 import { firstArrival, landfallView, markArrival, wideView } from "./ceremony.ts";
 import { bearingLine, type Capital } from "./coords.ts";
 import { bindStations } from "./cards.ts";
-import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
+import { DRIFT_SECONDS, createDrift, driftTarget } from "./drift.ts";
 import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
@@ -66,15 +66,14 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     apply();
   };
 
-  let driftTween: gsap.core.Tween | null = null;
-  let driftBase: Cam | null = null;
-  let idleTimer: ReturnType<typeof setTimeout> | undefined;
-  const armDrift = () => {
-    if (reduced()) return;
-    idleTimer = setTimeout(() => {
-      driftBase = { x: cam.x, y: cam.y, s: cam.s };
+  const drift = createDrift({
+    reduced,
+    setTimer: (run, ms) => setTimeout(run, ms),
+    clearTimer: (timer) => clearTimeout(timer),
+    camera: () => ({ x: cam.x, y: cam.y, s: cam.s }),
+    breathe: () => {
       const t = driftTarget(cam, fit);
-      driftTween = gsap.to(cam, {
+      return gsap.to(cam, {
         x: t.x,
         y: t.y,
         s: t.s,
@@ -84,15 +83,8 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
         repeat: -1,
         onUpdate: settle,
       });
-    }, IDLE_DELAY_MS);
-  };
-  const stopDrift = () => {
-    driftTween?.kill();
-    driftTween = null;
-    driftBase = null;
-    clearTimeout(idleTimer);
-    armDrift();
-  };
+    },
+  });
 
   // Any deliberate camera action summons the reader back to watch it (the 2026-08-28 ruling on Issue #472), through the browser's own scrollTo: the contract forbids intercepting scroll INPUT, and this is the anchor-link class it protects.
   const surface = () => {
@@ -102,7 +94,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   const flyTo = (target: Cam, duration: number) => {
     surface();
-    stopDrift();
+    drift.stop();
     gsap.killTweensOf(cam);
     if (reduced() || duration === 0) {
       assign(clampCam(target, view(), SHEET, fit));
@@ -113,7 +105,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   };
 
   const zoomBy = (factor: number, px?: number, py?: number, duration = 0.6): boolean => {
-    stopDrift();
+    drift.stop();
     const v = view();
     const at = { x: px ?? v.w / 2, y: py ?? v.h / 2 };
     const target = zoomTarget(cam, factor, at, v, SHEET, fit);
@@ -138,7 +130,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     takesTouch: () => takesTouch,
     press: () => {
       gestureScale = cam.s;
-      stopDrift();
+      drift.stop();
       gsap.killTweensOf(cam);
       stage.classList.add("dragging");
     },
@@ -151,8 +143,9 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       !sidewaysToPage(deltaX, deltaY, overhangOf(document.documentElement)) &&
       valve(performance.now(), deltaY, window.scrollY, () => {
         // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (PR #481 skeptic finding 1; e2e L1h).
-        if (driftBase !== null) {
-          assign(driftBase);
+        const base = drift.base();
+        if (base !== null) {
+          assign(base);
           settle();
         }
         return zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0);
@@ -205,5 +198,5 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     assign(landfallView(view(), SHEET, fit));
     settle();
   }
-  armDrift();
+  drift.arm();
 }

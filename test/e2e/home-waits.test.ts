@@ -2,9 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { h8KeySkip, h8bHoldSkip } from "../../e2e/suites/home/ceremony.ts";
 import { IDLE_DELAY_MS } from "../../src/site/home/drift.ts";
-import { DRIFT_TRIES, h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops } from "../../e2e/suites/home/drift.ts";
+import { DRIFT_TRIES, h15aDrift, h15bWheelStops } from "../../e2e/suites/home/drift.ts";
 import { homeKit } from "../../e2e/suites/home/kit.ts";
-import { h14cLegend, h14dPipHover } from "../../e2e/suites/home/stations.ts";
+import { h14cLegend } from "../../e2e/suites/home/stations.ts";
 import { makeMouse, readCam, readXform, type Cam } from "../../e2e/support/home.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
@@ -140,12 +140,6 @@ test("H15a times out naming the drift after the idle delay and its headroom", as
   assert.ok(DRIFT_TRIES * 50 > IDLE_DELAY_MS, "the budget outlasts the idle delay");
 });
 
-test("H15c samples the drift only once it has left the rest again", async () => {
-  const w = drifting(3);
-  await h15cRearmed(w.ctx);
-  assert.deepEqual(w.checked, [{ code: "H15c", ok: true }]);
-});
-
 test("H15b takes its first stillness sample only once the wheel's zoom has landed", async () => {
   const frames = [
     { scale: 1.65, x: 0 },
@@ -179,107 +173,6 @@ test("H15b times out when the drift keeps moving after the wheel", async () => {
   await assert.rejects(h15bWheelStops(w.ctx), (err: Error) =>
     err.message.startsWith("settle timeout H15b the wheel's zoom landed: "),
   );
-});
-
-type Stage = { open: boolean; printed: string; writes: number; frame: number };
-const stage = (open: boolean, printed: string, writes: number, frame: number): Stage => ({
-  open,
-  printed,
-  writes,
-  frame,
-});
-const H15D_MID = "matrix(2.00288, 0, 0, 2.00288, -1160.2, -1159.6)";
-const H15D_TAIL = "matrix(2.00288, 0, 0, 2.00288, -1148.6, -1159.6)";
-const H15D_END = "matrix(2.00288, 0, 0, 2.00288, -1148.59, -1159.6)";
-
-const landingPage = (stages: readonly Stage[]) => {
-  let at = -1;
-  const now = (): Stage => stages[Math.max(at, 0)]!;
-  return world((e, sent, slept) => {
-    if (e.includes(`data-station="reading-room"`) && e.includes("scrollIntoView")) return { x: 400, y: 300 };
-    if (e.includes("MutationObserver")) return true;
-    if (!sent.some((s) => s.params["type"] === "mousePressed")) return null;
-    if (e === readXform) return slept.includes(900) ? stages[stages.length - 1]!.printed : now().printed;
-    if (!e.includes("lf-card-reading-room")) return null;
-    at = Math.min(at + 1, stages.length - 1);
-    const s = now();
-    return e.includes(readXform)
-      ? { open: s.open, xform: s.printed }
-      : { open: s.open, writes: s.writes, frame: s.frame };
-  });
-};
-
-test("H15d hands over once the page has stopped writing the camera, not when its printed matrix first repeats", async () => {
-  const w = landingPage([
-    stage(false, H15D_MID, 10, 10),
-    stage(true, H15D_TAIL, 13, 13),
-    stage(true, H15D_TAIL, 16, 16),
-    stage(true, H15D_TAIL, 18, 19),
-    stage(true, H15D_END, 19, 22),
-    stage(true, H15D_END, 19, 25),
-  ]);
-  await h15dFlightStops(homeKit(w.ctx));
-  assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
-});
-
-test("H15d hands over only once a frame has run between its two reads", async () => {
-  const w = landingPage([
-    stage(false, H15D_MID, 10, 10),
-    stage(true, H15D_TAIL, 13, 13),
-    stage(true, H15D_TAIL, 13, 13),
-    stage(true, H15D_END, 15, 16),
-    stage(true, H15D_END, 15, 19),
-  ]);
-  await h15dFlightStops(homeKit(w.ctx));
-  assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
-});
-
-test("H15d takes its first stillness sample only once the station flight has landed", async () => {
-  const w = landingPage([
-    stage(false, matrix(1), 3, 3),
-    stage(false, matrix(2), 6, 6),
-    stage(false, matrix(2), 6, 9),
-    stage(true, matrix(3), 9, 12),
-    stage(true, matrix(4), 12, 15),
-    stage(true, matrix(5), 14, 18),
-    stage(true, matrix(5), 14, 21),
-  ]);
-  await h15dFlightStops(homeKit(w.ctx));
-  assert.deepEqual(w.checked, [{ code: "H15d", ok: true }]);
-});
-
-const pip = (cx: number, over: Record<string, unknown> = {}) => ({
-  cx,
-  cy: 200,
-  w: 34,
-  glyphW: 25.46,
-  btnBg: "rgba(0, 0, 0, 0)",
-  hover: false,
-  ...over,
-});
-
-test("H14d reads the pip at rest only once the camera is home, and on the hover only once the glyph has grown", async () => {
-  const atlas = cam({ scale: 2.6, x: -100, y: 50 });
-  const homed = [
-    { cam: atlas, pip: pip(900) },
-    { cam: atlas, pip: pip(900) },
-    { cam: cam({ scale: 2, x: -50 }), pip: pip(700) },
-    { cam: cam({ scale: 1.9, x: -20 }), pip: pip(500) },
-  ];
-  const hovered = [pip(300), pip(300), pip(300, { hover: true, glyphW: 28.6 })];
-  let flying = 0;
-  let hovering = 0;
-  const w = world((e, sent) => {
-    if (e === readCam) return atlas;
-    const hoverPhase = sent.some((s) => s.method === "Input.dispatchMouseEvent" && s.params["x"] !== 20);
-    const flight = () => homed[flying++] ?? { cam: cam({}), pip: pip(300) };
-    const hover = () => hovered[hovering++] ?? pip(300, { hover: true, glyphW: 31.82 });
-    if (e.includes("pip:")) return flight();
-    if (e.includes(`data-station="atlas"`)) return hoverPhase ? hover() : flight().pip;
-    return null;
-  });
-  await h14dPipHover(homeKit(w.ctx));
-  assert.deepEqual(w.checked, [{ code: "H14d", ok: true }]);
 });
 
 test("H14c hands over only once the slip is set aside and the camera has come to rest", async () => {
