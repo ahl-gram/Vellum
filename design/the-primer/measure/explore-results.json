@@ -1,0 +1,146 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/bare.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"34% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/arch.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":false,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"24% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"archipelago\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/arch20.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&type=archipelago&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":false,\"held\":false,\"readout\":\"about 20\"},{\"row\":\"sizes\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"coast\",\"hidden\":true,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":false,\"held\":false,\"readout\":\"round\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the count holds the sea level, and the looseness waits for a place\",\"type\":\"archipelago\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/arch20varied.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&type=archipelago&islands=20&isleSize=varied",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&isleSize=varied\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":false,\"held\":false,\"readout\":\"about 20\"},{\"row\":\"sizes\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"coast\",\"hidden\":true,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":false,\"held\":false,\"readout\":\"round\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the count holds the sea level, and the looseness waits for a place\",\"type\":\"archipelago\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/arch20ragged.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&type=archipelago&islands=20&raggedness=40",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&raggedness=40\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":false,\"held\":false,\"readout\":\"about 20\"},{\"row\":\"sizes\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"coast\",\"hidden\":true,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":false,\"held\":false,\"readout\":\"ragged 0.40\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the count holds the sea level, and the looseness waits for a place\",\"type\":\"archipelago\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/iceland.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":false,\"readout\":\"exact\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"coast\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the outline holds the sea level and the coast; loosen it to free the coast\",\"type\":\"\",\"band\":\"\",\"style\":\"antique\",\"place\":\"Iceland\",\"imprint\":\"42\",\"outline\":\"ne-1159320917\",\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/iceland-loose.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&outline=ne-1159320917&looseness=60",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&outline=ne-1159320917&looseness=60\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":false,\"readout\":\"looser\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the outline holds the sea level\",\"type\":\"\",\"band\":\"\",\"style\":\"antique\",\"place\":\"Iceland\",\"imprint\":\"42\",\"outline\":\"ne-1159320917\",\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/arch-iceland.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&type=archipelago&outline=ne-1159320917",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&type=archipelago&legend=1&arms=0&beasts=0&outline=ne-1159320917\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":false,\"readout\":\"exact\"},{\"row\":\"land\",\"hidden\":false,\"held\":true,\"readout\":\"held\"},{\"row\":\"coast\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"the outline holds the count; clear the place to free the islands\",\"strandNote\":\"the outline holds the sea level and the coast; loosen it to free the coast\",\"type\":\"archipelago\",\"band\":\"\",\"style\":\"antique\",\"place\":\"Iceland\",\"imprint\":\"42\",\"outline\":\"ne-1159320917\",\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/bad-shape.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&islands=20",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"34% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/polar.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&band=polar",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&band=polar&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"34% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"\",\"band\":\"polar\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/foreign-hash.png",
+  "url": "http://127.0.0.1:56264/explorer/#seed=42&lesson=land-2",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"34% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/explore/foreign-query.png",
+  "url": "http://127.0.0.1:56264/explorer/?lesson=land-2#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"href\":\"/explorer/?lesson=land-2#seed=42&style=antique&type=continent&legend=1&arms=0&beasts=0\",\"rows\":[{\"row\":\"type\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"band\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"place\",\"hidden\":false,\"held\":false,\"readout\":\"\"},{\"row\":\"islands\",\"hidden\":true,\"held\":false,\"readout\":\"seed's choice\"},{\"row\":\"sizes\",\"hidden\":true,\"held\":false,\"readout\":\"\"},{\"row\":\"land\",\"hidden\":false,\"held\":false,\"readout\":\"46% land\"},{\"row\":\"coast\",\"hidden\":false,\"held\":false,\"readout\":\"warp 0.55\"},{\"row\":\"ragged\",\"hidden\":true,\"held\":false,\"readout\":\"round\"},{\"row\":\"looseness\",\"hidden\":false,\"held\":true,\"readout\":\"held\"}],\"landNote\":\"\",\"strandNote\":\"the looseness waits for a place to loosen\",\"type\":\"continent\",\"band\":\"\",\"style\":\"antique\",\"place\":\"\",\"imprint\":\"42\",\"outline\":null,\"caption\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

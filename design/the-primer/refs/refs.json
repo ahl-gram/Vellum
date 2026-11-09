@@ -1,0 +1,83 @@
+{
+ "images": [
+  {
+   "file": "images/hornbook-1700s.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Hornbook_containing_alphabet,_syllabary,_and_the_Lord%27s_prayer,_perhaps_1700-1750,_from_the_Digital_Commonwealth_-_commonwealth_1n79hc85g.jpg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Hornbook_containing_alphabet%2C_syllabary%2C_and_the_Lord%27s_prayer%2C_perhaps_1700-1750%2C_from_the_Digital_Commonwealth_-_commonwealth_1n79hc85g.jpg",
+   "width": 2001,
+   "height": 3724,
+   "licence": "Public domain",
+   "date": "perhaps 1700-1750",
+   "why": "the name candidate The Hornbook: a child's first lesson-board, a printed sheet behind a pane of horn"
+  },
+  {
+   "file": "images/hornbook-brass-1729.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Brass_hornbook_by_Saint_Paul%27s_Infant_School,_1729,_from_the_Digital_Commonwealth_-_1_commonwealth_4q77g496b.jpg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/0/02/Brass_hornbook_by_Saint_Paul%27s_Infant_School%2C_1729%2C_from_the_Digital_Commonwealth_-_1_commonwealth_4q77g496b.jpg",
+   "width": 1582,
+   "height": 3427,
+   "licence": "Public domain",
+   "date": "1729",
+   "why": "the same, in brass, for the shape of the thing"
+  },
+  {
+   "file": "images/new-england-primer-1773.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Page_from_The_New_England_Primer_Improved,_1773,_letters_A_through_F,_illus._LCCN2006683472.jpg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Page_from_The_New_England_Primer_Improved%2C_1773%2C_letters_A_through_F%2C_illus._LCCN2006683472.jpg",
+   "width": 1132,
+   "height": 1536,
+   "licence": "Public domain",
+   "date": "1773",
+   "why": "the name candidate The Primer: a child's first schoolbook, one small picture and one line to a letter"
+  },
+  {
+   "file": "images/manicule.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Manicule_left_pointing.jpg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Manicule_left_pointing.jpg",
+   "width": 768,
+   "height": 376,
+   "licence": "Public domain",
+   "date": "circa 1900",
+   "why": "the pointing hand that directions C and D lay beside a control, already the house's glyph for The chart in hand"
+  }
+ ],
+ "pagesRead": [
+  {
+   "url": "https://blog.ncase.me/explorable-explanations/",
+   "read": "in full, 2026-11-05",
+   "for": "teach each mechanic alone first; withholding can teach better; end on a sandbox only the whole can open; interactivity only where it works best"
+  },
+  {
+   "url": "https://learningmusic.ableton.com/",
+   "read": "the first page, 2026-11-05",
+   "for": "the first task is a click that changes something (\"Click a box to turn it on or off.\"), and a lesson ends on a road to the next (\"Next: Make beats\")"
+  },
+  {
+   "url": "https://worrydream.com/LearnableProgramming/",
+   "read": "in full, 2026-11-05",
+   "for": "\"Start concrete, start grounded. Start with one specific case, entirely understood.\"; \"show as well as tell\""
+  },
+  {
+   "url": "https://worrydream.com/ExplorableExplanations/",
+   "read": "the definition, 2026-11-05",
+   "for": "a reactive document lets the reader play with the author's assumptions and see the consequences: direction B's ground"
+  },
+  {
+   "url": "https://www.intercom.com/blog/building-product-tours",
+   "read": "in full, 2026-11-05",
+   "for": "learning by doing was vindicated; testers asked to advance by using the product; a tour that tracked clicks broke, so it waited for an element that appears only in the right state: the drift check's and direction D's \"then\""
+  },
+  {
+   "url": "https://www.jesperjuul.net/ludologist/2015/09/08/miyamoto-and-tezuka-on-super-mario-bros-world-1-1/",
+   "read": "opened 2026-11-05; it carries no quote, only a pointer to a video the round did not open",
+   "for": "nothing: the Super Mario World 1-1 claims stay UNVERIFIABLE here"
+  }
+ ],
+ "secondhandNotOpened": [
+  "https://www.wayline.io/blog/teach-game-mechanics-through-design",
+  "https://medium.com/swlh/the-perfect-game-tutorial-analyzing-super-marios-level-design-92f08c28bdf7",
+  "https://drew.agilelearningcenters.org/four-step-game-development/",
+  "https://userpilot.com/blog/interactive-walkthrough-vs-product-tour",
+  "https://releaselens.pages.dev/blog/saas-onboarding-teardown"
+ ]
+}

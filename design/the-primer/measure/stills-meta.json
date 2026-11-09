@@ -1,0 +1,392 @@
+[
+ {
+  "file": "control-portfolio-plate.png",
+  "dir": "control",
+  "caption": "Today: the Portfolio's first visit, its three-step plate, the house's one piece of in-page how-to",
+  "kind": "full"
+ },
+ {
+  "file": "control-portfolio-plate-2x.png",
+  "dir": "control",
+  "caption": "Today: the Portfolio's first visit, its three-step plate, the house's one piece of in-page how-to, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "control-faq.png",
+  "dir": "control",
+  "caption": "Today: Questions & Answers at its nearest thing to a step, 'I found a map I love'",
+  "kind": "full"
+ },
+ {
+  "file": "control-faq-2x.png",
+  "dir": "control",
+  "caption": "Today: Questions & Answers at its nearest thing to a step, 'I found a map I love', at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "control-footnote.png",
+  "dir": "control",
+  "caption": "Today: help in place, the shape row's note open on the Broadside",
+  "kind": "full"
+ },
+ {
+  "file": "control-footnote-2x.png",
+  "dir": "control",
+  "caption": "Today: help in place, the shape row's note open on the Broadside, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-top.png",
+  "dir": "a",
+  "caption": "A, the Primer: its first screen, the ninth item on the nav, the index of rooms with the subrooms under the Explorer, the first three steps sealed",
+  "kind": "full"
+ },
+ {
+  "file": "a-top-2x.png",
+  "dir": "a",
+  "caption": "A, the Primer: its first screen, the ninth item on the nav, the index of rooms with the subrooms under the Explorer, the first three steps sealed, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-land.png",
+  "dir": "a",
+  "caption": "A: the Land, each control drawn as itself in the sentence, the room once done beside it",
+  "kind": "full"
+ },
+ {
+  "file": "a-land-2x.png",
+  "dir": "a",
+  "caption": "A: the Land, each control drawn as itself in the sentence, the room once done beside it, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-subroom.png",
+  "dir": "a",
+  "caption": "A: a subroom's ladder, the Wayfarer's Ribbon, seated under the Explorer",
+  "kind": "full"
+ },
+ {
+  "file": "a-subroom-2x.png",
+  "dir": "a",
+  "caption": "A: a subroom's ladder, the Wayfarer's Ribbon, seated under the Explorer, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-next.png",
+  "dir": "a",
+  "caption": "A: a ladder's foot, its commission and the road on to the next room's steps",
+  "kind": "full"
+ },
+ {
+  "file": "a-next-2x.png",
+  "dir": "a",
+  "caption": "A: a ladder's foot, its commission and the road on to the next room's steps, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-closing.png",
+  "dir": "a",
+  "caption": "A: the closing note, what to lean on afterwards and how to begin again",
+  "kind": "full"
+ },
+ {
+  "file": "a-closing-2x.png",
+  "dir": "a",
+  "caption": "A: the closing note, what to lean on afterwards and how to begin again, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-plain-land.png",
+  "dir": "a",
+  "caption": "A without the pictures: the Land as words and drawn controls alone",
+  "kind": "full"
+ },
+ {
+  "file": "a-plain-land-2x.png",
+  "dir": "a",
+  "caption": "A without the pictures: the Land as words and drawn controls alone, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-sitting-land.png",
+  "dir": "a",
+  "caption": "For the sitting only, never for a reader: the Land with every step whose control waits on the Broadside's post-use review marked in blue",
+  "kind": "full"
+ },
+ {
+  "file": "a-sitting-land-2x.png",
+  "dir": "a",
+  "caption": "For the sitting only, never for a reader: the Land with every step whose control waits on the Broadside's post-use review marked in blue, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-1024.png",
+  "dir": "a",
+  "caption": "A at the 1024 by 768 floor",
+  "kind": "full"
+ },
+ {
+  "file": "a-1024-2x.png",
+  "dir": "a",
+  "caption": "A at the 1024 by 768 floor, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "a-folded-full.png",
+  "dir": "a",
+  "caption": "A laid one room at a time: the Explorer's steps open, every other room folded to its head and what it is, the whole page at a glance",
+  "kind": "full"
+ },
+ {
+  "file": "a-try-it-lands.png",
+  "dir": "a",
+  "caption": "A: where a step's Try it lands, the real Explorer at that step's own address (islands, seed 42 as an archipelago)",
+  "kind": "full"
+ },
+ {
+  "file": "b-before.png",
+  "dir": "b",
+  "caption": "B, the Schoolroom: step 4, the real type row left in its own panel and every row not yet reached withheld, the Glass, the Press and the Drawer withheld too",
+  "kind": "full"
+ },
+ {
+  "file": "b-before-2x.png",
+  "dir": "b",
+  "caption": "B, the Schoolroom: step 4, the real type row left in its own panel and every row not yet reached withheld, the Glass, the Press and the Drawer withheld too, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "b-after.png",
+  "dir": "b",
+  "caption": "B: the same step once done, the chart redrawn as an archipelago by the real control, and the next row brought out",
+  "kind": "full"
+ },
+ {
+  "file": "b-after-2x.png",
+  "dir": "b",
+  "caption": "B: the same step once done, the chart redrawn as an archipelago by the real control, and the next row brought out, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "b-1024.png",
+  "dir": "b",
+  "caption": "B at the 1024 by 768 floor",
+  "kind": "full"
+ },
+ {
+  "file": "c-entry.png",
+  "dir": "c",
+  "caption": "C, a tour inside the room: its way in, a press on the trail's line beside the chart of the atelier's, in every room",
+  "kind": "full"
+ },
+ {
+  "file": "c-entry-2x.png",
+  "dir": "c",
+  "caption": "C, a tour inside the room: its way in, a press on the trail's line beside the chart of the atelier's, in every room, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "c-explorer.png",
+  "dir": "c",
+  "caption": "C: the Explorer's tour at the Land's first step, the type list ringed where it stands",
+  "kind": "full"
+ },
+ {
+  "file": "c-explorer-2x.png",
+  "dir": "c",
+  "caption": "C: the Explorer's tour at the Land's first step, the type list ringed where it stands, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "c-explorer-done.png",
+  "dir": "c",
+  "caption": "C: the same step once the reader has chosen archipelago, the tour seeing it done",
+  "kind": "full"
+ },
+ {
+  "file": "c-explorer-done-2x.png",
+  "dir": "c",
+  "caption": "C: the same step once the reader has chosen archipelago, the tour seeing it done, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "c-reading-room.png",
+  "dir": "c",
+  "caption": "C: the Reading Room's tour, Play ringed",
+  "kind": "full"
+ },
+ {
+  "file": "c-reading-room-2x.png",
+  "dir": "c",
+  "caption": "C: the Reading Room's tour, Play ringed, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "c-print-room.png",
+  "dir": "c",
+  "caption": "C: the Print Room's tour, Bind the atlas ringed",
+  "kind": "full"
+ },
+ {
+  "file": "c-print-room-2x.png",
+  "dir": "c",
+  "caption": "C: the Print Room's tour, Bind the atlas ringed, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "d-explorer.png",
+  "dir": "d",
+  "caption": "D, the Primer and the pointing hand: Try it on the Land's second step lands with the islands row ringed and the step in hand",
+  "kind": "full"
+ },
+ {
+  "file": "d-explorer-2x.png",
+  "dir": "d",
+  "caption": "D, the Primer and the pointing hand: Try it on the Land's second step lands with the islands row ringed and the step in hand, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "d-explorer-done.png",
+  "dir": "d",
+  "caption": "D: the same step once the islands slider is let go: the room sees the readout move and offers the next step",
+  "kind": "full"
+ },
+ {
+  "file": "d-explorer-done-2x.png",
+  "dir": "d",
+  "caption": "D: the same step once the islands slider is let go: the room sees the readout move and offers the next step, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "d-prospect.png",
+  "dir": "d",
+  "caption": "D on a subroom: the Prospect's year step, the year box ringed",
+  "kind": "full"
+ },
+ {
+  "file": "d-prospect-2x.png",
+  "dir": "d",
+  "caption": "D on a subroom: the Prospect's year step, the year box ringed, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "d-ribbon.png",
+  "dir": "d",
+  "caption": "D on a subroom: the Ribbon's lean step, a row of the itinerary ringed",
+  "kind": "full"
+ },
+ {
+  "file": "d-ribbon-2x.png",
+  "dir": "d",
+  "caption": "D on a subroom: the Ribbon's lean step, a row of the itinerary ringed, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "e-chart.png",
+  "dir": "e",
+  "caption": "E, the chart of lessons: the Primer opens on the atelier's own chart drawn large, each lesson a waypoint on the road, those done inked",
+  "kind": "full"
+ },
+ {
+  "file": "e-chart-2x.png",
+  "dir": "e",
+  "caption": "E, the chart of lessons: the Primer opens on the atelier's own chart drawn large, each lesson a waypoint on the road, those done inked, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "p-ninth-explorer-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: explorer",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-print-room-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: print-room",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-ribbon-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: ribbon",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-writing-room-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: writing-room",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-reading-room-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: reading-room",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-prospect-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: prospect",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-gallery-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: gallery",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-faq-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: faq",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-seed-of-the-day-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: seed-of-the-day",
+  "kind": "full"
+ },
+ {
+  "file": "p-ninth-portfolio-1024.png",
+  "dir": "p",
+  "caption": "A ninth item on the nav, Primer, at the 1024 floor: explorer",
+  "kind": "full"
+ },
+ {
+  "file": "p-child.png",
+  "dir": "p",
+  "caption": "The Primer as a child of Questions & Answers: off the nav's top line, named by the trail",
+  "kind": "full"
+ },
+ {
+  "file": "p-child-2x.png",
+  "dir": "p",
+  "caption": "The Primer as a child of Questions & Answers: off the nav's top line, named by the trail, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "p-road.png",
+  "dir": "p",
+  "caption": "A road out to the guide from the room's own press row, here the Explorer's",
+  "kind": "full"
+ },
+ {
+  "file": "p-road-2x.png",
+  "dir": "p",
+  "caption": "A road out to the guide from the room's own press row, here the Explorer's, at twice its size",
+  "kind": "crop"
+ },
+ {
+  "file": "p-home.png",
+  "dir": "p",
+  "caption": "Home's How It Works card, with a road out to the guide",
+  "kind": "full"
+ },
+ {
+  "file": "p-home-2x.png",
+  "dir": "p",
+  "caption": "Home's How It Works card, with a road out to the guide, at twice its size",
+  "kind": "crop"
+ }
+]

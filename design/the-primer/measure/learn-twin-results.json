@@ -1,0 +1,242 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-0-1024.png",
+  "url": "http://127.0.0.1:63011/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":56.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":24.1,\"h\":15},\"toCorner\":298,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-0-1280.png",
+  "url": "http://127.0.0.1:63011/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":56.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":24.1,\"h\":15},\"toCorner\":554,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-1-1024.png",
+  "url": "http://127.0.0.1:63011/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":10.3,\"centre\":32.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":23.9,\"h\":15},\"toCorner\":180,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-1-1280.png",
+  "url": "http://127.0.0.1:63011/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":10.3,\"centre\":32.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":23.9,\"h\":15},\"toCorner\":436,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-2-1024.png",
+  "url": "http://127.0.0.1:63011/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":29.6,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":24.8,\"h\":15},\"toCorner\":123,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-2-1280.png",
+  "url": "http://127.0.0.1:63011/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":29.6,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":24.8,\"h\":15},\"toCorner\":203,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-3-1024.png",
+  "url": "http://127.0.0.1:63011/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":46.8,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":71,\"h\":15},\"toCorner\":242,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-3-1280.png",
+  "url": "http://127.0.0.1:63011/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":46.8,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":71,\"h\":15},\"toCorner\":402,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-4-1024.png",
+  "url": "http://127.0.0.1:63011/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":36.1,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":32.5,\"h\":15},\"toCorner\":312,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-4-1280.png",
+  "url": "http://127.0.0.1:63011/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":36.1,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":32.5,\"h\":15},\"toCorner\":568,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-5-1024.png",
+  "url": "http://127.0.0.1:63011/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":80.8,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":32,\"h\":15},\"toCorner\":273,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-5-1280.png",
+  "url": "http://127.0.0.1:63011/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":80.8,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":32,\"h\":15},\"toCorner\":529,\"sameRow\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-6-1024.png",
+  "url": "http://127.0.0.1:63011/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":44.1,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":25.4,\"h\":15},\"toCorner\":166,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-6-1280.png",
+  "url": "http://127.0.0.1:63011/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":44.1,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":25.4,\"h\":15},\"toCorner\":422,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-7-1024.png",
+  "url": "http://127.0.0.1:63011/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":31.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":37.9,\"h\":15},\"toCorner\":257,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-7-1280.png",
+  "url": "http://127.0.0.1:63011/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":31.2,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":37.9,\"h\":15},\"toCorner\":513,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-8-1024.png",
+  "url": "http://127.0.0.1:63011/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":50.9,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":26,\"h\":15},\"toCorner\":393,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/learn-twin-8-1280.png",
+  "url": "http://127.0.0.1:63011/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"atelier\":{\"edge\":11.1,\"centre\":50.9,\"h\":13},\"learn\":{\"edge\":9.1,\"centre\":26,\"h\":15},\"toCorner\":649,\"sameRow\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/print-corner-primer-1024.png",
+  "url": "http://127.0.0.1:63011/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "\"pr-seed 63,pr-random 19,pr-style 75,pr-draw 122 corner 304\"",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1155/measure/extra/print-corner-today-1024.png",
+  "url": "http://127.0.0.1:63011/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "\"pr-seed 87,pr-random 29,pr-style 97,pr-draw 122 corner 358\"",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
