@@ -38,7 +38,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rs16Strip(k);
   await rs17Story(k, sm);
   await rs23OtherWorld(k);
-  // RS27 reads the arrival this visit opens on.
   await k.room.goto("#seed=42&style=antique&legend=1");
   await rs27NoReplay(k);
   await rs28Cancel(k);

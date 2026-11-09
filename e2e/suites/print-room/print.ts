@@ -61,7 +61,7 @@ export type GlideRead = {
 const REST_K = 1.4;
 const REST_TOLERANCE = 0.005;
 
-export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LENS): Promise<GlideRead> {
+export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
   const { evaluate, send, sleep } = ctx;
   // A reduced motion leaked by a suite that stopped mid-way makes every glide instant (Issue #637's class), so the read clears the features itself.
   await send("Emulation.setEmulatedMedia", { features: [] });
@@ -71,11 +71,11 @@ export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LEN
     if (press) await pressAt({ send }, press.x, press.y);
     let mid: Lens | null = null;
     for (let i = 0; i < 150 && mid === null; i++) {
-      const d = await evaluate(lens);
+      const d = await evaluate(LENS);
       if (d.k > 1.02 && d.k < 1.3) mid = d;
       else await sleep(20);
     }
-    const seatRead = seatedOf(lens);
+    const seatRead = seatedOf(LENS);
     const { w: from } = await evaluate(seatRead);
     await send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 760, deviceScaleFactor: 1, mobile: false });
     let seated: Seated | null = null;
@@ -84,12 +84,12 @@ export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LEN
       if (d.size[0] === 1200 && d.size[1] === 760 && d.w !== from) seated = d;
       else await sleep(20);
     }
-    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed", lens);
+    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed", LENS);
     return { press, mid, from, seated, landed };
   } finally {
     await evaluate(`document.documentElement.style.removeProperty("--glide")`);
     await clearMetrics({ evaluate, send, sleep }, 1200, 760);
-    await homeCamera(ctx, lens);
+    await homeCamera(ctx, LENS);
   }
 }
 
@@ -178,7 +178,6 @@ async function pr22FirstPage({
     }
   };
   const painted = await firstPage();
-  // Wiring, not the claim: the control hides the plates with a sheet the check adds and takes away, so the same page prints once bare in the same run.
   await evaluate(
     `(() => { const s = document.createElement("style"); s.id = "pr22-bare"; s.textContent = ${JSON.stringify(PLATES_HIDDEN)}; document.head.append(s); return true; })()`,
   );
