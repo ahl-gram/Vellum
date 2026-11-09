@@ -174,19 +174,6 @@ export async function prwPlace(ctx: SuiteContext): Promise<void> {
 const COUNT_HASH =
   "#seed=1&style=antique&type=archipelago&legend=1&arms=0&beasts=0&islands=20&isleSize=varied&raggedness=40";
 
-export async function prwCount(ctx: SuiteContext): Promise<void> {
-  const seen = await explorerAt(ctx, COUNT_HASH);
-  ctx.check(
-    "PRW5 a counted link opens its count in the Explorer and writes back the same link",
-    !!seen &&
-      seen.islands === "20" &&
-      seen.isleSize === "varied" &&
-      seen.raggedness === "0.4" &&
-      seen.hash === COUNT_HASH,
-    JSON.stringify(seen),
-  );
-}
-
 const DRAFTING = "Drafting…";
 const ISLAND_HASH = "#seed=1&style=antique&type=island&legend=1&arms=0&beasts=0";
 

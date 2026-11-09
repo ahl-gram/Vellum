@@ -2,7 +2,6 @@
 import { runJob, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import { clampPosterWidth } from "./poster-presets.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, type PosterBasis, type SheetFace } from "./bound-atlas.ts";
 import {
   bindPrintRoom,
@@ -44,7 +43,6 @@ declare global {
   interface Window {
     __vellumPrintRoomUsesWorker?: typeof usesWorker;
     __vellumPrintRoomState?: () => { seed: number; title: string };
-    __vellumClampPosterWidth?: typeof clampPosterWidth;
   }
 }
 
@@ -243,7 +241,6 @@ initOrderCounter({ basis: () => posterBasis, drawing: () => drawing, face });
 initBoundAtlas(() => posterBasis, face);
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
-window.__vellumClampPosterWidth = clampPosterWidth; // e2e: the tab-killing-width guard
 if (!usesWorker()) warning.hidden = false; // inline fallback: large plates will pause the tab
 
 written = await foundAddress(location.hash, pageFounder());

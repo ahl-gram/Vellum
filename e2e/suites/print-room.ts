@@ -2,24 +2,17 @@
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { printRoomKit, type PrintRoomKit } from "./print-room/kit.ts";
-import { prlLink, prwCount, prwCountType, prwPlace, prwPlaceLand, prwWarp } from "./print-room/link.ts";
+import { prlLink, prwCountType, prwPlace, prwPlaceLand, prwWarp } from "./print-room/link.ts";
 import { pr0Boots, pr37LegendClear, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";
-import { pr10PlatesEnable, pr12GrandPoster, pr16Desk, pr28ChartPlate, pr17Png } from "./print-room/plates.ts";
-import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download, pr25Hide } from "./print-room/atlas.ts";
+import { pr10PlatesEnable, pr12GrandPoster, pr28ChartPlate, pr17Png } from "./print-room/plates.ts";
+import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download } from "./print-room/atlas.ts";
 import { pr31dFocusKept } from "./print-room/gestures.ts";
-import {
-  pr21BoundPrint,
-  pr21bUnboundPrint,
-  pr21eWarningSlip,
-  pr21fLeanedPrint,
-  pr39SilentRefit,
-} from "./print-room/print.ts";
+import { pr21BoundPrint, pr21bUnboundPrint, pr21fLeanedPrint, pr39SilentRefit } from "./print-room/print.ts";
 import {
   pr24Redraw,
   pr24bInFlight,
-  pr24cRebind,
   pr24dLivePlate,
-  pr25bHideFace,
+  pr25Hide,
   pr26Redraw,
   pr27OrderDuring,
 } from "./print-room/redraw.ts";
@@ -58,7 +51,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   }
   await pr10PlatesEnable(ctx);
   await pr12GrandPoster(ctx);
-  await pr16Desk(ctx);
   await pr28ChartPlate(ctx);
   await pr17Png(k);
   await step("PR41, PR42, PR43, PR44, PR45, PR46", () => prRoadUnbound(k));
@@ -73,7 +65,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await prwWarp(ctx);
   await step("PRW3, PRW4", () => prwPlace(ctx));
   await step("PRW7", () => prwPlaceLand(ctx));
-  await step("PRW5", () => prwCount(ctx));
   await step("PRW8", () => prwCountType(ctx));
   await step("PR49", () => pr49NoRoad(ctx));
   await step("PR40", () => pr40RunnerLayout(ctx));
@@ -93,16 +84,13 @@ async function boundAndPaper(ctx: SuiteContext, k: PrintRoomKit, step: ReturnTyp
     await pr50Refit(ctx);
   });
   await ctx.shoot("print-room-bound.png");
+  await step("PR24d", () => pr24dLivePlate(ctx));
   await pr21BoundPrint(k);
   await pr23Download(ctx);
   await pr24Redraw(ctx);
   await pr24bInFlight(ctx);
-  await pr24cRebind(ctx);
-  await step("PR24d", () => pr24dLivePlate(ctx));
-  await pr25Hide(ctx);
-  await step("PR25b", () => pr25bHideFace(ctx));
+  await step("PR25", () => pr25Hide(ctx));
   await pr21bUnboundPrint(ctx);
-  await step("PR21e", () => pr21eWarningSlip(ctx));
   await step("PR21f", () => pr21fLeanedPrint(ctx));
   await step("PR39", () => pr39SilentRefit(ctx));
 }

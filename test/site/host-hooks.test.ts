@@ -13,9 +13,10 @@ test("installHostHooks puts every named seam on the window as a function (Issue 
     const seam = () => null;
     const livingChart = new Proxy({}, { get: () => seam });
     installHostHooks({ livingChart, runInline: seam } as unknown as Deps);
-    assert.ok(HOST_HOOK_NAMES.length > 1, "the roster this test sweeps is the installer's own");
+    const names: readonly string[] = HOST_HOOK_NAMES;
+    assert.ok(names.length > 1, "the roster this test sweeps is the installer's own");
     assert.deepEqual(
-      HOST_HOOK_NAMES.filter((name) => typeof w[name] !== "function"),
+      names.filter((name) => typeof w[name] !== "function"),
       [],
       "a seam the installer names is missing from the window",
     );

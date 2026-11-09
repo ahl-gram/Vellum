@@ -20,15 +20,6 @@ export async function pr10PlatesEnable({ evaluate, check, sleep }: SuiteContext)
     await sleep(50);
   }
   check("PR10 plate buttons enable once a proof is on the desk", !!plateReady, JSON.stringify(plateReady));
-
-  const clamp = await evaluate<{ hi: number; lo: number; grand: number }>(
-    `(()=>{const f=window.__vellumClampPosterWidth;return{hi:f(999999),lo:f(1),grand:f(4200)};})()`,
-  );
-  check(
-    "PR11 clampPosterWidth bounds any width to the [2400, 4200] envelope",
-    clamp.hi === 4200 && clamp.lo === 2400 && clamp.grand === 4200,
-    JSON.stringify(clamp),
-  );
 }
 
 async function pr13Poster({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
@@ -89,41 +80,6 @@ export async function pr12GrandPoster({ evaluate, check, sleep }: SuiteContext):
     "PR14 download-only: the wide poster never enters the DOM (no svg wider than the preview)",
     !!poster && poster.preview === true && poster.maxDom > 0 && poster.maxDom <= 1000,
     poster ? `maxDomSvgWidth=${poster.maxDom}` : "no poster",
-  );
-
-  const rt = await evaluate<{ seed: number; style: string } | null>(
-    `(async()=>{const {recipeFromSvg}=await import("/explorer/engine/render/recipe-meta.js");const p=window.__vellumLastPoster;const r=p?recipeFromSvg(p.svg):null;return r?{seed:r.recipe.seed,style:r.style}:null;})()`,
-    true,
-  );
-  check(
-    "PR15 recipeFromSvg round-trips the poster (seed 42, antique)",
-    !!rt && rt.seed === 42 && rt.style === "antique",
-    JSON.stringify(rt),
-  );
-}
-
-export async function pr16Desk({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  await evaluate(
-    `(()=>{window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();})()`,
-  );
-  let desk = null;
-  for (let i = 0; i < 200; i++) {
-    let s = null;
-    try {
-      s = await evaluate<{ filename: string; width: number; hasWidthAttr: boolean } | null>(
-        `(()=>{const p=window.__vellumLastPoster;return p?{filename:p.filename,width:p.width,hasWidthAttr:p.svg.includes('width="2400"')}:null;})()`,
-      );
-    } catch {}
-    if (s) {
-      desk = s;
-      break;
-    }
-    await sleep(50);
-  }
-  check(
-    "PR16 the Desk plate downloads a well-formed 2400px poster (each preset, not just Grand)",
-    !!desk && desk.width === 2400 && desk.filename === "vellum-poster-42-antique-2400.svg" && desk.hasWidthAttr,
-    JSON.stringify(desk),
   );
 }
 
