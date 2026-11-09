@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MAP_WORDS } from "../../src/site/shared/map-words.ts";
+import { MAP_WORDS, mapNoun } from "../../src/site/shared/map-words.ts";
 
 test("every map type has its article and its written form (Issue #1162)", () => {
   assert.deepEqual(MAP_WORDS, {
@@ -9,4 +9,13 @@ test("every map type has its article and its written form (Issue #1162)", () => 
     continent: "a continent",
     citystate: "a city-state",
   });
+});
+
+test("every map type has its noun without the article, as the Explorer's type select spells it (Issue #1162)", () => {
+  assert.deepEqual((["island", "archipelago", "continent", "citystate"] as const).map(mapNoun), [
+    "island",
+    "archipelago",
+    "continent",
+    "city-state",
+  ]);
 });

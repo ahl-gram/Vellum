@@ -6,3 +6,5 @@ export const MAP_WORDS: Readonly<Record<MapType, string>> = {
   continent: "a continent",
   citystate: "a city-state",
 };
+
+export const mapNoun = (type: MapType): string => type;
