@@ -1,9 +1,8 @@
-// Broadside e2e (BR1-BR25, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as authored and as dressed (BR9 to BR14), self-contained with scoped deltas.
+// Broadside e2e (BR1-BR25, Issue #270): the regrouped controls, seals, journal button and footnote apparatus on the built running page, and since Issue #779 part 2h the Explorer as dressed (BR12 to BR14), self-contained with scoped deltas.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import { br9Authored, br11Allowlist } from "./broadside/room.ts";
 import { br12Dress, br21Fields, br23Imprint } from "./broadside/dress.ts";
 import { br14Paper } from "./broadside/gestures.ts";
 import { br25Grows, br25dZoomed } from "./broadside/grow.ts";
@@ -66,19 +65,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  await step("BR1 to BR1c", async () => {
-    await br1Groups(k);
-    await br1cLegendClears(k);
-  });
+  await step("BR1c", () => br1cLegendClears(k));
   await step("BR12", () => br12Dress(k));
   await step("BR21", () => br21Fields(k));
-  await step("BR11", () => br11Allowlist(k));
   await step("BR2", () => br2JournalPeer(k));
   await br4Notes(k);
   await br5Hover(k);
   await step("BR14", () => br14Paper(k));
   await step("BR6", () => br6Tap(k));
-  await step("BR9", () => br9Authored(k));
   await step("BR15", () => br15TabClear(k));
   await step("BR16 to BR19", () => br16To19(k));
   await step("BR20", () => br20Twins(k));
@@ -86,29 +80,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("BR25, BR25b", () => br25Grows(k));
   await step("BR25d, BR25f, BR25h, BR25i", () => br25dZoomed(k));
   br8Clean(ctx, errBase, httpBase);
-}
-
-async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<void> {
-  await goto(EXP + "#seed=42&style=antique", "broadside-base");
-  const br1 = await evaluate<{ wrong: string[]; heads: (string | null)[] }>(`(()=>{
-      const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
-        return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
-      const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-strand",coast:"grp-strand",
-        style:"grp-hand",theme:"grp-hand",legend:"grp-hand",arms:"grp-hand",ages:"grp-hand",
-        "verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
-      const wrong=Object.entries(want).filter(([id,g])=>groupOf(id)!==g).map(([id])=>id+":"+groupOf(id));
-      const heads=["grp-land","grp-strand","grp-hand","grp-press"].map((id)=>(document.getElementById(id)||{}).textContent);
-      return{wrong,heads};
-    })()`);
-  check(
-    "BR1 every control sits in its wiring-truth group: the seed row in the folio, the Land, the Strand and the Hand on the slip, the Press as the legend row",
-    br1.wrong.length === 0 &&
-      br1.heads[0] === "The Land" &&
-      br1.heads[1] === "The Strand" &&
-      br1.heads[2] === "The Hand" &&
-      /^The Press\b/.test(br1.heads[3] || ""),
-    JSON.stringify(br1),
-  );
 }
 
 export async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {

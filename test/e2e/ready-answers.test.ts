@@ -107,18 +107,19 @@ const landfallKit = (cam: Cam | null): LandfallKit =>
   ({
     ...page(() => new Error(READ_THE_PAGE)).ctx,
     settleHome: (): Promise<Cam | null> => Promise.resolve(cam),
+    scrollToTop: (): Promise<void> => Promise.resolve(),
   }) as unknown as LandfallKit;
 
-test("L13 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
-  const at = stepper(["L13"]);
+test("L18 fails by name, carrying the camera, when settleHome's answer never reached its landfall, and reads nothing", async () => {
+  const at = stepper(["L18"]);
   await l13Home(landfallKit(LANDED), at.step);
-  const never = stepper(["L13"]);
+  const never = stepper(["L18"]);
   await l13Home(landfallKit(VEILED), never.step);
-  assert.equal(at.failed["L13"], READ_THE_PAGE, "a settled home did not reach L13's own read");
+  assert.equal(at.failed["L18"], READ_THE_PAGE, "a settled home did not reach L18's own read");
   assert.equal(
-    never.failed["L13"],
-    unsettled("L13"),
-    "L13 ran on a home that never settled, or failed for another reason",
+    never.failed["L18"],
+    unsettled("L18"),
+    "L18 ran on a home that never settled, or failed for another reason",
   );
 });
 
