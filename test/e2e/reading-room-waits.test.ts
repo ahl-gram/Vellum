@@ -230,3 +230,23 @@ test("RR28 fails a counter-drawn stage that is hidden but was asked for a plate,
   await rr17CounterRead(readingRoomKit(run.ctx));
   assert.deepEqual(row(run.checked, "RR28"), { code: "RR28", ok: false });
 });
+
+const shownRun = (stage: object) => recordingSuite((e) => (isBare(e) ? { stage, plate: "0:1059" } : null));
+
+test("plateShown keeps polling a stage that is hidden though it still carries a plate's blob src, and gives up after its 160 polls, since a hidden stage keeps its last plate's src", async () => {
+  const run = shownRun({ ...NEW_PLATE, hidden: true });
+  assert.equal(await readingRoomKit(run.ctx).plateShown(), null);
+  assert.deepEqual(
+    run.slept,
+    Array.from({ length: 160 }, () => 50),
+  );
+});
+
+test("plateShown keeps polling a shown stage whose src is not a blob, and gives up after its 160 polls", async () => {
+  const run = shownRun({ ...NEW_PLATE, src: "http://127.0.0.1:8765/prospect/plate.svg" });
+  assert.equal(await readingRoomKit(run.ctx).plateShown(), null);
+  assert.deepEqual(
+    run.slept,
+    Array.from({ length: 160 }, () => 50),
+  );
+});
