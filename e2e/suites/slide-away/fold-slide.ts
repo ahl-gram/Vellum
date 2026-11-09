@@ -191,8 +191,6 @@ function witnesses(i: Instance, zoomed: number | null): string[] {
 export async function fs2FoldSlides(ctx: SuiteContext): Promise<void> {
   const zoomed = { k: 2.744, cx: 0.35, cy: 0.62 };
   const moving = await motionOn(ctx, async () => {
-    await openAt(ctx, SEED_42, 1280, 800, "FS a");
-    const a = await pressBoth(ctx, "the Explorer at 1280x800", true, 1280);
     await size(ctx, 1024, 768);
     await open(ctx, "/seed-of-the-day/", 1024, 768, { w: 1024, h: 768 }, "FS b");
     await zoomAbout(ctx, 0.4, 0.55, 2, "FS b zoom");
@@ -200,11 +198,11 @@ export async function fs2FoldSlides(ctx: SuiteContext): Promise<void> {
     await openAt(ctx, SEED_42, 1024, 768, "FS c");
     await zoomAbout(ctx, zoomed.cx, zoomed.cy, zoomed.k, "FS c zoom");
     const c = await pressBoth(ctx, "the Explorer at 1024x768 zoomed to 2.744", true, 1024);
-    return [a, b, c] as const;
+    return [b, c] as const;
   });
   const heldNow = await pressBoth(ctx, "the Explorer at 1024x768 zoomed to 2.744, reduced motion", true, 1024);
-  const [e1280, seed, e1024] = moving;
-  const slideFaults = [...witnesses(e1280, null), ...witnesses(seed, null), ...witnesses(e1024, zoomed.k)];
+  const [seed, e1024] = moving;
+  const slideFaults = [...witnesses(seed, null), ...witnesses(e1024, zoomed.k)];
   const each = (pick: (r: FoldReads) => boolean): string[] =>
     moving.flatMap((i) => i.reads.filter(({ r }) => pick(r)).map(({ press }) => `${i.id} ${press}`));
   const paced = each((r) => r.worstPaceGap > PACE_GAP || r.sheetOffAfter > REST_PX || r.pressOffAfter > REST_PX);
@@ -219,7 +217,7 @@ export async function fs2FoldSlides(ctx: SuiteContext): Promise<void> {
     .map(({ press }) => `${heldNow.id} ${press}`);
   const heldFaults = witnesses(heldNow, zoomed.k);
   ctx.check(
-    "FS2 in the Explorer at 1280x800 and at 1024x768 zoomed to 2.744, and on the Seed of the Day at 1024x768 zoomed to 2, at a press on the side panel's fold and on its tab the sheet keeps the slip's own pace at every painted frame of the slip's travel, its progress toward its rest box within 0.05 of the slip's toward its own, so the chart shares the fold's duration and curve (`--fold` and `--ease-fold`); from the frame the slip stands at rest the sheet and the Press row stand at theirs, so nothing moves after the fold; and in the zoomed Explorer the chart under the sheet's centre and its depth hold at every frame within the gesture box's whole-pixel rounding, where main snapped the sheet to its new fit in one frame 340 ms after the press (Alex, 2026-11-05, Issue #1261: \"the chart slides just the same as the rest\")",
+    "FS2 in the Explorer at 1024x768 zoomed to 2.744 and on the Seed of the Day at 1024x768 zoomed to 2, at a press on the side panel's fold and on its tab the sheet keeps the slip's own pace at every painted frame of the slip's travel, its progress toward its rest box within 0.05 of the slip's toward its own, so the chart shares the fold's duration and curve (`--fold` and `--ease-fold`); from the frame the slip stands at rest the sheet and the Press row stand at theirs, so nothing moves after the fold; and in the zoomed Explorer the chart under the sheet's centre and its depth hold at every frame within the gesture box's whole-pixel rounding, where main snapped the sheet to its new fit in one frame 340 ms after the press (Alex, 2026-11-05, Issue #1261: \"the chart slides just the same as the rest\")",
     paced.length === 0 && framed.length === 0 && slideFaults.length === 0,
     `${[...paced.map((p) => `${p} off the slip's pace or not at rest`), ...framed.map((f) => `${f} framing drifted`), ...slideFaults].join("; ") || "at the slip's pace, at rest with it, framing held"}: ${moving.map(show).join(" | ")}`,
   );

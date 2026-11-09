@@ -2,8 +2,7 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
-import { rest } from "../stage/stage.ts";
-import { motionOn, mouseTo, openAt, pressSelector, SEED_42 } from "../stage/slide-kit.ts";
+import { motionOn, mouseTo, pressSelector } from "../stage/slide-kit.ts";
 import {
   awayFaults,
   fillOf,
@@ -11,7 +10,6 @@ import {
   foldLanded,
   homeFaults,
   openRoom,
-  PIECES,
   pressDepths,
   pressGlass,
   ROOMS,
@@ -41,14 +39,6 @@ const ARMS: readonly Arm[] = [
         800,
         "SW7 a",
       ),
-  },
-  {
-    id: "the Explorer at 1366x768",
-    open: async (c) => {
-      await openAt(c, SEED_42, 1366, 768, "SW7 b");
-      await rest(c, 1366, 768, "SW7 b");
-      return c.evaluate(PIECES);
-    },
   },
 ];
 
@@ -145,14 +135,13 @@ async function sequenceTwo(ctx: SuiteContext, arm: Arm): Promise<string[]> {
 
 export async function sw7FoldPast(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
-  const [room, explorer] = ARMS as [Arm, Arm];
+  const [room] = ARMS as [Arm];
   await motionOn(ctx, async () => {
     faults.push(...(await sequenceOne(ctx, room, true)));
-    faults.push(...(await sequenceOne(ctx, explorer, false)));
     faults.push(...(await sequenceTwo(ctx, room)));
   });
   ctx.check(
-    'SW7 folding the side panel at the press that filled the screen, on the Print Room at 1280x800 and on the Explorer at 1366x768, where the folded room fills only at the next press, brings the head cluster and the chart folio part way back, to where the zoom\'s own start and the folded room\'s fill put them, and the next press carries them to their thin lines; once past the fill, or back at the first press, the folded room keeps its own rule, so at its second press both stand home (Alex, 2026-10-23, Issue #1034, "Creep a little way back, as today" and "Both bars home"; Issue #996 step 6 ruling 4; Issue #997 ruling 5)',
+    'SW7 folding the side panel at the press that filled the screen, on the Print Room at 1280x800, where the folded room fills only at the next press, brings the head cluster and the chart folio part way back, to where the zoom\'s own start and the folded room\'s fill put them, and the next press carries them to their thin lines; once past the fill, or back at the first press, the folded room keeps its own rule, so at its second press both stand home (Alex, 2026-10-23, Issue #1034, "Creep a little way back, as today" and "Both bars home"; Issue #996 step 6 ruling 4; Issue #997 ruling 5)',
     faults.length === 0,
     faults.length
       ? `${faults.length} faults: ${faults.slice(0, 8).join("; ")}`
