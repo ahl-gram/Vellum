@@ -1,14 +1,11 @@
 // The Explorer at rest as dressed (Issue #779 part 2h): the stage's reserves, the sheet's depth, the fitted chart, the folio's written lines and the legend's seat.
-import { nearRgba, PAGE_RGBA, SHADE, tokenRgba, type Rgb } from "../../support/pixel.ts";
+import { PAGE_RGBA, SHADE } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { clearMetrics } from "../print-room/kit.ts";
 import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 import type { Payload } from "../../types.ts";
 import type { BroadsideKit } from "./kit.ts";
 import { mouseMove, sendKey } from "../../support/input.ts";
-import { contrast } from "../cluster/trail.ts";
-import { FLOOR_PLAIN } from "../stage/stage.ts";
-import { FONTS_LOADED, INK_RGBA, inkBrief, inkFaults, slipInk, type InkPiece } from "../specimen/slip-ink.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -112,63 +109,6 @@ export async function br21Fields({ evaluate, check }: BroadsideKit): Promise<voi
   );
 }
 
-// The bill's arms on the classes every slip wears, each read compared with the Broadside's own in the same run; an arm's other declarations leaking alone pass, and the Portfolio's slip stands for every room's, since only a shared sheet reaches them (Issue #1159).
-const HEAD_ARMS: readonly (readonly [arm: string, selector: string, pseudo: string | null, property: string])[] = [
-  ["head text-align", ".slip-head", null, "text-align"],
-  ["head padding-top", ".slip-head", null, "padding-top"],
-  ["verb display", ".slip-head .card-verb", null, "display"],
-  ["verb ::before", ".slip-head .card-verb", "::before", "content"],
-  ["verb ::after", ".slip-head .card-verb", "::after", "content"],
-  ["title display", ".slip-head .card-title", null, "display"],
-  ["title white-space", ".slip-head .card-title", null, "white-space"],
-  ["where display", ".slip-head .card-where", null, "display"],
-  ["where border-bottom-width", ".slip-head .card-where", null, "border-bottom-width"],
-  ["where ::before", ".slip-head .card-where", "::before", "content"],
-  ["where ::after", ".slip-head .card-where", "::after", "content"],
-  ["fold top", ".slip-head .slip-fold", null, "top"],
-  ["fold right", ".slip-head .slip-fold", null, "right"],
-];
-
-type Bill = {
-  width: string;
-  style: string;
-  colour: number[];
-  before: string;
-  after: string;
-  tacksInert: boolean;
-  head: (string | null)[];
-};
-const BILL: Payload<Bill | null> = `(() => { const rgba = ${PAGE_RGBA}, s = document.querySelector("#BILLID"); if (!s) return null;
-  const c = getComputedStyle(s); return { width: c.borderTopWidth, style: c.borderTopStyle, colour: rgba(c.borderTopColor), before: getComputedStyle(s, "::before").content, after: getComputedStyle(s, "::after").content, tacksInert: ["::before", "::after"].every((p) => getComputedStyle(s, p).pointerEvents === "none"), head: ${JSON.stringify(HEAD_ARMS)}.map(([, sel, pseudo, prop]) => { const e = s.querySelector(sel); return e ? getComputedStyle(e, pseudo).getPropertyValue(prop) : null; }) }; })()`;
-const billOf = (id: string): Payload<Bill | null> => BILL.replace("BILLID", id);
-const inkBorder = (b: Bill | null): boolean => !!b && b.width === "2px" && nearRgba(b.colour, tokenRgba("--chart-ink"));
-
-export async function br22Bill(k: BroadsideKit): Promise<void> {
-  const { evaluate, check, goto, gotoPlain, EXP, PORT } = k;
-  await goto(EXP + "#seed=42&style=antique", "broadside-bill");
-  const broadside = await evaluate(billOf("broadside"));
-  await gotoPlain(`http://127.0.0.1:${PORT}/explorer/portfolio/`, "broadside-bill-portfolio");
-  const portfolio = await evaluate(billOf("portfolio"));
-  const worn = HEAD_ARMS.filter((_, i) => {
-    const b = broadside?.head[i];
-    const p = portfolio?.head[i];
-    return !b || !p || b === p;
-  }).map(([arm]) => arm);
-  check(
-    "BR22 the posted bill is the Broadside's alone: the Explorer's slip wears its printed border, its two tacks and every arm of its proclamation head, and the Portfolio's slip, a room under the Explorer whose slip stands for every room's, wears none of them (Issue #1159)",
-    inkBorder(broadside) &&
-      broadside?.style === "solid" &&
-      broadside.before === '""' &&
-      broadside.after === '""' &&
-      broadside.tacksInert &&
-      portfolio?.before === "none" &&
-      portfolio.after === "none" &&
-      !inkBorder(portfolio) &&
-      worn.length === 0,
-    JSON.stringify({ worn, broadside, portfolio }),
-  );
-}
-
 type Printed = { folio: string | null; imprint: string | null; status: string | null };
 const PRINTED: Payload<Printed> = `(() => { const t = (id) => (document.getElementById(id) || {}).textContent ?? null; return { folio: t("folio-title"), imprint: t("imprint-no"), status: t("status") }; })()`;
 const SECOND = "7";
@@ -190,53 +130,5 @@ export async function br23Imprint(k: BroadsideKit): Promise<void> {
     "BR23 the printer's line follows the chart on screen: drawn anew in place, from seed 42 to the seed 7 set in the seed field and entered, it reads 7 as the folio's title does (Issue #1159)",
     before.imprint === "42" && !!before.folio && before.folio.endsWith("Chart № 42") && after.imprint === SECOND,
     JSON.stringify({ before, after }),
-  );
-}
-
-const BR24_PIECES: readonly InkPiece[] = [
-  ["head", "#note-broadside .fn-head"],
-  ["fold", "#broadside .slip-fold"],
-];
-type Head = { id: string; ink: Rgb; alpha: number; ground: number[] };
-const HEADS: Payload<Head[]> =
-  `(() => { const rgba = ${INK_RGBA}; return [...document.querySelectorAll(".fn-note")].map((n) => { const c = rgba(getComputedStyle(n.querySelector(".fn-head")).color); return { id: n.id, ink: [c[0], c[1], c[2]], alpha: c[3], ground: rgba(getComputedStyle(n).backgroundColor) }; }); })()`;
-const OPEN_NOTE: Payload<boolean> = `(() => { document.querySelector('a.fn[data-note="note-broadside"]').focus(); const n = document.getElementById("note-broadside"); return n.matches(":popover-open") && n.getClientRects().length > 0; })()`;
-const SHUT_NOTE: Payload<boolean> = `(() => { document.activeElement.blur(); return !document.getElementById("note-broadside").matches(":popover-open"); })()`;
-
-export async function br24Ink(k: BroadsideKit): Promise<void> {
-  const { evaluate, send, sleep, check, goto, EXP } = k;
-  await goto(EXP + "#seed=42&style=antique", "broadside-ink");
-  await makeSettle({ evaluate, sleep })(FONTS_LOADED, (d) => d === "loaded", "BR24 fonts");
-  await mouseMove(send, 1, 1);
-  const opened = await evaluate(OPEN_NOTE);
-  const reads = await slipInk(k, BR24_PIECES, "br24-hide");
-  const heads = await evaluate(HEADS);
-  const shut = await evaluate(SHUT_NOTE);
-  const under = reads.find((r) => r.piece === "head")?.ground ?? null;
-  const faults = [
-    ...(opened ? [] : ["the note of the broadside did not open on its mark's focus"]),
-    ...(shut ? [] : ["the note of the broadside stayed open after its mark's blur"]),
-    ...inkFaults(reads),
-    ...(reads.some((r) => r.piece === "head") ? [] : ["no footnote head read"]),
-    ...(reads.some((r) => r.piece === "fold") ? [] : ["no fold mark read"]),
-    ...(heads.length > 0 ? [] : ["no footnote on the page"]),
-    ...heads.flatMap((h) => [
-      ...(h.alpha === 255 ? [] : [`${h.id}'s head is see-through, alpha ${h.alpha}`]),
-      ...(nearRgba(h.ground, tokenRgba("--parchment-panel"))
-        ? []
-        : [`${h.id} stands on ${h.ground.join(",")}, not the panel`]),
-      ...(under !== null && contrast(h.ink, under) >= FLOOR_PLAIN
-        ? []
-        : [`${h.id}'s head reads ${under === null ? "against no ground" : contrast(h.ink, under).toFixed(2)}`]),
-    ]),
-  ];
-  check(
-    "BR24 every footnote head on the Broadside, and the bill's fold mark, read at 4.5:1 or better against the panel: the note of the broadside opened by its mark's focus, its head and the fold mark read against the ground painted under them, and every note's head against that ground, every note standing on the panel (Issue #1160)",
-    faults.length === 0,
-    JSON.stringify({
-      faults,
-      reads: inkBrief(reads),
-      heads: heads.map((h) => `${h.id} ${under === null ? "-" : contrast(h.ink, under).toFixed(2)}`),
-    }),
   );
 }

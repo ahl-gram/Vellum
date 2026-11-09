@@ -8,7 +8,7 @@ import {
   deferLandingArm,
 } from "../../src/site/explorer/survey-arm.ts";
 
-// The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
+// The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2 and SV2c.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {

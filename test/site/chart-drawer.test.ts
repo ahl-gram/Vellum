@@ -338,7 +338,7 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   );
 });
 
-test("CT7c one call reaches the landing paths (#631 round 3; kept at the close of Issue #779: a census of call sites; CD57 to CD59 read what is filed)", () => {
+test("CT7c one call reaches the landing paths (#631 round 3; kept at the close of Issue #779: a census of call sites; CD58 and CD59 read what is filed)", () => {
   const src = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
   assert.equal(
     [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].length,
@@ -347,7 +347,7 @@ test("CT7c one call reaches the landing paths (#631 round 3; kept at the close o
   );
 });
 
-test("CT9 the Explorer seats the table in exactly two places, the boot and the cached return (#634, ruled 2026-09-19; kept at the close of Issue #779: a census of call sites; CD37 to CD42 and CD52 read the device written on a change, the boot's precedence and the cached return)", () => {
+test("CT9 the Explorer seats the table in exactly two places, the boot and the cached return (#634, ruled 2026-09-19; kept at the close of Issue #779: a census of call sites; CD37, CD38 and CD52 read the device written on a change and the cached return)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
   assert.equal(
     [...app.matchAll(/chartTable\.restore\(/g)].length,

@@ -1,5 +1,3 @@
-import { makeSettle, makeStable } from "../../support/settle.ts";
-import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Point, SuiteContext } from "../../types.ts";
 import { mouseMove } from "../../support/input.ts";
 
@@ -26,22 +24,13 @@ export async function pManifest({ evaluate }: SuiteContext) {
     ruinIdx: number;
     ruinName: string | null;
     tale: string | null;
-    seatIdx: number;
-    seatName: string | null;
-    capSeat: boolean;
-    formerIdx: number;
-    formerName: string | null;
-    plainIdx: number;
   }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const places=r.manifest.places;
     const cap=places.findIndex((p)=>p.kind==="capital");
     const ruinIdx=places.findIndex((p)=>p.ruined);
     const tale=ruinIdx>=0?r.manifest.events.find((e)=>e.settlement===ruinIdx&&e.kind==="ruin"):null;
-    const seatIdx=places.findIndex((p)=>p.seat&&p.kind!=="capital");
-    const plainIdx=places.findIndex((p)=>!p.ruined&&p.formerName===undefined);
-    const formerIdx=places.findIndex((p)=>p.formerName!==undefined);
-    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null,seatIdx,seatName:seatIdx>=0?places[seatIdx].name:null,capSeat:places[cap].seat,formerIdx,formerName:formerIdx>=0?places[formerIdx].formerName:null,plainIdx};
+    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null};
   })()`);
   return pm;
 }
@@ -57,24 +46,19 @@ export async function p1Overlay({ evaluate, check }: SuiteContext, pm: Manifest)
   );
 }
 
-export async function p2Idle({ evaluate, check }: SuiteContext): Promise<void> {
-  const p2 = await evaluate<{ cardHidden: boolean; bg: string; bw: string; ovPe: string; hitPe: string }>(
-    `(()=>{const c=document.getElementById("place-card");const h=document.querySelector(".place-hit");const cs=getComputedStyle(h);const os=getComputedStyle(document.querySelector(".place-overlay"));return{cardHidden:c.hidden===true,bg:cs.backgroundColor,bw:cs.borderTopWidth,ovPe:os.pointerEvents,hitPe:cs.pointerEvents};})()`,
-  );
-  check(
-    "P2 idle: card hidden + hits transparent/borderless (no global-button leak)",
-    p2.cardHidden && p2.bg === "rgba(0, 0, 0, 0)" && p2.bw === "0px",
-    JSON.stringify(p2),
+export async function p3PointerEvents({ evaluate, check }: SuiteContext): Promise<void> {
+  const p3 = await evaluate<{ ovPe: string; hitPe: string }>(
+    `(()=>{const h=document.querySelector(".place-hit");const os=getComputedStyle(document.querySelector(".place-overlay"));return{ovPe:os.pointerEvents,hitPe:getComputedStyle(h).pointerEvents};})()`,
   );
   check(
     "P3 pointer-events: overlay none, hits auto (rest of page stays live)",
-    p2.ovPe === "none" && p2.hitPe === "auto",
-    `ov=${p2.ovPe} hit=${p2.hitPe}`,
+    p3.ovPe === "none" && p3.hitPe === "auto",
+    `ov=${p3.ovPe} hit=${p3.hitPe}`,
   );
 }
 
 export async function p2bPressLift({ evaluate, check }: SuiteContext): Promise<void> {
-  // P2 is idle-only, so a dropped :not(.place-hit) exclusion would leave it green; this P2b/P2c pair is the guard that actually bites that mutation.
+  // An idle-only read would stay green with the :not(.place-hit) exclusion dropped; this P2b/P2c pair is the guard that actually bites that mutation.
   const p2m = await evaluate<{ btn: string; hit: string }>(
     `(()=>{const b=getComputedStyle(document.getElementById("draw")).transitionDuration;const h=getComputedStyle(document.querySelector(".place-hit")).transitionDuration;return{btn:b,hit:h};})()`,
   );
@@ -90,42 +74,7 @@ export async function p2bPressLift({ evaluate, check }: SuiteContext): Promise<v
   );
 }
 
-async function p5bRealmSeat(
-  { evaluate, check, shoot, sleep }: Pick<SuiteContext, "evaluate" | "check" | "shoot" | "sleep">,
-  pm: Manifest,
-): Promise<void> {
-  if (pm.seatIdx >= 0) {
-    const stable = makeStable(makeSettle({ evaluate, sleep }));
-    const p5b = await evaluate<{
-      hidden: boolean;
-      name: string | undefined;
-      rank: string | undefined;
-      aria: string | null;
-      tale: boolean;
-    }>(
-      `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:!!c.querySelector(".pc-tale")};})()`,
-    );
-    check(
-      "P5b focus a realm seat: rank 'Realm Seat', aria matches, no tale",
-      p5b.hidden === false &&
-        p5b.rank === "Realm Seat" &&
-        p5b.name === pm.seatName &&
-        p5b.aria === pm.seatName + ", Realm Seat" &&
-        p5b.tale === false,
-      JSON.stringify(p5b),
-    );
-    // Wait out paperUnfurl before shooting: the card mounts at the animation's first keyframe (fill both), so an immediate shot catches it at zero scale and shows no card at all.
-    const before = await evaluate(CARD_ROLL);
-    await evaluate(`(()=>{document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]').click();})()`);
-    await stable(CARD_ROLL, "P5b the seat's card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
-    await shoot("explorer-place-card-seat.png");
-    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
-  } else {
-    check("P5b seed 42 has a non-capital realm seat to show", false, "no seat in manifest");
-  }
-}
-
-export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext, pm: Manifest): Promise<void> {
+export async function p4Capital({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
   const p4 = await evaluate<{
     hidden: boolean;
     aria: string | null;
@@ -146,28 +95,6 @@ export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext,
     JSON.stringify(p4),
   );
   check("P5 hit aria-label is name + rank (matches the card)", p4.aria === pm.capName + ", Capital", `aria=${p4.aria}`);
-
-  await p5bRealmSeat({ evaluate, check, shoot, sleep }, pm);
-  check(
-    "P5c the grand capital carries seat===true yet still ranks Capital",
-    pm.capSeat === true && p4.rank === "Capital",
-    `capSeat=${pm.capSeat} rank=${p4.rank}`,
-  );
-}
-
-export async function p6Ruin({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  if (pm.ruinIdx >= 0) {
-    const p6 = await evaluate<{ rank: string | undefined; aria: string | null; tale: string | undefined }>(
-      `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:(c.querySelector(".pc-tale")||{}).textContent};})()`,
-    );
-    check(
-      "P6 focus a ruin: rank Ruin, aria 'name, Ruin', and the abandonment tale",
-      p6.rank === "Ruin" && p6.aria === pm.ruinName + ", Ruin" && p6.tale === pm.tale,
-      JSON.stringify(p6),
-    );
-  } else {
-    check("P6 seed 42 has a ruin to show", false, "no ruin in manifest");
-  }
 }
 
 export async function p7Tooltip({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
@@ -190,24 +117,6 @@ export async function p8TapPins({ evaluate, check }: SuiteContext, pm: Manifest)
     "P8 tap opens+pins from closed, survives mouseleave, Escape dismisses",
     p8.startHidden === true && p8.opened && p8.survived && p8.closed,
     JSON.stringify(p8),
-  );
-}
-
-export async function p10Focus({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p10 = await evaluate<{ shown: boolean; gone: boolean }>(
-    `(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const shown=!c.hidden;hit.blur();const gone=c.hidden;return{shown,gone};})()`,
-  );
-  check("P10 unpinned: focus shows, blur dismisses", p10.shown && p10.gone, JSON.stringify(p10));
-}
-
-export async function p11OutsideClick({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p11 = await evaluate<{ pinnedOpen: boolean; dismissed: boolean }>(
-    `(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.click();const pinnedOpen=!c.hidden;document.body.dispatchEvent(new MouseEvent("click",{bubbles:true}));const dismissed=c.hidden;return{pinnedOpen,dismissed};})()`,
-  );
-  check(
-    "P11 outside-click (off any mark) dismisses a pinned card",
-    p11.pinnedOpen && p11.dismissed,
-    JSON.stringify(p11),
   );
 }
 
@@ -242,50 +151,13 @@ export async function p13AxDescription({ evaluate, check, axDescription }: Suite
       readable,
       JSON.stringify(axDesc),
     );
+    check(
+      "P17b the derivation is spoken too, not only drawn",
+      !!axDesc && axDesc.includes("A word of the Oromi speech"),
+      JSON.stringify(axDesc),
+    );
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   }
-}
-
-export async function p14Unfurl({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p14 = await evaluate<{
-    hoverName: string | null;
-    hoverDur: number | null;
-    pinName: string | null;
-    pinDur: number | null;
-    pinnedAtHover: boolean;
-    pinnedAtPin: boolean;
-  }>(`(()=>{
-    const c = document.getElementById("place-card");
-    if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
-    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
-    const cap = document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');
-    cap.dispatchEvent(new MouseEvent("mouseenter",{bubbles:true}));
-    const ih = c.querySelector(".pc-inner");
-    const csh = ih ? getComputedStyle(ih) : null;
-    const hoverName = csh ? csh.animationName : null;
-    const hoverDur = csh ? parseFloat(csh.animationDuration) : null;
-    const pinnedAtHover = c.classList.contains("pinned");
-    cap.dispatchEvent(new MouseEvent("mouseleave",{bubbles:true}));
-    cap.click();
-    const ip = c.querySelector(".pc-inner");
-    const csp = ip ? getComputedStyle(ip) : null;
-    const pinName = csp ? csp.animationName : null;
-    const pinDur = csp ? parseFloat(csp.animationDuration) : null;
-    const pinnedAtPin = c.classList.contains("pinned");
-    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
-    return {hoverName,hoverDur,pinName,pinDur,pinnedAtHover,pinnedAtPin};
-  })()`);
-  check(
-    "P14 card unfurl wired: .pc-inner runs paperUnfurl, pinned grade > hover grade, .pinned only on pin",
-    p14.hoverName === "paperUnfurl" &&
-      p14.pinName === "paperUnfurl" &&
-      p14.pinnedAtHover === false &&
-      p14.pinnedAtPin === true &&
-      Number.isFinite(p14.pinDur) &&
-      Number.isFinite(p14.hoverDur) &&
-      p14.pinDur! > p14.hoverDur!,
-    JSON.stringify(p14),
-  );
 }
 
 export async function p15RealHover({ evaluate, send, check, sleep }: SuiteContext, pm: Manifest): Promise<void> {

@@ -2,7 +2,7 @@
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
-import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
+import { countLine, layOnTable, LAY_ON_PAGE, trialFace } from "../explorer/chart-drawer.ts";
 import {
   emitTable,
   parseTable,
@@ -118,7 +118,7 @@ function paintLay(): void {
   }
   layPress.style.display = "";
   const trial = layOnTable(table, item);
-  const face = layPressFace({ holds: trial.reason === "already", full: trial.reason === "full" }, LAY_ON_PAGE);
+  const face = trialFace(trial, LAY_ON_PAGE);
   layPress.textContent = face.label;
   layPress.classList.toggle("dim", face.refuses);
   layCount.textContent = countLine(table);

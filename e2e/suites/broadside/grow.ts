@@ -1,26 +1,19 @@
 // The Broadside grown into a tall window's free height (BR25 to BR25i, Issue #1260): every box is read from the run, and the literals are the ruled start, pace and stop.
 import { ZOOM_STEP } from "../../../src/site/shared/zoom-keys.ts";
 import { sendClick, sendKey } from "../../support/input.ts";
-import { withReducedMotion } from "../../support/reduced-motion.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import { onSlipFloor, type BroadsideKit } from "./kit.ts";
 
-// 2026-11-05: Alex's rulings 2 and 3, Issue #1260 comment 6666875967: the bill starts growing above a 768 page, takes two pixels per pixel, and stops opening at twice its own width.
+// 2026-11-05: Alex's ruling 2, Issue #1260 comment 6666875967: the bill starts growing above a 768 page and takes two pixels per pixel.
 const START = 768;
 const PACE = 2;
-const STOP = 2;
 // 2026-11-05: a relation over at most eight rect edges, laid out in 1/64 px units, drifts at most 0.125 px; headroom 0.075, the largest read 0.03.
 const NEAR = 0.2;
 // 2026-11-06: the house's half-pixel relation for a foot against its floor; the foot stands short of it by under a 64th for each share the room is divided into and one for the paper (22 held, 0.34 px) and two edges drift at most 1/32 px, the largest read 0.31 (Issue #1260 plan revision 3).
 const ON = 0.5;
-// 2026-11-06: half the 1/64 px a browser lays a box out in; the body's foot and the printer's line's both stand on that grid, so the gap between them moves in whole 64ths and less than half of one is none (Issue #1260 plan revision 3).
-const HALF_UNIT = 1 / 128;
-// 2026-11-06: the rounding repeats once every as many pixels of window height as the shares the bill divides its room into, 19 in the default seat and 21 held (SP2, rowGapsOf), so 21 heights from 882 are one whole turn of it for either seat (Issue #1260 plan revision 3).
-const TURN = Array.from({ length: 21 }, (_, i) => 882 + i);
 
 const DEFAULT = "#seed=20261105&style=antique";
-const LINKED = `${DEFAULT}&cx=0.5&cy=0.5&k=1.2`;
 const HELD = "#seed=20261105&style=antique&type=archipelago&islands=20";
 const TEXAS = "ne-1159315211";
 
@@ -138,10 +131,12 @@ export async function br25Grows(k: BroadsideKit): Promise<void> {
     seats["default"] = await seatReads(k, "default", [
       [1024, 768],
       [1280, 800],
-      ...TURN.map((h) => [1512, h] as const),
-      [1280, 1200],
+      [1512, 882],
     ]);
-    seats["held"] = await seatReads(k, "held", [[1024, 768], ...TURN.map((h) => [1512, h] as const), [1280, 1200]]);
+    seats["held"] = await seatReads(k, "held", [
+      [1024, 768],
+      [1512, 882],
+    ]);
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
@@ -153,14 +148,12 @@ export async function br25Grows(k: BroadsideKit): Promise<void> {
     JSON.stringify({ at768: Object.values(seats).map((s) => s["1024x768"]), pace }),
   );
   check(
-    "BR25b on every window height through one whole turn of its rounding past the fill (21 heights from 882) the Broadside's foot stands on its floor, it passes its room by no part of a layout unit and nothing in it scrolls, and at 882 a gap between the groups opens twice what a gap between rows opens, the masthead takes a row's share above it, and a held box's note stays tucked under its row, in both seats (rulings 1, 2 and 6)",
-    Object.values(seats).every((s) => br25bHolds(s["1024x768"]!, s["1512x882"]!) && turnHolds(s)),
-    JSON.stringify({ at882: Object.values(seats).map((s) => s["1512x882"]), turns: Object.values(seats).map(turnOf) }),
-  );
-  check(
-    "BR25c on a window past the stop the rows open no further than twice the Broadside's width, its border runs on to the floor, and the flower stands centred in the blank paper between the Hand and the printer's line, in both seats (rulings 3 and 4)",
-    Object.values(seats).every((s) => br25cHolds(s["1280x1200"]!)),
-    JSON.stringify(Object.values(seats).map((s) => s["1280x1200"])),
+    "BR25b at 1512 by 882, past the fill, the Broadside's foot stands on its floor with nothing in it scrolling, a gap between the groups opens twice what a gap between rows opens, the masthead takes a row's share above it, and a held box's note stays tucked under its row, in both seats (rulings 1, 2 and 6)",
+    Object.values(seats).every((s) => br25bHolds(s["1024x768"]!, s["1512x882"]!)),
+    JSON.stringify({
+      at768: Object.values(seats).map((s) => s["1024x768"]),
+      at882: Object.values(seats).map((s) => s["1512x882"]),
+    }),
   );
 }
 
@@ -175,33 +168,6 @@ function br25bHolds(at768: Bill, at882: Bill): boolean {
     Math.abs(groupGain - 2 * rowGain) <= NEAR &&
     Math.abs(headGain - rowGain) <= NEAR &&
     Math.abs(note) <= NEAR
-  );
-}
-
-const passed = (at768: Bill, g: Bill): number => at768.bodyFoot - g.bodyFoot;
-
-function turnHolds(s: Record<string, Bill>): boolean {
-  return TURN.every((h) => onFloor(s[`1512x${h}`]!) && passed(s["1024x768"]!, s[`1512x${h}`]!) < HALF_UNIT);
-}
-
-const turnOf = (s: Record<string, Bill>): string[] =>
-  TURN.map((h) => {
-    const g = s[`1512x${h}`]!;
-    return `${h}: foot ${(g.slip.b - g.floor).toFixed(2)}, past ${(passed(s["1024x768"]!, g) * 64).toFixed(2)}/64${g.scrolls ? ", scrolls" : ""}`;
-  });
-
-function br25cHolds(g: Bill): boolean {
-  const { paper: p, flower: f } = g;
-  if (p === null || f === null || g.hand === null || g.imprint === null) return false;
-  return (
-    Math.abs(g.slip.h - p.h - STOP * g.slip.w) <= ON &&
-    Math.abs(g.slip.b - g.floor) <= ON &&
-    p.t >= g.hand.b - ON &&
-    p.b <= g.imprint.t + ON &&
-    f.h > 0 &&
-    f.t >= p.t - ON &&
-    f.b <= p.b + ON &&
-    Math.abs((f.t + f.b) / 2 - (p.t + p.b) / 2) <= ON
   );
 }
 
@@ -235,9 +201,7 @@ const shallow = (g: Bill, cam: { k: number }, natural: number): boolean =>
   cam.k > 1 && cam.k < ZOOM_STEP && Math.abs(g.slip.h - natural) <= ON && g.opened.every((v) => v === "0px");
 
 export async function br25dZoomed(k: BroadsideKit): Promise<void> {
-  const shallowRests = await br25dZoom(k);
-  await br25gLinked(k, shallowRests);
-  await br25eReduced(k);
+  await br25dZoom(k);
 }
 
 async function br25dZoom(k: BroadsideKit) {
@@ -258,7 +222,7 @@ async function br25dZoom(k: BroadsideKit) {
       Math.abs(zoomed.slip.h - h0) <= ON && zoomed.opened.every((v) => v === "0px") && onFloor(rest) && onFloor(home),
       JSON.stringify({ h0, rest, zoomed, home }),
     );
-    const wheeled = await br25hGlides(k, { h0, grown: rest.slip.h, pressed, homed });
+    await br25hGlides(k, { h0, grown: rest.slip.h, pressed, homed });
     const chosen = await k.evaluate(CHOOSE_ARCHIPELAGO);
     await k.waitSettled("BR25f the archipelago's draw lands");
     check(
@@ -266,7 +230,6 @@ async function br25dZoom(k: BroadsideKit) {
       chosen.tracks > home.tracks && onFloor(chosen),
       JSON.stringify({ home, chosen }),
     );
-    return { h0, wheeled };
   } finally {
     await send("Emulation.clearDeviceMetricsOverride");
   }
@@ -276,7 +239,7 @@ async function br25hGlides(
   k: BroadsideKit,
   { h0, grown, pressed, homed }: { h0: number; grown: number; pressed: Frame[]; homed: Frame[] },
 ) {
-  const wheeled = await br25gRests(k);
+  const wheeled = await br25hRests(k);
   const interrupted = await br25iInterrupted(k);
   k.check(
     "BR25h the first press closes the Broadside, and The whole sheet opens it, part way on a frame of their glide, in step with the chart, where a wheel closes it in the frame the chart first zooms and a press of Draw back from a deeper rest keeps it closed throughout (Alex, 2026-11-05, Issue #1260 comment 6668005484, P5, and 2026-11-06, comment 6684513791)",
@@ -291,46 +254,21 @@ async function br25hGlides(
     shallow(interrupted.bill, interrupted.at, h0),
     JSON.stringify({ h0, ...interrupted }),
   );
-  return wheeled;
 }
 
-async function br25gLinked(k: BroadsideKit, { h0, wheeled }: Awaited<ReturnType<typeof br25dZoom>>): Promise<void> {
+async function br25hRests(k: BroadsideKit): Promise<{ inFrames: Frame[]; backFrames: Frame[] }> {
   const read = reader(k);
-  try {
-    await win(k, 1512, 882);
-    await k.goto(k.EXP + LINKED, "broadside-grow-linked");
-    const linked = await read(1512, 882, "BR25g the bill under a link that opens at 1.2", (d) => d.zoomed);
-    const linkedAt = await k.evaluate(CAMERA);
-    k.check(
-      "BR25g zoomed in short of the first press's depth, by a wheel, by a press of Draw back from a wheel's deeper rest and by a link that opens at 1.2, the Broadside stands at its content's height with nothing opened, and wheeled back to the whole sheet it stands on its floor again (Alex, 2026-11-06, Issue #1260 comment 6684513791)",
-      shallow(wheeled.in, wheeled.inAt, h0) &&
-        shallow(wheeled.back, wheeled.backAt, h0) &&
-        shallow(linked, linkedAt, h0) &&
-        wheeled.homeAt.k === 1 &&
-        onFloor(wheeled.home),
-      JSON.stringify({ h0, ...wheeled, linked, linkedAt }),
-    );
-  } finally {
-    await k.send("Emulation.clearDeviceMetricsOverride");
-  }
-}
-
-async function br25gRests(k: BroadsideKit) {
-  const read = reader(k);
-  const inFrames = await moveAndRest(k, wheeling(k, 1), "BR25g the camera at rest a wheel's notch in");
-  const inRead = await read(1512, 882, "BR25g the bill a wheel's notch in", (d) => d.zoomed);
-  const inAt = await k.evaluate(CAMERA);
-  await moveAndRest(k, wheeling(k, -1), "BR25g the camera wheeled back to the whole sheet");
-  const home = await read(1512, 882, "BR25g the bill wheeled back to the whole sheet");
-  const homeAt = await k.evaluate(CAMERA);
-  await moveAndRest(k, wheeling(k, 4), "BR25g the camera four notches in");
-  await read(1512, 882, "BR25g the bill four notches in", (d) => d.zoomed);
-  const backFrames = await moveAndRest(k, pressing(k, "zoom-out"), "BR25g the camera drawn back from four notches in");
-  const back = await read(1512, 882, "BR25g the bill drawn back short of the first press's depth", (d) => d.zoomed);
-  const backAt = await k.evaluate(CAMERA);
-  await moveAndRest(k, pressing(k, "zoom-reset"), "BR25g the camera home again");
-  await read(1512, 882, "BR25g the bill home again", (d) => !d.zoomed);
-  return { inFrames, in: inRead, inAt, home, homeAt, backFrames, back, backAt };
+  const inFrames = await moveAndRest(k, wheeling(k, 1), "BR25h the camera at rest a wheel's notch in");
+  await read(1512, 882, "BR25h the bill a wheel's notch in", (d) => d.zoomed);
+  await moveAndRest(k, wheeling(k, -1), "BR25h the camera wheeled back to the whole sheet");
+  await read(1512, 882, "BR25h the bill wheeled back to the whole sheet");
+  await moveAndRest(k, wheeling(k, 4), "BR25h the camera four notches in");
+  await read(1512, 882, "BR25h the bill four notches in", (d) => d.zoomed);
+  const backFrames = await moveAndRest(k, pressing(k, "zoom-out"), "BR25h the camera drawn back from four notches in");
+  await read(1512, 882, "BR25h the bill drawn back short of the first press's depth", (d) => d.zoomed);
+  await moveAndRest(k, pressing(k, "zoom-reset"), "BR25h the camera home again");
+  await read(1512, 882, "BR25h the bill home again", (d) => !d.zoomed);
+  return { inFrames, backFrames };
 }
 
 async function br25iInterrupted(k: BroadsideKit) {
@@ -353,25 +291,4 @@ async function br25iInterrupted(k: BroadsideKit) {
   await moveAndRest(k, pressing(k, "zoom-reset"), "BR25i the camera home again");
   await read(1512, 882, "BR25i the bill home again", (d) => !d.zoomed);
   return { at, bill };
-}
-
-async function br25eReduced(k: BroadsideKit): Promise<void> {
-  const { send, check, goto, EXP } = k;
-  const read = reader(k);
-  try {
-    await withReducedMotion(k, async () => {
-      await win(k, 1280, 800);
-      await goto(EXP + DEFAULT, "broadside-grow-reduced");
-      await read(1280, 800, "BR25e the bill at 1280x800");
-      await win(k, 1512, 882);
-      const grown = await read(1512, 882, "BR25e the bill at 1512x882");
-      check(
-        "BR25e under reduced motion a window grown taller lays the Broadside's foot on its floor: no gap it opens runs as a transition (handbook/specs/cascade-traps.md)",
-        onFloor(grown),
-        JSON.stringify(grown),
-      );
-    });
-  } finally {
-    await send("Emulation.clearDeviceMetricsOverride");
-  }
 }

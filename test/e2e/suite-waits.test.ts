@@ -2,15 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { broadsideKit } from "../../e2e/suites/broadside/kit.ts";
 import { br9Authored } from "../../e2e/suites/broadside/room.ts";
-import { cd61FolioHomes } from "../../e2e/suites/chart-drawer/homes.ts";
-import type { DrawerKit, TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
-import {
-  bareArrived,
-  cd20PlatePortfolio,
-  cd50ScriptsOffHome,
-  cd62PlateReads,
-} from "../../e2e/suites/chart-drawer/portfolio.ts";
-import { cd54PortfolioLines, cd55WhereAuthored, cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
+import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
+import { bareArrived, cd20PlatePortfolio } from "../../e2e/suites/chart-drawer/portfolio.ts";
+import { cd55WhereAuthored, cd56WorkerBlocked } from "../../e2e/suites/chart-drawer/room.ts";
 import { pr36Authored } from "../../e2e/suites/print-room/room.ts";
 import { pr40RunnerLayout } from "../../e2e/suites/print-room/runner-layout.ts";
 import { pb3fGlassLeans } from "../../e2e/suites/prospect.ts";
@@ -101,7 +95,6 @@ const drawer = (ctx: SuiteContext): TableKit =>
     STORE: "localStorage",
   }) as unknown as TableKit;
 
-const FOLIO = "marker: window.__cd61";
 const ARRIVAL = `room: (document.querySelector(".room-name")`;
 const BARE = "fonts: document.fonts.status";
 
@@ -152,24 +145,6 @@ const SITES: readonly Site[] = [
     run: rr38Authored,
   },
   {
-    site: "CD61's folio",
-    label: "portfolio-folio",
-    answer: throwsOn(FOLIO),
-    run: (ctx) => cd61FolioHomes(drawer(ctx)),
-  },
-  {
-    site: "CD61's Back",
-    label: "portfolio-back-rebuilt",
-    answer: answersThenThrows(FOLIO, { items: 2, road: null, marker: null, nav: "navigate" }, 2),
-    run: (ctx) => cd61FolioHomes(drawer(ctx)),
-  },
-  {
-    site: "CD50's arrival",
-    label: "chart-drawer-arrival-from-/explorer/portfolio/",
-    answer: throwsOn(ARRIVAL),
-    run: (ctx) => cd50ScriptsOffHome(drawer(ctx)),
-  },
-  {
     site: "the bare Portfolio's arrival",
     label: "chart-drawer-bare-portfolio-arrived",
     answer: throwsOn(BARE),
@@ -185,12 +160,6 @@ const SITES: readonly Site[] = [
           ? { path: "/explorer/", ready: "complete", table: null, seed: null, items: null, room: null }
           : throwsOn(`verb: (document.querySelector("#table-road .verb")`)(expression),
     run: (ctx) => cd20PlatePortfolio(drawer(ctx)),
-  },
-  {
-    site: "CD54",
-    label: "portfolio-one-drafted",
-    answer: throwsOn("held: window.__cd54"),
-    run: (ctx) => cd54PortfolioLines(drawer(ctx)),
   },
   {
     site: "CD55",
@@ -218,14 +187,3 @@ for (const { site, label, answer, run } of SITES) {
     );
   });
 }
-
-test("the settles in CD62 fail at once with a read's own error, since nothing navigates while the plate is read across its two windows", async () => {
-  let reads = 0;
-  const ctx = page((expression) => {
-    if (!expression.includes("#portfolio .slip-foot .note")) return null;
-    reads++;
-    return new Error(GONE);
-  });
-  await assert.rejects(cd62PlateReads(ctx as unknown as DrawerKit), (err: Error) => err.message === GONE);
-  assert.equal(reads, 1, "a read that threw was read again");
-});

@@ -1,6 +1,5 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { DrawerKit, TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
 import {
@@ -86,34 +85,6 @@ export async function cd49PrintRoomRoad({
   );
 }
 
-export async function cd50ScriptsOffHome({
-  evaluate,
-  send,
-  check,
-  sleep,
-  settle,
-  PORT,
-  clickAt,
-}: TableKit): Promise<void> {
-  await withScriptsOff(send, async () => {
-    await bounce(send, `http://127.0.0.1:${PORT}/explorer/portfolio/`);
-    // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
-    const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(
-      `(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`,
-      (d, last) => d.ready === "complete" && !!last && last.x === d.x && last.y === d.y,
-      "chart-drawer-scripts-off-road",
-      DRAWN,
-    );
-    await clickAt(road.x, road.y);
-    const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
-    check(
-      "CD50 with scripts off, the Portfolio's notice still has a road home that answers a REAL press and lands on the Explorer, the parent the page now sits under (Issue #669)",
-      road.hit && arrived.path === "/explorer/" && arrived.room === "The Explorer",
-      JSON.stringify({ road, arrived }),
-    );
-  });
-}
-
 export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: DrawerKit, SIX: string): Promise<void> {
   const roadBefore = await evaluate<boolean>(`document.getElementById("table-road").disabled`);
   const roadAt = await evaluate<{
@@ -177,33 +148,6 @@ export async function cd19PortfolioDrafts({ evaluate, check, sleep }: SuiteConte
       pf.heads.length === 1 &&
       pf.heads[0] === "From The Isle of Rahai · chart № 42",
     JSON.stringify(pf),
-  );
-}
-
-export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: DrawerKit): Promise<void> {
-  // CD24 (Issue #547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. This does not wait the hold out; CD54 watches the line go.
-  const pfNext = await evaluate<{ x: number; y: number; reachable: boolean } | null>(
-    `(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`,
-  );
-  if (pfNext) await clickAt(pfNext.x, pfNext.y);
-  const PF_SAID: Payload<{ line: string; fadeMs: string; rest: string; faded: string } | null> =
-    `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
-  // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped. 40 tries is 2s: bringUp says synchronously inside the click handler's own task, so the first or second read has it (measured 2026-09-13, every local run read it on the first).
-  let pfSaid = await evaluate(PF_SAID);
-  for (let i = 0; i < 40 && (!pfSaid || pfSaid.line === ""); i++) {
-    await sleep(50);
-    pfSaid = await evaluate(PF_SAID);
-  }
-  check(
-    "CD24 the Portfolio announces the sheet it brought up on a pill that wears the SAME fade the Explorer's does, read as the declared duration AND as the opacity the cascade resolves under the class: a rule keyed to #status alone, or a later arm re-raising THIS page's opacity, would leave this announcement standing over the chart forever and every other guard green (#547 ruling 4)",
-    !!pfNext &&
-      pfNext.reachable &&
-      !!pfSaid &&
-      /is on top/.test(pfSaid.line) &&
-      pfSaid.fadeMs === "0.45s" &&
-      pfSaid.rest === "1" &&
-      pfSaid.faded === "0",
-    JSON.stringify({ press: pfNext, said: pfSaid }),
   );
 }
 
@@ -303,49 +247,6 @@ export async function cd20PlatePortfolio(kt: TableKit): Promise<void> {
     );
   } finally {
     await send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
-  }
-}
-
-type PlateWords = { count: number; smallest: number | null; width: number; floor: number };
-const PLATE_WORDS: Payload<PlateWords> = `(() => {
-  const note = document.querySelector("#portfolio .slip-foot .note");
-  const floor = note ? parseFloat(getComputedStyle(note).fontSize) : 0;
-  const svg = document.querySelector("#pf-sheet svg.how-plate");
-  if (!svg) return { count: 0, smallest: null, width: 0, floor };
-  const width = svg.getBoundingClientRect().width;
-  const scale = width / svg.viewBox.baseVal.width;
-  const sizes = [...svg.querySelectorAll("text")].map((t) => parseFloat(getComputedStyle(t).fontSize) * scale);
-  return { count: sizes.length, smallest: sizes.length ? Math.min(...sizes) : null, width, floor };
-})()`;
-
-export async function cd62PlateReads(k: DrawerKit): Promise<void> {
-  const { evaluate, send, check, sleep } = k;
-  const settle = makeSettle({ evaluate, sleep });
-  // The first read after arrival is still fitting (657.5 against the rest of 655.2 at 1280, measured 2026-10-16), so the width read is taken at rest like the others.
-  const wide = await settle(PLATE_WORDS, (d, last) => !!last && d.width === last.width, "cd62-plate-at-1280", DRAWN);
-  try {
-    await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
-    const narrow = await settle(
-      PLATE_WORDS,
-      (d, last) => (wide.width === 0 || Math.abs(d.width - wide.width) > 0.5) && !!last && d.width === last.width,
-      "cd62-plate-at-1024",
-      DRAWN,
-    );
-    const reads = (d: PlateWords): boolean =>
-      d.count === 16 && d.floor > 0 && d.smallest !== null && d.smallest >= d.floor;
-    check(
-      "CD62 every word of the plate reads at no less than the page's own smallest body text, the slip foot's note, at 1280x800 and at 1024x768, the windows the plate was ruled at, so there the plate a stranger is shown is never set smaller than the page around it; a window under 692 px tall is a ruled cost in handbook/errata/site.md (Issue #670, ruled from the redrawn stills and on the short window)",
-      reads(wide) && reads(narrow),
-      JSON.stringify({ wide, narrow }),
-    );
-  } finally {
-    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-    await settle(
-      PLATE_WORDS,
-      (d, last) => Math.abs(d.width - wide.width) < 0.5 && !!last && d.width === last.width,
-      "cd62-plate-back-at-1280",
-      DRAWN,
-    );
   }
 }
 

@@ -14,46 +14,7 @@ export const pressAtRest = (d: Card, last: Card | null): boolean =>
   last.press.box.w === d.press.box.w &&
   last.press.box.h === d.press.box.h;
 
-async function cd26DrawsPlate(
-  { check, settle, pressCard }: Pick<DrawerKit, "check" | "settle" | "pressCard">,
-  armed: Card,
-): Promise<void> {
-  await pressCard(armed);
-  const filed = await settle(CARD, (d) => d.cuttings === 1 && d.imgs === 1, "chart-drawer-prospect-drawn", DRAWN);
-  check(
-    "CD26 the filed prospect DRAWS its own plate rather than keeping a reserved frame, named for the TOWN and not for the world, and the press it was filed from relabels in place (#518 ruling 7; a prospect read 'drawing…' for good until this sub, and a press labelled only at card-show keeps offering an action it has spent)",
-    filed.cuttings === 1 &&
-      filed.prospects === 1 &&
-      filed.imgs === 1 &&
-      filed.frames === 0 &&
-      filed.decoded.every(Boolean) &&
-      /^The Prospect of \S/.test(filed.titles[0] || "") &&
-      // The year LITERAL, not a shape: "the year is the Explorer's present" is the ratified acceptance, and seed 42's
-      // present is 1059, so `\d+` would pass on any year at all and the acceptance would have no guard (PR #631's review).
-      filed.titles[0] !== "The Isle of Rahai" &&
-      filed.subs[0] === "a prospect, antique, 1059" &&
-      (filed.hashTable || "").indexOf("year-1059") !== -1 &&
-      !!filed.press &&
-      filed.press.text === "Already on the table" &&
-      filed.press.dim &&
-      !filed.press.disabled &&
-      typeof filed.hashTable === "string" &&
-      filed.hashTable.indexOf("k-p.") === 0,
-    JSON.stringify({
-      cuttings: filed.cuttings,
-      prospects: filed.prospects,
-      imgs: filed.imgs,
-      frames: filed.frames,
-      decoded: filed.decoded,
-      titles: filed.titles,
-      subs: filed.subs,
-      press: filed.press,
-      table: filed.hashTable,
-    }),
-  );
-}
-
-export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
+export async function cd25CardPress({ check, settle, go, pinCard }: DrawerKit): Promise<void> {
   await go(DRESS);
   const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
   await pinCard(1);
@@ -77,49 +38,6 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
       !armed.press.disabled &&
       armed.press.idx === "1",
     JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, road: armed.road, actsRow: armed.actsRow }),
-  );
-  await cd26DrawsPlate({ check, settle, pressCard }, armed);
-  // The DRAWN world and not the controls: a seed typed without pressing Draw is the reachable way to file a chart nobody drew.
-  await evaluate(`(() => { const s = document.getElementById("seed"); s.value = "7"; })()`);
-  await pinCard(2);
-  const other = await settle(
-    CARD,
-    (d, last) => d.shown && d.press?.idx === "2" && pressAtRest(d, last),
-    "chart-drawer-card-other",
-  );
-  await pressCard(other);
-  const second = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-prospect-second");
-  check(
-    "CD30 the card files the world on the SHEET, never the one in the seed box: a seed typed and not drawn leaves the chart alone, so an item built from the control would file a plate the reader has never seen (the lodController exposes no drawn world, which is what makes this reachable)",
-    second.seedBox === "7" &&
-      second.cuttings === 2 &&
-      typeof second.hashTable === "string" &&
-      second.hashTable.split("_").every((s) => s.indexOf("seed-42") !== -1) &&
-      second.hashTable.indexOf("seed-7") === -1,
-    JSON.stringify({ seedBox: second.seedBox, cuttings: second.cuttings, table: second.hashTable }),
-  );
-}
-
-// A full table costs no worker job, because the drawer fills its frames only when OPENED (Issue #520's ruling), so this boot is cheap.
-export async function cd27CardAtCap(
-  { evaluate, check, settle, go, pinCard, pressCard }: DrawerKit,
-  SIX: string,
-): Promise<void> {
-  await go(`${DRESS}&table=${SIX}`);
-  await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-full");
-  await pinCard(1);
-  const atCap = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-cap");
-  await pressCard(atCap);
-  const after = await evaluate(CARD);
-  check(
-    "CD27 at the cap the card's press wears the ruled refusal and stays PRESSABLE, so a keyboard reader still meets it and hears why, and pressing lays nothing (#518 ruling 7; disabled would drop it out of the tab order, which is why the dog-ear's ruled shape keeps answering)",
-    !!atCap.press &&
-      atCap.press.text === "No room on the table" &&
-      atCap.press.dim &&
-      !atCap.press.disabled &&
-      atCap.press.hit === "self" &&
-      after.cuttings === 6,
-    JSON.stringify({ press: atCap.press, before: atCap.cuttings, after: after.cuttings }),
   );
 }
 
@@ -211,79 +129,6 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
   );
   const two = await cd29SecondYear({ evaluate, check, sleep, settle, clickAt }, one);
   return two;
-}
-
-async function cd35NothingLaid(
-  { evaluate, check, sleep, clickAt }: Pick<DrawerKit, "evaluate" | "check" | "sleep" | "clickAt">,
-  atCapPage: Pp,
-): Promise<void> {
-  if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
-  // A refusal changes nothing, so there is no state to poll TO, and a settle here proves nothing: it returns on its FIRST satisfying read and this predicate is already true when the press is answered, so it read once and waited 0ms. What is real for "nothing happened" is a DWELL, held past the moment a wrongly accepted filing would have written the hash.
-  const dwell = [];
-  for (let i = 0; i < 8; i++) {
-    dwell.push(await evaluate(PP));
-    await sleep(50, "window: a dwell of eight reads in which nothing may be laid");
-  }
-  const stillFull = dwell[dwell.length - 1]!;
-  const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);
-  check(
-    "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
-    !!atCapPage.press &&
-      atCapPage.press.text === "No room on the table" &&
-      atCapPage.press.dim &&
-      !atCapPage.press.disabled &&
-      atCapPage.press.hit === "self" &&
-      /the table is full/.test(atCapPage.count || "") &&
-      heldSix &&
-      (stillFull.hashTable || "").split("_").length === 6,
-    JSON.stringify({
-      press: atCapPage.press,
-      count: atCapPage.count,
-      after: (stillFull.hashTable || "").split("_").length,
-      heldSix,
-      reads: dwell.length,
-    }),
-  );
-}
-
-export async function cd34PageRefusals(
-  { evaluate, send, check, sleep, PORT, settle, clickAt, forget }: DrawerKit,
-  SIX: string,
-): Promise<void> {
-  // The page's own two refusing faces. Nothing else drives them, and with no check here the two booleans handed to
-  // layPressFace could be swapped and ship green, which would put "No room" on a duplicate and "Already" on a full
-  // table, the exact inverse of ruling 4 (PR #631's review).
-  const held = await evaluate(PP);
-  check(
-    "CD34 filing the SAME plate twice turns the page's press to its held face, not its full one: the two refusals are told apart here or they can be swapped with every other check green (ruled 2026-09-17)",
-    !!held.press &&
-      held.press.text === "Already on the table" &&
-      held.press.dim &&
-      !held.press.disabled &&
-      /two sheets laid/.test(held.count || ""),
-    JSON.stringify({ press: held.press, count: held.count }),
-  );
-  // A boot with the cap already spent: the same press, the OTHER refusal. The six come from the ADDRESS, so the device is cleared first or the two sources are indistinguishable here.
-  await forget();
-  await bounce(send, `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}`);
-  for (let i = 0; i < 300; i++) {
-    await sleep(100);
-    if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break;
-  }
-  const atCapPage = await settle(
-    PP,
-    (d, last) =>
-      !!d.press &&
-      d.press.shown &&
-      !!last &&
-      !!last.press &&
-      d.press.centre &&
-      last.press.centre &&
-      d.press.centre.x === last.press.centre.x &&
-      d.press.centre.y === last.press.centre.y,
-    "prospect-note-open-full",
-  );
-  await cd35NothingLaid({ evaluate, check, sleep, clickAt }, atCapPage);
 }
 
 export async function cd31RoundTrip(

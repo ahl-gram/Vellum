@@ -385,3 +385,12 @@ test("CT18 the road carries the table to the route the tree names the Portfolio 
     else delete g.window;
   }
 });
+
+test("CT19 a survey laid a second time is refused in the drawer's own voice and the table is not written (Issue #1273, from e2e CD3)", () => {
+  const { table, said, changes } = drawer();
+  table.restore(fill(1));
+  const written = changes.length;
+  assert.equal(table.lay(survey(0), SVG, "again"), false, "the second lay of the same survey is refused");
+  assert.equal(said.at(-1), "this survey is already on the table", "in the drawer's own words for a duplicate");
+  assert.equal(changes.length, written, "and the table it holds is not written");
+});

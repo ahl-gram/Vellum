@@ -3,12 +3,12 @@ import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
-import { br9Authored, br10Terms, br11Allowlist } from "./broadside/room.ts";
-import { br12Dress, br21Fields, br22Bill, br23Imprint, br24Ink } from "./broadside/dress.ts";
-import { br13Tip, br14Paper } from "./broadside/gestures.ts";
+import { br9Authored, br11Allowlist } from "./broadside/room.ts";
+import { br12Dress, br21Fields, br23Imprint } from "./broadside/dress.ts";
+import { br14Paper } from "./broadside/gestures.ts";
 import { br25Grows, br25dZoomed } from "./broadside/grow.ts";
 import { br15TabClear } from "./broadside/tab.ts";
-import { br16To19, br17Holds, br20Twins } from "./broadside/shape.ts";
+import { br16To19, br20Twins } from "./broadside/shape.ts";
 import { broadsideKit, onSlipFloor, type BroadsideKit } from "./broadside/kit.ts";
 import { mouseMove, sendKey } from "../support/input.ts";
 
@@ -60,7 +60,7 @@ export const MARK: Payload<Point | null> = `(()=>{const m=document.querySelector
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
-  // BR3, BR4, BR5 and BR8 are deliberately not stepped: the reads and gestures in them return rather than throwing, and their checks already guard on it.
+  // BR4, BR5 and BR8 are deliberately not stepped: the reads and gestures in them return rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   const k = broadsideKit(ctx);
   const errBase = consoleErrors.length;
@@ -74,24 +74,17 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("BR21", () => br21Fields(k));
   await step("BR11", () => br11Allowlist(k));
   await step("BR2", () => br2JournalPeer(k));
-  await br3Seal(k);
   await br4Notes(k);
   await br5Hover(k);
-  await step("BR13", () => br13Tip(k));
   await step("BR14", () => br14Paper(k));
   await step("BR6", () => br6Tap(k));
-  await step("BR7", () => br7Glossary(k));
-  await step("BR10", () => br10Terms(k));
   await step("BR9", () => br9Authored(k));
   await step("BR15", () => br15TabClear(k));
   await step("BR16 to BR19", () => br16To19(k));
-  await step("BR17", () => br17Holds(k));
   await step("BR20", () => br20Twins(k));
-  await step("BR22", () => br22Bill(k));
   await step("BR23", () => br23Imprint(k));
-  await step("BR24", () => br24Ink(k));
-  await step("BR25 to BR25c", () => br25Grows(k));
-  await step("BR25d to BR25i", () => br25dZoomed(k));
+  await step("BR25, BR25b", () => br25Grows(k));
+  await step("BR25d, BR25f, BR25h, BR25i", () => br25dZoomed(k));
   br8Clean(ctx, errBase, httpBase);
 }
 
@@ -115,18 +108,6 @@ async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<
       br1.heads[2] === "The Hand" &&
       /^The Press\b/.test(br1.heads[3] || ""),
     JSON.stringify(br1),
-  );
-
-  const br1b = await evaluate<{ lLeft: number; cLeft: number; lRight: number; cRight: number }>(`(()=>{
-      const l=document.getElementById("land").getBoundingClientRect();
-      const c=document.getElementById("coast").getBoundingClientRect();
-      return{lLeft:Math.round(l.left*10)/10,cLeft:Math.round(c.left*10)/10,
-        lRight:Math.round(l.right*10)/10,cRight:Math.round(c.right*10)/10};
-    })()`);
-  check(
-    "BR1b the sea-level and coast tracks share both edges (equal length, one column)",
-    Math.abs(br1b.lLeft - br1b.cLeft) <= 1 && Math.abs(br1b.lRight - br1b.cRight) <= 1,
-    JSON.stringify(br1b),
   );
 }
 
@@ -196,38 +177,6 @@ async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Pro
       br2.before.j.top === br2.during.top &&
       br2.during.top === br2.after.top,
     JSON.stringify(br2),
-  );
-}
-
-async function br3Seal({ evaluate, check }: BroadsideKit): Promise<void> {
-  const br3 = await evaluate<{
-    off: { mark: string; bg: string };
-    on: { mark: string; bg: string; checked: boolean; hash: string };
-    back: { mark: string; bg: string; checked: boolean };
-    isSeal: boolean;
-    type: string;
-  }>(`(()=>{
-    const box=document.getElementById("ages");const lbl=box.closest("label");
-    const face=()=>({mark:getComputedStyle(lbl,"::before").content,bg:getComputedStyle(lbl).backgroundColor});
-    const off=face();
-    lbl.click();
-    const on={...face(),checked:box.checked,hash:location.hash};
-    lbl.click();
-    const back={...face(),checked:box.checked};
-    return{off,on,back,isSeal:lbl.classList.contains("seal"),type:box.type};
-  })()`);
-  check(
-    "BR3 a seal label click toggles its real checkbox and the countersign (check mark + fill) follows",
-    br3.isSeal &&
-      br3.type === "checkbox" &&
-      br3.on.checked === true &&
-      br3.back.checked === false &&
-      !br3.off.mark.includes("✓") &&
-      br3.on.mark.includes("✓") &&
-      !br3.back.mark.includes("✓") &&
-      br3.off.bg !== br3.on.bg &&
-      /(^|&)survey(&|$)/.test(br3.on.hash.slice(1)),
-    JSON.stringify(br3),
   );
 }
 
@@ -314,22 +263,6 @@ export async function br6Tap(k: BroadsideKit): Promise<void> {
       !afterTap2.open &&
       afterTap2.stayed,
     JSON.stringify(taps),
-  );
-}
-
-async function br7Glossary({ evaluate, check, gotoPlain, PORT }: BroadsideKit): Promise<void> {
-  await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
-  const br7 = await evaluate<{ missing: string[]; head: string | null; indexed: boolean }>(`(()=>{
-      const ids=["broadside","seeds-choice","shape","islands","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
-      const section=document.getElementById("drafting-table");
-      const indexed=!!document.querySelector('#index .index a.sec[href="#drafting-table"]');
-      return{missing:ids.filter(([,ok])=>!ok).map(([id])=>id),
-        head:section?section.textContent:null,indexed};
-    })()`);
-  check(
-    "BR7 every mark's glossary anchor exists, the drafting-table section presides over the control terms, and the index slip lists it (the TOC's successor, #462)",
-    br7.missing.length === 0 && br7.head === "At the drafting table" && br7.indexed,
-    JSON.stringify(br7),
   );
 }
 

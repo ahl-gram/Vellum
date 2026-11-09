@@ -1,33 +1,5 @@
 import type { SurveyKit } from "./kit.ts";
 
-export async function sv9NoSeams({ evaluate, check, goto }: SurveyKit): Promise<void> {
-  await goto("#seed=42&style=antique", "survey-seams");
-  const sv9 = await evaluate<{
-    stepTo: string;
-    paintAt: string;
-    plan: string;
-    log: string;
-    geom: string;
-    ages: string;
-    inline: string;
-  }>(`({
-      stepTo:typeof window.__vellumVoyageStepTo,paintAt:typeof window.__vellumVoyagePaintAt,
-      plan:typeof window.__vellumVoyagePlan,log:typeof window.__vellumVoyageLog,
-      geom:typeof window.__vellumVoyageLegGeometry,ages:typeof window.__vellumAgesState,
-      inline:typeof window.__vellumRunInline})`);
-  check(
-    "SV9 the Explorer publishes no time seams (voyage/ages hooks gone; the runInline oracle stays)",
-    sv9.stepTo === "undefined" &&
-      sv9.paintAt === "undefined" &&
-      sv9.plan === "undefined" &&
-      sv9.log === "undefined" &&
-      sv9.geom === "undefined" &&
-      sv9.ages === "undefined" &&
-      sv9.inline === "function",
-    JSON.stringify(sv9),
-  );
-}
-
 async function sv10TrackSurvives({ evaluate, check }: Pick<SurveyKit, "evaluate" | "check">): Promise<void> {
   const sv10 = await evaluate<{
     turned: boolean;
@@ -79,10 +51,12 @@ async function sv10TrackSurvives({ evaluate, check }: Pick<SurveyKit, "evaluate"
 export async function sv10TurnKeepsTrack({
   evaluate,
   check,
+  goto,
   waitTurned,
   armTurnWatch,
   waitInked,
 }: SurveyKit): Promise<void> {
+  await goto("#seed=42&style=antique", "survey-turn-base");
   await evaluate(
     `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
   );

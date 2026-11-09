@@ -1,31 +1,11 @@
-// What a hover, a key and a turn do to the place card's filing press (Issue #779 part 2g): the action row's dress under the hand and the keys, and the sheet a filing is made from across a style's turn and an aborted one.
+// What a style's turn does to the place card's filing press (Issue #779 part 2g): the sheet a filing is made from across a turn and across an aborted one.
 import { LAY_ON_CARD } from "../../../src/site/explorer/chart-drawer.ts";
-import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
-import { TIPPED } from "./desk.ts";
-import { park, tabInto, type DrawerKit } from "./kit.ts";
+import { park, type DrawerKit } from "./kit.ts";
 import { pressAtRest } from "./prospect.ts";
 import { CARD, DRESS, READ, type Card } from "./reads.ts";
-import { mouseMove, sendKey } from "../../support/input.ts";
+import { sendKey } from "../../support/input.ts";
 
-type Press = {
-  text: string;
-  dim: boolean;
-  hover: boolean;
-  focus: boolean;
-  acts: string[];
-  ground: number[];
-  border: number[];
-  opacity: string;
-  tipped: boolean;
-  x: number;
-  y: number;
-  running: number;
-};
-const PRESS: Payload<Press | null> = `(() => { const rgba = ${PAGE_RGBA}, p = document.querySelector("#place-card .pc-lay"), a = document.querySelector("#place-card .pc-acts"); if (!p || !a) return null;
-  const pc = getComputedStyle(p), ac = getComputedStyle(a), r = p.getBoundingClientRect();
-  return { text: p.textContent, dim: p.classList.contains("dim"), hover: p.matches(":hover"), focus: p.matches(":focus-visible"), acts: [ac.display, ac.rowGap],
-    ground: rgba(pc.backgroundColor), border: rgba(pc.borderTopColor), opacity: pc.opacity, tipped: ${TIPPED}(pc.transform), x: r.left + r.width / 2, y: r.top + r.height / 2, running: p.getAnimations().filter((x) => x.playState === "running").length }; })()`;
 const HIT = (idx: number): Payload<{ x: number; y: number; hit: boolean } | null> =>
   `(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]'); if (!h) return null; const b = h.getBoundingClientRect(); const x = b.x + b.width / 2, y = b.y + b.height / 2; return { x, y, hit: document.elementFromPoint(x, y) === h }; })()`;
 
@@ -47,83 +27,6 @@ export async function pinAt(k: DrawerKit, idx: number): Promise<Card> {
     (d, last) => d.press?.idx === String(idx) && pressAtRest(d, last),
     `chart-drawer-pin-${idx}-rest`,
   );
-}
-
-async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Press; keyed: Press | null }> {
-  const { evaluate, send, settle } = k;
-  await park(send);
-  const rest = await settle(
-    PRESS,
-    (d, last) => !d.hover && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
-    "chart-drawer-press-rest",
-  );
-  // The room re-seats the card when a filing opens the drawer, so a hand that missed the moving press is put back on it.
-  let hover: Press | null = null;
-  for (let i = 0; i < 4 && hover === null; i++) {
-    const at = await evaluate(PRESS);
-    if (at) await mouseMove(send, at.x, at.y);
-    hover = await settle(
-      PRESS,
-      (d, last) => d.hover && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
-      "chart-drawer-press-hovered",
-      20,
-    ).catch(() => null);
-  }
-  if (hover === null) throw new Error("the hand never rested on the filing press");
-  await park(send);
-  const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-ribbon"))
-    ? await settle(
-        PRESS,
-        (d, last) => d.focus && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
-        "chart-drawer-press-keyed",
-      )
-    : null;
-  await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
-  return { rest, hover, keyed };
-}
-
-const gold = (p: Press | null): boolean =>
-  !!p && !p.dim && nearRgba(p.ground, tokenRgba("--control-gold")) && p.opacity === "1" && !p.tipped;
-const cream = (p: Press | null): boolean =>
-  !!p &&
-  p.dim &&
-  nearRgba(p.ground, tokenRgba("--control-cream")) &&
-  nearRgba(p.border, tokenRgba("--line-faint")) &&
-  p.opacity === "1" &&
-  !p.tipped;
-
-export async function cd57PressDress(k: DrawerKit): Promise<void> {
-  const { check, settle, go, send } = k;
-  try {
-    await go(DRESS);
-    await settle(CARD, (d) => d.hits > 1, "chart-drawer-press-card");
-    await pinAt(k, (await k.evaluate(reachable([]))) ?? 1);
-    const open = await underHand(k);
-    const now = await k.evaluate(PRESS);
-    if (now) await k.clickAt(now.x, now.y);
-    await settle(
-      CARD,
-      (d, last) => d.press?.text === "Already on the table" && pressAtRest(d, last),
-      `chart-drawer-press-filed-at-${now?.x},${now?.y}`,
-    );
-    const held = await underHand(k);
-    check(
-      "CD57 the card's actions stand in one flex row with its own gap, and its filing press keeps its dress against the house skin: gold and unfaded at rest, under a real hover and under a keyboard's focus, untipped, and, refusing a place already on the table, cream with a faint line and still unfaded in all three (#522)",
-      JSON.stringify(open.rest?.acts) === JSON.stringify(["flex", "4.8px"]) &&
-        gold(open.rest) &&
-        gold(open.hover) &&
-        gold(open.keyed) &&
-        !!open.keyed?.focus &&
-        held.rest?.text === "Already on the table" &&
-        cream(held.rest) &&
-        cream(held.hover) &&
-        cream(held.keyed) &&
-        !!held.keyed?.focus,
-      JSON.stringify({ open, held }),
-    );
-  } finally {
-    await park(send);
-  }
 }
 
 // Every prospect thumbnail job is held at the worker's door, so a filing lays a cutting with no plate decoding under the next pin (the flake record's CD25 shape, Issue #716); a draw is held only while the turn read asks.

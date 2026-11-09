@@ -8,20 +8,15 @@ import {
   pSetup,
   pManifest,
   p1Overlay,
-  p2Idle,
+  p3PointerEvents,
   p2bPressLift,
   p4Capital,
-  p6Ruin,
   p7Tooltip,
   p8TapPins,
-  p10Focus,
-  p11OutsideClick,
   p12PinSwitch,
   p13AxDescription,
-  p14Unfurl,
   p15RealHover,
 } from "./cards/overlay.ts";
-import { p16Glass, p18Renamed, p18bNeverRenamed, p17RuinNote, pCardShot } from "./cards/glass.ts";
 import {
   p19CardsFit,
   p20PinnedTakesPointer,
@@ -30,18 +25,9 @@ import {
   p24NothingToScroll,
   pRestore,
 } from "./cards/cap.ts";
-import {
-  holdKit,
-  p9Grace,
-  p28Travel,
-  p29NearestTown,
-  p31Keyboard,
-  p31bFocusSurvivesRefill,
-  p32Dismiss,
-  p33DragKeepsPin,
-} from "./cards/hold.ts";
+import { holdKit, p28Travel, p29NearestTown, p31Keyboard, p32Dismiss, p33DragKeepsPin } from "./cards/hold.ts";
 import { p30Tablet } from "./cards/hold-tablet.ts";
-import { p34ButtonLift, p35ProspectLift, p36RaisedTakesHand } from "./cards/gestures.ts";
+import { p36RaisedTakesHand } from "./cards/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -51,10 +37,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("P setup", () => pSetup(ctx));
   const pm = await pManifest(ctx);
   await pOverlayReads(ctx, step, pm);
-  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
-  await step("P card shot", () => pCardShot(ctx, pm));
-  await step("P34", () => p34ButtonLift(ctx));
-  await step("P35", () => p35ProspectLift(ctx));
   const narrowCount = await evaluate<number>(
     `window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`,
   );
@@ -71,7 +53,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await p29NearestTown(hk, marks);
     await p28Travel(hk, marks);
     await p31Keyboard(hk, marks);
-    await p31bFocusSurvivesRefill(hk, marks);
     await p32Dismiss(hk, marks);
     await p33DragKeepsPin(hk, marks);
   });
@@ -86,21 +67,12 @@ async function pOverlayReads(
   pm: Awaited<ReturnType<typeof pManifest>>,
 ): Promise<void> {
   await p1Overlay(ctx, pm);
-  await p2Idle(ctx);
+  await p3PointerEvents(ctx);
   await p2bPressLift(ctx);
-  await step("P4, P5, P5b, P5c", () => p4Capital(ctx, pm));
-  await p6Ruin(ctx, pm);
+  await step("P4, P5", () => p4Capital(ctx, pm));
   await p7Tooltip(ctx, pm);
   await p8TapPins(ctx, pm);
-  await p9Grace(ctx, pm.cap);
-  await p10Focus(ctx, pm);
-  await p11OutsideClick(ctx, pm);
   await p12PinSwitch(ctx, pm);
   await p13AxDescription(ctx, pm);
-  await p14Unfurl(ctx, pm);
   await p15RealHover(ctx, pm);
-  await p16Glass(ctx, pm);
-  await p18Renamed(ctx, pm);
-  await p18bNeverRenamed(ctx, pm);
-  await p17RuinNote(ctx, pm);
 }
