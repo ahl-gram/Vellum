@@ -132,7 +132,7 @@ Each part of the home station was ruled from its own still.
 | ruling | Alex's words | ruled from |
 |---|---|---|
 | M1, a fifth press on home's legend row | "Pip plus a fifth legend press, \"Learn one / The Primer\"" (the option the round did not recommend) | `shots/stills/home-pip-key-legend-1024.png`, the fifth press, shot with the pip at the key, beside `shots/stills/home-pip-poalo-1280.png` |
-| M2, where the pip moors | "Poalo, in the empty north-west (Recommended)" | `shots/stills/home-pip-poalo-1024.png`, `shots/stills/home-pip-poalo-1280.png`, `shots/stills/home-pip-poalo-card-1024.png` and `shots/stills/home-pip-poalo-card-1280.png`, beside the key (`shots/stills/home-pip-key-1024.png`) and Nailo (`shots/stills/home-pip-nailo-1024.png`); `measure/pip-sweep.md` and `measure/home-pip.md` |
+| M2, where the pip moors | "Poalo, in the empty north-west (Recommended)" | `shots/stills/home-pip-poalo-1024.png`, `shots/stills/home-pip-poalo-1280.png`, `shots/stills/home-pip-poalo-card-1024.png` and `shots/stills/home-pip-poalo-card-1280.png`, beside the key (`shots/stills/home-pip-key-1024.png`); the menu's other option, Naukoa, had no still of its own and is a row of the sweep's table; `measure/pip-sweep.md` and `measure/home-pip.md`. The Nailo stills (`shots/stills/home-pip-nailo-1024.png`) show a mooring the notes weigh in their account of where the pip moors, and were not an option of this menu |
 | M3, a deploy that finds no browser to make the pictures | "Stop and say so (Recommended)" | no still |
 | M4, a tablet or motion step opened where it cannot apply | "No seal; it keeps its mark and the slip says why (Recommended)" | no still |
 
@@ -163,3 +163,4 @@ What the plate reader of Issue #1247's pull request saw in the kept stills, reco
 
 - `shots/stills/home-pip-poalo-1280.png` and `shots/stills/home-pip-poalo-legend-1024.png`: the pip's diamond covers the first letter of the town label Poalo, so "oalo" shows.
 - `shots/stills/home-pip-poalo-legend-1024.png`: the legend row with the fifth press, "Learn one / The Primer", sits at the panel's right edge against the "A Gallery of Worlds" label, which `measure/home-pip.md` already records as the row over the gallery, 1108 square px at 1024.
+- `measure/primer-tops.json`: line 3 carries the path of a session's scratchpad file (a /private/tmp/claude-501/ path ending 1155-tfull.png), which is not a path into the checkout and is kept as it ran.
