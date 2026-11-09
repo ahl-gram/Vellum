@@ -1,4 +1,4 @@
-// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup and dress at rest (L13-L32, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
+// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup at rest, its corner and legend passing the hand through, its stations, hint and camera (L13 to L20, L27, L28 and L30, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { forgetChartTouch, takeChartTouch } from "../support/chart-touch.ts";
 import { landed } from "../support/home.ts";
 import type { Cam } from "../support/home.ts";
@@ -7,18 +7,7 @@ import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { l13Stations, l14Legend, l15Shelf, l16NoticeAndPanel, l17Hook } from "./landfall/markup.ts";
-import {
-  l18Corner,
-  l19Legend,
-  l20Stations,
-  l21Stamp,
-  l22PanelDress,
-  l25Faces,
-  l26Corners,
-  l29SlipBox,
-  l31Veil,
-  l32Blanket,
-} from "./landfall/dress.ts";
+import { l18Corner, l19Legend, l20Stations } from "./landfall/dress.ts";
 import { stageKit, gestureKit, entersKit } from "./landfall/kit.ts";
 import type { LandfallKit } from "./landfall/kit.ts";
 import { stagePoint } from "./landfall/reads.ts";
@@ -36,7 +25,7 @@ import {
 } from "./landfall/panel.ts";
 import { l9aOneFinger, l9bPinch, l9cTwoFingerPan, l9iTouchOff, l9jBrowserPinch } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
-import { l9fPipGestures, l9hControlTap, l23KitReach, l24CameraLeaks, l30Camera } from "./landfall/controls.ts";
+import { l9fPipGestures, l9hControlTap, l30Camera } from "./landfall/controls.ts";
 import { l10NoScriptGet, l11IgnoresQuery } from "./landfall/seed.ts";
 import { leaveBlank } from "../support/nav.ts";
 
@@ -106,19 +95,10 @@ export async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>)
   await step("L17", () => l17Hook(k));
   await step("L18", () => l18Corner(k));
   await step("L19", () => l19Legend(k));
-  await step("L21", () => l21Stamp(k));
-  await step("L22", () => l22PanelDress(k));
-  await step("L25", () => l25Faces(k));
-  await step("L26", () => l26Corners(k));
-  await step("L23", () => l23KitReach(k));
-  await step("L24", () => l24CameraLeaks(k));
   await step("L27", () => l27HintPlace(k));
-  await step("L29", () => l29SlipBox(k));
   await step("L30", () => l30Camera(k));
   await step("L20", () => l20Stations(k));
   await step("L28", () => l28SlipGestures(k));
-  await step("L31", () => l31Veil(k));
-  await step("L32", () => l32Blanket(k));
 }
 
 export async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {

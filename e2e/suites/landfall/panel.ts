@@ -170,7 +170,8 @@ export async function l4l8Enters({ check, measureEnters }: LandfallKit): Promise
   );
 }
 
-const SLIPS = ["explorer", "reading-room", "atlas", "gallery"] as const;
+// One slip, since every station's slip is one template (`stations.map` in `src/pages/index.astro`, Issue #1273).
+const SLIPS = ["explorer"] as const;
 
 const OPEN = (id: string): Payload<{ open: boolean; focus: string | null; hasScroller: boolean }> =>
   `(() => { const c = document.getElementById("lf-card-${id}"); if (!c) return { open: false, focus: null, hasScroller: false }; const cs = getComputedStyle(c);
@@ -249,7 +250,7 @@ export async function l28SlipGestures(k: LandfallKit): Promise<void> {
     await shutSlips("L28 the last slip set aside");
   }
   check(
-    "L28 every station slip swallows a wheel over its head, the page and the chart both unmoved, and takes focus on itself, having no scroller; a press on a control inside the stage leaves an open slip open, while a tap on bare chart sets it aside, the same run's control (#459)",
+    "L28 a station slip swallows a wheel over its head, the page and the chart both unmoved, and takes focus on itself, having no scroller; a press on a control inside the stage leaves an open slip open, while a tap on bare chart sets it aside, the same run's control (#459)",
     ok,
     rows.join(" | "),
   );
