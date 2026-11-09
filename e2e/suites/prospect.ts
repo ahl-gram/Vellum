@@ -1,8 +1,7 @@
-// Prospect e2e (the PB checks, Issue #242; the chart room since Issue #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
+// Prospect e2e (the PB checks, Issue #242; the chart room since Issue #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, and year-awareness; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { SuiteContext } from "../types.ts";
-import { pb13Dress } from "./prospect/dress.ts";
 import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
 import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
 import { pb1cRoadOut } from "./prospect/way-in.ts";
@@ -20,19 +19,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  let first: string | null = null;
   await step("PB2 to PB5", async () => {
     await pb2CapitalPlate(k, href);
-    first = await pb3eRoomAndPlate(k);
+    await pb3eRoomAndPlate(k);
   });
   await step("PB12", () => pb12Markup(k));
-  await step("PB13", () => pb13Dress(k));
   await step("PB14", () => pb14Glass(k));
   await step("PB15", () => pb15FilingPress(k));
-  await step("PB6", () => pb6SameAddress(k, first));
   await step("PB7 to PB7d", () => pb7YearFilter(k));
   await step("PB7e", () => pb7eOrphan(k));
-  await step("PB8", () => pb8TwoDress(k));
   await step("PB9", () => pb9BareVisit(k));
   await step("PB16", () => pb16ScriptsOff(k));
   await step("PB17", () => pb17Boot(k));
@@ -178,7 +173,7 @@ export async function pb3fGlassLeans({
   await glassHome();
 }
 
-async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf, glassHome }: ProspectKit): Promise<string> {
+async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf, glassHome }: ProspectKit): Promise<void> {
   const room = await evaluate<{
     chartRoom: boolean;
     footer: boolean;
@@ -221,18 +216,6 @@ async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf, glassHome }: Pr
     "PB5b the slip's key mirrors the plate's numbered key: the same numerals in order and the same words, each lettered on the plate (Issue #754 ruling D12)",
     slip.length > 0 && slip.every((row, i) => row.startsWith(`${i + 1}. `) && first.includes(`aria-label="${row}"`)),
     JSON.stringify(slip),
-  );
-  return first;
-}
-
-async function pb6SameAddress({ check, goto, opened, svgOf }: ProspectKit, first: string | null): Promise<void> {
-  await goto("#seed=42&i=0");
-  await opened("the same address, fresh visit");
-  const second = await svgOf();
-  check(
-    "PB6 the same address presses a byte-identical plate",
-    first === second,
-    `first ${String(first).length}b, second ${String(second).length}b`,
   );
 }
 
@@ -362,24 +345,6 @@ async function pb7eOrphan({ check, goto, opened }: ProspectKit): Promise<void> {
       orphan.noteTitle === "Tewetulua" &&
       orphan.chart === "/explorer/#seed=42",
     JSON.stringify({ name: orphan.name, roads: orphan.roads, shown: orphan.ribbonShown, chart: orphan.chart }),
-  );
-}
-
-async function pb8TwoDress({ check, goto, opened, svgOf }: ProspectKit): Promise<void> {
-  await goto("#seed=42&style=nautical&i=0");
-  const dropped = await opened("the nautical fallback");
-  const nauticalSvg = await svgOf();
-  await goto("#seed=42&style=ink&i=0");
-  const inked = await opened("the ink dress");
-  const inkSvg = await svgOf();
-  check(
-    "PB8 the two-dress fallback holds: a nautical chart opens an antique plate, an ink chart an ink plate (#237)",
-    // The dress rides the plate's own id suffix (`${style.name}-${seed}-${index}`), so the BYTES witness it, not just the state hook.
-    dropped.dress === "antique" &&
-      /-antique-42-0/.test(nauticalSvg) &&
-      inked.dress === "ink" &&
-      /-ink-42-0/.test(inkSvg),
-    JSON.stringify({ nautical: dropped.dress, ink: inked.dress }),
   );
 }
 

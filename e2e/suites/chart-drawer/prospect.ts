@@ -128,7 +128,7 @@ async function cd29SecondYear(
   one: Pp,
 ) {
   // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
-  // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
+  // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose submit PB7c reads.
   await evaluate(
     `(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`,
   );

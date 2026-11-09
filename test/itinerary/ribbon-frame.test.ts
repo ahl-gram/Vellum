@@ -145,7 +145,7 @@ test("the three journeys that lean hardest on the frame still hold", () => {
   }
 });
 
-test("two presses of the same journey are byte-identical (the unit twin of e2e RB7)", () => {
+test("two presses of the same journey are byte-identical", () => {
   const world = worlds[0]!.world;
   const input = capitalJourneys(world)[0]!;
   for (const dress of ["antique", "ink"] as const) {
