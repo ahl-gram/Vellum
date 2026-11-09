@@ -128,7 +128,19 @@ export const shardOf = (
   total: number,
   seconds: Readonly<Record<string, number>> = UNIT_SECONDS,
 ): string[] => {
+  if (!Number.isInteger(total) || !Number.isInteger(index) || total < 1 || index < 1 || index > total) {
+    throw new RangeError(`--test-shard=${index}/${total} names no shard: the index runs from 1 to the total`);
+  }
   const weight = (file: string): number => seconds[file] ?? UNLISTED_SECONDS;
-  const order = files.slice().sort((a, b) => weight(b) - weight(a) || byPath(a, b));
-  return order.filter((_, i) => i % total === index - 1).sort(byPath);
+  const load = Array.from({ length: total }, () => 0);
+  const mine: string[] = [];
+  for (const file of files.slice().sort((a, b) => weight(b) - weight(a) || byPath(a, b))) {
+    const k = load.indexOf(Math.min(...load));
+    load[k] = load[k]! + weight(file);
+    if (k === index - 1) mine.push(file);
+  }
+  if (mine.length === 0) {
+    throw new RangeError(`shard ${index} of ${total} holds no file of the ${files.length} it was given`);
+  }
+  return mine.sort(byPath);
 };
