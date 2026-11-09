@@ -27,7 +27,6 @@ export const faults = (parts: (true | string)[]): string[] => parts.filter((f): 
 
 const entities: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
 
-// The page's text as a tree walk over its text nodes gathers it: markup with every script and style element and every tag removed, entities decoded.
 export function pageText(html: string): string {
   return html
     .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, "")

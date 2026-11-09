@@ -75,3 +75,16 @@ test("under reduced motion the drift never arms: no timer stands and no breath b
   assert.equal(clock.pending(), 0, "no idle timer stands");
   assert.equal(seen.breaths, 0, "no breath begins");
 });
+
+test("a stop during the idle delay takes the pending timer away: the sheet breathes one idle delay after the stop, not at the first arming's time, and only once (#458)", () => {
+  const { clock, seen, drift } = rig(false);
+  drift.arm();
+  clock.advance(4000);
+  drift.stop();
+  assert.equal(clock.pending(), 1, "one idle timer stands, the stop's");
+  clock.advance(IDLE_DELAY_MS - 4000);
+  assert.equal(seen.breaths, 0, "the first arming's timer is gone");
+  clock.advance(4000);
+  assert.equal(seen.breaths, 1, "the stop's timer runs one idle delay after it was set");
+  assert.equal(clock.pending(), 0, "and nothing else stands");
+});

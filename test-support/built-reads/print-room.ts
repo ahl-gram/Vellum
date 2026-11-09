@@ -243,7 +243,6 @@ function stageFaults(doc: Document): string[] {
   ]);
 }
 
-// The Print Room as authored (from e2e PR36). Dropped with what only a running browser has: both dropdowns' resolved 16px size.
 export function pr36Faults(doc: Document): string[] {
   return [...cornerFaults(doc), ...slipFaults(doc), ...legendFaults(doc), ...stageFaults(doc)];
 }

@@ -1,6 +1,5 @@
 import { before, faults, same, text } from "../built-dom.ts";
 
-// The Explorer's host contract (from e2e R16): the mount carries the class, the page links the engine's sheet, and the built file is that sheet (read as data, in place of document.styleSheets).
 export function r16Faults(doc: Document, served: (path: string) => string | null): string[] {
   const map = doc.getElementById("map");
   const links = [...doc.querySelectorAll('head link[rel="stylesheet"]')].map(
@@ -21,7 +20,6 @@ const GLASS = [
   ["zoom-reset", "fit"],
 ];
 
-// The Reading Room as authored (from e2e RR38).
 export function rr38Faults(doc: Document): string[] {
   const id = (s: string) => doc.getElementById(s);
   const corner = doc.querySelector(".corner.tr.folio-room");
@@ -98,7 +96,6 @@ export function rr38Faults(doc: Document): string[] {
   ]);
 }
 
-// The Hunt's skeleton before any guess: the stage holds the gesture box, the gesture box the transform target alone, the target the chart's own sheet alone; no caption; the folio stands outside the stage after it, its first line the title (from e2e HG6).
 export function hg6Faults(doc: Document): string[] {
   const vp = doc.getElementById("map-viewport");
   const folio = doc.querySelector(".corner.bl.folio");

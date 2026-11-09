@@ -1,7 +1,6 @@
 import { parseTableValue } from "../../src/site/shared/table-address.ts";
 import { faults, same, text } from "../built-dom.ts";
 
-// Every control sits in its wiring-truth group (from e2e BR1).
 export function br1Faults(doc: Document): string[] {
   const groupOf = (id: string): string | null => {
     const g = doc.getElementById(id)?.closest('[role="group"]');
@@ -58,7 +57,6 @@ const NOTE_HEADS = [
   "of the verso",
 ];
 
-// The Explorer as authored (from e2e BR9, which read it with scripts off), the groups in reading order included. Dropped with what only a running browser has: the Broadside slip's accessible name (its aria-labelledby stays asserted).
 export function br9Faults(doc: Document): string[] {
   const id = (s: string) => doc.getElementById(s);
   const corner = doc.querySelector(".corner.tr.folio-room");
@@ -105,6 +103,13 @@ export function br9Faults(doc: Document): string[] {
     same(groups, ["The seed", "grp-land", "held", "grp-strand", "held", "grp-hand", "grp-press", "Camera"]) ||
       "the groups in reading order",
     slip?.id === "broadside" || "the slip is #broadside",
+    (() => {
+      const title = doc.getElementById(slip?.getAttribute("aria-labelledby") ?? "");
+      return (
+        (text(title) === "The Broadside" && !title?.querySelector("a.fn")) ||
+        "the slip named by its title alone, the title's mark outside the heading"
+      );
+    })(),
     same(
       panels.map((p) => p.getAttribute("aria-labelledby")),
       ["grp-land", "grp-strand", "grp-hand"],
@@ -221,7 +226,6 @@ const SAMPLES: Record<string, string> = {
   theme: "k-s.seed-42.theme-VALUE.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1",
 };
 
-// Every value the style, type, climate and theme pickers offer is one the Chart Table's grammar files (from e2e BR11).
 export function br11Faults(doc: Document): string[] {
   const out: string[] = [];
   for (const id of ["style", "type", "band", "theme"]) {
@@ -235,7 +239,6 @@ export function br11Faults(doc: Document): string[] {
   return out;
 }
 
-// The Portfolio's where-line ships promising the sheets gathered at the Explorer (from e2e CD55). Dropped with what only a running browser has: the script's bare voice written over it when nothing was gathered.
 export function cd55Faults(doc: Document): string[] {
   const where = doc.querySelector("#portfolio .card-where")?.textContent ?? null;
   return where === "the sheets gathered at the Explorer" ? [] : [`the where-line reads ${JSON.stringify(where)}`];

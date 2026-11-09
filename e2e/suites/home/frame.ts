@@ -21,7 +21,7 @@ export async function h0Loads({ evaluate, check, sleep }: SuiteContext) {
 }
 
 export async function hVeilDown({ evaluate, sleep, pressKey }: HomeKit, ready: boolean): Promise<boolean> {
-  // First arrival raises the veil (H7 proves it); settle it with a REAL key so H1-H5 and their plates measure the page. Synthetic .click() dispatches no pointerdown, and a key thrown before the module arms the skip hits nothing, so press until it lands.
+  // First arrival raises the veil (H7 proves it); settle it with a REAL key so H4, H5 and their plates measure the page. Synthetic .click() dispatches no pointerdown, and a key thrown before the module arms the skip hits nothing, so press until it lands.
   if (!ready) return false;
   for (let i = 0; i < VEIL_PRESSES; i++) {
     await pressKey("Escape", "Escape", 27);

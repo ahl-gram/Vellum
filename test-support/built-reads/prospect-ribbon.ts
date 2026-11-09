@@ -13,7 +13,6 @@ const taglineOf = (corner: Element | null) => text(corner?.querySelector(":scope
 const roadRows = (row: Element | null) =>
   row ? [...row.children].map((a) => [text(a.querySelector(".verb")), text(a.querySelector(".room"))]) : [];
 
-// The Prospect's markup (from e2e PB12). Dropped with what only a running browser has: the year field's accessible name (its label's `for` stays asserted) and the Ribbon road's verb, which the script writes with the capital's name (its room stays).
 export function pb12Faults(doc: Document): string[] {
   const corner = doc.querySelector(".corner.tr.folio-room");
   const form = doc.getElementById("pp-year-form");
@@ -113,7 +112,6 @@ export function pb12Faults(doc: Document): string[] {
   ]);
 }
 
-// The Prospect as authored (from e2e PB16, which read it with scripts off). Dropped with what only a running browser has: the scripts-on control, the plate's resolved display and the scripts-off notice's box inside the stage.
 export function pb16Faults(doc: Document): string[] {
   const id = (s: string) => doc.getElementById(s);
   const plate = id("pp-plate");
@@ -131,7 +129,6 @@ export function pb16Faults(doc: Document): string[] {
   ]);
 }
 
-// The Ribbon's markup (from e2e RB11). Dropped with what only a running browser has: "bound for" holding only reachable places (`roadReachable` holds the logic in test/site/ribbon-job.test.ts) and the Prospect road's verb, which the script writes with the place's name (its room stays).
 export function rb11Faults(doc: Document): string[] {
   const id = (s: string) => doc.getElementById(s);
   const corner = doc.querySelector(".corner.tr.folio-room");

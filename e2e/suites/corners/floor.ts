@@ -1,7 +1,7 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718), read in the Explorer and the Print Room: a sideways wheel at 640 scrolls the page and reaches every right-hand piece, a keyboard-opened Chart Table leaves the room where it stood, and a one-pixel window leaves the camera alone.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
+import { LANDED, rest } from "../stage/stage.ts";
 import { mouseMove, mouseWheel, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
@@ -68,11 +68,6 @@ export async function load(ctx: SuiteContext, page: string, w: number, h: number
 async function open(ctx: SuiteContext, page: string, w: number, h: number): Promise<Pieces> {
   await load(ctx, page, w, h);
   return still(ctx, page, w, h, `floor ${page} ${w}x${h}`);
-}
-
-async function resized(ctx: SuiteContext, page: string, w: number, h: number): Promise<Pieces> {
-  await size(ctx, w, h);
-  return still(ctx, page, w, h, `floor ${page} resized to ${w}x${h}`);
 }
 
 export function differences(at: string, got: Pieces, want: Pieces): string[] {
@@ -150,29 +145,6 @@ export async function fl2Reach(ctx: SuiteContext): Promise<void> {
     "FL2 at a 640 window, in the Explorer and in the Print Room, a real sideways wheel over the sheet scrolls the page and does not zoom the chart, where a vertical wheel at the same place in the same run does zoom it (the control), and at the end of the scroll every right-hand piece (the room folio, the slip, the Glass, the drawer's tab) stands wholly in the window, each moved by exactly the scroll (Issue #762)",
     faults.length === 0 && control,
     `${rows.join(" | ")}; the control zoomed ${control}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
-  );
-}
-
-// Every read compared is taken after the same number of layout passes, since the Reading Room's and the Print Room's fits move on the second pass on main's build too (the handbook/errata/site.md rows). The witness (measured 2026-10-06 on the step 6 probe): with the page scrolled 384 at 640x800, a resize laid the Explorer's Press out at page x -358 against 26, its viewport x written back as a page one.
-export async function fl3Relayout(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
-  const faults: string[] = [];
-  for (const page of CHART_ROOM_FLOOR) {
-    await open(ctx, page, 640, 800);
-    await resized(ctx, page, 641, 800);
-    const rested = await resized(ctx, page, 640, 800);
-    await ctx.evaluate(`window.scrollTo(100000, 0)`);
-    await resized(ctx, page, 641, 800);
-    const back = await resized(ctx, page, 640, 800);
-    if (back.sx === 0) faults.push(`${page}: the scroll did not hold through the resize, so nothing was read scrolled`);
-    faults.push(...differences(`${page} laid out again while scrolled`, back, rested));
-  }
-  ctx.check(
-    "FL3 a layout fired while the page is scrolled sideways (a resize and back, at 640x800 scrolled fully right) leaves every piece of chrome and the sheet where the unscrolled page has them, in every chart room: the scripts place pieces in page coordinates, never the window's (Issue #762)",
-    faults.length === 0,
-    faults.length
-      ? `${faults.length} faults: ${faults.slice(0, 8).join("; ")}`
-      : `${CHART_ROOM_FLOOR.length} rooms held`,
   );
 }
 

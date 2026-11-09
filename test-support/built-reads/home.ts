@@ -3,7 +3,6 @@ import { homeStage } from "../../src/site/home/stage-data.ts";
 import { homeStations, howStation, unclaimedDots } from "../../src/site/home/stations.ts";
 import { faults, pageText, same } from "../built-dom.ts";
 
-// Home's stations and marks (from e2e L13).
 export function l13Faults(doc: Document): string[] {
   const want = [...homeStations(), howStation()];
   const dots = unclaimedDots(homeStage().dots, homeStations()).length;
@@ -43,7 +42,6 @@ const slipKids = (arms: boolean) => [
   "lf-card-enter",
 ];
 
-// The legend glosses the encounters once and lists one press per station; every station slip runs in order and ends at its room's door (from e2e L14).
 export function l14Faults(doc: Document, html: string): string[] {
   const stations = homeStations();
   const arms = ["charts/arms-42-0.svg", "charts/arms-42-1.svg", "charts/arms-42-2.svg"];
@@ -88,7 +86,6 @@ const PLATES = [
   ["charts/chart-42-nautical.svg", "Nautical chart, with fathom soundings"],
 ] as const;
 
-// The natural size of a served SVG: its root's width and height, or its viewBox's last two numbers where it has none.
 function svgSize(svg: string): [number, number] | null {
   const root = /<svg\b[^>]*>/.exec(svg)?.[0];
   if (!root) return null;
@@ -103,7 +100,6 @@ function svgSize(svg: string): [number, number] | null {
   return box.length === 4 && box[2]! > 0 && box[3]! > 0 ? [box[2]!, box[3]!] : null;
 }
 
-// The shelf is plain flow after the landfall section, three plates each linking its own chart (from e2e L15). Dropped with what only a running browser has: the link answering 200 over the network, read as the served file's presence, and the decoded size, read from the served SVG.
 export function l15Faults(doc: Document, served: (path: string) => string | null): string[] {
   const shelf = doc.querySelector("section.lf-shelf");
   if (!shelf) return ["no shelf"];
@@ -153,7 +149,6 @@ const MARKERS = [
 const HOW_KIDS = ["lf-card-close", "lf-card-verb", "lf-card-title", "lf-card-where", "lf-card-scroll"];
 const DOORS = ["explorer/", "reading-room/", "atlas/", "gallery/"];
 
-// The Notice to Mariners, the how panel and the noscript (from e2e L16). Dropped with what only a running browser has: the noscript's sheet not fetched with scripts on, a resource timing.
 export function l16Faults(doc: Document, html: string): string[] {
   const stamp = doc.querySelector("aside.notice-stamp");
   const how = doc.getElementById("lf-card-how");
@@ -189,7 +184,6 @@ export function l16Faults(doc: Document, html: string): string[] {
   ]);
 }
 
-// The corner's hook is the share card's, line for line, broken where the card breaks it (from e2e L17).
 export function l17Faults(doc: Document): string[] {
   const h = doc.querySelector(".lf-seed .seed-hook");
   const hook = h ? [...h.childNodes].map((n) => (n.nodeName === "BR" ? "<br>" : (n.textContent ?? "").trim())) : null;

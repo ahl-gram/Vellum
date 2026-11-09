@@ -58,7 +58,6 @@ const page = (route: string): string => {
   return html;
 };
 
-// The text of a file the build serves (a path without its leading slash), or null.
 const served = (path: string): string | null => {
   const file = join(DIST, path);
   return existsSync(file) ? readFileSync(file, "utf8") : null;
@@ -164,7 +163,7 @@ test("every Explorer control stands in its wiring-truth group in the built page:
   assert.deepEqual(br1Faults(documentOf(page("/explorer/"))), []);
 });
 
-test("the Explorer as authored in the built page: the folio's one h1 and tagline with the seed row its one control group, the groups in reading order, the Broadside slip with its three panels, six seals, seven footnote marks and notes and its printer's line, the Press as the legend row, the stage's leaf with the empty gesture box and the hidden verso, the Glass outside it, the status pill and the chart folio's three empty lines (from e2e BR9, less the slip's accessible name, whose aria-labelledby stays asserted)", () => {
+test("the Explorer as authored in the built page: the folio's one h1 and tagline with the seed row its one control group, the groups in reading order, the Broadside slip with its three panels, six seals, seven footnote marks and notes and its printer's line, the Press as the legend row, the stage's leaf with the empty gesture box and the hidden verso, the Glass outside it, the status pill and the chart folio's three empty lines (from e2e BR9, less the slip's accessible name, whose title and its aria-labelledby stay asserted)", () => {
   assert.deepEqual(br9Faults(documentOf(page("/explorer/"))), []);
 });
 
