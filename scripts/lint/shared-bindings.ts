@@ -22,7 +22,9 @@ export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>>
   "src/site/specimen/app.ts": [ZOOM_ROOM],
   "src/site/writing-room/app.ts": [ZOOM_ROOM],
   "src/site/seed-of-the-day/app.ts": [
+    ["bindRoom", "../shared/room.ts"],
     ["createZoomController", "../shared/zoom-controller.ts"],
+    ["bindGlassKeys", "../shared/glass-keys.ts"],
     ["framingCamera", "../shared/camera.ts"],
   ],
   "src/site/explorer/app.ts": [["bindRoom", "../shared/room.ts"], ANNOUNCER, STORE, ["filingAt", "./chart-drawer.ts"]],

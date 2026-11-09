@@ -118,6 +118,8 @@ test("a file the roster does not name is not read", async () => {
 
 const ROOM_BINDING: SharedBinding = ["bindRoom", "../shared/room.ts"];
 const ZOOM_BINDING: SharedBinding = ["createZoomController", "../shared/zoom-controller.ts"];
+const GLASS_BINDING: SharedBinding = ["bindGlassKeys", "../shared/glass-keys.ts"];
+const FRAMING_BINDING: SharedBinding = ["framingCamera", "../shared/camera.ts"];
 const ZOOM_ROOM: SharedBinding = ["bindZoomRoom", "../shared/zoom-room.ts"];
 const ANNOUNCE: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
@@ -136,7 +138,7 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/reading-room/seats.ts": [ZOOM_ROOM],
   "src/site/specimen/app.ts": [ZOOM_ROOM],
   "src/site/writing-room/app.ts": [ZOOM_ROOM],
-  "src/site/seed-of-the-day/app.ts": [ZOOM_BINDING, ["framingCamera", "../shared/camera.ts"]],
+  "src/site/seed-of-the-day/app.ts": [ROOM_BINDING, ZOOM_BINDING, GLASS_BINDING, FRAMING_BINDING],
   "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
@@ -148,11 +150,11 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };
 
-test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, and every file and module it names exists", () => {
+test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, the Seed of the Day's room and keys added by Issue #1284, and every file and module it names exists", () => {
   assert.deepEqual(
     SHARED_BINDINGS,
     ROSTER,
-    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them",
+    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them and Issue #1284 added to them",
   );
   for (const [file, bindings] of Object.entries(SHARED_BINDINGS)) {
     assert.ok(existsSync(join(ROOT, file)), `${file} does not exist`);
@@ -162,6 +164,54 @@ test("the roster is exactly the import pins the close of Issue #779 moved here, 
         `${file} names ${name} from ${from}, which does not exist`,
       );
   }
+});
+
+const SEED = "src/site/seed-of-the-day/app.ts";
+const SEED_ROOM = 'import { bindRoom } from "../shared/room.ts";';
+const SEED_ZOOM = 'import { createZoomController } from "../shared/zoom-controller.ts";';
+const SEED_GLASS = 'import { bindGlassKeys } from "../shared/glass-keys.ts";';
+const SEED_FRAMING = 'import { framingCamera } from "../shared/camera.ts";';
+
+const SEED_PLANTS: ReadonlyArray<readonly [string, readonly string[], Array<[string, string]>]> = [
+  [
+    "(s1) all four taken and used",
+    [
+      SEED_ROOM,
+      SEED_ZOOM,
+      SEED_GLASS,
+      SEED_FRAMING,
+      "export const s = [bindRoom, createZoomController, bindGlassKeys, framingCamera];",
+    ],
+    [],
+  ],
+  [
+    "(s2) bindRoom's import and use deleted",
+    [SEED_ZOOM, SEED_GLASS, SEED_FRAMING, "export const s = [createZoomController, bindGlassKeys, framingCamera];"],
+    [[...ROOM_BINDING]],
+  ],
+  [
+    "(s3) createZoomController's import and use deleted",
+    [SEED_ROOM, SEED_GLASS, SEED_FRAMING, "export const s = [bindRoom, bindGlassKeys, framingCamera];"],
+    [[...ZOOM_BINDING]],
+  ],
+  [
+    "(s4) bindGlassKeys's import and use deleted",
+    [SEED_ROOM, SEED_ZOOM, SEED_FRAMING, "export const s = [bindRoom, createZoomController, framingCamera];"],
+    [[...GLASS_BINDING]],
+  ],
+  [
+    "(s5) framingCamera's import and use deleted",
+    [SEED_ROOM, SEED_ZOOM, SEED_GLASS, "export const s = [bindRoom, createZoomController, bindGlassKeys];"],
+    [[...FRAMING_BINDING]],
+  ],
+];
+
+test("the Seed of the Day, which binds its room, its zoom and the Glass's keys itself rather than through bindZoomRoom, is held to each binding its roster entry names (Issue #1284)", async () => {
+  assert.ok(
+    SEED_PLANTS.some(([, , want]) => want.length === 0) && SEED_PLANTS.some(([, , want]) => want.length > 0),
+    "the plants cannot tell the rule from its negation",
+  );
+  for (const [name, lines, want] of SEED_PLANTS) assert.deepEqual(await reported(lines, SEED), want, name);
 });
 
 const resolvedRule = async (file: string): Promise<unknown> =>
