@@ -251,7 +251,9 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   Find a holder with `git grep` for the selector, symbol or constant the claim turns on, then
   read it: a mention is not a hold, and a unit test of the arithmetic behind a claim, or of the
   helper that measures it (`squeezes` in `test/e2e/corners.test.ts`), does not hold the claim on
-  the page.
+  the page. A holder a plan names as the reason a claim is not lost, or a check not needed, is
+  confirmed by running the claim's mutation and seeing the holder red, and the plan quotes that red
+  line; a holder read and not run is named as read.
 - **What a step costs** is its seconds on GitHub's machines, the median of three lane runs, read
   from the timestamp the log puts on every line
   (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`): the time
@@ -301,9 +303,10 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   the lane's job started by hand give the median. A step the rule finds too slow is reworked
   before the pull request merges.
 - **A check's coverage is needless on one of two grounds (Alex, 2026-11-08, Issue #1273).** It
-  covers no critical journey and is easy to verify by hand, as on a simple page or in the masthead
-  every page wears (its head cluster, its corner and its nav). Or it is coverage a critical journey
-  does not need: one rule read in every room that takes it from one shared module (as
+  covers no critical journey and is easy to verify by hand, as on a simple page, in the masthead
+  every page wears (its head cluster, its corner and its nav), or in a claim of dress alone
+  (`handbook/specs/check-placement.md`, The browser lanes and a plate read). Or it is coverage a
+  critical journey does not need: one rule read in every room that takes it from one shared module (as
   `SHARED_BINDINGS` in `scripts/lint/shared-bindings.ts` holds the zoom rooms to `bindZoomRoom`),
   one layout read across many windows, one claim reached by several paths where one would do, or a
   claim whose logic a unit test holds and whose path another check that stays reads, so that the
@@ -317,7 +320,9 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   Alex at its stop (`handbook/specs/development-workflow.md` step 6); no lane deletes a check its
   plan does not name. Narrowing a check to fewer rooms, windows or paths deletes the reads it stops
   making and is ruled the same way, and what the narrowed check keeps is proven to bite as a new
-  guard is (`handbook/specs/development-workflow.md` step 11).
+  guard is (`handbook/specs/development-workflow.md` step 11). A deleted or narrowed step leaves
+  behind what item 11 has a skipped one leave: before it goes, every state it set or waited for that
+  a later check in the suite reads is set or awaited by that later check itself.
 - **Each claim a deleted check held is moved or listed.** It moves to a unit test wherever one can
   hold it alone, written before the check goes, as `handbook/specs/check-placement.md` says (The
   browser lanes and a plate read). A claim that moves nowhere is listed as lost coverage, with the

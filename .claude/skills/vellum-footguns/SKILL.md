@@ -39,8 +39,13 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    the anchor was found (`notEqual(at, -1)`) before the negative assertion runs against the remainder.
 5. **N states or N siblings need N pins, not one floor.** Assert each state's own resolved value
    against a measured constant. A shared threshold, or A compared to B, is one pin written N times.
+   A sibling is an instance as item 6 defines it.
 6. **Guard the class.** List every instance the rule binds (every arm of a selector list, every page
    that carries its own sheet, every seat of the lattice) and sweep them. Two samples is the instance.
+   An instance is a place the rule can break on its own: rooms that take the rule from one shared
+   module and are held to it by `SHARED_BINDINGS` in `scripts/lint/shared-bindings.ts` are one
+   instance, read in one room, and a room keeps a read of its own only for the part of the rule its
+   own code carries (Issue #1273).
 7. **A transparent component (cache, memo, fast path) is guarded by its own counters**, never by an
    output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite. A
    determinism oracle builds a FRESH subject for the second run: a per-object memo makes a
@@ -89,8 +94,10 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     inverting the selector (PR #410).
 19. **A reference that went through a transform shares the defect's oracle**: also assert against
     the RAW source, on what the transform cannot represent (Issue #443).
-20. **A ratified acceptance gets a driving check beside any pure-function read**
-    (PR #631).
+20. **A ratified acceptance gets a driving check beside any pure-function read**, one that runs the
+    code the page runs: a unit test of the function the page itself calls wherever the page is shaped
+    so one can (`handbook/specs/check-placement.md`), a browser check only where the path runs in the
+    browser alone (PR #631, Issue #1273).
 21. **A proof resting on several instruments, each blind where another sees, takes a new one BESIDE
     the old, never in its place.** Ask what each one already there sees that no other does; if
     anything, it stays (PR #576).
@@ -187,7 +194,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     (Issue #522).
 16. **Read the two readings a plan printed for a browser check before you type it**
     (`vellum-planner`'s **Tests** line; Issue #1037).
-17. **Count and time a new or longer check** (settle-doctrine; Issue #1063).
+17. **Count, time and justify a new or longer check**: its ledger line (`handbook/specs/check-placement.md`)
+    and its seconds (`handbook/specs/settle-doctrine.md`; Issue #1063, Issue #1273).
 
 ## Gate 3: before writing CSS or moving layout
 
@@ -209,7 +217,10 @@ This is the checklist; the reasons are not copied here.
    tooltip, a class, an inline style). The piece you changed is the one place you will look by default.
    A collision is measured on ink, every visible text node's line boxes and each control's own rect,
    never a layout box, and an edge defect is swept a pixel at a time by resizing the loaded page,
-   `innerWidth` recorded beside the width set (Issue #638).
+   `innerWidth` recorded beside the width set (Issue #638). That sweep is how you look while you
+   build: the browser check that stays reads the widths where the rule can break, both sides of each
+   edge the sweep found (Gate 1 item 11), and names any other width in its ledger line
+   (`handbook/specs/check-placement.md`; Issue #1273).
 4. **Re-grounding a surface owes a contrast sweep of everything standing on it**: rest, hover,
    focus-visible, disabled, marks, roads. A defect that painted over a surface hid how the rest of it
    read.
@@ -218,8 +229,8 @@ This is the checklist; the reasons are not copied here.
    before the body claims it exists.
 6. **A feel decision gets rendered variants before a ruling**, the contract for which is
    `handbook/specs/development-workflow.md` step 6: the candidates, the control arm, and where the stills go.
-   The ruling stays provisional until Alex has used the branch live. Pin correctness now, let
-   dressing-level pins lag one live cycle.
+   The ruling stays provisional until Alex has used the branch live. Pin correctness now; dressing
+   is measured and checked by eye, never pinned (`handbook/specs/check-placement.md`).
 7. **A box a script measures after a class or an inline style changes its size or seat owes a
    render under reduced motion with the page's style resolved before the change**, the case in
    which that change can run as a 0.01ms transition and a rect read in the same task finds the box

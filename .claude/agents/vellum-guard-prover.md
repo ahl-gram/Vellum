@@ -98,7 +98,7 @@ For each test that claims to guard a behavior:
 4. Record which tests went red. **Exactly one going red is the good outcome.** Zero red is a hole. If many go red, the test is not the discriminator it claims to be and you should say which one actually bit.
 5. `restore` every path `status` listed, then run `status` again: it must list nothing and exit 0 before the next mutation. That clean exit is the byte proof of the restore; a green suite is not.
 
-Then sweep the class. If the bug hit one instance of N (one of four selectors bound together, three of seven swept pages, one culture of ten), check whether the guard covers all N. A guard written from a bug report comes out shaped like the bug, not the bug's class.
+Then sweep the class. If the bug hit one instance of N (one of four selectors bound together, three of seven swept pages, one culture of ten), check whether the guard covers all N. A guard written from a bug report comes out shaped like the bug, not the bug's class. An instance is a place the rule can break on its own (`vellum-footguns` Gate 1 item 6): rooms held to one shared module by `SHARED_BINDINGS` in `scripts/lint/shared-bindings.ts` are one instance, so a browser check read in one of them covers that class, and a gap across them is the module's test or the lint's to close, never a read in every room.
 
 ## What to look for beyond the mutation result
 
@@ -129,7 +129,7 @@ Return a ledger, one row per mutation:
 
 | behavior | mutation applied | suite run | tests red | verdict |
 
-Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red), or IMPRECISE (something red, but not the test claiming the guard). For every HOLE, propose the specific assertion that would close it, and say which existing test file it belongs in.
+Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red), or IMPRECISE (something red, but not the test claiming the guard). For every HOLE, propose the specific assertion that would close it, and say which existing test file it belongs in: a unit test's wherever one can hold the claim (`handbook/specs/check-placement.md`), a browser check's only where none can.
 
 State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the proof that you left the dispatch tree as you found it, taken AFTER teardown so your own sandbox is not reported as your own residue:
 

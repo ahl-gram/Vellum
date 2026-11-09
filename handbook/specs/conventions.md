@@ -40,8 +40,10 @@ they have been used, and they are where nearly every reversal has landed.
 
 **Do not state a provisional ruling in the same voice as a ratified one.** A pull request
 implementing a feel ruling names which of its choices are awaiting the re-review, so they land on the
-docket rather than being discovered later. Pin correctness-level tests immediately; let
-dressing-level pins lag one live-use cycle, so a re-decision does not rip out fresh test investment.
+docket rather than being discovered later. Pin correctness-level tests immediately; dressing is
+measured by `vellum-plate-reader` and checked by eye, never pinned in a browser check
+(`handbook/specs/check-placement.md`, The browser lanes and a plate read), so a re-decision rips out
+no test.
 
 **A reversal after live use is the process working, not scope churn.** Record the new call as a dated
 comment and move on.
