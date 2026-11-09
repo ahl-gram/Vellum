@@ -8,7 +8,6 @@ export const LEANED_ON: readonly string[] = ["/faq/", "/glossary/"];
 
 const AWAITS = "its ladder lands with Issue #1252";
 export const LEFT_UNTAUGHT: Readonly<Record<string, string>> = {
-  "/explorer/": AWAITS,
   "/seed-of-the-day/": AWAITS,
   "/writing-room/": AWAITS,
   "/reading-room/": AWAITS,
@@ -31,8 +30,9 @@ export const ROUTE_TREE: RouteTree = {
   names: ROUTE_NAMES,
 };
 
-export function untaught(_ladders: readonly Ladder[] = LADDERS, tree: RouteTree = ROUTE_TREE): readonly string[] {
-  return tree.routes;
+export function untaught(ladders: readonly Ladder[] = LADDERS, tree: RouteTree = ROUTE_TREE): readonly string[] {
+  const covered = new Set([...ladders.map((l) => l.route), ...LEANED_ON, ...Object.keys(LEFT_UNTAUGHT)]);
+  return tree.routes.filter((r) => !covered.has(r));
 }
 
 export interface Seated {
@@ -41,6 +41,20 @@ export interface Seated {
   readonly under: readonly Seated[];
 }
 
+const nameIn = (tree: RouteTree, route: string): string => {
+  const name = tree.names[route];
+  if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${route}`);
+  return name;
+};
+
 export function seated(ladders: readonly Ladder[] = LADDERS, tree: RouteTree = ROUTE_TREE): readonly Seated[] {
-  return ladders.map((ladder) => ({ ladder, name: tree.names[ladder.route] ?? "", under: [] }));
+  return ladders
+    .filter((l) => tree.seat(l.route) === null)
+    .map((ladder) => ({
+      ladder,
+      name: nameIn(tree, ladder.route),
+      under: ladders
+        .filter((l) => tree.seat(l.route) === ladder.route)
+        .map((l) => ({ ladder: l, name: nameIn(tree, l.route), under: [] })),
+    }));
 }

@@ -54,7 +54,7 @@ export interface Ladder {
 }
 
 export function phrasesOf(sentence: string): readonly string[] {
-  return [sentence];
+  return [...sentence.matchAll(/\{([^{}]+)\}/g)].map((m) => m[1] ?? "");
 }
 
 export const text = (css: string, says: string, match?: "starts" | "contains"): Words =>
