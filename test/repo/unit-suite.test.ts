@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { UNIT_SECONDS } from "../../scripts/unit-shards.ts";
 
 const LAUNCHER = resolve(import.meta.dirname, "..", "..", "scripts", "unit-suite.ts");
 const TAP = "--test-reporter=tap";
@@ -25,6 +26,19 @@ const FOUR_SUITES = suites(
   "test/d.test.ts",
   "out/copy/test/e.test.ts",
 );
+
+const HEAVIEST = Object.entries(UNIT_SECONDS).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]![0];
+const WEIGHED = suites("test/a.test.ts", "test/b.test.ts", "test/c.test.ts", HEAVIEST);
+const NESTED = {
+  ...suites(
+    "test/a.test.ts",
+    "test/sub/b.test.ts",
+    "test/sub/deep/c.test.ts",
+    "test/d.test.ts",
+    "out/copy/test/e.test.ts",
+  ),
+  "out/copy/package.json": TYPE_MODULE,
+};
 
 const ONE_RED = {
   "test/a.test.ts": `import { test } from "node:test";\ntest("red", () => { throw new Error("red"); });\n`,
@@ -128,5 +142,51 @@ test("every suite npm test runs, the whole suite or a named path, loads test-sup
     [whole.ran, named.ran],
     [["after the preload"], ["after the preload"]],
     `npm test ran a suite without test-support/source-read-guard.ts loaded first, so the source-read guard watches no read in it:\n${whole.output}\n${named.output}`,
+  );
+});
+
+test("the shard flag splits the suites under test/ by UNIT_SECONDS, not by count: the file the table weighs heaviest takes a leg of its own", () => {
+  const control = runIn(WEIGHED, ["--test", TAP, "--test-shard=1/2", "test/**/*.test.ts"]);
+  assert.equal(
+    control.ran.length,
+    2,
+    `node's own split already gives this leg something other than two files, so the fixture cannot tell a split by seconds from node's:\n${control.output}`,
+  );
+  const first = runIn(WEIGHED, [LAUNCHER, TAP, "--test-shard=1/2"]);
+  const second = runIn(WEIGHED, [LAUNCHER, TAP, "--test-shard=2/2"]);
+  assert.deepEqual(
+    [first.ran, second.ran],
+    [[HEAVIEST], ["test/a.test.ts", "test/b.test.ts", "test/c.test.ts"]],
+    `npm test hands the shard flag to node, which splits by position:\n${first.output}\n${second.output}`,
+  );
+});
+
+test("a sharded run of the whole suite prints each file's seconds under a per-file wall clock head", () => {
+  const run = runIn(FOUR_SUITES, [LAUNCHER, "--test-shard=1/1"]);
+  assert.equal(run.status, 0, run.output);
+  const lines = run.output.split("\n");
+  const head = lines.findIndex((l) => l.startsWith("per-file wall clock (4 files, "));
+  assert.notEqual(head, -1, `a sharded run prints no per-file wall clock head:\n${run.output}`);
+  assert.deepEqual(
+    lines
+      .slice(head + 1, head + 5)
+      .map((l) => l.trim().split(" ")[0])
+      .sort(),
+    ["test/a.test.ts", "test/b.test.ts", "test/c.test.ts", "test/d.test.ts"],
+    `the clock does not list each file under test/ once:\n${run.output}`,
+  );
+});
+
+test("the legs of a sharded run together run each suite under test/ exactly once, nested folders included, and none under out/", () => {
+  const legs = [1, 2, 3].map((k) => runIn(NESTED, [LAUNCHER, TAP, `--test-shard=${k}/3`]));
+  assert.deepEqual(
+    legs.map((l) => l.status),
+    [0, 0, 0],
+    legs.map((l) => l.output).join("\n"),
+  );
+  assert.deepEqual(
+    legs.flatMap((l) => l.ran).sort(),
+    ["test/a.test.ts", "test/d.test.ts", "test/sub/b.test.ts", "test/sub/deep/c.test.ts"],
+    "the legs drop a suite, run one twice, or run the copy under out/",
   );
 });
