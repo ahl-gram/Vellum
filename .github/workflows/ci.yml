@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4]
     # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (Issue #564), so each shard has a cap set well above any real run, on the ruling that a hang should cost minutes and not hours, so no measured worst is held to go stale (Issue #1116).
     timeout-minutes: 20
     steps:
