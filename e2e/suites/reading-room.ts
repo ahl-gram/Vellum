@@ -3,7 +3,7 @@ import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { readingRoomKit, type ReadingRoomKit } from "./reading-room/kit.ts";
-import { DESK, atDesk, sameSheet, sameSize } from "./reading-room/reads.ts";
+import { DESK, atDesk, sameSize } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rrDeskReads } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks, rr44PlaceLink } from "./reading-room/addresses.ts";
@@ -64,9 +64,10 @@ export async function atTheDesk(ctx: SuiteContext, step: Step, k: ReadingRoomKit
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
   const desk = await evaluate(DESK);
   await send("Emulation.clearDeviceMetricsOverride");
+  // 2026-11-09: rewritten for a red on CI: RR29, run 42683815779, Issue #1285: RR29 itself did not red, its sibling wait above did (RR36); the wait before RR29 departed on the sheet's box, which the stylesheet re-places at the cleared window at once, the same flaw; it departs on the sheet's size, which only the room's layout writes (folded in by Alex's ruling, comment 6750634316)
   await step("RR29", async () => {
     await stable(DESK, "the room laid out again after the 1440x900 override", {
-      departed: (d) => !atDesk(d) && !sameSheet(d, desk),
+      departed: (d) => !atDesk(d) && !sameSize(d, desk),
     });
     await rr29Play(k);
   });
