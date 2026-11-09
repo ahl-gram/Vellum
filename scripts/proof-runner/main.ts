@@ -123,10 +123,14 @@ const send = async (args: string[]): Promise<number> => {
   return 0;
 };
 
-const read = (args: string[]): number => {
+const BRANCH_GONE = /\(HTTP (?:404|422)\)/;
+
+export type Shell = (cmd: string, args: string[]) => string;
+
+export const read = (args: string[], shell: Shell = sh): number => {
   const id = args[0] ?? "";
   const run = JSON.parse(
-    sh("gh", ["run", "view", id, "-R", REPO, "--json", "status,conclusion,headBranch,workflowName,url"]),
+    shell("gh", ["run", "view", id, "-R", REPO, "--json", "status,conclusion,headBranch,workflowName,url"]),
   ) as RunView;
   const plan = readPlan(run, args.includes("--keep"));
   if (plan.action === "refuse") throw new Error(plan.reason);
@@ -135,18 +139,23 @@ const read = (args: string[]): number => {
     return 3;
   }
   const out = option(args, "--out") ?? mkdtempSync(join(tmpdir(), `proof-runner-${id}-`));
-  sh("gh", ["run", "download", id, "-R", REPO, "-n", "ledger", "-D", out]);
+  shell("gh", ["run", "download", id, "-R", REPO, "-n", "ledger", "-D", out]);
   console.log(readFileSync(join(out, "ledger.md"), "utf8"));
   console.log(`ledger saved in ${out}`);
   if (plan.deleteBranch !== null) {
-    sh("gh", ["api", "-X", "DELETE", `repos/${REPO}/git/refs/heads/${plan.deleteBranch}`]);
-    console.log(`deleted ${plan.deleteBranch}`);
+    try {
+      shell("gh", ["api", "-X", "DELETE", `repos/${REPO}/git/refs/heads/${plan.deleteBranch}`]);
+      console.log(`deleted ${plan.deleteBranch}`);
+    } catch (err) {
+      if (!BRANCH_GONE.test(err instanceof Error ? err.message : "")) throw err;
+      console.log(`${plan.deleteBranch} was already deleted by an earlier read`);
+    }
   }
   return plan.ok ? 0 : 1;
 };
 
 const USAGE =
-  "usage: npm run proof -- send <mutations.ts|.json> [--sha <sha>] [--runner <ref>] [--label <label>]\n       npm run proof -- send --raw <proof.json> [--runner <ref>] [--label <label>]\n       npm run proof -- read <run-id> [--out <dir>] [--keep]";
+  "usage: npm run proof -- send <mutations.ts|.json> [--sha <sha>] [--runner <ref>] [--label <label>]\n       npm run proof -- send --raw <proof.json> [--runner <ref>] [--label <label>]\n       npm run proof -- read <run-id> [--out <dir>] [--keep]\n       read deletes the run's throwaway branch unless --keep is passed; pass --keep when someone else will read the same run again";
 
 const main = async (argv: string[]): Promise<number> => {
   const [command, ...args] = argv;
