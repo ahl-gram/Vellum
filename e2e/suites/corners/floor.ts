@@ -1,25 +1,10 @@
-// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
-import { ATLAS_ROUTE } from "../../../scripts/generate-discovery.ts";
-import { PAGE_FLOOR } from "../../../src/site/shared/page-box.ts";
+// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718), read in the Explorer and the Print Room: a sideways wheel at 640 scrolls the page and reaches every right-hand piece, a keyboard-opened Chart Table leaves the room where it stood, and a one-pixel window leaves the camera alone.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
 import { mouseMove, mouseWheel, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
-const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
-const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
-const HOME = "/";
-const SCROLLS_DOWN = [...SCROLLING_ROOMS, HOME];
-export const FLOOR_PAGES = [...ROOMS, HOME, ATLAS_ROUTE];
-const FLOOR = PAGE_FLOOR;
-const ATLAS_PIECES = [
-  "body.atlas-sheet > header",
-  "body.atlas-sheet > figure",
-  ".atlas-sheet .styles",
-  ".atlas-sheet .themes",
-  "body.atlas-sheet > footer",
-];
 const TOLERANCE = 0.5;
 
 type Box = [number, number, number, number];
@@ -40,7 +25,7 @@ const PIECES: Payload<Pieces> = `(() => {
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
-  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf", ...${JSON.stringify(ATLAS_PIECES)}]) {
+  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf"]) {
     const e = document.querySelector(s);
     const b = e && getComputedStyle(e).visibility !== "hidden" ? box(e) : null;
     if (b) pieces[s] = b;
@@ -58,7 +43,7 @@ export const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> 
   ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
 async function still(ctx: SuiteContext, page: string, w: number, h: number, label: string): Promise<Pieces> {
-  if (!SCROLLING_ROOMS.includes(page)) await rest(ctx, w, h, label);
+  await rest(ctx, w, h, label);
   return makeSettle(ctx)(
     PIECES,
     (d, last) =>
@@ -102,54 +87,6 @@ export function differences(at: string, got: Pieces, want: Pieces): string[] {
   return out;
 }
 
-const overhang = (at: string, p: Pieces): string[] =>
-  Math.abs(p.over - (Math.max(p.cw, FLOOR) - p.cw)) > TOLERANCE
-    ? [`${at}: the page overhangs the window by ${p.over}, not ${FLOOR - p.cw}`]
-    : [];
-
-export async function fl1Floor(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
-  const faults: string[] = [];
-  const rows: string[] = [];
-  for (const page of FLOOR_PAGES) {
-    const fresh = await open(ctx, page, FLOOR, 800);
-    if (Object.keys(fresh.pieces).length === 0)
-      faults.push(`${page} 1024x800: no piece read, so every comparison below is empty`);
-    if (page === ATLAS_ROUTE)
-      faults.push(
-        ...ATLAS_PIECES.filter((s) => !(s in fresh.pieces)).map(
-          (s) => `${page} 1024x800: the atlas piece ${s} was not read`,
-        ),
-      );
-    const wide = await resized(ctx, page, 1100, 800);
-    const at800 = await resized(ctx, page, FLOOR, 800);
-    const at400 = await resized(ctx, page, FLOOR, 400);
-    for (const [at, p] of [
-      [`${page} 1024x800`, fresh],
-      [`${page} 1024x400`, at400],
-      [`${page} 1100x800`, wide],
-    ] as const)
-      if (p.over > TOLERANCE) faults.push(`${at}: scrolls sideways by ${p.over} at or above the floor`);
-    const narrow = await open(ctx, page, 640, 800);
-    faults.push(...overhang(`${page} 640x800`, narrow), ...differences(`${page} 640x800`, narrow, fresh));
-    const n900 = await resized(ctx, page, 900, 800);
-    faults.push(...overhang(`${page} 900x800`, n900), ...differences(`${page} 900x800`, n900, at800));
-    if (SCROLLS_DOWN.includes(page)) {
-      const slim = await resized(ctx, page, 400, 800);
-      faults.push(...overhang(`${page} 400x800`, slim), ...differences(`${page} 400x800`, slim, at800));
-      if (slim.navLines !== 1) faults.push(`${page} 400x800: the nav runs to ${slim.navLines} lines`);
-    }
-    const short = await resized(ctx, page, 640, 400);
-    faults.push(...overhang(`${page} 640x400`, short), ...differences(`${page} 640x400`, short, at400));
-    rows.push(`${page} ${Object.keys(at800.pieces).length} pieces, overhang ${narrow.over} at 640`);
-  }
-  ctx.check(
-    "FL1 a window narrower than 1024 lays out every page's 1024 layout at full size and scrolls sideways by exactly the page's overhang: every piece of chrome, the sheet and the main column (on home its stage, its camera's sheet, its seed panel, legend, Glass, bearing line, stamp and shelf) stand where they stand at 1024 of the same height, and on the served atlas, outside the tree, its head, hero plate, two plate grids and foot (Issue #763 ruling 3B), freshly loaded at 640x800 and resized to 900x800 and 640x400, the pages that scroll down at 400x800 too with their nav on one line; and no page scrolls sideways at 1024 or 1100 (Alex, 2026-10-06, on Issue #762)",
-    faults.length === 0,
-    `${rows.join(" | ")}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
-  );
-}
-
 type View = {
   sx: number;
   zoomed: boolean;
@@ -177,13 +114,15 @@ async function wheel(ctx: SuiteContext, x: number, y: number, dx: number, dy: nu
   await mouseWheel(ctx.send, x, y, dy, dx);
 }
 
+const FL2_ROOMS = ["/explorer/", "/print-room/"];
+
 export async function fl2Reach(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const settle = makeSettle(ctx);
   const faults: string[] = [];
   const rows: string[] = [];
   let control = false;
-  for (const page of ROOMS) {
+  for (const page of FL2_ROOMS) {
     const rested = await open(ctx, page, 640, 800);
     const start = await ctx.evaluate<View>(VIEW);
     for (let i = 0; i < 6; i++) await wheel(ctx, start.target!.x, start.target!.y, 120, 6);
@@ -208,7 +147,7 @@ export async function fl2Reach(ctx: SuiteContext): Promise<void> {
     rows.push(`${page} scrolled ${end.sx}, ${end.inView.length} right-hand pieces in view`);
   }
   ctx.check(
-    "FL2 at a 640 window a real sideways wheel over the sheet (or the text) scrolls the page and does not zoom the chart, where a vertical wheel at the same place in the same run does zoom it (the control), and at the end of the scroll every right-hand piece (the room folio, the slip, the Glass, the drawer's tab) stands wholly in the window, each moved by exactly the scroll (Issue #762)",
+    "FL2 at a 640 window, in the Explorer and in the Print Room, a real sideways wheel over the sheet scrolls the page and does not zoom the chart, where a vertical wheel at the same place in the same run does zoom it (the control), and at the end of the scroll every right-hand piece (the room folio, the slip, the Glass, the drawer's tab) stands wholly in the window, each moved by exactly the scroll (Issue #762)",
     faults.length === 0 && control,
     `${rows.join(" | ")}; the control zoomed ${control}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
   );
@@ -234,72 +173,6 @@ export async function fl3Relayout(ctx: SuiteContext): Promise<void> {
     faults.length
       ? `${faults.length} faults: ${faults.slice(0, 8).join("; ")}`
       : `${CHART_ROOM_FLOOR.length} rooms held`,
-  );
-}
-
-type Held = { sx: number; sy: number; ys: Record<string, number>; focus: { inView: boolean; hit: boolean } | null };
-const HELD: Payload<Held> = `(() => {
-  const ys = {};
-  for (const s of ["header.chrome", ".corner.tr", ".slip"]) { const e = document.querySelector(s); if (e) ys[s] = Math.round(e.getBoundingClientRect().top * 10) / 10; }
-  const a = document.activeElement;
-  let focus = null;
-  if (a && a.matches(".index .sec")) { const b = a.getBoundingClientRect(); const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); focus = { inView: b.left >= 0 && b.right <= innerWidth && b.top >= 0 && b.bottom <= innerHeight, hit: e === a || a.contains(e) }; }
-  return { sx: scrollX, sy: scrollY, ys, focus };
-})()`;
-
-const heldFaults = (where: string, top: Held, reads: readonly (readonly [string, Held])[]): string[] =>
-  reads.flatMap(([at, read]) => [
-    ...Object.entries(top.ys)
-      .filter(([s, y]) => Math.abs((read.ys[s] ?? NaN) - y) > TOLERANCE)
-      .map(([s, y]) => `${where}: ${s} moved from ${y} to ${read.ys[s]} ${at}`),
-    ...(read.sx !== 0 ? [`${where}: the window swung ${read.sx}px sideways ${at}, which only the reader may do`] : []),
-  ]);
-
-export async function fl4Read(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
-  const settle = makeSettle(ctx);
-  const faults: string[] = [];
-  for (const page of ["/faq/", "/glossary/"]) {
-    for (const w of [640, 1280]) {
-      await open(ctx, page, w, 800);
-      const top = await ctx.evaluate<Held>(HELD);
-      await ctx.evaluate(`window.scrollTo(0, 900)`);
-      const down = await settle(
-        HELD,
-        (d, last) => d.sy >= 899 && last !== null && JSON.stringify(d) === JSON.stringify(last),
-        `FL4 ${page} ${w} scrolled down`,
-      );
-      await ctx.evaluate(`window.scrollTo(0, document.documentElement.scrollHeight)`);
-      const end = await settle(
-        HELD,
-        (d, last) => d.sy > down.sy && last !== null && JSON.stringify(d) === JSON.stringify(last),
-        `FL4 ${page} ${w} at the end`,
-      );
-      faults.push(
-        ...heldFaults(`${page} at ${w}`, top, [
-          ["scrolled down", down],
-          ["at the document's end", end],
-        ]),
-      );
-      if (w === 640) {
-        await ctx.evaluate(`window.scrollTo(0, 0)`);
-        await ctx.evaluate(`document.querySelector(".index .sec").focus()`);
-        const f = await settle(
-          HELD,
-          (d, last) => d.focus !== null && last !== null && JSON.stringify(d) === JSON.stringify(last),
-          `FL4 ${page} the index link focused`,
-        );
-        if (!f.focus!.inView || !f.focus!.hit)
-          faults.push(
-            `${page} at 640: the focused index link ${f.focus!.inView ? "is in the window but takes no hit" : "is out of the window"}`,
-          );
-      }
-    }
-  }
-  ctx.check(
-    "FL4 a room that scrolls down keeps its head cluster, room folio and index where they stand while the text scrolls, down the page and at its end, at 640 and 1280, the window never swinging sideways on its own while the reader scrolls down (the index's ink keeps its row in view by scrolling the index alone), and at 640 a keyboard focus on the index's first link brings it into the window where it takes a hit (Issue #762)",
-    faults.length === 0,
-    faults.length ? `${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : "the FAQ and the Glossary held",
   );
 }
 

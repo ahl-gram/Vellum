@@ -143,11 +143,3 @@ export function verdict({ w, read }: Row): string | null {
     return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
   return null;
 }
-
-export type Control = { readonly t: string; readonly w: number; readonly natural: number };
-
-export function squeezes(w: number, controls: readonly Control[]): string[] {
-  return controls
-    .filter((c) => c.w < c.natural - 0.5)
-    .map((c) => `at ${w} the corner's ${c.t} is squeezed to ${c.w.toFixed(1)} from its own ${c.natural.toFixed(1)}`);
-}

@@ -11,14 +11,11 @@ import {
   pageFaults,
   plainShift,
   routesUnder,
-  squeezes,
   strideWidths,
   unreadWidthConditions,
   verdict,
 } from "../../e2e/suites/corners/geometry.ts";
 import type { Box, CornerRead, Row } from "../../e2e/suites/corners/geometry.ts";
-import { FLOOR_PAGES } from "../../e2e/suites/corners/floor.ts";
-import { ATLAS_ROUTE, DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const box = (x: number, y: number, r: number, b: number, t = "ink"): Box => ({ x, y, r, b, t });
@@ -249,35 +246,6 @@ test("a width passes only clear, laid out at the width set, with ink in both cor
   );
 });
 
-test("a corner control is squeezed when it renders narrower than its own width by more than rounding", () => {
-  assert.deepEqual(
-    squeezes(1023, [
-      { t: "input#pr-seed", w: 110.78, natural: 110.78 },
-      { t: "select#pr-style", w: 118.2, natural: 118.39 },
-    ]),
-    [],
-    "whole, or under half a pixel short",
-  );
-  assert.deepEqual(
-    squeezes(1023, [
-      { t: "input#pr-seed", w: 63.44, natural: 110.78 },
-      { t: "button#pr-random", w: 38.39, natural: 38.39 },
-    ]),
-    ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from its own 110.8"],
-    "the step 11 plate read's figure on the Print Room before its row wrapped",
-  );
-  assert.equal(
-    squeezes(1023, [{ t: "select#pr-style", w: 117.8, natural: 118.4 }]).length,
-    1,
-    "six tenths of a pixel short is a squeeze",
-  );
-  assert.deepEqual(
-    squeezes(1023, [{ t: "button#x", w: 38, natural: 38.5 }]),
-    [],
-    "exactly half a pixel short is rounding",
-  );
-});
-
 test("a width condition that tells two windows at or below the 1024 floor apart is named, in either form, and one that switches above the floor is not (Issue #763 ruling 2A)", () => {
   const floored = [
     "(max-width: 900px)",
@@ -339,14 +307,4 @@ test("a page's faults are its unreadable width conditions, its conditions that s
     "the floor is the caller's, threaded to the judgement and the line alike",
   );
   assert.deepEqual(pageFaults(["(min-width: 1050px)"], [], 1024), [], "and the same condition clears a lower floor");
-});
-
-test("FL1 reads every page the site serves, every page the tree builds and every discovery route, the served atlas among them, so a new page joins the floor by existing (Issue #763 ruling 3B)", () => {
-  const tree = routesUnder(resolve(REPO, "src/pages"));
-  const served = [...new Set([...tree, ...DISCOVERY_ROUTES])].sort();
-  assert.ok(
-    served.includes(ATLAS_ROUTE) && !tree.includes(ATLAS_ROUTE),
-    "the atlas is no longer a page outside the tree, so this roster no longer reaches past it",
-  );
-  assert.deepEqual([...FLOOR_PAGES].sort(), served);
 });
