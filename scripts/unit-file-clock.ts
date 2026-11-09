@@ -1,4 +1,4 @@
-import { relative } from "node:path";
+import { relative, resolve } from "node:path";
 
 export type FileTiming = { readonly file: string; readonly ms: number };
 
@@ -27,6 +27,7 @@ export default async function* unitFileClock(source: AsyncIterable<FileEvent>): 
   const timings: FileTiming[] = [];
   for await (const { type, data } of source) {
     if (type !== "test:complete" || data.nesting !== 0 || data.file === undefined || data.name === undefined) continue;
+    if (resolve(data.name) !== data.file) continue;
     timings.push({ file: relative(process.cwd(), data.file), ms: data.details?.duration_ms ?? 0 });
   }
   for (const line of fileClockLines(timings)) yield `${line}\n`;
