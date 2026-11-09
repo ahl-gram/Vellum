@@ -58,6 +58,7 @@ test("a risen Press whose top comes within the gap of the head cluster's foot sh
 });
 
 test("a risen Press clear of the gap whose soft pool would reach the head cluster's foot sheds its note (Issue #1273, from e2e NA4)", () => {
+  assert.equal(leansAt(CLUSTER_FOOT + 14), true, "14px under the foot, inside the 16px gap, with no pool, leans");
   assert.equal(
     leansAt(CLUSTER_FOOT + 18),
     false,
