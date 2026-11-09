@@ -235,7 +235,7 @@ const detail = (r: RoomRead, ask: Ask): string =>
 export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const rows: { r: RoomRead; ask: Ask }[] = [];
-  // 2026-11-08: zoomed by two presses at 1024x768 the Ribbon's coordinates in line-tan read 3.94 on the Mac harness browser and 3.92 (0.58 under the 4.5 floor) on the CI runner (run 41353331462, lane B), where the Explorer's folio reads 5.48 and 5.50, so the Ribbon is the room the line-tan witness can fail in (Issue #1159, Issue #1273 ruling 6).
+  // 2026-11-01: zoomed by two presses at 1024x768 the Ribbon's coordinates in line-tan read 3.94 on the Mac harness browser and 3.92 (0.58 under the 4.5 floor) on the CI runner (run 41353331462, lane B), where the Explorer's folio reads 5.48 and 5.50, so the Ribbon is the room the line-tan witness can fail in (Issue #1159, Issue #1273 ruling 6).
   const EZ1_ROOMS: readonly { page: string; ask: Ask }[] = [
     {
       page: "/explorer/",

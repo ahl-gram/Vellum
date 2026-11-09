@@ -311,7 +311,7 @@ const HIDDEN: Payload<boolean> = `(async () => { const c = document.getElementBy
   void getComputedStyle(c).display; return c.hidden; })()`;
 const AT_SEAT = (u: number, v: number): Payload<boolean> =>
   `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: vp.clientWidth / 2 - 4 * ${u} * vp.clientWidth, y: vp.clientHeight / 2 - 4 * ${v} * vp.clientHeight }); return true; })()`;
-// Seed 42 by its own address, so no earlier suite's sliders draw it (Issue #1273 ruling 7); at this one seat every variant and axis is nudged (4 to 10 cards each, measured 2026-11-08 on the Mac harness browser).
+// Seed 42 by its own address, so no earlier suite's sliders draw it (Issue #1273 ruling 7); at this one seat 4 to 10 cards are nudged on every variant and axis (measured 2026-11-08 on the Mac harness browser).
 const Z25_WORLD = "#seed=42&style=antique&legend=1&arms=0&beasts=0";
 const Z25_SEAT = { u: 0.25, v: 0.25 } as const;
 const CAMERA_HASH = /&cx=[^&]*&cy=[^&]*&k=[^&]*/;

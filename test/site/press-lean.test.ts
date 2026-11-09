@@ -54,11 +54,11 @@ function leansAt(rowTop: number, poolTop = ""): boolean {
 
 test("a risen Press whose top comes within the gap of the head cluster's foot sheds its note, and one clear of it keeps it (Issue #1273, from e2e NA4)", () => {
   assert.equal(leansAt(CLUSTER_FOOT + 2), true, "a row 2px under the cluster's foot, inside the 16px gap, leans");
+  assert.equal(leansAt(CLUSTER_FOOT + 14), true, "14px under the foot, inside the 16px gap, with no pool, leans");
   assert.equal(leansAt(560), false, "a row far below the cluster keeps its note");
 });
 
 test("a risen Press clear of the gap whose soft pool would reach the head cluster's foot sheds its note (Issue #1273, from e2e NA4)", () => {
-  assert.equal(leansAt(CLUSTER_FOOT + 14), true, "14px under the foot, inside the 16px gap, with no pool, leans");
   assert.equal(
     leansAt(CLUSTER_FOOT + 18),
     false,

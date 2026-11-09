@@ -312,10 +312,10 @@ away. **Provisional until the post-use review:** the crisp cluster on home and i
 2026-10-06, Issue #762: soft): the legend row's pool box ends inside the rise gap above the chart
 folio, so no backing box lies over another piece's lines, while its blur reaches a few pixels over
 the caption's top line, which is why every line there is read as it is painted, at 4.5:1 or better
-(`EA4` in `e2e/suites/stage/stage.ts`, on the Explorer, the Print Room folded and the Reading Room
-at 1024x474; the pool's blur itself is checked by eye since Issue #1273). Over a floored sheet the
-strip alone takes none: its lines
-stand on its own fade, and a pool there would lie over the chart folio and the Glass. The room
+(no check reads it as painted since Issue #1273 deleted `NS1`; `EA4` in `e2e/suites/stage/stage.ts`
+reads computed ink against the painted ground, and the pool's blur is checked by eye). Over a floored
+sheet the strip alone takes none: its lines stand on its own fade, and a pool there would lie over
+the chart folio and the Glass. The room
 folio's pool reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
