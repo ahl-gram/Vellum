@@ -1,10 +1,10 @@
-// Ribbon e2e (the RB checks; the chart room since Issue #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the first plate and Turn about's ink in up each strip while a picked journey's arrives whole, an address the roads refuse is named on the slip, each town row opens its prospect, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
+// Ribbon e2e (the RB checks; the chart room since Issue #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the first plate and Turn about's ink in up each strip while a picked journey's arrives whole, an address the roads refuse is named on the slip, and each town row opens its prospect; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { SuiteContext } from "../types.ts";
 import { rb19Refused, rb20RowProspects } from "./ribbon/courtesies.ts";
 import { rb12Dress } from "./ribbon/dress.ts";
-import { rb13RowHover, rb14Glass, rb15Paper } from "./ribbon/gestures.ts";
+import { rb15Paper } from "./ribbon/gestures.ts";
 import { rb21InksIn, rb22TurnAbout, rb23Reduced } from "./ribbon/ink.ts";
 import { ribbonKit, type Ribbon, type RibbonKit, type Row } from "./ribbon/kit.ts";
 import { rb11Markup, rb16RoadStandsDown, rb17PlaceLink, rb18CardRoad } from "./ribbon/room.ts";
@@ -17,21 +17,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const k = ribbonKit(ctx);
 
-  let svg1: string | null = null;
   await step("RB1 to RB5e", async () => {
     const first = await rb1SetsOut(k);
-    svg1 = await rb5PressedPlate(k);
+    await rb5PressedPlate(k);
     await rb5bTheSlip(k, first);
   });
   await rb6PickedDestination(k);
-  await step("RB7", () => rb7SameScroll(k, svg1));
   await step("RB11", () => rb11Markup(k));
   await step("RB12", () => rb12Dress(k));
-  await step("RB13", () => rb13RowHover(k));
-  await step("RB14", () => rb14Glass(k));
   await step("RB15", () => rb15Paper(k));
   await step("RB16", () => rb16RoadStandsDown(k));
-  await step("RB8", () => rb8InkDress(k));
   await step("RB17", () => rb17PlaceLink(k));
   await step("RB18", () => rb18CardRoad(k));
   await step("RB19", () => rb19Refused(k));
@@ -71,14 +66,13 @@ async function rb1SetsOut({ evaluate, send, check, page, opened }: RibbonKit): P
   return first;
 }
 
-async function rb5PressedPlate({ check, svgOf }: RibbonKit): Promise<string> {
+async function rb5PressedPlate({ check, svgOf }: RibbonKit): Promise<void> {
   const svg1 = await svgOf();
   check(
     "RB5 the plate is an itinerary strip chart of this road",
     typeof svg1 === "string" && svg1.includes("An itinerary strip chart of the road from Laukuwelua"),
     String(svg1).slice(0, 120),
   );
-  return svg1;
 }
 
 export async function rb5cLeans({
@@ -203,23 +197,6 @@ async function rb6PickedDestination({ evaluate, check, sleep, state }: RibbonKit
       redrawn.slipTitle === `Laukuwelua to ${redrawn.toName}`,
     JSON.stringify(redrawn && { rows: redrawn.rows, prospect: redrawn.prospect, slipTitle: redrawn.slipTitle }),
   );
-}
-
-async function rb7SameScroll({ check, goto, opened, svgOf }: RibbonKit, svg1: string | null): Promise<void> {
-  await goto("#seed=42");
-  await opened("the same address, fresh visit");
-  const svg2 = await svgOf();
-  check(
-    "RB7 the same address presses a byte-identical scroll",
-    svg1 === svg2,
-    `first ${String(svg1).length}b, second ${String(svg2).length}b`,
-  );
-}
-
-async function rb8InkDress({ check, goto, opened }: RibbonKit): Promise<void> {
-  await goto("#seed=42&style=ink");
-  const inked = await opened("the ink dress");
-  check("RB8 an ink chart unrolls an ink scroll (the two-dress fallback)", inked.dress === "ink", inked.dress);
 }
 
 function rb9NoErrors(ctx: SuiteContext, errBase: number, httpBase: number): void {

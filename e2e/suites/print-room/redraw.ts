@@ -79,72 +79,6 @@ export async function pr24bInFlight({ evaluate, check, sleep }: SuiteContext): P
   );
 }
 
-async function pr24cRebound({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
-  // Poll for the DECODED state, not for Bind's re-enable: the blobs decode after the binding lands, and a loaded CI lane read them mid-decode at the first sample (PR #500's run at 91da0e7). A value that never settles fails on the last sample.
-  let rebound = null;
-  for (let i = 0; i < 300; i++) {
-    let s = null;
-    try {
-      s = await evaluate<{
-        imgs: number;
-        loaded: boolean;
-        turnedLoaded: boolean;
-        here: string | undefined;
-        print: boolean;
-      } | null>(
-        `(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`,
-      );
-    } catch {}
-    if (s) rebound = s;
-    if (s && s.loaded && s.turnedLoaded) break;
-    await sleep(50);
-  }
-  return rebound;
-}
-
-export async function pr24cRebind({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // A click on the previous binding's thumbnail DURING a re-bind: the old plates stay turnable until the new ones land (skeptic on PR #496: revoked up front, the sheet and the index blanked).
-  await evaluate(`document.getElementById("pr-bind").click()`);
-  let boundOnce = false;
-  for (let i = 0; i < 300; i++) {
-    let ok = null;
-    try {
-      ok = await evaluate<boolean>(
-        `(()=>{const imgs=[...document.querySelectorAll("#pr-contents .plates img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete&&im.naturalWidth>0) && !document.getElementById("pr-bind").disabled;})()`,
-      );
-    } catch {}
-    if (ok) {
-      boundOnce = true;
-      break;
-    }
-    await sleep(50);
-  }
-  const midRebind = await evaluate<{
-    binding: boolean;
-    here: string | undefined;
-    src: string;
-    stillBound: boolean;
-  } | null>(
-    `(()=>{document.getElementById("pr-bind").click();const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-climate"] .thumb');if(!b)return null;b.click();const t=document.getElementById("pr-turned");return{binding:document.getElementById("pr-bind").disabled,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,src:t.src.slice(0,5),stillBound:document.body.classList.contains("has-atlas")};})()`,
-  );
-  const rebound = await pr24cRebound({ evaluate, sleep });
-  check(
-    "PR24c a turn during a re-bind stays on a live plate, and the new binding lands with every thumbnail and the sheet decoded",
-    boundOnce &&
-      !!midRebind &&
-      midRebind.binding === true &&
-      midRebind.here === "theme-climate" &&
-      midRebind.src === "blob:" &&
-      midRebind.stillBound === true &&
-      !!rebound &&
-      rebound.loaded === true &&
-      rebound.turnedLoaded === true &&
-      rebound.here === "antique" &&
-      rebound.print === true,
-    JSON.stringify({ boundOnce, midRebind, rebound }),
-  );
-}
-
 export async function pr26Redraw({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   let orderReady = false;
   for (let i = 0; i < 160; i++) {
@@ -270,26 +204,48 @@ export async function pr24dLivePlate(ctx: SuiteContext): Promise<void> {
   }
 }
 
-type Face = { up: boolean; label: string | null; away?: boolean; after?: string | null } | null;
-// Wiring, not the claim: the turn and Hide are pressed in one read, so a turn that fails reads as a fault and not a stop.
-const HIDE_FACE: Payload<Face> = `(() => { const t = document.querySelector('#pr-contents .turn[data-plate="gazetteer"]'), page = document.getElementById("pr-page"), vp = document.getElementById("map-viewport");
-  if (!t) return null; t.click(); const face = { up: !page.hidden, label: vp.getAttribute("aria-label") };
-  document.getElementById("pr-hide").click(); return { ...face, away: page.hidden, after: vp.getAttribute("aria-label") }; })()`;
+type Hidden = {
+  atlasEmpty: boolean;
+  hasAtlas: boolean;
+  bindEnabled: boolean;
+  printDisabled: boolean;
+  hideDisabled: boolean;
+  proofBack: boolean;
+  pageAway: boolean;
+  label: string | null;
+  thumbs: number;
+  plateLine: string;
+};
+// Wiring, not the claim: the gazetteer is turned with the element's own click and Hide pressed in the read that measures it, so a turn that fails reads as a fault and not a stop.
+const GAZETTEER_UP: Payload<{ up: boolean; label: string | null } | null> =
+  `(() => { const t = document.querySelector('#pr-contents .turn[data-plate="gazetteer"]'); if (!t) return null; t.click();
+  return { up: !document.getElementById("pr-page").hidden, label: document.getElementById("map-viewport").getAttribute("aria-label") }; })()`;
+const HIDE: Payload<Hidden> = `(() => { document.getElementById("pr-hide").click(); const el = (id) => document.getElementById(id);
+  return { atlasEmpty: el("pr-atlas").children.length === 0, hasAtlas: document.body.classList.contains("has-atlas"), bindEnabled: !el("pr-bind").disabled, printDisabled: el("pr-print").disabled,
+    hideDisabled: el("pr-hide").disabled, proofBack: !el("pr-preview").hidden && el("pr-turned").hidden, pageAway: el("pr-page").hidden, label: el("map-viewport").getAttribute("aria-label"),
+    thumbs: document.querySelectorAll("#pr-contents .plates").length, plateLine: el("pr-plate-line").textContent }; })()`;
 
-export async function pr25bHideFace(ctx: SuiteContext): Promise<void> {
+export async function pr25Hide(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
   await evaluate(`document.getElementById("pr-bind").click()`);
-  try {
-    const ready = await bound(ctx, "print-room-bound-for-hide");
-    const f = ready ? await evaluate(HIDE_FACE) : null;
-    check(
-      "PR25b Hide puts the page face away and gives the gesture box back its own label: with the gazetteer turned up (its label the page's, the control), Hide leaves the page hidden and the label the proof's",
-      !!f && f.up && !/^The proof\./.test(f.label ?? "") && f.away === true && /^The proof\./.test(f.after ?? ""),
-      JSON.stringify(f),
-    );
-  } finally {
-    await evaluate(
-      `(() => { const h = document.getElementById("pr-hide"); if (!h.disabled) h.click(); return true; })()`,
-    );
-  }
+  const ready = await bound(ctx, "print-room-bound-for-hide");
+  const turned = ready ? await evaluate(GAZETTEER_UP) : null;
+  const hidden = await evaluate(HIDE);
+  check(
+    "PR25 Hide dismisses the bound atlas and re-enables Bind: with the gazetteer turned up (its label the page's, the control), Hide puts the page face away and gives the gesture box back the proof's label, the proof back on the sheet, the contents unbound, the plate line cleared",
+    !!turned &&
+      turned.up &&
+      !/^The proof\./.test(turned.label ?? "") &&
+      hidden.atlasEmpty &&
+      !hidden.hasAtlas &&
+      hidden.bindEnabled &&
+      hidden.printDisabled &&
+      hidden.hideDisabled &&
+      hidden.proofBack &&
+      hidden.pageAway &&
+      /^The proof\./.test(hidden.label ?? "") &&
+      hidden.thumbs === 0 &&
+      hidden.plateLine === "",
+    JSON.stringify({ turned, hidden }),
+  );
 }

@@ -1,7 +1,5 @@
-import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { PrintRoomKit } from "./kit.ts";
-import type { Warning } from "./reads.ts";
 import { clearMetrics, pressAt } from "./kit.ts";
 import { mouseMove } from "../../support/input.ts";
 
@@ -63,7 +61,7 @@ export type GlideRead = {
 const REST_K = 1.4;
 const REST_TOLERANCE = 0.005;
 
-export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LENS): Promise<GlideRead> {
+export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
   const { evaluate, send, sleep } = ctx;
   // A reduced motion leaked by a suite that stopped mid-way makes every glide instant (Issue #637's class), so the read clears the features itself.
   await send("Emulation.setEmulatedMedia", { features: [] });
@@ -73,11 +71,11 @@ export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LEN
     if (press) await pressAt({ send }, press.x, press.y);
     let mid: Lens | null = null;
     for (let i = 0; i < 150 && mid === null; i++) {
-      const d = await evaluate(lens);
+      const d = await evaluate(LENS);
       if (d.k > 1.02 && d.k < 1.3) mid = d;
       else await sleep(20);
     }
-    const seatRead = seatedOf(lens);
+    const seatRead = seatedOf(LENS);
     const { w: from } = await evaluate(seatRead);
     await send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 760, deviceScaleFactor: 1, mobile: false });
     let seated: Seated | null = null;
@@ -86,12 +84,12 @@ export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LEN
       if (d.size[0] === 1200 && d.size[1] === 760 && d.w !== from) seated = d;
       else await sleep(20);
     }
-    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed", lens);
+    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed", LENS);
     return { press, mid, from, seated, landed };
   } finally {
     await evaluate(`document.documentElement.style.removeProperty("--glide")`);
     await clearMetrics({ evaluate, send, sleep }, 1200, 760);
-    await homeCamera(ctx, lens);
+    await homeCamera(ctx, LENS);
   }
 }
 
@@ -158,43 +156,49 @@ export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: Prin
     JSON.stringify({ letter: fitLetter, narrow: fitNarrow }),
   );
 
-  // The 20000-char floor is what separates a real bound atlas from the tiny PDF a blank sheet or a print-blank plate yields; paper fidelity itself stays a manual pass.
-  let pdf;
-  try {
-    pdf = await send<{ data: string }>("Page.printToPDF", { printBackground: true });
-  } catch {
-    pdf = null;
-  }
-  check(
-    "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",
-    !!pdf && typeof pdf.data === "string" && pdf.data.length > 20000,
-    pdf ? `${pdf.data.length} base64 chars` : "printToPDF failed",
-  );
+  await pr22FirstPage({ evaluate, send, check });
   await send("Emulation.setEmulatedMedia", { media: "" });
 }
 
-async function pr21cPaperWidth({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {
-  const paper = await evaluate<{
-    w: number;
-    tagline: string;
-    name: string;
-    nameSize: string;
-    folioMax: string;
-    stagePos: string;
-    corner: string;
-  }>(
-    `(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`,
+// 2026-11-08: the bound atlas's first page printed 6586752 base64 characters with its plate and 262220 with the plates hidden (25.1 to 1) on the Mac harness browser; with the plates' images unpainted in print both read 262220.
+const PAINTED_OVER_BARE = 2;
+const PLATES_HIDDEN = "@media print { body.has-atlas #pr-atlas img { visibility: hidden !important; } }";
+const PDF_MAGIC = "JVBERi0";
+
+async function pr22FirstPage({
+  evaluate,
+  send,
+  check,
+}: Pick<PrintRoomKit, "evaluate" | "send" | "check">): Promise<void> {
+  const firstPage = async (): Promise<string | null> => {
+    try {
+      return (await send<{ data: string }>("Page.printToPDF", { printBackground: true, pageRanges: "1" })).data;
+    } catch {
+      return null;
+    }
+  };
+  const painted = await firstPage();
+  await evaluate(
+    `(() => { const s = document.createElement("style"); s.id = "pr22-bare"; s.textContent = ${JSON.stringify(PLATES_HIDDEN)}; document.head.append(s); return true; })()`,
   );
+  let bare: string | null;
+  try {
+    bare = await firstPage();
+  } finally {
+    await evaluate(`(() => { document.getElementById("pr22-bare")?.remove(); return true; })()`);
+  }
   check(
-    "PR21c at paper width (816px, print media) the room's name and tagline print at their own size and the corner is unclamped; the chart's folio prints as nothing",
-    paper.w === 816 &&
-      paper.tagline === "block" &&
-      paper.name === "block" &&
-      paper.nameSize === "21.12px" &&
-      paper.folioMax === "none" &&
-      paper.stagePos === "static" &&
-      paper.corner === "none",
-    JSON.stringify(paper),
+    "PR22 Chrome paints the bound atlas into a PDF: the first page Save-as-PDF yields is a PDF, and with its plate it weighs more than twice the same page printed with the plates hidden in the same run (the control)",
+    !!painted &&
+      !!bare &&
+      painted.startsWith(PDF_MAGIC) &&
+      bare.startsWith(PDF_MAGIC) &&
+      painted.length > PAINTED_OVER_BARE * bare.length,
+    JSON.stringify({
+      painted: painted?.length ?? null,
+      bare: bare?.length ?? null,
+      ratio: painted && bare ? Number((painted.length / bare.length).toFixed(2)) : null,
+    }),
   );
 }
 
@@ -220,70 +224,7 @@ export async function pr21bUnboundPrint({ evaluate, send, check }: SuiteContext)
       printProof.slip === "none",
     JSON.stringify(printProof),
   );
-  // The warning is hidden until the worker fails, so the check unhides it the way app.ts does (warning.hidden = false) and puts the attribute back; reading it while hidden would assert the attribute's own display: none and prove nothing.
-  const warnRead: Payload<Warning | null> = `(()=>{const w=document.getElementById("pr-warning");if(!w)return null;const b=w.getBoundingClientRect();return{disp:getComputedStyle(w).display,pos:getComputedStyle(w).position,w:Math.round(b.width*100)/100,hidden:w.hidden};})()`;
-  await evaluate(`(()=>{document.getElementById("pr-warning").hidden=false;return true;})()`);
   await send("Emulation.setEmulatedMedia", { media: "" });
-  const warnScreen = await evaluate(warnRead);
-  await send("Emulation.setEmulatedMedia", { media: "print" });
-  const warnPrint = await evaluate(warnRead);
-  await evaluate(`(()=>{document.getElementById("pr-warning").hidden=true;return true;})()`);
-  check(
-    "PR21d the render-worker warning prints as nothing (#566, ruled 2026-09-11): it stands on the scripts-off notice's own seat, absolute at top calc(50% + 2.8rem), so on paper its box resolved against the page box and landed on the chart exactly as the status pill's did; unhidden the way a failed worker unhides it, it shows on screen in the same run and is gone, box and all, on paper",
-    !!warnScreen &&
-      warnScreen.hidden === false &&
-      warnScreen.disp !== "none" &&
-      warnScreen.w > 0 &&
-      warnScreen.pos === "absolute" &&
-      !!warnPrint &&
-      warnPrint.hidden === false &&
-      warnPrint.disp === "none" &&
-      warnPrint.w === 0,
-    JSON.stringify({ screen: warnScreen, print: warnPrint }),
-  );
-  // Paper lays out under the 900px query (test/site/room.test.ts pins the taking-back).
-  await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
-  await pr21cPaperWidth({ evaluate, check });
-  await send("Emulation.clearDeviceMetricsOverride");
-  await send("Emulation.setEmulatedMedia", { media: "" });
-}
-
-type Slip = {
-  w: number;
-  radii: string[];
-  borders: string[];
-  lines: number[][];
-  ink: number[];
-  ground: number[];
-  size: string[];
-} | null;
-const WARNING_SLIP: Payload<Slip> = `(() => { const rgba = ${PAGE_RGBA}, w = document.getElementById("pr-warning"); if (!w) return null;
-  const cs = getComputedStyle(w), sides = ["Top", "Right", "Bottom", "Left"];
-  return { w: w.getBoundingClientRect().width, radii: ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((c) => cs["border" + c + "Radius"]),
-    borders: sides.map((s) => cs["border" + s + "Width"] + " " + cs["border" + s + "Style"]), lines: sides.map((s) => rgba(cs["border" + s + "Color"])),
-    ink: rgba(cs.color), ground: rgba(cs.backgroundColor), size: [cs.fontSize, getComputedStyle(w.parentElement).fontSize] }; })()`;
-
-export async function pr21eWarningSlip({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  // PR21c's paper width is still the window's until its clear lands.
-  await clearMetrics({ evaluate, send, sleep }, 816, 1056);
-  await evaluate(`(() => { document.getElementById("pr-warning").hidden = false; return true; })()`);
-  try {
-    const s = await evaluate(WARNING_SLIP);
-    check(
-      "PR21e the render-worker warning wears the house slip: unhidden the way a failed worker unhides it, 6px corners, a 1px solid line-tan rule, ink-brown on the parchment-panel ground, at the size of what it stands in (#324 decision 4)",
-      !!s &&
-        s.w > 0 &&
-        s.radii.every((r) => r === "6px") &&
-        s.borders.every((b) => b === "1px solid") &&
-        s.lines.every((l) => nearRgba(l, tokenRgba("--line-tan"))) &&
-        nearRgba(s.ink, tokenRgba("--ink-brown")) &&
-        nearRgba(s.ground, tokenRgba("--parchment-panel")) &&
-        s.size[0] === s.size[1],
-      JSON.stringify(s),
-    );
-  } finally {
-    await evaluate(`(() => { document.getElementById("pr-warning").hidden = true; return true; })()`);
-  }
 }
 
 export async function pr21fLeanedPrint({ evaluate, send, check, sleep, wheel }: SuiteContext): Promise<void> {

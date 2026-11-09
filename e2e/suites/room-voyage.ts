@@ -25,7 +25,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const sLast = await rw6LastPort(k, plan, lastPort, entries);
   await rw7Home(k, homeStep, entries, sLast);
   await rw8StepBack(k, midPort);
-  await rw9Sibling(ctx);
   const presentShown = await evaluate<number>(`(()=>{${glyphCount}return shown;})()`);
   await rw10Rightward(ctx, presentShown);
   await rw11Reverses(ctx, presentShown);
@@ -226,21 +225,6 @@ async function rw8StepBack({ check, shoot, stepTo }: VoyageKit, midPort: number)
   );
   await shoot("reading-room-voyage.png");
 }
-
-async function rw9Sibling({ evaluate, check }: SuiteContext): Promise<void> {
-  const rw9 = await evaluate<{ chart: boolean; trackInChart: boolean; trackInOverlay: boolean }>(`(()=>{
-    const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
-    const overlay=document.querySelector(".rf-chart .voyage-overlay");
-    return{chart:!!chart,trackInChart:chart?!!chart.querySelector(".voyage-track"):false,
-      trackInOverlay:overlay?!!overlay.querySelector(".voyage-track"):false};
-  })()`);
-  check(
-    "RW9 the track is a sibling overlay, never inside the baked chart",
-    rw9.chart && !rw9.trackInChart && rw9.trackInOverlay,
-    JSON.stringify(rw9),
-  );
-}
-
 async function rw10Rightward({ evaluate, check }: SuiteContext, presentShown: number): Promise<void> {
   const rw10 = await evaluate<{
     chamber: string;

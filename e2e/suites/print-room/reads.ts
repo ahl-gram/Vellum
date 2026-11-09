@@ -19,7 +19,6 @@ export type Matter = {
   label: string | null;
 };
 type AtlasFit = { scrollW: number; clientW: number; plates: number; maxRight: number; atlasPadL: string };
-export type Warning = { disp: string; pos: string; w: number; hidden: boolean };
 
 export const ATLAS_FIT: Payload<AtlasFit> = `(()=>{const d=document.documentElement;const a=document.querySelector("#pr-atlas");const i=[...document.querySelectorAll("#pr-atlas figure img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:i.length,maxRight:i.length?Math.round(Math.max(...i.map((el)=>el.getBoundingClientRect().right))):-1,atlasPadL:a?getComputedStyle(a).paddingLeft:"absent"};})()`;

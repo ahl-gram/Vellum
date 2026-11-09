@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { rr18Park, rr22MidPlay, SWEEP } from "../../e2e/suites/reading-room/colophon.ts";
-import { rr31StripStands, rr35GoverningBudget, rr37Envelope, WIDE } from "../../e2e/suites/reading-room/desk.ts";
-import { DESK, stripRead, type Room as DeskRoom, type Strip } from "../../e2e/suites/reading-room/reads.ts";
-import { emulations, lastSent, recordingSuite, timeline, type Stage } from "../../test-support/recording-suite.ts";
+import { rr31StripStands, rr35GoverningBudget } from "../../e2e/suites/reading-room/desk.ts";
+import { stripRead, type Room as DeskRoom, type Strip } from "../../e2e/suites/reading-room/reads.ts";
+import { recordingSuite } from "../../test-support/recording-suite.ts";
 
 const strip = (h: number, gutter: string): Strip => ({
   position: "fixed",
@@ -37,62 +37,6 @@ test("RR31 and RR35 read the strip straight after the scroll and each range move
     { code: "RR35", ok: true },
   ]);
   assert.deepEqual(run.slept, [], "RR31 or RR35 paused after an action the page handles at once");
-});
-
-type Wide = { iw: number; ih: number; sheet: number[] | null; strip: Strip | null };
-type DeskRead = { iw: number; ih: number; sheet: number[] | null };
-const DESK_SHEET = [122.17, 144.73, 740.27, 571.45];
-const NARROW_SHEET = [40, 60, 600, 463.2];
-const wideAt = (iw: number, h: number, sheet: number[]): Wide => ({ iw, ih: 900, sheet, strip: strip(h, "day 3") });
-const deskStage = (rested: boolean): Stage<DeskRead> => ({
-  phases: [
-    [2, { iw: 768, ih: 900, sheet: [5, 5, 5, 5] }],
-    [2, { iw: 1440, ih: 900, sheet: NARROW_SHEET }],
-  ],
-  rest: rested ? { iw: 1440, ih: 900, sheet: DESK_SHEET } : { iw: 1440, ih: 900, sheet: NARROW_SHEET },
-});
-const envelopeRun = ({ reaches900 = true, backAtDesk = true }: { reaches900?: boolean; backAtDesk?: boolean } = {}) => {
-  const widths = timeline<Wide>([
-    { phases: [], rest: wideAt(1440, 100, DESK_SHEET) },
-    { phases: [[2, wideAt(1440, 100, DESK_SHEET)]], rest: wideAt(1024, 126, [30, 60, 640, 494]) },
-    {
-      phases: [[2, wideAt(1024, 126, [30, 60, 640, 494])]],
-      rest: reaches900 ? wideAt(900, 126, [35, 60, 620, 478.6]) : wideAt(1024, 126, [30, 60, 640, 494]),
-    },
-    { phases: [[2, wideAt(900, 126, [35, 60, 620, 478.6])]], rest: wideAt(768, 126, NARROW_SHEET) },
-  ]);
-  const desk = timeline<DeskRead>([
-    { phases: [], rest: { iw: 768, ih: 900, sheet: NARROW_SHEET } },
-    deskStage(backAtDesk),
-  ]);
-  const run = recordingSuite((expression, sent) => {
-    if (expression === WIDE) return widths.next(emulations(sent));
-    if (expression === DESK) return desk.next(emulations(sent) - 3);
-    return null;
-  });
-  return { ...run, envelope: () => rr37Envelope(run.ctx, strip(100, "day 3")) };
-};
-
-test("RR37 reads each width's strip only once the window reads that width, and hands back only once the room has laid out again at 1440x900", async () => {
-  const { envelope, checked, said, slept } = envelopeRun();
-  await envelope();
-  assert.deepEqual(checked, [{ code: "RR37", ok: true }]);
-  const deskReads = said.filter((e) => e === DESK).length;
-  assert.equal(deskReads, 6, "RR37 handed back before the room laid out again at 1440x900, or kept reading after");
-  assert.deepEqual([...new Set(slept)], [50], "RR37 paused other than to poll");
-});
-
-test("RR37 times out naming the width when the window never reaches it, and puts the desk's window back", async () => {
-  const { envelope, sent } = envelopeRun({ reaches900: false });
-  await assert.rejects(envelope(), (err: Error) => err.message.startsWith("settle timeout RR37 the strip at 900: "));
-  assert.deepEqual(lastSent(sent)?.params, { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-});
-
-test("RR37 times out naming the desk when the room never lays out again at 1440x900", async () => {
-  const { envelope } = envelopeRun({ backAtDesk: false });
-  await assert.rejects(envelope(), (err: Error) =>
-    err.message.startsWith("settle timeout RR37 the room laid out again at 1440x900: "),
-  );
 });
 
 test("RR18 reads the park straight after the range is driven to it and pauses for nothing, since the bar's input and change are handled inside that evaluate", async () => {

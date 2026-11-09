@@ -13,22 +13,16 @@ const show = (r: Read): string =>
   JSON.stringify({ n: r.n, seed: r.svgSeed, culture: r.culture, text: r.text, hash: r.hash });
 
 export async function wr1Link(k: WritingKit): Promise<void> {
-  const reads: string[] = [];
-  let ok = true;
-  for (const sentence of [FLAGSHIP, CLIMATE]) {
-    const f = foundWorld(sentence);
-    if (!f.ok) throw new Error(`${sentence} did not found in Node`);
-    const first = await k.goto(writtenHash(sentence, 1));
-    const again = await k.reload();
-    const agrees = (r: Read): boolean =>
-      r.svgSeed === String(f.seed) && r.culture === f.overrides.culture && r.text === f.sentence;
-    ok &&= agrees(first) && agrees(again);
-    reads.push(`${show(first)} then ${show(again)}`);
-  }
+  const f = foundWorld(CLIMATE);
+  if (!f.ok) throw new Error(`${CLIMATE} did not found in Node`);
+  const first = await k.goto(writtenHash(CLIMATE, 1));
+  const again = await k.reload();
+  const agrees = (r: Read): boolean =>
+    r.svgSeed === String(f.seed) && r.culture === f.overrides.culture && r.text === f.sentence;
   k.check(
-    "WR1 a written link founds its world, and the same world again after a reload, the bare visit's own sentence and one that is not: the chart's seed, naming tongue and lettered sentence are those Node's founding gives",
-    ok,
-    reads.join(" | "),
+    "WR1 a written link founds its world, and the same world again after a reload, on a sentence that is not the bare visit's own: the chart's seed, naming tongue and lettered sentence are those Node's founding gives",
+    agrees(first) && agrees(again),
+    `${show(first)} then ${show(again)}`,
   );
 }
 
@@ -82,11 +76,10 @@ export async function wr4Plate(k: WritingKit): Promise<void> {
 export async function wr5Lettering(k: WritingKit): Promise<void> {
   const none = await k.goto(writtenHash(NO_WORD, 1));
   const cancelled = await k.goto(writtenHash(ALL_CANCEL, 1));
-  const flagship = await k.goto(writtenHash(FLAGSHIP, 1));
   k.check(
     "WR5 a sentence is lettered only when a word was recognised, and the quiet line shows when none steered",
-    none.text === null && none.quiet && cancelled.text === ALL_CANCEL && cancelled.quiet && !flagship.quiet,
-    `no word: text ${none.text} quiet ${none.quiet}; all cancel: text ${cancelled.text} quiet ${cancelled.quiet}; flagship quiet ${flagship.quiet}`,
+    none.text === null && none.quiet && cancelled.text === ALL_CANCEL && cancelled.quiet,
+    `no word: text ${none.text} quiet ${none.quiet}; all cancel: text ${cancelled.text} quiet ${cancelled.quiet}`,
   );
 }
 

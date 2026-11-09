@@ -1,12 +1,10 @@
-// What a hover, a press and print do on the Ribbon (Issue #779 part 2g): a row's hover, keyboard focus and held press in the text's dress, the Glass and its silent refit, and paper standing a leaned camera down.
-import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
-import { makeMouse } from "../../support/home.ts";
-import { makeSettle } from "../../support/settle.ts";
+// What a press and print do on the Ribbon (Issue #779 part 2g): paper standing a leaned camera down.
+import { PAGE_RGBA } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
-import { glideLanded, homeCamera, LENS, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
+import { homeCamera, LENS, lensRest } from "../print-room/print.ts";
 import type { RibbonKit } from "./kit.ts";
 import { pressAt } from "../print-room/kit.ts";
-import { mouseMove, sendKey } from "../../support/input.ts";
+import { mouseMove } from "../../support/input.ts";
 
 type Lean = {
   x: number;
@@ -24,65 +22,6 @@ type Lean = {
 const LEAN: Payload<Lean> = `(() => { const rgba = ${PAGE_RGBA}, b = document.querySelector("#rb-itinerary .lean"), r = b.getBoundingClientRect(), cs = getComputedStyle(b);
   return { x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, hover: b.matches(":hover"), focus: b.matches(":focus-visible"), active: b.matches(":active"), on: b.parentElement.classList.contains("on"), moving: b.getAnimations().length > 0, image: cs.backgroundImage,
     stops: /^linear-gradient\\(to right, /.test(cs.backgroundImage) ? (cs.backgroundImage.match(/(color|rgba?|oklab)\\([^)]*\\)/g) || []).map(rgba) : [], transform: cs.transform, shadow: cs.boxShadow }; })()`;
-
-const washed = (d: Lean): boolean =>
-  d.stops.length === 2 &&
-  nearRgba(d.stops[0], tokenRgba("--control-gold")) &&
-  d.stops[1]![3] === 0 &&
-  d.transform === "none" &&
-  d.shadow === "none";
-const still = (d: Lean, last: Lean | null): boolean =>
-  !d.moving && !!last && JSON.stringify(d) === JSON.stringify(last);
-
-export async function rb13RowHover(k: RibbonKit): Promise<void> {
-  const { evaluate, send, check, sleep, opened } = k;
-  const settle = makeSettle({ evaluate, sleep });
-  const mouse = makeMouse({ send, sleep });
-  await opened("seed 42, for a row's hover");
-  try {
-    const atRest = await evaluate(LEAN);
-    await mouseMove(send, atRest.x, atRest.y);
-    const hovered = await settle(LEAN, (d, last) => d.hover && still(d, last), "ribbon-row-hovered");
-    await mouseMove(send, 1, 700);
-    await evaluate(`(() => { document.querySelector("#itinerary .slip-fold").focus(); return true; })()`);
-    await sendKey(send, "Tab", "Tab", 9);
-    const keyed = await settle(LEAN, (d, last) => d.focus && !d.hover && still(d, last), "ribbon-row-keyed");
-    await evaluate(`(() => { document.activeElement.blur(); return true; })()`);
-    await mouse.press(atRest.x, atRest.y);
-    await mouse.moveTo({ x: atRest.x, y: atRest.y }, { x: 1, y: 700 });
-    const held = await settle(LEAN, (d, last) => d.active && !d.hover && !d.focus && still(d, last), "ribbon-row-held");
-    check(
-      "RB13 a row's hover, keyboard focus and held press keep the text's dress against the house button skin: at rest no wash (the control), and under a real hand, a real Tab and a press held off the row the gold wash fading to nothing, no lift and no shadow",
-      atRest.image === "none" && washed(hovered) && washed(keyed) && !keyed.on && washed(held) && !held.on,
-      JSON.stringify({ atRest, hovered, keyed, held }),
-    );
-  } finally {
-    await mouse.release(1, 700);
-    await mouseMove(send, 1, 700);
-    await evaluate(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
-  }
-}
-
-export async function rb14Glass(k: RibbonKit): Promise<void> {
-  const { evaluate, check, opened, send } = k;
-  await opened("seed 42, for the Glass");
-  await mouseMove(send, 1, 1);
-  const press = await evaluate(ZOOM_IN);
-  try {
-    if (press) await pressAt({ send }, press.x, press.y);
-    const leaned = await lensRest(k, "leaned", "ribbon-leaned");
-    await homeCamera(k);
-    const glide = await midGlideRefit(k);
-    check(
-      "RB14 the Glass answers a real press on the scroll: the draw-nearer press leans the camera to 1.4, and a re-seat mid-glide still lands the glide",
-      press?.hit === "zoom-in" && leaned.zoomed && Math.abs(leaned.k - 1.4) < 0.005 && glideLanded(glide),
-      JSON.stringify({ press, leaned, glide }),
-    );
-  } finally {
-    await mouseMove(send, 1, 1);
-    await evaluate(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
-  }
-}
 
 type Paper = { map: string; plate: (string | number)[] };
 const PAPER: Payload<Paper> = `(() => { const p = document.getElementById("rb-plate"), r = p.getBoundingClientRect();

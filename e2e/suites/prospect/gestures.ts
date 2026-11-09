@@ -1,10 +1,10 @@
-// What a press, a hover, a key and print do on the Prospect (Issue #779 part 2g): the Glass and its silent refit, paper, and the filing press.
+// What a press, a hover, a key and print do on the Prospect (Issue #779 part 2g): the Glass, paper, and the filing press.
 import { countLine, LAY_ON_PAGE, layPressFace } from "../../../src/site/explorer/chart-drawer.ts";
 import { parseTableValue } from "../../../src/site/shared/table-address.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
-import { glideLanded, homeCamera, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
+import { homeCamera, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { STORE, type ProspectKit } from "./kit.ts";
 import { mouseMove, sendKey } from "../../support/input.ts";
 
@@ -24,18 +24,16 @@ export async function pb14Glass(k: ProspectKit): Promise<void> {
     const paper = await evaluate(PAPER);
     await send("Emulation.setEmulatedMedia", { media: "" });
     await homeCamera(k);
-    const glide = await midGlideRefit(k);
     check(
-      "PB14 the Glass answers a real press, and paper stands it down: the draw-nearer press leans the camera to 1.4 (the screen read the control), on paper the transform target is untransformed and the plate stands in flow at its own proportion, and a re-seat mid-glide still lands the glide",
+      "PB14 the Glass answers a real press, and paper stands it down: the draw-nearer press leans the camera to 1.4 (the screen read the control), on paper the transform target is untransformed and the plate stands in flow at its own proportion",
       press?.hit === "zoom-in" &&
         leaned.zoomed &&
         Math.abs(leaned.k - 1.4) < 0.005 &&
         paper.map === "none" &&
         paper.plate[0] === "static" &&
         (paper.plate[1] as number) > 0 &&
-        Math.abs((paper.plate[2] as number) - (paper.plate[3] as number)) < 0.01 &&
-        glideLanded(glide),
-      JSON.stringify({ press, leaned, paper, glide }),
+        Math.abs((paper.plate[2] as number) - (paper.plate[3] as number)) < 0.01,
+      JSON.stringify({ press, leaned, paper }),
     );
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "" });

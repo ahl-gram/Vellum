@@ -21,7 +21,7 @@ interface HostHookDeps {
   runInline: typeof runInline;
 }
 
-/** The seam names as DATA: the room's RS2 check imports this array and asserts against it, because a hand-copied list is a ONE-SIDED guard (it catches a seam removed from a host but never one added here that never reaches the room). */
+/** The seam names as DATA: test/site/host-hooks.test.ts imports this array and asserts against it, because a hand-copied list is a ONE-SIDED guard (it catches a seam removed from a host but never one added here that never reaches the room). */
 export const HOST_HOOK_NAMES = [
   "__vellumRunInline",
   "__vellumVoyageStepTo",

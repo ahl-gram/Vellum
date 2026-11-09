@@ -104,7 +104,7 @@ symbol and path so the reader goes and looks.
   `e2e/suites/chart-drawer/`); the entry never moves into its folder, and a part joins no roster.
   The folder is its suite's home and not private to it: another suite may import a part from it,
   as `e2e/suites/room-address.ts` does from `e2e/suites/chart-drawer/`. Suites that belong together
-  share a name prefix and stay flat, each a suite of its own (`e2e/suites/room-ink.ts`,
+  share a name prefix and stay flat, each a suite of its own (`e2e/suites/room-voyage-route.ts`,
   `e2e/suites/room-voyage.ts`).
 - **A phone lays every page out at a fixed 1024 CSS pixels and shrinks it to fit.** The layout's
   viewport tag is exactly `width=1024`: no `initial-scale`, which defeats the fit, and nothing that

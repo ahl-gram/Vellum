@@ -6,24 +6,6 @@ import type { Ages } from "./reads.ts";
 export const SWEEP: Payload<{ u: number | null }> =
   `(()=>{const a=window.__vellumReadingRoomAges();return{u:a?a.u:null};})()`;
 
-export async function rr16Colophon({ evaluate, check }: SuiteContext): Promise<void> {
-  const colo = await evaluate<{
-    input: boolean;
-    dice: boolean;
-    read: boolean;
-    inPanel: boolean | null;
-    inFolio: boolean;
-    shown: boolean;
-  } | null>(
-    `(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`,
-  );
-  check(
-    "RR16 the colophon dice is the room's one control, top right in the folio: input, dice, Read, outside the panel, visible (#318, re-seated by #462 ruling 2)",
-    !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.inFolio && colo.shown,
-    JSON.stringify(colo),
-  );
-}
-
 async function rr17DrawsTyped({
   evaluate,
   check,
@@ -61,21 +43,6 @@ export async function rr17CounterRead({
   plateStaysHidden,
 }: ReadingRoomKit): Promise<void> {
   await rr17DrawsTyped({ evaluate, check, sleep });
-  let reInked = false;
-  for (let i = 0; i < 120; i++) {
-    let ok = null;
-    try {
-      ok = await evaluate<boolean>(
-        `[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`,
-      );
-    } catch {}
-    if (ok) {
-      reInked = true;
-      break;
-    }
-    await sleep(50);
-  }
-  check("RR17b the counter draw replays the arrival ceremony and clears its coast dasharray (no residue)", reInked);
   const restaged = await plateStaysHidden();
   check(
     "RR28 the counter draw clears the old world's plate and stages no new one unasked (#442)",

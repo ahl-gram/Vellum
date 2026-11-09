@@ -30,8 +30,8 @@ repo, it is in one of the homes named at the end.
   inverting it moved corpus names with the suite green. Earlier, Issue #155: the press check S21, as
   PR #290 first wrote it, asserted the `transform-box` declaration and passed on the buggy origin,
   while S26 measured the town point staying a fixed point of the press, 0.873px on the old origin
-  against exactly 0 on the new at a 0.05px tolerance; S26 is RS22 in `e2e/suites/room-ink.ts`
-  today. Proves Gate 1 item 3, its outcome clause included.
+  against exactly 0 on the new at a 0.05px tolerance; S26 was RS22 in the room-ink suite
+  until Issue #1273 deleted it. Proves Gate 1 item 3, its outcome clause included.
 - *The instance, not the class.* #533: two siblings the first sweep missed. #536: three cameras
   pinned, the lattice unswept. #544: the clamp fixed on the road's button and not the stamp line.
   #530: one arm scoped of a selector list. #545: one child clamped.

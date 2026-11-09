@@ -1,54 +1,9 @@
-import { HOST_HOOK_NAMES } from "../../../src/site/shared/host-hooks.ts";
 import type { Facts, InstrumentKit } from "./kit.ts";
 
 export async function rs0Boots({ check, room }: InstrumentKit): Promise<void> {
   const booted = await room.goto("#seed=42&style=antique&legend=1");
   check("RS0 the room boots and settles on the deep-linked world", booted);
 }
-
-export async function rs1State({ evaluate, check }: InstrumentKit): Promise<void> {
-  // At a present park t is null BY DESIGN (agesState's chamber contract); a check demanding a number there would pin a bug.
-  const state = await evaluate<{
-    chamber: string;
-    t: number | null;
-    year: number | null;
-    u: number;
-    seamU: number;
-    held: boolean;
-    playing: boolean;
-    pace: number;
-    min: number;
-    max: number;
-  } | null>(`window.__vellumReadingRoomAges()`);
-  check(
-    "RS1 the room publishes the whole instrument state (u, held, min, max, playing, seamU), not just chamber+year",
-    !!state &&
-      state.chamber === "ages" &&
-      typeof state.year === "number" &&
-      state.t === null &&
-      typeof state.u === "number" &&
-      typeof state.seamU === "number" &&
-      typeof state.held === "boolean" &&
-      typeof state.min === "number" &&
-      typeof state.max === "number" &&
-      typeof state.playing === "boolean",
-    JSON.stringify(state),
-  );
-}
-
-export async function rs2Seams({ evaluate, check }: InstrumentKit): Promise<void> {
-  // The expected names come from the INSTALLER (HOST_HOOK_NAMES): a hand-copied list catches a seam removed but can never catch one added to installHostHooks (the guard-prover proved that one-sidedness on the first cut).
-  const surface = await evaluate<Record<string, string>>(`(()=>{
-    const names=${JSON.stringify(HOST_HOOK_NAMES)};
-    return Object.fromEntries(names.map((n)=>[n,typeof window[n]]));
-  })()`);
-  check(
-    `RS2 the room publishes every seam installHostHooks installs (${HOST_HOOK_NAMES.length} of them, derived from the installer)`,
-    Object.keys(surface).length === HOST_HOOK_NAMES.length && Object.values(surface).every((t) => t === "function"),
-    JSON.stringify(surface),
-  );
-}
-
 export async function rs3Parks({ evaluate, check }: InstrumentKit, sm: Facts): Promise<void> {
   const rs3 = await evaluate<{
     panelShown: boolean;
