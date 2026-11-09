@@ -90,6 +90,21 @@ export function layPressFace(
   return { label: resting, refuses: false };
 }
 
+export function trialFace(
+  trial: { readonly reason: Refusal | null },
+  resting: string,
+): { readonly label: string; readonly refuses: boolean } {
+  return layPressFace({ holds: trial.reason === "already", full: trial.reason === "full" }, resting);
+}
+
+export function tableFace(
+  table: { readonly holds: (item: TableItem) => boolean; readonly isFull: () => boolean },
+  item: TableItem,
+  resting: string,
+): { readonly label: string; readonly refuses: boolean } {
+  return layPressFace({ holds: table.holds(item), full: table.isFull() }, resting);
+}
+
 export function takeOffTable(items: ReadonlyArray<TableItem>, seat: number): ReadonlyArray<TableItem> {
   if (!Number.isInteger(seat) || seat < 0 || seat >= items.length) return items;
   return [...items.slice(0, seat), ...items.slice(seat + 1)];

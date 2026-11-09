@@ -18,7 +18,7 @@ import {
   refusalLine,
   thumbJobFor,
   thumbNames,
-  layPressFace,
+  tableFace,
   filingAt,
   LAY_ON_CARD,
   type FilingSheet,
@@ -105,9 +105,7 @@ const lc = createLivingChart({
   layProspect: {
     state: (idx) => {
       const item = prospectAt(idx);
-      return item
-        ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }, LAY_ON_CARD)
-        : { label: LAY_ON_CARD, refuses: true };
+      return item ? tableFace(chartTable, item, LAY_ON_CARD) : { label: LAY_ON_CARD, refuses: true };
     },
     lay: (idx) => {
       const item = prospectAt(idx);
