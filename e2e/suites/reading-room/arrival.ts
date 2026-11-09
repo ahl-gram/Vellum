@@ -81,12 +81,12 @@ export async function rr4AtRest({ evaluate, check }: SuiteContext): Promise<void
   );
 }
 
-export async function rr26BareVisit({ evaluate, check, plateStaysHidden }: ReadingRoomKit): Promise<void> {
-  const noPlate = await plateStaysHidden();
+export async function rr26BareVisit({ evaluate, check, plateBare }: ReadingRoomKit): Promise<void> {
+  const bare = await plateBare();
   check(
     "RR26 a plain visit opens BARE: no plate until the reader asks for one (#442)",
-    noPlate === null,
-    noPlate === null ? "stayed hidden" : JSON.stringify(noPlate),
+    bare === null,
+    bare === null ? "hidden, and the stage asked for no plate" : JSON.stringify(bare),
   );
 
   const strip = await evaluate(stripRead);
@@ -110,8 +110,8 @@ export async function rr29Play({ evaluate, check, plateShown }: ReadingRoomKit):
   await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
   const played = await plateShown();
   check(
-    "RR29 pressing Play asks for the picture, and one arrives on the slip above the journal (#442; #463)",
-    !!played && played.inSlip === true && played.aboveLog === true,
+    "RR29 pressing Play asks for the picture, and one arrives on the slip above the journal, the stage saying it was asked for it (#442; #463)",
+    !!played && played.inSlip === true && played.aboveLog === true && played.asked !== null,
     JSON.stringify(played),
   );
   await evaluate(

@@ -1,7 +1,7 @@
 import { makeRoom } from "../../support/room.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { Lens } from "../print-room/print.ts";
-import { stageRead } from "./reads.ts";
+import { bareRead, type Bare } from "./reads.ts";
 
 // The frame's chart is this room's transform target; an empty gesture box reads as a camera at rest, so a row that empties it fails the camera's reads rather than stopping them.
 export const RR_LENS: Payload<Lens> = `(() => { const e = document.querySelector("#map-viewport > .rf-chart"); if (!e) return { k: 1, t: "absent", zoomed: false };
@@ -18,18 +18,20 @@ export type ReadingRoomKit = ReturnType<typeof readingRoomKit>;
 function readingRoomPlateShown({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
   const plateShown = async (hrefTail?: string) => {
     for (let i = 0; i < 160; i++) {
-      let s = null;
+      let b: Bare | null = null;
       try {
-        s = await evaluate(stageRead);
+        b = await evaluate(bareRead);
       } catch {}
+      const s = b && b.stage;
       if (
+        b &&
         s &&
         s.hidden === false &&
         s.src &&
         s.src.startsWith("blob:") &&
         (!hrefTail || (s.href || "").endsWith(hrefTail))
       )
-        return s;
+        return { ...s, asked: b.plate };
       await sleep(50);
     }
     return null;
@@ -41,20 +43,11 @@ export function readingRoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const { boot, settled } = makeRoom(ctx);
   const { plateShown } = readingRoomPlateShown({ evaluate, sleep });
-  // The NEGATIVE half of the arrival rule (Issue #442) needs its own dwell: this holds for the window plateShown polls and fails on the first frame a plate is shown. A missing .rr-prospect is a failure, not quiet success: stageRead yields null for an absent element, and a negative check that read null as "stayed hidden" would pass with the stage deleted outright.
-  const plateStaysHidden = async (ms = 2500) => {
-    let saw = 0;
-    for (let i = 0; i < ms / 50; i++) {
-      let s = null;
-      try {
-        s = await evaluate(stageRead);
-      } catch {}
-      if (s === null) return { missing: true, sampled: saw };
-      saw++;
-      if (s.hidden === false || (s.src || "").startsWith("blob:")) return s;
-      await sleep(50);
-    }
-    return null;
+  // A hidden stage keeps its last plate's revoked blob src (measured 2026-11-09, Issue #1285), so whether a plate is up is read from `hidden` alone.
+  const plateBare = async (): Promise<Bare | { missing: true } | null> => {
+    const b = await evaluate(bareRead);
+    if (b.stage === null) return { missing: true };
+    return b.stage.hidden === true && b.plate === null ? null : b;
   };
-  return { ...ctx, boot, settled, plateShown, plateStaysHidden };
+  return { ...ctx, boot, settled, plateShown, plateBare };
 }
