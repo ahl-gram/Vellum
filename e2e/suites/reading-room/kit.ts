@@ -43,7 +43,6 @@ export function readingRoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const { boot, settled } = makeRoom(ctx);
   const { plateShown } = readingRoomPlateShown({ evaluate, sleep });
-  // A hidden stage keeps its last plate's revoked blob src (measured 2026-11-09, Issue #1285), so whether a plate is up is read from `hidden` alone.
   const plateBare = async (): Promise<Bare | { missing: true } | null> => {
     const b = await evaluate(bareRead);
     if (b.stage === null) return { missing: true };

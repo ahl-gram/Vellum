@@ -250,3 +250,9 @@ test("plateShown keeps polling a shown stage whose src is not a blob, and gives 
     Array.from({ length: 160 }, () => 50),
   );
 });
+
+test("RR26 reads a stage that is hidden and asked for nothing as bare though it still carries a plate's blob src, since a hidden stage keeps its last plate's src", async () => {
+  const run = rr26Run({ ...NEW_PLATE, hidden: true }, null);
+  await rr26BareVisit(readingRoomKit(run.ctx));
+  assert.deepEqual(row(run.checked, "RR26"), { code: "RR26", ok: true });
+});

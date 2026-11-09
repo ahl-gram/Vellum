@@ -95,7 +95,6 @@ export async function rr18Park({ evaluate, check }: SuiteContext): Promise<void>
 }
 
 export async function rr20Superseded({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // The worker answers draws in the order they were asked (`answerDraw` in `src/site/explorer/worker.ts` runs to its end before the next message), so once the newer draw has settled the stale seed-7 one has already been answered, and nothing after the settle is waited for.
   await evaluate(
     `(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");const lands={n:0};window.__rr20Lands=lands;window.__rr20Watch=new MutationObserver((rs)=>{for(const m of rs)for(const n of m.addedNodes)if(n.nodeName.toLowerCase()==="svg"&&!n.classList.contains("voyage-overlay"))lands.n++;});window.__rr20Watch.observe(document.querySelector(".rf-chart"),{childList:true});i.value="7";r.click();i.value="42";r.click();})()`,
   );
