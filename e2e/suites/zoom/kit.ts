@@ -1,6 +1,5 @@
 import { waitInked } from "../../support/explorer.ts";
 import type { SuiteContext } from "../../types.ts";
-import type { Ring } from "./reads.ts";
 
 export type ZoomKit = ReturnType<typeof zoomKit>;
 
@@ -32,14 +31,6 @@ export const REDRAFT_TRIES = 375;
 
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
-  const readRing = () =>
-    evaluate<Ring>(`(()=>{
-    const h=document.querySelector("#map .place-hit:hover");
-    if(!h)return{hover:false};
-    const s=getComputedStyle(h,"::after");
-    return{hover:true,t:s.transform,o:s.opacity};
-  })()`);
-
   const rgn = () =>
     evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null; window: unknown }>(
       `window.__vellumRegion()`,
@@ -67,7 +58,6 @@ export function zoomKit(ctx: SuiteContext) {
   return {
     ...ctx,
     waitInked: (label: string): Promise<number> => waitInked(ctx, label),
-    readRing,
     rgn,
     goHome,
     enterAt,

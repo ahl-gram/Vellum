@@ -21,7 +21,7 @@ export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void>
     tab: armed.tabShown,
   };
   check(
-    "CD1 the dog-ear rides the committed survey: labelled, inside the inset's own box so the place overlay's rect is untouched, and the inset still holds exactly ONE svg, which is what keeps suite-region-detail's .pop() on the survey (#518 ruling 3, #520)",
+    "CD1 the dog-ear rides the committed survey: labelled, inside the inset's own box so the place overlay's rect is untouched, and the inset still holds exactly ONE svg, which is what keeps the zoom suite's .pop() (Z21c, Z21d) on the survey (#518 ruling 3, #520)",
     !!armed.ear &&
       armed.ear.label === "lay this survey on the table" &&
       armed.insetSvgs === 1 &&

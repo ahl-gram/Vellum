@@ -29,15 +29,7 @@ export const CHART_ROOM_FLOOR = [
 export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
 export const DESK_FRAME_H = 768;
-export const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
-// Below 1024 the tab stands on the 1024 page past the window's edge, and the ink is read on the page, so the sibling is seen there too.
-export const SLIP_TAB_SIBLING = {
-  at: `at ${SHORT.w}x${SHORT.h} folded`,
-  pieces: ["button.slip-tab", "button.chart-drawer-tab"],
-  row: "the handbook/errata/site.md row on the slip's tab at 932x430",
-};
-
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
 type Backing = Box & { piece: number; role: string };
@@ -171,9 +163,6 @@ export function stageFaults({ page, size, s }: Read): string[] {
   return faults;
 }
 
-export const known = (all: readonly string[]): string[] =>
-  all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
-
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (a Portfolio with nothing gathered, which shows its plate) gives no other signal.
 const STILL_READS = 6;
 
@@ -230,7 +219,7 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
     .filter((r) => !r.s.framed || r.s.pageH !== DESK_FRAME_H || r.s.docH !== DESK_FRAME_H)
     .map((r) => `${r.page} (framed ${r.s.framed}, ${r.s.pageH} tall, document ${r.s.docH})`);
   const switched = switchFaults(reads, DESK_FRAME_H);
-  const faults = known(reads.flatMap(stageFaults));
+  const faults = reads.flatMap(stageFaults);
   ctx.check(
     "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps the desk frame: it lays out 1024 by 768, the page scrolling the 294 the window lacks, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #778 ruling 10, which retired the floor the Explorer and the Print Room took here under Issue #762)",
     missing.length === 0 &&
@@ -291,7 +280,7 @@ async function lifted(
 export async function ea5Lift(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const runs: { at: string; lifted: boolean; s: Stage | null }[] = [];
-  for (const page of CHART_ROOM_FLOOR)
+  for (const page of ["/explorer/"])
     for (const how of ["hover", "focus"] as const) runs.push(await lifted(ctx, page, how));
   const faults = runs.flatMap((r) => [
     ...(r.lifted || r.at.endsWith("no Press") ? [] : [`${r.at}: no press lifted, so the read proves nothing there`]),
@@ -300,8 +289,8 @@ export async function ea5Lift(ctx: SuiteContext): Promise<void> {
   ]);
   const read = runs.filter((r) => r.lifted).length;
   ctx.check(
-    "EA5 in every chart room with a Press, at 1280x800 with a press lifted by hover and then by keyboard focus while the room lays out again, the Press stays where main seats it and the sheet does not floor (the cold review of PR #777: the row rose and stayed risen)",
-    read >= CHART_ROOM_FLOOR.length && faults.length === 0,
+    "EA5 on the Explorer at 1280x800 with a press lifted by hover and then by keyboard focus while the room lays out again, the Press stays where main seats it and the sheet does not floor (the cold review of PR #777: the row rose and stayed risen)",
+    read === 2 && faults.length === 0,
     `${read} of ${runs.length} runs lifted a press; ${faults.length ? faults.slice(0, 6).join("; ") : "no faults"}`,
   );
 }

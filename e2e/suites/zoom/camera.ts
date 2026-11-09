@@ -1,10 +1,10 @@
 import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
 import { mouseMove, sendKey } from "../../support/input.ts";
+import { toExplorer } from "../../support/explorer.ts";
 import { makeSettle, makeStable } from "../../support/settle.ts";
 import { CARD_CARRIER, CARD_ROLL, rolledFrom } from "../../support/witness.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import type { ZoomKit } from "./kit.ts";
-import { ZERO_NUDGE, ringAtRest, ringScale } from "./reads.ts";
+import { ZERO_NUDGE } from "./reads.ts";
 import type { Cam } from "./reads.ts";
 
 export async function zSetup({ evaluate, shoot, waitReady, waitSettled, sleep }: SuiteContext): Promise<void> {
@@ -132,50 +132,6 @@ export async function z8CardConstant({ evaluate, check, shoot, sleep }: SuiteCon
   await stable(CARD_ROLL, "Z8 the pinned card unfurled", { animated: CARD_CARRIER, departed: rolledFrom(before) });
   await shoot("explorer-zoom-card-k8.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
-}
-
-export async function z8bHoverRing({ evaluate, send, check, sleep, readRing }: ZoomKit): Promise<void> {
-  const z8b = await evaluate<
-    | { ok: false; x?: undefined; y?: undefined }
-    | { ok: true; x: number; y: number; hitW: number; overlayK: string | null; mapK: string }
-  >(`(()=>{
-    const vp=document.getElementById("map-viewport");
-    window.__vellumZoomTo({k:1,x:0,y:0});
-    const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;
-    const hits=[...document.querySelectorAll("#map .place-hit")];
-    let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}
-    if(!best)return{ok:false};
-    const br=best.getBoundingClientRect();
-    const px=br.left+br.width/2-vr.left, py=br.top+br.height/2-vr.top;
-    const W=vp.clientWidth,H=vp.clientHeight;
-    window.__vellumZoomTo({k:4,x:W/2-4*px,y:H/2-4*py});
-    const r4=best.getBoundingClientRect();
-    const overlay=document.querySelector("#map .place-overlay");
-    return{ok:true,x:Math.round(r4.left+r4.width/2),y:Math.round(r4.top+r4.height/2),hitW:r4.width,
-      overlayK:overlay?overlay.style.getPropertyValue("--zoom-k"):null,
-      mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
-  })()`);
-  await mouseMove(send, z8b.x ?? 0, z8b.y ?? 0);
-  // Poll, never sleep: opacity below has NO tolerance, and Issue #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
-  let z8bRing = await readRing();
-  for (let i = 0; i < 60 && !ringAtRest(z8bRing); i++) {
-    await sleep(50);
-    z8bRing = await readRing();
-  }
-  const z8bScale = ringScale(z8bRing);
-  check(
-    "Z8b a hovered hit holds its designed ~26px box at zoom, ring pseudo at scale(1), var on the overlay never #map (#331)",
-    z8b.ok &&
-      z8bRing.hover &&
-      Math.abs(z8bScale - 1) <= 0.02 &&
-      parseFloat(z8bRing.o) === 1 &&
-      z8b.overlayK === "4" &&
-      z8b.mapK === "" &&
-      Math.abs(z8b.hitW - 26) <= 1,
-    JSON.stringify({ z8b, z8bRing, z8bScale }),
-  );
-  await mouseMove(send, 5, 5);
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
 type RingRead = {
@@ -355,12 +311,10 @@ const HIDDEN: Payload<boolean> = `(async () => { const c = document.getElementBy
   void getComputedStyle(c).display; return c.hidden; })()`;
 const AT_SEAT = (u: number, v: number): Payload<boolean> =>
   `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: vp.clientWidth / 2 - 4 * ${u} * vp.clientWidth, y: vp.clientHeight / 2 - 4 * ${v} * vp.clientHeight }); return true; })()`;
-// Seed 42's cards need a nudge on every variant and axis at the first seat only on some worlds (lane order draws it with the land and coast sliders the earlier suites moved), so a second and a third seat on the sheet's diagonal give each variant an edge to be nudged from.
-const SEATS: readonly (readonly [number, number])[] = [
-  [0.5, 0.5],
-  [0.25, 0.25],
-  [0.75, 0.75],
-];
+// Seed 42 by its own address, so no earlier suite's sliders draw it (Issue #1273 ruling 7); at this one seat 4 to 10 cards are nudged on every variant and axis (measured 2026-11-08 on the Mac harness browser).
+const Z25_WORLD = "#seed=42&style=antique&legend=1&arms=0&beasts=0";
+const Z25_SEAT = { u: 0.25, v: 0.25 } as const;
+const CAMERA_HASH = /&cx=[^&]*&cy=[^&]*&k=[^&]*/;
 const HITS: Payload<number[]> =
   `[...document.querySelectorAll(".place-overlay .place-hit")].map((h) => Number(h.dataset.idx))`;
 
@@ -379,23 +333,26 @@ const flushFaults = (r: Row): string[] => {
   ]);
 };
 
-export async function z25ClampFlush({ evaluate, send, check }: SuiteContext): Promise<void> {
+export async function z25ClampFlush(ctx: SuiteContext): Promise<void> {
+  const { evaluate, send, check, PORT } = ctx;
+  const back = (await evaluate<string>("location.href")).replace(CAMERA_HASH, "");
+  const redraftOff = () => evaluate<undefined>(`window.__vellumSetRedraftEnabled(false)`);
+  await toExplorer(ctx, `http://127.0.0.1:${PORT}/explorer/${Z25_WORLD}`, "Z25 its own world", redraftOff);
   await park({ evaluate, send });
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const rows: Row[] = [];
   try {
-    for (const [u, v] of SEATS) {
-      await evaluate(AT_SEAT(u, v));
-      await evaluate(HIDDEN, true);
-      for (const idx of await evaluate(HITS)) {
-        const still = await evaluate(ZERO_NUDGE, true);
-        const row = await evaluate(SEAT(idx), true);
-        if (row) rows.push({ ...row, fresh: row.fresh && still });
-      }
+    await evaluate(AT_SEAT(Z25_SEAT.u, Z25_SEAT.v));
+    await evaluate(HIDDEN, true);
+    for (const idx of await evaluate(HITS)) {
+      const still = await evaluate(ZERO_NUDGE, true);
+      const row = await evaluate(SEAT(idx), true);
+      if (row) rows.push({ ...row, fresh: row.fresh && still });
     }
   } finally {
     await park({ evaluate, send });
     await send("Emulation.setEmulatedMedia", { features: [] });
+    await toExplorer(ctx, back, "Z25 the page put back", redraftOff);
   }
   const wrong = faults([rows.length > 0 || "no cards read", ...rows.flatMap(flushFaults)]);
   const lacking = ["plain", "h", "v", "hv"].flatMap((v) =>

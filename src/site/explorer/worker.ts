@@ -58,7 +58,7 @@ function answerRegion(msg: Job<"region">): void {
     title,
     // The PARENT world's own title, which the region's title does not carry; the same line stands in the inline path so the two stay identical (Issue #169's rule, Issue #521's need).
     worldTitle: world.title.title,
-    cached, // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
+    cached, // whether worldFor skipped generateWorld this call
   });
 }
 

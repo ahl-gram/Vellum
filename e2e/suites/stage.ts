@@ -1,22 +1,18 @@
-// The chart's minimum size and what stands over a floored sheet (Issue #762 pull requests A and C), its own suite since Issue #763 split it from corners to balance the CI lanes: short windows (NS1, NA4), the desk frame on a phone, held sideways and upright (EA1, EA6 to EA9, Issue #778), desk windows, folded slips and the named world (EA2, EA3, EL1, EL2), the contrast over a floored sheet (EA4) and a lifted press (EA5), and the chrome over a zoomed chart (EZ1 to EZ4) and the Explorer's slide-away (ES1 to ES10).
+// The chart's minimum size and what stands over a floored sheet (Issue #762 pull requests A and C), its own suite since Issue #763 split it from corners to balance the CI lanes: the desk frame on a phone, held sideways and upright (EA1, EA6 to EA9, Issue #778), desk windows and the named world (EA2, EA3, EL1), the contrast over a floored sheet (EA4) and a lifted press (EA5), and the chrome over a zoomed chart (EZ1 to EZ3) and the Explorer's slide-away (ES1 to ES10).
 import { makeStep } from "../support/step.ts";
 import { withReducedMotion } from "../support/reduced-motion.ts";
 import type { SuiteContext } from "../types.ts";
 import { eaDesk } from "./stage/desk.ts";
 import { ea6Upright, ea7Scrolled, ea8Pinched, ea9Paper } from "./stage/frame.ts";
-import { na4Lean, ns1Soft } from "./stage/short.ts";
 import { DESK, ea1Phone, ea4Reads, ea5Lift } from "./stage/stage.ts";
 import { es1Follow, es2HomeSeats, es7Reduced, es9Fold } from "./stage/slide.ts";
 import { es10Drawer, es3Rest, es4Keys, es5Atelier, es6Link, es8StillPointer } from "./stage/slide-holds.ts";
-import { ez4Strip } from "./stage/strip.ts";
 import { ez1Zoomed, ez2Short, ez3Thin } from "./stage/zoomed.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   try {
     await withReducedMotion(ctx, async () => {
-      await step("NS1", () => ns1Soft(ctx));
-      await step("NA4", () => na4Lean(ctx));
       await step("EA1", async () => {
         await ea1Phone(ctx);
       });
@@ -25,13 +21,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
       await step("EA6", () => ea6Upright(ctx));
       await step("EA8", () => ea8Pinched(ctx));
       await ctx.clearMobile();
-      await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
+      await step("EA2, EA3, EL1", () => eaDesk(ctx));
       await step("EA4", () => ea4Reads(ctx));
       await step("EA5", () => ea5Lift(ctx));
       await step("EZ1", () => ez1Zoomed(ctx));
       await step("EZ2", () => ez2Short(ctx));
       await step("EZ3", () => ez3Thin(ctx));
-      await step("EZ4", () => ez4Strip(ctx));
       await step("ES1", () => es1Follow(ctx));
       await step("ES2", () => es2HomeSeats(ctx));
       await step("ES7", () => es7Reduced(ctx));

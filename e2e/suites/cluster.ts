@@ -67,7 +67,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
-  // The next suite in the lane starts on whatever page is current: hand it a SETTLED Explorer, since a suite that reads the Explorer without navigating races its boot draw (RD2/RD3 red on PR #482 CI).
+  // The next suite in the lane starts on whatever page is current: hand it a SETTLED Explorer, since a suite that reads the Explorer without navigating races its boot draw (two region-detail checks, since deleted, red on PR #482 CI).
   await step("CL restore", async () => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
     await explorerUp(ctx, "CL restore");

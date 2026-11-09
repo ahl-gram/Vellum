@@ -184,7 +184,7 @@ export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
   };
 }
 
-/** The dog-ear: the survey's own top-right corner turned back (Issue #518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because suite-region-detail reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
+/** The dog-ear: the survey's own top-right corner turned back (Issue #518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because the zoom suite (`z21dInsetCards` in `e2e/suites/zoom/inset-cards.ts`) reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
 export function makeDogEar(label: string, k: number, onLay: () => void): HTMLButtonElement {
   const b = document.createElement("button");
   // Set HERE and not left to the next zoom publish: the outgoing inset is still mounted at commit and carries its own ear, so a querySelector that takes the first one hands the counter-scale to the sheet on its way out and leaves this one 3x oversized until the reader zooms again.
