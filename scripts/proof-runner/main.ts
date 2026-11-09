@@ -148,7 +148,7 @@ export const read = (args: string[], shell: Shell = sh): number => {
       console.log(`deleted ${plan.deleteBranch}`);
     } catch (err) {
       if (!BRANCH_GONE.test(err instanceof Error ? err.message : "")) throw err;
-      console.log(`${plan.deleteBranch} was already deleted by an earlier read`);
+      console.log(`${plan.deleteBranch} is already gone, nothing to delete`);
     }
   }
   return plan.ok ? 0 : 1;

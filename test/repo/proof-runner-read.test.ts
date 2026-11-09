@@ -1,4 +1,4 @@
-import { mock, test } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -48,20 +48,12 @@ const fakeShell = (view: RunView, onDelete: () => string) => {
   return { shell, calls };
 };
 
-const readQuietly = (args: string[], shell: Shell): number => {
-  const quiet = mock.method(console, "log", () => {});
-  try {
-    return read(args, shell);
-  } finally {
-    quiet.mock.restore();
-  }
-};
-
 const deleteFails = (status: number, text: string) => () => {
   throw new Error(`gh api -X DELETE repos/x/git/refs/heads/proof/838-a failed: gh: ${text} (HTTP ${status})`);
 };
 
-test("reading a finished run again, when the first read already deleted its branch, still returns the ledger's own verdict", () => {
+test("reading a finished run again, when the first read already deleted its branch, still returns the ledger's own verdict", (t) => {
+  t.mock.method(console, "log", () => {});
   const out = mkdtempSync(join(tmpdir(), "proof-runner-read-test-"));
   try {
     for (const [status, text] of [
@@ -69,26 +61,27 @@ test("reading a finished run again, when the first read already deleted its bran
       [404, "Not Found"],
     ] as const) {
       const clean = fakeShell(run(), deleteFails(status, text));
-      assert.equal(readQuietly(["1", "--out", out], clean.shell), 0, `HTTP ${status} on a successful run`);
+      assert.equal(read(["1", "--out", out], clean.shell), 0, `HTTP ${status} on a successful run`);
       assert.ok(
         clean.calls.some((c) => c.includes("-X DELETE")),
         "the delete was attempted",
       );
       const red = fakeShell(run({ conclusion: "failure" }), deleteFails(status, text));
-      assert.equal(readQuietly(["1", "--out", out], red.shell), 1, `HTTP ${status} on a failed run`);
+      assert.equal(read(["1", "--out", out], red.shell), 1, `HTTP ${status} on a failed run`);
     }
   } finally {
     rmSync(out, { recursive: true, force: true });
   }
 });
 
-test("a delete that fails for any other reason still fails the read, and --keep never attempts one", () => {
+test("a delete that fails for any other reason still fails the read, and --keep never attempts one", (t) => {
+  t.mock.method(console, "log", () => {});
   const out = mkdtempSync(join(tmpdir(), "proof-runner-read-test-"));
   try {
     const denied = fakeShell(run(), deleteFails(403, "Resource not accessible by integration"));
-    assert.throws(() => readQuietly(["1", "--out", out], denied.shell), /HTTP 403/);
+    assert.throws(() => read(["1", "--out", out], denied.shell), /HTTP 403/);
     const kept = fakeShell(run(), () => assert.fail("--keep must not delete"));
-    assert.equal(readQuietly(["1", "--out", out, "--keep"], kept.shell), 0);
+    assert.equal(read(["1", "--out", out, "--keep"], kept.shell), 0);
     assert.ok(!kept.calls.some((c) => c.includes("-X DELETE")));
   } finally {
     rmSync(out, { recursive: true, force: true });
