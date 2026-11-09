@@ -69,7 +69,7 @@ export async function z17Inset({
   captionMs,
   insetView,
 }: ZoomKit): Promise<void> {
-  // Warm up first: Z15/Z16 left another seed in the worker's single-entry world cache and the first region gen pays one-time JIT, so a cold run would not log the steady-state redraft ms.
+  // Warm up first: the first region gen pays one-time JIT, so a cold run would not log the steady-state redraft ms.
   const warm0 = (await rgn()).redrafts;
   await enterAt(2, 0.4, 0.4);
   await waitRedraft(warm0);

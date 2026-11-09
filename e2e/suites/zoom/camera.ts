@@ -336,7 +336,7 @@ const flushFaults = (r: Row): string[] => {
 export async function z25ClampFlush(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, PORT } = ctx;
   const back = (await evaluate<string>("location.href")).replace(CAMERA_HASH, "");
-  const redraftOff = () => evaluate(`window.__vellumSetRedraftEnabled(false)`);
+  const redraftOff = () => evaluate<undefined>(`window.__vellumSetRedraftEnabled(false)`);
   await toExplorer(ctx, `http://127.0.0.1:${PORT}/explorer/${Z25_WORLD}`, "Z25 its own world", redraftOff);
   await park({ evaluate, send });
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
