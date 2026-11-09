@@ -158,8 +158,20 @@ belongs in.
   are, is ruled, and one a ruling sets as a duration is neither. A tolerance around a relation, a
   window a check holds a ruled clearance within among them, is a bound, derived as `CLAUDE.md` says.
 - **A browser check is kept for what it holds against what it costs.** How what it holds is
-  counted, and when a slow one is pulled out of the run, is `handbook/specs/settle-doctrine.md`'s
-  (When a check is pulled out of the run).
+  counted, when a slow one is pulled out of the run, and when one is deleted, is
+  `handbook/specs/settle-doctrine.md`'s (When a check leaves the run).
+- **A claim a deleted browser check held moves to a unit test wherever one can hold it alone
+  (Alex, 2026-11-08, Issue #1273).** The test checks that one claim and nothing beside it, runs
+  fast, and gives the same answer on every run: no browser, no wall clock, no dependence on the
+  order tests run in. It keeps the rules of "The unit suite" above, and it is written before the
+  check is deleted, with the mutation that reds it named, and proven as any new guard is
+  (`handbook/specs/development-workflow.md` step 11). Where page code has to change for a unit
+  test to hold the claim, the change is source work written test first, and the function it makes
+  takes its inputs (a clock, a reduced-motion flag, a measured box) as arguments and returns its
+  result, so one test can drive it and read the answer. A move never adds a browser check: a claim
+  that only a real browser's layout or paint, a real pointer or a real clock shows stays in a
+  check that stays, or is listed as lost coverage as `handbook/specs/settle-doctrine.md` says
+  (When a check leaves the run).
 - How a browser check waits and what the harness environment does is
   `handbook/specs/settle-doctrine.md`'s.
 

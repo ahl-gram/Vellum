@@ -15,9 +15,11 @@ where the proof goes.
 
 - **A red you believe is a flake gets a row before you re-run anything.** The payload verbatim, inside
   backticks, where an em-dash it carries stands; the run id, the sha and branch. A row costs a minute; the dig costs a session.
-- **A row's disposition is one of three**: *settled* (the wait or the bound was fixed, and the check
+- **A row's disposition is one of four**: *settled* (the wait or the bound was fixed, and the check
   asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue number,
-  per `handbook/specs/settle-doctrine.md` item 11), or *open* (seen, recorded, nobody has acted).
+  per `handbook/specs/settle-doctrine.md` item 11), *deleted* (the check is gone, with the PR that
+  deleted it, per that spec's "When a check leaves the run"), or *open* (seen, recorded, nobody has
+  acted).
 - **A rewritten unit test's red that the list does not explain gets a row with no re-run**
   (`handbook/specs/settle-doctrine.md` item 15): its disposition keeps the words
   `a rewritten unit test re-planned` through every change, since `handbook/specs/orchestration.md`

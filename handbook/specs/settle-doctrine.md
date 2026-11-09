@@ -144,11 +144,13 @@ headless browser actually do, so a green run can be believed.
     issue that is not open. A skipped body leaves nothing behind, so before the entry lands,
     every state the body sets or waits for that a later check in the suite reads is set or awaited by that
     later check itself (Issue #873: RS31 read the pace RS30's last press restored, and RR40 the window RR42
-    waited back). The issue stays open as the restore, and fixing the flake deletes the entry. The issue
-    names each claim the check held and each proof row that named it, and those claims count as
-    unprotected until the check returns; no earlier deletion is undone. The list is the one roster of
-    skipped checks. A step too slow for what it holds is pulled out by the same entry, under an issue
-    of its own, as "When a check is pulled out of the run" below says.
+    waited back). The issue stays open as the restore, and fixing the flake deletes the entry, as
+    deleting the check does where "When a check leaves the run" below allows it. The issue names each
+    claim the check held and each proof row that named it, and those claims count as unprotected
+    until the check returns, or, where it is deleted instead, until each is moved or listed as that
+    section says; no earlier deletion is undone. The list is the one roster of skipped checks. A step
+    too slow for what it holds is pulled out by the same entry, under an issue of its own, as
+    "When a check leaves the run" below says.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a step's CI rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` (counted by the step that runs the
@@ -217,17 +219,20 @@ holds only the order.
    issue is filed and the step skipped, with no offer first (item 12).
 4. **A filed issue pulls the check out of the run**, by whoever files it, with no ruling asked (item 11).
 5. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
-   until the check returns (item 11).
-6. **Fixing the flake puts the check back** (item 11).
+   until the check returns, or until each is moved or listed where the check is deleted instead
+   (item 11).
+6. **Fixing the flake puts the check back** (item 11), unless the check is deleted
+   instead (When a check leaves the run).
 
-## When a check is pulled out of the run
+## When a check leaves the run
 
 **Keep a test only while it gives reliable coverage worth its time (Alex, 2026-10-25,
-Issue #1063).** A browser check that is flaky or too slow is fixed, or pulled out of the run, at
-least for now, under an open issue that is its restore as item 11 says: one entry in `E2E_SKIPS`
-(`e2e/support/skips.ts`) naming its suite, its step and the issue, whether it is flaky or slow.
-The bullets say, for each kind, whether the fix or the pull comes first. The unit suite has no
-skip list, and this section sets no rule for a unit test.
+Issue #1063).** A browser check leaves the run one of two ways. One that is flaky or too slow is
+fixed, or pulled out of the run, at least for now, under an open issue that is its restore as
+item 11 says: one entry in `E2E_SKIPS` (`e2e/support/skips.ts`) naming its suite, its step and the
+issue, whether it is flaky or slow. One whose coverage is needless is deleted, with no entry and no
+restore (Alex, 2026-11-08, Issue #1273). The bullets say, for each kind, what comes first. The unit
+suite has no skip list, and this section sets no rule for deleting a unit test.
 
 - **Flaky is items 11 and 12, in the order the section above gives.** A flaky step is pulled out
   when its flake issue is filed, at its third counted CI row at the latest, and its fix is tried
@@ -295,6 +300,47 @@ skip list, and this section sets no rule for a unit test.
   2026-10-25 (`handbook/plans/1000/1063/1063-r2-plan.md`, call C22), is near the line: two more runs of
   the lane's job started by hand give the median. A step the rule finds too slow is reworked
   before the pull request merges.
+- **A check's coverage is needless on one of two grounds (Alex, 2026-11-08, Issue #1273).** It
+  covers no critical journey and is easy to verify by hand, as on a simple page or in the masthead
+  every page wears (its head cluster, its corner and its nav). Or it is coverage a critical journey
+  does not need: one rule read in every room that takes it from one shared module (as
+  `SHARED_BINDINGS` in `scripts/lint/shared-bindings.ts` holds the zoom rooms to `bindZoomRoom`),
+  one layout read across many windows, one claim reached by several paths where one would do, or a
+  claim whose logic a unit test holds and whose path another check that stays reads, so that the
+  check alone reads only the page's wiring of the two. Which journeys are critical is Alex's to
+  rule: the Explorer and the Primer are, and a simple page such as the FAQ or the Glossary is not.
+  Being red, flaky or slow is never a ground by itself: a red goes the way items 11 and 15 send it,
+  and a flaky or too slow step the way the bullets above send it unless Alex rules it deleted on a
+  ground here. A check already pulled out under item 11 is deleted on the same grounds as any other.
+- **Every deletion is Alex's ruling.** A plan that would delete a check names it, the claims it
+  holds, counted as "What a step holds" above says, and the ground it meets, and puts the list to
+  Alex at its stop (`handbook/specs/development-workflow.md` step 6); no lane deletes a check its
+  plan does not name. Narrowing a check to fewer rooms, windows or paths deletes the reads it stops
+  making and is ruled the same way, and what the narrowed check keeps is proven to bite as a new
+  guard is (`handbook/specs/development-workflow.md` step 11).
+- **Each claim a deleted check held is moved or listed.** It moves to a unit test wherever one can
+  hold it alone, written before the check goes, as `handbook/specs/check-placement.md` says (The
+  browser lanes and a plate read). A claim that moves nowhere is listed as lost coverage, with the
+  reason no unit test can hold it, on the issue that ruled the deletion and in the body of the pull
+  request that deletes the check.
+- **The pull request that deletes a check takes with it every line that names it.** It runs
+  `git grep -n -w <id>` for each check it deletes and `git grep -n -F <path>` for each file it
+  deletes or empties, and in the same pull request edits each hit that states a rule or depends on
+  the check, a spec, gate or agent line, a code or stylesheet comment, a roster or a test: a line
+  naming the check as a rule's holder names what holds the rule now, or drops the holder where
+  nothing does. An open row in `handbook/errata/` is live work, not a record: a row there that a
+  grep hits is edited to say what still stands once the check or the file is gone, or deleted
+  where nothing does, and any gap the row recorded that the edit takes out is listed with the
+  check's lost coverage, where the bullet above lists it, naming the row's file and the pull
+  request that left it. A closed or archived record stays as written: an archived plan under
+  `handbook/plans/`, a row in an errata file's Ruled and left section, or a row in
+  `.claude/skills/vellum-footguns/references/scars.md`, save that the check's rows in
+  `.claude/skills/vellum-footguns/references/flake-record.md` take the disposition *deleted*. The
+  check's entry in `E2E_SKIPS` goes with it, and a step that keeps another check is renamed to what
+  it keeps, entry and all; the issue an entry named is closed by that pull request's closing
+  reference once no entry names it, since CI fails while an entry names an issue that is not open
+  (`scripts/e2e-skips-open.ts`). A suite left with no check leaves every roster it joined, found
+  the way `vellum-footguns` Gate 4 finds them.
 
 ## The environment
 
