@@ -12,7 +12,6 @@ function keyOf(seed: number, overrides: Overrides | undefined): string {
   return seed + "|" + JSON.stringify(o, Object.keys(o).sort());
 }
 
-/** `cached` is true exactly when this call SKIPPED generateWorld: the flag the region-cache e2e asserts instead of a timing measurement. */
 export function worldFor(seed: number, overrides?: Overrides): { world: World; cached: boolean } {
   const key = keyOf(seed, overrides);
   if (entry && entry.key === key) {

@@ -189,7 +189,7 @@ async function z13dFoldAndNoHash(
 }
 
 export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
+  // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (found by the harness's own screenshot resize, which surfaced it as an extra region redraft).
   const settle = makeSettle({ evaluate, sleep });
   await evaluate(COUNT_RESIZES);
   try {

@@ -713,7 +713,7 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
 - **Paint: a read taken off paint differs**: a thin line's darkest pixel paints lighter on the
   runner, and a die's bare contrast reads lower there. Home: the bullet above opening
   "A visual claim in a suite is carried by a control taken in the same run";
-  `painted` in `e2e/suites/stage/short.ts`, which reads computed ink against the painted ground for
+  `grounds` in `e2e/suites/stage/stage.ts`, which reads computed ink against the painted ground for
   that reason; NS1's rows of 2026-10-06 in
   `.claude/skills/vellum-footguns/references/flake-record.md`; and, in `handbook/errata/guards.md`,
   the PR #777 row on `EA4`'s witnesses and the PR #307 row on screenshot goldens.

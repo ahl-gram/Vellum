@@ -400,7 +400,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   ink, the darkness that keeps the chrome's faintest ink at 4.5:1 under the fog, which in a chart
   room paints above the lens (Alex, 2026-10-21, Issue #751): a room the size of that sheet, placed
   in the lens by a transform from `loupeView`'s `paper` (`src/site/explorer/loupe-view.ts`), spreads
-  the dark outside itself, and `zl7DarkPastSheet` in `e2e/suites/zoom/loupe-chart.ts` reads it.
+  the dark outside itself.
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
 - **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box

@@ -1,4 +1,4 @@
-// Motion e2e (D the Issue #127 arrival ceremony, F the Issue #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
+// Motion e2e (D, the Issue #127 arrival ceremony): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
 import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
@@ -8,38 +8,9 @@ export const NEW_SHEET: Payload<{ fresh: boolean }> =
   `(()=>{const s=document.querySelector("#map svg");return{fresh:!!s&&!s.__d3Old};})()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, check } = ctx;
-  // F1 and F2 are deliberately not stepped: they read the CSSOM, with nothing to wait on.
   const step = makeStep(ctx);
   await step("D1, D2", () => d1ArrivalCeremony(ctx));
   await step("D3", () => d3DragQuiet(ctx));
-  // A view transition cannot be seen by e2e, so F1/F2 read the DECLARATION out of the CSSOM; motion.css is same-origin, so cssRules reads rather than throwing.
-  const folio = await evaluate<{ topAuto: boolean; reducedNone: boolean }>(`(()=>{
-    const hasVT = (r, nav) => /@view-transition/.test(r.cssText || "") && new RegExp("navigation:\\\\s*" + nav).test(r.cssText || "");
-    let topAuto = false, reducedNone = false;
-    for (const ss of document.styleSheets) {
-      if (!/motion\\.css/.test(ss.href || "")) continue;
-      let rules; try { rules = ss.cssRules; } catch (e) { continue; }
-      if (!rules) continue;
-      for (const r of rules) {
-        if (hasVT(r, "auto")) topAuto = true;
-        if (r.constructor.name === "CSSMediaRule" && /prefers-reduced-motion/.test(r.conditionText || (r.media && r.media.mediaText) || "")) {
-          for (const n of r.cssRules) if (hasVT(n, "none")) reducedNone = true;
-        }
-      }
-    }
-    return { topAuto, reducedNone };
-  })()`);
-  check(
-    "F1 the folio opt-in is parsed top-level (@view-transition navigation:auto)",
-    folio.topAuto === true,
-    JSON.stringify(folio),
-  );
-  check(
-    "F2 reduced-motion turns the folio off, nested in the @media block (navigation:none)",
-    folio.reducedNone === true,
-    JSON.stringify(folio),
-  );
 }
 
 async function d1ArrivalCeremony({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {

@@ -12,7 +12,7 @@ import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "../../src/world/lod.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
-// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region spec is proved live by e2e R14, and only its held cache is read from source at the foot of this file.
+// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region spec is proved live by e2e Z15, and only its held cache is read from source at the foot of this file.
 
 const SEED = 2;
 const CX = 0.5625;

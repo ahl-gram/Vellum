@@ -1,6 +1,7 @@
-// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards; the chart takes a finger only once its touch press is pressed (Issue #778), so ZG5 to ZG7 read it off, ZG9 reads every other room off, ZG10 carries it from room to room and takes it back, ZG8 presses it for ZG2 to ZG4, ZG8c takes it back, and the suite forgets it before the next. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), and NEVER load a page in the touch block after a dispatched two-finger touch (later touches then reach no listener, a tap landing only as its click, and a pinch zooms the page whatever touch-action says; measured 2026-10-13 on main's build too, Issue #778), so every page load comes before ZG2's pinch, the touch-off pinch is the browser's own (Input.synthesizePinchGesture) and is read for its two fingers and the camera, never for the page's own zoom (linux Chrome on CI never moves visualViewport.scale under it, where Brave on macOS zooms the page to 2; measured 2026-10-13, Issue #778), and ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
-import { forgetChartTouch } from "../support/chart-touch.ts";
+// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards; the chart takes a finger only once its touch press is pressed (Issue #778), so ZG5 to ZG7 read it off, ZG10 carries it from the Writing Room to the Explorer and takes it back, ZG8 presses it for ZG2 to ZG4, ZG8c takes it back, and the suite forgets it before the next. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), and NEVER load a page in the touch block after a dispatched two-finger touch (later touches then reach no listener, a tap landing only as its click, and a pinch zooms the page whatever touch-action says; measured 2026-10-13 on main's build too, Issue #778), so every page load comes before ZG2's pinch, the touch-off pinch is the browser's own (Input.synthesizePinchGesture) and is read for its two fingers and the camera, never for the page's own zoom (linux Chrome on CI never moves visualViewport.scale under it, where Brave on macOS zooms the page to 2; measured 2026-10-13, Issue #778), and ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
+import { forgetChartTouch, touchRead } from "../support/chart-touch.ts";
 import { toExplorer } from "../support/explorer.ts";
+import { bounce } from "../support/nav.ts";
 import { makeSettle, makeStable } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { countEvents } from "../support/witness.ts";
@@ -13,7 +14,6 @@ import {
   zg8TouchTaken,
   zg6Pinches,
   zg8cTakenBack,
-  zg9Rooms,
   zgTouchOff,
 } from "./zoom-gestures/touch.ts";
 
@@ -36,8 +36,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await setMobileViewport(1024, 768);
   await step("ZG5, ZG5b, ZG7", () => zgTouchOff(k));
   await step("ZG6", () => zg6Pinches(k));
-  await step("ZG9", () => zg9Rooms(k));
-  await step("ZG10", () => zg10Carried(k));
+  await step("ZG10", async () => {
+    await bounce(k.send, `http://127.0.0.1:${k.PORT}/writing-room/`);
+    await makeSettle(k)(touchRead("#map-viewport"), (d) => d.shown, "ZG10 the Writing Room shows the touch press", 200);
+    await zg10Carried(k);
+  });
   await step("ZG8, ZG8b, ZG11, ZG2, ZG3, ZG4, ZG8c", async () => {
     await zg8TouchTaken(k);
     await zg11LoupeDrag(k);

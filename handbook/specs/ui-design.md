@@ -312,8 +312,10 @@ away. **Provisional until the post-use review:** the crisp cluster on home and i
 2026-10-06, Issue #762: soft): the legend row's pool box ends inside the rise gap above the chart
 folio, so no backing box lies over another piece's lines, while its blur reaches a few pixels over
 the caption's top line, which is why every line there is read as it is painted, at 4.5:1 or better
-(`NS1` in `e2e/suites/stage/short.ts`). Over a floored sheet the strip alone takes none: its lines
-stand on its own fade, and a pool there would lie over the chart folio and the Glass. The room
+(no check reads it as painted since Issue #1273 deleted `NS1`; `EA4` in `e2e/suites/stage/stage.ts`
+reads computed ink against the painted ground, and the pool's blur is checked by eye). Over a floored
+sheet the strip alone takes none: its lines stand on its own fade, and a pool there would lie over
+the chart folio and the Glass. The room
 folio's pool reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
@@ -561,8 +563,8 @@ afterwards. A shadow escapes if the keyframes do not own it. Only a rendered pro
 place card's text read soft inside the magnified chart (Issue #751). So a 3D entrance rests flat.
 Where the motion's last tilt must be kept, it is held at 99.99% and the final keyframe is
 `transform: none`, which keeps every frame and fills flat (`paperUnfurl` in
-`src/styles/shared/motion.css`; `zh12CardFlat` in `e2e/suites/zoom/registration.ts` reads a card
-mid-roll and at rest); an entrance that need not fill takes `backwards` and rests on its element's own
+`src/styles/shared/motion.css`); an entrance that need not fill takes `backwards` and rests on its
+element's own
 style (`prospectUnfurl` in `src/styles/reading-room/index.css`).
 
 **A one-shot ceremony needs its own guard rather than an end event.** Hiding an element mid-animation

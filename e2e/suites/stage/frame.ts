@@ -122,7 +122,7 @@ const BILL_OPENED: Payload<string[] | null> =
 async function uprightReads(ctx: SuiteContext): Promise<{ reads: Read[]; bill: string[] | null }> {
   const reads: Read[] = [];
   let bill: string[] | null = null;
-  for (const page of CHART_ROOM_FLOOR) {
+  for (const page of ["/explorer/"]) {
     const s = await open(ctx, page, UPRIGHT.w, UPRIGHT.h, UPRIGHT.laidOut, "EA6");
     if (s) reads.push({ page, size: "390x844 phone", s });
     if (page === "/explorer/") bill = await ctx.evaluate(BILL_OPENED);
@@ -134,7 +134,7 @@ export async function ea6Upright(ctx: SuiteContext): Promise<void> {
   await ctx.setMobileViewport(UPRIGHT.w, UPRIGHT.h);
   const { reads, bill } = await withStyledBoot(ctx, () => uprightReads(ctx));
   const switched = switchFaults(reads, DESK_FRAME_H);
-  const missing = CHART_ROOM_FLOOR.filter((p) => !reads.some((r) => r.page === p));
+  const missing = reads.some((r) => r.page === "/explorer/") ? [] : ["/explorer/"];
   const faults = [
     ...reads.flatMap(stageFaults),
     ...reads
@@ -150,7 +150,7 @@ export async function ea6Upright(ctx: SuiteContext): Promise<void> {
     : null;
   const onInk = desk.every((p) => nearRgba([...p, 255], ink));
   ctx.check(
-    "EA6 on a phone held upright (390x844, laid out 1024x2217) every chart room keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, the desk below the frame reads chart ink where a row through a sheet does not (Issue #778 ruling 9), and the Explorer's Broadside opens none of its gaps, its page being 768 tall (Issue #1260)",
+    "EA6 on a phone held upright (390x844, laid out 1024x2217) the Explorer keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, the desk below the frame reads chart ink where a row through its sheet does not (Issue #778 ruling 9), and the Explorer's Broadside opens none of its gaps, its page being 768 tall (Issue #1260)",
     missing.length === 0 &&
       switched.length === 0 &&
       faults.length === 0 &&

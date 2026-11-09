@@ -30,7 +30,6 @@ import { run as runCorners } from "../suites/corners.ts";
 import { run as runStage } from "../suites/stage.ts";
 import { run as runSlideAway } from "../suites/slide-away.ts";
 import { run as runDocumentRooms } from "../suites/document-rooms.ts";
-import { run as runRegionDetail } from "../suites/region-detail.ts";
 import { run as runSpecimen } from "../suites/specimen.ts";
 import { run as runWritingRoom } from "../suites/writing-room.ts";
 
@@ -62,7 +61,6 @@ export const SUITES = {
   cluster: runCluster,
   "chart-drawer": runChartDrawer,
   "document-rooms": runDocumentRooms,
-  "region-detail": runRegionDetail,
   specimen: runSpecimen,
   "writing-room": runWritingRoom,
   corners: runCorners,

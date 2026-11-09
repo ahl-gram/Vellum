@@ -1,10 +1,6 @@
-import { PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
-import type { Rgba } from "../../support/pixel.ts";
+import { PAGE_RGBA } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
 export type Cam = { k: number; x: number; y: number };
-export type Ring = { hover: false; t?: undefined; o?: undefined } | { hover: true; t: string; o: string };
-export const ringScale = (r: Ring) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
-export const ringAtRest = (r: Ring) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
 
 export const INKED: Payload<boolean> = `(() => { const t = document.querySelector("#map .voyage-overlay .voyage-track");
   return !!t && (t.getAttribute("points") || "").length > 0; })()`;
@@ -86,107 +82,6 @@ export const SEAT_AT = (px: number, py: number, left: boolean, up: boolean): Pay
   `(() => { const vp = document.getElementById("map-viewport"), w = vp.clientWidth, h = vp.clientHeight;
   const want = { k: 4, x: (${left} ? w * 7 / 8 : w / 8) - 4 * ${px}, y: (${up} ? h * 7 / 8 : h / 8) - 4 * ${py} };
   window.__vellumZoomTo(want); const s = window.__vellumZoomState(); return s.k === want.k && s.x === want.x && s.y === want.y; })()`;
-
-export type Part = { cls: string; props: Record<string, string | number[]> };
-export const PART = (
-  sel: string,
-  props: readonly string[],
-): Payload<Part | null> => `(() => { const rgba = ${PAGE_RGBA}, e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null;
-  const cs = getComputedStyle(e), out = {};
-  for (const p of ${JSON.stringify(props)}) { const v = cs.getPropertyValue(p); out[p] = /color$/.test(p) && v ? rgba(v) : v; }
-  const r = e.getBoundingClientRect(); out.w = r.width; out.h = r.height; return { cls: e.className, props: out }; })()`;
-
-export type Want = readonly [key: string, want: string | number | Rgba, tolerance?: number];
-
-export const cardWants = (rem: number): readonly Want[] => [
-  ["position", "absolute"],
-  ["width", 16 * rem, 0.5],
-  ["pointer-events", "none"],
-];
-export const paperWants = (rem: number): readonly Want[] => [
-  ["box-sizing", "border-box"],
-  ["overflow-y", "auto"],
-  ["touch-action", "pan-y"],
-  ["background-color", tokenRgba("--control-cream")],
-  ["color", tokenRgba("--ink-dark")],
-  ["border-top-width", "1px"],
-  ["border-top-style", "solid"],
-  ["border-top-color", tokenRgba("--ink-dark")],
-  ["border-top-left-radius", "4px"],
-  ["padding-top", 0.6 * rem],
-  ["padding-left", 0.75 * rem],
-  ["font-size", 0.9 * rem],
-  ["line-height", 1.35 * 0.9 * rem],
-  ["animation-name", "paperUnfurl"],
-];
-export const nameWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["letter-spacing", 0.02 * rem],
-];
-export const rankWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["font-style", "italic"],
-  ["color", tokenRgba("--ink-brown")],
-  ["font-size", 0.82 * rem],
-  ["text-transform", "uppercase"],
-  ["margin-top", 0.1 * rem],
-];
-export const foundedWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["margin-top", 0.35 * rem],
-  ["font-variant-numeric", "tabular-nums"],
-];
-export const actsWants = (rem: number): readonly Want[] => [
-  ["display", "flex"],
-  ["flex-direction", "column"],
-  ["align-items", "flex-start"],
-  ["row-gap", 0.3 * rem],
-  ["margin-top", 0.45 * rem],
-];
-export const prospectWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["background-color", tokenRgba("--control-gold")],
-  ["border-top-width", "1px"],
-  ["border-top-color", tokenRgba("--line-tan")],
-  ["font-size", 0.82 * rem],
-  ["text-decoration-line", "none"],
-  ["pointer-events", "auto"],
-  ["color", tokenRgba("--ink-dark")],
-];
-export const layWants = (rem: number): readonly Want[] => [
-  ["background-color", tokenRgba("--control-gold")],
-  ["border-top-width", "1px"],
-  ["border-top-color", tokenRgba("--line-tan")],
-  ["font-size", 0.82 * rem],
-  ["text-align", "left"],
-  ["pointer-events", "auto"],
-];
-export const noteWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["border-top-width", "1px"],
-  ["border-top-style", "solid"],
-  ["border-top-color", tokenRgba("--ink-dark", 0.22)],
-  ["font-size", 0.8 * rem],
-  ["color", tokenRgba("--ink-brown")],
-  ["margin-top", 0.45 * rem],
-  ["padding-top", 0.4 * rem],
-];
-export const rootsWants = (rem: number): readonly Want[] => [
-  ["font-style", "italic"],
-  ["font-size", 0.78 * rem],
-  ["color", tokenRgba("--ink-tale")],
-];
-export const formerWants = (rem: number): readonly Want[] => [
-  ["display", "block"],
-  ["margin-top", 0.15 * rem],
-  ["font-size", 0.81 * rem],
-  ["color", tokenRgba("--ink-brown")],
-];
-export const taleWants = (rem: number): readonly Want[] => [
-  ["margin-top", 0.4 * rem],
-  ["font-style", "italic"],
-  ["color", tokenRgba("--ink-tale")],
-];
 
 // Under reduced motion the blanket's 0.01ms makes the map's camera a transition that runs for several frames and the card's own anchor another, so the engine's clamp measures the camera before this one, or the previous town's nudge (Issue #868); before each town is focused the map is waited to rest and the nudge zeroed and left two frames to land.
 export const ZERO_NUDGE: Payload<boolean> = `(async () => { const c = document.getElementById("place-card"), m = document.getElementById("map"), frame = () => new Promise((r) => requestAnimationFrame(r));
