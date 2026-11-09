@@ -94,12 +94,15 @@ belongs in.
   file (a chart, a face table), a config the house reads (`eslint.config.ts`, a workflow), or a
   stylesheet value the code's own arithmetic must match (the Glass's seat beside the slip in
   `test/site/room.test.ts`). The test checks what the file holds: a value against the code that must
-  agree with it, or a config's shape. **What a built page carries is read in
+  agree with it, or a config's shape. **A new claim about what a built page carries is read in
   `test/site/built-pages.test.ts`** (Alex, 2026-11-08, Issue #1273): its markup and attributes, the
-  names it gives its controls, its links, the files it names, and what it serves with scripts off,
-  read over one build of the site, parsed with `linkedom`, a development dependency only the tests
-  use, each read in its own file under `test-support/built-reads/`. A new read joins that file rather
-  than one that builds the site again. Finding the anchor first (`vellum-footguns` Gate 1) is part of
+  names it gives its controls, its links, the files it names, and what it serves with scripts off.
+  That file builds the site once and reads each page as text or as the document `documentOf` in
+  `test-support/built-dom.ts` parses with `linkedom`, a development dependency only the tests use,
+  with its longer reads kept under `test-support/built-reads/`. A new claim is a test in
+  `test/site/built-pages.test.ts` rather than in a file that builds the site again, and a page joins
+  the rosters `test/site/astro-scaffold.test.ts` keeps where `handbook/specs/site-architecture.md`
+  says (How a page is authored). Finding the anchor first (`vellum-footguns` Gate 1) is part of
   reading the file, not the check, and how such a reader goes blind is `vellum-footguns` Gate 7's.
 - **A lint rule's witness may read the source the rule keys on**, to show the rule still has
   something to hold where the rule cannot say so itself.
@@ -117,14 +120,14 @@ belongs in.
 
 - **What the browser computes is read in a browser**: a resolved style, a box, an overlap, a contrast,
   a motion. Neither the lint nor a unit test can see the cascade, so a rule about how a page looks is
-  measured by `vellum-plate-reader` when it is built or changed, whose measurements decide an
-  appearance, and is kept as a browser check only where a critical journey turns on it: a press a
-  reader must reach or must see answer the hand, or a floor a ruling sets for reading or typing
-  (4.5:1 over the chart, the 16 px a typing field takes). A claim of dress alone (a colour, a size,
-  a rounding, a shadow, a hover or focus colour, how a motion is staged) takes no browser check and
-  is checked by eye (Alex, 2026-11-09, Issue #1273), save in the Specimen Book's own suite,
-  `specimen`, which holds every piece of the kit in each state so the Book does not go stale (Alex,
-  2026-11-08, Issue #1273).
+  pinned here or by `vellum-plate-reader`, whose measurements decide an appearance. A claim of dress
+  alone (a colour, a size, a rounding, a shadow, a hover or focus colour, how a motion is staged) is
+  not written as a browser check: `vellum-plate-reader` measures it when it is built or changed, and
+  it is checked by eye (Alex, 2026-11-09, Issue #1273). It is written as one only where a reader must
+  reach a press or see it answer the hand, where a ruling sets a floor for reading or typing (4.5:1
+  over the chart, the 16 px a typing field takes), and in the Specimen Book's own suite, `specimen`,
+  which holds every piece of the kit in each state so the Book does not go stale (Alex, 2026-11-08,
+  Issue #1273).
 - **A number the room's layout decides is read from the layout in the run, never copied from one
   machine's.** Which press of the Glass fills the screen, a fill depth, a clearance between two
   pieces, a contrast over a ground and a piece's travel all move when a browser lays a room out a

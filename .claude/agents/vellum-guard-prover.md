@@ -98,7 +98,7 @@ For each test that claims to guard a behavior:
 4. Record which tests went red. **Exactly one going red is the good outcome.** Zero red is a hole. If many go red, the test is not the discriminator it claims to be and you should say which one actually bit.
 5. `restore` every path `status` listed, then run `status` again: it must list nothing and exit 0 before the next mutation. That clean exit is the byte proof of the restore; a green suite is not.
 
-Then sweep the class. If the bug hit one instance of N (one of four selectors bound together, three of seven swept pages, one culture of ten), check whether the guard covers all N. A guard written from a bug report comes out shaped like the bug, not the bug's class. An instance is a place the rule can break on its own (`vellum-footguns` Gate 1 item 6): rooms held to one shared module by `SHARED_BINDINGS` in `scripts/lint/shared-bindings.ts` are one instance, so a browser check read in one of them covers that class, and a gap across them is the module's test or the lint's to close, never a read in every room.
+Then sweep the class. If the bug hit one instance of N (one of four selectors bound together, three of seven swept pages, one culture of ten), check whether the guard covers all N. A guard written from a bug report comes out shaped like the bug, not the bug's class. Count the instances as `vellum-footguns` Gate 1 item 6 does, and a HOLE across rooms that item counts as one instance is closed by the shared module's test or the lint, never by a read in every room.
 
 ## What to look for beyond the mutation result
 

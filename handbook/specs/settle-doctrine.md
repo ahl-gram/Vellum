@@ -253,7 +253,7 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   helper that measures it (`squeezes` in `test/e2e/corners.test.ts`), does not hold the claim on
   the page. A holder a plan names as the reason a claim is not lost, or a check not needed, is
   confirmed by running the claim's mutation and seeing the holder red, and the plan quotes that red
-  line; a holder read and not run is named as read.
+  line.
 - **What a step costs** is its seconds on GitHub's machines, the median of three lane runs, read
   from the timestamp the log puts on every line
   (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`): the time
