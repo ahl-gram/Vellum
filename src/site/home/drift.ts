@@ -14,3 +14,42 @@ export function driftTarget(cam: Cam, fit: number): Cam {
     s: closeIn(s, fit) === closeIn(cam.s, fit) ? s : cam.s,
   };
 }
+
+export interface DriftTween {
+  readonly kill: () => void;
+}
+
+export interface DriftDeps<T> {
+  readonly reduced: () => boolean;
+  readonly setTimer: (run: () => void, ms: number) => T;
+  readonly clearTimer: (timer: T | undefined) => void;
+  readonly camera: () => Cam;
+  readonly breathe: () => DriftTween;
+}
+
+export interface Drift {
+  readonly arm: () => void;
+  readonly stop: () => void;
+  readonly base: () => Cam | null;
+}
+
+export function createDrift<T>(deps: DriftDeps<T>): Drift {
+  let timer: T | undefined;
+  let tween: DriftTween | null = null;
+  let base: Cam | null = null;
+  const arm = (): void => {
+    if (deps.reduced()) return;
+    timer = deps.setTimer(() => {
+      base = deps.camera();
+      tween = deps.breathe();
+    }, IDLE_DELAY_MS);
+  };
+  const stop = (): void => {
+    tween?.kill();
+    tween = null;
+    base = null;
+    deps.clearTimer(timer);
+    arm();
+  };
+  return { arm, stop, base: () => base };
+}
