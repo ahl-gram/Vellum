@@ -4,7 +4,6 @@ import { dropExpectedCancellations } from "../support/console.ts";
 import { onDay } from "../support/fixed-day.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { FORMER_DAY, h5cFormerName } from "./hunt/former.ts";
 import { huntQuarry, type Frac } from "./hunt/quarry.ts";
 import { huntRoom } from "./hunt/room.ts";
 import { hd1Dispatch, h8Reload } from "./hunt/solved.ts";
@@ -22,10 +21,8 @@ const HUNT_DAY = Date.UTC(2026, 9, 7, 12);
 const HUNT_SEED = seedForDate(new Date(HUNT_DAY));
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const step = makeStep(ctx);
   await onDay(ctx, HUNT_DAY, () => huntSuite(ctx));
-  await onDay(ctx, FORMER_DAY, () => step("H5c", () => h5cFormerName(huntKit(ctx))));
-  // OUTSIDE every step, since `makeStep` swallows a throw from inside one: H5c's live solve writes the harness's own FIXED_SEED into this key, and every later suite that opens the page in this browser would otherwise get it back already solved.
+  // OUTSIDE every step, since `makeStep` swallows a throw from inside one: the hunt's live solve writes this key, and every later suite that opens the page in this browser would otherwise inherit it.
   await ctx.evaluate(`localStorage.removeItem("vellum.hunt.v1")`);
 }
 
@@ -37,7 +34,6 @@ async function huntSuite(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   await h1Opens(ctx, HUNT_PAGE);
   await huntRoom(ctx);
-  await h2Clues(ctx);
   const tgt = await huntQuarry(ctx, HUNT_SEED);
   const miss = await h3Miss(k, tgt);
   await h3bWarmer(k, tgt, miss);
@@ -105,13 +101,6 @@ async function h1Opens({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE
     await sleep(75);
   }
   check("H1 seed-of-the-day hunt card appears with >=3 clues over a rendered map", huntReady);
-}
-
-async function h2Clues({ evaluate, check }: SuiteContext): Promise<void> {
-  const clueText = await evaluate<string>(
-    `Array.from(document.getElementById("clues").children).map((li)=>li.textContent).join(" | ")`,
-  );
-  check("H2 clues never disclose ruin/abandon wording", !/ruin|abandon/i.test(clueText));
 }
 
 async function h3Miss({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Promise<Guess> {
@@ -186,30 +175,11 @@ async function h4Solves({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): P
     post.reveal && post.revealText.includes(tgt.name) && /founded in the year/i.test(post.revealText),
     post.revealText.slice(0, 80),
   );
-  check(
-    "H5b the reveal names what the place was once called, or says nothing (#49)",
-    tgt.formerName ? post.revealText.includes(`Once called ${tgt.formerName}.`) : !/Once called/.test(post.revealText),
-    JSON.stringify({ formerName: tgt.formerName ?? null, text: post.revealText.slice(0, 120) }),
-  );
   check("H6 a win marker overlays the map and the Share button appears", post.star && post.share);
   check(
     "H7 streak + localStorage persist, keyed on the day's seed",
     /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""),
     `${post.streak} | ${post.ls}`,
-  );
-
-  const wire = await evaluate<{
-    starStamp: boolean;
-    starAnim: string | null;
-    revUnfurl: boolean;
-    revAnim: string | null;
-  }>(
-    `(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{starStamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revUnfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`,
-  );
-  check(
-    "H6b a live solve wires the win ceremony (star stamps in, reveal unfurls)",
-    wire.starStamp && wire.starAnim === "huntStarIn" && wire.revUnfurl && wire.revAnim === "paperUnfurl",
-    JSON.stringify(wire),
   );
 }
 

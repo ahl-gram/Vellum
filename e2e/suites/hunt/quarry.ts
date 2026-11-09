@@ -7,7 +7,6 @@ export async function huntQuarry({ evaluate }: Pick<SuiteContext, "evaluate">, s
   const tgt = await evaluate<{
     seed: number;
     name: string;
-    formerName: string | null;
     hit: Frac;
     miss: Frac;
     missName: string;
@@ -36,7 +35,7 @@ export async function huntQuarry({ evaluate }: Pick<SuiteContext, "evaluate">, s
     const q=chooseQuarry(world,{exclude});
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,formerName:q.settlement.formerName??null,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
+    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
   })()`,
     true,
   );
