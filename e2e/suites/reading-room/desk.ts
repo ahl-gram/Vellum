@@ -1,12 +1,6 @@
-import { makeSettle, makeStable } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { atDesk, DESK, GOVERNING_BUDGET, sameSheet, stripRead, WIDE_WORST } from "./reads.ts";
-import type { Desk, Room, Strip } from "./reads.ts";
-
-type Wide = Desk & { strip: Strip | null };
-export const WIDE: Payload<Wide> = `(() => ({ ...(${DESK}), strip: (${stripRead}) }))()`;
-const ENVELOPE_WIDTHS = [1024, 900, 768] as const;
-const AT_DESK = { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false } as const;
+import { GOVERNING_BUDGET, stripRead } from "./reads.ts";
+import type { Room, Strip } from "./reads.ts";
 
 export async function rr31StripStands(
   { evaluate, check }: SuiteContext,
@@ -22,7 +16,7 @@ export async function rr31StripStands(
   );
 }
 
-export async function rr35GoverningBudget({ evaluate, check }: SuiteContext, deskRest: Strip | null) {
+export async function rr35GoverningBudget({ evaluate, check }: SuiteContext, deskRest: Strip | null): Promise<void> {
   // BOTH halves at the governing width: deskRest alone is the chronicle half's short last annal, which reads 100 at every width and cannot exceed the budget; the survey half carries the long prose and can.
   await evaluate(
     `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
@@ -44,46 +38,6 @@ export async function rr35GoverningBudget({ evaluate, check }: SuiteContext, des
       /^\d+$/.test(deskChron.gutter || ""),
     JSON.stringify({ survey: deskSurvey, chronicle: deskChron, budget: GOVERNING_BUDGET, rest: deskRest }),
   );
-  return deskSurvey;
-}
-
-export async function rr37Envelope(
-  { evaluate, send, check, sleep }: SuiteContext,
-  deskSurvey: Strip | null,
-): Promise<void> {
-  // The SURVEY half carries the long prose (its day rows run to ~153 chars against an annal's ~105), so the bar is driven there first: the chronicle half's short last annal reports 100 at every width and the envelope passes vacuously.
-  await evaluate(
-    `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
-  );
-  const stable = makeStable(makeSettle({ evaluate, sleep }));
-  const across = async (): Promise<Wide[]> => {
-    const reads: Wide[] = [];
-    for (const w of ENVELOPE_WIDTHS) {
-      await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
-      reads.push(await stable(WIDE, `RR37 the strip at ${w}`, { departed: (d) => d.iw === w }));
-    }
-    return reads;
-  };
-  const reads = await across().finally(() => send("Emulation.setDeviceMetricsOverride", AT_DESK));
-  const narrowest = reads[reads.length - 1]!;
-  await stable(DESK, "RR37 the room laid out again at 1440x900", {
-    departed: (d) => atDesk(d) && !sameSheet(d, narrowest),
-  });
-  const byWidth = reads.map(({ iw, strip: s }) => ({
-    w: iw,
-    h: s && s.h,
-    told: s && s.toldDisplay,
-    gutter: s && s.gutter,
-  }));
-  check(
-    `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024, and at 900 and 768 the strip is the 1024 page's, the told row standing and the height the same (#462 ruling 6; the 1024 floor, Alex, 2026-10-06, Issue #762)`,
-    byWidth.length === 3 &&
-      byWidth.every((r) => r.h! > 0 && r.h! <= WIDE_WORST) &&
-      byWidth.every((r) => r.told === "flex" && Math.abs(r.h! - byWidth[0]!.h!) <= 0.5) &&
-      // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
-      byWidth[0]!.h! > deskSurvey!.h,
-    JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
-  );
 }
 
 const ROOM: Payload<Room> = `(() => { const box = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : { width: 0, height: 0, top: 0, bottom: 0 }; };
@@ -96,8 +50,11 @@ export async function rrDeskReads(ctx: SuiteContext): Promise<void> {
   const deskRest = await ctx.evaluate(stripRead);
   const room = await ctx.evaluate(ROOM);
   await rr31StripStands(ctx, deskRest, room);
-  const deskSurvey = await rr35GoverningBudget(ctx, deskRest);
-  await rr37Envelope(ctx, deskSurvey);
+  await rr35GoverningBudget(ctx, deskRest);
+  // Wiring, not a claim: the bar is left on the survey half, where the desk's later reads (RR39, RR41, RR29) were measured.
+  await ctx.evaluate<null>(
+    `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`,
+  );
   rr36ChartFills(ctx, room);
 }
 

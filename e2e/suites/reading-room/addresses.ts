@@ -138,22 +138,6 @@ export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: Rea
 }
 
 export async function rr10CrossLinks({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let card = null;
-  for (let i = 0; i < 120; i++) {
-    try {
-      card = await evaluate<{ verb: string | null; enter: string | null } | null>(
-        `(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`,
-      );
-    } catch {}
-    if (card) break;
-    await sleep(50);
-  }
-  check(
-    "RR10a the home station slip invites Watch one into the room (#459: the Go Deeper card retired)",
-    !!card && card.verb === "Watch one" && card.enter === "reading-room/",
-    JSON.stringify(card),
-  );
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {

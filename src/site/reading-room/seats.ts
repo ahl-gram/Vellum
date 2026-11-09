@@ -20,7 +20,7 @@ export interface RoomFurniture {
   readonly folioSub: HTMLElement;
 }
 
-// The frame's root stays where it is, the arrival ceremony's host (RS26).
+// The frame's root stays where it is, the arrival ceremony's host (RS27 reads its arrival class).
 export function seatFrame(frame: ReadingFrame, plate: ProspectStage, roomEls: RoomFurniture): void {
   roomEls.viewport.appendChild(frame.host.mapEl);
   roomEls.stage.appendChild(frame.host.statusEl);

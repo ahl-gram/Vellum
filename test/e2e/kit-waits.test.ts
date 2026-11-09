@@ -184,7 +184,7 @@ test("atTheDesk fails the desk's step by the wait's own label when the room neve
   await run();
   const first = failed.at(0);
   assert.ok(first, "no step failed");
-  assert.equal(first.name, "RR31, RR35, RR37, RR36");
+  assert.equal(first.name, "RR31, RR35, RR36");
   assert.match(first.message, /^settle timeout the room laid out at 1440x900: /);
 });
 
