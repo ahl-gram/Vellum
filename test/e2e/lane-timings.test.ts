@@ -26,7 +26,6 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   broadside: 12.7,
   "reading-room": 60.3,
   "room-instrument": 29.8,
-  "room-ink": 4.7,
   "room-voyage": 6.1,
   "room-voyage-route": 14.1,
   "room-address": 36.5,

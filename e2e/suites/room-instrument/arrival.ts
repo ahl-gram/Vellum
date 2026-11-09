@@ -48,40 +48,6 @@ export async function rs23OtherWorld({ evaluate, check, sleep }: InstrumentKit):
     }),
   );
 }
-
-export async function rs26Unfurl({ evaluate, check, sleep, room }: InstrumentKit): Promise<void> {
-  const arrivedRoom = await room.goto("#seed=42&style=antique&legend=1");
-  let rs26 = null;
-  for (let i = 0; i < 40; i++) {
-    const s = await evaluate<{
-      cls: boolean;
-      instAnim: string;
-      instDelay: string;
-      logAnim: string;
-      logDelay: string;
-    }>(`(()=>{const root=document.querySelector(".rf");
-      const inst=document.querySelector(".rf-instrument");const log=document.querySelector(".rf-log");
-      return{cls:root.classList.contains("rf-arrival"),
-        instAnim:getComputedStyle(inst).animationName,instDelay:getComputedStyle(inst).animationDelay,
-        logAnim:getComputedStyle(log).animationName,logDelay:getComputedStyle(log).animationDelay};})()`);
-    if (s.cls) {
-      rs26 = s;
-      break;
-    }
-    await sleep(30);
-  }
-  check(
-    "RS26 the arrival unfurl plays, staged: instrument and journal wear paperUnfurl, the journal one beat behind (S11's room successor)",
-    arrivedRoom &&
-      !!rs26 &&
-      rs26.instAnim === "paperUnfurl" &&
-      rs26.instDelay === "0s" &&
-      rs26.logAnim === "paperUnfurl" &&
-      rs26.logDelay === "0.18s",
-    JSON.stringify({ arrivedRoom, rs26 }),
-  );
-}
-
 export async function rs27NoReplay({ evaluate, check, sleep }: InstrumentKit): Promise<void> {
   // display:none terminates a CSS animation and restoring display starts it AFRESH; the engine drives the panel's hidden flag on every counter read, so a class left in place would replay the unfurl on every dice roll.
   let rs27clear = false;

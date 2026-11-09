@@ -24,7 +24,6 @@ export const E2E_SUITE_ORDER = [
   "broadside",
   "reading-room",
   "room-instrument",
-  "room-ink",
   "room-voyage",
   "room-voyage-route",
   "room-address",

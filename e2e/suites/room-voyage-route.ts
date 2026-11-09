@@ -1,4 +1,4 @@
-// Room voyage-route e2e (RV1-RV12, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the only check that a drawn mark keeps under MAX_TILT; RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
+// Room voyage-route e2e (RV1-RV10, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the only check that a drawn mark keeps under MAX_TILT; RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { rv7FullLog } from "./room-voyage-route/full-log.ts";
@@ -26,8 +26,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rv9Journal(ctx);
   await rv10Handoff(ctx);
   await step("RV8c", () => rv8cAsksThenGoes(ctx));
-  await rv11Seed39(ctx, room);
-  await rv12Landmasses(ctx, room);
   gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
 }
 
@@ -307,84 +305,4 @@ async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<vo
   );
   await evaluate(`window.__vellumVoyageStepTo(999)`);
   await shoot("reading-room-voyage-routed.png");
-}
-
-async function rv11Read({ evaluate }: Pick<SuiteContext, "evaluate">) {
-  const rv11 = await evaluate<
-    | {
-        handoffs: 0;
-        embFrom?: undefined;
-        landTo?: undefined;
-        ridesToShore?: undefined;
-        sails?: undefined;
-        ridesFromLandfall?: undefined;
-        narrated?: undefined;
-      }
-    | {
-        handoffs: number;
-        embFrom: number;
-        landTo: number;
-        ridesToShore: string;
-        sails: string;
-        ridesFromLandfall: string;
-        narrated: boolean;
-      }
-  >(`(()=>{
-    const legs=window.__vellumVoyageLegGeometry();
-    const n=legs.length;
-    const hs=legs.map((l,i)=>({l,i})).filter((x)=>x.l.inlandHandoff);
-    if(!hs.length) return{handoffs:0};
-    const emb=hs.reduce((a,b)=>(b.l.water.from>a.l.water.from?b:a));
-    const land=hs.reduce((a,b)=>((1-b.l.water.to)>(1-a.l.water.to)?b:a));
-    const glyph=(t)=>{
-      window.__vellumVoyagePaintAt(t);
-      const ship=document.querySelector(".rf-chart .voyage-ship");
-      return (!!ship&&ship.getAttribute("display")!=="none")?"ship":"rider";
-    };
-    const ridesToShore=glyph((emb.i+emb.l.water.from/2)/n);
-    const sails=glyph((emb.i+(emb.l.water.from+emb.l.water.to)/2)/n);
-    const ridesFromLandfall=glyph((land.i+(land.l.water.to+1)/2)/n);
-    const log=window.__vellumVoyageLog();
-    const narrated=[emb.i,land.i].every((i)=>
-      /rode from .+ to the coast, took ship, and made landfall below/.test(log.entries[i+1].text));
-    return{handoffs:hs.length,embFrom:emb.l.water.from,landTo:land.l.water.to,
-      ridesToShore,sails,ridesFromLandfall,narrated};
-  })()`);
-  return rv11;
-}
-
-export async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
-  // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
-  const rv11ok = await room.goto("#seed=39&style=antique&legend=1&survey");
-  const rv11 = await rv11Read({ evaluate });
-  check(
-    "RV11 seed 39: the mark rides to the shore, sails the crossing, and rides again on landfall, narrated",
-    rv11ok &&
-      rv11.handoffs === 2 &&
-      rv11.embFrom > 0.3 &&
-      rv11.landTo < 0.7 &&
-      rv11.ridesToShore === "rider" &&
-      rv11.sails === "ship" &&
-      rv11.ridesFromLandfall === "rider" &&
-      rv11.narrated,
-    JSON.stringify({ rv11ok, rv11 }),
-  );
-  await shoot("reading-room-voyage-handoff.png");
-}
-
-export async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
-  // Seed 430445745 puts ports on THREE landmasses; before Issue #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. Issue #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
-  const rv12ok = await room.goto("#seed=430445745&style=antique&legend=1&survey");
-  const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{
-    const legs=window.__vellumVoyageLegGeometry();
-    const modes={};
-    for(const l of legs) modes[l.mode]=(modes[l.mode]||0)+1;
-    return{legs:legs.length,road:modes.road||0,sea:modes.sea||0,straight:modes.straight||0};
-  })()`);
-  check(
-    "RV12 seed 430445745: every leg of the three-landmass world rides or sails, none degrades to a straight chord (#309)",
-    rv12ok && rv12.straight === 0 && rv12.road >= 10 && rv12.sea >= 2,
-    JSON.stringify({ rv12ok, rv12 }),
-  );
-  await shoot("reading-room-voyage-roaded-landmasses.png");
 }

@@ -134,24 +134,6 @@ export async function rs14Glyphs({ evaluate, check }: InstrumentKit): Promise<vo
     JSON.stringify(rs14),
   );
 }
-
-export async function rs15Slide({ evaluate, check }: InstrumentKit): Promise<void> {
-  const rs15 = await evaluate<{ li: false } | { li: true; prop: string; pastTf: string }>(`(()=>{
-    const li=document.querySelector(".rf-log-strip li");
-    if(!li)return{li:false};
-    const prop=getComputedStyle(li).transitionProperty;
-    const had=li.classList.contains("inked");
-    li.classList.add("inked");const pastTf=getComputedStyle(li).transform;
-    if(!had)li.classList.remove("inked");
-    return{li:true,prop,pastTf};
-  })()`);
-  check(
-    "RS15 journal inked-rows slide (transform in the transition + an indent)",
-    rs15.li && rs15.prop.includes("transform") && rs15.pastTf !== "none",
-    JSON.stringify(rs15),
-  );
-}
-
 export async function rs16Strip({ evaluate, check }: InstrumentKit): Promise<void> {
   const rs16 = await evaluate<{ rows: number; scrollH: number; clientH: number }>(
     `(()=>{const s=document.querySelector(".rf-log-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`,

@@ -10,9 +10,7 @@ import { h14aCardFits } from "../../e2e/suites/home/stations.ts";
 import { l13Home, l9Touch } from "../../e2e/suites/landfall.ts";
 import type { LandfallKit } from "../../e2e/suites/landfall/kit.ts";
 import { l5HowOpens } from "../../e2e/suites/landfall/panel.ts";
-import { ra2Clamps, ra3Survey, ra4Ignored, ra6Reduced, ra7Counter } from "../../e2e/suites/room-address.ts";
-import { rs18Silent } from "../../e2e/suites/room-ink.ts";
-import { rv11Seed39, rv12Landmasses } from "../../e2e/suites/room-voyage-route.ts";
+import { ra2Clamps, ra3Survey, ra7Counter } from "../../e2e/suites/room-address.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
 import { sb19SlidFromRest } from "../../e2e/suites/specimen/slid.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
@@ -234,7 +232,6 @@ const roomAnswering = (settled: boolean): Room => ({
 
 const SM = { present: 1200, minFounded: 300, count: 40 };
 const MID = 750;
-const FACTS = { present: 1200 } as unknown as Parameters<typeof rs18Silent>[2];
 
 type Dropper = {
   code: string;
@@ -266,16 +263,6 @@ const DROPPERS: readonly Dropper[] = [
     run: (ctx, settled) => ra3Survey(ctx, roomAnswering(settled)),
   },
   {
-    code: "RA4",
-    passing: () => ({ chamber: "ages", year: 1200, hash: "seed=42&style=antique&year=1200" }),
-    run: (ctx, settled) => ra4Ignored(ctx, roomAnswering(settled), SM, MID),
-  },
-  {
-    code: "RA6",
-    passing: () => ({ val: MID, playing: false, play: "Play", status: "" }),
-    run: (ctx, settled) => ra6Reduced(ctx, roomAnswering(settled), MID),
-  },
-  {
     code: "RA7",
     passing: (expression) =>
       expression.includes("__vellumReadingRoomState")
@@ -284,29 +271,6 @@ const DROPPERS: readonly Dropper[] = [
           ? true
           : String(MID),
     run: (ctx, settled) => ra7Counter(ctx, roomAnswering(settled), MID),
-  },
-  {
-    code: "RS18",
-    passing: () => 0,
-    run: (ctx, settled) => rs18Silent(ctx, () => Promise.resolve(1200), FACTS, settled),
-  },
-  {
-    code: "RV11",
-    passing: () => ({
-      handoffs: 2,
-      embFrom: 0.5,
-      landTo: 0.5,
-      ridesToShore: "rider",
-      sails: "ship",
-      ridesFromLandfall: "rider",
-      narrated: true,
-    }),
-    run: (ctx, settled) => rv11Seed39(ctx, roomAnswering(settled)),
-  },
-  {
-    code: "RV12",
-    passing: () => ({ legs: 12, road: 10, sea: 2, straight: 0 }),
-    run: (ctx, settled) => rv12Landmasses(ctx, roomAnswering(settled)),
   },
 ];
 

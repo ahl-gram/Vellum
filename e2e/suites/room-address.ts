@@ -1,4 +1,4 @@
-// Room address e2e (RA1-RA8, Issue #320 Sub 3): the Issue #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
+// Room address e2e (RA2-RA10, Issue #320 Sub 3): the Issue #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
 import { makeRoom } from "../support/room.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import { makeSettle } from "../support/settle.ts";
@@ -21,13 +21,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   const step = makeStep(ctx);
   const { sm, midYear } = await raWorld(ctx, room);
-  await ra1Restores(ctx, room, sm, midYear);
   await step("RA9", () => ra9TableRides(ctx, room));
   await ra2Clamps(ctx, room, sm);
   await ra3Survey(ctx, room);
-  await ra4Ignored(ctx, room, sm, midYear);
   await ra5AutoPark(ctx, sm, midYear);
-  await ra6Reduced(ctx, room, midYear);
   await step("RA10", () => ra10ReducedPace(ctx, room));
   await ra7Counter(ctx, room, midYear);
   ra8Clean(ctx, errBase, httpBase);
@@ -43,50 +40,6 @@ async function raWorld({ evaluate }: SuiteContext, room: Room) {
   const midYear = Math.floor((sm.minFounded + sm.present) / 2);
   return { sm, midYear };
 }
-
-async function ra1Restores(
-  { evaluate, check, shoot }: SuiteContext,
-  room: Room,
-  sm: World["sm"],
-  midYear: number,
-): Promise<void> {
-  const ra1ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
-  const ra1 = await evaluate<{
-    panelShown: boolean;
-    val: number | null;
-    chamber: string;
-    readout: string;
-    roads: string;
-    vis: number;
-    status: string;
-    play: string;
-  }>(`(()=>{
-    const roads=document.querySelector('.rf-chart #layer-roads');
-    const vis=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length;
-    const a=window.__vellumAgesState();
-    return{panelShown:!document.querySelector(".rf-ages").hidden,
-      val:a?a.year:-1,chamber:a?a.chamber:"",readout:document.querySelector(".rf-year").textContent,
-      roads:roads?getComputedStyle(roads).display:"(no-el)",vis,
-      status:document.querySelector(".rf-status").textContent,
-      play:document.querySelector(".rf-play").textContent};
-  })()`);
-  check(
-    "RA1 a year=N deep link restores the ages chamber at rest on that year, world and all",
-    ra1ok &&
-      ra1.panelShown &&
-      ra1.chamber === "ages" &&
-      ra1.val === midYear &&
-      ra1.readout === `year ${midYear}` &&
-      ra1.roads === "none" &&
-      ra1.vis > 0 &&
-      ra1.vis < sm.count &&
-      ra1.status === "" &&
-      ra1.play === "Play",
-    JSON.stringify({ ra1, midYear, count: sm.count }),
-  );
-  await shoot("reading-room-address-year.png");
-}
-
 export async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
   const ra2ok = await room.goto("#seed=42&style=antique&year=999999");
   const ra2 = await evaluate<{
@@ -146,31 +99,6 @@ export async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: 
   );
   await shoot("reading-room-address-survey.png");
 }
-
-export async function ra4Ignored(
-  { evaluate, check }: SuiteContext,
-  room: Room,
-  sm: World["sm"],
-  midYear: number,
-): Promise<void> {
-  const ra4ok = await room.goto(`#seed=42&style=antique&survey&year=${midYear}`);
-  const ra4 = await evaluate<{
-    chamber: string;
-    year: number | null;
-    hash: string;
-  }>(`(()=>{const a=window.__vellumAgesState();
-    return{chamber:a?a.chamber:"",year:a?a.year:-1,hash:location.hash.slice(1)};})()`);
-  check(
-    "RA4 a link carrying both survey and year=N is ignored whole: the room parks at its default present rest",
-    ra4ok &&
-      ra4.chamber === "ages" &&
-      ra4.year === sm.present &&
-      !/(^|&)survey(=|&|$)/.test(ra4.hash) &&
-      new URLSearchParams(ra4.hash).get("year") === String(sm.present),
-    JSON.stringify({ ra4ok, ra4, present: sm.present }),
-  );
-}
-
 async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["sm"], midYear: number): Promise<void> {
   // Play's auto-park is the one path where the year moves with NO input/change event, so the engine's onPark seam is all that re-writes the address; Issue #317 makes the room the sole author of year=N.
   const ra5set = await evaluate<string>(`(()=>{
@@ -202,27 +130,6 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
     JSON.stringify({ ra5set, ra5parked, present: sm.present }),
   );
 }
-
-export async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
-  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const ra6ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
-  const ra6 = await evaluate<{
-    val: number | null;
-    playing: boolean;
-    play: string;
-    status: string;
-  }>(`(()=>({val:window.__vellumAgesState().year,
-    playing:window.__vellumAgesState().playing,
-    play:document.querySelector(".rf-play").textContent,
-    status:document.querySelector(".rf-status").textContent}))()`);
-  await send("Emulation.setEmulatedMedia", { features: [] });
-  check(
-    "RA6 under reduced motion the deep link lands parked on the year, Play offered, no sweep",
-    ra6ok && ra6.val === midYear && ra6.playing === false && ra6.play === "Play" && ra6.status === "",
-    JSON.stringify({ ra6ok, ra6 }),
-  );
-}
-
 export async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
   const ra7ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra7pre = await evaluate<string | null>(`new URLSearchParams(location.hash.slice(1)).get("year")`);

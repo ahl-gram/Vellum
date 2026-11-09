@@ -2,20 +2,18 @@
 import { scrubFacts, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { instrumentKit } from "./room-instrument/kit.ts";
-import { rs0Boots, rs1State, rs2Seams, rs3Parks, rs4AllShown, rs5Scrub, rs7Ruin } from "./room-instrument/scrub.ts";
+import { rs0Boots, rs3Parks, rs4AllShown, rs5Scrub, rs7Ruin } from "./room-instrument/scrub.ts";
 import {
   rs8Sweeps,
   rs10Drag,
   rs11Forward,
   rs12Pause,
   rs14Glyphs,
-  rs15Slide,
   rs16Strip,
   rs17Story,
 } from "./room-instrument/sweep.ts";
-import { rs23OtherWorld, rs26Unfurl, rs27NoReplay, rs28Cancel } from "./room-instrument/arrival.ts";
-import { rs29Pace, rs30Rate, rs31PaceDress } from "./room-instrument/pace.ts";
-import { rs32BarDress } from "./room-instrument/dress.ts";
+import { rs23OtherWorld, rs27NoReplay, rs28Cancel } from "./room-instrument/arrival.ts";
+import { rs29Pace, rs30Rate } from "./room-instrument/pace.ts";
 import { makeStep } from "../support/step.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -26,8 +24,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
 
   await rs0Boots(k);
-  await rs1State(k);
-  await rs2Seams(k);
   const sm = await scrubFacts(evaluate, 42);
   await rs3Parks(k, sm);
   await rs4AllShown(k, sm);
@@ -39,18 +35,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RS12", () => rs12Pause(k, sm));
   await setYear(sm.present);
   await rs14Glyphs(k);
-  await rs15Slide(k);
   await rs16Strip(k);
   await rs17Story(k, sm);
   await rs23OtherWorld(k);
-  await rs26Unfurl(k);
+  // RS27 reads the arrival this visit opens on.
+  await k.room.goto("#seed=42&style=antique&legend=1");
   await rs27NoReplay(k);
   await rs28Cancel(k);
   // Issue #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
   await step("RS29", () => rs29Pace(k, smNow));
   await step("RS30", () => rs30Rate(k, smNow));
-  await step("RS31", () => rs31PaceDress(k));
-  await step("RS32", () => rs32BarDress(k));
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }

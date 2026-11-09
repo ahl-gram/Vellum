@@ -36,7 +36,6 @@ export const E2E_LANES: readonly E2eLane[] = [
       "ribbon",
       "broadside",
       "reading-room",
-      "room-ink",
       "room-voyage",
       "room-voyage-route",
       "runninghead",

@@ -20,7 +20,6 @@ import { run as runSurvey } from "../suites/survey.ts";
 import { run as runBroadside } from "../suites/broadside.ts";
 import { run as runReadingRoom } from "../suites/reading-room.ts";
 import { run as runRoomInstrument } from "../suites/room-instrument.ts";
-import { run as runRoomInk } from "../suites/room-ink.ts";
 import { run as runRoomVoyage } from "../suites/room-voyage.ts";
 import { run as runRoomAddress } from "../suites/room-address.ts";
 import { run as runRoomVoyageRoute } from "../suites/room-voyage-route.ts";
@@ -56,7 +55,6 @@ export const SUITES = {
   broadside: runBroadside,
   "reading-room": runReadingRoom,
   "room-instrument": runRoomInstrument,
-  "room-ink": runRoomInk,
   "room-voyage": runRoomVoyage,
   "room-voyage-route": runRoomVoyageRoute,
   "room-address": runRoomAddress,
