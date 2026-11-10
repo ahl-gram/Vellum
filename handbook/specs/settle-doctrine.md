@@ -107,7 +107,14 @@ headless browser actually do, so a green run can be believed.
    commit the gesture requested, and let stale in-flight commits pass by. **What it keys on**: an
    empty `#status`, `#verso-turn` not disabled, and an `#map svg` present (`waitSettled` in
    `e2e/harness.ts`, whose comment at the line says why that control carries the draw
-   lifecycle). The two ways a new draw path breaks it are opposite. A path that never disables the
+   lifecycle). `#status` is the Explorer's notice line as well as its draft line: laying a survey on
+   the table writes one that stands about eight seconds (measured 2026-11-09, Issue #1250), so a wait
+   after a press that drafts nothing keys on `#verso-turn` and never on the status line, as
+   `PRIMER_ROOMS` in `e2e/support/primer-rooms.ts` does. And the Explorer writes a camera into its
+   address only at the camera's settle, `settleMs` after the glide's last frame (`onCameraSettle` in
+   `src/site/explorer/glass.ts`), so two equal reads in that gap hand over an address with no camera;
+   `window.__vellumCameraSettling` says whether a settle is pending. The two ways a new draw path
+   breaks it are opposite. A path that never disables the
    control does not hang: it resolves at once on the draw before, which is a silent pass. A path
    that fails to re-enable it on BOTH the resolve and the catch hangs every suite that waits on it.
    **The predicate is satisfied by any settled draw**, the page's own boot draw included, so a check
