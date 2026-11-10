@@ -169,6 +169,7 @@ function glassApi(zoomController: ZoomController, lodController: LodController, 
     committedSurvey: () => lodController.committedSurvey(),
     committedInset: () => lodController.committedInset(),
     lodState: () => lodController.state(),
+    settlePending: () => zoomController.settlePending(),
   };
 }
 

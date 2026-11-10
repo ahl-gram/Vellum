@@ -107,7 +107,15 @@ headless browser actually do, so a green run can be believed.
    commit the gesture requested, and let stale in-flight commits pass by. **What it keys on**: an
    empty `#status`, `#verso-turn` not disabled, and an `#map svg` present (`waitSettled` in
    `e2e/harness.ts`, whose comment at the line says why that control carries the draw
-   lifecycle). The two ways a new draw path breaks it are opposite. A path that never disables the
+   lifecycle). `#status` is the Explorer's notice line as well as its draft line: laying a survey on
+   the table writes one that stands about eight seconds (measured 2026-11-09, Issue #1250), so a wait
+   after a press that drafts nothing keys on `#verso-turn` and never on the status line, as
+   `PRIMER_ROOMS` in `e2e/support/primer-rooms.ts` does. And a camera the glass moves to reaches the
+   Explorer's address only at the camera's settle, `settleMs` after the glide's last frame
+   (`onCameraSettle` in `src/site/explorer/glass.ts`), so two equal reads in that gap hand over an
+   address with no camera;
+   `window.__vellumCameraSettling` says whether a settle is pending. The two ways a new draw path
+   breaks it are opposite. A path that never disables the
    control does not hang: it resolves at once on the draw before, which is a silent pass. A path
    that fails to re-enable it on BOTH the resolve and the catch hangs every suite that waits on it.
    **The predicate is satisfied by any settled draw**, the page's own boot draw included, so a check
@@ -746,6 +754,13 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
 - **Layouts and glides: on the runner a room's layout after a window change, and a camera's glide,
   can stand still through two of a wait's polls, where on a Mac the next poll finds them moved.**
   Home: the bullet above opening "A room's own layout lands after a window's change".
+- **Settles: a wait that takes a frame between its two equal reads hands over inside the Explorer's
+  250 ms camera settle on a Mac, about 120 ms before it ends, and after it on the runner**, so the
+  Primer check's read of `window.__vellumCameraSettling` is proven on a fast machine only: without
+  it four of its steps lose their camera on a Mac every run and keep it on the runner (proof run
+  42781038629), and frames withheld 300 ms apart reproduce the runner's side. Home: clause 8's
+  sentence on `window.__vellumCameraSettling`, the line at `EXPLORER_REST` in
+  `e2e/support/primer-rooms.ts`, and the readings in `handbook/plans/1200/1250/1250-r3-plan.md`.
 - **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
   session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
   above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.

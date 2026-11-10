@@ -11,6 +11,7 @@ declare global {
     __vellumZoomTo: (t: ZoomState) => void;
     __vellumZoomState: () => ZoomState;
     __vellumRegion?: () => ReturnType<Glass["lodState"]>;
+    __vellumCameraSettling?: () => boolean;
   }
 }
 
@@ -30,4 +31,5 @@ export function installExplorerHooks({ glass, ...d }: HookDeps): void {
   window.__vellumZoomTo = (t) => glass.zoomTo(t);
   window.__vellumZoomState = () => glass.zoomState();
   window.__vellumRegion = () => glass.lodState();
+  window.__vellumCameraSettling = () => glass.settlePending();
 }

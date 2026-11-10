@@ -133,7 +133,7 @@ export const EXPLORER: Ladder = {
           see: "The sea rises as you drag, and the readout says how much of the sheet is land.",
           at: AT,
           words: [label("land", "sea level"), end("land", "min", "more sea")],
-          do: [set("#land", "30")],
+          do: [set("#land", "300")],
           then: [text("#land-readout", "% land", "contains")],
         },
         {

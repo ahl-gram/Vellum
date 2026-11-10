@@ -13,7 +13,7 @@ export interface Spot {
   readonly y: number;
 }
 
-// What the reader does, as a driver performs it with real input, never a script and never a wait on the clock: set with release false leaves the value uncommitted, choose takes the option in those words, repeat presses css until an element matching until is on the page, pick types text in the search box css and takes the entry named name, wait holds until an element matching css is on the page, nth counts matches from 0, and at is a point of the control's box in fractions of its width and height.
+// What the reader does, as a driver performs it and never by a wait on the clock: a press, a key and a typed box with real input, and a slider's or a list's value set in the page with the events a reader's change sends (Issue #1250, ruling D); set on a slider commits the value as a reader letting go does and with release false leaves it uncommitted, while set on a box only types the value and never commits it, so the act after it does (a press, or Enter); choose takes the option in those words, repeat presses css until an element matching until is on the page, pick types text in the search box css and takes the entry named name, wait holds until an element matching css is on the page, nth counts matches from 0, and at is a point of the control's box in fractions of its width and height.
 export type Act =
   | { readonly kind: "click"; readonly css: string; readonly nth?: number; readonly at?: Spot }
   | { readonly kind: "set"; readonly css: string; readonly value: string; readonly release?: false }
