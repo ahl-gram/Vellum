@@ -68,12 +68,45 @@ const FILES: Record<string, string> = {
     "// the table's two rows",
     "const table = [1, 2];",
     "",
+    'test("ignores it", () => {',
+    "  assert.equal(1, 1);",
+    "});",
+    "",
     'test("uses the table", () => {',
     "  assert.equal(table.length, 2);",
     "});",
     "",
-    'test("ignores it", () => {',
-    "  assert.equal(1, 1);",
+    "// the limit is three",
+    "const limit = 3;",
+    "",
+    'test("uses the limit", () => {',
+    "  assert.equal(limit, 3);",
+    "});",
+    "",
+    "const rows = [",
+    "  1, // the first row",
+    "  2,",
+    "];",
+    "",
+    'test("uses the rows", () => {',
+    "  assert.equal(rows[0], 1);",
+    "});",
+    "",
+  ].join("\n"),
+  "test/o.test.ts": [
+    HEAD + 'import { f } from "../src/other.ts";',
+    "",
+    'test("another module\'s f", () => {',
+    "  assert.equal(f(2), 4);",
+    "});",
+    "",
+  ].join("\n"),
+  "test/s.test.ts": [
+    HEAD + 'import { g, type T } from "../src/m.ts";',
+    "",
+    'test("a type specifier only", () => {',
+    "  const x: T = 1;",
+    "  assert.equal(x, 1);",
     "});",
     "",
   ].join("\n"),
@@ -85,6 +118,7 @@ const candidatesOf = (file: string, text: string) => {
   assert.ok(run, `no comment reads ${text} in ${file}`);
   return candidateFinder(tree)(run);
 };
+const placesOf = (file: string, text: string) => candidatesOf(file, text).map((c) => [c.file, c.name]);
 
 test("a comment in a source file is asked about every test, in a file that imports the module by a value import, whose body names a binding it imports", () => {
   const found = candidatesOf("src/m.ts", "f doubles its input");
@@ -109,8 +143,7 @@ test("a comment inside a test is asked about that test alone, sent without its c
 });
 
 test("a comment in a test file outside every test is asked about the tests that name what it declares", () => {
-  assert.deepEqual(
-    candidatesOf("test/e.test.ts", "the table's two rows").map((c) => [c.file, c.name]),
-    [["test/e.test.ts", "uses the table"]],
-  );
+  assert.deepEqual(placesOf("test/e.test.ts", "the table's two rows"), [["test/e.test.ts", "uses the table"]]);
+  assert.deepEqual(placesOf("test/e.test.ts", "the limit is three"), [["test/e.test.ts", "uses the limit"]]);
+  assert.deepEqual(placesOf("test/e.test.ts", "the first row"), [["test/e.test.ts", "uses the rows"]]);
 });
