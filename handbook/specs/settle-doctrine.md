@@ -110,9 +110,10 @@ headless browser actually do, so a green run can be believed.
    lifecycle). `#status` is the Explorer's notice line as well as its draft line: laying a survey on
    the table writes one that stands about eight seconds (measured 2026-11-09, Issue #1250), so a wait
    after a press that drafts nothing keys on `#verso-turn` and never on the status line, as
-   `PRIMER_ROOMS` in `e2e/support/primer-rooms.ts` does. And the Explorer writes a camera into its
-   address only at the camera's settle, `settleMs` after the glide's last frame (`onCameraSettle` in
-   `src/site/explorer/glass.ts`), so two equal reads in that gap hand over an address with no camera;
+   `PRIMER_ROOMS` in `e2e/support/primer-rooms.ts` does. And a camera the glass moves to reaches the
+   Explorer's address only at the camera's settle, `settleMs` after the glide's last frame
+   (`onCameraSettle` in `src/site/explorer/glass.ts`), so two equal reads in that gap hand over an
+   address with no camera;
    `window.__vellumCameraSettling` says whether a settle is pending. The two ways a new draw path
    breaks it are opposite. A path that never disables the
    control does not hang: it resolves at once on the draw before, which is a silent pass. A path

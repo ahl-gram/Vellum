@@ -55,7 +55,7 @@ export type Field = {
 };
 export const FIELD = (css: string): Payload<Field | null> =>
   `(() => { const e = ${at(css)}; return e ? { type: e.type, value: e.value, min: +e.min, max: +e.max, step: +e.step || 1 } : null; })()`;
-// A slider's or a list's value is set in the page with the events a reader's change sends, once the control stands reachable (Issue #1250, ruling D: "Set values from inside the page").
+// A slider's or a list's value is set in the page with the events a reader's change sends (Issue #1250, ruling D: "Set values from inside the page").
 export const SET_VALUE = (css: string, value: string, release: boolean): Payload<boolean> =>
   `(() => { const e = ${at(css)}; e.value = ${JSON.stringify(value)}; e.dispatchEvent(new Event("input", { bubbles: true })); ${release ? `e.dispatchEvent(new Event("change", { bubbles: true }));` : ""} return true; })()`;
 export const PICK_OPTION = (css: string, option: string): Payload<boolean> =>

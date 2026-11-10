@@ -13,7 +13,7 @@ export type PrimerRoom = {
   readonly repeatCap: number;
 };
 
-// 2026-11-10, Issue #1250: the camera-settle read below is proven on a fast machine only: without it the four steps whose address carries a camera lose it where frames come 200 ms apart or closer, as on this Mac every run, and keep it at 300 ms, as on GitHub's runner, where M5 reds nothing (proof run 42781038629).
+// 2026-11-10, Issue #1250: the camera-settle read below is proven on a fast machine only: without it four of the six steps whose address carries a camera lose it where frames come 200 ms apart or closer, as on this Mac every run, and keep it at 300 ms, as on GitHub's runner, where M5 reds nothing (proof run 42781038629).
 const EXPLORER_REST: Payload<Rest> = `(() => {
   const w = window.__primer, z = window.__vellumZoomState();
   const quiet = !document.getElementById("verso-turn").disabled && !!document.querySelector("#map > svg") && !window.__vellumCameraSettling() && !document.querySelector("#map .survey-pencil") && ${MOVING} === 0;
