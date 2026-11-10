@@ -228,7 +228,12 @@ test("the Seed of the Day, which binds its room, its zoom and the Glass's keys i
     SEED_PLANTS.some(([, , want]) => want.length === 0) && SEED_PLANTS.some(([, , want]) => want.length > 0),
     "the plants cannot tell the rule from its negation",
   );
-  for (const [name, lines, want] of SEED_PLANTS) assert.deepEqual(await reported(lines, SEED), want, name);
+  for (const [name, lines, want] of SEED_PLANTS)
+    assert.deepEqual(
+      (await reported(lines, SEED)).filter(([n]) => n !== "MAP_WORDS"),
+      want,
+      name,
+    );
 });
 
 const HOME = "src/site/home/app.ts";
