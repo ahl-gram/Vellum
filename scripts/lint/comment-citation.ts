@@ -2,6 +2,7 @@ import type { Rule } from "eslint";
 import type { CSSRuleDefinition } from "@eslint/css";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { noteText, ownLineAt, runs, type Loc, type Note } from "./comment-notes.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 export const CITED_ROOTS: readonly string[] = ["src", "test", "scripts", "e2e", "test-support", "public"];
@@ -10,27 +11,7 @@ const CITATION = new RegExp(
   "g",
 );
 
-type Loc = { start: { line: number; column: number }; end: { line: number; column: number } };
-type Note = { readonly text: string; readonly ownLine: boolean; readonly loc: Loc };
 type Finding = { readonly loc: Loc; readonly message: string };
-
-const lead = /^\s*\*+\s?/;
-const noteText = (value: string, block: boolean): string =>
-  value
-    .split("\n")
-    .map((line) => (block ? line.replace(lead, "") : line).trim())
-    .join(" ");
-
-function runs(notes: readonly Note[]): Note[][] {
-  const out: Note[][] = [];
-  for (const note of notes) {
-    const run = out.at(-1);
-    const last = run?.at(-1);
-    if (run && last?.ownLine && note.ownLine && note.loc.start.line === last.loc.end.line + 1) run.push(note);
-    else out.push([note]);
-  }
-  return out;
-}
 
 function findings(notes: readonly Note[]): Finding[] {
   return runs(notes).flatMap((run) => {
@@ -54,8 +35,6 @@ function findings(notes: readonly Note[]): Finding[] {
 
 const MESSAGE =
   "a comment {{finding}}: cite code as `symbol` in `repo/relative/path`, a file that exists and names the symbol, and never fall back to a line number (handbook/specs/conventions.md, How code is cited)";
-const ownLineAt = (text: string, offset: number): boolean =>
-  text.slice(text.lastIndexOf("\n", offset - 1) + 1, offset).trim() === "";
 
 const tsCitation: Rule.RuleModule = {
   meta: { type: "problem", messages: { found: MESSAGE } },
