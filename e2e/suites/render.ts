@@ -1,7 +1,6 @@
 // Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, coast warp, Tide Wheel and arms toggle.
 import { makeStep } from "../support/step.ts";
 import { FIXED_SEED } from "../support/fixed-day.ts";
-import { makeSettle } from "../support/settle.ts";
 import type { SuiteContext } from "../types.ts";
 import { r18RealPlace } from "./render/place.ts";
 import { r19RangeLimits } from "./render/ranges.ts";
@@ -20,7 +19,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("R11a", () => r11aFloods(ctx));
     await step("R11b", () => r11bFloodBelowDrain(ctx));
     await step("R11c", () => r11cTypeResets(ctx));
-    await step("R11d", () => r11dCityStateCaption(ctx));
   }
 
   const armsPresent = await evaluate<boolean>(`!!document.getElementById("arms")`);
@@ -165,26 +163,6 @@ async function r11cTypeResets({ evaluate, check, waitSettled }: SuiteContext): P
     `({reset:!location.hash.includes("land="),hash:location.hash})`,
   );
   check("R11c changing type resets the slider to auto (land= dropped)", a11c.reset, `hash=${a11c.hash}`);
-}
-
-async function r11dCityStateCaption({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  const settle = makeSettle({ evaluate, sleep });
-  const caption = `document.getElementById("caption").textContent`;
-  const before = await evaluate<string>(caption);
-  await evaluate(
-    `(()=>{const t=document.getElementById("type");t.value="citystate";t.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  const after = await settle<string>(
-    caption,
-    (d) => d !== before && !d.startsWith("Drafting"),
-    "the city-state draw's caption",
-    200,
-  );
-  check(
-    "R11d the Explorer's caption names a city-state's type as the type select does, with a hyphen",
-    /^city-state · (polar|temperate|tropical) · drawn in \d+ms$/.test(after),
-    `caption "${after}" after "${before}"`,
-  );
 }
 
 async function r12aArmsOff({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {

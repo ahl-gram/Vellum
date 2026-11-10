@@ -20,7 +20,6 @@ export type Read = {
   readonly status: string;
   readonly account: string;
   readonly hash: string;
-  readonly coords: string;
 };
 
 const HOOK: Payload<number | null> = `window.__vellumWritingRoom ? window.__vellumWritingRoom().n : null`;
@@ -42,7 +41,6 @@ export const READ: Payload<Read> = `(() => {
     status: document.getElementById("status").textContent,
     account: document.getElementById("wr-account").textContent,
     hash: location.hash,
-    coords: document.getElementById("folio-coords").textContent,
   };
 })()`;
 

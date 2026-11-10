@@ -140,10 +140,22 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/ribbon/seats.ts": [ZOOM_ROOM],
   "src/site/reading-room/seats.ts": [ZOOM_ROOM],
   "src/site/specimen/app.ts": [ZOOM_ROOM],
-  "src/site/writing-room/app.ts": [ZOOM_ROOM],
-  "src/site/seed-of-the-day/app.ts": [ROOM_BINDING, ZOOM_BINDING, GLASS_BINDING, FRAMING_BINDING],
+  "src/site/writing-room/app.ts": [ZOOM_ROOM, ["MAP_WORDS", "../shared/map-words.ts"]],
+  "src/site/seed-of-the-day/app.ts": [
+    ROOM_BINDING,
+    ZOOM_BINDING,
+    GLASS_BINDING,
+    FRAMING_BINDING,
+    ["MAP_WORDS", "../shared/map-words.ts"],
+  ],
   "src/site/home/app.ts": [TOUCH_BINDING],
-  "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
+  "src/site/explorer/app.ts": [
+    ROOM_BINDING,
+    ANNOUNCE,
+    STORE,
+    ["filingAt", "./chart-drawer.ts"],
+    ["mapNoun", "../shared/map-words.ts"],
+  ],
   "src/site/explorer/glass.ts": [TOUCH_BINDING],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],
@@ -155,11 +167,11 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };
 
-test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, the Seed of the Day's room and keys added by Issue #1284, the touch press's three binders added by Issue #1288, and every file and module it names exists", () => {
+test("the roster is exactly the import pins the close of Issue #779 moved here, the rooms' three folded into zoom-room.ts by Issue #1010, the Seed of the Day's room and keys added by Issue #1284, the touch press's three binders added by Issue #1288, the chart lines' map-type words added by Issue #1162, and every file and module it names exists", () => {
   assert.deepEqual(
     SHARED_BINDINGS,
     ROSTER,
-    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them and Issue #1284 and Issue #1288 added to them",
+    "the roster is not the import pins Issue #779 moved here as Issue #1010 folded them and Issue #1284, Issue #1288 and Issue #1162 added to them",
   );
   for (const [file, bindings] of Object.entries(SHARED_BINDINGS)) {
     assert.ok(existsSync(join(ROOT, file)), `${file} does not exist`);
@@ -271,4 +283,42 @@ test("the rule resolves at error, with the roster as its options, on every site 
     );
   for (const [glob, file] of Object.entries(WITNESSES))
     assert.equal(await resolvedRule(file), undefined, `${RULE} reaches ${file}, the witness of ${glob}`);
+});
+
+const MAP_WORDS_BINDING: SharedBinding = ["MAP_WORDS", "../shared/map-words.ts"];
+const MAP_NOUN_BINDING: SharedBinding = ["mapNoun", "../shared/map-words.ts"];
+const WORDS_IMPORT = 'import { MAP_WORDS } from "../shared/map-words.ts";';
+const NOUN_IMPORT = 'import { mapNoun } from "../shared/map-words.ts";';
+const INLINE_ARTICLE = 'export const line = type === "archipelago" ? "an" : "a";';
+const INLINE_RAW = "export const caption = type;";
+
+const MAP_PAGES: ReadonlyArray<readonly [string, string, SharedBinding, string, string]> = [
+  ["Today", "src/site/seed-of-the-day/app.ts", MAP_WORDS_BINDING, WORDS_IMPORT, "export const line = MAP_WORDS[type];"],
+  [
+    "the Writing Room",
+    "src/site/writing-room/app.ts",
+    MAP_WORDS_BINDING,
+    WORDS_IMPORT,
+    "export const line = MAP_WORDS[type];",
+  ],
+  ["the Explorer", "src/site/explorer/app.ts", MAP_NOUN_BINDING, NOUN_IMPORT, "export const caption = mapNoun(type);"],
+];
+
+test("Today, the Writing Room and the Explorer, each writing a chart line from the shared map-type words, are each held to that binding (Issue #1162)", async () => {
+  const held = async (lines: readonly string[], path: string, name: string): Promise<Array<[string, string]>> =>
+    (await reported(lines, path)).filter(([n]) => n === name);
+  for (const [room, path, binding, taken, use] of MAP_PAGES) {
+    const [name] = binding;
+    assert.deepEqual(await held([taken, use], path, name), [], `${room} takes ${name} and uses it`);
+    assert.deepEqual(
+      await held([name === "mapNoun" ? INLINE_RAW : INLINE_ARTICLE], path, name),
+      [[...binding]],
+      `${room} reverted to its inline form, import gone`,
+    );
+    assert.deepEqual(
+      await held([taken, name === "mapNoun" ? INLINE_RAW : INLINE_ARTICLE], path, name),
+      [[...binding]],
+      `${room} reverted to its inline form, import left`,
+    );
+  }
 });
