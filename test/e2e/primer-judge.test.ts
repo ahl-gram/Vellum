@@ -5,6 +5,7 @@ import {
   fits,
   keyOf,
   keysLost,
+  onItsArm,
   pressPoint,
   stateOf,
   wordsHold,
@@ -99,6 +100,17 @@ test("PJ3 expectFor holds a tablet step hidden on the desk and reachable on the 
     ],
     ["reachable", "hidden", "reachable", "hidden", "held", "hidden", "any"],
   );
+  assert.deepEqual(
+    [
+      onItsArm(step(), "desk"),
+      onItsArm(step(), "tablet"),
+      onItsArm(touch, "desk"),
+      onItsArm(touch, "tablet"),
+      onItsArm(step({ only: "motion" }), "desk"),
+      onItsArm(step({ only: "motion" }), "tablet"),
+    ],
+    [true, false, false, true, false, false],
+  );
 });
 
 test("PJ4 stateOf names each way a control can fail to be reached, and fits takes what each expectation allows", () => {
@@ -107,6 +119,7 @@ test("PJ4 stateOf names each way a control can fail to be reached, and fits take
       stateOf({ ...FACTS, found: false }, "self"),
       stateOf({ ...FACTS, shown: false }, "self"),
       stateOf({ ...FACTS, box: { x: 0, y: 0, w: 0, h: 9 } }, "self"),
+      stateOf({ ...FACTS, box: { x: 0, y: 0, w: 9, h: 0 } }, "self"),
       stateOf({ ...FACTS, held: true }, "self"),
       stateOf({ ...FACTS, disabled: true }, "self"),
       stateOf(FACTS, "off screen"),
@@ -114,7 +127,18 @@ test("PJ4 stateOf names each way a control can fail to be reached, and fits take
       stateOf(FACTS, "label"),
       stateOf(FACTS, "self"),
     ],
-    ["absent", "hidden", "no box", "held", "disabled", "off screen", "covered by place-hit", "reachable", "reachable"],
+    [
+      "absent",
+      "hidden",
+      "no box",
+      "no box",
+      "held",
+      "disabled",
+      "off screen",
+      "covered by place-hit",
+      "reachable",
+      "reachable",
+    ],
   );
   assert.deepEqual(
     [
