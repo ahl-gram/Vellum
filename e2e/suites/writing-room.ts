@@ -10,6 +10,7 @@ import {
   wr5Lettering,
   wr6Written,
   wr7FailedDraw,
+  wr16Coords,
 } from "./writing-room/checks.ts";
 import {
   wr10Hold,
@@ -48,6 +49,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("WR13", () => wr13Names(k));
   await step("WR14", () => wr14Road(k));
   await step("WR15", () => wr15PlaceHeld(k));
+  await step("WR16", () => wr16Coords(k));
   await ctx.send("Emulation.clearDeviceMetricsOverride");
   gate.check("WR0 the Writing Room logged no console error and fetched nothing that answered 4xx");
 }

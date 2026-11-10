@@ -4,6 +4,7 @@ import { dropExpectedCancellations } from "../support/console.ts";
 import { onDay } from "../support/fixed-day.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { h13Folio } from "./hunt/folio.ts";
 import { huntQuarry, type Frac } from "./hunt/quarry.ts";
 import { huntRoom } from "./hunt/room.ts";
 import { hd1Dispatch, h8Reload } from "./hunt/solved.ts";
@@ -48,6 +49,7 @@ async function huntSuite(ctx: SuiteContext): Promise<void> {
   h10LegendClear(ctx, tgt);
   await h11Labels(ctx);
   await h12Terrain(ctx, tgt);
+  await step("H13", () => h13Folio(ctx, HUNT_DAY, HUNT_PAGE));
 }
 
 function huntKit(ctx: SuiteContext) {

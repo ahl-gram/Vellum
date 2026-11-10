@@ -1,4 +1,6 @@
 import { foundWorld } from "../../../src/world/founding/found.ts";
+import { defaultRecipe } from "../../../src/world/generate.ts";
+import { MAP_WORDS } from "../../../src/site/shared/map-words.ts";
 import { writtenHash } from "../../../src/site/shared/written-address.ts";
 import type { Read, WritingKit } from "./kit.ts";
 
@@ -119,5 +121,28 @@ export async function wr7FailedDraw(k: WritingKit): Promise<void> {
       after.hash === link &&
       after.status.startsWith("The ink would not take"),
     `${show(after)} status "${after.status}" account kept ${after.account === before.account}`,
+  );
+}
+
+const TYPED = ["island", "archipelago", "continent", "city-state"].map((word) => `a quiet ${word} of gulls`);
+
+export async function wr16Coords(k: WritingKit): Promise<void> {
+  const rows: string[] = [];
+  const types = new Set<string>();
+  let agrees = true;
+  for (const sentence of TYPED) {
+    const f = foundWorld(sentence);
+    if (!f.ok) throw new Error(`${sentence} did not found in Node`);
+    const { mapType, band } = defaultRecipe(f.seed, f.overrides);
+    types.add(mapType);
+    const want = `Chart № ${f.seed} · ${MAP_WORDS[mapType]}, ${band}`;
+    const r = await k.goto(writtenHash(sentence, 1));
+    agrees &&= r.svgSeed === String(f.seed) && r.coords === want;
+    rows.push(`"${r.coords}" want "${want}"`);
+  }
+  k.check(
+    "WR16 the chart line under the title says the world's map type with its article and written form, for all four types: the line is the one Node's founding gives",
+    types.size === 4 && agrees,
+    `${types.size} types reached: ${rows.join("; ")}`,
   );
 }

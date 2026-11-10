@@ -7,4 +7,4 @@ export const MAP_WORDS: Readonly<Record<MapType, string>> = {
   citystate: "a city-state",
 };
 
-export const mapNoun = (type: MapType): string => type;
+export const mapNoun = (type: MapType): string => MAP_WORDS[type].replace(/^an? /, "");
