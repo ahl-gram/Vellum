@@ -34,7 +34,7 @@ export const gitTree = (repo: string, sha: string): Tree => ({
   sha,
   read: readAt(repo, sha),
   list: (prefix) =>
-    git(repo, ["ls-tree", "-r", "--name-only", sha, "--", prefix])
+    git(repo, ["ls-tree", "--full-tree", "-r", "--name-only", sha, "--", prefix])
       .split("\n")
       .filter((path) => path !== "")
       .sort(),
