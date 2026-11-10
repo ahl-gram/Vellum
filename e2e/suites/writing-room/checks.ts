@@ -141,7 +141,7 @@ export async function wr16Coords(k: WritingKit): Promise<void> {
     rows.push(`"${r.coords}" want "${want}"`);
   }
   k.check(
-    "WR16 the chart line under the title says the world's map type with its article and written form, for all four types: the line is the one Node's founding gives",
+    "WR16 the chart line under the title is the shared map-type words for the world's type, for all four types, with the seed and climate Node's founding gives (the words' own spelling is test/site/map-words.test.ts's)",
     types.size === 4 && agrees,
     `${types.size} types reached: ${rows.join("; ")}`,
   );

@@ -28,7 +28,7 @@ export async function h13Folio(ctx: SuiteContext, huntDay: number, page: string)
     onCity = await settle<string>(read, written, "the city-state day's chart line to be written", 200);
   });
   ctx.check(
-    "H13 Today's chart line says the day's map type with its article and written form, on an island day and on a city-state day",
+    "H13 Today's chart line is the shared map-type words for the day, on an island day and on a city-state day (the words' own spelling is test/site/map-words.test.ts's)",
     island.type === "island" && city.type === "citystate" && onHunt === island.want && onCity === city.want,
     `${island.type} day "${onHunt}" want "${island.want}"; ${city.type} day "${onCity}" want "${city.want}"`,
   );
