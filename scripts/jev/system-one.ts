@@ -2,6 +2,9 @@ export const ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 export const MODEL = "jev-1.14.0";
 export const KEY_VAR = "TYPESAFE_API_KEY";
 export const TIMEOUT_MS = 10_000;
+export const KEY_SHAPE = /^[!#-[\]-~]+$/;
+export const KEY_MASK = `<${KEY_VAR}>`;
+export const KEY_REFUSED = `${KEY_VAR} holds a character a request header cannot carry, so nothing was sent`;
 export type NoulQuestion = {
   readonly type: "noul";
   readonly instructions: string | Readonly<Record<string, unknown>>;
@@ -46,8 +49,22 @@ const readAnswers = (request: SystemOneRequest, body: unknown): Reply => {
   return { ok: true, model: body.model, nouls, inputTokens, ms: 0 };
 };
 
+const hide = (text: string, key: string): string => (key === "" ? text : text.split(key).join(KEY_MASK));
+const word = (value: unknown, shape: RegExp): string | null =>
+  typeof value === "string" && shape.test(value) ? value : null;
+const noAnswer = (error: unknown): string => {
+  const e = (typeof error === "object" && error !== null ? error : {}) as {
+    name?: unknown;
+    cause?: { code?: unknown };
+  };
+  const name = word(e.name, /^[A-Za-z]+$/) ?? "error";
+  const code = word(e.cause?.code, /^[A-Z0-9_]+$/);
+  return `the request got no answer: ${name}${code === null ? "" : ` (${code})`}`;
+};
+
 export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch): Promise<Reply> => {
   const began = performance.now();
+  let ok: boolean;
   let status: number;
   let text: string;
   try {
@@ -57,12 +74,13 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    ok = response.ok;
     status = response.status;
     text = await response.text();
   } catch (error) {
-    return fail(error instanceof Error ? error.message : String(error));
+    return fail(noAnswer(error));
   }
-  if (status < 200 || status > 299) return fail(`HTTP ${status}: ${text.slice(0, 200)}`);
+  if (!ok) return fail(`HTTP ${status}: ${hide(text, key).slice(0, 200)}`);
   let body: unknown;
   try {
     body = JSON.parse(text);
@@ -75,9 +93,9 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
 
 export const senderFor = (key: string | undefined, fetcher: Fetch): Send => {
   const trimmed = key?.trim() ?? "";
-  return trimmed === ""
-    ? () => Promise.resolve(fail(`${KEY_VAR} is not set`))
-    : (request) => ask(request, key!, fetcher);
+  if (trimmed === "") return () => Promise.resolve(fail(`${KEY_VAR} is not set`));
+  if (!KEY_SHAPE.test(trimmed)) return () => Promise.resolve(fail(KEY_REFUSED));
+  return (request) => ask(request, trimmed, fetcher);
 };
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));
