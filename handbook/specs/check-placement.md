@@ -211,6 +211,13 @@ belongs in.
   with `npm audit`, and acts on them as an issue (Issue #1174). `npm audit --omit=dev` reads only the
   libraries the pages ship, the `dependencies` in `package.json`, since the tools that build the site
   are `devDependencies`.
+- **No check holds a judgment that rests on a probability.** `npm run comment-judge`
+  (`scripts/comment-judge/main.ts`) asks TypeSafe's Jev whether each comment a diff adds only
+  restates its code or is already pinned by a test (Issue #1304), and its answers are probabilities
+  from a service whose model changes from version to version, so a red resting on one is a guard no
+  prover can show bites. It runs in no `npm test` file, no lint rule, no workflow step that can fail
+  and no refusal of the footgun hook; its findings are a reviewer's hypotheses that a command still
+  confirms; and a call that fails is reported as skipped, never as nothing found.
 
 ## Order
 
