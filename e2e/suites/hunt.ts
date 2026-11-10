@@ -1,4 +1,4 @@
-// Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
+// Daily Hunt e2e (H1-H13, HD, HG) on the seed-of-the-day page.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import { onDay } from "../support/fixed-day.ts";
