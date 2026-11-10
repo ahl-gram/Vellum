@@ -1,7 +1,7 @@
 import type { Judged } from "./judge.ts";
 
 const at = (j: Judged): string => `${j.run.file}:${j.run.line}`;
-const two = (n: number): string => n.toFixed(2);
+export const two = (n: number): string => n.toFixed(2);
 
 export const modelsOf = (judged: readonly Judged[]): string => {
   const models = new Set(judged.flatMap((j) => j.replies.flatMap((r) => (r.ok ? [r.model] : []))));

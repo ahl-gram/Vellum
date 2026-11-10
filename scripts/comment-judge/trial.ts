@@ -1,7 +1,7 @@
 import { commentRuns } from "./collect.ts";
 import type { Judged } from "./judge.ts";
 import { YES, pinsId } from "./questions.ts";
-import { modelsOf } from "./report.ts";
+import { modelsOf, two } from "./report.ts";
 import type { TrialRow } from "./trial-set.ts";
 import type { Tree } from "./tree.ts";
 import type { CommentRun } from "./types.ts";
@@ -12,7 +12,6 @@ export const locateRun = (tree: Tree, file: string, line: number): CommentRun | 
   commentRuns(file, tree.read(file)).find((run) => run.line <= line && line <= run.endLine) ?? null;
 
 const KINDS = ["finding", "clear", "unsettled", "skipped"] as const;
-const two = (n: number): string => n.toFixed(2);
 const cell = (text: string): string => text.replaceAll("|", "\\|");
 const where = (s: Scored): string => `${s.row.file}:${s.row.line}`;
 
@@ -56,6 +55,7 @@ const everyComment = (scored: readonly Scored[]): string[] =>
 
 export const scoreLines = (scored: readonly Scored[]): string[] => {
   const judged = scored.map((s) => s.judged);
+  const built = judged.reduce((sum, j) => sum + j.requests.length, 0);
   const replies = judged.flatMap((j) => j.replies);
   const answered = replies.flatMap((r) => (r.ok ? [r] : []));
   const tokens = answered.reduce((sum, r) => sum + r.inputTokens, 0);
@@ -72,7 +72,7 @@ export const scoreLines = (scored: readonly Scored[]): string[] => {
   return [
     "# Issue #1304: the comment trial",
     "",
-    `${scored.length} comments; answered by ${modelsOf(judged)}; ${replies.length} requests sent, ${tokens} input tokens reported, ${seconds.toFixed(1)} seconds`,
+    `${scored.length} comments; answered by ${modelsOf(judged)}; ${built} requests built, ${answered.length} answered, ${replies.length - answered.length} not answered; ${tokens} input tokens reported, ${seconds.toFixed(1)} seconds`,
     "",
     "## The pass against the sweeps",
     "",
