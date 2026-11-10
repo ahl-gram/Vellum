@@ -16,6 +16,7 @@ import { fillAboutCentre, restingBox } from "../shared/slide-away.ts";
 import { errorText } from "../shared/error-text.ts";
 import { framingCamera } from "../shared/camera.ts";
 import { $ } from "../shared/by-id.ts";
+import { MAP_WORDS } from "../shared/map-words.ts";
 
 declare global {
   interface Window {
@@ -86,8 +87,7 @@ setTimeout(() => {
     dryIn($("folio-sub"), "260ms");
     $("folio-sub").textContent = world.title.subtitle;
     dryIn($("folio-coords"), "320ms");
-    $("folio-coords").textContent =
-      `Chart № ${seed} · ${world.recipe.mapType === "archipelago" ? "an" : "a"} ${world.recipe.mapType}, ${world.recipe.band}`;
+    $("folio-coords").textContent = `Chart № ${seed} · ${MAP_WORDS[world.recipe.mapType]}, ${world.recipe.band}`;
 
     const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
     if (capital) {

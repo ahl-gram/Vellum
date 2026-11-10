@@ -8,6 +8,8 @@ const ANNOUNCER: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
 const ITEM: SharedBinding = ["prospectItemFrom", "../shared/table-address.ts"];
 const TOUCH: SharedBinding = ["bindChartTouch", "../shared/chart-touch.ts"];
+const MAP_WORDS: SharedBinding = ["MAP_WORDS", "../shared/map-words.ts"];
+const MAP_NOUN: SharedBinding = ["mapNoun", "../shared/map-words.ts"];
 
 export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>> = {
   "src/site/shared/zoom-room.ts": [
@@ -22,15 +24,22 @@ export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>>
   "src/site/ribbon/seats.ts": [ZOOM_ROOM],
   "src/site/reading-room/seats.ts": [ZOOM_ROOM],
   "src/site/specimen/app.ts": [ZOOM_ROOM],
-  "src/site/writing-room/app.ts": [ZOOM_ROOM],
+  "src/site/writing-room/app.ts": [ZOOM_ROOM, MAP_WORDS],
   "src/site/seed-of-the-day/app.ts": [
     ["bindRoom", "../shared/room.ts"],
     ["createZoomController", "../shared/zoom-controller.ts"],
     ["bindGlassKeys", "../shared/glass-keys.ts"],
     ["framingCamera", "../shared/camera.ts"],
+    MAP_WORDS,
   ],
   "src/site/home/app.ts": [TOUCH],
-  "src/site/explorer/app.ts": [["bindRoom", "../shared/room.ts"], ANNOUNCER, STORE, ["filingAt", "./chart-drawer.ts"]],
+  "src/site/explorer/app.ts": [
+    ["bindRoom", "../shared/room.ts"],
+    ANNOUNCER,
+    STORE,
+    ["filingAt", "./chart-drawer.ts"],
+    MAP_NOUN,
+  ],
   "src/site/explorer/glass.ts": [TOUCH],
   "src/site/explorer/portfolio/app.ts": [
     ["makeAnnouncer", "../../shared/announce.ts"],

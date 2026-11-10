@@ -35,6 +35,7 @@ import { createLivingChart } from "../shared/living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { errorText } from "../shared/error-text.ts";
+import { mapNoun } from "../shared/map-words.ts";
 import { $ } from "../shared/by-id.ts";
 import { prefersReduce } from "../shared/reduced-motion.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -247,7 +248,7 @@ function keepDraw(res: DrawResult, seed: number, t0: number): void {
   const ms = (performance.now() - t0).toFixed(0);
   status.textContent = "";
   writeFolio(res, seed);
-  caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+  caption.textContent = `${mapNoun(res.mapType)} · ${res.band} · drawn in ${ms}ms`;
 }
 
 function landInPlace(
