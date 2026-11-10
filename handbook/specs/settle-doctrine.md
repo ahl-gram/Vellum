@@ -753,6 +753,13 @@ first browser `findBrowser` in `src/cli/raster.ts` finds, Brave before Google Ch
 - **Layouts and glides: on the runner a room's layout after a window change, and a camera's glide,
   can stand still through two of a wait's polls, where on a Mac the next poll finds them moved.**
   Home: the bullet above opening "A room's own layout lands after a window's change".
+- **Settles: a wait that takes a frame between its two equal reads hands over inside the Explorer's
+  250 ms camera settle on a Mac, about 120 ms before it ends, and after it on the runner**, so the
+  Primer check's read of `window.__vellumCameraSettling` is proven on a fast machine only: without
+  it four of its steps lose their camera on a Mac every run and keep it on the runner (proof run
+  42781038629), and frames withheld 300 ms apart reproduce the runner's side. Home: clause 8's
+  sentence on `window.__vellumCameraSettling`, the line at `EXPLORER_REST` in
+  `e2e/support/primer-rooms.ts`, and the readings in `handbook/plans/1200/1250/1250-r3-plan.md`.
 - **Strays: a killed local run leaves its browser and profile behind, and they accrue across a
   session until a lane stalls**, while the runner is thrown away after each job. Home: the bullet
   above opening "A run deletes its own browser profile", and `vellum-footguns` Gate 2 item 11.
