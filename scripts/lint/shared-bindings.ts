@@ -8,7 +8,6 @@ const ANNOUNCER: SharedBinding = ["makeAnnouncer", "../shared/announce.ts"];
 const STORE: SharedBinding = ["deviceStorage", "../shared/table-store.ts"];
 const ITEM: SharedBinding = ["prospectItemFrom", "../shared/table-address.ts"];
 const TOUCH: SharedBinding = ["bindChartTouch", "../shared/chart-touch.ts"];
-// BLIND SPOT, direction toward a pass (Issue #1162): the three map-type entries hold that the room takes the binding and uses it somewhere in the file, not that the use is the chart line's, so a revert that leaves some other use of the binding in the file passes, while one that drops its import or its last use reds. The wording of the table is src/site/shared/map-words.ts's own unit test's.
 const MAP_WORDS: SharedBinding = ["MAP_WORDS", "../shared/map-words.ts"];
 const MAP_NOUN: SharedBinding = ["mapNoun", "../shared/map-words.ts"];
 

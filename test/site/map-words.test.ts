@@ -11,7 +11,7 @@ test("every map type has its article and its written form (Issue #1162)", () => 
   });
 });
 
-test("every map type has its noun without the article, as the Explorer's type select spells it (Issue #1162)", () => {
+test("every map type has its noun without the article (Issue #1162)", () => {
   assert.deepEqual((["island", "archipelago", "continent", "citystate"] as const).map(mapNoun), [
     "island",
     "archipelago",

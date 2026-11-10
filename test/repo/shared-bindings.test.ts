@@ -318,12 +318,12 @@ test("Today, the Writing Room and the Explorer, each writing a chart line from t
     assert.deepEqual(
       await held([name === "mapNoun" ? INLINE_RAW : INLINE_ARTICLE], path, name),
       [[...binding]],
-      `${room} reverted to its inline form, import gone`,
+      `${room} reverted to its inline form, import gone. ${BLIND_SPOT}`,
     );
     assert.deepEqual(
       await held([taken, name === "mapNoun" ? INLINE_RAW : INLINE_ARTICLE], path, name),
       [[...binding]],
-      `${room} reverted to its inline form, import left`,
+      `${room} reverted to its inline form, import left. ${BLIND_SPOT}`,
     );
   }
 });
