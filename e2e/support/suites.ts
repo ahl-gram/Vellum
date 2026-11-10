@@ -36,6 +36,7 @@ export const E2E_SUITE_ORDER = [
   "corners",
   "stage",
   "slide-away",
+  "primer-explorer",
 ] as const;
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];

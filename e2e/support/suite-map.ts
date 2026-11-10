@@ -32,6 +32,7 @@ import { run as runSlideAway } from "../suites/slide-away.ts";
 import { run as runDocumentRooms } from "../suites/document-rooms.ts";
 import { run as runSpecimen } from "../suites/specimen.ts";
 import { run as runWritingRoom } from "../suites/writing-room.ts";
+import { run as runPrimerExplorer } from "../suites/primer-explorer.ts";
 
 export const SUITES = {
   render: runRender,
@@ -66,4 +67,5 @@ export const SUITES = {
   corners: runCorners,
   stage: runStage,
   "slide-away": runSlideAway,
+  "primer-explorer": runPrimerExplorer,
 } satisfies Record<E2eSuiteName, (ctx: SuiteContext) => Promise<void>>;
