@@ -45,11 +45,11 @@ test("an own-line run's code stops at a blank line and at five lines", () => {
 
 test("an added run is one whose text the file did not carry before, so a moved comment is not added", () => {
   const before = "// kept\nconst a = 1;\n// moved\nconst b = 2;\n";
-  const after = "// moved\nconst b = 2;\n// kept\nconst a = 1;\n// new one\nconst c = 3;\n";
+  const after = "const z = 0;\nconst y = 1;\n// new one\nconst c = 3;\n// kept\nconst a = 1;\n// moved\nconst b = 2;\n";
   const added = addedRuns("src/a.ts", before, after);
   assert.deepEqual(
     added.map((r) => [r.line, r.text]),
-    [[5, "new one"]],
+    [[3, "new one"]],
   );
   assert.equal(addedRuns("src/a.ts", null, after).length, 3);
 });

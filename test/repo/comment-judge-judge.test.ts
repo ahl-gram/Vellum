@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { commentRuns } from "../../scripts/comment-judge/collect.ts";
 import { judgeAll, judgeRun, type Judged } from "../../scripts/comment-judge/judge.ts";
-import { reportLines } from "../../scripts/comment-judge/report.ts";
+import { replyLines, reportLines, requestLines } from "../../scripts/comment-judge/report.ts";
 import { memoryTree } from "../../scripts/comment-judge/tree.ts";
 import type { Candidate, CommentRun, Outcome } from "../../scripts/comment-judge/types.ts";
 import type { Answered, Reply, Send } from "../../scripts/jev/system-one.ts";
@@ -49,7 +49,7 @@ test("once a run's reported input tokens reach the cap, the comments after it ar
   let calls = 0;
   const send: Send = () => {
     calls += 1;
-    return Promise.resolve(answered({ restates: 0.1 }, 600));
+    return Promise.resolve(answered({ restates: 0.1 }, 500));
   };
   const judged = await judgeAll(items, send, 1000);
   assert.deepEqual(
@@ -76,7 +76,7 @@ test("the report names each test a finding rests on, and says a skipped comment 
   const j: Judged[] = [
     judged(
       3,
-      { kind: "finding", pinnedBy: [{ file: "test/a.test.ts", name: "f doubles", noul: 0.91 }], restates: null },
+      { kind: "finding", pinnedBy: [{ file: "test/a.test.ts", name: "f doubles", noul: 0.91 }], restates: 0.82 },
       reply(answered({})),
     ),
     judged(9, { kind: "clear" }, reply(answered({}))),
@@ -85,7 +85,7 @@ test("the report names each test a finding rests on, and says a skipped comment 
   ];
   assert.deepEqual(reportLines(j, false), [
     "answered by jev-1.14.0",
-    'FINDING src/a.ts:3: pinned by "f doubles" in test/a.test.ts (0.91)',
+    'FINDING src/a.ts:3: pinned by "f doubles" in test/a.test.ts (0.91); restates its code (0.82)',
     "clear src/a.ts:9",
     "unsettled src/a.ts:12: highest answer 0.55",
     "SKIPPED src/a.ts:20: HTTP 529",
@@ -94,4 +94,44 @@ test("the report names each test a finding rests on, and says a skipped comment 
   const dry = reportLines(j, true);
   assert.equal(dry.length, 1);
   assert.ok(dry[0]!.startsWith("dry run: 4 comments, "));
+});
+
+test("every request built and every reply received is one JSON line, numbered within its comment", () => {
+  const first = { model: "jev-1.14.0", state: { comment: "a" }, questions: {} };
+  const second = { model: "jev-1.14.0", state: { comment: "b" }, questions: {} };
+  const failed: Reply = { ok: false, reason: "HTTP 529: overloaded" };
+  const j: Judged[] = [
+    {
+      sha: "s1",
+      run: run("src/a.ts", 3),
+      candidates: [],
+      requests: [first, second],
+      replies: [answered({ restates: 0.1 }), failed],
+      outcome: { kind: "skipped", reason: failed.reason },
+    },
+    {
+      sha: "s2",
+      run: run("src/b.ts", 7),
+      candidates: [],
+      requests: [first],
+      replies: [answered({ restates: 0.2 })],
+      outcome: { kind: "clear" },
+    },
+  ];
+  assert.deepEqual(
+    requestLines(j).map((line) => JSON.parse(line) as unknown),
+    [
+      { sha: "s1", comment: "src/a.ts:3", request: 1, body: first },
+      { sha: "s1", comment: "src/a.ts:3", request: 2, body: second },
+      { sha: "s2", comment: "src/b.ts:7", request: 1, body: first },
+    ],
+  );
+  assert.deepEqual(
+    replyLines(j).map((line) => JSON.parse(line) as unknown),
+    [
+      { sha: "s1", comment: "src/a.ts:3", request: 1, reply: answered({ restates: 0.1 }) },
+      { sha: "s1", comment: "src/a.ts:3", request: 2, reply: failed },
+      { sha: "s2", comment: "src/b.ts:7", request: 1, reply: answered({ restates: 0.2 }) },
+    ],
+  );
 });

@@ -25,4 +25,9 @@ test("every answer below 0.3 is clear, and one at 0.3 is unsettled", () => {
 
 test("an answer of exactly 0.7 is unsettled, not a finding", () => {
   assert.deepEqual(decide({ restates: 0.7, pins: [0.7] }, [A]), { kind: "unsettled", highest: 0.7 });
+  assert.deepEqual(decide({ restates: 0.7, pins: [0.8] }, [A]), {
+    kind: "finding",
+    pinnedBy: [{ file: "test/a.test.ts", name: "a", noul: 0.8 }],
+    restates: null,
+  });
 });

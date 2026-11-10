@@ -31,9 +31,14 @@ const pinned = (c: Candidate) => ({
 test("one request asks the restatement question and one question per candidate, each test in its own question with its name, file and body", () => {
   const first = candidate("one", "body one");
   const second = candidate("two", "body two");
-  assert.deepEqual(requestsFor(run, [first, second]), [
+  const requests = requestsFor(run, [first, second]);
+  assert.deepEqual(requests, [
     { model: MODEL, state, questions: { restates: RESTATES, pins_0: pinned(first), pins_1: pinned(second) } },
   ]);
+  for (const [id, question] of Object.entries(requests[0]!.questions)) {
+    assert.deepEqual(Object.keys(question), ["type", "instructions", "criteria"], id);
+    assert.deepEqual(Object.keys(question.criteria ?? {}), ["true", "false"], id);
+  }
 });
 
 test("questions past the request bound go to further requests with the same state, and every id stays unique", () => {
@@ -48,6 +53,14 @@ test("questions past the request bound go to further requests with the same stat
     requests.flatMap((r) => Object.keys(r.questions)),
     ["restates", "pins_0", "pins_1", "pins_2", "pins_3"],
   );
+});
+
+test("a question that brings its request to exactly the bound joins it, and one character more starts the next", () => {
+  const room = MAX_REQUEST_CHARS - JSON.stringify(requestsFor(run, [candidate("edge", "")])[0]).length;
+  const exact = requestsFor(run, [candidate("edge", "x".repeat(room))]);
+  assert.equal(exact.length, 1);
+  assert.equal(JSON.stringify(exact[0]).length, MAX_REQUEST_CHARS);
+  assert.equal(requestsFor(run, [candidate("edge", "x".repeat(room + 1))]).length, 2);
 });
 
 test("a question larger than the bound is still sent, alone", () => {
