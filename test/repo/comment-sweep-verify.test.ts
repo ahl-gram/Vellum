@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/comment-judge/tree.ts";
+import { scriptTokens } from "../../scripts/comment-sweep/tokens.ts";
 import { findingsOf, firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
 
 const READ = [
@@ -82,6 +83,7 @@ test("each changed path gets one finding, prose first, then added, renamed, not 
     { path: "src/styles/a.css", before: "src/styles/a.css" },
     { path: "src/pages/p.astro", before: "src/pages/p.astro" },
     { path: "handbook/m.md", before: "handbook/m.md" },
+    { path: "handbook/z.md", before: "src/z.ts" },
   ];
   assert.deepEqual(findingsOf(changed, ["src/d.ts", "handbook/old.md"], before, after), [
     { kind: "prose", path: "handbook/x.md" },
@@ -93,7 +95,14 @@ test("each changed path gets one finding, prose first, then added, renamed, not 
     { kind: "identical", path: "src/styles/a.css" },
     { kind: "identical", path: "src/pages/p.astro" },
     { kind: "prose", path: "handbook/m.md" },
+    { kind: "renamed", path: "handbook/z.md", before: "src/z.ts" },
     { kind: "deleted", path: "src/d.ts" },
     { kind: "prose", path: "handbook/old.md" },
   ]);
+});
+
+test("a tsx file is read as JSX and a ts file is not", () => {
+  const jsx = 'export const f = () => <div className="a">{x}</div>;\n';
+  assert.ok(scriptTokens("src/a.tsx", jsx).some((t) => t.text === "JsxElement"));
+  assert.ok(!scriptTokens("src/a.ts", jsx).some((t) => t.text === "JsxElement"));
 });

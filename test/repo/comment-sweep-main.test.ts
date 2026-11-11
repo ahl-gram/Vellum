@@ -123,5 +123,6 @@ test("the command takes verify and two refs, and anything else is a usage error"
   assert.equal(main(["verify", "a"], ROOT), 2);
   assert.equal(main(["diff", "a", "b"], ROOT), 2);
   assert.equal(main(["verify", "a", "--dry-run"], ROOT), 2);
+  assert.equal(main(["verify", "a", "b", "c"], ROOT), 2);
   assert.equal(main([], ROOT), 2);
 });

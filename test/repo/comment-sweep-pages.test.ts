@@ -99,3 +99,19 @@ for (const f of PAGES_QUIET)
     const read = readerOf(f.path)!;
     assert.equal(firstDifference(read(f.before), read(f.after)), null);
   });
+
+test("a difference in a page is reported at its own line", () => {
+  const read = readerOf("src/pages/a.astro")!;
+  assert.deepEqual(firstDifference(read("<p>a</p>\n<p>b</p>\n<p>c</p>\n"), read("<p>a</p>\n<p>b</p>\n<p>d</p>\n")), {
+    base: { line: 3, text: 'text "c"' },
+    head: { line: 3, text: 'text "d"' },
+  });
+});
+
+test("a page the parser cannot read pushes its diagnostic, so a sweep that breaks a page reads as a change", () => {
+  const read = readerOf("src/pages/a.astro")!;
+  assert.deepEqual(
+    read("<div>\n").filter((t) => t.text.startsWith("diagnostic")),
+    [{ text: "diagnostic error Unexpected token", line: 2 }],
+  );
+});
