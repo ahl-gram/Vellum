@@ -12,7 +12,6 @@ import { nameSetting, settlementsLayer } from "../../src/render/layers/settlemen
 import { glyphPoly, polysOverlap, textNodes } from "../../test-support/label-geometry.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
-import { renderMap } from "../../src/render/map-renderer.ts";
 import { MAX_DETAIL } from "../../src/terrain/heightfield.ts";
 import {
   finerMarkBox,
@@ -24,6 +23,7 @@ import {
   type SettlementTier,
 } from "../../src/render/layers/settlement-marks.ts";
 import { inkExtent, type Extent } from "../../test-support/dress-svg.ts";
+import { sheetOf } from "../../test-support/antique-sheet.ts";
 
 const largerSide = (e: Extent): number => Math.max(e.x1 - e.x0, e.y1 - e.y0);
 
@@ -72,8 +72,6 @@ test("on a close-up the marks keep the ruled order at every depth, in every dres
 });
 
 const DEEP = generateRegionWorld(world56, { ...spec, detail: true });
-
-const sheetOf = (w: World): string => renderMap(w, { style: "antique", widthPx: 1500, legend: true });
 
 function sheetMark(svg: string, tier: SettlementTier, nth = 0): Extent {
   let at = -1;
