@@ -9,6 +9,7 @@ export type AcceptedCopy = {
 const DAILY_HUNT_RULING = "https://github.com/ahl-gram/Vellum/issues/1318#issuecomment-6791902246";
 const LISTED_RULING = "https://github.com/ahl-gram/Vellum/issues/1319#issuecomment-6795585660";
 const KEPT_BY_1332 = "https://github.com/ahl-gram/Vellum/issues/1332#issuecomment-6799386440";
+const KEPT_ERROR_TEXT = "https://github.com/ahl-gram/Vellum/issues/1332#issuecomment-6803596304";
 const CLUES = "src/world/daily-hunt-clue-facts.ts";
 const MIRROR = "test-support/daily-hunt-geometry.ts";
 const MIRRORED =
@@ -71,6 +72,13 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
     reason:
       "The plate test's own box-overlap check, the one its bird assertions share with the plate's layout, kept beside the original with a line above the copy naming it; a later edit to one copy is caught, a mistake typed into both at once is not",
     ruling: KEPT_BY_1332,
+  },
+  {
+    a: { file: "src/site/shared/error-text.ts", name: "errorText", hash: "4619f717ef9ee94a" },
+    b: { file: "e2e/support/suites.ts", name: "errorText", hash: "4619f717ef9ee94a" },
+    reason:
+      "The e2e suite rules' own errorText: the proof runner (rulesAt in scripts/proof-runner/main.ts) loads suites.ts at a sha by copying only it and skips.ts, so suites.ts may import nothing else, with a line above the copy naming the original",
+    ruling: KEPT_ERROR_TEXT,
   },
   {
     a: { file: "scripts/agent-sandbox.ts", name: "haveCommit", hash: "3dc95b12918f2154" },
