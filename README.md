@@ -168,3 +168,4 @@ attribution required.
 The house rules live in [`handbook/specs/`](handbook/specs/), one file per area and every one of
 them normative. Read them rather than a summary here, since the summary is the
 thing that goes stale.
+Probe line for Issue #1306, closed unmerged.
