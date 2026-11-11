@@ -16,7 +16,6 @@ export type ClickFeedback =
   | {
       readonly kind: "miss";
       readonly band: DistanceBand;
-      // The click's own distance to the quarry, in grid units (Issue #327).
       readonly dist: number;
       readonly pickedIdx: number;
       readonly pickedName: string;

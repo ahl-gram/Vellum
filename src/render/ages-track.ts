@@ -2,7 +2,7 @@ import type { YearRange } from "./chronicle-scrubber.ts";
 
 export const SEAM_U = 0.5;
 
-// Pointer px, not a bar fraction, since one fraction is two different gestures on the two real layouts (measured 2026-07-28 on the built site): the desktop track ran 852px, where 28px is a light pull, while a 390px phone wrapped the bar to a line of about 230px, where a desktop-tuned fraction falls under 8px, inside touch jitter; DETENT_ESCAPE_MAX_U keeps the detent from claiming more than 15 percent of the bar.
+// On the built site, a bar fraction tuned for the desktop track would fall under 8px on a 390px phone's wrapped line, inside touch jitter.
 export const DETENT_ESCAPE_PX = 28;
 export const DETENT_ESCAPE_MAX_U = 0.15;
 

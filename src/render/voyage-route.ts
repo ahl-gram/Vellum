@@ -21,15 +21,15 @@ export type RoutedLeg = VoyageLeg & {
   readonly inlandHandoff: boolean;
 };
 
-// Swept under Issue #185 (2026-07-25) over seeds 1 to 40 against the lossless walk's 9353 vertices, as vertices kept and the worst stray of a walked cell from the drawn line: 0.5 gave 7332 and 0.50 cells, 0.75 gave 5869 and 1.00, 1.0 gave 4781 and 1.00, 1.5 gave 3974 and 1.49, and 2.5 gave 3205 and 2.50; `BOUND` in `test/render/voyage-route.test.ts` is RDP_EPSILON + 0.5, so raising this loosens that check.
+// Swept under Issue #185 (2026-07-25) over seeds 1 to 40 against the lossless walk's 9353 vertices, as vertices kept and the worst stray of a walked cell from the drawn line: 0.5 gave 7332 and 0.50 cells, 0.75 gave 5869 and 1.00, 1.0 gave 4781 and 1.00, 1.5 gave 3974 and 1.49, and 2.5 gave 3205 and 2.50.
 /** Grid cells. */
 export const RDP_EPSILON = 0.75;
 
-// Swept under Issue #185 (2026-07-25) over seeds 1 to 40 on Issue #275's itinerary, sea legs of 945 by value: 1.0 gave 329, 1.15 gave 272, 1.3 gave 237, 1.5 gave 199, 2.0 gave 152 and 3.0 gave 110, and from 1.5 up the leanest genuine inland handoff fell from 8.94 cells to 4.24; 1.3 catches seed 3084684951's 2.2x inland loop, and it sailed 242 of 945 after Issue #298's reorder (2026-07-28).
+// Swept under Issue #185 (2026-07-25) over seeds 1 to 40 on Issue #275's itinerary, sea legs of 945 by value: 1.0 gave 329, 1.15 gave 272, 1.3 gave 237, 1.5 gave 199, 2.0 gave 152 and 3.0 gave 110; 1.3 catches seed 3084684951's 2.2x inland loop, and it sailed 242 of 945 after Issue #298's reorder (2026-07-28).
 /** Sail when the road is this many times the sea route. Bounded above: past ~1.5 the leanest genuine inland handoff falls into the INLAND_STUB_CELLS gap (voyage-water.ts) and stubs too short to narrate start firing the handoff prose. */
 const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
 
-// Swept under Issue #185 (2026-07-25) over seeds 1 to 40: at 4 the leanest genuine inland handoff landed at exactly 4.00 cells and at 6 the handoffs went from 8 to 11, every new one a coastal shortcut, while 2 routed 236 sea legs of 945 against 237 and cut the worst coastal stub from 3.00 to 1.41.
+// Swept under Issue #185 (2026-07-25) over seeds 1 to 40: raised to 6 the inland handoffs went from 8 to 11, while lowered to 2 it routed 236 sea legs of 945 against 237 and cut the worst coastal stub from 3.00 to 1.41.
 /** Max embark stub for a coastal shortcut, in grid cells. */
 export const COAST_EMBARK_MAX = 3;
 

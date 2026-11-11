@@ -12,7 +12,7 @@ export type IsolineSet = {
 
 const ISO_LEVELS = 9; // matches the elevation contours' level count
 
-// Grid cells, about 2.8px at the 1500px chart width: a closed ring whose extent falls below this is single-cell mottle, not a feature.
+// Grid cells, about 2.8px at the 1500px chart width.
 const MIN_RING_CELLS = 0.6;
 
 type IsoStroke = { readonly color: string; readonly width: number; readonly opacity: number };

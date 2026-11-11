@@ -2,7 +2,7 @@ import type { Pt } from "../core/rdp.ts";
 import type { LegMode } from "./voyage-route.ts";
 import type { WaterSpan } from "./voyage-water.ts";
 
-// Measured over 150 seeds (Issue #185, 2026-07-25): every world ran 19 to 24 legs and a whole sweep took 10.2s to 16.1s, mean 13.4s, so MAX_SWEEP_MS never bit and the worst world sat 1.61x under it; MIN_LEG_MS lifted 125 of 945 legs, every leg under about 52px, onto the floor.
+// Measured over 150 seeds (Issue #185, 2026-07-25): every world ran 19 to 24 legs and a whole sweep took 10.2s to 16.1s, mean 13.4s, the worst world 1.61x under MAX_SWEEP_MS; MIN_LEG_MS lifted 125 of 945 legs, every leg under about 52px, onto the floor.
 /** PACE_EXP: 1 is constant speed, 0 is equal-time per leg; PACE_MS_PER_UNIT is the linear pace knob that reaches the screen; MAX_SWEEP_MS is a safety valve that has never bitten, tune the pace rather than raise it. */
 const PACE_EXP = 0.55;
 const PACE_MS_PER_UNIT = 34;
@@ -41,7 +41,7 @@ export function elapsedAtT(cumMs: ReadonlyArray<number>, t: number): number {
   return cumMs[i]! + (scaled - i) * (cumMs[i + 1]! - cumMs[i]!);
 }
 
-// Not an outlier clamp: measured over 945 legs at LOOKAHEAD 24 (Issue #185, 2026-07-25), the median leg peaked at 23.6 degrees and 630 legs pressed past 20, so a change here moves the whole sweep.
+// Measured over 945 legs at LOOKAHEAD 24 (Issue #185, 2026-07-25): 630 of them pressed past 20 degrees.
 /** Degrees. */
 export const MAX_TILT = 24;
 

@@ -36,9 +36,9 @@ export type ProspectInput = {
   readonly arms: Arms | null;
   readonly view: ProspectView;
   readonly siteRel: number;
-  /** Elevation profile behind the site, left to right, relative to sea level and normalized by the world's elevation span. */
+  /** Sampled left to right as the viewer faces the backdrop. */
   readonly backdrop: ReadonlyArray<number>;
-  /** Biome band in front of the site, left to right. */
+  /** Sampled left to right as the viewer faces the backdrop. */
   readonly foreground: ReadonlyArray<BiomeName>;
 };
 
