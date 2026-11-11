@@ -48,14 +48,17 @@ const NON_AROMATIC = [
 
 test("'smell of' notes never use a non-aromatic good", () => {
   const writer = createLoreWriter(stubWorld("oromi"), createRng(7).fork("lore"));
+  let smelled = 0;
   for (let i = 0; i < 60; i++) {
     const note = writer.settlementNote(harbor(i));
     const m = note.match(/smell of (.+?) and old rope/);
     if (m) {
+      smelled++;
       const good = m[1] as string;
       assert.ok(!NON_AROMATIC.includes(good), `"smell of ${good}" is not aromatic — in: ${note}`);
     }
   }
+  assert.ok(smelled >= 1, "none of the 60 notes used the 'smell of' template, so no good was checked");
 });
 
 test("harbor notes do not repeat the same sentence excessively", () => {
@@ -101,11 +104,16 @@ test("note pools are large enough to avoid clustering", () => {
 test("'smell of' notes draw only from the aromatic register", () => {
   const writer = createLoreWriter(stubWorld("oromi"), createRng(11).fork("lore"));
   const aromatic = AROMATIC_GOODS["oromi"] as readonly string[];
+  let smelled = 0;
   for (let i = 0; i < 60; i++) {
     const note = writer.settlementNote(harbor(i));
     const m = note.match(/smell of (.+?) and old rope/);
-    if (m) assert.ok(aromatic.includes(m[1] as string), `non-aromatic smell: ${note}`);
+    if (m) {
+      smelled++;
+      assert.ok(aromatic.includes(m[1] as string), `non-aromatic smell: ${note}`);
+    }
   }
+  assert.ok(smelled >= 1, "none of the 60 notes used the 'smell of' template, so no good was checked");
 });
 
 test("the capital's note is drawn from its own register", () => {

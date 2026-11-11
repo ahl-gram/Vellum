@@ -63,11 +63,20 @@ const WIDTH = 1500;
 
 test("region sea caption never lands on a parent-world lake (#234, seed 42)", () => {
   const { world, region, win } = capitalRegion(42);
-  const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
-  const center = seaCaptionCenter(svg, region.names.sea);
-  // On seed 42's capital plate the deepest water is the parent lake "The Mairoa Pool", so the gate is exercised on the assertion below, not on a missing element.
+  const toGrid = pxToGrid(region, WIDTH);
+  const ungated: World = { ...region, region: { ...region.region!, seaGate: undefined } };
+  const bare = seaCaptionCenter(renderMap(ungated, { style: "antique", widthPx: WIDTH }), region.names.sea);
+  assert.ok(bare, "without the sea gate the plate draws no sea caption, so it holds no water for the gate to judge");
+  const bareAt = toGrid(bare.px, bare.py);
+  assert.equal(
+    parentSeaAt(world, win, bareAt.gx, bareAt.gy, region),
+    0,
+    `without the sea gate the caption sits on genuine sea at region(${bareAt.gx},${bareAt.gy}), so this plate does not exercise the gate`,
+  );
+
+  const center = seaCaptionCenter(renderMap(region, { style: "antique", widthPx: WIDTH }), region.names.sea);
   if (center !== null) {
-    const { gx, gy } = pxToGrid(region, WIDTH)(center.px, center.py);
+    const { gx, gy } = toGrid(center.px, center.py);
     assert.equal(
       parentSeaAt(world, win, gx, gy, region),
       1,

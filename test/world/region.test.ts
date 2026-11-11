@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround, regionTitle } from "../../src/world/region.ts";
 import { createRng } from "../../src/core/rng.ts";
-import { createLoreWriter } from "../../src/society/lore.ts";
+import { CAPITAL_NOTES, createLoreWriter, HARBOR_NOTES } from "../../src/society/lore.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { classifyBiomes, BIOMES } from "../../src/climate/biomes.ts";
@@ -286,10 +286,22 @@ test("settlement notes are deterministic, non-empty prose", () => {
 test("a writer avoids back-to-back template repeats", () => {
   const writer = createLoreWriter(world, createRng(9));
   const harborTowns = world.settlements.filter((s) => s.harbor).slice(0, 6);
-  if (harborTowns.length < 3) return;
-  const notes = harborTowns.map((s) => writer.settlementNote(s));
-  for (let i = 1; i < notes.length; i++) {
-    assert.notEqual(notes[i], notes[i - 1], "adjacent notes identical");
+  assert.ok(harborTowns.length >= 3, `seed 42 has ${harborTowns.length} harbors, too few to compare`);
+  const pool = [...CAPITAL_NOTES, ...HARBOR_NOTES];
+  const templateOf = (note: string): number => {
+    const opening = note.split(/(?<=\.)\s/)[0] as string;
+    return pool.findIndex((t) => {
+      const parts = t.split(/%[ac]/);
+      return opening.startsWith(parts[0] as string) && opening.endsWith(parts.at(-1) as string);
+    });
+  };
+  const templates = harborTowns.map((s) => templateOf(writer.settlementNote(s)));
+  assert.ok(
+    templates.every((t) => t >= 0),
+    `a note opens on no capital or harbor template: ${templates.join(",")}`,
+  );
+  for (let i = 1; i < templates.length; i++) {
+    assert.notEqual(templates[i], templates[i - 1], `adjacent notes open on one template: ${pool[templates[i]!]}`);
   }
 });
 
