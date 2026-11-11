@@ -19,7 +19,7 @@ export type NoulQuestion = {
 };
 export type SystemOneRequest = {
   readonly model: string;
-  readonly state: Readonly<Record<string, string>>;
+  readonly state: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
   readonly questions: Readonly<Record<string, NoulQuestion>>;
 };
 export type Answered = {
