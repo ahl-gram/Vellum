@@ -5,7 +5,7 @@ import { sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
 import { STYLES } from "../../scripts/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { type Plant, reportedLines, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const INTRO = "vellum/css-house-owns-intro";
 const CONTROLS = "vellum/css-house-owns-controls";
@@ -17,20 +17,6 @@ const HOST_ID = "vellum/css-engine-no-host-id";
 
 const REFUSE = true;
 const PASS = false;
-type Plant = ReadonlyArray<readonly [string, boolean]>;
-
-const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> => [
-  ...new Set(
-    (
-      await plantMessages(
-        plant.map(([line]) => line),
-        path,
-      )
-    )
-      .filter((m) => m.ruleId === rule)
-      .map((m) => m.line),
-  ),
-];
 
 const assertRule = async (
   plant: Plant,
@@ -43,9 +29,13 @@ const assertRule = async (
     refused.length > 0 && refused.length < plant.length,
     `${rule}'s plant cannot tell the rule from its negation`,
   );
-  assert.deepEqual(await reported(plant, refusedAt, rule), refused, `${rule} at ${refusedAt}`);
+  assert.deepEqual(await reportedLines(plant, refusedAt, rule), refused, `${rule} at ${refusedAt}`);
   for (const path of passedAt)
-    assert.deepEqual(await reported(plant, path, rule), [], `${rule} reports at ${path}, the file that owns the rule`);
+    assert.deepEqual(
+      await reportedLines(plant, path, rule),
+      [],
+      `${rule} reports at ${path}, the file that owns the rule`,
+    );
 };
 
 test("no sheet but src/styles/shared/house.css binds the intro voice: a colour, a face or a style on a rule naming the intro class (Issue #324, Issue #709, Issue #779 part 2d)", async () => {
@@ -126,8 +116,8 @@ test("no page sheet re-dresses the kit: a colour, border, shadow, face or tracki
     "src/styles/shared/atelier-split.css",
   ]);
   assert.deepEqual(
-    await reported(KIT_PLANT, "src/styles/home-noscript.css", KIT),
-    await reported(KIT_PLANT, "src/styles/specimen/index.css", KIT),
+    await reportedLines(KIT_PLANT, "src/styles/home-noscript.css", KIT),
+    await reportedLines(KIT_PLANT, "src/styles/specimen/index.css", KIT),
     "home's scripts-off sheet is a page sheet, read as every page sheet is",
   );
 });
@@ -207,9 +197,6 @@ test("every sheet the owner rules key on or read is a sheet under src/styles/, s
   for (const [role, key] of owned)
     assert.ok(onDisk.has(`${STYLES}/${key}`), `OWNED_SHEETS.${role} is ${key}, which is no sheet under src/styles/`);
 });
-
-const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
 test("the seven owner rules resolve at error on every sheet and on no script (Issue #779 part 2d)", async () => {
   for (const rule of [INTRO, CONTROLS, KIT, ROW, SELECT, ENGINE, HOST_ID]) {

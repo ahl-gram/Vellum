@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 import importBounds, { ROOMS_UNDER_THE_EXPLORER, TOOLING_ROOTS } from "../../scripts/lint/import-bounds.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { plantMessages, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -270,12 +270,13 @@ test("src/ reaches scripts/, test/, test-support/ and e2e/ by no module source a
     );
 });
 
-const resolvedRule = async (file: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[TOOLING_RULE];
-
 test("the src/ import rule resolves at error on every file under src/, a room not yet written too, and on no other TypeScript root, whose files import from scripts/ freely; and its four folders are the ruled four and stand on disk (Issue #1132)", async () => {
   for (const file of [WITNESSES["src/**/*.ts"]!, "src/site/zz-new-room/part.ts"])
-    assert.deepEqual(await resolvedRule(file), [2], `${TOOLING_RULE} does not resolve at error on ${file}`);
+    assert.deepEqual(
+      await resolvedRule(file, TOOLING_RULE),
+      [2],
+      `${TOOLING_RULE} does not resolve at error on ${file}`,
+    );
   const roots = lintTsRoots();
   assert.ok(
     roots.includes("src") && roots.length > 1,
@@ -285,7 +286,7 @@ test("the src/ import rule resolves at error on every file under src/, a room no
     const witness = WITNESSES[`${root}/**/*.ts`];
     assert.ok(witness !== undefined, `${root} has no witness in test-support/lint-witnesses.ts`);
     assert.equal(
-      await resolvedRule(witness),
+      await resolvedRule(witness, TOOLING_RULE),
       undefined,
       `${TOOLING_RULE} reaches ${witness}, code that may import scripts/`,
     );

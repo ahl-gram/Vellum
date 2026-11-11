@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, globSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { globSync } from "node:fs";
+import { resolve } from "node:path";
+import { offList, plantMessages, real, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/founding-locale-clock-free";
@@ -112,9 +112,6 @@ const BROWSER_SAMPLE = [
   "self",
   "window",
 ];
-const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
-const offList = (names: readonly string[], approved: readonly string[]): string[] =>
-  [...new Set(names)].filter((name) => !approved.includes(name) && IDENTIFIER.test(name)).sort();
 const OFF_LIST: ReadonlyArray<readonly [string, string]> = offList(
   [...Object.getOwnPropertyNames(globalThis), ...BROWSER_SAMPLE],
   APPROVED,
@@ -137,20 +134,12 @@ test("founding refuses the locale members however spelled, Intl, the clock, chan
   assert.deepEqual(await reports(plant, AT), expected, BLIND_SPOTS);
 });
 
-const resolvedAt = async (file: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[RULE];
-const real = async (file: string): Promise<string> => {
-  assert.ok(existsSync(join(ROOT, file)), `${file}, a witness here, does not exist`);
-  assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so it witnesses nothing`);
-  return file;
-};
-
 test("the founding rule resolves at error on every file under src/world/founding/ and on one nested deeper, and on nothing outside it, the modules founding imports from included (Issue #829)", async () => {
   const files = globSync("src/world/founding/**/*.ts", { cwd: ROOT });
   assert.ok(files.length > 0, "src/world/founding/ holds no file, so this sweep reads nothing");
   const inside = [...(await Promise.all(files.map(real))), "src/world/founding/nested/deeper/part.ts"];
   const unresolved: string[] = [];
-  for (const file of inside) if (JSON.stringify(await resolvedAt(file)) !== "[2]") unresolved.push(file);
+  for (const file of inside) if (JSON.stringify(await resolvedRule(file, RULE)) !== "[2]") unresolved.push(file);
   assert.deepEqual(unresolved, [], `${RULE} does not resolve at error on these files`);
   for (const file of [
     "src/world/generate.ts",
@@ -159,7 +148,7 @@ test("the founding rule resolves at error on every file under src/world/founding
     "src/prospect/compose.ts",
     "test/world/founding-covenant.test.ts",
   ]) {
-    assert.equal(await resolvedAt(await real(file)), undefined, `${RULE} reaches ${file}, outside its scope`);
+    assert.equal(await resolvedRule(await real(file), RULE), undefined, `${RULE} reaches ${file}, outside its scope`);
   }
 });
 
