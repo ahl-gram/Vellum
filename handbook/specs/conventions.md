@@ -244,29 +244,34 @@ is run and PROVEN in a particular way.
 - **The proof that a sweep changed no code is `npm run comment-sweep -- verify origin/main HEAD`,
   run on the sweep's branch: an AST token-stream comparison against the base, per file**
   (`scripts/comment-sweep/main.ts`). It reads the branch's commits from their merge base with
-  `origin/main`, compares each script, sheet and page the branch changes with its comments
-  removed, names every file that differs (with the first difference's line on each side), is
-  added, deleted or renamed, or is of a kind it does not read, and exits 1 on any of them; it
-  passes the house prose `isDoc` in `scripts/docs-only.ts` names. These things it must handle
-  or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to `LastJSDocNode`, because
-  TypeScript models JSDoc as real syntax and a reworded doc block otherwise reads as a code
-  change. Strip Astro's two comment forms, `<!-- -->` in the markup and `{/* */}` in an
-  expression, which no comment counter inventories and the comparison reads as text. Never
-  build it on `ts.createScanner`, which mis-lexes regular-expression literals and backticks and
-  reports drift that is not there; `ts.createSourceFile` and a walk that reads every node's kind
-  beside every leaf's text are the shape that works, since the leaves alone read a `return`
-  whose value sits on the next line as one that returns it. Its unit tests are its proof: a
-  changed identifier, string, regular-expression body or template literal, a dropped default
-  argument or type annotation, a deleted CSS declaration, a changed selector, a dropped media
-  query, and an edited Astro attribute, expression, style or script each read as a change, and
-  every comment form removed beside them reads as none. Its blind spots each err toward
-  passing: pure reindentation; in a page, a run of whitespace read as one space and a blank run
-  at the edge of an element's content not read; and a directive comment (`@ts-expect-error`,
-  `eslint-disable-line`, `prettier-ignore`), read as a comment, whose removal the pull request's
-  own type check, lint and format check report wherever it still did its work. A comment inside
-  a template literal is string data rather than a comment, so it reads as a change by
-  construction. The cold review runs the verifier again on the sweep's pull request
-  (`.claude/agents/vellum-pr-skeptic.md`).
+  `origin/main`, compares each script, sheet and page the branch changes with every comment
+  removed but one that instructs a tool, names every file that differs (with the first
+  difference's line on each side), is added, deleted or renamed, changes type, or is of a kind
+  it does not read, and exits 1 on any of them; it passes the house prose `isDoc` in
+  `scripts/docs-only.ts` names. A run that exits 1 is fixed on the branch, never argued. These
+  things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
+  `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block
+  otherwise reads as a code change. Strip Astro's two comment forms, `<!-- -->` in the markup
+  and `{/* */}` in an expression, which no comment counter inventories and the comparison reads
+  as text. Never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
+  backticks and reports drift that is not there; `ts.createSourceFile` and a walk that reads
+  every node's kind beside every leaf's text are the shape that works, since the leaves alone
+  read a `return` whose value sits on the next line as one that returns it. Read a comment that
+  instructs a tool as code, since no type check, lint or format check reports the removal of
+  every one: a comment an entry of `INSTRUCTION_COMMENTS` in
+  `scripts/comment-sweep/instructions.ts` reads, each entry reading its form the way the tool
+  that obeys it does, stays in the token stream where it stands, so removing or editing one, or
+  moving it past code, is a change. Its unit tests are its proof: a changed identifier, string,
+  regular-expression body or template literal, a dropped default argument or type annotation, a
+  deleted CSS declaration, a changed selector, a dropped media query, an edited Astro
+  attribute, expression, style or script, a moved or dropped array hole, and an instruction
+  comment removed, edited or moved, each read as a change, and every other comment form removed
+  beside them reads as none. Its blind spots each err toward passing: pure reindentation; in a
+  page, a run of whitespace read as one space and a blank run at the edge of an element's
+  content not read; and a comment that instructs a tool in a form the list does not read, read
+  as a comment. A comment inside a template literal is string data rather than a comment, so it
+  reads as a change by construction. The cold review runs the verifier again on the sweep's pull
+  request (`.claude/agents/vellum-pr-skeptic.md`).
 - **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
   nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
   DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named
@@ -294,6 +299,10 @@ is run and PROVEN in a particular way.
   ledger written while the grep is still open, because it cannot be reconstructed afterwards. Naming
   a test is not enough by itself: check that the named test actually pins the behaviour the comment
   stated, since a citation to a test that merely touches the same code reads identically in a ledger.
+- **A sweep is cut on a branch named `chore/comment-sweep-<date>`, and its pull request's title
+  begins `Comment sweep <date>: `** and goes on to say what it cut, `<date>` the sitting's date,
+  the one its `comment-sweep/<date>` tag carries, written `YYYY-MM-DD`. The cold review keys on
+  that title (`.claude/agents/vellum-pr-skeptic.md`).
 - **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
   sweep and run `npm run comment-sweep -- verify origin/main HEAD` again before merging that. A
   comment-only branch absorbing feature work is re-provable mechanically; a feature branch
