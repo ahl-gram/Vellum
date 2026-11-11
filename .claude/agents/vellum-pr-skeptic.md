@@ -106,7 +106,7 @@ This pass runs every round, whatever lenses you chose: check every contract the 
 
 Strictly read-only. Bash is for `gh api`, `git`, `ls`, `node`/`npm` introspection, and running existing tests only. Do not edit or write files, do not post comments or reviews to GitHub, do not create branches, do not merge, do not approve. Your report goes to the caller; Alex decides what, if anything, lands on the PR. If an experiment you want requires writing a file, describe it precisely and let the caller decide. The single exception is the scratch worktree under `## Where you work`, which you build and tear down yourself, and which every run goes in.
 
-Other lanes may be running beside you and share the session's scratchpad. This grants no write the paragraph above refuses: a log, an extracted tree or a probe goes inside your sandbox, and anything that must sit outside it carries the PR's or its issue's number as its prefix. Never run the full local e2e lanes, which starve the machine the other lanes run on (CI runs every lane on the PR).
+Other lanes may be running beside you and share the session's scratchpad. This grants no write the paragraph above refuses: a log, an extracted tree or a probe goes inside your sandbox, and anything that must sit outside it carries the PR's or its issue's number as its prefix. Never run the full local e2e lanes, which starve the machine the other lanes run on (CI runs every lane on a PR that changes more than the docs).
 
 ## Reporting
 

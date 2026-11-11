@@ -374,6 +374,18 @@ precisely, because a token that falls outside it looks identical at the point of
   not the sum, and the repeated install and build are the price of that. Every lane rebuilds rather
   than downloading a shared artifact, and prints a hash of its own `dist/` so a disagreement between
   two lanes is visible instead of silent.
+- **A pull request runs every check `main` runs, except that one whose every changed file is a doc
+  passes each browser lane without building or running it** (Alex, 2026-11-10, Issue #1306). A doc
+  is a path `isDoc` in `scripts/docs-only.ts` names, house prose that neither `npm run build` nor any
+  browser check reads. Each lane job still starts and reports its check, since main's required
+  checks wait on every one: its scope step reads the changed files off the merge commit's first
+  parent, and every step after it runs unless the reading is docs only, so a reading that fails runs
+  the lane in full. A push to `main` and a run started by hand run every lane whatever they change,
+  and the unit jobs run on every diff, since the unit suite reads the docs. Never filter the
+  workflow's triggers by path or skip a lane job whole: a required check that never reports holds
+  every merge. A change that makes the build or a browser check read a file the list names takes
+  that file off the list in the same pull request, since nothing else notices: a later pull request
+  editing only that file would pass its lanes unbuilt and turn main red at its merge.
 - **A pull request's newest run, a re-run included, cancels any of its own runs still going, and no
   other run is ever cancelled that way.** A push to `main` and a run started by hand each take a
   concurrency group of their own, so every merge's own run finishes and none waits behind another;

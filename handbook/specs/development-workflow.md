@@ -261,10 +261,11 @@ the control, the predecessor and yours wherever they differ; and never promote a
 on one fixture into an unconditional invariant.
 
 **Name which checks ran.** CI is the full-suite gate and runs everything on the pull request
-regardless, so the local run is the targeted one this step already describes. Say so plainly in the
-report and in the body, because "tests pass" is otherwise read as "the whole suite passed locally",
-and the gap between those two is exactly where a reviewer's trust is spent. The time this saves does
-not transfer to skipping step 11.
+regardless, the browser lanes excepted on a pull request that changes only the docs
+(`handbook/specs/site-architecture.md`), so the local run is the targeted one this step already
+describes. Say so plainly in the report and in the body, because "tests pass" is otherwise read as
+"the whole suite passed locally", and the gap between those two is exactly where a reviewer's trust
+is spent. The time this saves does not transfer to skipping step 11.
 
 **A clean mergeable verdict is about text.** When main moves under a branch whose tests pin measured
 values, no file needs to overlap for the merged state to behave differently, and the branch's own

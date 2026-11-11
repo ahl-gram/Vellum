@@ -286,15 +286,6 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
   );
 });
 
-test("every CI trigger gets the same full coverage, so no e2e step is conditional on the event", () => {
-  const at = CI.indexOf("test:e2e:lanes");
-  // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both assertions below passing against nothing.
-  assert.notEqual(at, -1, "the e2e step is gone, so this guard would be reading an empty slice");
-  const step = CI.slice(at);
-  assert.doesNotMatch(step, /github\.event_name/, "the e2e step is conditional on the event again");
-  assert.doesNotMatch(step, /full-e2e/, "the full-e2e label is wired back in, so PRs differ from main again");
-});
-
 test("the harness hands out exactly the two throwing waits vellum/e2e-throw-inside-step seeds from, so a third one cannot arrive unread", () => {
   const harness = src("e2e/harness.ts").split("\n");
   const found = harness
