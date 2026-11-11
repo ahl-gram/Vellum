@@ -16,17 +16,10 @@ test("the report lists each lost, unsettled and skipped comment with its confide
   const scanned: Scanned[] = [
     {
       sha: "b1",
-      run: { ...RUN, file: "src/a.ts", line: 3, text: "measured over 945 legs" },
+      run: { ...RUN, file: "src/c.ts", line: 2, text: "px" },
       requests: [],
-      replies: [answered({})],
-      outcome: {
-        kind: "read",
-        band: "lost",
-        signals: [
-          { signal: "measured", keeper: 0.91, survival: 0.1 },
-          { signal: "units", keeper: 0.8, survival: 0.85 },
-        ],
-      },
+      replies: [{ ok: false, reason: "HTTP 529" }],
+      outcome: { kind: "skipped", reason: "HTTP 529" },
     },
     {
       sha: "b1",
@@ -58,10 +51,17 @@ test("the report lists each lost, unsettled and skipped comment with its confide
     },
     {
       sha: "b1",
-      run: { ...RUN, file: "src/c.ts", line: 2, text: "px" },
+      run: { ...RUN, file: "src/a.ts", line: 3, text: "measured over 945 legs" },
       requests: [],
-      replies: [{ ok: false, reason: "HTTP 529" }],
-      outcome: { kind: "skipped", reason: "HTTP 529" },
+      replies: [answered({})],
+      outcome: {
+        kind: "read",
+        band: "lost",
+        signals: [
+          { signal: "measured", keeper: 0.91, survival: 0.1 },
+          { signal: "units", keeper: 0.8, survival: 0.85 },
+        ],
+      },
     },
   ];
   assert.deepEqual(reportLines(scanned, NOT_READ, AT, false), [
