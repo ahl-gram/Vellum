@@ -15,6 +15,7 @@ import {
   standInTarget,
 } from "../../test-support/stand-in-browser.ts";
 import { settle } from "../../test-support/launch-settle.ts";
+import { goneWithin, isAlive } from "../../test-support/process-fakes.ts";
 
 // REAL gives a stand-in node child 3000ms to bind: on ten CI runs through 2026-10-03 (PR #735) the slowest second stand-in came up in about 420ms.
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
@@ -54,21 +55,6 @@ async function standIn(silent: number, body = `exec "${process.execPath}" "${STA
     lines,
     profiles: () => readdirSync(dir).filter((n) => n.startsWith("vellum-e2e-")),
   };
-}
-
-const isAlive = (pid: number): boolean => {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-async function goneWithin(pid: number, ms: number): Promise<boolean> {
-  const until = performance.now() + ms;
-  while (isAlive(pid) && performance.now() < until) await new Promise((r) => setTimeout(r, 20));
-  return !isAlive(pid);
 }
 
 test(

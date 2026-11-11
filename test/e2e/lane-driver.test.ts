@@ -1,5 +1,4 @@
 import { test } from "node:test";
-import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { join, resolve } from "node:path";
@@ -8,28 +7,12 @@ import { LANES_SKIP_LINE, RUNNER, runLanes, runLanesFromProcess } from "../../e2
 import type { LaneChild, LaneDriverIo } from "../../e2e/support/lane-driver.ts";
 import { E2E_LANES, laneLineIsSkip } from "../../e2e/support/lanes.ts";
 import type { EnvLike } from "../../e2e/support/runner.ts";
+import { noExit, withTTY } from "../../test-support/process-fakes.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const BROWSERLESS = ["CI", "VELLUM_REQUIRE_BROWSER", "VELLUM_ALLOW_NO_BROWSER", "VELLUM_E2E_SUITES"] as const;
 
 type Spawned = { command: string; args: readonly string[]; env: Record<string, string>; stdio: readonly string[] };
-
-async function withTTY<T>(value: boolean, body: () => Promise<T>): Promise<T> {
-  const own = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
-  Object.defineProperty(process.stdout, "isTTY", { value, configurable: true });
-  try {
-    return await body();
-  } finally {
-    if (own) Object.defineProperty(process.stdout, "isTTY", own);
-    else Reflect.deleteProperty(process.stdout, "isTTY");
-  }
-}
-
-const noExit = (t: TestContext): void => {
-  t.mock.method(process, "exit", () => {
-    throw new Error("process.exit was reached inside a unit test, which would erase this file's tally");
-  });
-};
 
 type Script = { out?: readonly string[]; err?: readonly string[]; code?: number | null; fail?: string };
 
