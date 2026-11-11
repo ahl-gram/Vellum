@@ -56,6 +56,11 @@ export const changedFiles = (repo: string, from: string, head: string): Changed[
       return { path: first!, before: status === "A" ? null : first! };
     });
 
+export const deletedFiles = (repo: string, from: string, head: string): string[] =>
+  git(repo, ["-c", "core.quotepath=false", "diff", "--name-only", "--find-renames", "--diff-filter=D", from, head])
+    .split("\n")
+    .filter((line) => line !== "");
+
 export const ensureCommit = (repo: string, sha: string, ref: string): void => {
   const has = (): boolean =>
     spawnSync("git", ["cat-file", "-e", `${sha}^{commit}`], { cwd: repo, timeout: GIT_MS }).status === 0;

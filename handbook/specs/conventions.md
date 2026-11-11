@@ -251,8 +251,21 @@ is run and PROVEN in a particular way.
 - **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
   nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
   DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named
-  browser, a ratified deviation, a byte-identity or golden claim) and check whether the fact survives
-  anywhere in its file. **CSS is the weakest ground for the whole doctrine**, because no unit test
+  browser, a ratified deviation, a byte-identity or golden claim, and on a trailing line the units, a
+  coordinate convention or a sentinel's decode) and check whether the fact survives anywhere in its
+  file. For TypeScript, run `npm run keeper-scan -- diff origin/main HEAD` on the sweep's branch
+  before its pull request opens, and paste its report into the sweep's ledger whole
+  (`scripts/keeper-scan/main.ts`). It asks TypeSafe's Jev whether each comment the branch deletes or
+  trims carries each signal, and asks each signal Jev is confident the comment carried (an answer
+  above 0.7) whether the file at head still says it. It lists only those confident facts: as lost
+  where the file no longer says one (an answer under 0.3), and as unsettled where it may not (from
+  0.3 to 0.7). A comment Jev is unsure carries any signal (an answer from 0.3 to 0.7) is counted and
+  not listed (Alex, 2026-11-11, Issue #1320). Read by hand every comment it lists as lost, unsettled
+  or skipped, and every file it names as not read (a sheet, a page, a TypeScript file outside the
+  lint's roots, a file the branch deletes): put each keeper fact back at its line or into the test
+  that pins it, or name in the ledger why it is not one, since the scan only lists and a person
+  decides what is a keeper. Its questions are frozen in `scripts/keeper-scan/questions.ts` by its
+  unit tests. **CSS is the weakest ground for the whole doctrine**, because no unit test
   pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
   dangerous single loss: without the line the next reader "fixes" the value back. A line holding
   `rewritten for a red on CI` is never removed by a sweep: it marks a check rewritten once for a red

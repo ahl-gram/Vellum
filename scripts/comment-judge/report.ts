@@ -1,9 +1,11 @@
+import type { Reply, SystemOneRequest } from "../jev/system-one.ts";
 import type { Judged } from "./judge.ts";
+import type { CommentRun } from "./types.ts";
 
-const at = (j: Judged): string => `${j.run.file}:${j.run.line}`;
+const at = (j: { readonly run: CommentRun }): string => `${j.run.file}:${j.run.line}`;
 export const two = (n: number): string => n.toFixed(2);
 
-export const modelsOf = (judged: readonly Judged[]): string => {
+export const modelsOf = (judged: readonly { readonly replies: readonly Reply[] }[]): string => {
   const models = new Set(judged.flatMap((j) => j.replies.flatMap((r) => (r.ok ? [r.model] : []))));
   return models.size === 0 ? "none" : [...models].join(", ");
 };
@@ -44,12 +46,16 @@ export const reportLines = (judged: readonly Judged[], dryRun: boolean): string[
   ];
 };
 
-export const requestLines = (judged: readonly Judged[]): string[] =>
+export const requestLines = (
+  judged: readonly { readonly sha: string; readonly run: CommentRun; readonly requests: readonly SystemOneRequest[] }[],
+): string[] =>
   judged.flatMap((j) =>
     j.requests.map((body, i) => JSON.stringify({ sha: j.sha, comment: at(j), request: i + 1, body })),
   );
 
-export const replyLines = (judged: readonly Judged[]): string[] =>
+export const replyLines = (
+  judged: readonly { readonly sha: string; readonly run: CommentRun; readonly replies: readonly Reply[] }[],
+): string[] =>
   judged.flatMap((j) =>
     j.replies.map((reply, i) => JSON.stringify({ sha: j.sha, comment: at(j), request: i + 1, reply })),
   );

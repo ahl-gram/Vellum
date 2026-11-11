@@ -5,7 +5,8 @@ import { judgeAll, judgeRun, type Judged } from "../../scripts/comment-judge/jud
 import { replyLines, reportLines, requestLines } from "../../scripts/comment-judge/report.ts";
 import { memoryTree } from "../../scripts/comment-judge/tree.ts";
 import type { Candidate, CommentRun, Outcome } from "../../scripts/comment-judge/types.ts";
-import type { Answered, Reply, Send } from "../../scripts/jev/system-one.ts";
+import type { Reply, Send } from "../../scripts/jev/system-one.ts";
+import { answered } from "../../test-support/jev-fakes.ts";
 
 const run = (file: string, line: number): CommentRun => ({
   file,
@@ -19,13 +20,6 @@ const run = (file: string, line: number): CommentRun => ({
 });
 const A: Candidate = { file: "test/a.test.ts", name: "f doubles", body: "" };
 const B: Candidate = { file: "test/b.test.ts", name: "g is one", body: "" };
-const answered = (nouls: Record<string, number>, inputTokens = 500): Answered => ({
-  ok: true,
-  model: "jev-1.14.0",
-  nouls,
-  inputTokens,
-  ms: 5,
-});
 
 test("a comment is judged from all its replies, and one failed request skips it rather than clearing it", async () => {
   const good: Send = () => Promise.resolve(answered({ restates: 0.1, pins_0: 0.9, pins_1: 0.1 }));
