@@ -310,15 +310,15 @@ const SURROUNDED: Surroundings = {
   realmProclaimed: true,
 };
 
-// Re-pinned 2026-10-06 for E (Issue #754): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
+// Re-pinned 2026-10-06 for E (Issue #754), and the river village's two on 2026-11-10 when its door took the townscape's path (Issue #1314): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "ink"; sum: number }> = [
   { name: "harborCapital", year: 1300, style: "antique", sum: 1782288422 },
   { name: "harborCapital", year: 1300, style: "ink", sum: 1277032137 },
   { name: "harborCapital", year: 1040, style: "ink", sum: 1669871168 },
   { name: "ruinedTown", year: 1200, style: "antique", sum: 4087823426 },
   { name: "ruinedTown", year: 1120, style: "ink", sum: 699834108 },
-  { name: "riverVillage", year: 1300, style: "antique", sum: 4107077100 },
-  { name: "riverVillage", year: 1300, style: "ink", sum: 159481560 },
+  { name: "riverVillage", year: 1300, style: "antique", sum: 1677082508 },
+  { name: "riverVillage", year: 1300, style: "ink", sum: 763815528 },
   { name: "fieldsHamlet", year: 1300, style: "antique", sum: 1603591529 },
   { name: "fieldsHamlet", year: 1300, style: "ink", sum: 2085009582 },
   { name: "drownedVillage", year: 1300, style: "antique", sum: 3771020040 },

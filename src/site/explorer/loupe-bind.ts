@@ -1,5 +1,6 @@
 // The loupe's hands (Issue #751): its press, its held key, the pointer it follows and, where touch is the main pointer, the finger that drags it by its grip while the chart is in hand.
 import type { Loupe } from "./loupe.ts";
+import { within } from "../shared/slide-away.ts";
 
 const LOUPE_KEY = "l";
 
@@ -46,7 +47,6 @@ const clampTo = (b: Box, p: Point): Point => ({
   x: Math.min(Math.max(p.x, 0), b.right - b.left),
   y: Math.min(Math.max(p.y, 0), b.bottom - b.top),
 });
-const within = (b: Box, x: number, y: number): boolean => x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
 
 function whereAt(touchable: boolean, h: Readonly<Hands>, r: Box): Point | null {
   if (touchable) return h.at;
@@ -59,7 +59,7 @@ function placer(deps: LoupeBindDeps, h: Readonly<Hands>): () => void {
     const r = deps.viewport.getBoundingClientRect();
     const at = whereAt(deps.touchable, h, r);
     const card = at && !deps.touchable ? deps.cardRect() : null;
-    if (!(h.lit || h.held) || !at || !deps.standing() || (card && within(card, r.left + at.x, r.top + at.y))) {
+    if (!(h.lit || h.held) || !at || !deps.standing() || (card && within(r.left + at.x, r.top + at.y, card))) {
       deps.loupe.hide();
       return;
     }

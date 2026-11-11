@@ -2,7 +2,7 @@ import type { SettlementKind } from "../society/sites.ts";
 import type { World } from "../world/types.ts";
 import { CELLS_PER_LEAGUE } from "../render/layers/scalebar.ts";
 import { roadMask, roadWalk } from "./route.ts";
-import { findEvents, type RibbonEvent } from "./events.ts";
+import { findEvents, travelDir, type RibbonEvent } from "./events.ts";
 
 const FLANK_OFFSET = 2.5;
 
@@ -47,16 +47,6 @@ function biomeAt(world: World, x: number, y: number): number {
   return world.biomes[cx + cy * world.elev.w] as number;
 }
 
-/** Central-difference travel direction, smoothed over two cells each way. */
-function directionAt(chain: ReadonlyArray<number>, w: number, k: number): { x: number; y: number } {
-  const a = chain[Math.max(0, k - 2)] as number;
-  const b = chain[Math.min(chain.length - 1, k + 2)] as number;
-  const dx = (b % w) - (a % w);
-  const dy = ((b / w) | 0) - ((a / w) | 0);
-  const len = Math.hypot(dx, dy) || 1;
-  return { x: dx / len, y: dy / len };
-}
-
 function roadSamples(
   world: World,
   chain: ReadonlyArray<number>,
@@ -74,7 +64,7 @@ function roadSamples(
       dist += Math.hypot(x - (p % w), y - ((p / w) | 0));
     }
     dists.push(dist);
-    const t = directionAt(chain, w, k);
+    const t = travelDir(chain, w, k);
     const rx = -t.y;
     const ry = t.x;
     samples.push({

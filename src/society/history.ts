@@ -1,4 +1,5 @@
 import type { Rng } from "../core/rng.ts";
+import { freshPicker } from "../core/fresh-pick.ts";
 import type { Settlement } from "./sites.ts";
 
 /** Runs on its own rng.fork("history"), appended LAST in the pipeline, so it can never reshuffle a seed's geography or names. */
@@ -59,17 +60,6 @@ const RUIN_TEMPLATES = [
   "%s was sacked in the wars and never rebuilt.",
   "The people of %s drifted away, leaving only stones to the wind.",
 ];
-
-function makeCycler(rng: Rng, pool: readonly string[]): () => string {
-  const used = new Set<string>();
-  return () => {
-    if (used.size >= pool.length) used.clear();
-    const avail = pool.filter((t) => !used.has(t));
-    const choice = rng.pick(avail);
-    used.add(choice);
-    return choice;
-  };
-}
 
 type YearAt = (f: number) => number;
 
@@ -185,10 +175,11 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
   const ruinedSet = new Set(ruinedIdx);
   const ruined: boolean[] = settlements.map((_, i) => ruinedSet.has(i));
 
-  const founding = makeCycler(rng, FOUNDING_TEMPLATES);
-  const rise = makeCycler(rng, RISE_TEMPLATES);
-  const war = makeCycler(rng, WAR_TEMPLATES);
-  const ruin = makeCycler(rng, RUIN_TEMPLATES);
+  const pick = freshPicker(rng);
+  const founding = (): string => pick(FOUNDING_TEMPLATES);
+  const rise = (): string => pick(RISE_TEMPLATES);
+  const war = (): string => pick(WAR_TEMPLATES);
+  const ruin = (): string => pick(RUIN_TEMPLATES);
 
   const events: HistoricalEvent[] = [
     ...foundingEvents(settlements, founded, founding),

@@ -2,6 +2,7 @@
 import { parseYear } from "../shared/year.ts";
 import { readWorldKeys, type WorldKeys } from "../shared/address-grammar.ts";
 import { seedFromHash } from "../explorer/address.ts";
+import { keptKeys } from "../shared/table-address.ts";
 
 export { parseYear };
 
@@ -16,18 +17,15 @@ export function parseProspectAddress(hash: string): ProspectAddress {
   return { ...readWorldKeys(p), index: seedFromHash(p.get("i")), year: yearRaw === null ? null : parseYear(yearRaw) };
 }
 
-const kept = (hash: string, drop: RegExp): string[] =>
-  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
-
 export function chartTarget(hash: string): string {
-  const keys = kept(hash, /^(i|year)(=|$)/);
+  const keys = keptKeys(hash, /^(i|year)(=|$)/);
   return "/explorer/" + (keys.length ? "#" + keys.join("&") : "");
 }
 
 export function ribbonTarget(hash: string, index: number): string {
-  return "/ribbon/#" + [...kept(hash, /^(i|year|a|b)(=|$)/), `a=${index}`].join("&");
+  return "/ribbon/#" + [...keptKeys(hash, /^(i|year|a|b)(=|$)/), `a=${index}`].join("&");
 }
 
 export function yearHash(hash: string, year: number): string {
-  return "#" + [...kept(hash, /^year(=|$)/), `year=${year}`].join("&");
+  return "#" + [...keptKeys(hash, /^year(=|$)/), `year=${year}`].join("&");
 }

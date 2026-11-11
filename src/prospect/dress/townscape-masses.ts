@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Mass } from "../geometry.ts";
 import { hatchNode, poly, r1, stroke, washOr, type Engraver } from "./burin.ts";
+import type { DressContext } from "./context.ts";
 
 const SHADOW = 0.3;
 
@@ -19,10 +20,10 @@ function windows(e: Engraver, m: Mass, rows: number): SvgNode[] {
   return out;
 }
 
-function door(e: Engraver, cx: number, base: number, hw: number, rise: number): SvgNode {
+export function door(c: DressContext, cx: number, base: number, hw: number, rise: number): SvgNode {
   return el("path", {
     d: `M${r1(cx - hw)} ${r1(base)}V${r1(base - rise)}Q${r1(cx)} ${r1(base - rise * 1.5)} ${r1(cx + hw)} ${r1(base - rise)}V${r1(base)}Z`,
-    fill: e.ink,
+    fill: c.ink,
   });
 }
 

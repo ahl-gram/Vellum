@@ -1,4 +1,5 @@
-import { createRng, type Rng } from "../core/rng.ts";
+import { createRng } from "../core/rng.ts";
+import { freshPicker } from "../core/fresh-pick.ts";
 import type { SettlementKind } from "../society/sites.ts";
 import type { LegMode } from "../render/voyage-route.ts";
 
@@ -98,21 +99,6 @@ export const LAND_HOMECOMINGS: readonly string[] = [
   "and slept that night under a roof we had some claim on",
 ];
 
-function makeCycler(rng: Rng): (list: readonly string[]) => string {
-  const used = new Map<readonly string[], Set<string>>();
-  return (list) => {
-    let seen = used.get(list);
-    if (!seen) {
-      seen = new Set();
-      used.set(list, seen);
-    }
-    if (seen.size >= list.length) seen.clear();
-    const choice = rng.pick(list.filter((x) => !seen.has(x)));
-    seen.add(choice);
-    return choice;
-  };
-}
-
 function arrivalVerb(mode: LegMode | null): string {
   if (mode === null) return "We set out from";
   if (mode === "sea") return "We made sail for";
@@ -164,7 +150,7 @@ export function buildVoyageLog(
   subtitle: string,
   homecoming: VoyageHomecoming | null = null,
 ): VoyageLog {
-  const pick = makeCycler(createRng(seed).fork("voyage-log"));
+  const pick = freshPicker(createRng(seed).fork("voyage-log"));
   let cumLength = 0;
   let prevDay = 0;
   const nextDay = (legLength: number): number => {

@@ -170,7 +170,7 @@ function branchEvents(
   return out;
 }
 
-function travelDir(chain: ReadonlyArray<number>, w: number, k: number): { x: number; y: number } {
+export function travelDir(chain: ReadonlyArray<number>, w: number, k: number): { x: number; y: number } {
   const a = chain[Math.max(0, k - 2)] as number;
   const b = chain[Math.min(chain.length - 1, k + 2)] as number;
   const dx = (b % w) - (a % w);
