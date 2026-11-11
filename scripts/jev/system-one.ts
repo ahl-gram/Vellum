@@ -13,7 +13,8 @@ export const KEY_FILE_SHOWN = "~/.config/typesafe/key";
 export const NO_KEY = `${KEY_VAR} is not set and ${KEY_FILE_SHOWN} holds no key`;
 export type Env = Readonly<Record<string, string | undefined>>;
 export type ReadText = (path: string) => string;
-export const keyFileOf = (home: string): string => join(home, ".config", "typesafe", "key");
+export const typesafeDirOf = (home: string): string => join(home, ".config", "typesafe");
+export const keyFileOf = (home: string): string => join(typesafeDirOf(home), "key");
 export type NoulQuestion = {
   readonly type: "noul";
   readonly instructions: string | Readonly<Record<string, unknown>>;
