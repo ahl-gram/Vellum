@@ -31,7 +31,7 @@ const send: Send = () => Promise.resolve(answered);
 const options: HuntOptions = { send, cap: RUN_INPUT_TOKEN_CAP, accepted: [] };
 const loc = (f: Found): string[] => [`${f.x.file}:${f.x.line} ${f.x.name}`, `${f.y.file}:${f.y.line} ${f.y.name}`];
 
-const inRepo = (body: (dir: string, base: string, head: string) => Promise<void>): Promise<void> =>
+const inRepo = (body: (dir: string, base: string, head: string) => void | Promise<void>): Promise<void> =>
   withTempRepo({ "src/a.ts": ALPHA, "src/d.ts": OTHER, "docs/n.md": "x\n" }, async (dir, base) => {
     writeFiles(dir, { "src/b.ts": ALPHA_COPY, "src/c.ts": ALPHA_NEAR, "src/d.ts": OTHER + TINY });
     await body(dir, base, commitAll(dir, "head"));
@@ -91,7 +91,7 @@ test("a run refuses an accepted list with a fault, naming it", async () => {
 });
 
 test("revParse names the commit a ref points at, and refuses one that names none", async () => {
-  await inRepo(async (dir, base, head) => {
+  await inRepo((dir, base, head) => {
     assert.equal(revParse(dir, "HEAD"), head);
     assert.equal(revParse(dir, "main"), head);
     assert.equal(revParse(dir, base), base);
