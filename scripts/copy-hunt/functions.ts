@@ -37,6 +37,20 @@ const declaredBy = (node: ts.VariableDeclaration): ts.Node =>
     ? node.parent.parent
     : node;
 
+const ASSIGNING = new Set([
+  ts.SyntaxKind.EqualsToken,
+  ts.SyntaxKind.QuestionQuestionEqualsToken,
+  ts.SyntaxKind.BarBarEqualsToken,
+  ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+]);
+
+const assignsFunction = (node: ts.Expression): boolean =>
+  ts.isParenthesizedExpression(node)
+    ? assignsFunction(node.expression)
+    : ts.isArrowFunction(node) ||
+      ts.isFunctionExpression(node) ||
+      (ts.isBinaryExpression(node) && ASSIGNING.has(node.operatorToken.kind) && assignsFunction(node.right));
+
 export const functionsIn = (path: string, text: string): Fn[] => {
   const comments = parseTs(path, text).comments;
   const sf = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
@@ -74,11 +88,7 @@ export const functionsIn = (path: string, text: string): Fn[] => {
     else if ((ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node)) && node.body)
       push(`${owner}.${ts.isGetAccessorDeclaration(node) ? "get" : "set"} ${node.name.getText(sf)}`, node);
     else if (ts.isConstructorDeclaration(node) && node.body) push(`${owner}.constructor`, node);
-    else if (
-      ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
-      (ts.isArrowFunction(node.right) || ts.isFunctionExpression(node.right))
-    )
+    else if (ts.isBinaryExpression(node) && ASSIGNING.has(node.operatorToken.kind) && assignsFunction(node.right))
       push(node.left.getText(sf), ts.isExpressionStatement(node.parent) ? node.parent : node);
     const next = ts.isClassDeclaration(node) && node.name ? node.name.text : owner;
     ts.forEachChild(node, (child) => visit(child, next));
