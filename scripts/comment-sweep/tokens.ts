@@ -1,5 +1,6 @@
 import { tokenize, tokenTypes } from "@eslint/css-tree";
 import ts from "typescript";
+import { isInstruction } from "./instructions.ts";
 
 export type Token = { readonly text: string; readonly line: number };
 
@@ -11,12 +12,24 @@ export const lineFinder = (text: string): ((offset: number) => number) => {
 export const scriptKindOf = (path: string): ts.ScriptKind =>
   path.endsWith(".tsx") ? ts.ScriptKind.TSX : /\.[mc]?js$/.test(path) ? ts.ScriptKind.JS : ts.ScriptKind.TS;
 
+const commentsBefore = (text: string, pos: number): readonly ts.CommentRange[] => [
+  ...(pos === 0 ? [] : (ts.getTrailingCommentRanges(text, pos) ?? [])),
+  ...(ts.getLeadingCommentRanges(text, pos) ?? []),
+];
+
 export const scriptTokens = (path: string, text: string): Token[] => {
   const file = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, scriptKindOf(path));
-  const out: Token[] = [];
+  const lineAt = (pos: number): number => file.getLineAndCharacterOfPosition(pos).line + 1;
+  const shebang = ts.getShebang(text);
+  const out: Token[] = shebang !== undefined && isInstruction(shebang) ? [{ text: shebang, line: 1 }] : [];
   const walk = (node: ts.Node): void => {
     if (node.kind >= ts.SyntaxKind.FirstJSDocNode && node.kind <= ts.SyntaxKind.LastJSDocNode) return;
-    const line = file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1;
+    if (ts.isToken(node))
+      for (const range of commentsBefore(text, node.getFullStart())) {
+        const comment = text.slice(range.pos, range.end);
+        if (isInstruction(comment)) out.push({ text: comment, line: lineAt(range.pos) });
+      }
+    const line = lineAt(node.getStart(file));
     out.push({ text: String(ts.SyntaxKind[node.kind]), line });
     const children = node.getChildren(file);
     if (children.length === 0) out.push({ text: node.getText(file), line });
