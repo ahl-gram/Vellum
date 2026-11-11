@@ -40,6 +40,7 @@
     "gsap": "^3.15.0"
   },
   "devDependencies": {
+    "@astrojs/compiler-rs": "^0.5.1",
     "@eslint/css": "^2.0.0",
     "@eslint/css-tree": "^4.0.5",
     "@eslint/js": "^10.0.1",
