@@ -21,6 +21,8 @@ const OTHER_FORMS = [
   "later = (n: number): number => n + 1;",
   "const holder: { p?: (n: number) => number } = {};",
   "holder.p = (n: number): number => n * 2;",
+  "declare class Ghost { constructor(size: string); get shape(): number; }",
+  "abstract class Shape { abstract get span(): number; }",
   "",
 ].join("\n");
 const SEVERAL = [
