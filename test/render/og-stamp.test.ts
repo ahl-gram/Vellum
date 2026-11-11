@@ -2,37 +2,31 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
-import { KIT_FONTS } from "../../scripts/kit-fonts.ts";
+import { embeddedFaces } from "../../scripts/build-og.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
-import { buildOgCard, fontFaceCss, OG_FONT_FACES } from "../../src/render/og-card.ts";
+import { buildOgCard } from "../../src/render/og-card.ts";
 import { OG_STAMP_KEYWORD, cardStamp, readStamps, stampPng, stripStamps } from "../../src/render/og-stamp.ts";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
-const shippingFontCss = (): string =>
-  OG_FONT_FACES.map((face) => fontFaceCss(face, readFileSync(join(KIT_FONTS, face.file)).toString("base64"))).join(
-    "\n",
-  );
-
-const shippingCard = (): string =>
+const shippingCard = async (): Promise<string> =>
   buildOgCard(renderMap(generateWorld(defaultRecipe(42)), { style: "antique", legend: false }), {
-    fontCss: shippingFontCss(),
+    fontCss: await embeddedFaces(),
   });
 
-test("src/static/og.png carries exactly one vellum-card stamp, the hash of the card as built today (#490)", () => {
+test("src/static/og.png carries exactly one vellum-card stamp, the hash of the card as built today (#490)", async () => {
   const stamps = readStamps(readFileSync(root("src/static/og.png")));
   assert.equal(stamps.length, 1, `exactly one ${OG_STAMP_KEYWORD} tEXt chunk`);
   assert.equal(
     stamps[0],
-    cardStamp(shippingCard()),
+    cardStamp(await shippingCard()),
     "src/static/og.png was rendered from an older card: run npm run og and commit the PNG",
   );
 });
 
-test("the stamp covers the card's dress and the embedded faces but not the chart, so chart float drift cannot move it", () => {
-  const card = shippingCard();
+test("the stamp covers the card's dress and the embedded faces but not the chart, so chart float drift cannot move it", async () => {
+  const card = await shippingCard();
   const at = card.indexOf('data-vellum-seed="42"');
   const open = card.lastIndexOf("<svg", at);
   const close = card.indexOf("</svg>", at) + "</svg>".length;
