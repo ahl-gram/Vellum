@@ -43,7 +43,7 @@ export const sheetTokens = (css: string, lineOf: (offset: number) => number): To
   const out: Token[] = [];
   let spaced = false;
   tokenize(css, (type, start, end) => {
-    if (type === tokenTypes["Comment"]) return;
+    if (type === tokenTypes["Comment"] && !isInstruction(css.slice(start, end))) return;
     if (type === tokenTypes["WhiteSpace"]) {
       spaced = true;
       return;
