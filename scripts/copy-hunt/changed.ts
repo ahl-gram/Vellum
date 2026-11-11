@@ -1,5 +1,6 @@
 import type { Changed } from "../comment-judge/tree.ts";
-import { isHuntedPath, type Fn } from "./functions.ts";
+import { isTsUnderLintRoots } from "../../test-support/lint-roots.ts";
+import type { Fn } from "./functions.ts";
 
 const counts = (fns: readonly Fn[]): Map<string, number> => {
   const out = new Map<string, number>();
@@ -14,7 +15,7 @@ export const changedFunctions = (
 ): Set<number> => {
   const hunted = new Set<number>();
   for (const c of changed) {
-    if (!isHuntedPath(c.path)) continue;
+    if (!isTsUnderLintRoots(c.path)) continue;
     const base = counts(c.before === null ? [] : before(c.before));
     const here = fns.flatMap((f, i) => (f.file === c.path ? [i] : []));
     const head = counts(here.map((i) => fns[i]!));

@@ -1,11 +1,8 @@
-import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { noteText, ownLineAt, runs, type Note } from "../lint/comment-notes.ts";
 import { blankComments, parseTs } from "./parse.ts";
 import type { CommentRun } from "./types.ts";
 
 export const CODE_LINES = 5;
-
-export const isJudged = (path: string): boolean => path.endsWith(".ts") && lintTsRoots().includes(path.split("/")[0]!);
 
 type Placed = Note & { readonly range: readonly [number, number] };
 

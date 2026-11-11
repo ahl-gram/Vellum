@@ -1,5 +1,6 @@
 import type { AcceptedCopy, AcceptedSide } from "./accepted-copies.ts";
-import { isHuntedPath, type Fn } from "./functions.ts";
+import { isTsUnderLintRoots } from "../../test-support/lint-roots.ts";
+import type { Fn } from "./functions.ts";
 
 export const RULING = /^https:\/\/github\.com\/ahl-gram\/Vellum\/(?:issues|pull)\/\d+#issuecomment-\d+$/;
 export const HASH = /^[0-9a-f]{16}$/;
@@ -16,7 +17,7 @@ export const acceptedFaults = (copies: readonly AcceptedCopy[]): string[] =>
     ] as const;
     return [
       ...sides.flatMap(([which, side]) =>
-        isHuntedPath(side.file) ? [] : [`${at}: ${which}.file is not a .ts file under the lint's roots`],
+        isTsUnderLintRoots(side.file) ? [] : [`${at}: ${which}.file is not a .ts file under the lint's roots`],
       ),
       ...sides.flatMap(([which, side]) => (side.name === "" ? [`${at}: ${which}.name is empty`] : [])),
       ...sides.flatMap(([which, side]) => (HASH.test(side.hash) ? [] : [`${at}: ${which}.hash is not 16 hex digits`])),
