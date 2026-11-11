@@ -34,6 +34,12 @@ test("a file left conflicted by a merge is listed once, not once per stage (Issu
   });
 });
 
+test("a listing that runs past the time it is given throws, naming git ls-files, rather than return a partial tree (Issue #1332)", async () => {
+  await withTempRepo(FILES, (dir) => {
+    assert.throws(() => listWorkingTree(dir, [], 1), /git ls-files under .+ failed/);
+  });
+});
+
 test("outside a git repository the listing throws, naming git ls-files, rather than return an empty tree (Issue #1332)", () => {
   const made = mkdtempSync(join(tmpdir(), "working-tree-"));
   try {
