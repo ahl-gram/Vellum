@@ -51,6 +51,15 @@ function linearToLab([R, G, B]: Vec3): Vec3 {
 
 const deltaE = (a: Vec3, b: Vec3): number => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
+export const CONFUSABLE_DE = 2.5;
+
+export type WashDistances = { readonly normal: number; readonly deuteranopia: number; readonly protanopia: number };
+
+export function washDistances(a: string, b: string, paper: string, opacity: number): WashDistances {
+  const normal = washesConfusable(a, b, paper, opacity) ? 0 : CONFUSABLE_DE;
+  return { normal, deuteranopia: normal, protanopia: normal };
+}
+
 export function washesConfusable(a: string, b: string, paper: string, opacity: number, threshold = 2.5): boolean {
   const la = compositeLinear(hexToRgb(a), hexToRgb(paper), opacity);
   const lb = compositeLinear(hexToRgb(b), hexToRgb(paper), opacity);
