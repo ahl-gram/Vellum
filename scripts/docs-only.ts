@@ -23,7 +23,7 @@ export const isDoc = (path: string): boolean =>
   DOC_FILES.includes(path) || DOC_DIRS.some((dir) => path.startsWith(dir));
 
 export const isUnsafePath = (path: string): boolean =>
-  [...path].some((ch) => {
+  Array.from(path).some((ch) => {
     const c = ch.codePointAt(0) ?? 0;
     return c < 0x20 || c === 0x7f || c === 0x85 || c === 0x2028 || c === 0x2029;
   });
