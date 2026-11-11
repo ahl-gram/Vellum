@@ -10,7 +10,7 @@ import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 import type { FlowResult } from "../../src/hydrology/flow.ts";
 import { worldRiversDrawn } from "../../scripts/region-detail/feature-match.ts";
-import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
+import { worldRiverRuns } from "../../src/world/river-runs.ts";
 import { closeUp, relay, townWindows } from "../../test-support/region-rivers-fixtures.ts";
 
 const SEA = 0;
@@ -267,20 +267,26 @@ test("no drawn river's points stand more than one diagonal step apart, at any ba
   assert.deepEqual(gaps, []);
 });
 
-const landUnder = (run: ReturnType<typeof worldRiverRuns>[number], region: World): boolean => {
-  const { w, data } = region.elev;
-  return densifyCourse(run.course).some(
-    (p) => (data[Math.round(p.x) + Math.round(p.y) * w] as number) > region.seaLevel,
-  );
-};
-
 test("a world river with no land under its course in the window lays nothing: Toatauhe's band 4 on chart 42 (Issue #951)", () => {
   const window = TOATAUHE[3] as UvWindow;
   const { region, laid } = relay(HERO, window);
   const runs = worldRiverRuns(HERO, window, region.elev.w, region.elev.h);
-  const onLand = runs.filter((run) => landUnder(run, region));
-  assert.ok(onLand.length < runs.length, "the window holds a run that crosses only the close-up's sea");
-  assert.equal(laid.length, onLand.length, "one river is laid for each run with land under it, none on the water");
+  assert.equal(runs.length, 2, "the window holds two world river runs");
+  assert.deepEqual(
+    runs[1]!.course.map((p) => [Math.round(p.x), Math.round(p.y)]),
+    [
+      [73, 0],
+      [73, 6],
+    ],
+    "the second runs down column 73 from the top edge to row 6",
+  );
+  for (let y = 0; y <= 6; y++) assert.ok(region.elev.at(73, y) <= region.seaLevel, `column 73 is sea at row ${y}`);
+  assert.equal(laid.length, 1, "one river is laid, none on the water");
+  assert.deepEqual(
+    [laid[0]!.points[0]!.x, laid[0]!.points[0]!.y],
+    [281, 0],
+    "the one laid is the first run, entering at the top edge at x 281",
+  );
 });
 
 test("the runs are laid majors first, then the highest peak accumulation first (Issue #951)", () => {
