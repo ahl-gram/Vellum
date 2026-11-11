@@ -33,6 +33,13 @@ const line = (over: Record<string, unknown>): Record<string, unknown> => ({
   ...over,
 });
 
+const sendTwice: Main = async (_argv, sendFor) => {
+  const send = sendFor(false);
+  await send(ONE_QUESTION);
+  await send(ONE_QUESTION);
+  return 0;
+};
+
 type Harness = {
   readonly deps: RunDeps;
   readonly warnings: string[];
@@ -85,13 +92,7 @@ test("a request that failed after it was sent counts as sent, adds no tokens, an
     const fetcher: Fetch = (url, init) =>
       (calls += 1) === 1 ? first(url, init) : Promise.resolve(new Response("slow down", { status: 429 }));
     const { deps } = harness(home, fetcher);
-    const main: Main = async (_argv, sendFor) => {
-      const send = sendFor(false);
-      await send(ONE_QUESTION);
-      await send(ONE_QUESTION);
-      return 0;
-    };
-    assert.equal(await runCommand("keeper-scan", main, ["diff", "a", "b"], deps), 0);
+    assert.equal(await runCommand("keeper-scan", sendTwice, ["diff", "a", "b"], deps), 0);
     assert.deepEqual(usageLinesIn(home), [
       line({ input_tokens: 300, requests: 2, command: "keeper-scan diff", estimated: true }),
     ]);
@@ -133,13 +134,7 @@ test("an interrupt logs what the run spent, a request still in flight included, 
         return held;
       };
       const { deps, registered, handlers, exits } = harness(home, fetcher);
-      const main: Main = async (_argv, sendFor) => {
-        const send = sendFor(false);
-        await send(ONE_QUESTION);
-        await send(ONE_QUESTION);
-        return 0;
-      };
-      const run = runCommand("copy-hunt", main, ["full"], deps);
+      const run = runCommand("copy-hunt", sendTwice, ["full"], deps);
       assert.deepEqual(registered, ["SIGINT", "SIGTERM"]);
 
       await secondSent;
