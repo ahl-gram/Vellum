@@ -84,6 +84,10 @@ belongs in.
   `node --test`'s own family.
 - **A unit test runs the code and asserts what it does.** Assert the outcome, never the declaration
   (`vellum-footguns` Gate 1).
+- **A unit test reaches a check on every path.** `vellum/test-unskippable-check` in
+  `scripts/lint/skippable-checks.ts` refuses one whose every check an early `return` or `continue`
+  can skip, or an `if` with no checking `else` can pass by; a deliberate case is an entry in
+  `SKIPPABLE_TESTS` there with its reason (Alex, Issue #1315 comment 6785163784).
 - **A unit test of date logic passes its own date**, as `test/world/seed-of-the-day.test.ts` passes
   each `Date` it asserts on, and no unit test reads the clock as a day. A browser check's day is the
   harness's (`handbook/specs/settle-doctrine.md`, The environment, the bullet opening "Every page the

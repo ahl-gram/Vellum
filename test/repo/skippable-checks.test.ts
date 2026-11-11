@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint } from "eslint";
-import { SKIPPABLE_TESTS } from "../../scripts/lint/test-skips.ts";
+import { SKIPPABLE_TESTS } from "../../scripts/lint/skippable-checks.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import {
@@ -16,7 +16,7 @@ import {
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/test-unskippable-check";
-const AT = "test/repo/test-skips.test.ts";
+const AT = "test/repo/skippable-checks.test.ts";
 const REFUSE = true;
 const PASS = false;
 

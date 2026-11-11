@@ -131,7 +131,7 @@ const testUnskippableCheck: Rule.RuleModule = {
     ],
     messages: {
       found:
-        '"{{title}}" can pass with nothing checked: each of its checks sits under an if whose else checks nothing or under a ?:, or after a return or a continue that an if takes first, so a fixture that lacks the case passes it. Assert after the loop that the case was reached (a floor such as checked >= 1), announce the skip with t.skip(), or give the if an else that checks; a deliberate case is an entry in SKIPPABLE_TESTS in scripts/lint/test-skips.ts with its reason (Alex, Issue #1315 comment 6785163784)',
+        '"{{title}}" can pass with nothing checked: each of its checks sits under an if whose else checks nothing or under a ?:, or after a return or a continue that an if takes first, so a fixture that lacks the case passes it. Assert after the loop that the case was reached (a floor such as checked >= 1), announce the skip with t.skip(), or give the if an else that checks; a deliberate case is an entry in SKIPPABLE_TESTS in scripts/lint/skippable-checks.ts with its reason (Alex, Issue #1315 comment 6785163784)',
       stale:
         "{{entry}} is in SKIPPABLE_TESTS, but no test of that title in this file can pass with nothing checked, so the excuse lifts nothing: delete it rather than leave it looking like a decision (Issue #1329)",
     },
