@@ -76,6 +76,7 @@ test("a port whose nearest water is an inland pond still launches into the share
 
 test("on real worlds, EVERY cross-landmass leg sails, never degrading to a straight rider", () => {
   // A same-landmass leg MAY also sail (a coastal shortcut), so this only pins the cross-landmass direction.
+  let crossing = 0;
   for (const seed of [526413615, 42, 7]) {
     const world = generateWorld(defaultRecipe(seed));
     const manifest = buildPlaceManifest(world, 1500);
@@ -92,9 +93,13 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
       const a = byIdx.get(l.fromIdx)!;
       const b = byIdx.get(l.toIdx)!;
       const crosses = comp[a.gx + a.gy * s.gridW] !== comp[b.gx + b.gy * s.gridW];
-      if (crosses) assert.equal(l.mode, "sea", `seed ${seed}: ${a.name} -> ${b.name} crosses water as "${l.mode}"`);
+      if (crosses) {
+        crossing++;
+        assert.equal(l.mode, "sea", `seed ${seed}: ${a.name} -> ${b.name} crosses water as "${l.mode}"`);
+      }
     }
   }
+  assert.ok(crossing >= 1, "no leg on seeds 526413615, 42 and 7 runs between two landmasses, so none was checked");
 });
 
 test("a coastal leg SAILS when its road loops far around a bay", () => {
