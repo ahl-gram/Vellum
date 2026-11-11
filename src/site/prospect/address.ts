@@ -1,8 +1,7 @@
 // The prospect page's address grammar, pure and DOM-free like src/site/explorer/address.ts: the SAME hash keys the Explorer writes (presence-gated, allowlisted, clamped, so a crafted hash can never push the engine out of range) plus its own `i` and `year`.
 import { parseYear } from "../shared/year.ts";
-import { readWorldKeys, type WorldKeys } from "../shared/address-grammar.ts";
+import { keptKeys, readWorldKeys, type WorldKeys } from "../shared/address-grammar.ts";
 import { seedFromHash } from "../explorer/address.ts";
-import { keptKeys } from "../shared/table-address.ts";
 
 export { parseYear };
 
