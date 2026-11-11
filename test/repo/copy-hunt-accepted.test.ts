@@ -2,19 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
 import { acceptedFaults, acceptedFor, staleCopies } from "../../scripts/copy-hunt/accepted.ts";
-import type { Fn } from "../../scripts/copy-hunt/functions.ts";
-
-const fnOf = (file: string, line: number, name: string, tokens: string[], extra: Partial<Fn> = {}): Fn => ({
-  file,
-  line,
-  end: line,
-  name,
-  body: `${name}()`,
-  norm: `${name}()`,
-  tokens: [...tokens].sort(),
-  hash: "0123456789abcdef",
-  ...extra,
-});
+import { fnOf } from "../../test-support/copy-hunt-fixtures.ts";
 
 const A = fnOf("src/a.ts", 3, "alpha", [], { hash: "a070d6cdc7bcc32e" });
 const B = fnOf("test/a.test.ts", 9, "alphaCopy", [], { hash: "0c6f87685ec89b96" });

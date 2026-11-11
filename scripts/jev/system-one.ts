@@ -122,3 +122,4 @@ export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: 
 };
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));
+export const capReason = (cap: number): string => `the input-token cap of ${cap} for this run was reached`;

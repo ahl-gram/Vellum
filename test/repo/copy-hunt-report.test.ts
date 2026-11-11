@@ -1,55 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
-import { functionsIn, type Fn } from "../../scripts/copy-hunt/functions.ts";
-import { hunt, RUN_INPUT_TOKEN_CAP, type Found, type Outcome, type Run } from "../../scripts/copy-hunt/hunt.ts";
-import { requestFor, verdictOf } from "../../scripts/copy-hunt/questions.ts";
+import { hunt, RUN_INPUT_TOKEN_CAP, type Found, type Run } from "../../scripts/copy-hunt/hunt.ts";
+import { requestFor } from "../../scripts/copy-hunt/questions.ts";
 import { BLIND_SPOTS, pairLines, replyLines, reportLines, requestLines } from "../../scripts/copy-hunt/report.ts";
-import { liveSender, type Answered, type Fetch, type Reply } from "../../scripts/jev/system-one.ts";
+import { liveSender } from "../../scripts/jev/system-one.ts";
+import { alphaFns, asked, fnOf, pair, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
+import { keyEchoingFetch } from "../../test-support/jev-fakes.ts";
 
-const ALPHA = [
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const ALPHA_COPY = [
-  "// the same function, commented",
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight); // light first",
-  "",
-].join("\n");
-const ALPHA_NEAR = [
-  "export const alphaOf = (items: readonly Item[], cap: number): Item[] =>",
-  "  items.filter((item) => item.weight <= cap).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const OTHER =
-  "export const unrelated = (name: string, count: number): string => name.repeat(count).toUpperCase().trim();\n";
-
-const fnOf = (file: string, line: number, name: string, tokens: string[], extra: Partial<Fn> = {}): Fn => ({
-  file,
-  line,
-  end: line,
-  name,
-  body: `${name}()`,
-  norm: `${name}()`,
-  tokens: [...tokens].sort(),
-  hash: "0123456789abcdef",
-  ...extra,
-});
-const ok = (same: number): Answered => ({ ok: true, model: "jev-1.14.0", nouls: { same }, inputTokens: 500, ms: 5 });
-const pair = (x: Fn, y: Fn, similarity: number, outcome: Outcome, replies: Reply[] = []): Found => ({
-  x,
-  y,
-  similarity,
-  requests: replies.length === 0 ? [] : [requestFor(x, y), requestFor(y, x)],
-  replies,
-  outcome,
-});
-const asked = (ab: number, ba: number): Outcome => ({
-  kind: "asked",
-  asked: { ab, ba, mean: (ab + ba) / 2, verdict: verdictOf((ab + ba) / 2) },
-});
 const STALE: AcceptedCopy = {
   a: { file: "src/gone.ts", name: "gone", hash: "0123456789abcdef" },
   b: { file: "src/x.ts", name: "x", hash: "0123456789abcdef" },
@@ -61,16 +19,19 @@ const parsed = (line: string): Record<string, unknown> => JSON.parse(line) as Re
 const n1x = fnOf("src/e.ts", 30, "zeta", []);
 const n1y = fnOf("src/h.ts", 1, "eta", []);
 const found: Found[] = [
-  pair(n1x, n1y, 0.65, asked(0.1, 0.1), [ok(0.1), ok(0.1)]),
+  pair(n1x, n1y, 0.65, asked(0.1, 0.1), [sameAnswer(0.1), sameAnswer(0.1)]),
   pair(fnOf("src/c.ts", 20, "delta", []), fnOf("src/d.ts", 2, "deltaAt", []), 0.62, asked(0.9, 0.8), [
-    ok(0.9),
-    ok(0.8),
+    sameAnswer(0.9),
+    sameAnswer(0.8),
   ]),
   pair(fnOf("src/b.ts", 3, "beta", []), fnOf("src/a.ts", 9, "alpha", []), 1, { kind: "exact" }),
-  pair(fnOf("src/e.ts", 5, "eps", []), fnOf("src/f.ts", 6, "epsOf", []), 0.7, asked(0.4, 0.6), [ok(0.4), ok(0.6)]),
+  pair(fnOf("src/e.ts", 5, "eps", []), fnOf("src/f.ts", 6, "epsOf", []), 0.7, asked(0.4, 0.6), [
+    sameAnswer(0.4),
+    sameAnswer(0.6),
+  ]),
   pair(fnOf("src/c.ts", 1, "gamma", []), fnOf("test/g.test.ts", 4, "gammaOf", []), 0.8, asked(0.96, 0.94), [
-    ok(0.96),
-    ok(0.94),
+    sameAnswer(0.96),
+    sameAnswer(0.94),
   ]),
   pair(
     fnOf("src/e.ts", 40, "theta", []),
@@ -148,15 +109,8 @@ test("a run over every function says so in its header", () => {
 
 test("no line of the report, the request log, the reply log or the pair log carries the key", async () => {
   const KEY = "k-copy-secret-77";
-  const echo: Fetch = () =>
-    Promise.resolve(new Response(JSON.stringify({ error: `bad key Bearer ${KEY}` }), { status: 401 }));
-  const send = liveSender({}, "/h", () => `${KEY}\n`, echo);
-  const fns = [
-    ...functionsIn("src/a.ts", ALPHA),
-    ...functionsIn("src/b.ts", ALPHA_COPY),
-    ...functionsIn("src/c.ts", ALPHA_NEAR),
-    ...functionsIn("src/d.ts", OTHER),
-  ];
+  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY));
+  const fns = alphaFns();
   const hunted = await hunt(fns, null, { send, cap: RUN_INPUT_TOKEN_CAP, accepted: [] });
   const written = [
     ...reportLines({

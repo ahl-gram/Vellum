@@ -1,4 +1,4 @@
-import type { Reply, Send, SystemOneRequest } from "../jev/system-one.ts";
+import { capReason, type Reply, type Send, type SystemOneRequest } from "../jev/system-one.ts";
 import type { AcceptedCopy } from "./accepted-copies.ts";
 import { acceptedFor } from "./accepted.ts";
 import type { Fn, Unread } from "./functions.ts";
@@ -7,7 +7,6 @@ import { requestFor, SAME_ID, verdictOf, type Verdict } from "./questions.ts";
 
 // 2026-11-10, Issue #1319: a whole-repo hunt at f8f9c967 asks 522 pairs for about 650,000 input tokens (443,766 for 333 of them, 205,732 for the other 189), so two million holds three times that and caps a run at 8 cents.
 export const RUN_INPUT_TOKEN_CAP = 2_000_000;
-export const capReason = (cap: number): string => `the input-token cap of ${cap} for this run was reached`;
 export type Asked = { readonly ab: number; readonly ba: number; readonly mean: number; readonly verdict: Verdict };
 export type Outcome =
   | { readonly kind: "exact" }

@@ -3,31 +3,11 @@ import { test } from "node:test";
 import { revParse } from "../../scripts/comment-judge/tree.ts";
 import { RUN_INPUT_TOKEN_CAP, type Found, type HuntOptions } from "../../scripts/copy-hunt/hunt.ts";
 import { diffRun, fullRun } from "../../scripts/copy-hunt/runs.ts";
-import type { Answered, Send } from "../../scripts/jev/system-one.ts";
+import type { Send } from "../../scripts/jev/system-one.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
+import { ALPHA, ALPHA_COPY, ALPHA_NEAR, OTHER, sameAnswer, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 
-const ALPHA = [
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const ALPHA_COPY = [
-  "// the same function, commented",
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight); // light first",
-  "",
-].join("\n");
-const ALPHA_NEAR = [
-  "export const alphaOf = (items: readonly Item[], cap: number): Item[] =>",
-  "  items.filter((item) => item.weight <= cap).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const OTHER =
-  "export const unrelated = (name: string, count: number): string => name.repeat(count).toUpperCase().trim();\n";
-const TINY = "export const tiny = (a: number): number => a + 1;\n";
-
-const answered: Answered = { ok: true, model: "jev-1.14.0", nouls: { same: 0.9 }, inputTokens: 500, ms: 5 };
-const send: Send = () => Promise.resolve(answered);
+const send: Send = () => Promise.resolve(sameAnswer(0.9));
 const options: HuntOptions = { send, cap: RUN_INPUT_TOKEN_CAP, accepted: [] };
 const loc = (f: Found): string[] => [`${f.x.file}:${f.x.line} ${f.x.name}`, `${f.y.file}:${f.y.line} ${f.y.name}`];
 

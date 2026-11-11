@@ -1,67 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { functionsIn, type Fn } from "../../scripts/copy-hunt/functions.ts";
+import { functionsIn } from "../../scripts/copy-hunt/functions.ts";
 import { CUT, exactPairs, jaccard, similarPairs } from "../../scripts/copy-hunt/pairs.ts";
-
-const ALPHA = [
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const ALPHA_COPY = [
-  "// the same function, commented",
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight); // light first",
-  "",
-].join("\n");
-const ALPHA_NEAR = [
-  "export const alphaOf = (items: readonly Item[], cap: number): Item[] =>",
-  "  items.filter((item) => item.weight <= cap).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const OTHER =
-  "export const unrelated = (name: string, count: number): string => name.repeat(count).toUpperCase().trim();\n";
-const TINY = "export const tiny = (a: number): number => a + 1;\n";
-const KINDS = [
-  "export function declared(first: number, second: number): number {",
-  "  // the sum",
-  "  return first + second; /* both */",
-  "}",
-  "const arrow = (value: number): number => value * 2;",
-  "const expression = function (value: number): number {",
-  "  return value - 1;",
-  "};",
-  "class Store {",
-  "  get(key: string): string {",
-  "    return key;",
-  "  }",
-  "}",
-  "const table = {",
-  "  read: (key: string): string => key,",
-  "  write(key: string): void {},",
-  "};",
-  "export function outer(items: readonly Item[], limit: number): Item[] {",
-  "  const inner = (items: readonly Item[], limit: number): Item[] => items.filter((item) => item.weight <= limit);",
-  "  return inner(items, limit);",
-  "}",
-  "",
-].join("\n");
-const LONG_HEAD =
-  "export const longOne = (alphaW: number, betaW: number, gammaW: number, deltaW: number, epsW: number): number =>\n  alphaW + betaW + gammaW + deltaW + epsW";
-const LONG = `${LONG_HEAD}${" + alphaW".repeat(700)};\n`;
-const LONG_NEAR = `${LONG_HEAD.replace("longOne", "longTwo")}${" + alphaW".repeat(700)};\n`;
-
-const fnOf = (file: string, line: number, name: string, tokens: string[], extra: Partial<Fn> = {}): Fn => ({
-  file,
-  line,
-  end: line,
-  name,
-  body: `${name}()`,
-  norm: `${name}()`,
-  tokens: [...tokens].sort(),
-  hash: "0123456789abcdef",
-  ...extra,
-});
+import {
+  ALPHA,
+  ALPHA_COPY,
+  ALPHA_NEAR,
+  fnOf,
+  KINDS,
+  LONG,
+  LONG_NEAR,
+  OTHER,
+  TINY,
+} from "../../test-support/copy-hunt-fixtures.ts";
 
 test("similarity is the share of names two functions hold in common, and 0.6 itself is in", () => {
   assert.equal(jaccard(["a", "b", "c"], ["b", "c", "d"]), 0.5);

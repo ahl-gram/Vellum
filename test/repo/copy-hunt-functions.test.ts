@@ -2,45 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/comment-judge/tree.ts";
 import { functionsAt, functionsIn, isHuntedPath } from "../../scripts/copy-hunt/functions.ts";
-
-const ALPHA = [
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const ALPHA_COPY = [
-  "// the same function, commented",
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight); // light first",
-  "",
-].join("\n");
-const OTHER =
-  "export const unrelated = (name: string, count: number): string => name.repeat(count).toUpperCase().trim();\n";
-const TINY = "export const tiny = (a: number): number => a + 1;\n";
-const KINDS = [
-  "export function declared(first: number, second: number): number {",
-  "  // the sum",
-  "  return first + second; /* both */",
-  "}",
-  "const arrow = (value: number): number => value * 2;",
-  "const expression = function (value: number): number {",
-  "  return value - 1;",
-  "};",
-  "class Store {",
-  "  get(key: string): string {",
-  "    return key;",
-  "  }",
-  "}",
-  "const table = {",
-  "  read: (key: string): string => key,",
-  "  write(key: string): void {},",
-  "};",
-  "export function outer(items: readonly Item[], limit: number): Item[] {",
-  "  const inner = (items: readonly Item[], limit: number): Item[] => items.filter((item) => item.weight <= limit);",
-  "  return inner(items, limit);",
-  "}",
-  "",
-].join("\n");
+import { ALPHA, ALPHA_COPY, KINDS, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 
 test("every named function at any depth is read, with its owner's name, its lines, and its text with comments removed", () => {
   const fns = functionsIn("src/k.ts", KINDS);

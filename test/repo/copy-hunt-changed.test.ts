@@ -2,19 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { changedFunctions } from "../../scripts/copy-hunt/changed.ts";
 import { functionsIn, type Fn } from "../../scripts/copy-hunt/functions.ts";
-
-const ALPHA = [
-  "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
-  "  items.filter((item) => item.weight <= limit).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const ALPHA_NEAR = [
-  "export const alphaOf = (items: readonly Item[], cap: number): Item[] =>",
-  "  items.filter((item) => item.weight <= cap).sort((left, right) => left.weight - right.weight);",
-  "",
-].join("\n");
-const OTHER =
-  "export const unrelated = (name: string, count: number): string => name.repeat(count).toUpperCase().trim();\n";
+import { ALPHA, ALPHA_NEAR, OTHER } from "../../test-support/copy-hunt-fixtures.ts";
 
 const before =
   (files: Record<string, string>) =>
