@@ -12,6 +12,7 @@ export const DOC_FILES: readonly string[] = [
   "README.md",
   ".github/PULL_REQUEST_TEMPLATE.md",
   ".claude/skills/vellum-footguns/SKILL.md",
+  ".claude/skills/comment-sweep/SKILL.md",
   ".claude/skills/vellum-footguns/hooks/README.md",
 ];
 export const OUTPUT_KEY = "docs_only";
