@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cellsPerWorldCell, nearestParentCells } from "../../src/world/region-parent.ts";
+import { cellsPerWorldCell, clipSegment, nearestParentCells, windowFrame } from "../../src/world/region-parent.ts";
 
 test("nearestParentCells samples the nearest parent cell, corner to corner", () => {
   const window = { u0: 0.25, v0: 0.25, u1: 0.5, v1: 0.5 };
@@ -21,4 +21,30 @@ test("cellsPerWorldCell is 2, 8 and 32 at bands 1, 3 and 5, and 1 on a degenerat
   assert.equal(cellsPerWorldCell(320, { u0: 0.5, u1: 0.5, v0: 0, v1: 1 }, 320), 1, "zero width");
   assert.equal(cellsPerWorldCell(1, sized(0.5), 320), 1, "one region column");
   assert.equal(cellsPerWorldCell(320, sized(0.5), 1), 1, "one parent column");
+});
+
+test("windowFrame boxes the window in the parent's cells and maps that box's corners onto the region grid's corners", () => {
+  const frame = windowFrame(321, 241, { u0: 0.25, v0: 0.5, u1: 0.5, v1: 1 }, 320, 240);
+  assert.deepEqual(frame.box, { x0: 80, x1: 160, y0: 120, y1: 240 });
+  assert.deepEqual(frame.toRegion({ x: 80, y: 120 }), { x: 0, y: 0 }, "the box's top left is region cell (0, 0)");
+  assert.deepEqual(
+    frame.toRegion({ x: 160, y: 240 }),
+    { x: 319, y: 239 },
+    "its bottom right is region cell (319, 239)",
+  );
+  assert.deepEqual(frame.toRegion({ x: 120, y: 180 }), { x: 159.5, y: 119.5 }, "its middle is the grid's middle");
+});
+
+test("clipSegment keeps the share of a segment inside the box, from where it enters to where it leaves, and nothing of one outside", () => {
+  const box = { x0: 80, x1: 160, y0: 120, y1: 180 };
+  assert.deepEqual(clipSegment({ x: 100, y: 130 }, { x: 120, y: 140 }, box), [0, 1], "wholly inside");
+  assert.deepEqual(clipSegment({ x: 60, y: 150 }, { x: 100, y: 150 }, box), [0.5, 1], "in across the left edge");
+  assert.deepEqual(clipSegment({ x: 150, y: 130 }, { x: 170, y: 130 }, box), [0, 0.5], "out across the right edge");
+  assert.deepEqual(
+    clipSegment({ x: 100, y: 100 }, { x: 100, y: 200 }, box),
+    [0.2, 0.8],
+    "through the top and the bottom",
+  );
+  assert.equal(clipSegment({ x: 10, y: 10 }, { x: 20, y: 20 }, box), null, "wholly outside");
+  assert.equal(clipSegment({ x: 10, y: 150 }, { x: 10, y: 160 }, box), null, "parallel to an edge, beyond it");
 });
