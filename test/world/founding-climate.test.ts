@@ -17,6 +17,7 @@ const bandOf = (steers: ReadonlyArray<Steer>): ClimateBand | undefined => {
   return undefined;
 };
 
+// Kept on purpose (Issue #1318): a copy of `tongueOf` in `src/world/founding/found.ts` that reads a lexicon entry's people to choose the fixtures, while the sentences this file spells out pin the rule both share.
 const tongueOf = (steers: ReadonlyArray<Steer>): CultureId | undefined => {
   for (const steer of steers) if (steer.subject === "culture") return steer.value;
   return undefined;

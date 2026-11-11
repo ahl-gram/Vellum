@@ -68,6 +68,7 @@ const base = {
   closeUp: null,
 };
 
+// Kept on purpose (Issue #1318): the box `placeRealmLabel` in `src/render/layers/realm-label-placement.ts` claims for a spot, built from the same `spacedTextBox` call, to lay the furniture and read where a placement's box falls.
 const boxOf = (p: { readonly x: number; readonly y: number }): Box =>
   spacedTextBox(p.x, p.y, base.name, base.fs, base.ls, WIDTH_FACTOR.caps);
 
