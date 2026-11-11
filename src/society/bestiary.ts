@@ -1,4 +1,5 @@
 import type { Rng } from "../core/rng.ts";
+import { freshPicker } from "../core/fresh-pick.ts";
 import { createNamer, isNearExisting, type Culture } from "./names.ts";
 
 /** Every world's deep water is haunted. Beasts are drawn on their own fork, so nothing else in the world moves; whether a chart SHOWS them is a view option, so committed charts hold byte-for-byte. */
@@ -97,14 +98,6 @@ function nearestPort(haunt: Haunt, settlements: ReadonlyArray<Settled>): Settled
   return by(settlements.filter((s) => s.harbor)) ?? by(settlements);
 }
 
-function freshPick<T>(rng: Rng, list: readonly T[], used: Set<T>): T {
-  if (used.size >= list.length) used.clear();
-  const avail = list.filter((x) => !used.has(x));
-  const choice = rng.pick(avail);
-  used.add(choice);
-  return choice;
-}
-
 export function conjureBestiary(
   input: BestiaryInput,
   rng: Rng,
@@ -120,8 +113,7 @@ export function conjureBestiary(
 
   const namer = createNamer(rng.fork("names"), input.culture);
   const loreRng = rng.fork("lore");
-  const usedEpithets = new Map<BeastKind, Set<string>>();
-  const usedTales = new Set<string>();
+  const pick = freshPicker(loreRng);
 
   const earliest = input.settlements.length
     ? Math.min(...input.settlements.map((s) => s.founded))
@@ -136,18 +128,13 @@ export function conjureBestiary(
     }
     taken.add(name.toLowerCase());
 
-    let seen = usedEpithets.get(kind);
-    if (!seen) {
-      seen = new Set();
-      usedEpithets.set(kind, seen);
-    }
-    const epithet = freshPick(loreRng, EPITHETS[kind], seen);
+    const epithet = pick(EPITHETS[kind]);
 
     const span = Math.max(1, input.presentYear - earliest);
     const firstSeen = earliest + loreRng.int(span);
 
     const port = nearestPort(haunt, input.settlements);
-    const tale = freshPick(loreRng, TALES, usedTales)
+    const tale = pick(TALES)
       .replace(/%t/g, port?.name ?? "the coast")
       .replace(/%y/g, String(firstSeen));
 
