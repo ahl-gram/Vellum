@@ -211,13 +211,18 @@ belongs in.
   with `npm audit`, and acts on them as an issue (Issue #1174). `npm audit --omit=dev` reads only the
   libraries the pages ship, the `dependencies` in `package.json`, since the tools that build the site
   are `devDependencies`.
-- **No check holds a judgment that rests on a probability.** `npm run comment-judge`
-  (`scripts/comment-judge/main.ts`) asks TypeSafe's Jev whether each comment a diff adds only
-  restates its code or is already pinned by a test (Issue #1304), and its answers are probabilities
-  from a service whose model changes from version to version, so a red resting on one is a guard no
-  prover can show bites. It runs in no `npm test` file, no lint rule, no workflow step that can fail
-  and no refusal of the footgun hook; its findings are a reviewer's hypotheses that a command still
-  confirms; and a call that fails is reported as skipped, never as nothing found.
+- **No check holds a judgment that rests on a probability.** Two commands ask TypeSafe's Jev:
+  `npm run comment-judge` (`scripts/comment-judge/main.ts`) whether each comment a diff adds only
+  restates its code or is already pinned by a test (Issue #1304), and `npm run recon-triage`
+  (`scripts/recon-triage/main.ts`) whether the code an issue cites does what the issue's claim says,
+  which orders `vellum-spec-recon`'s reading (Issue #1310). Their answers are probabilities from a
+  service whose model changes from version to version, so a red resting on one is a guard no prover
+  can show bites. Neither runs in an `npm test` file, a lint rule, a workflow step that can fail or a
+  refusal of the footgun hook; what either reports is a reader's hypothesis that a command still
+  confirms; and a call that fails is reported as skipped, never as nothing found. Each reads the key
+  from `TYPESAFE_API_KEY`, then from `~/.config/typesafe/key`, and never prints it (`readKey` in
+  `scripts/jev/system-one.ts`). A pull request that moves `MODEL` in `scripts/jev/system-one.ts`
+  runs each command's `trial` and posts both scores on itself.
 
 ## Order
 
