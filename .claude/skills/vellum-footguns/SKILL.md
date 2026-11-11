@@ -26,6 +26,9 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 2. **Check the fixture is not degenerate where the hazard lives.** A camera on a lattice point, a
    window at the clamp edge, a stride that never lands on the case, a world that takes the fallback:
    each has passed a RED step. Assert the precondition that makes the case non-trivial in the same test.
+   `vellum/test-unskippable-check` refuses a unit test whose every check sits behind a skip, and a
+   deliberate one is an entry in `SKIPPABLE_TESTS` in `scripts/lint/test-skips.ts` with its reason
+   (Alex, Issue #1315 comment 6785163784).
    **A differential guard's second world is a MEASUREMENT**: sweep for the seed whose asserted
    quantities actually differ, and pick the fixture on the metric the assertion uses, not a proxy for
    it (#320, #275). A bound is DERIVED and the sweep only corroborates it; a ceiling fitted to the
