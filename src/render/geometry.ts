@@ -90,16 +90,18 @@ export function spacedTextBox(
   return { x: x - w / 2, y: y - fontSize, w, h: fontSize * 1.2 };
 }
 
-export function rotatedSpanBoxes(box: Box, degrees: number, originX: number, originY: number, segments = 6): Box[] {
+function spinAbout(degrees: number, originX: number, originY: number): (px: number, py: number) => Pt {
   const a = (degrees * Math.PI) / 180;
   const cos = Math.cos(a);
   const sin = Math.sin(a);
-  const spin = (px: number, py: number) => {
-    const dx = px - originX;
-    const dy = py - originY;
-    return { x: originX + dx * cos - dy * sin, y: originY + dx * sin + dy * cos };
-  };
+  return (px, py) => ({
+    x: originX + (px - originX) * cos - (py - originY) * sin,
+    y: originY + (px - originX) * sin + (py - originY) * cos,
+  });
+}
 
+export function rotatedSpanBoxes(box: Box, degrees: number, originX: number, originY: number, segments = 6): Box[] {
+  const spin = spinAbout(degrees, originX, originY);
   const out: Box[] = [];
   const step = box.w / segments;
   for (let i = 0; i < segments; i++) {
@@ -116,13 +118,7 @@ export function rotatedSpanBoxes(box: Box, degrees: number, originX: number, ori
 }
 
 export function rotatedRect(box: Box, degrees: number, originX: number, originY: number): Pt[] {
-  const a = (degrees * Math.PI) / 180;
-  const cos = Math.cos(a);
-  const sin = Math.sin(a);
-  const spin = (px: number, py: number): Pt => ({
-    x: originX + (px - originX) * cos - (py - originY) * sin,
-    y: originY + (px - originX) * sin + (py - originY) * cos,
-  });
+  const spin = spinAbout(degrees, originX, originY);
   return [
     spin(box.x, box.y),
     spin(box.x + box.w, box.y),
