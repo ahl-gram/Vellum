@@ -7,6 +7,8 @@ export const lineFinder = (text: string): ((offset: number) => number) => {
   return (offset) => source.getLineAndCharacterOfPosition(offset).line + 1;
 };
 
-export const scriptTokens: (path: string, text: string) => Token[] = () => [];
+export const scriptTokens = (_path: string, text: string): Token[] => [{ text, line: 1 }];
 
-export const sheetTokens: (css: string, lineOf: (offset: number) => number) => Token[] = () => [];
+export const sheetTokens: (css: string, lineOf: (offset: number) => number) => Token[] = (css) => [
+  { text: css, line: 1 },
+];

@@ -36,3 +36,24 @@ for (const f of SHEETS_BITING)
     const read = readerOf(f.path)!;
     assert.notEqual(firstDifference(read(f.before), read(f.after)), null);
   });
+
+const SHEETS_QUIET = [
+  {
+    name: "leading, trailing and own-line comments removed",
+    path: "src/styles/a.css",
+    before: "/* head */\n.a {\n  color: red; /* why */\n  /* own line */\n  margin: 0;\n}\n",
+    after: ".a {\n  color: red;\n  margin: 0;\n}\n",
+  },
+  {
+    name: "reindented",
+    path: "src/styles/a.css",
+    before: ".a {\n  color: red;\n}\n",
+    after: ".a {\n    color: red;\n}\n",
+  },
+];
+
+for (const f of SHEETS_QUIET)
+  test(`a comment-only edit in a sheet reads as no change: ${f.name}`, () => {
+    const read = readerOf(f.path)!;
+    assert.equal(firstDifference(read(f.before), read(f.after)), null);
+  });

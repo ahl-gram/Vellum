@@ -42,3 +42,60 @@ for (const f of PAGES_BITING)
     const read = readerOf(f.path)!;
     assert.notEqual(firstDifference(read(f.before), read(f.after)), null);
   });
+
+const PAGES_QUIET = [
+  {
+    name: "frontmatter comments removed",
+    path: "src/pages/a.astro",
+    before: "---\n// fm\nconst a = 1; /* t */\n---\n<p>{a}</p>\n",
+    after: "---\nconst a = 1;\n---\n<p>{a}</p>\n",
+  },
+  {
+    name: "an html comment removed directly after the frontmatter",
+    path: "src/pages/a.astro",
+    before: "---\nconst a = 1;\n---\n<!-- c -->\n<p>{a}</p>\n",
+    after: "---\nconst a = 1;\n---\n<p>{a}</p>\n",
+  },
+  {
+    name: "an empty expression removed",
+    path: "src/pages/a.astro",
+    before: '<div class="a">{/* jsx */}{a}</div>\n',
+    after: '<div class="a">{a}</div>\n',
+  },
+  {
+    name: "script comments removed",
+    path: "src/pages/a.astro",
+    before: "<script>\n// js\nconst b = 2; /* t */\n</script>\n",
+    after: "<script>\nconst b = 2;\n</script>\n",
+  },
+  {
+    name: "style comments removed",
+    path: "src/pages/a.astro",
+    before: "<style>\n/* css */\n.a { color: red; } /* t */\n</style>\n",
+    after: "<style>\n.a { color: red; }\n</style>\n",
+  },
+  {
+    name: "an html comment removed between inline elements",
+    path: "src/pages/a.astro",
+    before: "<a>x</a><!-- c --><b>y</b>\n",
+    after: "<a>x</a><b>y</b>\n",
+  },
+  {
+    name: "html comments removed on their own line inside an element and at the end",
+    path: "src/pages/a.astro",
+    before: "<div>\n  <!-- c -->\n  <p>x</p>\n</div>\n<!-- end -->\n",
+    after: "<div>\n  <p>x</p>\n</div>\n",
+  },
+  {
+    name: "an html comment removed inside a sentence",
+    path: "src/pages/a.astro",
+    before: "<p>Hello <!-- c --> world</p>\n",
+    after: "<p>Hello world</p>\n",
+  },
+];
+
+for (const f of PAGES_QUIET)
+  test(`a comment-only edit in a page reads as no change: ${f.name}`, () => {
+    const read = readerOf(f.path)!;
+    assert.equal(firstDifference(read(f.before), read(f.after)), null);
+  });
