@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
+import { memoryTree } from "../../scripts/comment-judge/tree.ts";
+import { findingsOf, firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
 
 const READ = [
   "src/a.ts",
@@ -56,4 +57,43 @@ test("the first difference is the first pair of token texts that differ, its lin
   );
   assert.equal(firstDifference([{ text: "a", line: 1 }], [{ text: "a", line: 3 }]), null);
   assert.equal(firstDifference([], []), null);
+});
+
+test("each changed path gets one finding, prose first, then added, renamed, not read, and the token comparison, and each deleted path is deleted or prose", () => {
+  const before = memoryTree("b1", {
+    "src/a.ts": "const a = 1; // c\n",
+    "src/b.ts": "const b = 1;\n",
+    "src/styles/a.css": "/* c */\n.a { x: 1; }\n",
+    "src/pages/p.astro": "<!-- c -->\n<p>x</p>\n",
+  });
+  const after = memoryTree("h1", {
+    "src/a.ts": "const a = 1;\n",
+    "src/b.ts": "const b = 2;\n",
+    "src/styles/a.css": ".a { x: 1; }\n",
+    "src/pages/p.astro": "<p>x</p>\n",
+  });
+  const changed = [
+    { path: "handbook/x.md", before: null },
+    { path: "src/a.ts", before: "src/a.ts" },
+    { path: "src/b.ts", before: "src/b.ts" },
+    { path: "src/n.ts", before: null },
+    { path: "src/s.ts", before: "src/r.ts" },
+    { path: "data/x.json", before: "data/x.json" },
+    { path: "src/styles/a.css", before: "src/styles/a.css" },
+    { path: "src/pages/p.astro", before: "src/pages/p.astro" },
+    { path: "handbook/m.md", before: "handbook/m.md" },
+  ];
+  assert.deepEqual(findingsOf(changed, ["src/d.ts", "handbook/old.md"], before, after), [
+    { kind: "prose", path: "handbook/x.md" },
+    { kind: "identical", path: "src/a.ts" },
+    { kind: "differs", path: "src/b.ts", difference: { base: { line: 1, text: "1" }, head: { line: 1, text: "2" } } },
+    { kind: "added", path: "src/n.ts" },
+    { kind: "renamed", path: "src/s.ts", before: "src/r.ts" },
+    { kind: "not read", path: "data/x.json" },
+    { kind: "identical", path: "src/styles/a.css" },
+    { kind: "identical", path: "src/pages/p.astro" },
+    { kind: "prose", path: "handbook/m.md" },
+    { kind: "deleted", path: "src/d.ts" },
+    { kind: "prose", path: "handbook/old.md" },
+  ]);
 });
