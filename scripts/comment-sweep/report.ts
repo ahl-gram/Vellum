@@ -18,7 +18,7 @@ const findingLine = (f: Finding): string | null => {
     case "type changed":
       return `TYPE CHANGED ${f.path}`;
     case "mode changed":
-      return null;
+      return `MODE CHANGED ${f.path} ${f.oldMode}->${f.newMode}`;
     case "not read":
       return `NOT READ ${f.path}: ${NOT_READ}`;
     case "renamed":

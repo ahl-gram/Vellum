@@ -77,7 +77,15 @@ export const typeChangedFiles = (repo: string, from: string, head: string): stri
 
 export type ModeChange = { readonly path: string; readonly oldMode: string; readonly newMode: string };
 
-export const modeChangedFiles: (repo: string, from: string, head: string) => ModeChange[] = () => [];
+export const modeChangedFiles = (repo: string, from: string, head: string): ModeChange[] =>
+  git(repo, ["-c", "core.quotepath=false", "diff", "--raw", "--find-renames", "--diff-filter=M", from, head])
+    .split("\n")
+    .filter((line) => line !== "")
+    .flatMap((line) => {
+      const [meta, path] = line.split("\t");
+      const [oldMode, newMode] = meta!.slice(1).split(" ");
+      return oldMode === newMode ? [] : [{ path: path!, oldMode: oldMode!, newMode: newMode! }];
+    });
 
 export const ensureCommit = (repo: string, sha: string, ref: string): void => {
   const has = (): boolean =>

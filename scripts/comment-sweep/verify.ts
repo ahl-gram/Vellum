@@ -56,8 +56,13 @@ export const findingsOf = (
   before: Tree,
   after: Tree,
 ): Finding[] => [
-  ...changed.map((c) => findingOf(c, before, after)),
+  ...changed.flatMap((c) => {
+    const finding = findingOf(c, before, after);
+    return finding.kind === "identical" && modeChanged.some((m) => m.path === c.path) ? [] : [finding];
+  }),
   ...deleted.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "deleted", path })),
   ...typeChanged.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "type changed", path })),
-  ...modeChanged.map((m): Finding => ({ kind: "identical", path: m.path })),
+  ...modeChanged
+    .filter((m) => !isDoc(m.path))
+    .map((m): Finding => ({ kind: "mode changed", path: m.path, oldMode: m.oldMode, newMode: m.newMode })),
 ];
