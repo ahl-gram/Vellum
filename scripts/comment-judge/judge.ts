@@ -43,7 +43,7 @@ export const judgeRun = async (
   };
 };
 
-const tokensOf = (judged: Judged): number =>
+export const tokensOf = (judged: { readonly replies: readonly Reply[] }): number =>
   judged.replies.reduce((sum, reply) => sum + (reply.ok ? reply.inputTokens : 0), 0);
 
 export const judgeAll = async (
