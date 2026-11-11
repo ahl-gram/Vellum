@@ -8,6 +8,7 @@ import {
   readKey,
   senderFor,
   type Fetch,
+  type Meter,
   type ReadText,
   type SystemOneRequest,
 } from "../../scripts/jev/system-one.ts";
@@ -89,17 +90,20 @@ test("a failed call is a failure with its reason, never an answer", async () => 
 });
 
 test("with no key nothing is sent, and the reply says why", async () => {
+  const touched: string[] = [];
+  const watching: Meter = { sent: () => touched.push("sent"), replied: () => touched.push("replied") };
   const reason = { ok: false, reason: "TYPESAFE_API_KEY is not set" };
-  assert.deepEqual(await senderFor(undefined, throwing, unmetered)(R), reason);
-  assert.deepEqual(await senderFor("  ", throwing, unmetered)(R), reason);
+  assert.deepEqual(await senderFor(undefined, throwing, watching)(R), reason);
+  assert.deepEqual(await senderFor("  ", throwing, watching)(R), reason);
 
   const refused = {
     ok: false,
     reason: "TYPESAFE_API_KEY holds a character a request header cannot carry, so nothing was sent",
   };
   for (const bad of ["k-test\nsecret", "k-test\rsecret", "k-test\u0000secret", "k-testĀsecret", 'k-"test"', "k test"]) {
-    assert.deepEqual(await senderFor(bad, throwing, unmetered)(R), refused, JSON.stringify(bad));
+    assert.deepEqual(await senderFor(bad, throwing, watching)(R), refused, JSON.stringify(bad));
   }
+  assert.deepEqual(touched, []);
 });
 
 test("a reply with no token count counts the request's characters at two a token, and says the count is an estimate", async () => {
