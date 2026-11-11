@@ -24,7 +24,7 @@ export function dressContext(style: MapStyle): DressContext {
 }
 
 /** Round to 0.1 px at emit only; upstream geometry stays unrounded for groundingViolations' exact equality. */
-export const r1 = (v: number): number => Math.round(v * 10) / 10;
+export { r1 } from "../../core/math.ts";
 
 export function stroke(c: DressContext, w: number): Record<string, string | number> {
   return {

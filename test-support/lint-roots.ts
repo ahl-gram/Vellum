@@ -29,3 +29,6 @@ export const lintTsRoots = (): string[] =>
         (e): e is FileEntry => typeof e === "string" || (Array.isArray(e) && e.every((g) => typeof g === "string")),
       ),
   );
+
+export const isTsUnderLintRoots = (path: string): boolean =>
+  path.endsWith(".ts") && !path.endsWith(".d.ts") && lintTsRoots().includes(path.split("/")[0]!);

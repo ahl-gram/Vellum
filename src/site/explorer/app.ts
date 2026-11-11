@@ -251,6 +251,16 @@ function keepDraw(res: DrawResult, seed: number, t0: number): void {
   caption.textContent = `${mapNoun(res.mapType)} · ${res.band} · drawn in ${ms}ms`;
 }
 
+function armLanded(res: DrawResult, seed: number, quiet: boolean, deferArm: boolean): void {
+  armOnLanding({
+    arm: surveyArm,
+    armed: agesChk.checked,
+    defer: deferArm,
+    clear: lc.clearAges,
+    rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
+  });
+}
+
 function landInPlace(
   res: DrawResult,
   seed: number,
@@ -268,13 +278,7 @@ function landInPlace(
   lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
   room.layout();
   if (!quiet) startArrival(mapDiv.querySelector("svg"));
-  armOnLanding({
-    arm: surveyArm,
-    armed: agesChk.checked,
-    defer: deferArm,
-    clear: lc.clearAges,
-    rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
-  });
+  armLanded(res, seed, quiet, deferArm);
   glass.syncZoom();
   // Issue #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
   glass.setWorld({
@@ -314,13 +318,7 @@ function landDraw(
       lc.buildPlaceOverlay(res.manifest);
       lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
       room.layout();
-      armOnLanding({
-        arm: surveyArm,
-        armed: agesChk.checked,
-        defer: deferArm,
-        clear: lc.clearAges,
-        rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
-      });
+      armLanded(res, seed, quiet, deferArm);
       glass.syncZoom();
       glass.setWorld({
         seed,

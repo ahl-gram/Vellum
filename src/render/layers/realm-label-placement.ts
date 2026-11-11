@@ -36,17 +36,20 @@ function withinChart(box: Box, proj: Projection): boolean {
   return box.x >= proj.margin && box.x + box.w <= proj.widthPx - proj.margin;
 }
 
+type BoxAt = (x: number, y: number) => Box;
+
 export function placeRealmLabel(args: Args): RealmLabelPlacement {
-  return args.closeUp === null ? placeOnWorldSheet(args) : placeOnCloseUp(args, args.closeUp);
+  const boxAt: BoxAt = (x, y) => spacedTextBox(x, y, args.name, args.fs, args.ls, WIDTH_FACTOR.caps);
+  return args.closeUp === null ? placeOnWorldSheet(args, boxAt) : placeOnCloseUp(args, args.closeUp, boxAt);
 }
 
 function placeOnCloseUp(
-  { blob, gridW, proj, centroid, yCandidates, name, fs, ls, arena }: Args,
+  { blob, gridW, proj, centroid, yCandidates, arena }: Args,
   room: CloseUpRoom,
+  boxAt: BoxAt,
 ): RealmLabelPlacement {
-  const boxAt = (p: Pt): Box => spacedTextBox(p.x, p.y, name, fs, ls, WIDTH_FACTOR.caps);
   const slid = (p: Pt): Pt => {
-    const { dx, dy } = slideInsideSheet(boxAt(p), proj);
+    const { dx, dy } = slideInsideSheet(boxAt(p.x, p.y), proj);
     return { x: p.x + dx, y: p.y + dy };
   };
   const spots = [
@@ -54,27 +57,18 @@ function placeOnCloseUp(
     ...interiorProbes(blob, gridW, proj, centroid).map(slid),
   ];
   const claimed =
-    spots.find((p) => room.dry(boxAt(p)) && arena.tryClaim(boxAt(p), CLAIM_PAD)) ??
-    spots.find((p) => arena.tryClaim(boxAt(p), CLAIM_PAD));
+    spots.find((p) => room.dry(boxAt(p.x, p.y)) && arena.tryClaim(boxAt(p.x, p.y), CLAIM_PAD)) ??
+    spots.find((p) => arena.tryClaim(boxAt(p.x, p.y), CLAIM_PAD));
   if (claimed) return { x: claimed.x, y: claimed.y, claimed: true };
-  const forced = spots.find((p) => clearOfFurniture(boxAt(p), room.furniture)) ?? slid(centroid);
-  arena.claim(boxAt(forced));
+  const forced = spots.find((p) => clearOfFurniture(boxAt(p.x, p.y), room.furniture)) ?? slid(centroid);
+  arena.claim(boxAt(forced.x, forced.y));
   return { x: forced.x, y: forced.y, claimed: false };
 }
 
-function placeOnWorldSheet({
-  blob,
-  gridW,
-  proj,
-  centroid,
-  yCandidates,
-  name,
-  fs,
-  ls,
-  arena,
-}: Args): RealmLabelPlacement {
-  const boxAt = (x: number, y: number) => spacedTextBox(x, y, name, fs, ls, WIDTH_FACTOR.caps);
-
+function placeOnWorldSheet(
+  { blob, gridW, proj, centroid, yCandidates, arena }: Args,
+  boxAt: BoxAt,
+): RealmLabelPlacement {
   // Stage 1 is the historical ladder, unfiltered by withinChart on purpose: filtering it would move existing labels and force a regen.
   for (const y of yCandidates) {
     const box = boxAt(centroid.x, y);

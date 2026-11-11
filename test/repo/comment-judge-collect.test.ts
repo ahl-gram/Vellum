@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { addedRuns, commentRuns, isJudged } from "../../scripts/comment-judge/collect.ts";
+import { addedRuns, commentRuns } from "../../scripts/comment-judge/collect.ts";
 
 const shape = (text: string) =>
   commentRuns("src/a.ts", text).map((r) => ({
@@ -52,17 +52,4 @@ test("an added run is one whose text the file did not carry before, so a moved c
     [[3, "new one"]],
   );
   assert.equal(addedRuns("src/a.ts", null, after).length, 3);
-});
-
-test("only TypeScript under the lint's roots is judged", () => {
-  for (const path of ["src/a.ts", "scripts/x/y.ts", "test/a.test.ts", "test-support/h.ts", "e2e/s.ts"])
-    assert.equal(isJudged(path), true, path);
-  for (const path of [
-    "design/r/x.ts",
-    "handbook/plans/1300/x.ts",
-    "src/styles/a.css",
-    "src/pages/a.astro",
-    "src/a.mjs",
-  ])
-    assert.equal(isJudged(path), false, path);
 });

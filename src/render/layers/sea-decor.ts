@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../svg.ts";
-import { prunePoints } from "../geometry.ts";
+import { clearOfCircles, prunePoints } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
 import type { Rng } from "../../core/rng.ts";
@@ -7,7 +7,7 @@ import type { CompassPlan } from "./compass.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
 type OpenSpot = { x: number; y: number; d: number; edgeOk: boolean };
-type ClearOf = (px: number, py: number, extra?: number) => boolean;
+type ClearOf = (px: number, py: number, extra: number) => boolean;
 
 function openSeaSpots(ctx: RenderCtx, clearOf: ClearOf): OpenSpot[] {
   const { world, proj } = ctx;
@@ -168,8 +168,7 @@ export function seaDecorLayer(
   ];
   if (compass) avoid.push({ x: compass.cx, y: compass.cy, r: compass.r * 2.2 });
 
-  const clearOf = (px: number, py: number, extra = 0): boolean =>
-    avoid.every((a) => Math.hypot(px - a.x, py - a.y) > a.r + extra);
+  const clearOf = clearOfCircles(avoid);
 
   const open = openSeaSpots(ctx, clearOf);
   const waves = waveNodes(style, k, drng, open);

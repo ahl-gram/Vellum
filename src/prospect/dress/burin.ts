@@ -1,8 +1,9 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Limner, MapStyle } from "../../render/style.ts";
+import { r3 } from "../../core/math.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { Pt } from "../geometry.ts";
-import { dressContext, type DressContext } from "./context.ts";
+import { dressContext, r1, type DressContext } from "./context.ts";
 
 export type Engraver = DressContext & { readonly wash: Limner | null };
 
@@ -14,15 +15,12 @@ export const washOr = (e: Engraver, key: keyof Limner): string => e.wash?.[key] 
 
 export const quietInk = (e: Engraver): string => (e.wash === null ? e.soft : e.ink);
 
-export const r1 = (v: number): number => Math.round(v * 10) / 10;
+export { r1 };
 export const pt = (p: Pt): string => `${r1(p.x)} ${r1(p.y)}`;
 export const poly = (pts: ReadonlyArray<Pt>, closed = true): string => `M${pts.map(pt).join("L")}${closed ? "Z" : ""}`;
 
-/** A width rounded to the thousandth, so a product such as 1.2 * 0.85 writes 1.02, not its float. */
-const width = (w: number): number => Math.round(w * 1000) / 1000;
-
 export function stroke(e: Engraver, w: number): Record<string, string | number> {
-  return { stroke: e.ink, "stroke-width": width(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
+  return { stroke: e.ink, "stroke-width": r3(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
 }
 
 export function hatchPolygon(pts: ReadonlyArray<Pt>, slope: number, spacing: number, phase = 0): string {
@@ -63,7 +61,7 @@ export function hatchNode(
     d: hatchPolygon(pts, slope, spacing, phase),
     fill: "none",
     stroke: e.ink,
-    "stroke-width": width(w),
+    "stroke-width": r3(w),
     "stroke-opacity": opacity,
     "stroke-linecap": "butt",
   });

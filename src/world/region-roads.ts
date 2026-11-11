@@ -3,7 +3,7 @@ import { clamp } from "../core/math.ts";
 import { REUSE_DISCOUNT, RIVER_CROSSING, SLOPE_PENALTY, type Road, type RoadPoint } from "../society/roads.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
 import { slopeField } from "../terrain/slope.ts";
-import { cellsPerWorldCell } from "./region-parent.ts";
+import { cellsPerWorldCell, clipSegment, windowFrame, type WindowFrame } from "./region-parent.ts";
 import { cheapestPath, corridorRadius, courseDistance } from "./river-route.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import type { NamedSettlement, World } from "./types.ts";
@@ -20,9 +20,8 @@ export type PlacedSettlements = {
   readonly regionIdxOf: ReadonlyMap<number, number>;
 };
 
-type Frame = {
+type Frame = WindowFrame & {
   readonly world: World;
-  readonly window: UvWindow;
   readonly gridW: number;
   readonly gridH: number;
   readonly snapRadius: number;
@@ -41,40 +40,6 @@ type LegContext = {
   readonly laid: Uint8Array;
 };
 
-function toRegion(f: Frame, p: RoadPoint): RoadPoint {
-  const { u0, u1, v0, v1 } = f.window;
-  const ww = f.world.recipe.gridW - 1;
-  const wh = f.world.recipe.gridH - 1;
-  return { x: ((p.x / ww - u0) / (u1 - u0)) * (f.gridW - 1), y: ((p.y / wh - v0) / (v1 - v0)) * (f.gridH - 1) };
-}
-
-function clipSegment(a: RoadPoint, b: RoadPoint, f: Frame): readonly [number, number] | null {
-  const { u0, u1, v0, v1 } = f.window;
-  const ww = f.world.recipe.gridW - 1;
-  const wh = f.world.recipe.gridH - 1;
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const edges: ReadonlyArray<readonly [number, number]> = [
-    [-dx, a.x - u0 * ww],
-    [dx, u1 * ww - a.x],
-    [-dy, a.y - v0 * wh],
-    [dy, v1 * wh - a.y],
-  ];
-  let t0 = 0;
-  let t1 = 1;
-  for (const [p, q] of edges) {
-    if (p === 0) {
-      if (q < 0) return null;
-      continue;
-    }
-    const r = q / p;
-    if (p < 0) t0 = Math.max(t0, r);
-    else t1 = Math.min(t1, r);
-    if (t0 > t1) return null;
-  }
-  return [t0, t1];
-}
-
 function junctionCells(world: World): Set<number> {
   const width = world.recipe.gridW;
   const towns = new Set(world.settlements.map((s) => s.x + s.y * width));
@@ -87,7 +52,7 @@ function junctionCells(world: World): Set<number> {
 }
 
 function anchorAt(f: Frame, ground: RoadGround, p: RoadPoint): number | null {
-  const r = toRegion(f, p);
+  const r = f.toRegion(p);
   const gx = clamp(Math.round(r.x), 0, f.gridW - 1);
   const gy = clamp(Math.round(r.y), 0, f.gridH - 1);
   const cell = snapToLand(ground.elev, ground.seaLevel, gx, gy, f.snapRadius);
@@ -111,7 +76,7 @@ function runsOfRoad(f: Frame, ground: RoadGround, placed: PlacedSettlements, pin
     line = [];
     anchors = [];
   };
-  const vertexPoint = (v: RoadPoint): RoadPoint => dotOf(f, placed, pins, v) ?? toRegion(f, v);
+  const vertexPoint = (v: RoadPoint): RoadPoint => dotOf(f, placed, pins, v) ?? f.toRegion(v);
   const vertexAnchor = (v: RoadPoint): number | null => {
     const dot = dotOf(f, placed, pins, v);
     return dot === null ? anchorAt(f, ground, v) : dot.x + dot.y * f.gridW;
@@ -119,7 +84,7 @@ function runsOfRoad(f: Frame, ground: RoadGround, placed: PlacedSettlements, pin
   for (let i = 1; i < road.points.length; i++) {
     const a = road.points[i - 1] as RoadPoint;
     const b = road.points[i] as RoadPoint;
-    const t = clipSegment(a, b, f);
+    const t = clipSegment(a, b, f.box);
     if (t === null) {
       flush();
       continue;
@@ -127,11 +92,11 @@ function runsOfRoad(f: Frame, ground: RoadGround, placed: PlacedSettlements, pin
     const at = (s: number): RoadPoint => ({ x: a.x + (b.x - a.x) * s, y: a.y + (b.y - a.y) * s });
     if (line.length === 0) {
       const opensAtVertex = t[0] === 0 && i === 1;
-      line.push(opensAtVertex ? vertexPoint(a) : toRegion(f, at(t[0])));
+      line.push(opensAtVertex ? vertexPoint(a) : f.toRegion(at(t[0])));
       anchors.push(opensAtVertex ? vertexAnchor(a) : anchorAt(f, ground, at(t[0])));
     }
     if (t[1] < 1) {
-      line.push(toRegion(f, at(t[1])));
+      line.push(f.toRegion(at(t[1])));
       anchors.push(anchorAt(f, ground, at(t[1])));
       flush();
       continue;
@@ -198,7 +163,13 @@ function layRun(run: Run, ctx: LegContext): Road[] {
 export function layWorldRoads(world: World, window: UvWindow, ground: RoadGround, placed: PlacedSettlements): Road[] {
   const { w, h } = ground.elev;
   const worldW = world.recipe.gridW;
-  const f: Frame = { world, window, gridW: w, gridH: h, snapRadius: landSnapRadius(w, window, worldW) };
+  const f: Frame = {
+    ...windowFrame(worldW, world.recipe.gridH, window, w, h),
+    world,
+    gridW: w,
+    gridH: h,
+    snapRadius: landSnapRadius(w, window, worldW),
+  };
   const townAt = new Map<number, number>();
   world.settlements.forEach((s, i) => townAt.set(s.x + s.y * worldW, i));
   const pins: Pins = { townAt, junctions: junctionCells(world) };

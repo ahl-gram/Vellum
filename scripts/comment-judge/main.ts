@@ -1,7 +1,8 @@
 import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
-import { addedRuns, isJudged } from "./collect.ts";
+import { isTsUnderLintRoots } from "../../test-support/lint-roots.ts";
+import { addedRuns } from "./collect.ts";
 import { judgeAll, RUN_INPUT_TOKEN_CAP, type Judged } from "./judge.ts";
 import { replyLines, reportLines, requestLines } from "./report.ts";
 import { TRIAL_REFS, TRIAL_ROWS } from "./trial-set.ts";
@@ -27,7 +28,7 @@ const diff = async (repo: string, base: string, head: string, args: Args): Promi
   const before = gitTree(repo, from);
   const after = gitTree(repo, head);
   const items = changedFiles(repo, from, head)
-    .filter((c) => isJudged(c.path))
+    .filter((c) => isTsUnderLintRoots(c.path))
     .flatMap((c) =>
       addedRuns(c.path, c.before === null ? null : before.read(c.before), after.read(c.path)).map((run) => ({
         tree: after,
