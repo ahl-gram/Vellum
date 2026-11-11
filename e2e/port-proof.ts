@@ -1,9 +1,9 @@
 // The e2e tree's proof (Issue #653's port, Issue #679's move): every e2e file compared with its base, at the place the ruled layout moved it, as the JavaScript Node will run, so a port or a move shows it changed nothing but types and specifiers that still reach the same module.
-import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { join, posix, resolve } from "node:path";
 import ts from "typescript";
+import { git } from "./proof-git.ts";
 
 type RuntimeEdit = { readonly line: number; readonly before: string; readonly after: string };
 type PortComparison = {
@@ -221,9 +221,6 @@ export function compareSources(before: string, after: string, sameModule: SameMo
 }
 
 const ROOT = resolve(import.meta.dirname, "..");
-const GIT_TIMEOUT_MS = 30_000;
-const git = (args: string[]): string =>
-  execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
 
 const SELF = new Set(["scripts/e2e-port-proof.ts", "e2e/port-proof.ts"]);
 const scope = (paths: readonly string[]): string[] =>

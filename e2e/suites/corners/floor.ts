@@ -1,7 +1,7 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718), read in the Explorer and the Print Room: a sideways wheel at 640 scrolls the page and reaches every right-hand piece, a keyboard-opened Chart Table leaves the room where it stood, and a one-pixel window leaves the camera alone.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { LANDED, rest } from "../stage/stage.ts";
+import { LANDED, rest, size } from "../stage/stage.ts";
 import { mouseMove, mouseWheel, sendKey } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
@@ -38,9 +38,6 @@ const PIECES: Payload<Pieces> = `(() => {
   const camera = !document.getElementById("lf-stage") || (!!wrote && Math.abs(cr.width - cam.offsetWidth * wrote.a) < 1 && Math.abs(cr.left - sr.left - wrote.e) < 1 && Math.abs(cr.top - sr.top - wrote.f) < 1);
   return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && camera && ${LANDED} };
 })()`;
-
-export const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
-  ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
 async function still(ctx: SuiteContext, page: string, w: number, h: number, label: string): Promise<Pieces> {
   await rest(ctx, w, h, label);

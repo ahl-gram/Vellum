@@ -1,5 +1,5 @@
 import { waitInked } from "../../support/explorer.ts";
-import type { SuiteContext } from "../../types.ts";
+import type { Evaluate, SuiteContext } from "../../types.ts";
 
 export type ZoomKit = ReturnType<typeof zoomKit>;
 
@@ -29,6 +29,13 @@ function zoomInsetView({ evaluate }: Pick<SuiteContext, "evaluate">) {
 // 2026-10-23, Issue #954: 375 polls of 40 ms, 15 s; the slowest redraft a suite waits on, band 5's cold first descent, drew in 1775 ms locally (seed 42's capital, three loads within 15 ms), times CI's 3.3 (handbook/specs/settle-doctrine.md item 10) is 5.9 s, so 15 s keeps twice that.
 export const REDRAFT_TRIES = 375;
 
+export const zoomTo =
+  (evaluate: Evaluate) =>
+  (k: number, cu: number, cv: number): Promise<undefined> =>
+    evaluate<undefined>(
+      `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
+    );
+
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const rgn = () =>
@@ -38,10 +45,7 @@ export function zoomKit(ctx: SuiteContext) {
   const goHome = async () => {
     await evaluate(`document.getElementById("zoom-reset").click()`);
   };
-  const enterAt = (k: number, cu: number, cv: number) =>
-    evaluate<undefined>(
-      `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
-    );
+  const enterAt = zoomTo(evaluate);
   const waitRedraft = async (prev: number) => {
     for (let i = 0; i < REDRAFT_TRIES; i++) {
       const s = await rgn();

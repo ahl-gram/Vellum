@@ -1,3 +1,4 @@
+import { errorText } from "../../src/site/shared/error-text.ts";
 import { skipLabel } from "./skips.ts";
 import type { E2eSkip } from "./skips.ts";
 
@@ -152,7 +153,7 @@ export interface E2eRunHooks {
 // A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml caps each lane, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
 const ABORTED_STREAK_LIMIT = 3;
 
-export const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+export { errorText };
 
 export async function runSelected<C extends object>(
   names: readonly E2eSuiteName[],

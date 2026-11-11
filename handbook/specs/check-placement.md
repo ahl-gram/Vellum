@@ -175,7 +175,7 @@ belongs in.
   chart room's furniture out". Neither kind takes in a check's own inputs (the window it opens, the
   address it loads, the press its claim names) or a constant the product sets that the check writes
   again (the Glass's step), since the layout decides neither; such a constant that a ruling sets as
-  a size in pixels, as the clearances `travelsOf` in `e2e/suites/slide-away/kit.ts` writes again
+  a size in pixels, as the clearances `travelsOf` in `e2e/suites/stage/slide-kit.ts` writes again
   are, is ruled, and one a ruling sets as a duration is neither. A tolerance around a relation, a
   window a check holds a ruled clearance within among them, is a bound, derived as `CLAUDE.md` says.
 - **A browser check is written, and kept, for what it holds against what it costs.** Each one a
