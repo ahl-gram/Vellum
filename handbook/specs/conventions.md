@@ -137,8 +137,8 @@ home: another spec, or a gate re-explaining the contract rather than pointing at
 
 **A skill that walks a recurring sitting holds no rule of its own.**
 `.claude/skills/comment-sweep/SKILL.md` puts the weekly comment sweep's steps in order and names
-the command each runs, and every step points at the line of this file that is its rule, which wins
-where the two disagree. The `vellum-footguns` gates are the other kind of skill: each is its
+the command each runs, or the line that names it, and every step points at the line of this file
+that is its rule, which wins where the two disagree. The `vellum-footguns` gates are the other kind of skill: each is its
 imperative's one home, keyed to the moment of typing.
 
 **A tracked agent or skill file never sends its reader to the private auto-memory for content.**
@@ -232,7 +232,7 @@ is run and PROVEN in a particular way.
   and `git tag -l 'comment-sweep/*' --sort=-refname | head -1`; the sweep reads the comments
   `git diff <tag> origin/main` adds, then tags the `origin/main` commit it read. The first tag,
   `comment-sweep/2026-09-09`, marks the merge of PR #548 (`7db3d30b`), the last sweep of the whole
-  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below. The same sitting runs the copy hunt over the same merges (`handbook/specs/development-workflow.md`, Sweeps the per-sub recon does not reach). The sitting walks the `comment-sweep` skill (`.claude/skills/comment-sweep/SKILL.md`), which puts its steps in order and names each step's command; the rules stay here.
+  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below. The same sitting runs the copy hunt over the same merges (`handbook/specs/development-workflow.md`, Sweeps the per-sub recon does not reach). The sitting walks the `comment-sweep` skill (`.claude/skills/comment-sweep/SKILL.md`), which puts its steps in order and names each step's command, or the line that names it; the rules stay here.
 
 - **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
   scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
@@ -246,8 +246,9 @@ is run and PROVEN in a particular way.
   (`scripts/comment-sweep/main.ts`). It reads the branch's commits from their merge base with
   `origin/main`, compares each script, sheet and page the branch changes with every comment
   removed but one that instructs a tool, names every file that differs (with the first
-  difference's line on each side), is added, deleted or renamed, changes type, or is of a kind
-  it does not read, and exits 1 on any of them; it passes the house prose `isDoc` in
+  difference's line on each side), is added, deleted or renamed, changes type, changes mode (the
+  executable bit, content unchanged), or is of a kind it does not read, and exits 1 on any of
+  them; it passes the house prose `isDoc` in
   `scripts/docs-only.ts` names. A run that exits 1 is fixed on the branch, never argued. These
   things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
   `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block
@@ -264,9 +265,9 @@ is run and PROVEN in a particular way.
   moving it past code, is a change. Its unit tests are its proof: a changed identifier, string,
   regular-expression body or template literal, a dropped default argument or type annotation, a
   deleted CSS declaration, a changed selector, a dropped media query, an edited Astro
-  attribute, expression, style or script, a moved or dropped array hole, and an instruction
-  comment removed, edited or moved, each read as a change, and every other comment form removed
-  beside them reads as none. Its blind spots each err toward passing: pure reindentation; in a
+  attribute, expression, style or script, a moved or dropped array hole, an instruction comment
+  removed, edited or moved, and a mode-only change, each read as a change, and every other
+  comment form removed beside them reads as none. Its blind spots each err toward passing: pure reindentation; in a
   page, a run of whitespace read as one space and a blank run at the edge of an element's
   content not read; and a comment that instructs a tool in a form the list does not read, read
   as a comment. A comment inside a template literal is string data rather than a comment, so it

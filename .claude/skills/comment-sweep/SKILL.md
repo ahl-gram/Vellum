@@ -5,7 +5,7 @@ description: "The weekly comment sweep, step by step: find where the last one en
 
 # The weekly comment sweep
 
-This is the order of the sitting and the command each step runs. It holds no rule: each step names
+This is the order of the sitting and the command each step runs, or the line that names it. It holds no rule: each step names
 the line of `handbook/specs/conventions.md`, The comment sweep, that is its rule, and that section
 wins wherever the two disagree. Read the section in full before step 1, and the comment doctrine it
 applies, the opening paragraph of "Durable engineering constraints from shipped work" in
