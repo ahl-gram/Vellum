@@ -5,6 +5,7 @@ import {
   MODEL,
   type Answered,
   type Fetch,
+  type Meter,
   type Reply,
   type Send,
   type SystemOneRequest,
@@ -33,6 +34,20 @@ export const answered = (nouls: Record<string, number>, inputTokens = 500): Answ
   estimated: false,
   ms: 5,
 });
+
+export const unmetered: Meter = { sent: () => {}, replied: () => {} };
+
+export const answeringFetch = (usages: readonly (number | null)[]): Fetch => {
+  let calls = 0;
+  return (_url, init) => {
+    const request = JSON.parse(init.body as string) as SystemOneRequest;
+    const used = usages[Math.min(calls, usages.length - 1)];
+    calls += 1;
+    const answers = Object.fromEntries(Object.keys(request.questions).map((id) => [id, { type: "noul", noul: 0.5 }]));
+    const body = { model: request.model, answers, ...(used === null ? {} : { usage: { input_tokens: used } }) };
+    return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+  };
+};
 
 export const ONE_QUESTION: SystemOneRequest = {
   model: MODEL,

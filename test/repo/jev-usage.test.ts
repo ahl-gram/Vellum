@@ -46,7 +46,7 @@ test("the line is the run's six totals, estimated when any request sent came bac
     command: "copy-hunt diff",
     estimated: false,
   });
-  assert.deepEqual(Object.keys(line!), ["at", "input_tokens", "requests", "model", "command", "estimated"]);
+  assert.deepEqual(Object.keys(line), ["at", "input_tokens", "requests", "model", "command", "estimated"]);
 
   assert.equal(usageLine({ ...whole, counted: 1 }, "copy-hunt diff", AT)!.estimated, true);
   assert.equal(usageLine({ ...whole, models: [MODEL, "jev-2"] }, "copy-hunt diff", AT)!.model, `${MODEL}, jev-2`);

@@ -39,6 +39,10 @@ export type Failed = { readonly ok: false; readonly reason: string };
 export type Reply = Answered | Failed;
 export type Send = (request: SystemOneRequest) => Promise<Reply>;
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
+export type Meter = {
+  readonly sent: (request: SystemOneRequest) => void;
+  readonly replied: (reply: Reply) => void;
+};
 
 const fail = (reason: string): Failed => ({ ok: false, reason });
 const isProbability = (value: unknown): value is number =>
@@ -106,7 +110,7 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
   return reply.ok ? { ...reply, ms: Math.round(performance.now() - began) } : reply;
 };
 
-export const senderFor = (key: string | undefined, fetcher: Fetch): Send => {
+export const senderFor = (key: string | undefined, fetcher: Fetch, _meter: Meter): Send => {
   const trimmed = key?.trim() ?? "";
   if (trimmed === "") return () => Promise.resolve(fail(`${KEY_VAR} is not set`));
   if (!KEY_SHAPE.test(trimmed)) return () => Promise.resolve(fail(KEY_REFUSED));
@@ -124,9 +128,9 @@ export const readKey = (env: Env, home: string, readText: ReadText): string | un
   }
 };
 
-export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch): Send => {
+export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch, meter: Meter): Send => {
   const key = readKey(env, home, readText);
-  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher);
+  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher, meter);
 };
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));

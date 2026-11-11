@@ -11,6 +11,7 @@ import {
   type ReadText,
   type SystemOneRequest,
 } from "../../scripts/jev/system-one.ts";
+import { unmetered } from "../../test-support/jev-fakes.ts";
 
 const R: SystemOneRequest = {
   model: MODEL,
@@ -89,15 +90,15 @@ test("a failed call is a failure with its reason, never an answer", async () => 
 
 test("with no key nothing is sent, and the reply says why", async () => {
   const reason = { ok: false, reason: "TYPESAFE_API_KEY is not set" };
-  assert.deepEqual(await senderFor(undefined, throwing)(R), reason);
-  assert.deepEqual(await senderFor("  ", throwing)(R), reason);
+  assert.deepEqual(await senderFor(undefined, throwing, unmetered)(R), reason);
+  assert.deepEqual(await senderFor("  ", throwing, unmetered)(R), reason);
 
   const refused = {
     ok: false,
     reason: "TYPESAFE_API_KEY holds a character a request header cannot carry, so nothing was sent",
   };
   for (const bad of ["k-test\nsecret", "k-test\rsecret", "k-test\u0000secret", "k-testĀsecret", 'k-"test"', "k test"]) {
-    assert.deepEqual(await senderFor(bad, throwing)(R), refused, JSON.stringify(bad));
+    assert.deepEqual(await senderFor(bad, throwing, unmetered)(R), refused, JSON.stringify(bad));
   }
 });
 
@@ -110,7 +111,7 @@ test("a reply with no token count counts the request's characters at two a token
 
 test("a key read with spaces or a line break around it is sent trimmed", async () => {
   const seen: Seen[] = [];
-  const reply = await senderFor(`  ${KEY}\n`, answering(json(both), seen))(R);
+  const reply = await senderFor(`  ${KEY}\n`, answering(json(both), seen), unmetered)(R);
   assert.ok(reply.ok);
   assert.equal(seen.length, 1);
   assert.deepEqual(seen[0]!.init.headers, { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" });
@@ -150,7 +151,7 @@ test("the key comes from TYPESAFE_API_KEY first, then from ~/.config/typesafe/ke
 });
 
 test("with no key in either place nothing is sent, and the reason names both", async () => {
-  assert.deepEqual(await liveSender({}, "/h", missingFile, throwing)(R), {
+  assert.deepEqual(await liveSender({}, "/h", missingFile, throwing, unmetered)(R), {
     ok: false,
     reason: "TYPESAFE_API_KEY is not set and ~/.config/typesafe/key holds no key",
   });
@@ -158,7 +159,7 @@ test("with no key in either place nothing is sent, and the reason names both", a
 
 test("a key read from the file is sent trimmed as the bearer token, and an error that echoes it reaches the reason masked", async () => {
   const seen: Seen[] = [];
-  const reply = await liveSender({}, "/h", () => `${KEY}\n`, answering(json(both), seen))(R);
+  const reply = await liveSender({}, "/h", () => `${KEY}\n`, answering(json(both), seen), unmetered)(R);
   assert.ok(reply.ok);
   assert.deepEqual(seen[0]!.init.headers, { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" });
 
@@ -167,6 +168,7 @@ test("a key read from the file is sent trimmed as the bearer token, and an error
     "/h",
     () => `${KEY}\n`,
     answering(json({ error: `invalid key Bearer ${KEY}` }, 401)),
+    unmetered,
   )(R);
   assert.deepEqual(echoed, { ok: false, reason: 'HTTP 401: {"error":"invalid key Bearer <TYPESAFE_API_KEY>"}' });
 });

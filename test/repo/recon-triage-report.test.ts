@@ -7,7 +7,7 @@ import type { Excerpt } from "../../scripts/recon-triage/excerpt.ts";
 import { requestFor } from "../../scripts/recon-triage/questions.ts";
 import { replyLines, reportLines, requestLines } from "../../scripts/recon-triage/report.ts";
 import { RUN_INPUT_TOKEN_CAP, triage, type Triaged } from "../../scripts/recon-triage/triage.ts";
-import { keyEchoingFetch } from "../../test-support/jev-fakes.ts";
+import { keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 
 const row = (claim: string, source: string, kind: Kind, paths: string[]): ClaimRow => ({
   claim,
@@ -137,7 +137,7 @@ test("ranked rows run from the lowest score, ties kept in the claims' order", ()
 
 test("no line of the report, the request log or the reply log carries the key", async () => {
   const KEY = "k-recon-secret-77";
-  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY));
+  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY), unmetered);
   const tree = memoryTree("t", { "src/a.ts": "export const a = 1;\n" });
   const triaged = await triage([A], tree, send, RUN_INPUT_TOKEN_CAP);
   const written = [...reportLines("t", triaged), ...requestLines(triaged), ...replyLines(triaged)].join("\n");
