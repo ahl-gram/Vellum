@@ -220,6 +220,9 @@ belongs in.
     only restates its code or is already pinned by a test (Issue #1304);
   - `npm run recon-triage` (`scripts/recon-triage/main.ts`), whether the code an issue cites does
     what the issue's claim says, which orders `vellum-spec-recon`'s reading (Issue #1310);
+  - `npm run keeper-scan` (`scripts/keeper-scan/main.ts`), whether each comment a diff deletes
+    carries a keeper fact its file no longer says, which a comment sweep's ledger carries
+    (Issue #1320);
   - `npm run copy-hunt` (`scripts/copy-hunt/main.ts`), whether a function a diff adds or changes
     implements the same logic as another under the lint's roots, which `vellum-pr-skeptic` runs on
     every pull request (Issue #1319); the exact copies it lists are found by code, with no call.
@@ -232,8 +235,8 @@ belongs in.
   never as nothing found. Each reads the key from `TYPESAFE_API_KEY`, then from
   `~/.config/typesafe/key`, and never prints it (`readKey` in `scripts/jev/system-one.ts`); where
   neither holds one, as in the cloud routine's environment, every call is skipped before it is
-  sent. A pull request that moves `MODEL` in `scripts/jev/system-one.ts` runs each command's
-  `trial` and posts every score on itself.
+  sent. A pull request that moves `MODEL` in `scripts/jev/system-one.ts` runs the `trial` of each
+  command that has one and posts every score on itself.
 
 ## Order
 

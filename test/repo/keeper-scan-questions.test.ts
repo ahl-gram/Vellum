@@ -26,7 +26,9 @@ test("the keeper request asks the trial's seven frozen keeper questions about th
 
 test("a survival request asks one frozen survival question per signal it is given, in that order, against the whole file after and never the code beside the comment", () => {
   assert.equal(
-    createHash("sha256").update(JSON.stringify(survivalRequest(RUN, "F", SIGNALS).questions)).digest("hex"),
+    createHash("sha256")
+      .update(JSON.stringify(survivalRequest(RUN, "F", SIGNALS).questions))
+      .digest("hex"),
     "ab5710cd94fe2ff111add0695d2c10a26fa6af851cb03051632600afd0b7cb09",
   );
   const two = survivalRequest(RUN, "F", ["measured", "units"]);

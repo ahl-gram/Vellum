@@ -3,7 +3,8 @@ import { test } from "node:test";
 import { BY_HAND, DELETED_FILE, deletedRuns, filesToRead } from "../../scripts/keeper-scan/collect.ts";
 
 test("a deleted run is one whose text the file no longer carries, read at the base with its line and the code beside it there, so a trimmed comment is deleted and a moved one is not", () => {
-  const before = "// kept\nconst a = 1;\n// gone\nconst b = 2;\n// one two three\nconst c = 3;\n// moved\nconst d = 4;\n";
+  const before =
+    "// kept\nconst a = 1;\n// gone\nconst b = 2;\n// one two three\nconst c = 3;\n// moved\nconst d = 4;\n";
   const after = "// moved\nconst z = 0;\n// kept\nconst a = 1;\nconst b = 2;\n// one two\nconst c = 3;\nconst d = 4;\n";
   assert.deepEqual(
     deletedRuns("src/a.ts", before, after).map((r) => [r.line, r.text, r.code]),
