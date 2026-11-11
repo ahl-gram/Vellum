@@ -53,15 +53,9 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
     ruling: LISTED_RULING,
   },
   {
-    a: { file: "src/render/layers/realm-label-placement.ts", name: "boxAt", hash: "914bee9148fa02be" },
+    a: { file: "src/render/layers/realm-label-placement.ts", name: "boxAt", hash: "e47bdad8dedebb9a" },
     b: { file: "test/render/realm-label-placement.test.ts", name: "boxOf", hash: "17e4971ae07be9fe" },
-    reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call; this boxAt is placeOnCloseUp's.`,
-    ruling: LISTED_RULING,
-  },
-  {
-    a: { file: "src/render/layers/realm-label-placement.ts", name: "boxAt", hash: "9872cd2e45def8ec" },
-    b: { file: "test/render/realm-label-placement.test.ts", name: "boxOf", hash: "17e4971ae07be9fe" },
-    reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call; this boxAt is placeOnWorldSheet's.`,
+    reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call as the one boxAt placeRealmLabel builds for both placements since PR #1337 (Issue #1331) folded its two; the hunt reads the pair at similarity 0.50, under its 0.6 cut, and the entry waits for a change that lifts it (Issue #1341).`,
     ruling: LISTED_RULING,
   },
   {
