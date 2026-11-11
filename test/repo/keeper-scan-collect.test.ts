@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BY_HAND, DELETED_FILE, deletedRuns, filesToRead } from "../../scripts/keeper-scan/collect.ts";
+import { BY_HAND, DELETED_FILE, deletedRuns, filesToRead, OUTSIDE_ROOTS } from "../../scripts/keeper-scan/collect.ts";
 
 test("a deleted run is one whose text the file no longer carries, read at the base with its line and the code beside it there, so a trimmed comment is deleted and a moved one is not", () => {
   const before =
@@ -24,7 +24,6 @@ test("the scan reads every TypeScript file under the lint's roots the branch edi
       { path: "src/pages/p.astro", before: "src/pages/p.astro" },
       { path: "handbook/x.md", before: "handbook/x.md" },
       { path: "src/c.ts", before: "src/old.ts" },
-      { path: "design/r/x.ts", before: "design/r/x.ts" },
     ],
     ["src/d.ts", "src/styles/old.css", "notes.md"],
   );
@@ -37,5 +36,27 @@ test("the scan reads every TypeScript file under the lint's roots the branch edi
     { path: "src/pages/p.astro", reason: BY_HAND },
     { path: "src/d.ts", reason: DELETED_FILE },
     { path: "src/styles/old.css", reason: DELETED_FILE },
+  ]);
+});
+
+test("a TypeScript file outside the lint's roots that the branch edits or deletes is named as not read, a file it adds or a declaration file is not, and none is scanned", () => {
+  const { read, notRead } = filesToRead(
+    [
+      { path: "eslint.config.ts", before: "eslint.config.ts" },
+      { path: "design/r/x.ts", before: "design/r/x.ts" },
+      { path: "astro.config.ts", before: null },
+      { path: "src/types.d.ts", before: "src/types.d.ts" },
+      { path: "src/e.ts", before: "src/e.ts" },
+    ],
+    ["prettier.config.ts", "src/old.d.ts"],
+  );
+  assert.deepEqual(
+    read.map((c) => c.path),
+    ["src/e.ts"],
+  );
+  assert.deepEqual(notRead, [
+    { path: "eslint.config.ts", reason: OUTSIDE_ROOTS },
+    { path: "design/r/x.ts", reason: OUTSIDE_ROOTS },
+    { path: "prettier.config.ts", reason: DELETED_FILE },
   ]);
 });

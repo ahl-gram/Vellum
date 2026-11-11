@@ -6,6 +6,8 @@ import type { CommentRun } from "../comment-judge/types.ts";
 export type NotRead = { readonly path: string; readonly reason: string };
 
 export const BY_HAND = "a sheet or a page, which this scan does not read, so its deleted comments are scanned by hand";
+export const OUTSIDE_ROOTS =
+  "a TypeScript file outside the lint's roots, which this scan does not read, so its deleted comments are scanned by hand";
 export const DELETED_FILE = "the branch deletes the file, so no file is left to read its comments against";
 
 export const isHandScanned = (path: string): boolean => path.endsWith(".css") || path.endsWith(".astro");
