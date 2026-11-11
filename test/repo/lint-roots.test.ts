@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { tsRootsOf } from "../../test-support/lint-roots.ts";
+import { isTsUnderLintRoots, tsRootsOf } from "../../test-support/lint-roots.ts";
 
 test("the lint's TypeScript roots are read from globs of one shape, and a TypeScript glob of any other shape is refused rather than dropped", () => {
   assert.deepEqual(
@@ -32,4 +32,19 @@ test("the lint's TypeScript roots are read from globs of one shape, and a TypeSc
       `${JSON.stringify(entry)} was dropped, so a root the lint reads through it would be one neither guard walks`,
     );
   }
+});
+
+test("the copy hunt and the comment judge read a .ts file under one of the lint's roots, and never a declaration file", () => {
+  for (const path of ["src/a.ts", "scripts/x/y.ts", "test/a.test.ts", "test-support/h.ts", "e2e/s.ts"])
+    assert.equal(isTsUnderLintRoots(path), true, path);
+  for (const path of [
+    "src/a.d.ts",
+    "srcx/a.ts",
+    "design/r/x.ts",
+    "handbook/plans/1300/x.ts",
+    "src/styles/a.css",
+    "src/pages/a.astro",
+    "src/a.mjs",
+  ])
+    assert.equal(isTsUnderLintRoots(path), false, path);
 });

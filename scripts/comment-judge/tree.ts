@@ -43,6 +43,9 @@ export const gitTree = (repo: string, sha: string): Tree => ({
 export const mergeBase = (repo: string, base: string, head: string): string =>
   git(repo, ["merge-base", base, head]).trim();
 
+export const revParse = (repo: string, ref: string): string =>
+  git(repo, ["rev-parse", "--verify", `${ref}^{commit}`]).trim();
+
 export const changedFiles = (repo: string, from: string, head: string): Changed[] =>
   git(repo, ["-c", "core.quotepath=false", "diff", "--name-status", "--find-renames", "--diff-filter=AMR", from, head])
     .split("\n")

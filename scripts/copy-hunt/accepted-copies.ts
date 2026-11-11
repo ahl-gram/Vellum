@@ -1,0 +1,72 @@
+export type AcceptedSide = { readonly file: string; readonly name: string; readonly hash: string };
+export type AcceptedCopy = {
+  readonly a: AcceptedSide;
+  readonly b: AcceptedSide;
+  readonly reason: string;
+  readonly ruling: string;
+};
+
+const DAILY_HUNT_RULING = "https://github.com/ahl-gram/Vellum/issues/1318#issuecomment-6791902246";
+const LISTED_RULING = "https://github.com/ahl-gram/Vellum/issues/1319#issuecomment-6795585660";
+const CLUES = "src/world/daily-hunt-clue-facts.ts";
+const MIRROR = "test-support/daily-hunt-geometry.ts";
+const MIRRORED =
+  "The Daily Hunt's deliberate second copy of the clue rules (Issue #335), kept as its sweep's ground truth beside examples worked out by hand (Issue #1318, ruling D2)";
+const KEPT = "Kept on purpose by PR #1334 (Issue #1318), with a line above the copy naming the original";
+
+export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
+  {
+    a: { file: CLUES, name: "quarryPool", hash: "0c69cf5dc0bee468" },
+    b: { file: MIRROR, name: "quarryPoolMirror", hash: "6e3f7ff390bfd23f" },
+    reason: `${MIRRORED}: quarryPoolMirror mirrors chooseQuarry's base pool.`,
+    ruling: DAILY_HUNT_RULING,
+  },
+  {
+    a: { file: CLUES, name: "ewBandOf", hash: "a520837d678fb80e" },
+    b: { file: MIRROR, name: "expectedEW", hash: "31e0860ed11f73ad" },
+    reason: `${MIRRORED}: expectedEW mirrors ewBandOf.`,
+    ruling: DAILY_HUNT_RULING,
+  },
+  {
+    a: { file: CLUES, name: "nsBandOf", hash: "4af217fd9b2aef97" },
+    b: { file: MIRROR, name: "expectedNS", hash: "6befc421a0d6fee0" },
+    reason: `${MIRRORED}: expectedNS mirrors nsBandOf.`,
+    ruling: DAILY_HUNT_RULING,
+  },
+  {
+    a: { file: CLUES, name: "roadStateAt", hash: "0b94b9b876b9a07b" },
+    b: { file: MIRROR, name: "roadState", hash: "8552a1bcab032738" },
+    reason: `${MIRRORED}: roadState mirrors roadStateAt.`,
+    ruling: DAILY_HUNT_RULING,
+  },
+  {
+    a: { file: CLUES, name: "realmNameAt", hash: "c106b16c610c6d89" },
+    b: { file: MIRROR, name: "realmNameAt", hash: "df064fc1cedc4577" },
+    reason: `${MIRRORED}: realmNameAt mirrors realmNameAt.`,
+    ruling: DAILY_HUNT_RULING,
+  },
+  {
+    a: { file: "src/world/founding/found.ts", name: "tongueOf", hash: "37b7b5dcc31ee50e" },
+    b: { file: "test/world/founding-climate.test.ts", name: "tongueOf", hash: "37b7b5dcc31ee50e" },
+    reason: `${KEPT}: the test's copy reads a lexicon entry's people to choose its fixtures, while the sentences the file spells out pin the rule both share.`,
+    ruling: LISTED_RULING,
+  },
+  {
+    a: { file: "src/render/layers/realm-label-placement.ts", name: "boxAt", hash: "914bee9148fa02be" },
+    b: { file: "test/render/realm-label-placement.test.ts", name: "boxOf", hash: "17e4971ae07be9fe" },
+    reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call; this boxAt is placeOnCloseUp's.`,
+    ruling: LISTED_RULING,
+  },
+  {
+    a: { file: "src/render/layers/realm-label-placement.ts", name: "boxAt", hash: "9872cd2e45def8ec" },
+    b: { file: "test/render/realm-label-placement.test.ts", name: "boxOf", hash: "17e4971ae07be9fe" },
+    reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call; this boxAt is placeOnWorldSheet's.`,
+    ruling: LISTED_RULING,
+  },
+  {
+    a: { file: "scripts/agent-sandbox.ts", name: "haveCommit", hash: "3dc95b12918f2154" },
+    b: { file: "test/repo/agent-sandbox.test.ts", name: "hasCommit", hash: "e0956ef6254d9f92" },
+    reason: `${KEPT}: the test's copy only checks the fixture's premise, that the clone lacks the commit create is asked to fetch.`,
+    ruling: LISTED_RULING,
+  },
+];

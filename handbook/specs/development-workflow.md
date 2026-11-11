@@ -34,7 +34,7 @@ its definition under `.claude/agents/`.
 | `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree in the order `npm run recon-triage` ranks them, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
 | `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
-| `vellum-pr-skeptic` | 14 | the pull request, read cold through the lenses its diff calls for, in its own sandbox with commands of its own, to a merge verdict | what the implementing session believed and never checked, against the issue and the house contracts |
+| `vellum-pr-skeptic` | 14 | the pull request, read cold through the lenses its diff calls for, in its own sandbox with commands of its own, `npm run copy-hunt` among them, to a merge verdict | what the implementing session believed and never checked, against the issue and the house contracts, and a function the diff writes a second time |
 
 `vellum-planner` and `vellum-implementer` are not reviewers: between them they take one issue through
 this sequence, and together they are a lane. The planner runs steps 1 to 6 on the most capable model,
@@ -356,7 +356,7 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
-NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs. The cloud
+NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs. Every round it also runs `npm run copy-hunt -- diff` over the pull request in its sandbox (Alex, 2026-11-10, Issue #1319), and a copy it reports is a finding like any other, weighed at step 15. The cloud
 routine runs it only for a diff that touches `src/` or changes more than 50 lines (`handbook/specs/cloud-routine.md`).
 
 **Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
@@ -444,6 +444,8 @@ pull requests for the deferral words ("provisional", "re-judge", "post-use", the
 number), and once the ledger is posted, run the recon against the LEDGER and put whatever it
 surfaces to Alex in the same sitting. A completeness claim in a ledger's preamble is exactly the
 confidence with no command behind it that this file exists to refuse.
+
+**The weekly sitting that runs the comment sweep runs the copy hunt over the same merges** (Alex, 2026-11-11, Issue #1319): `npm run copy-hunt -- diff <the last comment-sweep tag> origin/main --out out/copy-sweep-<date>`, the tag found as `handbook/specs/conventions.md` (The comment sweep) finds it, before the sitting tags the commit it read. Step 14 hunts each pull request on its own, and this catches what those hunts let through: a cloud run, which has no key and, for a small fix, no cold review (Alex, 2026-11-11, Issue #1319), a skipped call, a copy kept with no ruling. Each family of copies it reports that `scripts/copy-hunt/accepted-copies.ts` does not list is filed as one issue, searched for first as step 15 says.
 
 **An epic filed from 2026-10-04 on nests its subs as native sub-issues** (Alex, 2026-10-04), so the
 roadmap board shows each sub under its epic. File a sub with `gh issue create --parent <epic>`, or
