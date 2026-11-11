@@ -237,6 +237,13 @@ belongs in.
   neither holds one, as in the cloud routine's environment, every call is skipped before it is
   sent. A pull request that moves `MODEL` in `scripts/jev/system-one.ts` runs the `trial` of each
   command that has one and posts every score on itself.
+- **No check holds that a comment sweep changed no code.** A pull request runs the checks `main`
+  runs, its one exception the docs-only lanes, read from the changed files alone
+  (`handbook/specs/site-architecture.md`, the bullet opening "A pull request runs every check"),
+  and `main` has no sweep to verify, so `npm run comment-sweep -- verify`
+  (`scripts/comment-sweep/main.ts`) is run by the sweep's sitting and by the cold review, as
+  `handbook/specs/conventions.md` (The comment sweep) says. It is deterministic, and its own unit
+  tests hold what it reads.
 
 ## Order
 

@@ -135,6 +135,12 @@ and a comment stating it at the line that breaks are both correct, and moving a 
 not by itself a reason to delete the comment. What the routing rule forbids is a second NORMATIVE
 home: another spec, or a gate re-explaining the contract rather than pointing at it.
 
+**A skill that walks a recurring sitting holds no rule of its own.**
+`.claude/skills/comment-sweep/SKILL.md` puts the weekly comment sweep's steps in order and names
+the command each runs, or the line that names it, and every step points at the line of this file
+that is its rule, which wins where the two disagree. The `vellum-footguns` gates are the other kind of skill: each is its
+imperative's one home, keyed to the moment of typing.
+
 **A tracked agent or skill file never sends its reader to the private auto-memory for content.**
 That memory is private to Alex, so a pointer into it is one no other reader can follow and nothing
 notices when it goes stale: write the content into the tracked home the routing rule names and point
@@ -226,7 +232,7 @@ is run and PROVEN in a particular way.
   and `git tag -l 'comment-sweep/*' --sort=-refname | head -1`; the sweep reads the comments
   `git diff <tag> origin/main` adds, then tags the `origin/main` commit it read. The first tag,
   `comment-sweep/2026-09-09`, marks the merge of PR #548 (`7db3d30b`), the last sweep of the whole
-  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below. The same sitting runs the copy hunt over the same merges (`handbook/specs/development-workflow.md`, Sweeps the per-sub recon does not reach).
+  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below. The same sitting runs the copy hunt over the same merges (`handbook/specs/development-workflow.md`, Sweeps the per-sub recon does not reach). The sitting walks the `comment-sweep` skill (`.claude/skills/comment-sweep/SKILL.md`), which puts its steps in order and names each step's command, or the line that names it; the rules stay here.
 
 - **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
   scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
@@ -235,19 +241,38 @@ is run and PROVEN in a particular way.
   the most work, because it labels a line that is otherwise indistinguishable from its neighbours: a
   near-identical fixture, a state poke, the units on a bare constant, a coordinate convention, a
   sentinel's decode.
-- **The proof that a sweep changed no code is an AST token-stream comparison against the base, per
-  file.** These things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
-  `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block otherwise
-  reads as a code change. Strip Astro's two comment forms, `<!-- -->` in the markup and `{/* */}`
-  in an expression, which no comment counter inventories and the comparison reads as text. And
-  never build it on `ts.createScanner`, which mis-lexes regular-expression literals and backticks
-  and reports drift that is not there; `ts.createSourceFile` and a leaf walk are the shape that
-  works. Prove the verifier itself on fixtures before trusting it, including a changed identifier,
-  string, regular-expression body or template literal, a dropped default argument or type
-  annotation, a deleted CSS declaration, a changed selector, a dropped media query, and an edited
-  Astro attribute, expression, style or script. Pure reindentation is its one acceptable blind
-  spot, and a comment inside a template literal is string data rather than a comment, so it is out
-  of scope by construction.
+- **The proof that a sweep changed no code is `npm run comment-sweep -- verify origin/main HEAD`,
+  run on the sweep's branch: an AST token-stream comparison against the base, per file**
+  (`scripts/comment-sweep/main.ts`). It reads the branch's commits from their merge base with
+  `origin/main`, compares each script, sheet and page the branch changes with every comment
+  removed but one that instructs a tool, names every file that differs (with the first
+  difference's line on each side), is added, deleted or renamed, changes type, changes mode (the
+  executable bit, content unchanged), or is of a kind it does not read, and exits 1 on any of
+  them; it passes the house prose `isDoc` in
+  `scripts/docs-only.ts` names. A run that exits 1 is fixed on the branch, never argued. These
+  things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
+  `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block
+  otherwise reads as a code change. Strip Astro's two comment forms, `<!-- -->` in the markup
+  and `{/* */}` in an expression, which no comment counter inventories and the comparison reads
+  as text. Never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
+  backticks and reports drift that is not there; `ts.createSourceFile` and a walk that reads
+  every node's kind beside every leaf's text are the shape that works, since the leaves alone
+  read a `return` whose value sits on the next line as one that returns it. Read a comment that
+  instructs a tool as code, since no type check, lint or format check reports the removal of
+  every one: a comment an entry of `INSTRUCTION_COMMENTS` in
+  `scripts/comment-sweep/instructions.ts` reads, each entry reading its form the way the tool
+  that obeys it does, stays in the token stream where it stands, so removing or editing one, or
+  moving it past code, is a change. Its unit tests are its proof: a changed identifier, string,
+  regular-expression body or template literal, a dropped default argument or type annotation, a
+  deleted CSS declaration, a changed selector, a dropped media query, an edited Astro
+  attribute, expression, style or script, a moved or dropped array hole, an instruction comment
+  removed, edited or moved, and a mode-only change, each read as a change, and every other
+  comment form removed beside them reads as none. Its blind spots each err toward passing: pure reindentation; in a
+  page, a run of whitespace read as one space and a blank run at the edge of an element's
+  content not read; and a comment that instructs a tool in a form the list does not read, read
+  as a comment. A comment inside a template literal is string data rather than a comment, so it
+  reads as a change by construction. The cold review runs the verifier again on the sweep's pull
+  request (`.claude/agents/vellum-pr-skeptic.md`).
 - **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
   nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
   DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named
@@ -275,10 +300,15 @@ is run and PROVEN in a particular way.
   ledger written while the grep is still open, because it cannot be reconstructed afterwards. Naming
   a test is not enough by itself: check that the named test actually pins the behaviour the comment
   stated, since a citation to a test that merely touches the same code reads identically in a ledger.
+- **A sweep is cut on a branch named `chore/comment-sweep-<date>`, and its pull request's title
+  begins `Comment sweep <date>: `** and goes on to say what it cut, `<date>` the sitting's date,
+  the one its `comment-sweep/<date>` tag carries, written `YYYY-MM-DD`. The cold review keys on
+  that title (`.claude/agents/vellum-pr-skeptic.md`).
 - **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
-  sweep and re-run its token verifier before merging that. A comment-only branch absorbing feature
-  work is re-provable mechanically; a feature branch absorbing a sweep costs a full e2e run and can
-  silently revert a measured value on the strength of a comment cleanup.
+  sweep and run `npm run comment-sweep -- verify origin/main HEAD` again before merging that. A
+  comment-only branch absorbing feature work is re-provable mechanically; a feature branch
+  absorbing a sweep costs a full e2e run and can silently revert a measured value on the strength
+  of a comment cleanup.
 
 ---
 

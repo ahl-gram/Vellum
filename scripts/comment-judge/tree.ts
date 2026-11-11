@@ -56,10 +56,36 @@ export const changedFiles = (repo: string, from: string, head: string): Changed[
       return { path: first!, before: status === "A" ? null : first! };
     });
 
-export const deletedFiles = (repo: string, from: string, head: string): string[] =>
-  git(repo, ["-c", "core.quotepath=false", "diff", "--name-only", "--find-renames", "--diff-filter=D", from, head])
+const pathsWith = (repo: string, from: string, head: string, filter: "D" | "T"): string[] =>
+  git(repo, [
+    "-c",
+    "core.quotepath=false",
+    "diff",
+    "--name-only",
+    "--find-renames",
+    `--diff-filter=${filter}`,
+    from,
+    head,
+  ])
     .split("\n")
     .filter((line) => line !== "");
+
+export const deletedFiles = (repo: string, from: string, head: string): string[] => pathsWith(repo, from, head, "D");
+
+export const typeChangedFiles = (repo: string, from: string, head: string): string[] =>
+  pathsWith(repo, from, head, "T");
+
+export type ModeChange = { readonly path: string; readonly oldMode: string; readonly newMode: string };
+
+export const modeChangedFiles = (repo: string, from: string, head: string): ModeChange[] =>
+  git(repo, ["-c", "core.quotepath=false", "diff", "--raw", "--find-renames", "--diff-filter=M", from, head])
+    .split("\n")
+    .filter((line) => line !== "")
+    .flatMap((line) => {
+      const [meta, path] = line.split("\t");
+      const [oldMode, newMode] = meta!.slice(1).split(" ");
+      return oldMode === newMode ? [] : [{ path: path!, oldMode: oldMode!, newMode: newMode! }];
+    });
 
 export const ensureCommit = (repo: string, sha: string, ref: string): void => {
   const has = (): boolean =>
