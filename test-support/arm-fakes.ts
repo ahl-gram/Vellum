@@ -1,4 +1,3 @@
-/** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 export function paintQueue() {
   const queued: Array<() => void> = [];
   return {
@@ -11,7 +10,6 @@ export function paintQueue() {
   };
 }
 
-/** Primes whose promises the test releases. `settle()` resolves EVERY one outstanding, which is what lets two arms be caught waiting at once. */
 export function heldPrime() {
   const waiting: Array<() => void> = [];
   let calls = 0;
