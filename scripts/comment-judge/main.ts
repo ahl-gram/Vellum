@@ -1,6 +1,6 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { dryRunSender, KEY_VAR, senderFor, type Send } from "../jev/system-one.ts";
+import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
 import { addedRuns, isJudged } from "./collect.ts";
 import { judgeAll, RUN_INPUT_TOKEN_CAP, type Judged } from "./judge.ts";
 import { replyLines, reportLines, requestLines } from "./report.ts";
@@ -19,33 +19,8 @@ const NOTES = [
   "",
 ].join("\n");
 
-type Args = { readonly positional: string[]; readonly dryRun: boolean; readonly out: string | null };
-
-const parseArgs = (argv: readonly string[]): Args | null => {
-  const positional: string[] = [];
-  let dryRun = false;
-  let out: string | null = null;
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i]!;
-    if (arg === "--dry-run") dryRun = true;
-    else if (arg === "--out") {
-      const value = argv[(i += 1)];
-      if (value === undefined) return null;
-      out = value;
-    } else if (arg.startsWith("--")) return null;
-    else positional.push(arg);
-  }
-  return { positional, dryRun, out };
-};
-
-const sendFor = (dryRun: boolean): Send => (dryRun ? dryRunSender : senderFor(process.env[KEY_VAR], fetch));
 const exitFor = (judged: readonly Judged[], dryRun: boolean): number =>
   !dryRun && judged.some((j) => j.outcome.kind === "skipped") ? 1 : 0;
-
-const writeAll = (dir: string, files: Readonly<Record<string, string[]>>): void => {
-  mkdirSync(dir, { recursive: true });
-  for (const [name, lines] of Object.entries(files)) writeFileSync(join(dir, name), lines.join("\n") + "\n");
-};
 
 const diff = async (repo: string, base: string, head: string, args: Args): Promise<number> => {
   const from = mergeBase(repo, base, head);
