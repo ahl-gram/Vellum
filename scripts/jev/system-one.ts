@@ -56,7 +56,7 @@ const readAnswers = (request: SystemOneRequest, body: unknown): Reply => {
   }
   const usage = isRecord(body.usage) ? body.usage.input_tokens : undefined;
   const inputTokens = typeof usage === "number" ? usage : Math.ceil(JSON.stringify(request).length / 2);
-  return { ok: true, model: body.model, nouls, inputTokens, estimated: false, ms: 0 };
+  return { ok: true, model: body.model, nouls, inputTokens, estimated: typeof usage !== "number", ms: 0 };
 };
 
 const hide = (text: string, key: string): string => (key === "" ? text : text.split(key).join(KEY_MASK));
