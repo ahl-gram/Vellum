@@ -26,7 +26,8 @@ export type Band = "likely stale" | "unsettled" | "likely current";
 export const requestFor = (claim: string, code: string): SystemOneRequest => ({
   model: MODEL,
   state: { claim, code },
-  questions: {},
+  questions: { [HOLDS_ID]: HOLDS, [CONTRADICTS_ID]: CONTRADICTS },
 });
-export const scoreOf = (holds: number, _contradicts: number): number => holds;
-export const bandOf = (_score: number): Band => "unsettled";
+export const scoreOf = (holds: number, contradicts: number): number => (holds + 1 - contradicts) / 2;
+export const bandOf = (score: number): Band =>
+  score < NO ? "likely stale" : score > YES ? "likely current" : "unsettled";
