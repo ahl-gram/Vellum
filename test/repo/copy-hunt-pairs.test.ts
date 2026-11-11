@@ -26,6 +26,17 @@ test("similarity is the share of names two functions hold in common, and 0.6 its
     similarPairs([x, y, z], () => true),
     [{ x: 0, y: 1, similarity: 0.6 }],
   );
+  const few = ["s1", "s2", "s3", "s4", "s5"];
+  const p = fnOf("src/p.ts", 1, "p", few);
+  const q = fnOf("src/q.ts", 1, "q", few);
+  assert.ok(
+    jaccard(p.tokens, q.tokens) >= CUT,
+    "five shared names would pass the cut, so it is the floor that keeps them out",
+  );
+  assert.deepEqual(
+    similarPairs([p, q], () => true),
+    [],
+  );
 });
 
 test("an exact copy is the same text in any two functions of 6 or more names, at any length, and only where one side is hunted", () => {

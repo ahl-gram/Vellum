@@ -12,6 +12,32 @@ test("a trial side is found by its file, line and name, and one that is not ther
   assert.throws(() => locate(fns, "t", { file: "src/k.ts", line: 20, name: "inner" }), {
     message: "src/k.ts:20 inner is not a function at t",
   });
+  const twice = [...fns, ...functionsIn("src/other.ts", KINDS)];
+  assert.equal(locate(twice, "t", { file: "src/other.ts", line: 19, name: "inner" }).file, "src/other.ts");
+});
+
+test("a mean of exactly 0.7 is not a copy, and every reason a row was skipped is named", () => {
+  const row: TrialRow = {
+    sha: "s",
+    a: { file: "src/a.ts", line: 1, name: "a" },
+    b: { file: "src/b.ts", line: 1, name: "b" },
+    same: true,
+    then: 0.95,
+  };
+  const x = fnOf("src/a.ts", 1, "a", []);
+  const y = fnOf("src/b.ts", 1, "b", []);
+  const skipped = (reason: string) => pair(x, y, 0.7, { kind: "skipped", reason }, [{ ok: false, reason }]);
+  const lines = scoreLines([
+    { row, found: pair(x, y, 0.7, asked(0.7, 0.7), [sameAnswer(0.7), sameAnswer(0.7)]) },
+    { row, found: skipped("HTTP 529: overloaded") },
+    { row, found: skipped("the request got no answer: TimeoutError") },
+  ]);
+  assert.equal(
+    lines[3],
+    "Agree with the reading: 0 of 1 answered (the set: 3 copies, 0 different). Crossed 0.7 since the scan: 1.",
+  );
+  assert.equal(lines[4], "Not answered: 2 (HTTP 529: overloaded; the request got no answer: TimeoutError).");
+  assert.equal(lines[8], "| copy | 0.95 | 0.70 | 0.70 | 0.70 | no | src/a.ts:1 a | src/b.ts:1 b |");
 });
 
 test("the score sets each answer beside the scan's and counts a skipped row apart", () => {

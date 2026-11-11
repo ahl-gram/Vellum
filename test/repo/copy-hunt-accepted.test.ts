@@ -37,6 +37,9 @@ test("an entry with a fault is refused by its number and the fault", () => {
     "accepted copy 1: b.hash is not 16 hex digits",
   ]);
   assert.deepEqual(acceptedFaults([{ ...ok, b: ok.a }]), ["accepted copy 1: a and b are the same function"]);
+  const NOT_A_LINK = ["accepted copy 1: ruling is not a link to an issue or pull request comment"];
+  assert.deepEqual(acceptedFaults([{ ...ok, ruling: `${RULED} trailing` }]), NOT_A_LINK);
+  assert.deepEqual(acceptedFaults([{ ...ok, ruling: `x${RULED}` }]), NOT_A_LINK);
 });
 
 test("a listed pair matches in either order, and not once either side's text has changed", () => {
@@ -44,6 +47,7 @@ test("a listed pair matches in either order, and not once either side's text has
   assert.equal(acceptedFor([ok], B, A), ok);
   assert.equal(acceptedFor([ok], A, { ...B, hash: "ffffffffffffffff" }), null);
   assert.equal(acceptedFor([ok], A, { ...B, file: "test/b.test.ts" }), null);
+  assert.equal(acceptedFor([ok], A, { ...B, name: "alphaOther" }), null);
 });
 
 test("an entry is stale when no function matches one of its sides", () => {

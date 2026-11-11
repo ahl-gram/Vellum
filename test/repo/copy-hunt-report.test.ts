@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
+import type { Fn } from "../../scripts/copy-hunt/functions.ts";
 import { hunt, RUN_INPUT_TOKEN_CAP, type Found, type Run } from "../../scripts/copy-hunt/hunt.ts";
 import { requestFor } from "../../scripts/copy-hunt/questions.ts";
 import { BLIND_SPOTS, pairLines, replyLines, reportLines, requestLines } from "../../scripts/copy-hunt/report.ts";
@@ -155,4 +156,53 @@ test("the logs hold one line per request built, per reply and per pair, naming t
     mean: (0.9 + 0.8) / 2,
     verdict: "copy",
   });
+});
+
+test("the pair log names the ruling of an accepted pair and the reason of a skipped one", () => {
+  assert.deepEqual(parsed(pairLines(found)[6]!), {
+    a: { file: "src/j.ts", line: 1, name: "kappa", hash: "0123456789abcdef" },
+    b: { file: "test/k.test.ts", line: 2, name: "kappaMirror", hash: "0123456789abcdef" },
+    similarity: 0.9,
+    outcome: "accepted",
+    ruling: STALE.ruling,
+  });
+  assert.equal(parsed(pairLines(found)[5]!).reason, "HTTP 529: overloaded");
+});
+
+test("every section lists its entries in place order, and the copies by mean first, whatever order they were found in", () => {
+  const at = (file: string, name: string): Fn => fnOf(file, 1, name, []);
+  const sorted: Run = {
+    sha: "s",
+    base: null,
+    functions: 10,
+    hunted: 10,
+    tooLong: [at("src/z.ts", "zed"), at("src/y.ts", "why")],
+    unread: [],
+    stale: [],
+    found: [
+      pair(at("src/m.ts", "m"), at("src/n.ts", "n"), 1, { kind: "exact" }),
+      pair(at("src/b.ts", "b"), at("src/c.ts", "c"), 1, { kind: "exact" }),
+      pair(at("src/a.ts", "a"), at("src/a2.ts", "a2"), 0.7, asked(0.8, 0.8)),
+      pair(at("src/z.ts", "z"), at("src/z2.ts", "z2"), 0.7, asked(0.96, 0.96)),
+      pair(at("src/t2.ts", "t2"), at("src/t3.ts", "t3"), 0.7, asked(0.9, 0.9)),
+      pair(at("src/t1.ts", "t1"), at("src/t3.ts", "t3"), 0.7, asked(0.9, 0.9)),
+      pair(at("src/s2.ts", "s2"), at("src/s3.ts", "s3"), 0.7, { kind: "skipped", reason: "late" }),
+      pair(at("src/s1.ts", "s1"), at("src/s3.ts", "s3"), 0.7, { kind: "skipped", reason: "early" }),
+    ],
+  };
+  assert.deepEqual(
+    reportLines(sorted).filter((l) => l.startsWith("- ") || l.startsWith("| 0.")),
+    [
+      "- src/b.ts:1 b = src/c.ts:1 c",
+      "- src/m.ts:1 m = src/n.ts:1 n",
+      "| 0.96 | 0.96 | 0.96 | 0.70 | src/z.ts:1 z | src/z2.ts:1 z2 |",
+      "| 0.90 | 0.90 | 0.90 | 0.70 | src/t1.ts:1 t1 | src/t3.ts:1 t3 |",
+      "| 0.90 | 0.90 | 0.90 | 0.70 | src/t2.ts:1 t2 | src/t3.ts:1 t3 |",
+      "| 0.80 | 0.80 | 0.80 | 0.70 | src/a.ts:1 a | src/a2.ts:1 a2 |",
+      "- src/s1.ts:1 s1 | src/s3.ts:1 s3: early",
+      "- src/s2.ts:1 s2 | src/s3.ts:1 s3: late",
+      "- src/y.ts:1 why",
+      "- src/z.ts:1 zed",
+    ],
+  );
 });
