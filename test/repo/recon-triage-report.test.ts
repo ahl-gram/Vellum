@@ -22,6 +22,7 @@ const ok = (holds: number, contradicts: number): Answered => ({
   model: "jev-1.14.0",
   nouls: { holds, contradicts },
   inputTokens: 600,
+  estimated: false,
   ms: 5,
 });
 const A: ClaimRow = { claim: "a is one", source: "body", paths: ["src/a.ts"], symbols: ["a"], kind: "behavior" };

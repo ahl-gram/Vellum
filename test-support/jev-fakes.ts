@@ -19,5 +19,6 @@ export const answered = (nouls: Record<string, number>, inputTokens = 500): Answ
   model: "jev-1.14.0",
   nouls,
   inputTokens,
+  estimated: false,
   ms: 5,
 });

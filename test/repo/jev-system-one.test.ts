@@ -58,6 +58,7 @@ test("one POST to the System One endpoint with the key as a bearer token, and ev
   assert.equal(reply.model, "jev-1.14.0");
   assert.deepEqual(reply.nouls, { restates: 0.2, pins_0: 0.9 });
   assert.equal(reply.inputTokens, 321);
+  assert.equal(reply.estimated, false);
   assert.equal(seen.length, 1);
   assert.equal(seen[0]!.url, "https://api.typesafe.ai/v1/systemone");
   assert.equal(seen[0]!.init.method, "POST");
@@ -100,10 +101,11 @@ test("with no key nothing is sent, and the reply says why", async () => {
   }
 });
 
-test("a reply with no token count counts the request's characters at two a token", async () => {
+test("a reply with no token count counts the request's characters at two a token, and says the count is an estimate", async () => {
   const reply = await ask(R, KEY, answering(json(both)));
   assert.ok(reply.ok);
   assert.equal(reply.inputTokens, Math.ceil(JSON.stringify(R).length / 2));
+  assert.equal(reply.estimated, true);
 });
 
 test("a key read with spaces or a line break around it is sent trimmed", async () => {
