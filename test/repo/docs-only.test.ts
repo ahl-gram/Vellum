@@ -145,7 +145,11 @@ test("each e2e lane runs every step after the docs-only verdict unless the verdi
   ]);
   const after = steps.slice(at + 1);
   for (const s of after) {
-    assert.deepEqual(s.match(/^ {8}if: .*$/gm), [SKIP_UNLESS_DOCS], `this step is not skipped on a docs-only verdict alone:\n${s}`);
+    assert.deepEqual(
+      s.match(/^ {8}if: .*$/gm),
+      [SKIP_UNLESS_DOCS],
+      `this step is not skipped on a docs-only verdict alone:\n${s}`,
+    );
   }
   const firstValue = (s: string): string | undefined => {
     const m = /^ {6}- (?:uses|run): (.*)$|^ {8}(?:uses|run): (.*)$/m.exec(s);
