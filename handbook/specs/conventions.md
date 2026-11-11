@@ -226,7 +226,7 @@ is run and PROVEN in a particular way.
   and `git tag -l 'comment-sweep/*' --sort=-refname | head -1`; the sweep reads the comments
   `git diff <tag> origin/main` adds, then tags the `origin/main` commit it read. The first tag,
   `comment-sweep/2026-09-09`, marks the merge of PR #548 (`7db3d30b`), the last sweep of the whole
-  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below.
+  TypeScript tree (Alex, 2026-11-10). Its keeper scan is the keeper-scan bullet below. The same sitting runs the copy hunt over the same merges (`handbook/specs/development-workflow.md`, Sweeps the per-sub recon does not reach).
 
 - **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
   scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
