@@ -57,7 +57,7 @@ export const changedFiles = (repo: string, from: string, head: string): Changed[
     });
 
 export const deletedFiles = (repo: string, from: string, head: string): string[] =>
-  git(repo, ["-c", "core.quotepath=false", "diff", "--name-only", "--diff-filter=D", from, head])
+  git(repo, ["-c", "core.quotepath=false", "diff", "--name-only", "--find-renames", "--diff-filter=D", from, head])
     .split("\n")
     .filter((line) => line !== "");
 

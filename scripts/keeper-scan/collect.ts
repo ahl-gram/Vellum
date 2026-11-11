@@ -12,6 +12,9 @@ export const DELETED_FILE = "the branch deletes the file, so no file is left to 
 
 export const isHandScanned = (path: string): boolean => path.endsWith(".css") || path.endsWith(".astro");
 
+export const isTsOutsideRoots = (path: string): boolean =>
+  path.endsWith(".ts") && !path.endsWith(".d.ts") && !isTsUnderLintRoots(path);
+
 export const deletedRuns = (path: string, before: string, after: string): CommentRun[] =>
   addedRuns(path, after, before);
 
@@ -23,9 +26,15 @@ export const filesToRead = (
   return {
     read: edited.filter((c) => isTsUnderLintRoots(c.path)),
     notRead: [
-      ...edited.filter((c) => isHandScanned(c.path)).map((c) => ({ path: c.path, reason: BY_HAND })),
+      ...edited.flatMap((c) =>
+        isHandScanned(c.path)
+          ? [{ path: c.path, reason: BY_HAND }]
+          : isTsOutsideRoots(c.path)
+            ? [{ path: c.path, reason: OUTSIDE_ROOTS }]
+            : [],
+      ),
       ...deleted
-        .filter((path) => isTsUnderLintRoots(path) || isHandScanned(path))
+        .filter((path) => isTsUnderLintRoots(path) || isTsOutsideRoots(path) || isHandScanned(path))
         .map((path) => ({ path, reason: DELETED_FILE })),
     ],
   };
