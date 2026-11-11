@@ -8,7 +8,7 @@ export type ClaimRow = {
   readonly kind: Kind;
 };
 
-const isList = (value: unknown): value is string[] =>
+export const isList = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
 
 const parseRow = (line: string, n: number): ClaimRow => {

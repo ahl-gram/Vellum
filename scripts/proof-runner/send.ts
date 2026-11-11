@@ -30,7 +30,7 @@ const count = (text: string, part: string): number => text.split(part).length - 
 export const readAt =
   (repo: string, sha: string) =>
   (file: string): string => {
-    const r = spawnSync("git", ["show", `${sha}:${file}`], {
+    const r = spawnSync("git", ["cat-file", "blob", `${sha}:${file}`], {
       cwd: repo,
       encoding: "utf8",
       timeout: GIT_MS,

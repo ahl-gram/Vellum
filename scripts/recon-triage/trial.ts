@@ -1,5 +1,6 @@
 import { two } from "../comment-judge/report.ts";
 import type { Reply } from "../jev/system-one.ts";
+import { isList } from "./claims.ts";
 import { bandOf, CONTRADICTS_ID, HOLDS_ID, scoreOf, type Band } from "./questions.ts";
 
 export type TrialRow = {
@@ -18,9 +19,6 @@ export type ScoredRow = { readonly row: TrialRow; readonly holds: number; readon
 export const FIRST_N = [10, 25, 50, 100] as const;
 export const TRIAL_REFERENCE =
   "The trial at jev-1.14.0 (Issue #1310 comment 6782678031): AUC 0.76 (holds), 0.79 (1 - contradicts), 0.79 (mean of both); stale among the first 10, 25, 50, 100: 10, 21, 37, 66.";
-
-const isList = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === "string");
 
 const parseRow = (line: string, n: number): TrialRow => {
   let value: unknown;
