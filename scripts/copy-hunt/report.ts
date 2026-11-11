@@ -7,7 +7,7 @@ import type { Verdict } from "./questions.ts";
 export const BLIND_SPOTS =
   "Not seen, so a copy there goes unreported and none is made up: a function with fewer than 6 names, a pair under similarity 0.6, the body of a test(...) call or any unnamed callback, a function beside one nested in it, and any file but a .ts under the lint's roots; a function over 6,000 characters is held to exact copies.";
 
-const loc = (f: Fn): string => `${f.file}:${f.line} ${f.name}`;
+export const loc = (f: Fn): string => `${f.file}:${f.line} ${f.name}`;
 const section = (title: string, lines: readonly string[]): string[] =>
   lines.length === 0 ? [] : ["", title, "", ...lines];
 const byPlace = (a: Fn, b: Fn): number =>
