@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Mass } from "../geometry.ts";
 import { r1, stroke, type DressContext } from "./context.ts";
+import { door } from "./townscape-masses.ts";
 
 function windowDashes(c: DressContext, m: Mass): SvgNode[] {
   if (m.h < 12 || m.w < 8) return [];
@@ -17,13 +18,6 @@ function roofHatch(parts: string[], x0: number, y0: number, dx: number, dy: numb
   for (let i = 0; i < n; i++) {
     parts.push(`M${r1(x0 + i * step)} ${r1(y0 + i * step * 0.14)}l${r1(dx)} ${r1(dy)}`);
   }
-}
-
-function archedDoor(c: DressContext, cx: number, base: number, hw: number, rise: number): SvgNode {
-  return el("path", {
-    d: `M${r1(cx - hw)} ${r1(base)}L${r1(cx - hw)} ${r1(base - rise)}Q${r1(cx)} ${r1(base - rise * 1.5)} ${r1(cx + hw)} ${r1(base - rise)}L${r1(cx + hw)} ${r1(base)}Z`,
-    fill: c.ink,
-  });
 }
 
 function gableNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
@@ -51,7 +45,7 @@ function gableNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   }
   if (!m.broken) {
     out.push(...windowDashes(c, m));
-    if (w > 16 && h > 14) out.push(archedDoor(c, x + w / 2, base, 1.6, 3));
+    if (w > 16 && h > 14) out.push(door(c, x + w / 2, base, 1.6, 3));
   }
   if (hatch.length > 0) out.push(el("path", { d: hatch.join(""), fill: "none", ...stroke(c, 0.7) }));
   return out;
@@ -128,7 +122,7 @@ function brokenKeepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return [
     el("path", { d, fill: c.paper, ...stroke(c, weight) }),
     el("path", { d: hatch, fill: "none", ...stroke(c, 0.7) }),
-    archedDoor(c, x + w / 2, base, 2.2, 4.2),
+    door(c, x + w / 2, base, 2.2, 4.2),
   ];
 }
 
@@ -172,7 +166,7 @@ function keepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
       }),
     );
   }
-  out.push(archedDoor(c, x + w / 2, base, 2.2, 4.2));
+  out.push(door(c, x + w / 2, base, 2.2, 4.2));
   out.push(el("rect", { x: r1(x + w * 0.3), y: r1(top + h * 0.3), width: 1.4, height: 3, fill: c.ink }));
   out.push(el("rect", { x: r1(x + w * 0.66), y: r1(top + h * 0.3), width: 1.4, height: 3, fill: c.ink }));
   return out;
