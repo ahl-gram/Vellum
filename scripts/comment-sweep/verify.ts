@@ -1,4 +1,5 @@
 import type { Changed, Tree } from "../comment-judge/tree.ts";
+import { isDoc } from "../docs-only.ts";
 import { pageTokens } from "./page-tokens.ts";
 import { lineFinder, scriptTokens, sheetTokens, type Token } from "./tokens.ts";
 
@@ -36,9 +37,22 @@ export const firstDifference = (base: readonly Token[], head: readonly Token[]):
   return null;
 };
 
-export const findingsOf: (
+const findingOf = (c: Changed, before: Tree, after: Tree): Finding => {
+  if (isDoc(c.path) && (c.before === null || isDoc(c.before))) return { kind: "prose", path: c.path };
+  if (c.before === null) return { kind: "added", path: c.path };
+  if (c.before !== c.path) return { kind: "renamed", path: c.path, before: c.before };
+  const read = readerOf(c.path);
+  if (read === null) return { kind: "not read", path: c.path };
+  const difference = firstDifference(read(before.read(c.before)), read(after.read(c.path)));
+  return difference === null ? { kind: "identical", path: c.path } : { kind: "differs", path: c.path, difference };
+};
+
+export const findingsOf = (
   changed: readonly Changed[],
   deleted: readonly string[],
   before: Tree,
   after: Tree,
-) => Finding[] = () => [];
+): Finding[] => [
+  ...changed.map((c) => findingOf(c, before, after)),
+  ...deleted.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "deleted", path })),
+];
