@@ -4,7 +4,7 @@ import { memoryTree } from "../../scripts/comment-judge/tree.ts";
 import { functionsAt, functionsIn } from "../../scripts/copy-hunt/functions.ts";
 import { ALPHA, ALPHA_COPY, KINDS, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 
-const UNREAD = [
+const OTHER_FORMS = [
   "class Box {",
   "  private size = 0;",
   "  constructor(size: number) {",
@@ -30,7 +30,7 @@ const SEVERAL = [
   "",
 ].join("\n");
 
-test("a function declaration, a const arrow or function expression, a method with a body and an object-literal member are read at any depth, with the owner's name, the lines and the text with comments removed, each declarator of a statement that declares several, or of a for loop, on its own; a getter, a setter, a constructor and an arrow assigned to an existing name are not", () => {
+test("a function declaration, a const arrow or function expression, a method, getter, setter or constructor with a body, an object-literal member and an arrow or function assigned to an existing name are read at any depth, with the owner's name, the lines and the text with comments removed, and each declarator of a statement that declares several, or of a for loop, on its own", () => {
   const fns = functionsIn("src/k.ts", KINDS);
   assert.deepEqual(
     fns.map((f) => [f.name, f.line, f.end]),
@@ -50,7 +50,16 @@ test("a function declaration, a const arrow or function expression, a method wit
     "export function declared(first: number, second: number): number {\n  return first + second;\n}",
   );
   assert.equal(fns[1]!.body, "const arrow = (value: number): number => value * 2;");
-  assert.deepEqual(functionsIn("src/u.ts", UNREAD), []);
+  assert.deepEqual(
+    functionsIn("src/u.ts", OTHER_FORMS).map((f) => [f.name, f.line, f.end, f.norm]),
+    [
+      ["Box.constructor", 3, 5, "constructor(size: number) { this.size = size; }"],
+      ["Box.get area", 6, 8, "get area(): number { return this.size * this.size; }"],
+      ["Box.set area", 9, 11, "set area(value: number) { this.size = Math.sqrt(value); }"],
+      ["later", 14, 14, "later = (n: number): number => n + 1;"],
+      ["holder.p", 16, 16, "holder.p = (n: number): number => n * 2;"],
+    ],
+  );
   const several = functionsIn("src/m.ts", SEVERAL);
   assert.deepEqual(
     several.map((f) => [f.name, f.line, f.end, f.norm]),
