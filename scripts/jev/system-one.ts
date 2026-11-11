@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { isRecord } from "../is-record.ts";
 
 export const ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 export const MODEL = "jev-1.14.0";
@@ -35,8 +36,6 @@ export type Send = (request: SystemOneRequest) => Promise<Reply>;
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 
 const fail = (reason: string): Failed => ({ ok: false, reason });
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 const isProbability = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
 
