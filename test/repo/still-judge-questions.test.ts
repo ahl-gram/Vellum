@@ -21,6 +21,10 @@ test("a still's request carries its image once, under a reference its state name
     assert.equal(req.model, MODEL);
   }
   assert.notEqual(referenceOf(pngHeader(1500, 1159)), ref);
+
+  const wide = Buffer.concat([png, Buffer.from([0xfb, 0xff, 0xfe, 0xff])]);
+  assert.match(wide.toString("base64"), /\+\/.*==$/);
+  assert.equal(requestFor("crop", wide).assets![referenceOf(wide)]!.data_base64, wide.toString("base64"));
 });
 
 test("each kind asks its own questions, in the trial's order and word for word", () => {

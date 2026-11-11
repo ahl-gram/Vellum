@@ -29,6 +29,29 @@ test("a picture outside TypeSafe's limits is refused before anything is sent, an
   assert.deepEqual(results[1], { path: "b.png", problem: TOO_BIG, request: null, reply: null });
   assert.equal(results[0]!.path, "a.png");
   assert.ok(results[0]!.reply!.ok);
+
+  const first = answered({ realm_names_read: 0.9, title_reads_first: 0.2 });
+  const second = answered({ realm_names_read: 0.4, title_reads_first: 0.6 });
+  const two = recordingSender([first, second]);
+  const mixed = await askStills(
+    "sheet",
+    [
+      { path: "c.png", bytes: pngHeader(1680, 2478) },
+      { path: "a.png", bytes: pngHeader(1500, 1158) },
+      { path: "d.png", bytes: pngHeader(1400, 1100) },
+    ],
+    two.send,
+    1_000_000,
+  );
+  assert.deepEqual(
+    mixed.map((m) => [m.path, m.reply]),
+    [
+      ["c.png", null],
+      ["a.png", first],
+      ["d.png", second],
+    ],
+  );
+  assert.deepEqual(mixed[2]!.request, requestFor("sheet", pngHeader(1400, 1100)));
 });
 
 test("a difference is read in hundredths, and one under 0.12 either way is no difference", () => {
@@ -66,6 +89,40 @@ test("each other version is set against today's picture question by question, an
     "d.png: not compared: skipped: HTTP 429: slow down",
     COMPARISON_RULE,
   ]);
+
+  const same = { realm_names_read: 0.5, rain_lines_lead: 0.5, title_reads_first: 0.5 };
+  assert.deepEqual(
+    compareLines("rainfall", [
+      gave("today.png", answered(same)),
+      gave("a.png", answered(same)),
+      refused("c.png", TOO_BIG),
+      refused("e.png", TOO_BIG),
+      gave("d.png", { ok: false, reason: "HTTP 429: slow down" }),
+    ]),
+    [
+      "still-judge compare rainfall at jev-1.14.0: 5 pictures, 2 answered, 2 refused unsent, 1 skipped, 1000 input tokens reported",
+      "today: today.png",
+      "a.png: realm_names_read today 0.50, this 0.50, difference +0.00, no difference",
+      "a.png: rain_lines_lead today 0.50, this 0.50, difference +0.00, no difference",
+      "a.png: title_reads_first today 0.50, this 0.50, difference +0.00, no difference",
+      `c.png: not compared: refused unsent: ${TOO_BIG}`,
+      `e.png: not compared: refused unsent: ${TOO_BIG}`,
+      "d.png: not compared: skipped: HTTP 429: slow down",
+      COMPARISON_RULE,
+    ],
+  );
+  assert.deepEqual(
+    compareLines("crop", [
+      gave("today.png", answered({ names_read: 0.4 })),
+      gave("a.png", answered({ names_read: 0.6 })),
+    ]),
+    [
+      "still-judge compare crop at jev-1.14.0: 2 pictures, 2 answered, 0 refused unsent, 0 skipped, 1000 input tokens reported",
+      "today: today.png",
+      "a.png: names_read today 0.40, this 0.60, difference +0.20, reads better",
+      COMPARISON_RULE,
+    ],
+  );
 });
 
 test("when today's picture is not answered, no other version is compared", () => {

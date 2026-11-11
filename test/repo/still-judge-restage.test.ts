@@ -40,6 +40,14 @@ test("the crop is 600 by 400 around the range name's centre, and stays inside th
   const at = (rotation: string): string => SHEET.replace("rotate(32.0 586.4 686.1)", rotation);
   assert.deepEqual(cropClip(at("rotate(0 100.0 50.0)")), { x: 0, y: 0, width: 600, height: 400 });
   assert.deepEqual(cropClip(at("rotate(-12.5 1450.0 1150.0)")), { x: 900, y: 758, width: 600, height: 400 });
+  assert.deepEqual(cropClip(at("rotate(32.0 586.5 686.1)")), { x: 287, y: 486, width: 600, height: 400 });
+  const small = SHEET.replace('width="1500" height="1158"', 'width="1000" height="800"');
+  assert.deepEqual(cropClip(small.replace("rotate(32.0 586.4 686.1)", "rotate(0 990.0 790.0)")), {
+    x: 400,
+    y: 400,
+    width: 600,
+    height: 400,
+  });
   assert.throws(() => cropClip(without(SHEET, CASING)), /no mountain range name/);
 });
 

@@ -121,3 +121,84 @@ test("a question that also drops on a defect it is not about is not kept", () =>
   const out = lines(dropped);
   assert.ok(out.includes("| realm-faint | #158 | realm_names_read | 2 | 1.00 | 1.00 | 2 | 2 | no |"), out.join("\n"));
 });
+
+const tenSeeds = Array.from({ length: 10 }, (_, i) => i + 1);
+const tenStills = tenSeeds.flatMap((seed) => stillsOf(seed, SHEET, RAIN).stills);
+const bounds =
+  (level: boolean): Replies =>
+  (s) => {
+    const at = `${s.kind} ${s.arm}`;
+    const i = s.seed;
+    if (at === "sheet clean") return answered({ realm_names_read: 0.9, title_reads_first: 0.8 });
+    if (at === "rainfall clean")
+      return answered({ realm_names_read: 0.9, rain_lines_lead: 0.8, title_reads_first: 0.8 });
+    if (at === "rainfall rain-faint")
+      return answered({ realm_names_read: 0.9, rain_lines_lead: 0.2, title_reads_first: 0.8 });
+    if (at === "sheet realm-faint")
+      return level
+        ? answered({ realm_names_read: i <= 8 ? 0.2 : 0.95, title_reads_first: 0.8 })
+        : answered({
+            realm_names_read: i <= 7 ? 0.2 : i === 8 ? 0.9 : 0.95,
+            title_reads_first: i <= 7 ? 0.5 : i === 8 ? 0.8 : 0.95,
+          });
+    if (at === "crop range-thin") return answered({ names_read: i === 1 ? 0.3 : 0.1 });
+    if (at === "sheet title-small")
+      return answered({ realm_names_read: i <= 7 ? 0.5 : 0.95, title_reads_first: i <= 8 ? 0.5 : 0.95 });
+    return answered({ names_read: i === 1 ? 0.7 : 0.9 });
+  };
+const tenLines = (level: boolean): string[] =>
+  scoreLines(tenSeeds, tenStills, tenStills.map(bounds(level)), tenStills.length);
+
+test("a question is kept at exactly 0.80 of its own pairs and 0.70 elsewhere, and not at 0.75 of its own or 0.75 elsewhere", () => {
+  const short = tenLines(false);
+  for (const row of [
+    "| realm-faint | #158 | realm_names_read | 10 | 0.75 | 0.70 | 10 | 7 | no |",
+    "| title-small | #1309 | title_reads_first | 10 | 0.80 | 0.75 | 10 | 0 | no |",
+    "| range-thin | #9 | names_read | 10 | 1.00 | - | 9 | 9 | yes |",
+    "Re-asked: 0 answers compared, largest difference n/a.",
+  ])
+    assert.ok(short.includes(row), `${row}\n${short.join("\n")}`);
+  assert.equal(
+    short.some((l) => l.startsWith("Not answered")),
+    false,
+  );
+  const level = tenLines(true);
+  for (const row of [
+    "| realm-faint | #158 | realm_names_read | 10 | 0.80 | 0.70 | 10 | 8 | yes |",
+    "| title-small | #1309 | title_reads_first | 10 | 0.80 | 0.50 | 10 | 0 | yes |",
+  ])
+    assert.ok(level.includes(row), `${row}\n${level.join("\n")}`);
+});
+
+test("a pair needs both its answers, and a defect no other asks about leaves the others' rate alone", () => {
+  const noCleanSheet: Replies = (s) =>
+    s.kind === "sheet" && s.arm === "clean" && s.seed === 2 ? { ok: false, reason: "HTTP 500: x" } : table(s);
+  const missing = lines(noCleanSheet);
+  assert.ok(
+    missing.includes("| realm-faint | #158 | realm_names_read | 1 | 1.00 | 0.50 | 1 | 1 | no |"),
+    missing.join("\n"),
+  );
+  const noRain: Replies = (s) => (s.arm === "rain-faint" ? { ok: false, reason: "HTTP 500: x" } : table(s));
+  const silent = lines(noRain);
+  assert.ok(
+    silent.includes("| realm-faint | #158 | realm_names_read | 2 | 1.00 | 0.50 | 2 | 2 | yes |"),
+    silent.join("\n"),
+  );
+});
+
+test("a re-asked still is compared with the first still of its own seed, in either direction, and not when either answer failed", () => {
+  const again = [...stills, ...reaskedOf(stills, seeds, 2)];
+  const replies = again.map((s, i): Reply => {
+    if (i < stills.length) {
+      if (s.kind === "sheet" && s.arm === "clean")
+        return answered({ realm_names_read: s.seed === 1 ? 0.9 : 0.5, title_reads_first: 0.8 });
+      if (s.kind === "rainfall" && s.arm === "clean" && s.seed === 2) return { ok: false, reason: "HTTP 500: x" };
+      return table(s);
+    }
+    if (i === 16) return { ok: false, reason: "HTTP 500: x" };
+    if (i === 17) return answered({ realm_names_read: 0.3, title_reads_first: 0.8 });
+    return table(s);
+  });
+  const out = scoreLines(seeds, again, replies, stills.length);
+  assert.ok(out.includes("Re-asked: 8 answers compared, largest difference 0.20."), out.join("\n"));
+});

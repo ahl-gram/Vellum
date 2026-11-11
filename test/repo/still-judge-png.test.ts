@@ -11,6 +11,9 @@ test("a PNG's width and height are read from its header, and anything else is no
   notIhdr.write("IEND", 12, "latin1");
   assert.equal(pngSize(notIhdr), null);
   assert.equal(pngSize(pngHeader(1500, 1158).subarray(0, 23)), null);
+  const notPng = pngHeader(1500, 1158);
+  notPng[0] = 0x88;
+  assert.equal(pngSize(notPng), null);
 });
 
 test("a still is sent only when each side is 280 to 1568 pixels and the file holds at most 16 MiB, both ends included", () => {
@@ -24,6 +27,8 @@ test("a still is sent only when each side is 280 to 1568 pixels and the file hol
   assert.equal(limitProblem(pngHeader(279, 1000)), "279 by 1000 pixels: each side must be 280 to 1568");
   assert.equal(limitProblem(pngHeader(1000, 1569)), "1000 by 1569 pixels: each side must be 280 to 1568");
   assert.equal(limitProblem(pngHeader(1680, 2478)), "1680 by 2478 pixels: each side must be 280 to 1568");
+  assert.equal(limitProblem(pngHeader(1000, 279)), "1000 by 279 pixels: each side must be 280 to 1568");
+  assert.equal(limitProblem(pngHeader(1569, 1000)), "1569 by 1000 pixels: each side must be 280 to 1568");
 
   const sized = (bytes: number): Buffer => {
     const b = Buffer.alloc(bytes);
