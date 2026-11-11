@@ -23,21 +23,26 @@ const UNTRACKED = ALPHA_NEAR.replace("alphaOf", "alphaUntracked");
 const BLIND_SPOTS =
   "BLIND SPOTS, declared, each toward passing: a function with fewer than 6 names; the body of a test(...) call or any unnamed callback; a function the shared reader does not read: one wrapped in as, satisfies or ! in a declaration, an assignment or an object member, or in parentheses in a declaration or an object member, a class field's arrow or function expression, the outer name of a chained declaration, and an export default function or arrow; a copy whose text differs in anything but white space and comments, an export keyword or a name among them; any file but a .ts under the lint's roots, and one git ignores; and, in a long-lived ESLint process such as an editor's, a file changed after the process first read the tree.";
 
-const reports = (dir: string, path: string, text: string, accepted: readonly AcceptedCopy[] = []): string[] =>
-  new Linter({ cwd: dir })
-    .verify(
-      text,
-      [
-        {
-          files: ["**/*.ts"],
-          languageOptions: { parser: tseslint.parser },
-          plugins: { vellum: wordForWord },
-          rules: { [RULE]: ["error", { roots: ["src", "test"], accepted }] },
-        },
-      ],
-      join(dir, path),
-    )
-    .map((m) => `${m.line} ${m.message}`);
+const verify = (dir: string, path: string, text: string, options: unknown): Linter.LintMessage[] =>
+  new Linter({ cwd: dir }).verify(
+    text,
+    [
+      {
+        files: ["**/*.ts"],
+        languageOptions: { parser: tseslint.parser },
+        plugins: { vellum: wordForWord },
+        rules: { [RULE]: ["error", options] },
+      },
+    ],
+    join(dir, path),
+  );
+const reports = (
+  dir: string,
+  path: string,
+  text: string,
+  accepted: readonly AcceptedCopy[] = [],
+  roots: readonly string[] = ["src", "test"],
+): string[] => verify(dir, path, text, { roots, accepted }).map((m) => `${m.line} ${m.message}`);
 
 test("a function word for word another under the lint's roots is refused at its own line, naming each copy, the file's own among them, read from the text being linted; a copy outside the roots or in a file git ignores, one of fewer than six names, the function itself and a listed pair are not (Issue #1332)", async () => {
   await withTempRepo(
@@ -131,4 +136,65 @@ test("the rule resolves at error on every TypeScript root the lint reads, with t
     `${RULE} does not reach a room written tomorrow`,
   );
   assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!, RULE), undefined, `${RULE} reaches a sheet`);
+});
+
+test("a function with copies in an earlier file, its own file and a later file names them in file and line order, and is reported over its own lines (Issue #1332)", async () => {
+  await withTempRepo({ "src/a.ts": ALPHA_NEAR, "src/z.ts": ALPHA_NEAR }, (dir) => {
+    const messages = verify(dir, "src/m.ts", `${ALPHA_NEAR}${ALPHA_NEAR}`, { roots: ["src"], accepted: [] });
+    assert.deepEqual(
+      messages.map((m) => ({
+        line: m.line,
+        column: m.column,
+        endLine: m.endLine,
+        endColumn: m.endColumn,
+        text: m.message,
+      })),
+      [
+        {
+          line: 1,
+          column: 1,
+          endLine: 2,
+          endColumn: 1,
+          text: `alphaOf is word for word alphaOf at src/a.ts:1, alphaOf at src/m.ts:3, alphaOf at src/z.ts:1${TAIL}`,
+        },
+        {
+          line: 3,
+          column: 1,
+          endLine: 4,
+          endColumn: 1,
+          text: `alphaOf is word for word alphaOf at src/a.ts:1, alphaOf at src/m.ts:1, alphaOf at src/z.ts:1${TAIL}`,
+        },
+      ],
+    );
+  });
+});
+
+test("two sets of roots handed for one working directory are each read from their own tree (Issue #1332)", async () => {
+  await withTempRepo({ "src/a.ts": ALPHA, "docs/y.ts": ALPHA_COPY }, (dir) => {
+    const before = readCounts();
+    const narrow = reports(dir, "src/b.ts", ALPHA_COPY, [], ["src"]);
+    const wide = reports(dir, "src/b.ts", ALPHA_COPY, [], ["src", "docs"]);
+    assert.deepEqual(
+      { narrow, wide, trees: readCounts().trees - before.trees },
+      {
+        narrow: [`2 alpha is word for word alpha at src/a.ts:1${TAIL}`],
+        wide: [`2 alpha is word for word alpha at docs/y.ts:2, alpha at src/a.ts:1${TAIL}`],
+        trees: 2,
+      },
+    );
+  });
+});
+
+test("the rule takes only an object holding a non-empty list of roots and a list of accepted copies, and nothing else (Issue #1332)", () => {
+  const taken = (options: unknown): void => void verify(ROOT, "src/zz-1332.ts", "export const x = 1;\n", options);
+  assert.doesNotThrow(() => taken({ roots: ["src"], accepted: [] }), "a well-formed option is refused");
+  for (const options of [
+    {},
+    { roots: ["src"] },
+    { accepted: [] },
+    { roots: [], accepted: [] },
+    { roots: [1], accepted: [] },
+    { roots: ["src"], accepted: [], extra: true },
+  ])
+    assert.throws(() => taken(options), /Key "vellum\/no-word-for-word-copy":/, `${JSON.stringify(options)} is taken`);
 });
