@@ -221,8 +221,9 @@ belongs in.
     every pull request (Issue #1319); the exact copies it lists are found by code, with no call.
 
   Their answers are probabilities from a service whose model changes from version to version, so a
-  red resting on one is a guard no prover can show bites. None of them runs in an `npm test` file, a
-  lint rule, a workflow step that can fail or a refusal of the footgun hook; what each reports is a
+  red resting on one is a guard no prover can show bites. No call of theirs is made, and no
+  answer of theirs asserted, in an `npm test` file, and none runs in a lint rule, a workflow step
+  that can fail or a refusal of the footgun hook; what each reports is a
   reader's hypothesis that a command still confirms; and a call that fails is reported as skipped,
   never as nothing found. Each reads the key from `TYPESAFE_API_KEY`, then from
   `~/.config/typesafe/key`, and never prints it (`readKey` in `scripts/jev/system-one.ts`); where
