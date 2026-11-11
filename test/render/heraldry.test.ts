@@ -159,6 +159,7 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
   const sh = size * 1.18;
 
   const names = w.names.realms as unknown as string[];
+  let side = 0;
   for (let realm = 0; realm < w.arms.length; realm++) {
     const label = names[realm]?.toUpperCase();
     if (!label) continue;
@@ -176,6 +177,7 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
     const sm = new RegExp(`vellum-arms-m${realm}[^M]*M([\\d.]+) ([\\d.]+)`).exec(svg);
     if (!sm) continue;
     const shieldBox = { x: Number(sm[1]), y: Number(sm[2]), w: size, h: sh };
+    if (shieldBox.y < labelBox.y + labelBox.h && shieldBox.y + shieldBox.h > labelBox.y) side++;
 
     const overlap =
       shieldBox.x < labelBox.x + labelBox.w &&
@@ -187,6 +189,10 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
       `realm ${realm} shield ${JSON.stringify(shieldBox)} overlaps its caps label ${JSON.stringify(labelBox)}`,
     );
   }
+  assert.ok(
+    side >= 1,
+    `no realm's shield stands beside its label, of ${w.arms.length} realms, so no side placement was checked`,
+  );
 });
 
 const ALL_TINCTURES: Tincture[] = ["or", "argent", "gules", "azure", "sable", "vert", "purpure"];
