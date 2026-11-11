@@ -27,7 +27,11 @@ test("a chart carries every subject only with a realm name, one range name, a ti
     "no legend": without(SHEET, '<g id="layer-legend"></g>'),
   };
   for (const [what, sheet] of Object.entries(sheets)) assert.equal(carriesEverySubject(sheet, RAIN), false, what);
-  assert.equal(carriesEverySubject(SHEET, without(RAIN, '<path d="M0 0" stroke="#78765f"/>')), false, "no rainfall line");
+  assert.equal(
+    carriesEverySubject(SHEET, without(RAIN, '<path d="M0 0" stroke="#78765f"/>')),
+    false,
+    "no rainfall line",
+  );
   assert.equal(carriesEverySubject(SHEET, without(RAIN, '<path d="M0 0" stroke="#4a3826"/>')), false, "no wind line");
 });
 

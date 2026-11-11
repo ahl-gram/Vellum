@@ -43,7 +43,13 @@ export const stillsOf = (seed: number, sheet: string, rain: string): { files: Sh
     files.push({ name, text: withStyle(r.kind === "rainfall" ? rain : sheet, r.css) });
     stills.push({ seed, kind: r.kind, arm: r.id, svg: name, png: `stills/${seed}-${r.kind}-${r.id}.png` });
   }
-  stills.push({ seed, kind: "crop", arm: "clean", svg: `${seed}-sheet-clean.svg`, png: `stills/${seed}-crop-clean.png` });
+  stills.push({
+    seed,
+    kind: "crop",
+    arm: "clean",
+    svg: `${seed}-sheet-clean.svg`,
+    png: `stills/${seed}-crop-clean.png`,
+  });
   return { files, stills };
 };
 

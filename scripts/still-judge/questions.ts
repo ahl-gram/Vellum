@@ -33,7 +33,8 @@ export const QUESTIONS: Readonly<Record<string, NoulQuestion>> = {
   },
   title_reads_first: {
     type: "noul",
-    instructions: "In `chart`, does the title in the framed box read as the sheet's title before any other lettering on the sheet?",
+    instructions:
+      "In `chart`, does the title in the framed box read as the sheet's title before any other lettering on the sheet?",
     criteria: {
       true: "The title in the framed box is the first lettering the eye lands on, plainly larger and stronger than every name on the land.",
       false: "A name on the land, or other lettering on the sheet, catches the eye before the title in the framed box.",

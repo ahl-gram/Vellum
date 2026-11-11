@@ -31,7 +31,11 @@ const lines = (replies: Replies, rows = asked): string[] =>
   scoreLines(
     seeds,
     rows,
-    rows.map((s, i) => (i >= stills.length && s.kind === "sheet" ? answered({ realm_names_read: 0.85, title_reads_first: 0.8 }) : replies(s))),
+    rows.map((s, i) =>
+      i >= stills.length && s.kind === "sheet"
+        ? answered({ realm_names_read: 0.85, title_reads_first: 0.8 })
+        : replies(s),
+    ),
     stills.length,
   );
 
@@ -68,12 +72,23 @@ test("the off-target rows read each restaged still's other questions", () => {
     "| title-small | realm_names_read | 2 | 0.50 |",
   ])
     assert.ok(out.includes(row), `${row}\n${out.join("\n")}`);
-  assert.equal(out.some((l) => l.startsWith("| realm-faint | realm_names_read | ")), false);
-  assert.equal(out.some((l) => l.startsWith("| range-thin | ") && !l.startsWith("| range-thin | #9 |")), false);
+  assert.equal(
+    out.some((l) => l.startsWith("| realm-faint | realm_names_read | ")),
+    false,
+  );
+  assert.equal(
+    out.some((l) => l.startsWith("| range-thin | ") && !l.startsWith("| range-thin | #9 |")),
+    false,
+  );
 });
 
 test("the first line counts requests built, answered and not answered, so a dry run claims nothing sent, and the score ends with the comparison rule", () => {
-  const dry = scoreLines(seeds, asked, asked.map(() => DRY), stills.length);
+  const dry = scoreLines(
+    seeds,
+    asked,
+    asked.map(() => DRY),
+    stills.length,
+  );
   for (const line of [
     "17 requests built (14 stills over 2 seeds, 3 re-asked), 0 answered, 17 not answered, 0 input tokens reported, models: none.",
     "Not answered: 17 (dry run: nothing was sent).",
@@ -100,7 +115,9 @@ test("a re-asked still reports the largest difference between its two answers", 
 
 test("a question that also drops on a defect it is not about is not kept", () => {
   const dropped: Replies = (s) =>
-    s.kind === "sheet" && s.arm === "title-small" ? answered({ realm_names_read: 0.2, title_reads_first: 0.75 }) : table(s);
+    s.kind === "sheet" && s.arm === "title-small"
+      ? answered({ realm_names_read: 0.2, title_reads_first: 0.75 })
+      : table(s);
   const out = lines(dropped);
   assert.ok(out.includes("| realm-faint | #158 | realm_names_read | 2 | 1.00 | 1.00 | 2 | 2 | no |"), out.join("\n"));
 });

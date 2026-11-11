@@ -1,13 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Reply } from "../../scripts/jev/system-one.ts";
-import {
-  askStills,
-  COMPARISON_RULE,
-  differenceOf,
-  readingOf,
-  type Asked,
-} from "../../scripts/still-judge/compare.ts";
+import { askStills, COMPARISON_RULE, differenceOf, readingOf, type Asked } from "../../scripts/still-judge/compare.ts";
 import { limitProblem } from "../../scripts/still-judge/png.ts";
 import { requestFor } from "../../scripts/still-judge/questions.ts";
 import { compareLines } from "../../scripts/still-judge/report.ts";

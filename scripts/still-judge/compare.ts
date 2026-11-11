@@ -27,14 +27,13 @@ export const askStills = async (
   send: Send,
   cap: number,
 ): Promise<Asked[]> => {
-  const problems = stills.map((s) => limitProblem(s.bytes));
-  const sendable = stills.filter((_, i) => problems[i] === null);
+  const checked = stills.map((s) => ({ still: s, problem: limitProblem(s.bytes) }));
+  const sendable = checked.filter((c) => c.problem === null).map((c) => c.still);
   const requests = sendable.map((s) => requestFor(kind, s.bytes));
   const replies = await askAll(requests, send, cap);
-  return stills.map((s, i) => {
-    const problem = problems[i]!;
-    if (problem !== null) return { path: s.path, problem, request: null, reply: null };
-    const at = sendable.indexOf(s);
-    return { path: s.path, problem: null, request: requests[at]!, reply: replies[at]! };
+  return checked.map(({ still, problem }) => {
+    if (problem !== null) return { path: still.path, problem, request: null, reply: null };
+    const at = sendable.indexOf(still);
+    return { path: still.path, problem: null, request: requests[at]!, reply: replies[at]! };
   });
 };

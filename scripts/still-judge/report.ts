@@ -7,7 +7,7 @@ import type { TrialStill } from "./trial-set.ts";
 
 export const loggedRequest = (request: SystemOneRequest, png: Uint8Array, path: string): unknown => {
   const { width, height } = pngSize(png)!;
-  const assets = Object.keys(request.assets ?? {}).map((ref) => [
+  const assets = Object.keys(request.assets ?? {}).map((ref): [string, object] => [
     ref,
     { path, sha256: sha256Of(png), bytes: png.length, width, height },
   ]);
@@ -18,7 +18,11 @@ export const trialLine = (n: number, still: TrialStill, rest: Readonly<Record<st
   JSON.stringify({ n, seed: still.seed, kind: still.kind, arm: still.arm, ...rest });
 
 const notAnswered = (a: Asked): string | null =>
-  a.problem !== null ? `refused unsent: ${a.problem}` : a.reply !== null && !a.reply.ok ? `skipped: ${a.reply.reason}` : null;
+  a.problem !== null
+    ? `refused unsent: ${a.problem}`
+    : a.reply !== null && !a.reply.ok
+      ? `skipped: ${a.reply.reason}`
+      : null;
 
 export const compareLines = (kind: Kind, asked: readonly Asked[]): string[] => {
   const [today, ...others] = asked;
@@ -34,8 +38,7 @@ export const compareLines = (kind: Kind, asked: readonly Asked[]): string[] => {
   for (const other of others) {
     const otherOut = notAnswered(other);
     if (otherOut !== null) lines.push(`${other.path}: not compared: ${otherOut}`);
-    else if (todayOut !== null)
-      lines.push(`${other.path}: not compared: today's picture was ${todayOut}`);
+    else if (todayOut !== null) lines.push(`${other.path}: not compared: today's picture was ${todayOut}`);
     else {
       const before = today!.reply!.ok ? today!.reply!.nouls : {};
       const after = other.reply!.ok ? other.reply!.nouls : {};
