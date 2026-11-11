@@ -21,7 +21,7 @@ test("a malformed row is refused by its line number and what is wrong", () => {
   };
   refused(`${OK}\nnot json`, "line 2: not a JSON object");
   refused(`${OK}\n\nnot json`, "line 3: not a JSON object");
-  refused("[1]","line 1: not a JSON object");
+  refused("[1]", "line 1: not a JSON object");
   refused(row({ claim: " " }), "line 1: claim is missing or empty");
   refused(row({ source: 3 }), "line 1: source is not a string");
   refused(row({ paths: ["a", 1] }), "line 1: paths is not a list of strings");
