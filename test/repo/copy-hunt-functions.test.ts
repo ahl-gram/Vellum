@@ -99,6 +99,6 @@ test("a tree's functions come root by root in path order, and a file that does n
     ["e2e/z.ts", "src/a.ts", "src/b.ts"],
   );
   assert.equal(unread.length, 1);
-  assert.equal(unread[0]?.file, "src/bad.ts");
-  assert.ok(unread[0]?.reason.startsWith("src/bad.ts does not parse"), unread[0]?.reason);
+  assert.equal(unread[0]!.file, "src/bad.ts");
+  assert.ok(unread[0]!.reason.startsWith("src/bad.ts does not parse"), unread[0]!.reason);
 });
