@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
+import { ACCEPTED_COPIES, type AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
 import { acceptedFaults, acceptedFor, staleCopies } from "../../scripts/copy-hunt/accepted.ts";
 import { fnOf } from "../../test-support/copy-hunt-fixtures.ts";
 
@@ -48,6 +48,10 @@ test("a listed pair matches in either order, and not once either side's text has
   assert.equal(acceptedFor([ok], A, { ...B, hash: "ffffffffffffffff" }), null);
   assert.equal(acceptedFor([ok], A, { ...B, file: "test/b.test.ts" }), null);
   assert.equal(acceptedFor([ok], A, { ...B, name: "alphaOther" }), null);
+});
+
+test("the tracked list of accepted copies has no fault", () => {
+  assert.deepEqual(acceptedFaults(ACCEPTED_COPIES), []);
 });
 
 test("an entry is stale when no function matches one of its sides", () => {

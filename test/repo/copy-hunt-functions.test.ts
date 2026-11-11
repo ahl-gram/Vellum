@@ -4,7 +4,27 @@ import { memoryTree } from "../../scripts/comment-judge/tree.ts";
 import { functionsAt, functionsIn, isHuntedPath } from "../../scripts/copy-hunt/functions.ts";
 import { ALPHA, ALPHA_COPY, KINDS, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 
-test("every named function at any depth is read, with its owner's name, its lines, and its text with comments removed", () => {
+const UNREAD = [
+  "class Box {",
+  "  private size = 0;",
+  "  constructor(size: number) {",
+  "    this.size = size;",
+  "  }",
+  "  get area(): number {",
+  "    return this.size * this.size;",
+  "  }",
+  "  set area(value: number) {",
+  "    this.size = Math.sqrt(value);",
+  "  }",
+  "}",
+  "let later: (n: number) => number;",
+  "later = (n: number): number => n + 1;",
+  "const holder: { p?: (n: number) => number } = {};",
+  "holder.p = (n: number): number => n * 2;",
+  "",
+].join("\n");
+
+test("a function declaration, a const arrow or function expression, a method with a body and an object-literal member are read at any depth, with the owner's name, the lines and the text with comments removed; a getter, a setter, a constructor and an arrow assigned to an existing name are not", () => {
   const fns = functionsIn("src/k.ts", KINDS);
   assert.deepEqual(
     fns.map((f) => [f.name, f.line, f.end]),
@@ -24,6 +44,7 @@ test("every named function at any depth is read, with its owner's name, its line
     "export function declared(first: number, second: number): number {\n  return first + second;\n}",
   );
   assert.equal(fns[1]!.body, "const arrow = (value: number): number => value * 2;");
+  assert.deepEqual(functionsIn("src/u.ts", UNREAD), []);
 });
 
 test("a function's names leave out the common words and one-letter names, its text collapses white space, and its hash is the first 16 hex digits of the text's sha256", () => {
