@@ -76,6 +76,20 @@ test("the changed files are read off a merge commit's first parent with a move l
     assert.deepEqual([...(changedPaths(dir) ?? [])].sort(), ["handbook/a.md", "src/a.ts"]);
     git(["checkout", "-q", "feature"], dir);
     assert.equal(changedPaths(dir), null);
+    git(["checkout", "-q", "main"], dir);
+    for (const branch of ["one", "two"]) {
+      git(["checkout", "-q", "-b", branch, "main"], dir);
+      writeFiles(dir, { [`src/${branch}.ts`]: `${branch}\n` });
+      commitAll(dir, branch);
+      git(["checkout", "-q", "main"], dir);
+    }
+    git(["merge", "-q", "--no-ff", "-m", "octopus", "one", "two"], dir);
+    assert.equal(
+      git(["rev-list", "--parents", "-n", "1", "HEAD"], dir).split(" ").length,
+      4,
+      "the fixture is a three-parent merge",
+    );
+    assert.equal(changedPaths(dir), null);
   });
 });
 
