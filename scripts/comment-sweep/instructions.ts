@@ -29,4 +29,4 @@ export const INSTRUCTION_COMMENTS: readonly Instruction[] = [
 ];
 
 export const isInstruction = (comment: string): boolean =>
-  INSTRUCTION_COMMENTS.some((instruction) => instruction.name === comment);
+  INSTRUCTION_COMMENTS.some((instruction) => instruction.reads.test(comment));
