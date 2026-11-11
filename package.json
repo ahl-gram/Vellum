@@ -20,6 +20,7 @@
     "comment-judge": "node scripts/comment-judge/main.ts",
     "copy-hunt": "node scripts/copy-hunt/main.ts",
     "recon-triage": "node scripts/recon-triage/main.ts",
+    "keeper-scan": "node scripts/keeper-scan/main.ts",
     "astro:generate": "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
     "astro:dev": "npm run astro:generate && astro dev",
     "astro:preview": "astro preview",
