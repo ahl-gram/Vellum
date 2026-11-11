@@ -296,8 +296,9 @@ is run and PROVEN in a particular way.
   stated, since a citation to a test that merely touches the same code reads identically in a ledger.
 - **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
   sweep and run `npm run comment-sweep -- verify origin/main HEAD` again before merging that. A
-  comment-only branch absorbing feature work is re-provable mechanically; a feature branch absorbing a sweep costs a full e2e run and can
-  silently revert a measured value on the strength of a comment cleanup.
+  comment-only branch absorbing feature work is re-provable mechanically; a feature branch
+  absorbing a sweep costs a full e2e run and can silently revert a measured value on the strength
+  of a comment cleanup.
 
 ---
 
