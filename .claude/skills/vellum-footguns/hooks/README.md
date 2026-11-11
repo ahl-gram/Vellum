@@ -18,7 +18,8 @@ is ever removed.
   The routes are `gate-routes.ts`. Each names its gates in order, an edit is read against the first
   route its path matches, and the first of that route's gates this session has not been shown is
   the one pasted. Two routes name two gates, Gate 1 and then Gate 7, one per edit, because the two
-  in one note pass the 8,000-character bound the size probes hold (Issue #782): tests under
+  in one note pass the bound the size probes hold (`HOOK_CONTEXT_LIMIT` in
+  `.claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts`; Issue #782): tests under
   `test/repo/` and `test/site/`, the first route, and `test-support/*.ts`, the last, so a helper
   folder inside a directory an earlier route owns keeps that route's gate.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position

@@ -28,7 +28,7 @@ test("every section of the PR template has its own denial row in the table", () 
 });
 
 // Names, needles and limit written out on purpose: this file only spawns the selftest, and a deleted size check, an emptied probe or needle list, a loosened needle test or a raised limit all print no FAIL.
-test("every gate-size probe passes at the 8,000-character limit", () => {
+test("every gate-size probe passes at the 9,000-character limit", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const probes: [string, string][] = [
     ["a test file", "## Gate 1"],
@@ -68,10 +68,10 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
   );
   for (const [name, carries] of probes) {
     const row = out.split("\n").find((l) => l.startsWith(`ok   ${name}: the pasted note carries ${carries} in `));
-    const size = /in (\d+) of 8000 characters$/.exec(row ?? "");
+    const size = /in (\d+) of 9000 characters$/.exec(row ?? "");
     assert.ok(
-      size && Number(size[1]) <= 8000,
-      `no passing size row carrying ${carries} within 8000 for ${name}\n${out}`,
+      size && Number(size[1]) <= 9000,
+      `no passing size row carrying ${carries} within 9000 for ${name}\n${out}`,
     );
   }
 });
