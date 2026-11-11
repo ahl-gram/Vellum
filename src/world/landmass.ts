@@ -1,6 +1,7 @@
 import type { Field } from "../core/grid.ts";
 
 export type LandmassLabels = {
+  // Int32, not Int16: an id is bounded only by the cell count, and a 320x240 world has 76800 cells.
   readonly ids: Int32Array;
   readonly sizes: ReadonlyArray<number>;
 };

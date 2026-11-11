@@ -36,7 +36,9 @@ export type ProspectInput = {
   readonly arms: Arms | null;
   readonly view: ProspectView;
   readonly siteRel: number;
+  /** Sampled left to right as the viewer faces the backdrop. */
   readonly backdrop: ReadonlyArray<number>;
+  /** Sampled left to right as the viewer faces the backdrop. */
   readonly foreground: ReadonlyArray<BiomeName>;
 };
 

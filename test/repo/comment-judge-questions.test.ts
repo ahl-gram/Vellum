@@ -22,18 +22,29 @@ const run: CommentRun = {
 };
 const state = { comment: "c", file: "src/m.ts", code: "x" };
 const candidate = (name: string, body: string): Candidate => ({ file: "test/m.test.ts", name, body });
-const pinned = (c: Candidate) => ({
-  type: "noul",
-  instructions: { test: { name: c.name, file: c.file, body: c.body }, question: PINS_QUESTION },
-  criteria: PINS_CRITERIA,
-});
 
 test("one request asks the restatement question and one question per candidate, each test in its own question with its name, file and body", () => {
   const first = candidate("one", "body one");
   const second = candidate("two", "body two");
   const requests = requestsFor(run, [first, second]);
   assert.deepEqual(requests, [
-    { model: MODEL, state, questions: { restates: RESTATES, pins_0: pinned(first), pins_1: pinned(second) } },
+    {
+      model: MODEL,
+      state,
+      questions: {
+        restates: RESTATES,
+        pins_0: {
+          type: "noul",
+          instructions: { test: { name: "one", file: "test/m.test.ts", body: "body one" }, question: PINS_QUESTION },
+          criteria: PINS_CRITERIA,
+        },
+        pins_1: {
+          type: "noul",
+          instructions: { test: { name: "two", file: "test/m.test.ts", body: "body two" }, question: PINS_QUESTION },
+          criteria: PINS_CRITERIA,
+        },
+      },
+    },
   ]);
   for (const [id, question] of Object.entries(requests[0]!.questions)) {
     assert.deepEqual(Object.keys(question), ["type", "instructions", "criteria"], id);

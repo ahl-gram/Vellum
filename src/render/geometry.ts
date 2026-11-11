@@ -30,6 +30,7 @@ export function centroidOf(points: ReadonlyArray<Pt>): Pt {
   return { x: sx / n, y: sy / n };
 }
 
+// Principal axis angle of a point cloud, in radians, for label rotation.
 export function principalAngle(points: ReadonlyArray<Pt>): number {
   if (points.length < 2) return 0;
   const c = centroidOf(points);

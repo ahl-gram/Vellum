@@ -2,6 +2,7 @@ import type { YearRange } from "./chronicle-scrubber.ts";
 
 export const SEAM_U = 0.5;
 
+// On the built site, a bar fraction tuned for the desktop track would fall under 8px on a 390px phone's wrapped line, inside touch jitter.
 export const DETENT_ESCAPE_PX = 28;
 export const DETENT_ESCAPE_MAX_U = 0.15;
 

@@ -11,7 +11,7 @@ import { KIT_FONTS } from "./kit-fonts.ts";
 
 const HERO_SEED = 42;
 
-async function embeddedFaces(): Promise<string> {
+export async function embeddedFaces(): Promise<string> {
   const rules = await Promise.all(
     OG_FONT_FACES.map(async (face) => {
       const woff2 = await readFile(join(KIT_FONTS, face.file));
@@ -42,7 +42,9 @@ async function main(): Promise<void> {
   console.log("src/static/og.png (1200x630, stamped vellum-card)");
 }
 
-main().catch((err: unknown) => {
-  console.error(err instanceof Error ? err.message : err);
-  process.exitCode = 1;
-});
+if (import.meta.main) {
+  main().catch((err: unknown) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  });
+}

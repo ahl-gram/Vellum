@@ -34,6 +34,7 @@ function place(mark: HTMLElement, noteEl: HTMLElement): void {
 }
 
 export function wireFootnotes(): void {
+  // An engine without the Popover API keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
   // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path where a keyboard user needs it (e2e BR4/BR5); queried at event time so a device-mode flip (or the e2e's emulation) is honored without a reload.
   const touchPrimary = (): boolean => window.matchMedia(TOUCH_PRIMARY).matches;

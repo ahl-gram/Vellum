@@ -14,8 +14,10 @@ export const HAMLET_SPACING_WORLD_CELLS = 2.5;
 
 export const HAMLET_MAX_WINDOW_UV = 0.125;
 
+// The fraction of its lattice cell a point may wander: at 0.7, neighbours jittered toward each other still keep 0.3 cells apart.
 const JITTER = 0.7;
 
+// The knob for overall density: flat grassland keeps roughly a third of its lattice points and steep desert almost none; recorded 2026-07-20 (Issue #171) over 16 seeds as a median of about 9 hamlets per deepest-band window centred on a settlement, the most in the low 20s.
 const DENSITY = 0.22;
 
 /** The same open-window inset region.ts applies when projecting settlements. */
