@@ -199,6 +199,7 @@ test("the road clue reads a trunk within 1.5 cells as a made road, a lane within
     "road",
     "a trunk in reach outranks a nearer lane",
   );
+  assert.equal(stateWith([at("lane", 101.6, 100)]), "pathless", "a lane 1.6 cells off serves nothing");
   assert.equal(stateWith([]), "pathless", "no road at all");
 });
 
