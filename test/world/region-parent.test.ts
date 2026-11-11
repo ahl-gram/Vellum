@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cellsPerWorldCell, clipSegment, nearestParentCells, windowFrame } from "../../src/world/region-parent.ts";
+import { quarterWindow } from "../../test-support/uv-window.ts";
 
 test("nearestParentCells samples the nearest parent cell, corner to corner", () => {
   const window = { u0: 0.25, v0: 0.25, u1: 0.5, v1: 0.5 };
@@ -14,13 +15,12 @@ test("nearestParentCells samples the nearest parent cell, corner to corner", () 
 });
 
 test("cellsPerWorldCell is 2, 8 and 32 at bands 1, 3 and 5, and 1 on a degenerate window", () => {
-  const sized = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
-  assert.equal(cellsPerWorldCell(320, sized(0.5), 320), 2);
-  assert.equal(cellsPerWorldCell(320, sized(0.125), 320), 8);
-  assert.equal(cellsPerWorldCell(320, sized(1 / 32), 320), 32);
+  assert.equal(cellsPerWorldCell(320, quarterWindow(0.5), 320), 2);
+  assert.equal(cellsPerWorldCell(320, quarterWindow(0.125), 320), 8);
+  assert.equal(cellsPerWorldCell(320, quarterWindow(1 / 32), 320), 32);
   assert.equal(cellsPerWorldCell(320, { u0: 0.5, u1: 0.5, v0: 0, v1: 1 }, 320), 1, "zero width");
-  assert.equal(cellsPerWorldCell(1, sized(0.5), 320), 1, "one region column");
-  assert.equal(cellsPerWorldCell(320, sized(0.5), 1), 1, "one parent column");
+  assert.equal(cellsPerWorldCell(1, quarterWindow(0.5), 320), 1, "one region column");
+  assert.equal(cellsPerWorldCell(320, quarterWindow(0.5), 1), 1, "one parent column");
 });
 
 test("windowFrame boxes the window in the parent's cells and maps that box's corners onto the region grid's corners", () => {

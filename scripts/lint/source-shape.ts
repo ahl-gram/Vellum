@@ -7,6 +7,10 @@ type Node = Rule.Node;
 const ROOT = resolve(import.meta.dirname, "..", "..");
 export const repoPath = (file: string): string => relative(ROOT, file).split(sep).join("/");
 export const problem = (message: string): Rule.RuleMetaData => ({ type: "problem", messages: { found: message } });
+export const reportFound =
+  (context: Rule.RuleContext): ((node: Node) => void) =>
+  (node) =>
+    context.report({ node, messageId: "found" });
 
 const ID_LOOKUP = "getElementById";
 const LOOKUP_MODULE = "src/site/shared/by-id.ts";
@@ -22,7 +26,7 @@ const engineNoIdLookup: Rule.RuleModule = {
     "the living-chart engine looks up no element by id: ids are the host's namespace, and the host passes elements in (handbook/specs/explorer-doctrine.md)",
   ),
   create(context) {
-    const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const found = reportFound(context);
     const importsLookup = (node: Node): boolean => {
       const text = wholeString(node);
       return (

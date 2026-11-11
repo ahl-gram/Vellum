@@ -1,7 +1,7 @@
 import type { Rule } from "eslint";
 import { dirname, resolve } from "node:path";
 import { CANCELLATION_PREFIXES } from "../../e2e/support/console.ts";
-import { VALUE_WRAPPERS, inTypePosition, isName, problem, repoPath, wholeString } from "./source-shape.ts";
+import { VALUE_WRAPPERS, inTypePosition, isName, problem, repoPath, reportFound, wholeString } from "./source-shape.ts";
 
 type Node = Rule.Node;
 
@@ -34,7 +34,7 @@ const e2eCancellationRoster: Rule.RuleModule = {
   ),
   create(context) {
     if (repoPath(context.filename) === CONSOLE_MODULE) return {};
-    const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const found = reportFound(context);
     return {
       Literal(node) {
         const text = typeof node.value === "string" ? node.value : "regex" in node ? node.regex.pattern : "";

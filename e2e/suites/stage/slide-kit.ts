@@ -87,7 +87,13 @@ export const fillOf = (p: Pieces): number => {
   return Math.max(1, cx / (cx - sl), cy / (cy - st), (right - cx) / (sr - cx), (p.innerH - cy) / (sb - cy));
 };
 
-export const travelsOf = (p: Pieces): { up: number; down: number } => ({
+export type Travelling = {
+  readonly innerH: number;
+  readonly head: { readonly nav: readonly [number, number] };
+  readonly folio: { readonly title: readonly [number, number] };
+};
+
+export const travelsOf = (p: Travelling): { up: number; down: number } => ({
   up: -Math.ceil(p.head.nav[1] + 3),
   down: Math.ceil(p.innerH - 2 - p.folio.title[1]),
 });

@@ -1,5 +1,5 @@
 import type { Rule } from "eslint";
-import { inTypePosition, repoPath, stringText } from "./source-shape.ts";
+import { inTypePosition, repoPath, reportFound, stringText } from "./source-shape.ts";
 import { bare, globalReferences, keyName, literalText, memberName } from "./import-bounds.ts";
 
 type Node = Rule.Node;
@@ -36,7 +36,7 @@ const roomNoScroll: Rule.RuleModule = {
     "a chart room moves no reading position: no scroll call and no scroll write, so a reader's place holds while the story plays (Issue #442 decision 4, ruled 2026-08-22)",
   ),
   create(context) {
-    const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const found = reportFound(context);
     const written = (target: Node): void => {
       if (SCROLL_WRITES.has(memberName(bare(target)) ?? "")) found(target);
     };
@@ -60,7 +60,7 @@ const stageNoStatus: Rule.RuleModule = {
     "the prospect stage writes nothing to the polite status line: the settle signal is the host's (Issue #311)",
   ),
   create(context) {
-    const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const found = reportFound(context);
     const named = (node: Node): void => {
       const at = node.type === "TemplateElement" ? node.parent : node;
       if (stringText(node)?.includes("#status") && !inTypePosition(at.parent ?? at)) found(node);

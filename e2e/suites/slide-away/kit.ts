@@ -82,10 +82,7 @@ export function fillOf(p: Pieces, rule: "sheet" | "gesture"): number {
   return Math.max(1, cx / (cx - sl), cy / (cy - st), (p.innerH - cy) / (sb - cy));
 }
 
-export const travelsOf = (p: Pieces): { up: number; down: number } => ({
-  up: -Math.ceil(p.head.nav[1] + 3),
-  down: Math.ceil(p.innerH - 2 - p.folio.title[1]),
-});
+export { travelsOf } from "../stage/slide-kit.ts";
 
 export const EASE_MS = 340;
 const STILL_READS = 8;

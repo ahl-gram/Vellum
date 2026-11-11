@@ -2,6 +2,7 @@ import { functionsIn, type Fn } from "../scripts/copy-hunt/functions.ts";
 import type { Found, Outcome } from "../scripts/copy-hunt/hunt.ts";
 import { requestFor, verdictOf } from "../scripts/copy-hunt/questions.ts";
 import type { Answered, Reply } from "../scripts/jev/system-one.ts";
+import { answered } from "./jev-fakes.ts";
 
 export const ALPHA = [
   "export const alpha = (items: readonly Item[], limit: number): Item[] =>",
@@ -68,13 +69,7 @@ export const fnOf = (file: string, line: number, name: string, tokens: string[],
   hash: "0123456789abcdef",
   ...extra,
 });
-export const sameAnswer = (same: number, inputTokens = 500): Answered => ({
-  ok: true,
-  model: "jev-1.14.0",
-  nouls: { same },
-  inputTokens,
-  ms: 5,
-});
+export const sameAnswer = (same: number, inputTokens = 500): Answered => answered({ same }, inputTokens);
 export const pair = (x: Fn, y: Fn, similarity: number, outcome: Outcome, replies: Reply[] = []): Found => ({
   x,
   y,

@@ -152,6 +152,7 @@ export interface E2eRunHooks {
 // A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml caps each lane, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
 const ABORTED_STREAK_LIMIT = 3;
 
+// Kept on purpose (Issue #1332): word for word `errorText` in `src/site/shared/error-text.ts`, since `rulesAt` in `scripts/proof-runner/main.ts` loads this file at a sha by copying only it and `skips.ts`, so it may import nothing else.
 export const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 export async function runSelected<C extends object>(

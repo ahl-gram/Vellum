@@ -8,17 +8,15 @@ import { READ, type Specimen } from "../../e2e/suites/specimen/reads.ts";
 import { specimenKit } from "../../e2e/suites/specimen/kit.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { answering, checkInto } from "../../test-support/ctx-fakes.ts";
 
 const world = (answer: (expression: string) => unknown) => {
   const checked: { code: string; ok: boolean }[] = [];
   const ctx = {
-    evaluate: (expression: string) => {
-      const said = answer(expression);
-      return said instanceof Error ? Promise.reject(said) : Promise.resolve(said);
-    },
+    evaluate: answering(answer),
     send: () => Promise.resolve({}),
     sleep: () => Promise.resolve(),
-    check: (name: string, ok: unknown) => void checked.push({ code: name.split(" ")[0]!, ok: !!ok }),
+    check: checkInto(checked),
     shoot: () => Promise.resolve(),
     PORT: 8765,
   } as unknown as SuiteContext;

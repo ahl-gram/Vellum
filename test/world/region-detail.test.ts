@@ -9,6 +9,7 @@ import { mouthReachCells } from "../../src/world/region-rivers.ts";
 import { snapToLand } from "../../src/world/snap-to-land.ts";
 import { createField, type Field } from "../../src/core/grid.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
+import { quarterWindow } from "../../test-support/uv-window.ts";
 
 /** deepEqual on two broadly differing 76,800-cell fields takes 11s and builds a 2MB message, which is what a real routing regression produces; this reports the first differing cell instead. */
 function firstDifference(a: Field, b: Field): string | null {
@@ -151,10 +152,9 @@ test("a settlement with no shore in reach is named in a warning, never dropped i
 });
 
 test("mouthReachCells is three parent cells, whatever the band scales that to", () => {
-  const band = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
-  assert.equal(mouthReachCells(320, band(0.5), 320), 6, "band 1");
-  assert.equal(mouthReachCells(320, band(0.25), 320), 12, "band 2");
-  assert.equal(mouthReachCells(320, band(0.125), 320), 24, "band 3");
+  assert.equal(mouthReachCells(320, quarterWindow(0.5), 320), 6, "band 1");
+  assert.equal(mouthReachCells(320, quarterWindow(0.25), 320), 12, "band 2");
+  assert.equal(mouthReachCells(320, quarterWindow(0.125), 320), 24, "band 3");
   assert.equal(mouthReachCells(320, FULL_WINDOW, 320), 3, "the world window");
   assert.equal(mouthReachCells(320, { u0: 0.5, v0: 0.5, u1: 0.5, v1: 0.5 }, 320), 3, "degenerate");
 });

@@ -1,8 +1,8 @@
 // The e2e split's proof (Issue #673): each suite's files taken as one family (the suite file and its folder), against the same family at a base, so a split shows it moved statements without changing one, their order, or the step each runs under.
-import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, posix, resolve, sep } from "node:path";
 import ts from "typescript";
+import { git } from "./proof-git.ts";
 import { flattenFamily, functionsOf, parse, short } from "./split-proof-flatten.ts";
 
 export type Verdict = { readonly same: boolean; readonly lines: readonly string[] };
@@ -133,9 +133,6 @@ export function familyOf(path: string): string {
 }
 
 const ROOT = resolve(import.meta.dirname, "..");
-const GIT_TIMEOUT_MS = 30_000;
-const git = (args: string[]): string =>
-  execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
 const inTree = (path: string): boolean =>
   /^e2e\/.+\.ts$/.test(path) && path !== "e2e/split-proof.ts" && path !== "e2e/split-proof-flatten.ts";
 

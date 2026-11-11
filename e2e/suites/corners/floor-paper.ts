@@ -1,6 +1,6 @@
 import type { Payload, SuiteContext } from "../../types.ts";
-import { rest } from "../stage/stage.ts";
-import { load, size } from "./floor.ts";
+import { rest, size } from "../stage/stage.ts";
+import { load } from "./floor.ts";
 
 // 2026-10-31: on paper at 816 every chart room's chart spans 0 to 816 exactly (Issue #1013 plan readings), so half a pixel is rounding alone.
 const PAPER_EDGE = 0.5;

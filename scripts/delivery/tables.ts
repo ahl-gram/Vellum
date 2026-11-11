@@ -1,3 +1,4 @@
+import { isRecord } from "../is-record.ts";
 import { escapeHtml } from "./markdown.ts";
 
 export const ROW_CAP = 500;
@@ -37,9 +38,6 @@ const csvRow = (line: string): string[] => {
 };
 
 export const parseCsv = (text: string): Table => ({ head: null, rows: lines(text).map(csvRow) });
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const cellText = (value: unknown): string =>
   typeof value === "string" ? value : value === undefined ? "" : JSON.stringify(value);

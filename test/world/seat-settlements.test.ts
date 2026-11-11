@@ -13,9 +13,9 @@ import {
 } from "../../src/world/seat-settlements.ts";
 import type { World } from "../../src/world/types.ts";
 import { laidRiverCount } from "../../scripts/region-detail/feature-match.ts";
+import { quarterWindow } from "../../test-support/uv-window.ts";
 
 const SEA = 0;
-const sized = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
 const shoreAtX15 = () => createField(21, 21, (x) => (x >= 15 ? -1 : 1));
 const allLand = () => createField(21, 21, () => 1);
 
@@ -38,21 +38,21 @@ function onOrBeside(region: World, at: { x: number; y: number }, hit: (i: number
 }
 
 test("the harbour reach is the far corner of a diagonal neighbour cell, in fine cells", () => {
-  assert.equal(harbourReachCells(320, sized(0.5), 320), 5);
-  assert.equal(harbourReachCells(320, sized(0.125), 320), 17);
-  assert.equal(harbourReachCells(320, sized(1 / 32), 320), 68);
+  assert.equal(harbourReachCells(320, quarterWindow(0.5), 320), 5);
+  assert.equal(harbourReachCells(320, quarterWindow(0.125), 320), 17);
+  assert.equal(harbourReachCells(320, quarterWindow(1 / 32), 320), 68);
   assert.equal(harbourReachCells(320, { u0: 0.5, u1: 0.5, v0: 0, v1: 1 }, 320), 1, "a zero-width window");
 });
 
 test("the river reach is a diagonal step plus the rivers' corridor, in fine cells", () => {
-  assert.equal(riverReachCells(320, sized(0.5), 320), 5);
-  assert.equal(riverReachCells(320, sized(0.125), 320), 20);
-  assert.equal(riverReachCells(320, sized(1 / 32), 320), 78);
+  assert.equal(riverReachCells(320, quarterWindow(0.5), 320), 5);
+  assert.equal(riverReachCells(320, quarterWindow(0.125), 320), 20);
+  assert.equal(riverReachCells(320, quarterWindow(1 / 32), 320), 78);
   assert.equal(riverReachCells(320, { u0: 0.5, u1: 0.5, v0: 0, v1: 1 }, 320), 1, "a zero-width window");
 });
 
 test("a close-up's seat reach is its harbour reach and its river reach", () => {
-  assert.deepEqual(seatReach(320, sized(0.125), 320), { harbour: 17, river: 20 });
+  assert.deepEqual(seatReach(320, quarterWindow(0.125), 320), { harbour: 17, river: 20 });
 });
 
 test("a harbour town walks to the nearest land cell beside water", () => {

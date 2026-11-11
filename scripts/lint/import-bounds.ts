@@ -1,6 +1,14 @@
 import type { Rule, Scope } from "eslint";
 import { dirname, resolve } from "node:path";
-import { hostFree, inTypePosition, isModuleSource, repoPath, sourceBan, stringText } from "./source-shape.ts";
+import {
+  hostFree,
+  inTypePosition,
+  isModuleSource,
+  repoPath,
+  reportFound,
+  sourceBan,
+  stringText,
+} from "./source-shape.ts";
 
 type Node = Rule.Node;
 
@@ -82,7 +90,7 @@ const philologyNoEntropy: Rule.RuleModule = {
     },
   },
   create(context) {
-    const found = (node: Node): void => context.report({ node, messageId: "found" });
+    const found = reportFound(context);
     return {
       ...sourcesJudged(context, (text) => /\brng\b/.test(text)),
       Identifier(node) {

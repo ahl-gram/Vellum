@@ -12,6 +12,8 @@ import type { ProbeContext } from "../../e2e/support/fingerprint-probe.ts";
 import { unreadBrowser } from "../../e2e/support/fingerprint.ts";
 import type { BrowserFacts } from "../../e2e/support/fingerprint.ts";
 
+const boom = (): Promise<never> => Promise.reject(new Error("eval exception: boom"));
+
 type Script = {
   version?: () => Promise<unknown>;
   ready?: () => Promise<boolean>;
@@ -75,7 +77,7 @@ test("a page that answers gives the browser's product, both readings and the fac
 });
 
 test("a probe that throws names why, still takes its box off the page and turns CSS back off, and never throws itself", async () => {
-  const thrown = page({ measure: () => Promise.reject(new Error("eval exception: boom")) });
+  const thrown = page({ measure: boom });
   assert.deepEqual(await readBrowserFacts(thrown.ctx, PAGE), {
     product: "Chrome/1.2.3.4",
     numeroWidth: null,
@@ -175,7 +177,7 @@ test("every path hands the page back as start left it, through a blank page to t
   const answered = page();
   await readBrowserFacts(answered.ctx, PAGE);
   assert.deepEqual(answered.calls.slice(-3), ["remove", ...HANDED_BACK]);
-  const thrown = page({ measure: () => Promise.reject(new Error("eval exception: boom")) });
+  const thrown = page({ measure: boom });
   await readBrowserFacts(thrown.ctx, PAGE);
   assert.deepEqual(thrown.calls.slice(-3), ["remove", ...HANDED_BACK]);
   t.mock.timers.enable({ apis: ["setTimeout"] });

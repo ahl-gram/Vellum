@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import vm from "node:vm";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
@@ -10,6 +10,7 @@ import { E2E_LANES } from "../../e2e/support/lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 import { e2eSourcePaths, e2eSuiteFamily, readE2eSource } from "../../test-support/e2e-source.ts";
 import { CTX_THROWING_WAITS } from "../../scripts/lint/e2e-steps.ts";
+import { writeFiles } from "../../test-support/proof-runner-repo.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 import { r0ToR4Worker } from "../../e2e/suites/render.ts";
 import { rr0Boots } from "../../e2e/suites/reading-room/arrival.ts";
@@ -313,18 +314,19 @@ test("npm runs the e2e runner and the lane driver themselves, so neither script 
 test("the e2e source list reads every TypeScript file under e2e/ at any depth, and nothing else", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-e2e-notes-"));
   try {
-    const plant = (rel: string): void => {
-      mkdirSync(dirname(join(root, rel)), { recursive: true });
-      writeFileSync(join(root, rel), "");
-    };
-    [
-      "e2e/top.ts",
-      "e2e/suites/split/nested.ts",
-      "e2e/left.mjs",
-      "scripts/other.ts",
-      "scripts/e2e-beside.ts",
-      "test/e2e/x.test.ts",
-    ].forEach(plant);
+    writeFiles(
+      root,
+      Object.fromEntries(
+        [
+          "e2e/top.ts",
+          "e2e/suites/split/nested.ts",
+          "e2e/left.mjs",
+          "scripts/other.ts",
+          "scripts/e2e-beside.ts",
+          "test/e2e/x.test.ts",
+        ].map((rel) => [rel, ""]),
+      ),
+    );
     assert.deepEqual(
       e2eSourcePaths(root)
         .map((f) => relative(root, f))
@@ -352,21 +354,22 @@ test("no e2e source is an .mts, .cts or .tsx: the lint reads only e2e/**/*.ts an
 test("a suite's family is its suite file and every TypeScript file in its own folder at any depth, and never a sibling whose name it prefixes", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-e2e-family-"));
   try {
-    const plant = (rel: string): void => {
-      mkdirSync(dirname(join(root, rel)), { recursive: true });
-      writeFileSync(join(root, rel), "");
-    };
-    [
-      "e2e/suites/zoom.ts",
-      "e2e/suites/zoom/reads.ts",
-      "e2e/suites/zoom/deep/checks.ts",
-      "e2e/suites/zoom/notes.md",
-      "e2e/suites/zoom-gestures.ts",
-      "e2e/suites/zoom-gestures/checks.ts",
-      "e2e/support/zoom.ts",
-      "e2e/zoom.ts",
-      "e2e/suites/health.ts",
-    ].forEach(plant);
+    writeFiles(
+      root,
+      Object.fromEntries(
+        [
+          "e2e/suites/zoom.ts",
+          "e2e/suites/zoom/reads.ts",
+          "e2e/suites/zoom/deep/checks.ts",
+          "e2e/suites/zoom/notes.md",
+          "e2e/suites/zoom-gestures.ts",
+          "e2e/suites/zoom-gestures/checks.ts",
+          "e2e/support/zoom.ts",
+          "e2e/zoom.ts",
+          "e2e/suites/health.ts",
+        ].map((rel) => [rel, ""]),
+      ),
+    );
     assert.deepEqual(e2eSuiteFamily(root, "zoom"), [
       "e2e/suites/zoom.ts",
       "e2e/suites/zoom/deep/checks.ts",
