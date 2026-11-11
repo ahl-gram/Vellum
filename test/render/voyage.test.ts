@@ -53,13 +53,19 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
     o(c, d, a) !== 0 &&
     o(c, d, b) !== 0;
   const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
+  let pairs = 0;
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
       // leg 0 and the closing leg share a port, the one adjacent-pair exclusion
       if (i === 0 && j === legs.length - 1) continue;
+      pairs++;
       assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]), `legs ${i} and ${j} cross`);
     }
   }
+  assert.ok(
+    pairs >= 1,
+    `the ring's ${legs.length} legs hold no two that are not neighbours, so no crossing was checked`,
+  );
 });
 
 test("legs close the tour into a round trip: the last leg sails home to the capital", () => {
