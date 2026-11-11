@@ -71,6 +71,15 @@ export const functionsIn = (path: string, text: string): Fn[] => {
       (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))
     )
       push(`${owner}.${node.name.getText(sf)}`, node);
+    else if ((ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node)) && node.body)
+      push(`${owner}.${ts.isGetAccessorDeclaration(node) ? "get" : "set"} ${node.name.getText(sf)}`, node);
+    else if (ts.isConstructorDeclaration(node) && node.body) push(`${owner}.constructor`, node);
+    else if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      (ts.isArrowFunction(node.right) || ts.isFunctionExpression(node.right))
+    )
+      push(node.left.getText(sf), ts.isExpressionStatement(node.parent) ? node.parent : node);
     const next = ts.isClassDeclaration(node) && node.name ? node.name.text : owner;
     ts.forEachChild(node, (child) => visit(child, next));
   };
