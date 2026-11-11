@@ -144,7 +144,7 @@ export default defineConfig(
       "vellum/ts-comment-citation-resolves": "error",
       "vellum/param-excuse-holds-element": ["error", { names: PAGE_ELEMENT_PARAMETERS }],
       "vellum/package-import-declared": "error",
-      "vellum/no-word-for-word-copy": ["error", { roots: TS_ROOTS.map((glob) => glob.slice(0, glob.indexOf("/"))), accepted: ACCEPTED_COPIES }],
+      "vellum/no-word-for-word-copy": ["error", { root: import.meta.dirname, roots: TS_ROOTS.map((glob) => glob.slice(0, glob.indexOf("/"))), accepted: ACCEPTED_COPIES }],
     },
   },
   {

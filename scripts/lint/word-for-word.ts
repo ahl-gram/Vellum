@@ -7,7 +7,7 @@ import type { AcceptedCopy } from "../copy-hunt/accepted-copies.ts";
 import { acceptedFor } from "../copy-hunt/accepted.ts";
 import { functionsAt, functionsIn, MIN_TOKENS, type Fn } from "../copy-hunt/functions.ts";
 
-type Options = { readonly roots: readonly string[]; readonly accepted: readonly AcceptedCopy[] };
+type Options = { readonly root: string; readonly roots: readonly string[]; readonly accepted: readonly AcceptedCopy[] };
 type Index = {
   readonly texts: ReadonlyMap<string, string>;
   readonly byFile: ReadonlyMap<string, readonly Fn[]>;
@@ -26,11 +26,15 @@ const workingTree = (root: string): Tree => ({
   sha: "the working tree",
   read: (path) => readFileSync(join(root, path), "utf8"),
   list: (prefix) => {
-    const r = spawnSync("git", ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", prefix], {
-      cwd: root,
-      encoding: "utf8",
-      timeout: GIT_MS,
-    });
+    const r = spawnSync(
+      "git",
+      ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", prefix],
+      {
+        cwd: root,
+        encoding: "utf8",
+        timeout: GIT_MS,
+      },
+    );
     if (r.status !== 0) throw new Error(`git ls-files under ${root} failed: ${(r.stderr || String(r.error)).trim()}`);
     return r.stdout
       .split("\0")
@@ -72,7 +76,7 @@ const wordForWord: Rule.RuleModule = {
           roots: { type: "array", items: { type: "string" }, minItems: 1 },
           accepted: { type: "array" },
         },
-        required: ["roots", "accepted"],
+        required: ["root", "roots", "accepted"],
         additionalProperties: false,
       },
     ],
@@ -81,18 +85,18 @@ const wordForWord: Rule.RuleModule = {
     },
   },
   create(context) {
-    const { roots, accepted } = context.options[0] as Options;
-    const path = relative(context.cwd, context.filename).split(sep).join("/");
+    const { root, roots, accepted } = context.options[0] as Options;
+    const path = relative(root, context.filename).split(sep).join("/");
     return {
       Program() {
         const text = context.sourceCode.text;
-        const read = indexes.get(keyOf(context.cwd, roots));
+        const read = indexes.get(keyOf(root, roots));
         const own = read?.texts.get(path) === text ? read.byFile.get(path) : undefined;
         if (own === undefined) textReads += 1;
         const here = own ?? functionsIn(path, text);
         const counted = here.filter((f) => f.tokens.length >= MIN_TOKENS);
         if (counted.length === 0) return;
-        const index = indexOf(context.cwd, roots);
+        const index = indexOf(root, roots);
         for (const f of counted) {
           const elsewhere = (index.byNorm.get(f.norm) ?? []).filter((g) => g.file !== path);
           const copies = [...here.filter((g) => g !== f && g.norm === f.norm), ...elsewhere]
@@ -100,7 +104,10 @@ const wordForWord: Rule.RuleModule = {
             .sort(byPlace);
           if (copies.length > 0)
             context.report({
-              loc: { start: { line: f.line, column: 0 }, end: { line: f.end, column: 0 } },
+              loc: {
+                start: { line: f.line, column: 0 },
+                end: { line: f.end, column: context.sourceCode.lines[f.end - 1]!.length },
+              },
               messageId: "copy",
               data: { name: f.name, copies: copies.map(place).join(", ") },
             });
