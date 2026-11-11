@@ -168,3 +168,25 @@ test("a key read from the file is sent trimmed as the bearer token, and an error
   )(R);
   assert.deepEqual(echoed, { ok: false, reason: 'HTTP 401: {"error":"invalid key Bearer <TYPESAFE_API_KEY>"}' });
 });
+
+test("a request carrying an image is sent with TypeSafe's images header and its assets, and one without an image is sent without the header", async () => {
+  const withImage: SystemOneRequest = {
+    model: MODEL,
+    state: { chart: "still-0123456789abcdef" },
+    questions: { q: { type: "noul", instructions: "Is `chart` a map?" } },
+    assets: { "still-0123456789abcdef": { type: "image", format: "png", data_base64: "iVBORw0KGgo=" } },
+  };
+  const seen: Seen[] = [];
+  const reply = await ask(withImage, KEY, answering(json({ model: "jev-1.14.0", answers: { q: noul(0.8) } }), seen));
+  assert.ok(reply.ok);
+  assert.deepEqual(seen[0]!.init.headers, {
+    Authorization: `Bearer ${KEY}`,
+    "Content-Type": "application/json",
+    "TypeSafe-Danger-Zone-Images": "true",
+  });
+  assert.deepEqual(JSON.parse(seen[0]!.init.body as string), withImage);
+
+  const plain: Seen[] = [];
+  assert.ok((await ask(R, KEY, answering(json(both), plain))).ok);
+  assert.deepEqual(plain[0]!.init.headers, { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" });
+});

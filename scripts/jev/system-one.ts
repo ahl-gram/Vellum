@@ -5,6 +5,7 @@ export const ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 export const MODEL = "jev-1.14.0";
 export const KEY_VAR = "TYPESAFE_API_KEY";
 export const TIMEOUT_MS = 10_000;
+export const IMAGES_HEADER = "TypeSafe-Danger-Zone-Images";
 export const KEY_SHAPE = /^[!#-[\]-~]+$/;
 export const KEY_MASK = `<${KEY_VAR}>`;
 export const KEY_REFUSED = `${KEY_VAR} holds a character a request header cannot carry, so nothing was sent`;
@@ -18,10 +19,12 @@ export type NoulQuestion = {
   readonly instructions: string | Readonly<Record<string, unknown>>;
   readonly criteria?: { readonly true: string; readonly false: string };
 };
+export type ImageAsset = { readonly type: "image"; readonly format: "png"; readonly data_base64: string };
 export type SystemOneRequest = {
   readonly model: string;
   readonly state: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
   readonly questions: Readonly<Record<string, NoulQuestion>>;
+  readonly assets?: Readonly<Record<string, ImageAsset>>;
 };
 export type Answered = {
   readonly ok: true;
@@ -76,7 +79,11 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
   try {
     const response = await fetcher(ENDPOINT, {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        ...(request.assets === undefined ? {} : { [IMAGES_HEADER]: "true" }),
+      },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });

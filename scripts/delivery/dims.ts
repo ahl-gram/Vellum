@@ -7,12 +7,15 @@ export interface Dims {
 }
 
 const HEAD_BYTES = 65536;
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-const png = (buf: Buffer): Dims | null =>
-  buf.length >= 24 && buf.subarray(0, 4).equals(PNG_SIGNATURE)
-    ? { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) }
-    : null;
+export const pngDims = (bytes: Uint8Array): Dims | null => {
+  if (bytes.length < 24) return null;
+  if (!PNG_SIGNATURE.equals(bytes.subarray(0, 8))) return null;
+  if (Buffer.from(bytes.subarray(12, 16)).toString("latin1") !== "IHDR") return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return { width: view.getUint32(16), height: view.getUint32(20) };
+};
 
 const gif = (buf: Buffer): Dims | null =>
   buf.length >= 10 && buf.toString("latin1", 0, 3) === "GIF"
@@ -51,7 +54,7 @@ export const pictureDims = (abs: string): Dims | null => {
   const ext = extname(abs).toLowerCase();
   try {
     const head = readHead(abs, ext === ".svg" ? 4096 : HEAD_BYTES);
-    if (ext === ".png") return png(head);
+    if (ext === ".png") return pngDims(head);
     if (ext === ".gif") return gif(head);
     if (ext === ".jpg" || ext === ".jpeg") return jpeg(head);
     if (ext === ".svg") return svg(head);
