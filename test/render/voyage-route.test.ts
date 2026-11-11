@@ -139,6 +139,11 @@ test("seed 526413615 sails: it has at least one sea leg and many road legs", () 
 
 test("on a real world, every road-leg vertex is dry land and every sea-leg interior vertex is water", () => {
   const { s, routed } = realWorld(526413615);
+  const modes = new Set(routed.map((l) => l.mode));
+  assert.ok(
+    modes.has("road") && modes.has("sea"),
+    `seed 526413615 routes ${[...modes].join(" and ") || "no"} legs, so a road or a sea leg is never checked`,
+  );
   for (const l of routed) {
     if (l.mode === "road") {
       for (const p of l.points) assert.ok(isLand(s, p), `road vertex ${p.x},${p.y} is on water`);
@@ -188,6 +193,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
   const nearest = nearestOf(s);
 
   const isWaterVertex = (p: { x: number; y: number }) => s.land[p.x + p.y * s.gridW] === 0;
+  let sampled = 0;
 
   for (const l of routed) {
     // A sea leg's ends are LAND ports joined by short overland stubs; the invariant concerns the open water between, so scan from the first water vertex to the last.
@@ -205,6 +211,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
       const b = l.points[i]!;
       const steps = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 4));
       for (let k = 0; k <= steps; k++) {
+        sampled++;
         const t = k / steps;
         const x = a.x + (b.x - a.x) * t;
         const y = a.y + (b.y - a.y) * t;
@@ -219,6 +226,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
       }
     }
   }
+  assert.ok(sampled >= 1, "no chord of seed 526413615's legs was sampled, so no leg was held to its terrain");
 });
 
 test("a straight fallback leg walks the land, never across open water (#298)", () => {
