@@ -229,7 +229,7 @@ test("the line names the command by its script and the subcommand its arguments 
   assert.equal(commandOf("keeper-scan", []), "keeper-scan");
 });
 
-// 2026-11-11: WAIT_MS sits above the child's HOLD_MS of 30 s so a handler that never exits ends the child by itself with code 0; the child reaches "asked" in CHILD_ASKED_SECONDS on a loaded Mac.
+// 2026-11-11: WAIT_MS sits above the child's HOLD_MS of 30 s so a handler that never exits ends the child by itself with code 0; the child reached "asked" in 80 ms and exited in 83 ms on an idle Mac (this file, 1 run), so 60 s is a cap on a hang and no budget.
 const WAIT_MS = 60_000;
 
 test("a real SIGINT reaches the run: it logs what was spent and the process exits 130", async () => {

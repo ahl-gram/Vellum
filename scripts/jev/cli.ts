@@ -1,7 +1,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { dryRunSender, liveSender, type Env, type Fetch, type ReadText, type Send } from "./system-one.ts";
+import { errorText } from "../../src/site/shared/error-text.ts";
+import { dryRunSender, liveSender, type Env, type Fetch, type Meter, type ReadText, type Send } from "./system-one.ts";
+import { appendUsage, NO_TALLY, notLogged, usageLine, withReply, withSent } from "./usage.ts";
 
 export type Args = { readonly positional: string[]; readonly dryRun: boolean; readonly out: string | null };
 
@@ -50,28 +52,54 @@ export const processDeps = (): RunDeps => ({
   exit: (code) => process.exit(code),
 });
 
-export const commandOf = (script: string, _argv: readonly string[]): string => script;
-
-export const runCommand = async (
-  _script: string,
-  main: Main,
-  argv: readonly string[],
-  _deps: RunDeps,
-): Promise<number> => {
-  try {
-    return await main(argv, () => dryRunSender);
-  } catch {
-    return 1;
-  }
+export const commandOf = (script: string, argv: readonly string[]): string => {
+  const first = argv[0];
+  return first === undefined || first.startsWith("-") ? script : `${script} ${first}`;
 };
 
-export const sendFor = (dryRun: boolean): Send =>
-  dryRun
-    ? dryRunSender
-    : liveSender(process.env, homedir(), (path) => readFileSync(path, "utf8"), fetch, {
-        sent: () => {},
-        replied: () => {},
-      });
+export const runCommand = async (
+  script: string,
+  main: Main,
+  argv: readonly string[],
+  deps: RunDeps,
+): Promise<number> => {
+  let tally = NO_TALLY;
+  let logged = false;
+  const meter: Meter = {
+    sent: (request) => {
+      tally = withSent(tally, request);
+    },
+    replied: (reply) => {
+      tally = withReply(tally, reply);
+    },
+  };
+  const log = (): void => {
+    if (logged) return;
+    logged = true;
+    const line = usageLine(tally, commandOf(script, argv), deps.now());
+    if (line === null) return;
+    try {
+      appendUsage(deps.home, line);
+    } catch (error) {
+      deps.warn(notLogged(line, error));
+    }
+  };
+  for (const signal of ["SIGINT", "SIGTERM"] as const)
+    deps.onSignal(signal, () => {
+      log();
+      deps.exit(SIGNAL_EXITS[signal]);
+    });
+  const sendFor: SendFor = (dryRun) =>
+    dryRun ? dryRunSender : liveSender(deps.env, deps.home, deps.readText, deps.fetcher, meter);
+  try {
+    return await main(argv, sendFor);
+  } catch (error) {
+    deps.warn(errorText(error));
+    return 1;
+  } finally {
+    log();
+  }
+};
 
 export const writeAll = (dir: string, files: Readonly<Record<string, string[]>>): void => {
   mkdirSync(dir, { recursive: true });

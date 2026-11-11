@@ -110,11 +110,16 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
   return reply.ok ? { ...reply, ms: Math.round(performance.now() - began) } : reply;
 };
 
-export const senderFor = (key: string | undefined, fetcher: Fetch, _meter: Meter): Send => {
+export const senderFor = (key: string | undefined, fetcher: Fetch, meter: Meter): Send => {
   const trimmed = key?.trim() ?? "";
   if (trimmed === "") return () => Promise.resolve(fail(`${KEY_VAR} is not set`));
   if (!KEY_SHAPE.test(trimmed)) return () => Promise.resolve(fail(KEY_REFUSED));
-  return (request) => ask(request, trimmed, fetcher);
+  return async (request) => {
+    meter.sent(request);
+    const reply = await ask(request, trimmed, fetcher);
+    meter.replied(reply);
+    return reply;
+  };
 };
 
 export const readKey = (env: Env, home: string, readText: ReadText): string | undefined => {
