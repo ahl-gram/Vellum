@@ -116,8 +116,9 @@ test("a tree's functions come root by root in path order, and a file that does n
     "src/bad.ts": "export const = ;\n",
     "src/note.md": "x\n",
     "docs/c.ts": ALPHA,
+    "src/types.d.ts": ALPHA,
   });
-  const { fns, unread } = functionsAt(tree);
+  const { fns, unread } = functionsAt(tree, ["e2e", "src"]);
   assert.deepEqual(
     fns.map((f) => f.file),
     ["e2e/z.ts", "src/a.ts", "src/b.ts"],

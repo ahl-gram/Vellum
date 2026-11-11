@@ -1,5 +1,7 @@
 import { changedFiles, ensureCommit, gitTree, mergeBase, revParse } from "../comment-judge/tree.ts";
-import { acceptedFaults, staleCopies } from "./accepted.ts";
+import { lintTsRoots } from "../../test-support/lint-roots.ts";
+import { acceptedFaults } from "./accepted-faults.ts";
+import { staleCopies } from "./accepted.ts";
 import { changedFunctions } from "./changed.ts";
 import { functionsAt, functionsIn, MAX_CHARS, type Fn, type Unread } from "./functions.ts";
 import { hunt, type HuntOptions, type Run } from "./hunt.ts";
@@ -15,7 +17,7 @@ export const diffRun = async (repo: string, base: string, head: string, options:
   ensureCommit(repo, head, head);
   const sha = revParse(repo, head);
   const from = mergeBase(repo, base, sha);
-  const { fns, unread } = functionsAt(gitTree(repo, sha));
+  const { fns, unread } = functionsAt(gitTree(repo, sha), lintTsRoots());
   const old = gitTree(repo, from);
   const baseUnread: Unread[] = [];
   const before = (path: string): readonly Fn[] => {
@@ -44,7 +46,7 @@ export const fullRun = async (repo: string, at: string, options: HuntOptions): P
   refuseFaults(options);
   ensureCommit(repo, at, at);
   const sha = revParse(repo, at);
-  const { fns, unread } = functionsAt(gitTree(repo, sha));
+  const { fns, unread } = functionsAt(gitTree(repo, sha), lintTsRoots());
   const found = await hunt(fns, null, options);
   return {
     sha,

@@ -1,5 +1,6 @@
 import type { Linter } from "eslint";
 import lintConfig from "../eslint.config.ts";
+import { isTsUnderRoots } from "./ts-under-roots.ts";
 
 type FileEntry = string | string[];
 
@@ -30,5 +31,4 @@ export const lintTsRoots = (): string[] =>
       ),
   );
 
-export const isTsUnderLintRoots = (path: string): boolean =>
-  path.endsWith(".ts") && !path.endsWith(".d.ts") && lintTsRoots().includes(path.split("/")[0]!);
+export const isTsUnderLintRoots = (path: string): boolean => isTsUnderRoots(lintTsRoots(), path);
