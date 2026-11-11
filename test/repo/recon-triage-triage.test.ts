@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/comment-judge/tree.ts";
-import type { Answered, Reply } from "../../scripts/jev/system-one.ts";
+import type { Reply } from "../../scripts/jev/system-one.ts";
 import type { ClaimRow } from "../../scripts/recon-triage/claims.ts";
 import { excerptOf } from "../../scripts/recon-triage/excerpt.ts";
 import { requestFor } from "../../scripts/recon-triage/questions.ts";
 import { RUN_INPUT_TOKEN_CAP, triage } from "../../scripts/recon-triage/triage.ts";
-import { recordingSender } from "../../test-support/jev-fakes.ts";
+import { answered, recordingSender } from "../../test-support/jev-fakes.ts";
 
 const tree = memoryTree("t", { "src/a.ts": "export const a = 1;\n", "src/b.ts": "export const b = 2;\n" });
 const A: ClaimRow = { claim: "a is one", source: "body", paths: ["src/a.ts"], symbols: ["a"], kind: "behavior" };
@@ -18,14 +18,6 @@ const X: ClaimRow = {
   symbols: [],
   kind: "existence",
 };
-
-const answered = (nouls: Record<string, number>, inputTokens = 500): Answered => ({
-  ok: true,
-  model: "jev-1.14.0",
-  nouls,
-  inputTokens,
-  ms: 5,
-});
 
 test("each behavior claim is asked once about its excerpt at the tree and scored from both answers, and a command claim is not asked", async () => {
   const { send, seen } = recordingSender([answered({ holds: 0.5, contradicts: 0 })]);
