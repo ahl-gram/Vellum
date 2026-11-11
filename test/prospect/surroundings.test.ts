@@ -1,19 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import type { World } from "../../src/world/types.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { viewRight } from "../../src/prospect/transect.ts";
 import { plateSurroundings } from "../../src/prospect/surroundings.ts";
-
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  const cached = worlds.get(seed);
-  if (cached) return cached;
-  const w = generateWorld(defaultRecipe(seed));
-  worlds.set(seed, w);
-  return w;
-}
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 /** The test's own walk: along each road's polyline from the town's cell, stopping at the first settlement met, so a town found here is one a road reaches without passing another. */
 function reachedFirst(world: World, index: number): Set<number> {

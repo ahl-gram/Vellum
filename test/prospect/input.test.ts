@@ -12,27 +12,10 @@ import {
   FOREGROUND_OFFSET,
   GRADIENT_RADIUS,
 } from "../../src/prospect/transect.ts";
-
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  let w = worlds.get(seed);
-  if (w === undefined) {
-    w = generateWorld(defaultRecipe(seed));
-    worlds.set(seed, w);
-  }
-  return w;
-}
+import { fnv1a } from "../../test-support/dress-svg.ts";
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 const SWEEP_SEEDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
-function fnv1a(s: string): number {
-  let h = 0x811c9dc5 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h >>> 0;
-}
 
 /** Independent oracle: a second bilinear written here, so a transect.ts regression cannot hide behind its own sampler. */
 function bilinear(w: World, x: number, y: number): number {

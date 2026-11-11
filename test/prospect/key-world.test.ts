@@ -1,21 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import type { World } from "../../src/world/types.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { eraFor } from "../../src/prospect/caption.ts";
 import { plateKey } from "../../src/prospect/key.ts";
 import { plateSurroundings } from "../../src/prospect/surroundings.ts";
-
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  const cached = worlds.get(seed);
-  if (cached) return cached;
-  const w = generateWorld(defaultRecipe(seed));
-  worlds.set(seed, w);
-  return w;
-}
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 function keyOf(seed: number, index: number, year?: number): string[] {
   const w = worldFor(seed);
