@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { composeAtlas, prospectPlates, ribbonPlates } from "../../src/atlas/compose.ts";
 import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
@@ -16,8 +15,8 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { decideSettle, FULL_WINDOW } from "../../src/world/lod.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
 import type { World } from "../../src/world/types.ts";
+import { digest } from "../../test-support/svg-digest.ts";
 
-const digest = (svg: string): string => `${createHash("sha256").update(svg).digest("hex").slice(0, 16)}/${svg.length}`;
 const PLATE_RENDER = { style: "antique", widthPx: 1500, legend: true } as const;
 
 function glassWindow(world: World, name: string): UvWindow {
