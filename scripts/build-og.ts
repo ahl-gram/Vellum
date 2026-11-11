@@ -37,6 +37,7 @@ async function main(): Promise<void> {
     return;
   }
   const pngPath = resolve("src/static/og.png");
+  // Scale 1 keeps the PNG at exactly the card's declared 1200x630.
   await rasterizeSvg(browser, cardPath, pngPath, 1);
   await writeFile(pngPath, stampPng(await readFile(pngPath), cardStamp(card)));
   console.log("src/static/og.png (1200x630, stamped vellum-card)");

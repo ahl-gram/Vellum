@@ -13,12 +13,15 @@ export const BASE_GROUND = 232;
 export const RIVER_BANK_DROP = 12;
 export const SHORE_DROP = 6;
 export const WATER_BOTTOM = 276;
+// Px above the ground line: a back-row mass sits BACK_ROW_RAISE up to read as one street behind, and a walled town's keep sits WALLED_KEEP_RAISE up.
 export const BACK_ROW_RAISE = 8;
 export const WALLED_KEEP_RAISE = 4;
 const MOUND_HALF_SPAN = 200;
 export const MOUND_MAX_RISE = 56;
+// Backdrop ridge: RIDGE_SCALE is vertical px per unit of relative elevation above the site, and below RIDGE_MIN_RISE the horizon reads flat and is omitted.
 export const RIDGE_SCALE = 140;
 export const RIDGE_MIN_RISE = 0.02;
+// Px between ground polyline samples, matching the ruled spike's 8px (Issue #237).
 export const GROUND_SAMPLE_STEP = 8;
 
 export type MassForm = "gable" | "ridge" | "tower" | "spire" | "keep";

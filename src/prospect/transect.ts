@@ -8,12 +8,15 @@ export type ProspectView = {
   readonly dy: number;
 };
 
+// Cells either side of the site: a 64-cell transect, about 29 leagues at `CELLS_PER_LEAGUE` in `src/render/layers/scalebar.ts`.
 export const TRANSECT_HALF_WIDTH = 32;
 export const BACKDROP_SAMPLES = 129;
 export const FOREGROUND_SAMPLES = 33;
 export const BACKDROP_OFFSET = 12;
 export const FOREGROUND_OFFSET = 2;
+// Cells: the uphill gradient's stencil is wider than one cell so ridged noise does not jitter the vantage.
 export const GRADIENT_RADIUS = 3;
+// Chebyshev radius, in cells, searched for sea around a harbor site.
 const SEA_SEARCH_RADIUS = 2;
 
 export function sampleBilinear(f: Field, x: number, y: number): number {

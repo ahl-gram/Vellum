@@ -153,6 +153,7 @@ test("a settlement keeps a blocklisted base when a town suffix fuses onto it", (
 });
 
 test("the near-dup screen rarely forces the Roman-numeral fallback", () => {
+  // A real world draws about 40 names from one namer (recorded 2026-06-19, Issue #17), and an over-aggressive screen degrades its output to "Xxx II/III", so the fallback share must stay well under 5%.
   const isFallback = (n: string) => / (II|III|IV|V|VI|VII|VIII|IX|X)$/.test(n);
   for (const culture of CULTURES) {
     let fallbacks = 0;

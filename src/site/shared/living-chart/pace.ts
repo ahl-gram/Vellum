@@ -13,6 +13,7 @@ export const anchorAt = (now: number, elapsed0: number, pace: number): SweepAnch
   floor: elapsed0,
 });
 
+// The floor: a vsync-aligned rAF stamp can precede the performance.now() that struck the anchor, and an unclamped frame would step the year backward across a rounding boundary, the one-frame flicker CI's slower runner caught at Play in PR #311.
 export const storyAt = (a: SweepAnchor, now: number, pace: number): number => Math.max((now - a.begin) * pace, a.floor);
 
 export const repaced = (a: SweepAnchor, now: number, pace: number, next: number): SweepAnchor =>
