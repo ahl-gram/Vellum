@@ -1,43 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createSurveyArm, armOnLanding, wireSurveyToggle } from "../../src/site/explorer/survey-arm.ts";
+import { fakeBox, heldPrime, paintQueue } from "../../test-support/arm-fakes.ts";
 
 // The second wait (Issue #373): the Issue #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order; every Issue #300/Issue #366 guard in survey-arm.test.ts is re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
-
-/** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
-function paintQueue() {
-  const queued: Array<() => void> = [];
-  return {
-    afterPaint: (run: () => void): void => {
-      queued.push(run);
-    },
-    paint: (): void => {
-      for (const run of queued.splice(0)) run();
-    },
-  };
-}
-
-/** Primes whose promises the test releases. `settle()` resolves EVERY one outstanding, which is what lets two arms be caught waiting at once. */
-function heldPrime() {
-  const waiting: Array<() => void> = [];
-  let calls = 0;
-  return {
-    calls: () => calls,
-    prime: (): Promise<void> => {
-      calls++;
-      return new Promise<void>((resolve) => {
-        waiting.push(resolve);
-      });
-    },
-    settle: (): void => {
-      for (const r of waiting.splice(0)) r();
-    },
-    flush: (): Promise<void> =>
-      Promise.resolve()
-        .then(() => {})
-        .then(() => {}),
-  };
-}
 
 function waitingHarness() {
   const q = paintQueue();
@@ -185,23 +151,6 @@ test("#373 with no off-thread source at all, every arm is synchronous", () => {
 
   assert.equal(builds, 1, "every host without a worker, and any future one that wires no source");
 });
-
-function fakeBox() {
-  let handler: (() => void) | null = null;
-  const box = {
-    checked: false,
-    addEventListener: (type: string, fn: () => void): void => {
-      if (type === "change") handler = fn;
-    },
-  };
-  return {
-    box,
-    change: (to: boolean): void => {
-      box.checked = to;
-      if (handler) handler();
-    },
-  };
-}
 
 test("#373 the tick's arm waits for the order the box's own wiring was handed", async () => {
   const q = paintQueue();
