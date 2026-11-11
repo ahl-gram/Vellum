@@ -79,7 +79,11 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
   try {
     const response = await fetcher(ENDPOINT, {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        ...(request.assets === undefined ? {} : { [IMAGES_HEADER]: "true" }),
+      },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
