@@ -2,7 +2,7 @@ import { el, type SvgNode } from "../../render/svg.ts";
 import type { Limner, MapStyle } from "../../render/style.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { Pt } from "../geometry.ts";
-import { dressContext, type DressContext } from "./context.ts";
+import { dressContext, r1, type DressContext } from "./context.ts";
 
 export type Engraver = DressContext & { readonly wash: Limner | null };
 
@@ -14,7 +14,7 @@ export const washOr = (e: Engraver, key: keyof Limner): string => e.wash?.[key] 
 
 export const quietInk = (e: Engraver): string => (e.wash === null ? e.soft : e.ink);
 
-export const r1 = (v: number): number => Math.round(v * 10) / 10;
+export { r1 };
 export const pt = (p: Pt): string => `${r1(p.x)} ${r1(p.y)}`;
 export const poly = (pts: ReadonlyArray<Pt>, closed = true): string => `M${pts.map(pt).join("L")}${closed ? "Z" : ""}`;
 

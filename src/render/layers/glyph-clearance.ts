@@ -1,3 +1,4 @@
+import { r1 } from "../../core/math.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
 import { SYMBOL_EXTENT } from "./glyph-symbols.ts";
 import type { RealmAnchor } from "./feature-labels.ts";
@@ -31,8 +32,6 @@ export function realmNameBox(a: RealmAnchor): Box {
   return { x: a.cx - a.halfW, y: a.cy - a.halfH, w: 2 * a.halfW, h: 2 * a.halfH };
 }
 
-const tenth = (v: number): number => Math.round(v * 10) / 10;
-
 type Slide = { readonly dx: number; readonly dy: number; readonly len: number; readonly order: number };
 
 function slidesClear(b: Box, met: ReadonlyArray<Box>, pad: number): Slide[] {
@@ -53,7 +52,7 @@ export function marksClearOf(marks: ReadonlyArray<Mark>, names: ReadonlyArray<Bo
   const nudged = (m: Mark, met: ReadonlyArray<Box>): Mark | null => {
     for (const s of slidesClear(markBox(m), met, ground.pad)) {
       if (s.len > ground.reach(m.kind)) return null;
-      const moved = { ...m, x: tenth(m.x + s.dx), y: tenth(m.y + s.dy) };
+      const moved = { ...m, x: r1(m.x + s.dx), y: r1(m.y + s.dy) };
       if (metBy(markBox(moved)).length === 0 && ground.stands(m.kind, moved.x, moved.y)) return moved;
     }
     return null;

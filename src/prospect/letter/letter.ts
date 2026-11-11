@@ -1,3 +1,4 @@
+import { r1 } from "../../core/math.ts";
 import { el, type SvgNode } from "../../render/svg.ts";
 import { GRID, UNITS_PER_EM, type FaceName, type FaceTable, type Glyph } from "./face.ts";
 import { ROMAN } from "./face-roman.ts";
@@ -93,7 +94,6 @@ export function runBox(spec: RunSpec): RunBox {
   };
 }
 
-const r1 = (v: number): number => Math.round(v * 10) / 10;
 const r2 = (v: number): number => Math.round(v * 100) / 100;
 const r6 = (v: number): number => Math.round(v * 1e6) / 1e6;
 
