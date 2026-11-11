@@ -5,7 +5,7 @@ import type { Asked, Found, Run } from "./hunt.ts";
 import type { Verdict } from "./questions.ts";
 
 export const BLIND_SPOTS =
-  "Not seen, so a copy there goes unreported and none is made up: a function with fewer than 6 names, a pair under similarity 0.6, the body of a test(...) call or any unnamed callback, an arrow written as a class field (x = () => ...) or an export default function (), a function beside one nested in it, and any file but a .ts under the lint's roots; a function over 6,000 characters is held to exact copies.";
+  "Not seen, so a copy there goes unreported and none is made up: a function with fewer than 6 names, a pair under similarity 0.6, the body of a test(...) call or any unnamed callback, a declaration or object member whose function is wrapped in as, satisfies, ! or parentheses, a function written as a class field (x = () => ...), the outer name of a chained declaration (const x = y = () => 1), an export default function or arrow, a function beside one nested in it, and any file but a .ts under the lint's roots; a function over 6,000 characters is held to exact copies.";
 
 export const loc = (f: Fn): string => `${f.file}:${f.line} ${f.name}`;
 const section = (title: string, lines: readonly string[]): string[] =>
