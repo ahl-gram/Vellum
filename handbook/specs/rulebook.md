@@ -248,6 +248,9 @@ byte-identical, and the drift guard is green.**
 - **The Horizon tier is filed but unscheduled.** Filing an epic there does not enter it into the
   strategic order. **A slot is ratified in this file before any sub is drafted.** Membership of
   Horizon and of the numbered phases is board state; read it from the Project, not from here.
+- **Horizon holds only epics whose subs are still to be spec'ed out** (Alex, 2026-11-03). Any other
+  newly filed issue goes into the theme phase it belongs to, and the session filing it names that
+  phase to Alex.
 - **#395 (The Farther Interior) HAS ITS SLOT, ratified 2026-08-23.** It enters the strategic order.
   **Its board item deliberately still sits in the Horizon column** (Alex, 2026-08-23): where it lands
   among the numbered phases is a separate sequencing call he has not taken, and this ratification
