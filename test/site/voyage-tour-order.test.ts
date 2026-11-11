@@ -224,6 +224,19 @@ test("#373 a primed order reaches the builder: the host and the engine agree on 
   );
 });
 
+test("#373 the job carries the straight-line port set, the capital first, since refineTour holds its first port as the start", async () => {
+  const { manifest, survey } = await realWorld();
+  const h = tourHarness(() => reversedTour(portsOf(manifest)));
+  const primed = h.orders.prime(manifest, survey, SEED);
+  h.release();
+  await primed;
+  assert.equal(h.jobs.length, 1, "one job was sent");
+  const capital = manifest.places.find((p) => p.kind === "capital");
+  assert.ok(capital, "fixture: the world has a capital");
+  assert.equal(h.jobs[0]!.ports[0], capital.idx, "the voyage's origin, the capital, is the job's first port");
+  assert.deepEqual([...h.jobs[0]!.ports], portsOf(manifest), "the straight-line port set, before any reorder");
+});
+
 test("#373 nothing is cached until the job lands", async () => {
   const { manifest, survey } = await realWorld();
   const h = tourHarness(() => reversedTour(portsOf(manifest)));
