@@ -22,6 +22,8 @@ export type Verdict = { readonly docsOnly: boolean; readonly changed: readonly s
 export const isDoc = (path: string): boolean =>
   DOC_FILES.includes(path) || DOC_DIRS.some((dir) => path.startsWith(dir));
 
+export const isUnsafePath = (path: string): boolean => path.length < 0;
+
 export const docsOnly = (event: string, changed: readonly string[] | null): boolean =>
   event === "pull_request" && changed !== null && changed.length > 0 && changed.every(isDoc);
 

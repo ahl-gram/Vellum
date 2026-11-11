@@ -4,7 +4,16 @@ import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "nod
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
-import { DOC_DIRS, DOC_FILES, OUTPUT_KEY, changedPaths, docsOnly, isDoc, verdict } from "../../scripts/docs-only.ts";
+import {
+  DOC_DIRS,
+  DOC_FILES,
+  OUTPUT_KEY,
+  changedPaths,
+  docsOnly,
+  isDoc,
+  isUnsafePath,
+  verdict,
+} from "../../scripts/docs-only.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
@@ -192,4 +201,99 @@ test("the unit jobs run every step on every diff, and ci.yml's triggers carry no
     (l) => l.trim() !== "" && !l.trim().startsWith("#"),
   );
   assert.deepEqual(block, ["on:", "  push:", "    branches: [main]", "  pull_request:", "  workflow_dispatch:"]);
+});
+
+// Blind spot, with its direction: a run body that learns its trigger without an expression or one of these variables, such as a gh or git call, slips past, a miss that review holds; an expression this list does not name reds, the safe side.
+test("no ci.yml job can tell a pull request from a push: every expression in a job is the lane, the shard, the shard total or the job's token, and no job reads an event variable or a label", () => {
+  const lines = readFileSync(join(ROOT, ".github", "workflows", "ci.yml"), "utf8").split("\n");
+  const at = lines.indexOf("jobs:");
+  assert.notEqual(at, -1, "ci.yml has no top-level jobs: key");
+  const ids = lines.slice(at + 1).flatMap((l) => /^ {2}([A-Za-z0-9_-]+):\s*$/.exec(l)?.[1] ?? []);
+  assert.ok(
+    ids.includes("check-and-test") && ids.includes("build-and-e2e"),
+    "the job reader found neither known job, so the sweep below reads nothing",
+  );
+  const jobs = ids.map((id) => ciJob(id));
+  const expressions = [
+    ...new Set(jobs.flatMap((j) => [...j.matchAll(/\$\{\{\s*([^}]*?)\s*\}\}/g)].map((m) => m[1] ?? ""))),
+  ].sort();
+  assert.deepEqual(
+    expressions,
+    ["github.token", "matrix.lane", "matrix.shard", "strategy.job-total"],
+    "a ci.yml job holds an expression past the lane, the shard, the shard total and the job's token; one that reads the trigger lets a pull request run differently from main, and one that does not joins this list with its reason",
+  );
+  for (const job of jobs) {
+    const rows = job.split("\n");
+    assert.deepEqual(
+      rows.filter((l) => /\bGITHUB_(?:EVENT_NAME|EVENT_PATH|HEAD_REF|BASE_REF|REF_NAME|REF_TYPE|REF)\b/.test(l)),
+      [],
+      "a ci.yml job reads one of GitHub's event variables, so a step can run differently on a pull request than on main",
+    );
+    assert.deepEqual(
+      rows.filter((l) => /\blabels?\b|full-e2e/i.test(l)),
+      [],
+      "a ci.yml job reads a label, so a pull request's coverage can depend on how it is labelled (Issue #381 retired the full-e2e label)",
+    );
+  }
+});
+
+test("a changed path holding a line break or another control character runs every lane, and the step never prints it", async () => {
+  for (const p of [
+    "handbook/a\nb.md",
+    "handbook/a\rb.md",
+    "handbook/a\tb.md",
+    "handbook/a\u007fb.md",
+    "handbook/a\u0085b.md",
+    "handbook/a b.md",
+    "handbook/a b.md",
+  ]) {
+    assert.equal(isUnsafePath(p), true, `${JSON.stringify(p)} is unsafe`);
+  }
+  for (const p of ["handbook/a b.md", "handbook/été.md", "handbook/specs/rulebook.md"]) {
+    assert.equal(isUnsafePath(p), false, `${JSON.stringify(p)} is safe`);
+  }
+  const name = "handbook/x\n::set-output name=docs_only::true";
+  const outDir = realpathSync(mkdtempSync(join(tmpdir(), "docs-only-nl-")));
+  try {
+    await withTempRepo({ "src/a.ts": "a\n" }, (dir) => {
+      git(["checkout", "-q", "-b", "feature"], dir);
+      writeFiles(dir, { [name]: "x\n" });
+      commitAll(dir, "doc");
+      git(["checkout", "-q", "main"], dir);
+      writeFiles(dir, { "src/c.ts": "c\n" });
+      commitAll(dir, "main moves");
+      git(["merge", "-q", "--no-ff", "-m", "merge", "feature"], dir);
+      assert.deepEqual(
+        git(["diff", "--name-only", "--no-renames", "-z", "HEAD^1", "HEAD"], dir)
+          .split("\0")
+          .filter((p) => p !== ""),
+        [name],
+      );
+      assert.equal(isDoc(name), true);
+      assert.deepEqual(verdict("pull_request", dir), {
+        docsOnly: false,
+        changed: [],
+        reason:
+          "a changed path holds a line break or another control character, so no path is printed and every lane runs",
+      });
+      const out = join(outDir, "output");
+      const stdout = execFileSync(process.execPath, [join(ROOT, "scripts", "docs-only.ts")], {
+        cwd: dir,
+        env: { ...process.env, GITHUB_EVENT_NAME: "pull_request", GITHUB_OUTPUT: out },
+        encoding: "utf8",
+        timeout: 30_000,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      assert.equal(readFileSync(out, "utf8"), `${OUTPUT_KEY}=false\n`);
+      assert.deepEqual(
+        stdout
+          .replaceAll("\r", "\n")
+          .split("\n")
+          .filter((l) => l.startsWith("::")),
+        [],
+      );
+    });
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
 });
