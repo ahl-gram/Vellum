@@ -1,34 +1,18 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { listWorkingTree } from "../../test-support/working-tree.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-// A cap on a hang, never a budget (2026-10-18: this listing ran in 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw, and no test drives that path.
-const GIT_TIMEOUT_MS = 30_000;
 const BUNDLE_SUFFIX = "app.bundle.js";
 const HOME_SHEETS: readonly string[] = ["home-noscript.css", "index.css"];
 
 const codeFolderOf = (twin: string): string =>
   twin === BUNDLE_SUFFIX ? "src/site/home/app.ts" : `src/site/${twin.slice(0, -BUNDLE_SUFFIX.length)}app.ts`;
 
-const listed = (dir: string): string[] => {
-  const listing = spawnSync(
-    "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", dir],
-    { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS },
-  );
-  if (listing.status !== 0)
-    throw new Error(
-      `git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr}): the tree listing would be empty or partial`,
-    );
-  return listing.stdout
-    .split("\0")
-    .filter(Boolean)
-    .map((path) => path.slice(`${dir}/`.length));
-};
+const listed = (dir: string): string[] => listWorkingTree(ROOT, [dir]).map((path) => path.slice(`${dir}/`.length));
 const foldersOf = (remainders: readonly string[]): Set<string> =>
   new Set(remainders.filter((r) => r.includes("/")).map((r) => r.slice(0, r.indexOf("/"))));
 const isRoute = (name: string): boolean => existsSync(join(ROOT, "src/pages", name, "index.astro"));

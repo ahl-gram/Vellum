@@ -1,7 +1,7 @@
 import type { Rule } from "eslint";
-import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { listWorkingTree } from "../../test-support/working-tree.ts";
 import type { Tree } from "../comment-judge/tree.ts";
 import type { AcceptedCopy } from "../copy-hunt/accepted-copies.ts";
 import { acceptedFor } from "../copy-hunt/accepted.ts";
@@ -14,7 +14,6 @@ type Index = {
   readonly byNorm: ReadonlyMap<string, readonly Fn[]>;
 };
 
-const GIT_MS = 30_000;
 let treeReads = 0;
 let textReads = 0;
 export const readCounts = (): { readonly trees: number; readonly texts: number } => ({
@@ -25,22 +24,7 @@ export const readCounts = (): { readonly trees: number; readonly texts: number }
 const workingTree = (root: string): Tree => ({
   sha: "the working tree",
   read: (path) => readFileSync(join(root, path), "utf8"),
-  list: (prefix) => {
-    const r = spawnSync(
-      "git",
-      ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", prefix],
-      {
-        cwd: root,
-        encoding: "utf8",
-        timeout: GIT_MS,
-      },
-    );
-    if (r.status !== 0) throw new Error(`git ls-files under ${root} failed: ${(r.stderr || String(r.error)).trim()}`);
-    return r.stdout
-      .split("\0")
-      .filter((path) => path !== "")
-      .sort();
-  },
+  list: (prefix) => listWorkingTree(root, [prefix]),
 });
 
 const indexes = new Map<string, Index>();
