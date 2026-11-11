@@ -1,6 +1,6 @@
 import type { Rule, SourceCode } from "eslint";
 import type { CallExpression, Node } from "estree";
-import { repoPath } from "./source-shape.ts";
+import { repoPath, wholeString } from "./source-shape.ts";
 
 type Keys = SourceCode.VisitorKeys;
 type Found = { node: Node; path: readonly Node[] };
@@ -33,9 +33,7 @@ function testBody(call: CallExpression): Body | null {
 function titleOf(call: CallExpression, text: string): string {
   const first = call.arguments[0];
   if (first === undefined) return "";
-  if (first.type === "Literal" && typeof first.value === "string") return first.value;
-  if (first.type === "TemplateLiteral" && first.expressions.length === 0) return first.quasis[0]?.value.cooked ?? "";
-  return text.slice(range(first)[0], range(first)[1]);
+  return wholeString(first as Rule.Node) ?? text.slice(range(first)[0], range(first)[1]);
 }
 
 function collect(body: Body, keys: Keys) {
