@@ -71,6 +71,7 @@ test("a function word for word another under the lint's roots is refused at its 
         {
           copy: reports(dir, "src/b.ts", ALPHA_COPY),
           subfolder: reports(dir, "src/b.ts", ALPHA_COPY, [], ["src", "test"], join(dir, "src")),
+          subfolderSelf: reports(dir, "src/a.ts", ALPHA, [], ["src", "test"], join(dir, "src")),
           listed: reports(dir, "src/b.ts", ALPHA_COPY, [listed]),
           self: reports(dir, "src/a.ts", ALPHA),
           buffer: reports(dir, "src/a.ts", OTHER),
@@ -83,6 +84,7 @@ test("a function word for word another under the lint's roots is refused at its 
         {
           copy: [`2 alpha is word for word alpha at src/a.ts:1${TAIL}`],
           subfolder: [`2 alpha is word for word alpha at src/a.ts:1${TAIL}`],
+          subfolderSelf: [],
           listed: [],
           self: [],
           buffer: [`1 unrelated is word for word unrelated at src/h.ts:1${TAIL}`],
