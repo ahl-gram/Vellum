@@ -105,9 +105,20 @@ export const senderFor = (key: string | undefined, fetcher: Fetch): Send => {
   return (request) => ask(request, trimmed, fetcher);
 };
 
-export const readKey = (env: Env, _home: string, _readText: ReadText): string | undefined => env[KEY_VAR];
+export const readKey = (env: Env, home: string, readText: ReadText): string | undefined => {
+  const fromEnv = env[KEY_VAR];
+  if (typeof fromEnv === "string" && fromEnv.trim() !== "") return fromEnv;
+  try {
+    const text = readText(keyFileOf(home));
+    return text.trim() === "" ? undefined : text;
+  } catch {
+    return undefined;
+  }
+};
 
-export const liveSender = (env: Env, _home: string, _readText: ReadText, fetcher: Fetch): Send =>
-  senderFor(env[KEY_VAR], fetcher);
+export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch): Send => {
+  const key = readKey(env, home, readText);
+  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher);
+};
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));
