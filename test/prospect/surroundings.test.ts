@@ -35,9 +35,6 @@ function reachedFirst(world: World, index: number): Set<number> {
   return found;
 }
 
-const ruinedBy = (world: World, i: number, year: number): boolean =>
-  world.history.events.some((e) => e.kind === "ruin" && e.settlement === i && e.year <= year);
-
 test("a road town is one the roads reach without passing another town, standing in the plate's view, the nearest two", () => {
   let named = 0;
   for (const seed of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
@@ -63,10 +60,7 @@ test("a road town is one the roads reach without passing another town, standing 
           dist <= 40 && ox * view.dx + oy * view.dy > 2 && Math.abs((ox * right.dx + oy * right.dy) / 40) <= 1,
           `seed ${seed} index ${i}: ${n.name} stands in the view`,
         );
-        assert.ok(
-          n.founded <= year && !ruinedBy(world, t.index, year),
-          `seed ${seed} index ${i}: ${n.name} stands at the year`,
-        );
+        assert.ok(n.founded <= year && !n.ruined, `seed ${seed} index ${i}: ${n.name} stands at the year`);
         assert.ok(dist >= last, "nearest first");
         last = dist;
         named++;
@@ -86,6 +80,19 @@ test("the round's ruled places name the towns their stills name", () => {
   assert.deepEqual(names(w42, 22), [], "Homaitani");
   assert.deepEqual(names(worldFor(26), 22), [], "Voorea");
   assert.deepEqual(names(w42, 0, 400), [], "before its founding a place has no road");
+});
+
+test("a town stands on the plate until its ruin's own year: Laihoanui, seen from Naukoa on chart 42", () => {
+  const w42 = worldFor(42);
+  assert.equal(w42.settlements[3]!.name, "Naukoa");
+  assert.ok(
+    w42.history.events.some((e) => e.kind === "ruin" && e.settlement === 19 && e.year === 1039),
+    "premise: Laihoanui (index 19) falls in 1039",
+  );
+  const names = (year: number): string[] =>
+    plateSurroundings(w42, 3, year).roadTowns.map((t) => w42.settlements[t.index]!.name);
+  assert.deepEqual(names(1038), ["Laihoanui", "Pelo"], "the year before its ruin the road still runs to it");
+  assert.deepEqual(names(1039), ["Pelo"], "from the year of its ruin it is gone");
 });
 
 test("the river under the town, the range behind it, the roads out and the beast in the bay are the world's", () => {

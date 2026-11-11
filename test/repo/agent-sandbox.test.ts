@@ -324,6 +324,7 @@ const withRemote = (body: (clone: string, sha: string) => void): void => {
   }
 };
 
+// Kept on purpose (Issue #1318): a copy of `haveCommit` in `scripts/agent-sandbox.ts` that only checks the fixture's premise, that the clone lacks the commit `create` is asked to fetch.
 const hasCommit = (cwd: string, sha: string): boolean => {
   try {
     git(["cat-file", "-e", `${sha}^{commit}`], cwd);

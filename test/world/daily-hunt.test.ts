@@ -12,7 +12,7 @@ import {
   type Quarry,
 } from "../../src/world/daily-hunt.ts";
 import { createProjection } from "../../src/render/transform.ts";
-import { buildClueFacts } from "../../src/world/daily-hunt-clue-facts.ts";
+import { buildClueFacts, quarryPool } from "../../src/world/daily-hunt-clue-facts.ts";
 import type { World } from "../../src/world/types.ts";
 import { expectedLeadAxis, mustQuarry, villagePoolSize } from "../../test-support/daily-hunt-geometry.ts";
 import { DAILY_SEEDS, DAILY, SWEEP, SWEEP_SVGS, gatesFor } from "../../test-support/daily-hunt-sweep.ts";
@@ -85,6 +85,17 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
   assert.deepEqual(subjects(120, 90), { ew: "central", ns: "central" });
   assert.deepEqual(subjects(118, 88), { ew: "west", ns: "north" });
   assert.deepEqual(subjects(201, 152), { ew: "east", ns: "south" });
+  assert.deepEqual(
+    subjects(119, 89),
+    { ew: "west", ns: "north" },
+    "one cell past each low edge, at 119.625 and 89.625",
+  );
+  assert.deepEqual(
+    subjects(199, 149),
+    { ew: "central", ns: "central" },
+    "the last central cells, before 199.375 and 149.375",
+  );
+  assert.deepEqual(subjects(200, 150), { ew: "east", ns: "south" }, "one cell past each high edge");
 });
 
 test("the survey leads with the axis the quarry is furthest off-center on", () => {
@@ -168,6 +179,42 @@ test("days the decisive axis already led are untouched: the coin is still drawn"
   assert.equal(sig(DAILY[0]!), "ew:east | onriver: | near:Sahi | road:track | terrain:forest");
   assert.equal(sig(DAILY[3]!), "ew:west | near:Nepai | road:track | realm:Greater Hoaro");
   assert.equal(sig(DAILY[5]!), "ns:south | near:Tseyama | road:track | realm:The Shogunate of Gaicha | terrain:forest");
+});
+
+test("the road clue reads a trunk within 1.5 cells as a made road, a lane within it as a track, and anything farther as pathless", () => {
+  const stateWith = (roads: World["roads"]): string | undefined =>
+    buildClueFacts({ ...flatWorld(320, 240), roads }, villageAt(100, 100)).features.find((c) => c.clue.kind === "road")
+      ?.clue.subject;
+  const at = (rank: "trunk" | "lane", x: number, y: number): World["roads"][number] => ({ rank, points: [{ x, y }] });
+  assert.equal(stateWith([at("trunk", 101.5, 100)]), "road", "a trunk 1.5 cells off comes to the gate");
+  assert.equal(stateWith([at("trunk", 101.6, 100)]), "pathless", "a trunk 1.6 cells off serves nothing");
+  assert.equal(stateWith([at("lane", 100, 101.5)]), "track", "a lane 1.5 cells off is a track");
+  assert.equal(
+    stateWith([at("trunk", 101.6, 100), at("lane", 101, 101)]),
+    "track",
+    "a lane 1.41 cells off, the trunk past reach",
+  );
+  assert.equal(
+    stateWith([at("lane", 100, 101), at("trunk", 100, 98.5)]),
+    "road",
+    "a trunk in reach outranks a nearer lane",
+  );
+  assert.equal(stateWith([at("lane", 101.6, 100)]), "pathless", "a lane 1.6 cells off serves nothing");
+  assert.equal(stateWith([]), "pathless", "no road at all");
+});
+
+test("the quarry pool is the villages that seat no realm, else every place but the capital and the seats, else every place", () => {
+  const poolOf = (
+    kinds: ReadonlyArray<World["settlements"][number]["kind"]>,
+    seats: ReadonlyArray<number>,
+  ): number[] => {
+    const flat = flatWorld(320, 240);
+    const settlements = kinds.map((kind, i) => ({ ...villageAt(i, 0).settlement, kind, name: `${kind} ${i}` }));
+    return quarryPool({ ...flat, settlements, realms: { ...flat.realms, seats } }).map((e) => e.idx);
+  };
+  assert.deepEqual(poolOf(["capital", "town", "village", "village"], [3]), [2], "the village that seats no realm");
+  assert.deepEqual(poolOf(["capital", "town", "town"], [2]), [1], "no village: the town that seats no realm");
+  assert.deepEqual(poolOf(["capital", "town"], [1]), [0, 1], "no village and every other place a seat: everyone");
 });
 
 test("classifyDistanceBand is monotonic and a direct hit is never cold", () => {

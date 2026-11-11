@@ -59,12 +59,14 @@ export function realmNameAt(world: World, x: number, y: number): string | null {
 // Mirrored from buildClues: the central band is the middle quarter (1/8 either side of the midpoint).
 const CENTRAL_BAND = 1 / 8;
 
+// Mirrors `ewBandOf` in `src/world/daily-hunt-clue-facts.ts` on purpose, as the sweep's ground truth (Issue #335).
 export function expectedEW(world: World, x: number): "east" | "west" | "central" {
   const c = (world.elev.w - 1) / 2;
   if (Math.abs(x - c) <= (world.elev.w - 1) * CENTRAL_BAND) return "central";
   return x < c ? "west" : "east";
 }
 
+// Mirrors `nsBandOf` in `src/world/daily-hunt-clue-facts.ts` on purpose, as the sweep's ground truth (Issue #335).
 export function expectedNS(world: World, y: number): "north" | "south" | "central" {
   const c = (world.elev.h - 1) / 2;
   if (Math.abs(y - c) <= (world.elev.h - 1) * CENTRAL_BAND) return "central";
@@ -152,6 +154,7 @@ export function terrainCounts(world: World, x: number, y: number): Record<Terrai
 
 export type RoadState = "road" | "track" | "pathless";
 
+// Mirrors `roadStateAt` in `src/world/daily-hunt-clue-facts.ts` on purpose, as the sweep's ground truth (Issue #335).
 export function roadState(world: World, x: number, y: number): RoadState {
   let trunk = Infinity;
   let lane = Infinity;
