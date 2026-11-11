@@ -279,8 +279,8 @@ const FIXTURES: Fixture[] = [
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],
 ];
 
-// Claude Code 2.1.287, read 2026-10-02: hook additionalContext past 10,000 characters reaches the model as a 2,000-character preview, and the binary's hook-output sanitizer cuts the field at 8,000; which path a project hook takes is unverified, so the stricter binds (Issue #708, ruling D).
-const HOOK_CONTEXT_LIMIT = 8_000;
+// Claude Code 2.1.322, measured 2026-11-11 with a project hook in a non-interactive session, an interactive one and an agent dispatched from each: added text of 9,900 characters arrived whole and 10,100 became a 2,000-character preview in the interactive session and the agents (the non-interactive session itself was read at 9,499, whole, and 10,499, a preview), and the 8,000-character cut the program carries reached none of them (the cloud routine unmeasured), so the limit sits 1,000 under that switch (Issue #1338).
+const HOOK_CONTEXT_LIMIT = 9_000;
 // Every lead quotes the edited path, and the longest root a session edits under is an EnterWorktree directory named for its branch: the longest branch among the closed PRs read 2026-10-02 was 47 characters, and a shorter root here under-measures every probe.
 const LONG_ROOT = `/Users/someone/CodeProjects/Vellum/.claude/worktrees/${"b".repeat(47)}`;
 const NOISY_AND_CLICK = "const R = `a\\(b`; el.click();";
