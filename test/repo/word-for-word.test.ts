@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { Linter } from "eslint";
@@ -11,7 +12,8 @@ import wordForWord, { readCounts } from "../../scripts/lint/word-for-word.ts";
 import { ALPHA, ALPHA_COPY, ALPHA_NEAR, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
+import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
+import { git } from "../../test-support/sandbox-repo.ts";
 import { eslint, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -20,11 +22,12 @@ const TAIL =
   ": fold them into one function, or list each pair in scripts/copy-hunt/accepted-copies.ts with the ruling that keeps it (Issue #1332)";
 const IGNORED = ALPHA_NEAR.replace("alphaOf", "alphaIgnored");
 const UNTRACKED = ALPHA_NEAR.replace("alphaOf", "alphaUntracked");
+const ENDS_AT = ALPHA_NEAR.split("\n")[1]!.length + 1;
 const BLIND_SPOTS =
   "BLIND SPOTS, declared, each toward passing: a function with fewer than 6 names; the body of a test(...) call or any unnamed callback; a function the shared reader does not read: one wrapped in as, satisfies or ! in a declaration, an assignment or an object member, or in parentheses in a declaration or an object member, a class field's arrow or function expression, the outer name of a chained declaration, and an export default function or arrow; a copy whose text differs in anything but white space and comments, an export keyword or a name among them; any file but a .ts under the lint's roots, and one git ignores; and, in a long-lived ESLint process such as an editor's, a file changed after the process first read the tree.";
 
-const verify = (dir: string, path: string, text: string, options: unknown): Linter.LintMessage[] =>
-  new Linter({ cwd: dir }).verify(
+const verify = (dir: string, path: string, text: string, options: unknown, cwd = dir): Linter.LintMessage[] =>
+  new Linter({ cwd }).verify(
     text,
     [
       {
@@ -42,7 +45,8 @@ const reports = (
   text: string,
   accepted: readonly AcceptedCopy[] = [],
   roots: readonly string[] = ["src", "test"],
-): string[] => verify(dir, path, text, { roots, accepted }).map((m) => `${m.line} ${m.message}`);
+  cwd = dir,
+): string[] => verify(dir, path, text, { root: dir, roots, accepted }, cwd).map((m) => `${m.line} ${m.message}`);
 
 test("a function word for word another under the lint's roots is refused at its own line, naming each copy, the file's own among them, read from the text being linted; a copy outside the roots or in a file git ignores, one of fewer than six names, the function itself and a listed pair are not (Issue #1332)", async () => {
   await withTempRepo(
@@ -66,6 +70,7 @@ test("a function word for word another under the lint's roots is refused at its 
       assert.deepEqual(
         {
           copy: reports(dir, "src/b.ts", ALPHA_COPY),
+          subfolder: reports(dir, "src/b.ts", ALPHA_COPY, [], ["src", "test"], join(dir, "src")),
           listed: reports(dir, "src/b.ts", ALPHA_COPY, [listed]),
           self: reports(dir, "src/a.ts", ALPHA),
           buffer: reports(dir, "src/a.ts", OTHER),
@@ -77,6 +82,7 @@ test("a function word for word another under the lint's roots is refused at its 
         },
         {
           copy: [`2 alpha is word for word alpha at src/a.ts:1${TAIL}`],
+          subfolder: [`2 alpha is word for word alpha at src/a.ts:1${TAIL}`],
           listed: [],
           self: [],
           buffer: [`1 unrelated is word for word unrelated at src/h.ts:1${TAIL}`],
@@ -118,7 +124,7 @@ test("outside a git repository the rule throws, naming git ls-files, rather than
 
 test("the rule resolves at error on every TypeScript root the lint reads, with the lint's roots and the accepted-copies list, at any depth and in a room not yet written, and on no sheet (Issue #1332)", async () => {
   const roots = lintTsRoots();
-  const wired = [2, { roots, accepted: ACCEPTED_COPIES }];
+  const wired = [2, { root: ROOT, roots, accepted: ACCEPTED_COPIES }];
   assert.ok(roots.length > 0, "the lint reads no TypeScript root, so this sweep reads nothing");
   for (const root of roots) {
     const witness = WITNESSES[`${root}/**/*.ts`];
@@ -140,7 +146,7 @@ test("the rule resolves at error on every TypeScript root the lint reads, with t
 
 test("a function with copies in an earlier file, its own file and a later file names them in file and line order, and is reported over its own lines (Issue #1332)", async () => {
   await withTempRepo({ "src/a.ts": ALPHA_NEAR, "src/z.ts": ALPHA_NEAR }, (dir) => {
-    const messages = verify(dir, "src/m.ts", `${ALPHA_NEAR}${ALPHA_NEAR}`, { roots: ["src"], accepted: [] });
+    const messages = verify(dir, "src/m.ts", `${ALPHA_NEAR}${ALPHA_NEAR}`, { root: dir, roots: ["src"], accepted: [] });
     assert.deepEqual(
       messages.map((m) => ({
         line: m.line,
@@ -154,17 +160,45 @@ test("a function with copies in an earlier file, its own file and a later file n
           line: 1,
           column: 1,
           endLine: 2,
-          endColumn: 1,
+          endColumn: ENDS_AT,
           text: `alphaOf is word for word alphaOf at src/a.ts:1, alphaOf at src/m.ts:3, alphaOf at src/z.ts:1${TAIL}`,
         },
         {
           line: 3,
           column: 1,
           endLine: 4,
-          endColumn: 1,
+          endColumn: ENDS_AT,
           text: `alphaOf is word for word alphaOf at src/a.ts:1, alphaOf at src/m.ts:1, alphaOf at src/z.ts:1${TAIL}`,
         },
       ],
+    );
+  });
+});
+
+test("a function on one line is reported over the whole line, not over no columns (Issue #1332)", async () => {
+  await withTempRepo({ "src/h.ts": OTHER }, (dir) => {
+    const [only] = verify(dir, "src/k.ts", OTHER, { root: dir, roots: ["src"], accepted: [] });
+    assert.deepEqual(
+      { line: only!.line, column: only!.column, endLine: only!.endLine, endColumn: only!.endColumn },
+      { line: 1, column: 1, endLine: 1, endColumn: OTHER.split("\n")[0]!.length + 1 },
+    );
+  });
+});
+
+test("a conflicted file git lists once per stage is read once, so its functions are not copies of themselves (Issue #1332)", async () => {
+  await withTempRepo({ "src/c.ts": ALPHA_NEAR, "src/h.ts": OTHER }, (dir) => {
+    git(["checkout", "-q", "-b", "side"], dir);
+    writeFiles(dir, { "src/c.ts": ALPHA_NEAR.replace("alphaOf", "alphaSide") });
+    commitAll(dir, "side");
+    git(["checkout", "-q", "main"], dir);
+    writeFiles(dir, { "src/c.ts": ALPHA_NEAR.replace("alphaOf", "alphaMain") });
+    commitAll(dir, "main");
+    spawnSync("git", ["merge", "side"], { cwd: dir, timeout: 30_000 });
+    assert.match(git(["ls-files", "-u"], dir), /src\/c\.ts/, "the merge left no conflict, so this test reads none");
+    writeFiles(dir, { "src/c.ts": ALPHA_NEAR });
+    assert.deepEqual(
+      { elsewhere: reports(dir, "src/h.ts", OTHER), conflicted: reports(dir, "src/c.ts", ALPHA_NEAR) },
+      { elsewhere: [], conflicted: [] },
     );
   });
 });
@@ -185,16 +219,18 @@ test("two sets of roots handed for one working directory are each read from thei
   });
 });
 
-test("the rule takes only an object holding a non-empty list of roots and a list of accepted copies, and nothing else (Issue #1332)", () => {
+test("the rule takes only an object holding the root to read from, a non-empty list of roots and a list of accepted copies, and nothing else (Issue #1332)", () => {
   const taken = (options: unknown): void => void verify(ROOT, "src/zz-1332.ts", "export const x = 1;\n", options);
-  assert.doesNotThrow(() => taken({ roots: ["src"], accepted: [] }), "a well-formed option is refused");
+  assert.doesNotThrow(() => taken({ root: ROOT, roots: ["src"], accepted: [] }), "a well-formed option is refused");
   for (const options of [
     {},
-    { roots: ["src"] },
-    { accepted: [] },
-    { roots: [], accepted: [] },
-    { roots: [1], accepted: [] },
-    { roots: ["src"], accepted: [], extra: true },
+    { root: ROOT, roots: ["src"] },
+    { root: ROOT, accepted: [] },
+    { roots: ["src"], accepted: [] },
+    { root: 1, roots: ["src"], accepted: [] },
+    { root: ROOT, roots: [], accepted: [] },
+    { root: ROOT, roots: [1], accepted: [] },
+    { root: ROOT, roots: ["src"], accepted: [], extra: true },
   ])
     assert.throws(() => taken(options), /Key "vellum\/no-word-for-word-copy":/, `${JSON.stringify(options)} is taken`);
 });

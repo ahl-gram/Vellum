@@ -68,6 +68,7 @@ const wordForWord: Rule.RuleModule = {
       {
         type: "object",
         properties: {
+          root: { type: "string" },
           roots: { type: "array", items: { type: "string" }, minItems: 1 },
           accepted: { type: "array" },
         },
