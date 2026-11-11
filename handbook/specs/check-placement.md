@@ -225,7 +225,10 @@ belongs in.
     (Issue #1320);
   - `npm run copy-hunt` (`scripts/copy-hunt/main.ts`), whether a function a diff adds or changes
     implements the same logic as another under the lint's roots, which `vellum-pr-skeptic` runs on
-    every pull request (Issue #1319); the exact copies it lists are found by code, with no call.
+    every pull request (Issue #1319); the exact copies it lists are found by code, with no call,
+    and the lint refuses one: `vellum/no-word-for-word-copy` in `scripts/lint/word-for-word.ts`
+    reads every function under the lint's roots with the hunt's reader and refuses one whose text
+    another shares, unless `scripts/copy-hunt/accepted-copies.ts` lists the pair (Issue #1332).
 
   Their answers are probabilities from a service whose model changes from version to version, so a
   red resting on one is a guard no prover can show bites. No call of theirs is made, and no
