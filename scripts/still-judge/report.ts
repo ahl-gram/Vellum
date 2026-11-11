@@ -1,12 +1,12 @@
 import { two } from "../comment-judge/report.ts";
+import { pngDims } from "../delivery/dims.ts";
 import { MODEL, type SystemOneRequest } from "../jev/system-one.ts";
 import { COMPARISON_RULE, differenceOf, readingOf, type Asked } from "./compare.ts";
-import { pngSize } from "./png.ts";
 import { ASKED, sha256Of, type Kind } from "./questions.ts";
 import type { TrialStill } from "./trial-set.ts";
 
 export const loggedRequest = (request: SystemOneRequest, png: Uint8Array, path: string): unknown => {
-  const { width, height } = pngSize(png)!;
+  const { width, height } = pngDims(png)!;
   const assets = Object.keys(request.assets ?? {}).map((ref): [string, object] => [
     ref,
     { path, sha256: sha256Of(png), bytes: png.length, width, height },

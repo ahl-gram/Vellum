@@ -6,11 +6,28 @@ import type { Shot } from "../design/shoot.ts";
 import type { Kind } from "./questions.ts";
 import { cropClip, RESTAGES, withStyle, witnessProbe, type RestageId } from "./restage.ts";
 
-// 2026-11-11, Issue #1309: the 30 charts the live trial scored, the first from 1 whose sheets carried every subject its five restages then needed; a question reworded after its score is scored again on charts from 36 up.
 export const TRIAL_SEEDS: readonly number[] = [
   1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35,
 ];
 export const REASKED_SEEDS = 10;
+export const MAX_SEEDS = 100;
+
+export const seedRange = (text: string): number[] | null => {
+  const m = /^(\d+)-(\d+)$/.exec(text);
+  if (m === null) return null;
+  const from = Number(m[1]);
+  const to = Number(m[2]);
+  if (from < 1 || to < from || to - from >= MAX_SEEDS) return null;
+  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+};
+
+export const takeSeeds = (argv: readonly string[]): { rest: string[]; range: string | null } | null => {
+  const at = argv.indexOf("--seeds");
+  if (at === -1) return { rest: [...argv], range: null };
+  const range = argv[at + 1];
+  if (range === undefined) return null;
+  return { rest: [...argv.slice(0, at), ...argv.slice(at + 2)], range };
+};
 export type Arm = "clean" | RestageId;
 export type TrialStill = {
   readonly seed: number;

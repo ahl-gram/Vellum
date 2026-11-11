@@ -1,41 +1,29 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
 import { COMPARISON_RULE } from "../../scripts/still-judge/compare.ts";
+import { NO_KEY, runKeyless, type Run } from "../../test-support/keyless-spawn.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
 const MAIN = resolve(import.meta.dirname, "..", "..", "scripts", "still-judge", "main.ts");
 // 2026-11-11, Issue #1309: ten runs over header-only PNGs took under 0.2 s each on the Mac (the three tests in 1.0 s together); a minute holds three hundred times the slowest.
 const RUN_MS = 60_000;
 
-const NO_KEY = "TYPESAFE_API_KEY is not set and ~/.config/typesafe/key holds no key";
 const TOO_BIG = "1680 by 2478 pixels: each side must be 280 to 1568";
 
-const judge = (
-  args: readonly string[],
-  inside: (dir: string) => void = () => {},
-): { status: number | null; stdout: string; stderr: string } => {
+const judge = (args: readonly string[], inside: (dir: string) => void = () => {}): Run => {
   const dir = mkdtempSync(join(tmpdir(), "still-judge-"));
-  const home = mkdtempSync(join(tmpdir(), "still-judge-home-"));
   try {
     writeFileSync(join(dir, "a.png"), pngHeader(1500, 1158));
     writeFileSync(join(dir, "big.png"), pngHeader(1680, 2478));
-    const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => name !== "TYPESAFE_API_KEY"));
-    const r = spawnSync(process.execPath, [MAIN, ...args], {
-      cwd: dir,
-      env: { ...env, HOME: home },
-      encoding: "utf8",
-      timeout: RUN_MS,
-    });
+    const run = runKeyless(MAIN, args, dir, RUN_MS);
     inside(dir);
-    return { status: r.status, stdout: r.stdout, stderr: r.stderr };
+    return run;
   } finally {
     rmSync(dir, { recursive: true, force: true });
-    rmSync(home, { recursive: true, force: true });
   }
 };
 
@@ -101,6 +89,11 @@ test("a command the usage does not name exits 2 and prints the usage", () => {
     ["trial", "x", "--out", "o"],
     ["bogus", "sheet", "a.png", "a.png"],
     ["bogus", "--out", "o"],
+    ["trial", "--out", "o", "--seeds"],
+    ["trial", "--out", "o", "--seeds", "x"],
+    ["trial", "--out", "o", "--seeds", "3-1"],
+    ["trial", "--out", "o", "--seeds", "1-2", "--seeds", "3-4"],
+    ["compare", "sheet", "a.png", "a.png", "--seeds", "1-2"],
   ]) {
     const run = judge(args);
     assert.equal(run.status, 2, `${args.join(" ")}: ${run.stderr}`);

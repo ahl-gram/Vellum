@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { RESTAGES, withStyle, witnessProbe } from "../../scripts/still-judge/restage.ts";
-import { reaskedOf, shotsOf, stillsOf } from "../../scripts/still-judge/trial-set.ts";
+import { reaskedOf, seedRange, shotsOf, stillsOf, takeSeeds } from "../../scripts/still-judge/trial-set.ts";
 import { RAIN, SHEET } from "../../test-support/still-judge-fixtures.ts";
 
 const CLIP = { x: 286, y: 486, width: 600, height: 400 };
@@ -60,6 +60,23 @@ test("a crop still is clipped around the range name, a restaged still carries it
   assert.equal("clip" in shots[5]!, false);
   assert.deepEqual(shots[6]!.clip, CLIP);
   assert.equal("probe" in shots[6]!, false);
+});
+
+test("a seed range is two whole numbers from 1 up, the first not above the second, at most a hundred apart, and anything else is no range", () => {
+  assert.deepEqual(seedRange("36-38"), [36, 37, 38]);
+  assert.deepEqual(seedRange("5-5"), [5]);
+  assert.equal(seedRange("1-100")!.length, 100);
+  for (const bad of ["", "36", "38-36", "0-3", "a-b", "1-2-3", "-5-3", "1-101", " 1-2", "1.5-3"])
+    assert.equal(seedRange(bad), null, bad);
+});
+
+test("a --seeds argument is taken out of the arguments with its value, and one with no value is refused", () => {
+  assert.deepEqual(takeSeeds(["trial", "--out", "o", "--seeds", "36-65", "--dry-run"]), {
+    rest: ["trial", "--out", "o", "--dry-run"],
+    range: "36-65",
+  });
+  assert.deepEqual(takeSeeds(["trial", "--out", "o"]), { rest: ["trial", "--out", "o"], range: null });
+  assert.equal(takeSeeds(["trial", "--seeds"]), null);
 });
 
 test("only the clean stills of the first seeds are asked twice", () => {

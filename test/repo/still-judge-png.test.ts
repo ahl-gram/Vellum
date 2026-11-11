@@ -1,19 +1,27 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { limitProblem, MAX_BYTES, pngSize } from "../../scripts/still-judge/png.ts";
+import { pngDims } from "../../scripts/delivery/dims.ts";
+import { limitProblem, MAX_BYTES } from "../../scripts/still-judge/png.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
 test("a PNG's width and height are read from its header, and anything else is not a PNG", () => {
-  assert.deepEqual(pngSize(pngHeader(1500, 1158)), { width: 1500, height: 1158 });
-  assert.deepEqual(pngSize(pngHeader(280, 1568)), { width: 280, height: 1568 });
-  assert.equal(pngSize(Buffer.from("GIF89a".padEnd(33, "\0"), "latin1")), null);
+  assert.deepEqual(pngDims(pngHeader(1500, 1158)), { width: 1500, height: 1158 });
+  assert.deepEqual(pngDims(pngHeader(280, 1568)), { width: 280, height: 1568 });
+  assert.deepEqual(pngDims(Buffer.concat([Buffer.alloc(5), pngHeader(1500, 1158)]).subarray(5)), {
+    width: 1500,
+    height: 1158,
+  });
+  assert.equal(pngDims(Buffer.from("GIF89a".padEnd(33, "\0"), "latin1")), null);
   const notIhdr = pngHeader(1500, 1158);
   notIhdr.write("IEND", 12, "latin1");
-  assert.equal(pngSize(notIhdr), null);
-  assert.equal(pngSize(pngHeader(1500, 1158).subarray(0, 23)), null);
+  assert.equal(pngDims(notIhdr), null);
+  assert.equal(pngDims(pngHeader(1500, 1158).subarray(0, 23)), null);
   const notPng = pngHeader(1500, 1158);
   notPng[0] = 0x88;
-  assert.equal(pngSize(notPng), null);
+  assert.equal(pngDims(notPng), null);
+  const halfSignature = pngHeader(1500, 1158);
+  halfSignature[5] = 0x0b;
+  assert.equal(pngDims(halfSignature), null);
 });
 
 test("a still is sent only when each side is 280 to 1568 pixels and the file holds at most 16 MiB, both ends included", () => {
