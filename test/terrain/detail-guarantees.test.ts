@@ -10,27 +10,11 @@ import {
   parentSurfaceOnWindow,
   rejectBridges,
 } from "../../src/terrain/detail-guarantees.ts";
-import { labelLandmasses } from "../../src/world/landmass.ts";
+import { fieldFromRows, landmassCount } from "../../test-support/ascii-field.ts";
 import { cellSegmentEdgePairs } from "../../test-support/saddle-probe.ts";
 
 const SEA = 0;
 const FULL = { u0: 0, v0: 0, u1: 1, v1: 1 } as const;
-
-function fieldFromRows(rows: ReadonlyArray<string>): Field {
-  const h = rows.length;
-  const w = (rows[0] as string).length;
-  const data = new Float64Array(w * h);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      data[x + y * w] = (rows[y] as string)[x] === "#" ? 0.5 : -0.5;
-    }
-  }
-  return fieldFrom(w, h, data);
-}
-
-function landmassCount(f: Field, seaLevel: number): number {
-  return labelLandmasses(f, seaLevel).sizes.length;
-}
 
 test("the parent surface is sampled bilinearly, not nearest neighbour (#397)", () => {
   const ramp = createField(3, 3, (x) => x);
