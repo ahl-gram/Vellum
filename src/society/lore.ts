@@ -1,4 +1,5 @@
 import type { Rng } from "../core/rng.ts";
+import { freshPicker, type FreshPick } from "../core/fresh-pick.ts";
 import { BIOMES } from "../climate/biomes.ts";
 import type { NamedSettlement, World } from "../world/types.ts";
 
@@ -142,24 +143,6 @@ function foundingYearsByName(world: World): Map<string, number> {
   return foundingYear;
 }
 
-type FreshPick = (list: readonly string[]) => string;
-
-function createFreshPick(rng: Rng): FreshPick {
-  const used = new Map<readonly string[], Set<string>>();
-  return (list: readonly string[]): string => {
-    let seen = used.get(list);
-    if (!seen) {
-      seen = new Set();
-      used.set(list, seen);
-    }
-    if (seen.size >= list.length) seen.clear();
-    const avail = list.filter((x) => !seen.has(x));
-    const choice = rng.pick(avail);
-    seen.add(choice);
-    return choice;
-  };
-}
-
 function createFill(
   freshPick: FreshPick,
   aromatic: readonly string[],
@@ -212,7 +195,7 @@ function settlementNoteFor(kit: NoteKit, s: NamedSettlement): string {
 export function createLoreWriter(world: World, rng: Rng): LoreWriter {
   const aromatic = AROMATIC_GOODS[world.culture.id] ?? AROMATIC_GOODS["thalassic"]!;
   const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;
-  const freshPick = createFreshPick(rng);
+  const freshPick = freshPicker(rng);
   const kit: NoteKit = {
     world,
     rng,

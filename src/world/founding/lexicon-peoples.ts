@@ -1,15 +1,8 @@
-import type { ClimateBand } from "../../climate/climate.ts";
 import type { CultureId } from "../../society/culture-ids.ts";
-import type { MapType } from "../../terrain/heightfield.ts";
-import type { COAST_WARP, LexiconEntry, Steer } from "./lexicon.ts";
+import type { LexiconEntry, Steer } from "./lexicon.ts";
+import { band, coast, group, type } from "./lexicon-steers.ts";
 
-const type = (value: MapType): Steer => ({ subject: "mapType", value });
-const band = (value: ClimateBand): Steer => ({ subject: "band", value });
-const coast = (value: keyof typeof COAST_WARP): Steer => ({ subject: "coast", value });
 const tongue = (value: CultureId): Steer => ({ subject: "culture", value });
-
-const group = (steers: ReadonlyArray<Steer>, phrases: ReadonlyArray<string>): LexiconEntry[] =>
-  phrases.map((phrase) => ({ phrase, steers }));
 
 export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
   ...group([coast("ragged"), tongue("norden")], ["fjords", "fjord"]),

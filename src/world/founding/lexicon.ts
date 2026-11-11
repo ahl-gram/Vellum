@@ -4,6 +4,7 @@ import type { MapType } from "../../terrain/heightfield.ts";
 import { MAX_ISLANDS, MIN_ISLANDS, type IsleSize } from "../../terrain/lobes.ts";
 import type { OutlineId } from "../outline-ids.ts";
 import { PEOPLE_WORDS } from "./lexicon-peoples.ts";
+import { band, coast, group, type } from "./lexicon-steers.ts";
 import {
   BAND_WORDS,
   BETWEEN_WORDS,
@@ -43,13 +44,7 @@ export type Steer =
 
 export type LexiconEntry = { readonly phrase: string; readonly steers: ReadonlyArray<Steer> };
 
-const type = (value: MapType): Steer => ({ subject: "mapType", value });
-const band = (value: ClimateBand): Steer => ({ subject: "band", value });
 const land = (value: keyof typeof LAND_FACTOR): Steer => ({ subject: "land", value });
-const coast = (value: keyof typeof COAST_WARP): Steer => ({ subject: "coast", value });
-
-const group = (steers: ReadonlyArray<Steer>, phrases: ReadonlyArray<string>): LexiconEntry[] =>
-  phrases.map((phrase) => ({ phrase, steers }));
 
 export const LEXICON: ReadonlyArray<LexiconEntry> = [
   ...group([type("island")], ["island", "isle", "islet"]),
