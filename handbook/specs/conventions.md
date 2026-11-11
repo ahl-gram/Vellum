@@ -218,6 +218,16 @@ A sweep deletes comments the comment doctrine (`handbook/specs/rulebook.md`, und
 constraints) says are not owed. It is a mechanical change with a non-mechanical failure mode, so it
 is run and PROVEN in a particular way.
 
+- **A sweep runs every week, over the comments added since the last one** (Alex, 2026-11-10). It is
+  run by hand, in the weekly sitting where Alex reviews memory, never on a timer: no workflow carries a
+  schedule, and the cloud routine reaches neither GitHub nor TypeSafe. The last sweep is the newest
+  commit on `main` whose subject says `comment sweep`, read from subjects only
+  (`git log --format='%cs %s' origin/main | grep -i -m1 'comment sweep'`), since `--grep` also
+  searches bodies and finds commits that merely mention one; so every sweep's title says
+  `comment sweep`. The sweep reads the comments the diff from that commit to `main` adds, and a week
+  with nothing to cut opens no pull request. Its keeper scan is the bullet below, run by
+  `npm run keeper-scan` once Issue #1320 lands.
+
 - **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
   scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
   stripping a comment off the end of a code line that survives shows up as a CHANGED CODE LINE, so an

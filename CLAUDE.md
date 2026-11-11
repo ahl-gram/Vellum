@@ -61,6 +61,8 @@ root), RESUME-HERE and auto-memory but does NOT know about the Project, so this 
 step. **A rule change EDITS the spec that owns the rule** (the table above names each, and
 `handbook/specs/conventions.md` says where a rule lives) in a branch and a PR, as readily for a corrected fact
 as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
+**A weekly comment sweep is due** when the last one is a week old or more; say so at the handoff
+(`handbook/specs/conventions.md`, The comment sweep, says how to find the last one and what it reads).
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). The project, field and
 phase-option ids are NOT written here (the board is private, this file is public); look them up once
