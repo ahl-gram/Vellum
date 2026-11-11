@@ -1,5 +1,6 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Limner, MapStyle } from "../../render/style.ts";
+import { r3 } from "../../core/math.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { Pt } from "../geometry.ts";
 import { dressContext, r1, type DressContext } from "./context.ts";
@@ -18,11 +19,8 @@ export { r1 };
 export const pt = (p: Pt): string => `${r1(p.x)} ${r1(p.y)}`;
 export const poly = (pts: ReadonlyArray<Pt>, closed = true): string => `M${pts.map(pt).join("L")}${closed ? "Z" : ""}`;
 
-/** A width rounded to the thousandth, so a product such as 1.2 * 0.85 writes 1.02, not its float. */
-const width = (w: number): number => Math.round(w * 1000) / 1000;
-
 export function stroke(e: Engraver, w: number): Record<string, string | number> {
-  return { stroke: e.ink, "stroke-width": width(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
+  return { stroke: e.ink, "stroke-width": r3(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
 }
 
 export function hatchPolygon(pts: ReadonlyArray<Pt>, slope: number, spacing: number, phase = 0): string {
@@ -63,7 +61,7 @@ export function hatchNode(
     d: hatchPolygon(pts, slope, spacing, phase),
     fill: "none",
     stroke: e.ink,
-    "stroke-width": width(w),
+    "stroke-width": r3(w),
     "stroke-opacity": opacity,
     "stroke-linecap": "butt",
   });

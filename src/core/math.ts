@@ -12,3 +12,4 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 }
 
 export const r1 = (v: number): number => Math.round(v * 10) / 10;
+export const r3 = (v: number): number => Math.round(v * 1000) / 1000;

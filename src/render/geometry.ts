@@ -19,6 +19,12 @@ export function prunePoints<T extends Pt>(candidates: ReadonlyArray<T>, minDist:
   return accepted;
 }
 
+export function clearOfCircles(
+  avoid: ReadonlyArray<{ x: number; y: number; r: number }>,
+): (px: number, py: number, extra: number) => boolean {
+  return (px, py, extra) => avoid.every((a) => Math.hypot(px - a.x, py - a.y) > a.r + extra);
+}
+
 export function centroidOf(points: ReadonlyArray<Pt>): Pt {
   let sx = 0;
   let sy = 0;
