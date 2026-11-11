@@ -5,20 +5,26 @@ import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { regionPlateSpec } from "../../src/atlas/compose.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
+import { quarterWindow } from "../../test-support/uv-window.ts";
 
-const sized = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
 const BAND_3_ZOOM = Math.sqrt(319 / (0.125 * 319));
 
 test("past band 3's window a close-up keeps band 3's mark spacing and grows its caps with its area", () => {
-  assert.deepEqual(glyphDensity(320, { window: sized(1 / 32), worldGridW: 320 }), {
+  assert.deepEqual(glyphDensity(320, { window: quarterWindow(1 / 32), worldGridW: 320 }), {
     zoom: BAND_3_ZOOM,
     capScale: 4,
   });
-  assert.deepEqual(glyphDensity(320, { window: sized(1 / 16), worldGridW: 320 }), { zoom: BAND_3_ZOOM, capScale: 2 });
+  assert.deepEqual(glyphDensity(320, { window: quarterWindow(1 / 16), worldGridW: 320 }), {
+    zoom: BAND_3_ZOOM,
+    capScale: 2,
+  });
 });
 
 test("band 3's window, the atlas plate and a world sheet draw as before", () => {
-  assert.deepEqual(glyphDensity(320, { window: sized(0.125), worldGridW: 320 }), { zoom: BAND_3_ZOOM, capScale: 1 });
+  assert.deepEqual(glyphDensity(320, { window: quarterWindow(0.125), worldGridW: 320 }), {
+    zoom: BAND_3_ZOOM,
+    capScale: 1,
+  });
   const world = generateWorld(defaultRecipe(42));
   const capital = world.settlements.find((s) => s.kind === "capital")!;
   const plate = regionPlateSpec(world, capital).window;

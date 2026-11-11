@@ -8,8 +8,6 @@ import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/split-arguments-by-name";
 
-const reports = (lines: readonly string[], path: string): Promise<number[]> => ruleLines(lines, path, RULE);
-
 test("a split builder hands each value to its own file's parts under the name of the parameter it lands in, and a call of an exported function is not read (Issue #654)", async () => {
   const plant = [
     "function part(view: number, scale: number): number { return view * scale; }",
@@ -21,34 +19,36 @@ test("a split builder hands each value to its own file's parts under the name of
     "export function short(view: number): number { return scaled(view); }",
   ];
   assert.deepEqual(
-    await reports(plant, "src/site/explorer/hash-sync.ts"),
+    await ruleLines(plant, "src/site/explorer/hash-sync.ts", RULE),
     [3, 4, 7],
     "BLIND SPOTS, declared, each erring toward passing: a module-level const arrow (a handbook/errata/guards.md row), an exported function, a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (57 calls in 15 other files under src/site hand values on under other names)",
   );
 });
 
 test("a file on the list that hands nothing to a part of its own reds, so the list cannot go stale (Issue #654)", async () => {
-  assert.deepEqual(await reports(["export const x = 1;"], "src/site/explorer/hash-sync.ts"), [1]);
+  assert.deepEqual(await ruleLines(["export const x = 1;"], "src/site/explorer/hash-sync.ts", RULE), [1]);
 });
 
 test("an older call is excused by its exact text, and an excuse whose call is gone or edited reds (Alex, Issue #654 comment 5939656565, decision B)", async () => {
   const declare =
     "function startSounding(statusEl: Element, random: () => number): void { void statusEl; void random; }";
   assert.deepEqual(
-    await reports(
+    await ruleLines(
       [
         declare,
         "export function boot(veil: { status: Element }, opts: { random?: () => number }): void { startSounding(veil.status, opts.random ?? Math.random); }",
       ],
       "src/site/home/veil.ts",
+      RULE,
     ),
     [],
     "the excused call as written",
   );
   assert.deepEqual(
-    await reports(
+    await ruleLines(
       [declare, "export function boot(veil: { status: Element }): void { startSounding(veil.status, Math.random); }"],
       "src/site/home/veil.ts",
+      RULE,
     ),
     [1, 2],
     "the edited call reds where it stands, and its excuse reds as stale",

@@ -5,6 +5,7 @@ import { l9d2Debt, l9eFloor } from "../../e2e/suites/landfall/clamps.ts";
 import { entersKit, gestureKit, stageKit } from "../../e2e/suites/landfall/kit.ts";
 import { l9bPinch } from "../../e2e/suites/landfall/touch.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { checkIntoMap } from "../../test-support/ctx-fakes.ts";
 
 // A state change an action causes lands LAG evaluates after it, so a pause that resolves at once reads the state before it lands.
 const LAG = 3;
@@ -36,7 +37,7 @@ const world = (answer: (expr: string, w: World) => unknown) => {
       return Promise.resolve();
     },
     sleep: () => Promise.resolve(),
-    check: (name: string, ok: unknown) => void w.checked.set(name.split(" ")[0]!, !!ok),
+    check: checkIntoMap(w.checked),
     PORT: 8765,
   } as unknown as SuiteContext;
   return { w, k: entersKit(gestureKit(stageKit(ctx))) };

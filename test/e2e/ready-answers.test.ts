@@ -11,8 +11,7 @@ import { ra2Clamps, ra3Survey, ra7Counter } from "../../e2e/suites/room-address.
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
 import { sb19SlidFromRest } from "../../e2e/suites/specimen/slid.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
-
-type Checked = { code: string | undefined; ok: boolean };
+import { answering, checkInto, type CheckedCode } from "../../test-support/ctx-fakes.ts";
 
 const READ_THE_PAGE = "the step read the page";
 const LANDED: Cam = { veil: false, lifting: false, status: null, scale: 1.72, x: 0, y: 0, fit: 1, expected: 1.72 };
@@ -20,15 +19,12 @@ const VEILED: Cam = { veil: true, lifting: false, status: "Landfall", scale: 1.1
 const unsettled = (label: string) => `${label}: home never settled at its landfall: ${JSON.stringify(VEILED)}`;
 
 function page(answer: (expression: string) => unknown) {
-  const checked: Checked[] = [];
+  const checked: CheckedCode[] = [];
   const ctx = {
-    evaluate: (expression: string): Promise<unknown> => {
-      const a = answer(expression);
-      return a instanceof Error ? Promise.reject(a) : Promise.resolve(a);
-    },
+    evaluate: answering(answer),
     send: (): Promise<unknown> => Promise.resolve({}),
     sleep: (): Promise<void> => Promise.resolve(),
-    check: (name: string, ok: unknown): void => void checked.push({ code: name.split(" ")[0], ok: !!ok }),
+    check: checkInto(checked),
     shoot: (): Promise<void> => Promise.resolve(),
     setMobileViewport: (): Promise<void> => Promise.resolve(),
     clearMobile: (): Promise<void> => Promise.resolve(),

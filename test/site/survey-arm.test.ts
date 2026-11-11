@@ -1,42 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  createSurveyArm,
-  afterNextPaint,
-  armOnLanding,
-  wireSurveyToggle,
-  deferLandingArm,
-} from "../../src/site/explorer/survey-arm.ts";
-import { fakeBox, paintQueue } from "../../test-support/arm-fakes.ts";
+import { afterNextPaint, armOnLanding, wireSurveyToggle, deferLandingArm } from "../../src/site/explorer/survey-arm.ts";
+import { fakeBox, paintQueue, surveyHarness as harness } from "../../test-support/arm-fakes.ts";
 
 // The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2 and SV2c.
-
-function harness() {
-  const q = paintQueue();
-  // builds = the tick's arm, landings = a settle or turn arm (Issue #366), clears = the unticked teardown: counted apart so a test can say WHICH ran.
-  const state = { armed: false, worldGen: 0, builds: 0, landings: 0, clears: 0 };
-  const arm = createSurveyArm({
-    afterPaint: q.afterPaint,
-    isArmed: () => state.armed,
-    worldGen: () => state.worldGen,
-    arm: () => {
-      state.builds++;
-    },
-  });
-  const land = (opts: { defer?: boolean } = {}) =>
-    armOnLanding({
-      arm,
-      armed: state.armed,
-      rearm: () => {
-        state.landings++;
-      },
-      clear: () => {
-        state.clears++;
-      },
-      ...opts,
-    });
-  return { ...q, state, arm, land };
-}
 
 test("#300 the arm is deferred past the paint: the click's turn builds nothing", () => {
   const h = harness();

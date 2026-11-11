@@ -1,7 +1,8 @@
 import type { SuiteContext } from "../e2e/types.ts";
+import { checkInto } from "./ctx-fakes.ts";
 
 export type Said = { kind: "send" | "evaluate" | "shoot"; what: string };
-export type Checked = { code: string | undefined; ok: boolean };
+export type Checked = { code: string; ok: boolean };
 
 export const recording = (answer: (expression: string, said: readonly Said[]) => unknown) => {
   const said: Said[] = [];
@@ -20,7 +21,7 @@ export const recording = (answer: (expression: string, said: readonly Said[]) =>
       slept.push(ms);
       return Promise.resolve();
     },
-    check: (name: string, ok: unknown): void => void checked.push({ code: name.split(" ")[0], ok: !!ok }),
+    check: checkInto(checked),
     shoot: (file: string): Promise<void> => {
       said.push({ kind: "shoot", what: file });
       return Promise.resolve();

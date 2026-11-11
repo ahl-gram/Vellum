@@ -10,6 +10,7 @@ import { backHome } from "../../e2e/suites/prospect/room.ts";
 import { rb5cLeans } from "../../e2e/suites/ribbon.ts";
 import { ROOMS } from "../../e2e/suites/slide-away/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { answering } from "../../test-support/ctx-fakes.ts";
 
 const GONE = "eval exception: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')";
 const AWAY = "({ path: location.pathname, ready: document.readyState })";
@@ -59,10 +60,7 @@ for (const { code, leaned, lean } of LEANS) {
 
 const page = (answer: (expression: string) => unknown): SuiteContext =>
   ({
-    evaluate: (expression: string): Promise<unknown> => {
-      const a = answer(expression);
-      return a instanceof Error ? Promise.reject(a) : Promise.resolve(a);
-    },
+    evaluate: answering(answer),
     send: (): Promise<unknown> => Promise.resolve({}),
     sleep: (): Promise<void> => Promise.resolve(),
     check: (): void => undefined,

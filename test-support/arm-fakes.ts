@@ -1,3 +1,7 @@
+import { armOnLanding, createSurveyArm } from "../src/site/explorer/survey-arm.ts";
+
+export const crashedPrime = (): Promise<never> => Promise.reject(new Error("the render worker crashed"));
+
 export function paintQueue() {
   const queued: Array<() => void> = [];
   return {
@@ -46,4 +50,32 @@ export function fakeBox() {
       if (handler) handler();
     },
   };
+}
+
+export function surveyHarness(prime?: () => Promise<void>) {
+  const q = paintQueue();
+  // builds = the tick's arm, landings = a settle or turn arm (Issue #366), clears = the unticked teardown: counted apart so a test can say WHICH ran.
+  const state = { armed: false, worldGen: 0, builds: 0, landings: 0, clears: 0 };
+  const arm = createSurveyArm({
+    afterPaint: q.afterPaint,
+    isArmed: () => state.armed,
+    worldGen: () => state.worldGen,
+    arm: () => {
+      state.builds++;
+    },
+    prime,
+  });
+  const land = (opts: { defer?: boolean } = {}) =>
+    armOnLanding({
+      arm,
+      armed: state.armed,
+      rearm: () => {
+        state.landings++;
+      },
+      clear: () => {
+        state.clears++;
+      },
+      ...opts,
+    });
+  return { ...q, state, arm, land };
 }

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRoomArm } from "../../src/site/reading-room/arm.ts";
-import { heldPrime, paintQueue } from "../../test-support/arm-fakes.ts";
+import { crashedPrime, heldPrime, paintQueue } from "../../test-support/arm-fakes.ts";
 
 // Issue #418: the slot's contract, whose why lives at the head of src/site/reading-room/arm.ts.
 
@@ -84,7 +84,7 @@ test("#418 a prime that REJECTS still arms: the room falls back to the inline or
   const arm = createRoomArm({ afterPaint: q.afterPaint, worldGen: () => 0 });
 
   arm.schedule({
-    prime: () => Promise.reject(new Error("the render worker crashed")),
+    prime: crashedPrime,
     arm: () => {
       arms++;
     },

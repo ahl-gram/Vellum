@@ -1,4 +1,5 @@
 import type { SuiteContext } from "../e2e/types.ts";
+import { checkInto } from "./ctx-fakes.ts";
 
 export type Sent = { method: string; params?: Record<string, unknown> };
 export type Checked = { code: string; ok: boolean };
@@ -22,7 +23,7 @@ export const recordingSuite = (answer: (expression: string, sent: readonly Sent[
       slept.push(ms);
       return Promise.resolve();
     },
-    check: (name: string, ok: unknown): void => void checked.push({ code: name.split(" ")[0]!, ok: !!ok }),
+    check: checkInto(checked),
     shoot: (): Promise<void> => Promise.resolve(),
     touch: (type: string, points: unknown): Promise<unknown> => record(`touch ${type}`, { points }),
     setNarrowViewport: async (width: number, height: number): Promise<void> => {

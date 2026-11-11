@@ -18,6 +18,8 @@ import { INSET_CARDS, z21dInsetCards } from "../../e2e/suites/zoom/inset-cards.t
 import { count, recording } from "../../test-support/recording-ctx.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
+const atFive = () => Promise.resolve({ redrafts: 5, band: 0, committed: false });
+
 type Cam = { k: number; x: number; y: number };
 const HOME: Cam = { k: 1, x: 0, y: 0 };
 const ZOOMED: Cam = { k: 1.2, x: -60, y: -80 };
@@ -184,7 +186,7 @@ test("Z19b presses home only once the region job is in flight", async () => {
   let homes = 0;
   const { ctx } = recording((expression) => (expression === DRAFTING ? { drafting: false, redrafts: 5 } : {}));
   const k = zoomKitOver(ctx, {
-    rgn: () => Promise.resolve({ redrafts: 5, band: 0, committed: false }),
+    rgn: atFive,
     goHome: () => {
       homes++;
       return Promise.resolve();
@@ -215,7 +217,7 @@ test("the inset context shot waits for the region drafting to end, not for the d
 
 test("Z19b does not press home once the job it waited for has already landed", async () => {
   const { ctx } = recording((expression) => (expression === DRAFTING ? { drafting: true, redrafts: 6 } : {}));
-  const k = zoomKitOver(ctx, { rgn: () => Promise.resolve({ redrafts: 5, band: 0, committed: false }) });
+  const k = zoomKitOver(ctx, { rgn: atFive });
   await assert.rejects(z19bSupersession(k), (err: Error) =>
     err.message.startsWith("settle timeout Z19b the region job in flight: "),
   );

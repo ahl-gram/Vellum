@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField, NEIGHBORS_8 } from "../../src/core/grid.ts";
 import { landSnapRadius, snapToLand, snapToStandingLand } from "../../src/world/snap-to-land.ts";
+import { quarterWindow } from "../../test-support/uv-window.ts";
 
 const SEA = 0;
 
@@ -9,12 +10,11 @@ const oneLandCell = (w: number, h: number, lx: number, ly: number) =>
   createField(w, h, (x, y) => (x === lx && y === ly ? 1 : -1));
 
 test("the snap radius is the fine cells per parent cell, one per band rung", () => {
-  const band = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
-  assert.equal(landSnapRadius(320, band(0.5), 320), 2, "band 1");
-  assert.equal(landSnapRadius(320, band(0.25), 320), 4, "band 2");
-  assert.equal(landSnapRadius(320, band(0.125), 320), 8, "band 3");
+  assert.equal(landSnapRadius(320, quarterWindow(0.5), 320), 2, "band 1");
+  assert.equal(landSnapRadius(320, quarterWindow(0.25), 320), 4, "band 2");
+  assert.equal(landSnapRadius(320, quarterWindow(0.125), 320), 8, "band 3");
   assert.equal(landSnapRadius(320, { u0: 0, v0: 0, u1: 1, v1: 1 }, 320), 1, "the world window");
-  assert.equal(landSnapRadius(160, band(0.5), 320), 1, "a coarser region grid never snaps further");
+  assert.equal(landSnapRadius(160, quarterWindow(0.5), 320), 1, "a coarser region grid never snaps further");
 });
 
 test("a degenerate window or grid falls back to radius 1 rather than an unbounded search", () => {

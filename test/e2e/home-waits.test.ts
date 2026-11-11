@@ -7,6 +7,7 @@ import { homeKit } from "../../e2e/suites/home/kit.ts";
 import { h14cLegend } from "../../e2e/suites/home/stations.ts";
 import { makeMouse, readCam, readXform, type Cam } from "../../e2e/support/home.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { checkInto } from "../../test-support/ctx-fakes.ts";
 
 type Sent = { method: string; params: Record<string, unknown> };
 
@@ -28,7 +29,7 @@ const world = (answer: (expression: string, sent: readonly Sent[], slept: readon
       slept.push(ms);
       return Promise.resolve();
     },
-    check: (name: string, ok: unknown) => void checked.push({ code: name.split(" ")[0]!, ok: !!ok }),
+    check: checkInto(checked),
     shoot: () => Promise.resolve(),
     PORT: 8765,
   } as unknown as SuiteContext;

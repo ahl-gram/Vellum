@@ -15,12 +15,21 @@ const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "proof-runn
 const harnessLine = (name: string, ok: boolean, detail = "") =>
   `${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  ${String.fromCharCode(0x2014)} ${detail}` : ""}`;
 
+const lineInto =
+  (out: string[]) =>
+  (name: string, ok: unknown, detail = ""): number =>
+    out.push(harnessLine(name, !!ok, detail));
+const into =
+  (err: string[]) =>
+  (...parts: unknown[]): number =>
+    err.push(format(...parts));
+
 const realRun = async () => {
   const out: string[] = [];
   const err: string[] = [];
-  const check = (name: string, ok: unknown, detail = "") => out.push(harnessLine(name, !!ok, detail));
+  const check = lineInto(out);
   const saved = console.error;
-  console.error = (...parts: unknown[]) => err.push(format(...parts));
+  console.error = into(err);
   try {
     check("IX9 the survey sheet frames the page", false, "border 0px");
     check("IX10 the index stands beside the broadside", true);
@@ -89,9 +98,9 @@ test("a red's id is its first token with trailing punctuation stripped", () => {
 const stoppedSteps = async (names: readonly string[]) => {
   const out: string[] = [];
   const err: string[] = [];
-  const check = (name: string, ok: unknown, detail = "") => out.push(harnessLine(name, !!ok, detail));
+  const check = lineInto(out);
   const saved = console.error;
-  console.error = (...parts: unknown[]) => err.push(format(...parts));
+  console.error = into(err);
   try {
     for (const name of names)
       await makeStep({ check, suite: "landfall" })(name, () => Promise.reject(new Error(`settle timeout ${name}`)));
