@@ -24,15 +24,15 @@ test("cellsPerWorldCell is 2, 8 and 32 at bands 1, 3 and 5, and 1 on a degenerat
 });
 
 test("windowFrame boxes the window in the parent's cells and maps that box's corners onto the region grid's corners", () => {
-  const frame = windowFrame(321, 241, { u0: 0.25, v0: 0.5, u1: 0.5, v1: 1 }, 320, 240);
-  assert.deepEqual(frame.box, { x0: 80, x1: 160, y0: 120, y1: 240 });
-  assert.deepEqual(frame.toRegion({ x: 80, y: 120 }), { x: 0, y: 0 }, "the box's top left is region cell (0, 0)");
+  const frame = windowFrame(201, 161, { u0: 0.25, v0: 0.5, u1: 0.5, v1: 1 }, 320, 240);
+  assert.deepEqual(frame.box, { x0: 50, x1: 100, y0: 80, y1: 160 });
+  assert.deepEqual(frame.toRegion({ x: 50, y: 80 }), { x: 0, y: 0 }, "the box's top left is region cell (0, 0)");
   assert.deepEqual(
-    frame.toRegion({ x: 160, y: 240 }),
+    frame.toRegion({ x: 100, y: 160 }),
     { x: 319, y: 239 },
     "its bottom right is region cell (319, 239)",
   );
-  assert.deepEqual(frame.toRegion({ x: 120, y: 180 }), { x: 159.5, y: 119.5 }, "its middle is the grid's middle");
+  assert.deepEqual(frame.toRegion({ x: 75, y: 120 }), { x: 159.5, y: 119.5 }, "its middle is the grid's middle");
 });
 
 test("clipSegment keeps the share of a segment inside the box, from where it enters to where it leaves, and nothing of one outside", () => {
