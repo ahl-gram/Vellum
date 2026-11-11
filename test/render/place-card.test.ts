@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import type { PlaceMark } from "../../src/render/place-manifest.ts";
-import type { HistoricalEvent } from "../../src/society/history.ts";
 import {
   placeRank,
   placeAriaLabel,
@@ -12,6 +11,7 @@ import {
   composePlaceCard,
   composeDerivation,
 } from "../../src/render/place-card.ts";
+import { ev } from "../../test-support/chronicle-fixtures.ts";
 
 const UNCERTAIN_LINE = "Of uncertain derivation, even to the philologists.";
 
@@ -30,13 +30,6 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   ny: 0.5,
   gx: 0,
   gy: 0,
-  ...over,
-});
-
-const ev = (over: Partial<HistoricalEvent> = {}): HistoricalEvent => ({
-  year: 100,
-  kind: "founding",
-  text: "An event of no special note.",
   ...over,
 });
 

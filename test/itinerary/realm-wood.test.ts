@@ -4,14 +4,10 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { borderSteps, woodEntries } from "../../src/itinerary/realm-wood.ts";
 import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts";
 import { layoutRibbon, stripFor } from "../../src/itinerary/dress/layout.ts";
-import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
-import { capitalJourneys, namedJourney } from "../../test-support/ribbon-fixtures.ts";
+import { capitalJourneys, namedJourney, only } from "../../test-support/ribbon-fixtures.ts";
 import { sweepJourneys } from "../../test-support/ribbon-captions.ts";
 import type { World } from "../../src/world/types.ts";
-
-const only = <K extends RibbonEvent["kind"]>(input: RibbonInput, kind: K): Extract<RibbonEvent, { kind: K }>[] =>
-  input.events.filter((e): e is Extract<RibbonEvent, { kind: K }> => e.kind === kind);
 
 test("a border fires where the road passes into another named realm and stays three cells, or stays to the road's end", () => {
   const cases: Array<[number[], Array<{ k: number; from: number; to: number }>]> = [

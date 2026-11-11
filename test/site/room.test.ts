@@ -13,6 +13,7 @@ import {
 import { bindRoom } from "../../src/site/shared/room.ts";
 import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
+import { press } from "../../test-support/press-button.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + --slip-right + 1.4rem)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "src/styles/shared/atelier.css"), "utf8");
@@ -134,9 +135,6 @@ class PageEl extends El {
     return { left, right, top: top - y, bottom: bottom - y, width: right - left, height: bottom - top };
   }
 }
-
-const press = (offsetTop: number): El =>
-  Object.assign(new El("button"), { offsetTop, rect: { left: 0, top: 0, right: 80, bottom: 32 } });
 
 class StackedLegend extends PageEl {
   override querySelectorAll(): El[] {

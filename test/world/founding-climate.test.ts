@@ -2,16 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { ClimateBand } from "../../src/climate/climate.ts";
 import { CULTURE_IDS, type CultureId } from "../../src/society/culture-ids.ts";
-import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
+import type { Founding } from "../../src/world/founding/found.ts";
 import { CLIMATE_TRADITION, LEXICON, type LexiconEntry, type Steer } from "../../src/world/founding/lexicon.ts";
-
-const founded = (sentence: string): Founding => {
-  const f = foundWorld(sentence);
-  assert.ok(f.ok, `"${sentence}" should found a world, was refused: ${f.ok ? "" : f.reason}`);
-  return f;
-};
-
-const phrases = (list: Founding["steered"]): string[] => list.map((r) => r.phrase);
+import { founded, phrases } from "../../test-support/founded-world.ts";
 
 const steersOf = (f: Founding, phrase: string): ReadonlyArray<Steer> => {
   const found = f.steered.find((r) => r.phrase === phrase);

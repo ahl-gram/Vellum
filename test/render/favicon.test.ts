@@ -16,6 +16,8 @@ import {
 } from "../../src/render/favicon.ts";
 import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "../../scripts/glyph-outline.ts";
 import { decodePng, hexOf } from "../../test-support/png-decode.ts";
+import { attr } from "../../test-support/dress-svg.ts";
+import { near } from "../../test-support/near.ts";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
@@ -31,9 +33,7 @@ const SQUARE: GlyphOutline = {
 
 const rootTag = (svg: string) => svg.slice(0, svg.indexOf(">") + 1);
 const tags = (svg: string, name: string): string[] => [...(svg.match(new RegExp(`<${name}\\b[^>]*>`, "g")) ?? [])];
-const attr = (tag: string, name: string) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
 const num = (tag: string, name: string) => Number(attr(tag, name));
-const near = (a: number, b: number, msg: string) => assert.ok(Math.abs(a - b) < 1e-9, `${msg}: ${a} vs ${b}`);
 
 test("the favicon root is 32 square and the touch icon 180 square, integer width before height, one viewBox", () => {
   for (const [svg, size] of [

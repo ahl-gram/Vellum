@@ -9,23 +9,7 @@ import {
   toldRow,
   reorderPlanByTravel,
 } from "../../src/render/voyage.ts";
-
-const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
-  idx: 0,
-  worldIdx: 0,
-  name: "Aelmoor",
-  kind: "town",
-  founded: 300,
-  ruined: false,
-  seat: false,
-  roads: false,
-  nx: 0.5,
-  ny: 0.5,
-  // buildVoyagePlan orders ports by the chart fractions nx/ny and never reads gx/gy, so these are filler, not fixtures.
-  gx: 0,
-  gy: 0,
-  ...over,
-});
+import { mark } from "../../test-support/chronicle-fixtures.ts";
 
 // A hand-laid world with unambiguous sweep order: the capital at the origin, A/C/B collinear along x at 0.1 / 0.2 / 0.3.
 const capital = mark({ idx: 0, name: "Aelmoor", kind: "capital", founded: 812, nx: 0, ny: 0 });
