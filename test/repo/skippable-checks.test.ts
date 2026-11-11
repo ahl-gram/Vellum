@@ -86,11 +86,11 @@ const PLANT: Plant = [
     'test("an earlier if leaves a later check after a bare return", () => { if (xs.length > 0) assert.ok(1); if (c) return; assert.ok(2); });',
     REFUSE,
   ],
-  ['test("a computed member is no check", () => { if (c) return; assert["ok"](1); });', PASS],
+  ['test("a computed member is no check", () => { if (c) return; assert[c](1); });', PASS],
 ];
 
 const BLIND_SPOTS =
-  "BLIND SPOTS, declared, each with its direction: a check made through a helper under any other name (check, must, verify) is no check, so a test whose only checks are such calls passes (a miss), and one that makes such a call on every path beside an assert under an if is refused (a false red); a check inside a callback, a forEach's or a function the body defines, is not read, in the same two directions; a break, a try's catch, a switch and a && or || are read as neither a skip nor a condition (a miss); an else-if chain counts as checked on both sides once its first if and a later branch check, though its last if has no else (a miss); a loop over a list a filter emptied, and a floor that cannot fail (count >= 0), pass (a miss); a test whose body is passed by name is not read (a miss); a check through a computed member (assert[name]) is no check (a miss); a labelled continue is read against its nearest loop rather than its label's (either way)";
+  "BLIND SPOTS, declared, each with its direction: a check made through a helper under any other name (check, must, verify) is no check, so a test whose only checks are such calls passes (a miss), and one that makes such a call on every path beside an assert under an if is refused (a false red); a check inside a callback, a forEach's or a function the body defines, is not read, in the same two directions; a break, a try's catch, a switch and a && or || are read as neither a skip nor a condition (a miss); an else-if chain counts as checked on both sides once its first if and a later branch check, though its last if has no else (a miss); a loop over a list a filter emptied, and a floor that cannot fail (count >= 0), pass (a miss); a test whose body is passed by name is not read (a miss); a check through a computed member (assert[c]) is no check (a miss); a labelled continue is read against its nearest loop rather than its label's (either way)";
 
 test("a unit test whose every check can be skipped is refused at its call, and one with a check on every path, an announced skip or an if whose else checks passes (Issue #1329)", async () => {
   const refused = refusedLines(PLANT);
