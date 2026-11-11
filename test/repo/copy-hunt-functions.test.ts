@@ -23,6 +23,10 @@ const OTHER_FORMS = [
   "holder.p = (n: number): number => n * 2;",
   "declare class Ghost { constructor(size: string); get shape(): number; }",
   "abstract class Shape { abstract get span(): number; }",
+  "let g: (n: number) => number;",
+  "g = function (n: number): number { return n; };",
+  "let h: (() => number) | undefined;",
+  "h ??= () => 1;",
   "",
 ].join("\n");
 const SEVERAL = [
@@ -60,6 +64,7 @@ test("a function declaration, a const arrow or function expression, a method, ge
       ["Box.set area", 9, 11, "set area(value: number) { this.size = Math.sqrt(value); }"],
       ["later", 14, 14, "later = (n: number): number => n + 1;"],
       ["holder.p", 16, 16, "holder.p = (n: number): number => n * 2;"],
+      ["g", 20, 20, "g = function (n: number): number { return n; };"],
     ],
   );
   const several = functionsIn("src/m.ts", SEVERAL);
