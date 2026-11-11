@@ -154,6 +154,24 @@ test("refineTour: the cycle's orientation is canonical, so a tie never flips the
   assert.equal(forward[1], 1, "0->1 costs 1 and 0->2 costs 5, so the survey leaves via 1");
 });
 
+test("refineTour: the fresh nearest-first start must win by more than the tolerance, so a tie keeps the given order's refinement", () => {
+  const given = [0, 2, 1, 3, 4];
+  const nearest = [0, 1, 2, 3, 4];
+  const level = () => 1;
+  assert.equal(
+    tourCost(given, level),
+    tourCost(nearest, level),
+    "fixture premise: the given cycle and the nearest-first cycle tie",
+  );
+  assert.deepEqual(refineTour(given, level), given, "an exact tie keeps the given order");
+  const nudged = (a: number, b: number) => (a + b === 1 ? 1 - 1e-12 : 1);
+  assert.ok(
+    tourCost(nearest, nudged) < tourCost(given, nudged),
+    "fixture premise: the nearest-first cycle is cheaper, by 1e-12",
+  );
+  assert.deepEqual(refineTour(given, nudged), given, "a win inside the tolerance is a tie too");
+});
+
 test("refineTour: never worse than the given order, start pinned, set preserved", () => {
   for (let seed = 1; seed <= 6; seed++) {
     let s = (seed * 2654435761) >>> 0;
