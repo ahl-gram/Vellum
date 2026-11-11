@@ -34,42 +34,29 @@ import {
 import { LOD_BANDS, lodWindowFor } from "../../src/world/lod.ts";
 import { placeId } from "../../src/world/outline-ids.ts";
 import type { WorldRecipe } from "../../src/world/types.ts";
-import { hashOf } from "../../test-support/table-address-fixtures.ts";
+import { hashOf, surveyAt } from "../../test-support/table-address-fixtures.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionJob, RegionResult } from "../../src/site/explorer/worker-client.ts";
 type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 // The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
-const survey = (lx: number): SurveyItem => ({
-  kind: "survey",
-  seed: 42,
-  overrides: {},
-  rung: 2,
-  lx,
-  ly: 3,
-  style: "antique",
-  legend: true,
-  arms: false,
-  beasts: false,
-  theme: null,
-});
-const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
+const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => surveyAt(i));
 
 test("a survey lays on the table, and the table it came from is untouched (#520)", () => {
   const before = fill(2);
-  const after = layOnTable(before, survey(9));
+  const after = layOnTable(before, surveyAt(9));
   assert.equal(after.refused, false);
   assert.equal(after.items.length, 3);
   assert.equal(before.length, 2, "the caller's array is never mutated");
   assert.notEqual(after.items, before);
-  assert.deepEqual(after.items[2], survey(9), "the newest sheet lies on top of the pile, last");
+  assert.deepEqual(after.items[2], surveyAt(9), "the newest sheet lies on top of the pile, last");
 });
 
 test("the table holds six and refuses the seventh, leaving the six it has (#520, #401 ruling: cap six)", () => {
   const full = fill(TABLE_CAP);
   assert.equal(full.length, 6, "TABLE_CAP is the grammar's own six");
-  const after = layOnTable(full, survey(99));
+  const after = layOnTable(full, surveyAt(99));
   assert.equal(after.refused, true);
   assert.equal(after.items.length, TABLE_CAP, "a refusal never grows the table");
   assert.deepEqual(after.items, full, "a refusal never reorders it either");
@@ -141,20 +128,20 @@ test("the tab counts the drawer it is shut over (#520)", () => {
 });
 
 test("the same survey is refused a second time, and the table is unmoved (#520, ruled)", () => {
-  const one = layOnTable([], survey(4)).items;
-  const again = layOnTable(one, survey(4));
+  const one = layOnTable([], surveyAt(4)).items;
+  const again = layOnTable(one, surveyAt(4));
   assert.equal(again.refused, true);
   assert.equal(again.reason, "already", "refused for being a duplicate, not for want of room");
   assert.equal(again.items, one, "and the table is handed back untouched");
 
-  const other = layOnTable(one, survey(5));
+  const other = layOnTable(one, surveyAt(5));
   assert.equal(other.refused, false, "a different seat on the same world is a different survey");
   assert.equal(other.items.length, 2);
 });
 
 test("the cap refuses for want of room, which reads differently from a duplicate (#520)", () => {
-  const full = layOnTable(fill(TABLE_CAP - 1), survey(98)).items;
-  const seventh = layOnTable(full, survey(99));
+  const full = layOnTable(fill(TABLE_CAP - 1), surveyAt(98)).items;
+  const seventh = layOnTable(full, surveyAt(99));
   assert.equal(seventh.refused, true);
   assert.equal(seventh.reason, "full");
   assert.notEqual(refusalLine("full"), refusalLine("already"), "the two refusals are not the same sentence");
@@ -163,7 +150,7 @@ test("the cap refuses for want of room, which reads differently from a duplicate
 
 // The fixtures above vary only lx, so a sameSheet comparing the seat alone passes all of them.
 test("a sheet differing in ANY field the address carries is a different sheet (#520)", () => {
-  const base = survey(4);
+  const base = surveyAt(4);
   const twins: ReadonlyArray<readonly [string, TableItem]> = [
     ["seed", { ...base, seed: 43 }],
     ["rung", { ...base, rung: 3 }],
@@ -186,7 +173,7 @@ test("a sheet differing in ANY field the address carries is a different sheet (#
 
 test("a prospect is told from a survey, and from another prospect (#520)", () => {
   const p1: TableItem = { kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059 };
-  assert.equal(layOnTable([survey(4)], p1).refused, false, "a prospect is never the survey beside it");
+  assert.equal(layOnTable([surveyAt(4)], p1).refused, false, "a prospect is never the survey beside it");
   assert.equal(layOnTable([p1], p1).refused, true, "the same prospect twice is refused");
   assert.equal(layOnTable([p1], { ...p1, index: 4 }).refused, false, "a different plate is a different prospect");
   assert.equal(layOnTable([p1], { ...p1, year: 900 }).refused, false, "so is the same plate in another year");
@@ -194,7 +181,7 @@ test("a prospect is told from a survey, and from another prospect (#520)", () =>
 
 // Nothing else makes a table both FULL and holding the item, so swapping the two guards in layOnTable was invisible at both layers.
 test("a full table refusing a sheet it ALREADY holds says so, not that it is full (#520)", () => {
-  const target = survey(0);
+  const target = surveyAt(0);
   const full = fill(TABLE_CAP);
   assert.equal(full.length, TABLE_CAP);
   assert.deepEqual(full[0], target, "the target is on the full table");
@@ -228,7 +215,7 @@ test("CT1 thumbJobFor hands a prospect its own job, dressed as the ADDRESS state
 });
 
 test("CT2 thumbJobFor hands EVERY table item a job, so no kind can be left drafting forever (#522; a prospect returned null until this sub and read 'drawing…' for good)", () => {
-  for (const item of [survey(2), prospect(), prospect({ style: "antique", year: 300 })] as TableItem[]) {
+  for (const item of [surveyAt(2), prospect(), prospect({ style: "antique", year: 300 })] as TableItem[]) {
     const job = thumbJobFor(item);
     assert.ok(job, `${item.kind} has no job, so its cutting never fills`);
     assert.equal(job.kind, item.kind === "prospect" ? "prospect" : "region");
@@ -261,7 +248,7 @@ test("CT4 a prospect's cutting names the dress the PLATE is drawn in, so a hand-
     "nautical draws antique, so it reads antique",
   );
   assert.equal(subOf(prospect({ style: "topographic" })), "a prospect, antique, 1059");
-  assert.equal(subOf(survey(1)), "band 2, antique", "a survey's line is unchanged");
+  assert.equal(subOf(surveyAt(1)), "band 2, antique", "a survey's line is unchanged");
 });
 
 test("CT6 the card's press wears the two ruled faces, and a table that is BOTH full and already holding this plate says the more useful of the two true things (#518 ruling 7, Alex 2026-09-17, and #520's own precedence scar)", () => {
@@ -357,10 +344,10 @@ test("CT9 the Explorer seats the table in exactly two places, the boot and the c
 });
 
 test("CT10 the sheets a re-seat drops are read against the table it brings, so every departed sheet's picture is named for revoking (#634; the drawer's own passes are chart-drawer-ceremony.test.ts's)", () => {
-  const before = [survey(1), survey(2), survey(3)];
+  const before = [surveyAt(1), surveyAt(2), surveyAt(3)];
   assert.deepEqual(
-    sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])),
-    [emitTable([survey(2)])],
+    sheetsThatLeft(before, [surveyAt(1), surveyAt(3)]).map((i) => emitTable([i])),
+    [emitTable([surveyAt(2)])],
     "the middle sheet left and was not named, so its picture is never revoked",
   );
   assert.deepEqual(

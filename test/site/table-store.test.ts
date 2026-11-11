@@ -11,23 +11,11 @@ import {
   TABLE_STORE_KEY,
   TRAVERSAL,
 } from "../../src/site/shared/table-store.ts";
-import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+import { emitTable, parseTable, type TableItem } from "../../src/site/shared/table-address.ts";
+import { surveyAt } from "../../test-support/table-address-fixtures.ts";
 
 // The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
-const survey = (lx: number): SurveyItem => ({
-  kind: "survey",
-  seed: 42,
-  overrides: {},
-  rung: 2,
-  lx,
-  ly: 3,
-  style: "antique",
-  legend: true,
-  arms: false,
-  beasts: false,
-  theme: null,
-});
-const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
+const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => surveyAt(i));
 
 /** Records what was ASKED of it, not only what it ends up holding: removing a key and storing an empty string leave the same bytes behind and mean different things to the next arrival. */
 class FakeStore {
@@ -115,8 +103,8 @@ test("TS15 a traversal takes the device WHOSEVER folio the entry carries, which 
   // address is rewritten. TS4's fixture cannot tell this apart, because the table its address carries is a subset of
   // the device's, which is the stale-snapshot shape that the rejected alternative would also have answered this way.
   // The fixture here is DISJOINT on purpose: the alternative returns the address's folio and this test reds.
-  const theirs = [survey(7), survey(8)];
-  const mine = [survey(1), survey(2)];
+  const theirs = [surveyAt(7), surveyAt(8)];
+  const mine = [surveyAt(1), surveyAt(2)];
   assert.equal(
     emitTable(tableOnArrival(theirs, mine, TRAVERSAL)),
     emitTable(mine),
