@@ -43,7 +43,7 @@ test("accumulation is non-decreasing from head to mouth", () => {
 });
 
 test("tributaries end at a junction point shared with another river", () => {
-  const f = buildHeightfield({ seed: 42, gridW: 100, gridH: 75, mapType: "island" });
+  const f = buildHeightfield({ seed: 13, gridW: 100, gridH: 75, mapType: "island" });
   const sea = pickSeaLevel(f, 0.38);
   const flow = computeFlow(f, sea);
   const rivers = extractRivers(f, flow, sea);
@@ -53,13 +53,12 @@ test("tributaries end at a junction point shared with another river", () => {
     `the fixture grows no tributary among its ${rivers.length} rivers, so nothing below runs`,
   );
 
-  const allPoints = new Set<string>();
-  for (const r of rivers) {
-    for (const p of r.points) allPoints.add(`${p.x},${p.y}`);
-  }
   for (const t of tribs) {
     const last = t.points[t.points.length - 1]!;
-    assert.ok(allPoints.has(`${last.x},${last.y}`), "junction must lie on the network");
+    assert.ok(
+      rivers.some((r) => r !== t && r.points.some((p) => p.x === last.x && p.y === last.y)),
+      `tributary ending at ${last.x},${last.y} meets no other river`,
+    );
   }
 });
 
