@@ -27,6 +27,15 @@ const OTHER_FORMS = [
   "g = function (n: number): number { return n; };",
   "let h: (() => number) | undefined;",
   "h ??= () => 1;",
+  "let i: (() => number) | undefined;",
+  "i ||= () => 2;",
+  "let j: (() => number) | undefined;",
+  "j &&= () => 3;",
+  "let z: (() => number) | undefined;",
+  "z = (() => 4);",
+  "const a: { b?: () => number } = {};",
+  "const c: { d?: () => number } = {};",
+  "a.b = c.d = () => 6;",
   "",
 ].join("\n");
 const SEVERAL = [
@@ -65,6 +74,12 @@ test("a function declaration, a const arrow or function expression, a method, ge
       ["later", 14, 14, "later = (n: number): number => n + 1;"],
       ["holder.p", 16, 16, "holder.p = (n: number): number => n * 2;"],
       ["g", 20, 20, "g = function (n: number): number { return n; };"],
+      ["h", 22, 22, "h ??= () => 1;"],
+      ["i", 24, 24, "i ||= () => 2;"],
+      ["j", 26, 26, "j &&= () => 3;"],
+      ["z", 28, 28, "z = (() => 4);"],
+      ["a.b", 31, 31, "a.b = c.d = () => 6;"],
+      ["c.d", 31, 31, "c.d = () => 6"],
     ],
   );
   const several = functionsIn("src/m.ts", SEVERAL);
