@@ -248,11 +248,12 @@ byte-identical, and the drift guard is green.**
 - **The Horizon tier is filed but unscheduled.** Filing an epic there does not enter it into the
   strategic order. **A slot is ratified in this file before any sub is drafted.** Membership of
   Horizon and of the numbered phases is board state; read it from the Project, not from here.
+- **Horizon holds only epics whose subs are still to be specced out** (Alex, 2026-11-03, recorded on
+  PR #1321). Any other newly filed issue goes into the theme phase it belongs to, meaning any phase
+  on the board but Horizon and Parked, numbered or named (Alex, 2026-11-10); Parked takes only an
+  issue moved there later. The session filing it names that phase to Alex.
 - **#395 (The Farther Interior) HAS ITS SLOT, ratified 2026-08-23.** It enters the strategic order.
-  **Its board item deliberately still sits in the Horizon column** (Alex, 2026-08-23): where it lands
-  among the numbered phases is a separate sequencing call he has not taken, and this ratification
-  does not pre-empt it. This is the one case where the board's Horizon column does not mean
-  unscheduled, and the rule above yields to this line. The trigger the epic named for itself was met:
+  The trigger the epic named for itself was met:
   #376 shipped all five subs and closed, and Alex used the shallow detailed coast in the Explorer and
   confirmed it reads right, then ratified going deeper rather than settling at four bands. **Sub 0 is
   a spike and it gates the rest**: render band-4 and band-5 windows with the detailed coast beside
