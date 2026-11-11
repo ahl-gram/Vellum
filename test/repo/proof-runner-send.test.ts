@@ -174,3 +174,14 @@ test("an edit's replacement is taken literally, never as a replacement pattern",
   ]);
   assert.equal(after.get("src/c.ts"), "const a = '$&$';\nconst b = '$`$&';\n");
 });
+
+test("a file over a mebibyte is read whole at the commit, not refused as missing", async () => {
+  const big = "x".repeat(2 * 1024 * 1024) + "\n";
+  await withTempRepo({ "big.svg": big }, (dir, sha) => {
+    let text = "";
+    assert.doesNotThrow(() => {
+      text = readAt(dir, sha)("big.svg");
+    });
+    assert.equal(text.length, big.length);
+  });
+});

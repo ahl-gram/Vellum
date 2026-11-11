@@ -23,12 +23,19 @@ export type SuiteRules = {
 };
 
 const GIT_MS = 30_000;
+// 2026-11-10, Issue #1310: spawnSync's default 1 MiB refused a 1,078,207-byte chart a trial row reads; the largest file tracked at main is 10,767,194 bytes, so 64 MiB keeps six times that.
+const MAX_BUFFER = 64 * 1024 * 1024;
 const count = (text: string, part: string): number => text.split(part).length - 1;
 
 export const readAt =
   (repo: string, sha: string) =>
   (file: string): string => {
-    const r = spawnSync("git", ["show", `${sha}:${file}`], { cwd: repo, encoding: "utf8", timeout: GIT_MS });
+    const r = spawnSync("git", ["show", `${sha}:${file}`], {
+      cwd: repo,
+      encoding: "utf8",
+      timeout: GIT_MS,
+      maxBuffer: MAX_BUFFER,
+    });
     if (r.status !== 0) throw new Error(`${file} is not a file at ${sha}: ${r.stderr.trim()}`);
     return r.stdout;
   };
