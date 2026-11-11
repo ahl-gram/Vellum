@@ -37,11 +37,13 @@ test("#79 no realm spans open water: seated-landmass cells belong to a realm sea
   const { ids, seatLm } = landmassOf(w);
   const seated = new Set(seatLm);
   const n = w.elev.w * w.elev.h;
+  let checked = 0;
   for (let i = 0; i < n; i++) {
     const r = w.realms.labels[i] as number;
     if (r < 0) continue;
     const lm = ids[i] as number;
     if (seated.has(lm)) {
+      checked++;
       assert.equal(
         seatLm[r],
         lm,
@@ -49,6 +51,7 @@ test("#79 no realm spans open water: seated-landmass cells belong to a realm sea
       );
     }
   }
+  assert.ok(checked >= 1, "no cell of seed 9 lies in a realm on a seated landmass, so none was checked");
 });
 
 test("#79 each seatless island attaches whole to exactly one realm", () => {

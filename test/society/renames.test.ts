@@ -55,14 +55,17 @@ test("former names are distinct from each other", () => {
 });
 
 test("ruined towns keep the card they have: no former name", () => {
+  let ruined = 0;
   for (const seed of SEEDS) {
     const w = worldFor(seed);
     for (const s of w.settlements) {
       if (s.ruined) {
+        ruined++;
         assert.equal(s.formerName, undefined, `seed ${seed}: ruined ${s.name} was renamed`);
       }
     }
   }
+  assert.ok(ruined >= 1, `no town on seeds ${SEEDS.join(", ")} is a ruin, so none was checked`);
 });
 
 test("capitals and realm seats are eligible", () => {

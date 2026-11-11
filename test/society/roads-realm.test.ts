@@ -193,13 +193,16 @@ test("#309: no road shadows another; a royal trunk rides its home web out of tow
         for (let dx = -3; dx <= 3; dx++) if (cells.has(x + dx + (y + dy) * W)) return true;
       return false;
     };
+    let pairs = 0;
     for (let a = 0; a < w.roads.length; a++) {
       for (let b = 0; b < w.roads.length; b++) {
         if (a === b || groupOf(w.roads[a]!) === groupOf(w.roads[b]!)) continue;
+        pairs++;
         const best = longestShadowRun(w.roads[a]!.points, cellSets[b]!, near, W);
         assert.ok(best < 15, `seed ${seed}: road ${a} shadows road ${b} for ${best} cells without touching it`);
       }
     }
+    assert.ok(pairs >= 1, `seed ${seed}: no two roads belong to different groups, so no shadow was measured`);
   }
 });
 

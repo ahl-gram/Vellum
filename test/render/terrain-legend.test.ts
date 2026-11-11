@@ -114,12 +114,14 @@ test("the key omits Marsh when the map has none", () => {
 });
 
 test("the added terrain rows keep the key inside the frame", () => {
+  let planned = 0;
   for (let seed = 1; seed <= 20; seed++) {
     const world = generateWorld(defaultRecipe(seed, { gridW: 160, gridH: 120 }));
     for (const name of ["antique", "ink"] as const) {
       const ctx = glyphCtx(world, name);
       const plan = planLegend(ctx, []);
       if (!plan) continue;
+      planned++;
       const { box } = plan;
       const m = ctx.proj.margin;
       assert.ok(
@@ -128,4 +130,5 @@ test("the added terrain rows keep the key inside the frame", () => {
       );
     }
   }
+  assert.ok(planned >= 1, "no world of seeds 1 to 20 planned a key in either style, so no key was held to its frame");
 });
