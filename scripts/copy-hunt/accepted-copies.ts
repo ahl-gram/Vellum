@@ -8,6 +8,7 @@ export type AcceptedCopy = {
 
 const DAILY_HUNT_RULING = "https://github.com/ahl-gram/Vellum/issues/1318#issuecomment-6791902246";
 const LISTED_RULING = "https://github.com/ahl-gram/Vellum/issues/1319#issuecomment-6795585660";
+const KEPT_BY_1332 = "https://github.com/ahl-gram/Vellum/issues/1332#issuecomment-6799386440";
 const CLUES = "src/world/daily-hunt-clue-facts.ts";
 const MIRROR = "test-support/daily-hunt-geometry.ts";
 const MIRRORED =
@@ -62,6 +63,20 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
     b: { file: "test/render/realm-label-placement.test.ts", name: "boxOf", hash: "17e4971ae07be9fe" },
     reason: `${KEPT}: the test's boxOf is the box placeRealmLabel claims for a spot, built from the same spacedTextBox call; this boxAt is placeOnWorldSheet's.`,
     ruling: LISTED_RULING,
+  },
+  {
+    a: { file: "src/world/region-parent.ts", name: ".toRegion", hash: "02e996b42f735427" },
+    b: { file: "scripts/region-detail/feature-match.ts", name: ".toRegion", hash: "02e996b42f735427" },
+    reason:
+      "The region census's own mapping into a close-up's grid, kept apart so a guard built on it does not share the close-up's code (its file's opening line), word for word windowFrame's since PR #1337 (Issue #1331) folded the close-up's two, with a line above the copy naming the original",
+    ruling: KEPT_BY_1332,
+  },
+  {
+    a: { file: "src/prospect/dress/furniture.ts", name: "overlaps", hash: "0b548949825e9bdb" },
+    b: { file: "test/prospect/plate-e-world.test.ts", name: "overlaps", hash: "0b548949825e9bdb" },
+    reason:
+      "The plate test's own box-overlap check, the one its bird assertions share with the plate's layout, kept beside the original with a line above the copy naming it; a later edit to one copy is caught, a mistake typed into both at once is not",
+    ruling: KEPT_BY_1332,
   },
   {
     a: { file: "scripts/agent-sandbox.ts", name: "haveCommit", hash: "3dc95b12918f2154" },

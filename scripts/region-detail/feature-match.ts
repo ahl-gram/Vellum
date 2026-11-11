@@ -28,6 +28,7 @@ function frameOf(world: World, window: UvWindow, gridW: number, gridH: number): 
     x1: window.u1 * ww,
     y0: window.v0 * wh,
     y1: window.v1 * wh,
+    // Kept on purpose (Issue #1332): word for word the mapping of `windowFrame` in `src/world/region-parent.ts`, kept apart so a guard built on this census does not share the close-up's code.
     toRegion: (p) => ({
       x: ((p.x / ww - window.u0) / (window.u1 - window.u0)) * (gridW - 1),
       y: ((p.y / wh - window.v0) / (window.v1 - window.v0)) * (gridH - 1),

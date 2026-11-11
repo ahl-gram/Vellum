@@ -34,6 +34,7 @@ const RULED: ReadonlyArray<readonly [number, number, number?]> = [
   [42, 0, 400],
 ];
 const SWEEP = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+// Kept on purpose (Issue #1332): word for word the private `overlaps` in `src/prospect/dress/furniture.ts`, the check the bird assertions share with the plate's layout.
 const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 const inside = (b: Box): boolean => b.x0 >= INNER.x0 && b.x1 <= INNER.x1 && b.y0 >= INNER.y0 && b.y1 <= INNER.y1;
 
