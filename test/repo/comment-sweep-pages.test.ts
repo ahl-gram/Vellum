@@ -35,6 +35,18 @@ const PAGES_BITING = [
     before: "<a>x</a> <b>y</b>\n",
     after: "<a>x</a><b>y</b>\n",
   },
+  {
+    name: "an array hole moved",
+    path: "src/pages/a.astro",
+    before: "---\nconst [, a, b] = x;\n---\n",
+    after: "---\nconst [a, , b] = x;\n---\n",
+  },
+  {
+    name: "an array hole dropped",
+    path: "src/pages/a.astro",
+    before: "<p>{[1, , 2]}</p>\n",
+    after: "<p>{[1, 2]}</p>\n",
+  },
 ];
 
 for (const f of PAGES_BITING)

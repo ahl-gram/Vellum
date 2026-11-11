@@ -82,7 +82,7 @@ const SCRIPTS_QUIET = [
     after: "const a = 1;\n\nconst b = 2;\n",
   },
   {
-    name: "reindented, the one blind spot",
+    name: "reindented, a blind spot",
     path: "src/a.ts",
     before: "if (x) {\n  y();\n}\n",
     after: "if (x) {\n        y();\n}\n",
