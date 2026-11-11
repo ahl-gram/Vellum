@@ -56,5 +56,5 @@ export const findingsOf = (
 ): Finding[] => [
   ...changed.map((c) => findingOf(c, before, after)),
   ...deleted.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "deleted", path })),
-  ...typeChanged.map((path): Finding => ({ kind: "identical", path })),
+  ...typeChanged.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "type changed", path })),
 ];
