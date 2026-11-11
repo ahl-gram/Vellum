@@ -7,21 +7,9 @@ import {
   wireSurveyToggle,
   deferLandingArm,
 } from "../../src/site/explorer/survey-arm.ts";
+import { fakeBox, paintQueue } from "../../test-support/arm-fakes.ts";
 
 // The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2 and SV2c.
-
-/** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
-function paintQueue() {
-  const queued: Array<() => void> = [];
-  return {
-    afterPaint: (run: () => void): void => {
-      queued.push(run);
-    },
-    paint: (): void => {
-      for (const run of queued.splice(0)) run();
-    },
-  };
-}
 
 function harness() {
   const q = paintQueue();
@@ -179,23 +167,6 @@ test("#366 a quiet mid-drag landing arms INLINE: the track follows the coastline
 });
 
 // The box's own wiring: what the handler does SYNCHRONOUSLY is the acknowledgment, what it defers is the build.
-
-function fakeBox() {
-  let handler: (() => void) | null = null;
-  const box = {
-    checked: false,
-    addEventListener: (type: string, fn: () => void): void => {
-      if (type === "change") handler = fn;
-    },
-  };
-  return {
-    box,
-    change: (to: boolean): void => {
-      box.checked = to;
-      if (handler) handler();
-    },
-  };
-}
 
 function toggleHarness() {
   const q = paintQueue();

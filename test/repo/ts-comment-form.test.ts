@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { ESLint, type Rule } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
@@ -9,7 +9,7 @@ import tseslint from "typescript-eslint";
 import * as prettier from "prettier";
 import { blockWitnesses } from "../../test-support/lint-block-witnesses.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { eslint, plantMessages, resolvedRules } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const NO_JS = "vellum/ts-comment-no-js-module";
@@ -122,12 +122,6 @@ const ROOT_WITNESSES: Readonly<Record<string, string>> = {
   src: "src/cli/main.ts",
   test: "test/repo/lint-wiring.test.ts",
   "test-support": "test-support/element-shim.ts",
-};
-
-const resolvedRules = async (file: string): Promise<Record<string, unknown>> => {
-  assert.ok(existsSync(join(ROOT, file)), `${file}, a witness here, does not exist`);
-  assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so its root reads nothing`);
-  return ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules ?? {};
 };
 
 test("the two comment rules and the escape twin reach every TypeScript root the lint reads, and the sheets carry the CSS siblings instead (Issue #675)", async () => {

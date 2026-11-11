@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, ruleLines } from "../../test-support/source-shape-reports.ts";
+import { resolvedRule, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/e2e-sleep-inside-poll";
@@ -149,9 +149,6 @@ test("an e2e sleep stands inside a for poll that leaves on what it reads, or nam
   assert.deepEqual(await reported("e2e/support/settle.ts"), REFUSED, "a support module is held as a suite is");
 });
 
-const resolvedRule = async (file: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[RULE];
-
 test("the rule resolves at error on every e2e file at any depth and on no other root or sheet", async () => {
   const roots = lintTsRoots();
   assert.ok(roots.includes("e2e") && roots.length > 1, "the lint's roots are not what this sweep expects");
@@ -160,7 +157,7 @@ test("the rule resolves at error on every e2e file at any depth and on no other 
     assert.ok(witness !== undefined && existsSync(join(ROOT, witness)), `${root} has no existing witness`);
     const want = root === "e2e" ? [2] : undefined;
     for (const file of [witness, `${root}/nested/deeper/part.ts`])
-      assert.deepEqual(await resolvedRule(file), want, `${RULE} resolves wrongly on ${file}`);
+      assert.deepEqual(await resolvedRule(file, RULE), want, `${RULE} resolves wrongly on ${file}`);
   }
-  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
+  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!, RULE), undefined, `${RULE} reaches a sheet`);
 });

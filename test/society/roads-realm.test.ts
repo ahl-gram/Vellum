@@ -1,26 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createField } from "../../src/core/grid.ts";
 import { labelComponents } from "../../src/core/mask-components.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
 import { buildRoads } from "../../src/society/roads.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import type { Settlement } from "../../src/society/sites.ts";
+import { land, noRivers, settle, type Rect } from "../../test-support/hand-built-realms.ts";
 
 // Issue #309 guards on hand-built worlds: exact realm and landmass geometry no natural seed guarantees.
 
 const SEA = 0.5;
-type Rect = { x0: number; y0: number; x1: number; y1: number };
-const inRect = (x: number, y: number, r: Rect) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
-
-function land(w: number, h: number, rects: ReadonlyArray<Rect>) {
-  return createField(w, h, (x, y) => (rects.some((r) => inRect(x, y, r)) ? 1 : 0));
-}
-function settle(x: number, y: number, kind: Settlement["kind"], score = 1): Settlement {
-  return { x, y, kind, harbor: false, onRiver: false, score };
-}
-const noRivers = (w: number, h: number) => new Uint8Array(w * h);
 
 const roadCellSet = (roads: ReturnType<typeof buildRoads>, w: number) => {
   const cells = new Set<number>();

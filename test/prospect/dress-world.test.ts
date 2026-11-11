@@ -1,22 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import type { World } from "../../src/world/types.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { outlinedSolids } from "../../test-support/dress-svg.ts";
-
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  let w = worlds.get(seed);
-  if (w === undefined) {
-    w = generateWorld(defaultRecipe(seed));
-    worlds.set(seed, w);
-  }
-  return w;
-}
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 // No byte pins here: world-sourced geometry descends from Math.hypot, so its rendered bytes may drift across platforms (the compose-world.test.ts caveat); purity and dress-invariance are same-process claims and safe.
 test("every settlement in real worlds engraves in both dresses, purely and dress-invariantly", () => {

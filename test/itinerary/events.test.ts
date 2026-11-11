@@ -8,7 +8,7 @@ import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { layoutRibbon } from "../../src/itinerary/dress/layout.ts";
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
-import { capitalJourneys } from "../../test-support/ribbon-fixtures.ts";
+import { capitalJourneys, only } from "../../test-support/ribbon-fixtures.ts";
 import { plateCaptions, sweepJourneys } from "../../test-support/ribbon-captions.ts";
 
 // Issue #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
@@ -22,9 +22,6 @@ function journey(seed: number, toName: string): { input: RibbonInput; rng: Retur
   assert.ok(input, `seed ${seed}'s capital still reaches ${toName} by road`);
   return { input, rng: createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`) };
 }
-
-const only = <K extends RibbonEvent["kind"]>(input: RibbonInput, kind: K): Extract<RibbonEvent, { kind: K }>[] =>
-  input.events.filter((e): e is Extract<RibbonEvent, { kind: K }> => e.kind === kind);
 
 test("seed 15, Stanbyl to Svidsvikov: one river crossed, named, and major enough for a bridge", () => {
   const { input, rng } = journey(15, "Svidsvikov");

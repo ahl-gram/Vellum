@@ -1,43 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRoomArm } from "../../src/site/reading-room/arm.ts";
+import { heldPrime, paintQueue } from "../../test-support/arm-fakes.ts";
 
 // Issue #418: the slot's contract, whose why lives at the head of src/site/reading-room/arm.ts.
-
-/** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
-function paintQueue() {
-  const queued: Array<() => void> = [];
-  return {
-    afterPaint: (run: () => void): void => {
-      queued.push(run);
-    },
-    paint: (): void => {
-      for (const run of queued.splice(0)) run();
-    },
-  };
-}
-
-/** Primes whose promises the test releases, so an arm can be caught waiting. */
-function heldPrime() {
-  const waiting: Array<() => void> = [];
-  let calls = 0;
-  return {
-    calls: () => calls,
-    prime: (): Promise<void> => {
-      calls++;
-      return new Promise<void>((resolve) => {
-        waiting.push(resolve);
-      });
-    },
-    settle: (): void => {
-      for (const r of waiting.splice(0)) r();
-    },
-    flush: (): Promise<void> =>
-      Promise.resolve()
-        .then(() => {})
-        .then(() => {}),
-  };
-}
 
 function harness() {
   const q = paintQueue();

@@ -1,11 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, globSync } from "node:fs";
+import { globSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { Linter } from "eslint";
 import tseslint from "typescript-eslint";
 import sourceShape from "../../scripts/lint/source-shape.ts";
-import { READS, ROSTER, at, eslint, houseReports } from "../../test-support/source-shape-reports.ts";
+import { READS, ROSTER, at, eslint, houseReports, resolvedRules } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const ENGINE = "vellum/engine-no-id-lookup";
@@ -315,12 +315,6 @@ test("a single-escaped regex class or dot in a backtick string reports in every 
     at(ESCAPE, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 18]),
   );
 });
-
-const resolvedRules = async (file: string): Promise<Record<string, unknown>> => {
-  assert.ok(existsSync(join(ROOT, file)), `${file}, a witness here, does not exist, so its scope reads nothing`);
-  assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so its scope reads nothing`);
-  return ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules ?? {};
-};
 
 const REACH: ReadonlyArray<readonly [string, string, string]> = [
   [ENGINE, "src/site/shared/living-chart/index.ts", "src/site/explorer/app.ts"],

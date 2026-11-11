@@ -1,28 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
-import { TABLE_CAP, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+import { TABLE_CAP, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
+import { surveyAt } from "../../test-support/table-address-fixtures.ts";
 
 // The ceremony half of the Chart Table (Issue #523 Sub 5 of Issue #401): the settle on a laid cutting, the jolt at the cap, the ghost's url adopted on a drag-drop, the drawer revealed for a carry and put back, and a thumbnail patched into its cutting in place. The drawer BUILDS DOM, so the element shim stands in for the environment, never the module under test; every rect is the one the test states.
 
 installShim();
 
-const survey = (lx: number): SurveyItem => ({
-  kind: "survey",
-  seed: 42,
-  overrides: {},
-  rung: 2,
-  lx,
-  ly: 3,
-  style: "antique",
-  legend: true,
-  arms: false,
-  beasts: false,
-  theme: null,
-});
-const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
+const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => surveyAt(i));
 const SVG = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 
 function drawer(
@@ -77,10 +65,10 @@ const landing = (li: El): boolean => li.classList.contains("landing");
 
 test("CT12 a lay marks exactly the laid cutting `landing`, once: a second lay marks the second and the first is bare again", () => {
   const { table, cuttings } = drawer();
-  table.lay(survey(1), SVG, "one");
+  table.lay(surveyAt(1), SVG, "one");
   assert.equal(lis(cuttings).length, 1);
   assert.equal(landing(lis(cuttings)[0]!), true, "the cutting just laid settles");
-  table.lay(survey(2), SVG, "two");
+  table.lay(surveyAt(2), SVG, "two");
   assert.equal(lis(cuttings).length, 2);
   assert.equal(landing(lis(cuttings)[0]!), false, "the earlier cutting, rebuilt by the render, does not settle again");
   assert.equal(landing(lis(cuttings)[1]!), true, "the one just laid does");
@@ -95,16 +83,16 @@ test("CT12b a restore marks nothing: a reload, a Back or a shared link lands its
 
 test("CT12c the mark is consumed by the render that plays it: a lay followed by a restore that still holds that sheet re-seats it STILL, since a mark surviving its render would settle the sheet again on the cached return (the guard-prover's hole, 2026-09-21)", () => {
   const { table, cuttings } = drawer();
-  table.lay(survey(1), SVG, "one");
+  table.lay(surveyAt(1), SVG, "one");
   assert.equal(landing(lis(cuttings)[0]!), true, "the lay settles");
-  table.restore([survey(1), survey(2)]);
+  table.restore([surveyAt(1), surveyAt(2)]);
   assert.equal(lis(cuttings).length, 2);
   assert.equal(lis(cuttings).some(landing), false, "the restore re-seats the same sheet without a settle");
 });
 
 test("CT13 the settle retires on the cutting's OWN animation end and not on its picture's: the img's shadow keyframe ending first must not cut the sheet's settle short", () => {
   const { table, cuttings } = drawer();
-  table.lay(survey(1), SVG, "one");
+  table.lay(surveyAt(1), SVG, "one");
   const li = lis(cuttings)[0]!;
   const img = li.children.find((c) => c.tagName === "IMG");
   assert.ok(img, "the cutting carries its picture");
@@ -118,16 +106,16 @@ test("CT14 a refusal at the cap jolts the sheets on the table, a duplicate does 
   const { table, cuttings, said } = drawer();
   table.restore(fill(TABLE_CAP));
   table.reveal();
-  assert.equal(table.lay(survey(99), SVG, "seventh"), false, "the cap refuses");
+  assert.equal(table.lay(surveyAt(99), SVG, "seventh"), false, "the cap refuses");
   assert.equal(cuttings.classList.contains("jolt"), true, "the table reacts");
   assert.match(said.at(-1) ?? "", /the table is full/);
   cuttings.fire("animationend", { target: cuttings });
   assert.equal(cuttings.classList.contains("jolt"), false, "and the jolt retires on its own end");
   table.restore(fill(2));
-  assert.equal(table.lay(survey(1), SVG, "again"), false, "a duplicate is refused");
+  assert.equal(table.lay(surveyAt(1), SVG, "again"), false, "a duplicate is refused");
   assert.equal(cuttings.classList.contains("jolt"), false, "without a jolt: the jolt is the cap's");
   table.restore(fill(TABLE_CAP));
-  table.lay(survey(99), SVG, "seventh");
+  table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), true);
   table.restore(fill(1));
   assert.equal(
@@ -140,7 +128,7 @@ test("CT14 a refusal at the cap jolts the sheets on the table, a duplicate does 
 test("CT14b the jolt, like the settle, is dropped rather than queued when the sheets are off screen", () => {
   const { table, cuttings } = drawer({ onScreen: false });
   table.restore(fill(TABLE_CAP));
-  table.lay(survey(99), SVG, "seventh");
+  table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), false);
 });
 
@@ -148,7 +136,7 @@ test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawe
   const shut = drawer();
   shut.table.restore(fill(TABLE_CAP));
   assert.equal(shut.els.root.classList.contains("open"), false, "shut before the refusal");
-  shut.table.lay(survey(99), SVG, "seventh");
+  shut.table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(shut.els.root.classList.contains("open"), true, "the refusal opens the drawer, which starts its slide");
   assert.equal(
     shut.cuttings.classList.contains("jolt"),
@@ -160,13 +148,13 @@ test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawe
   const open = drawer();
   open.table.restore(fill(TABLE_CAP));
   open.table.reveal();
-  open.table.lay(survey(99), SVG, "seventh");
+  open.table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(open.cuttings.classList.contains("jolt"), true, "an open drawer dips at once");
 });
 
 test("CT14d a shut inside a ceremony clears it rather than leaving it armed: display:none cancels an animation with no end event, so a settle or a dip caught by the shut press, and a dip armed on a slide the shut cancelled, would all replay on the next plain open (the cold review's round 3 finding 2 on PR #663)", () => {
   const { table, cuttings, els } = drawer();
-  table.lay(survey(1), SVG, "one");
+  table.lay(surveyAt(1), SVG, "one");
   assert.equal(landing(lis(cuttings)[0]!), true, "settling");
   els.shut.fire("click");
   assert.equal(landing(lis(cuttings)[0]!), false, "a shut mid-settle takes the mark off, since no end event will");
@@ -174,7 +162,7 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
   assert.equal(lis(cuttings).some(landing), false, "and the next open replays nothing");
   table.restore(fill(TABLE_CAP));
   els.shut.fire("click");
-  table.lay(survey(99), SVG, "seventh");
+  table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(
     els.root.classList.contains("open"),
     true,
@@ -188,7 +176,7 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
     false,
     "a shut inside that slide dropped the armed dip, so the next plain open's slide end dips nothing",
   );
-  table.lay(survey(99), SVG, "seventh");
+  table.lay(surveyAt(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), true, "dipping");
   els.shut.fire("click");
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
@@ -208,17 +196,17 @@ test("CT10b a re-seat that drops sheets revokes every departed sheet's picture a
   };
   try {
     const { table } = drawer();
-    assert.equal(table.lay(survey(1), SVG, "one"), true);
-    assert.equal(table.lay(survey(2), SVG, "two"), true);
-    assert.equal(table.lay(survey(3), SVG, "three"), true);
+    assert.equal(table.lay(surveyAt(1), SVG, "one"), true);
+    assert.equal(table.lay(surveyAt(2), SVG, "two"), true);
+    assert.equal(table.lay(surveyAt(3), SVG, "three"), true);
     assert.equal(
       minted,
       3,
       "each laid sheet minted its own picture, so the revokes below have three urls to tell apart",
     );
-    table.restore([survey(1), survey(2), survey(3)]);
+    table.restore([surveyAt(1), surveyAt(2), surveyAt(3)]);
     assert.deepEqual(revoked, [], "a re-seat that keeps every sheet drops no picture");
-    table.restore([survey(2)]);
+    table.restore([surveyAt(2)]);
     assert.deepEqual(
       [...revoked].sort(),
       ["blob:minted-0", "blob:minted-2"],
@@ -246,7 +234,7 @@ test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none;
   };
   try {
     const { table, cuttings } = drawer();
-    assert.equal(table.lay(survey(1), SVG, "one", { url: "blob:ghost" }), true);
+    assert.equal(table.lay(surveyAt(1), SVG, "one", { url: "blob:ghost" }), true);
     assert.equal(
       minted.length,
       0,
@@ -254,7 +242,7 @@ test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none;
     );
     const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
     assert.equal(img?.src, "blob:ghost");
-    assert.equal(table.lay(survey(2), SVG, "two"), true);
+    assert.equal(table.lay(surveyAt(2), SVG, "two"), true);
     assert.equal(minted.length, 1, "the click path still mints its own");
   } finally {
     URL.createObjectURL = real;
@@ -268,7 +256,7 @@ test("CT16 reveal() opens a shut drawer and hands back the function that shuts i
   assert.equal(els.root.classList.contains("open"), true, "the carry sees the table");
   back();
   assert.equal(els.root.classList.contains("open"), false, "a snap-back puts the drawer back as it was");
-  table.lay(survey(1), SVG, "one");
+  table.lay(surveyAt(1), SVG, "one");
   assert.equal(els.root.classList.contains("open"), true, "a filing leaves it open (Issue #520, the filing gesture)");
   const noop = table.reveal();
   noop();
@@ -286,7 +274,7 @@ test("CT17 a thumbnail arriving for a recovered sheet is patched into its cuttin
       resolveThumb = r;
     });
   const { table, cuttings, els } = drawer({ drawThumb });
-  table.restore([survey(1)]);
+  table.restore([surveyAt(1)]);
   const before = lis(cuttings)[0]!;
   assert.ok(
     before.children.some((c) => c.classList.contains("awaited")),
@@ -316,10 +304,10 @@ test("CT17 a thumbnail arriving for a recovered sheet is patched into its cuttin
 test("CT10c a re-seat that lands while a picture is drawing asks for ANOTHER pass, so the sheet it brought is drawn rather than left in its frame (#634)", async () => {
   const { asked, drawThumb, lxs } = thumbs();
   const { table, els } = drawer({ drawThumb });
-  table.restore([survey(1)]);
+  table.restore([surveyAt(1)]);
   els.tab.fire("click");
   assert.deepEqual(lxs(), [1], "the opening draws the one recovered sheet");
-  table.restore([survey(1), survey(2)]);
+  table.restore([surveyAt(1), surveyAt(2)]);
   asked[0]!.done({ url: "blob:one", title: "one" });
   await turn();
   assert.deepEqual(lxs(), [1, 2], "the sheet that arrived mid-draw is drawn once the pass in flight ends");
@@ -334,9 +322,9 @@ test("CT10d a picture that finishes for a sheet that left while it drew is revok
   try {
     const { asked, drawThumb, lxs } = thumbs();
     const { table, els, cuttings } = drawer({ drawThumb });
-    table.restore([survey(1), survey(2)]);
+    table.restore([surveyAt(1), surveyAt(2)]);
     els.tab.fire("click");
-    table.restore([survey(2)]);
+    table.restore([surveyAt(2)]);
     asked[0]!.done({ url: "blob:late", title: "one" });
     await turn();
     assert.deepEqual(revoked, ["blob:late"], "the departed sheet's picture is let go");
@@ -346,7 +334,7 @@ test("CT10d a picture that finishes for a sheet that left while it drew is revok
     const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
     assert.equal(img?.src, "blob:two", "which wears its own picture");
     assert.deepEqual(revoked, ["blob:late"], "and keeps it");
-    table.restore([survey(1), survey(2)]);
+    table.restore([surveyAt(1), surveyAt(2)]);
     assert.deepEqual(
       lxs(),
       [1, 2, 1],
@@ -360,12 +348,12 @@ test("CT10d a picture that finishes for a sheet that left while it drew is revok
 test("CT10e a re-seat on a drawer standing open draws what arrived, and one on a shut drawer leaves it for the opening (#634; drawing deferred to the first opening, ruled 2026-09-07)", async () => {
   const { asked, drawThumb, lxs } = thumbs();
   const { table, els } = drawer({ drawThumb });
-  table.restore([survey(1)]);
+  table.restore([surveyAt(1)]);
   assert.deepEqual(lxs(), [], "a shut drawer draws nothing");
   els.tab.fire("click");
   asked[0]!.done({ url: "blob:one", title: "one" });
   await turn();
-  table.restore([survey(1), survey(3)]);
+  table.restore([surveyAt(1), surveyAt(3)]);
   assert.deepEqual(lxs(), [1, 3], "the open drawer draws the sheet the re-seat brought");
 });
 
@@ -377,7 +365,7 @@ test("CT18 the road carries the table to the route the tree names the Portfolio 
   g.window = { location };
   try {
     const { table, els } = drawer();
-    table.restore([survey(1)]);
+    table.restore([surveyAt(1)]);
     els.road.fire("click");
     assert.equal(new URL(location.href, "https://v.test/explorer/").pathname, PORTFOLIO_ROUTE);
   } finally {
@@ -390,7 +378,7 @@ test("CT19 a survey laid a second time is refused in the drawer's own voice and 
   const { table, said, changes } = drawer();
   table.restore(fill(1));
   const written = changes.length;
-  assert.equal(table.lay(survey(0), SVG, "again"), false, "the second lay of the same survey is refused");
+  assert.equal(table.lay(surveyAt(0), SVG, "again"), false, "the second lay of the same survey is refused");
   assert.equal(said.at(-1), "this survey is already on the table", "in the drawer's own words for a duplicate");
   assert.equal(changes.length, written, "and the table it holds is not written");
 });

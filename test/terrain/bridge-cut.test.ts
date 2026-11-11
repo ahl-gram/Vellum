@@ -1,25 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fieldFrom, type Field } from "../../src/core/grid.ts";
 import { BRIDGE_REJECT_EPS, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
-import { labelLandmasses } from "../../src/world/landmass.ts";
+import { fieldFromRows, landmassCount } from "../../test-support/ascii-field.ts";
 import { fusingSaddles } from "../../test-support/saddle-probe.ts";
-
-function fieldFromRows(rows: ReadonlyArray<string>, land = 0.5, water = -0.5): Field {
-  const h = rows.length;
-  const w = (rows[0] as string).length;
-  const data = new Float64Array(w * h);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      data[x + y * w] = (rows[y] as string)[x] === "#" ? land : water;
-    }
-  }
-  return fieldFrom(w, h, data);
-}
-
-function landmassCount(f: Field, seaLevel: number): number {
-  return labelLandmasses(f, seaLevel).sizes.length;
-}
 
 test("a bridge is cut at its narrowest neck, nearest the shore it touches least, and the rest stays as shore (Issue #1036)", () => {
   const coarse = fieldFromRows(["...........", ".##.....##.", ".##.....##.", ".##.....##.", "..........."]);

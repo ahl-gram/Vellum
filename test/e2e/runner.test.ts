@@ -1,5 +1,4 @@
 import { test } from "node:test";
-import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -17,6 +16,8 @@ import { E2E_SUITE_ORDER, resolveSuiteSelection } from "../../e2e/support/suites
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { laneLineIsSkip } from "../../e2e/support/lanes.ts";
 import type { StartOptions } from "../../e2e/types.ts";
+import { noExit, withTTY } from "../../test-support/process-fakes.ts";
+import { freshAccumulators } from "../../test-support/runner-accumulators.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const BROWSER_ENV = ["CI", "VELLUM_REQUIRE_BROWSER", "VELLUM_ALLOW_NO_BROWSER", "VELLUM_E2E_SUITES"] as const;
@@ -27,23 +28,6 @@ type Ctx = {
   alive: () => Promise<boolean>;
   clearMobile: () => Promise<void>;
   send: RunnerContext["send"];
-};
-
-async function withTTY<T>(value: boolean, body: () => Promise<T>): Promise<T> {
-  const own = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
-  Object.defineProperty(process.stdout, "isTTY", { value, configurable: true });
-  try {
-    return await body();
-  } finally {
-    if (own) Object.defineProperty(process.stdout, "isTTY", own);
-    else Reflect.deleteProperty(process.stdout, "isTTY");
-  }
-}
-
-const noExit = (t: TestContext): void => {
-  t.mock.method(process, "exit", () => {
-    throw new Error("process.exit was reached inside a unit test, which would erase this file's tally");
-  });
 };
 
 type SuiteBody = (name: E2eSuiteName, acc: Accumulators) => void;
@@ -60,14 +44,6 @@ const fakeSuites = (ctx: Ctx, acc: Accumulators, ran: E2eSuiteName[], run: Suite
       },
     ]),
   );
-
-const freshAccumulators = (): Accumulators => ({
-  results: [],
-  consoleErrors: [],
-  http4xx: [],
-  skippedGroups: [],
-  skippedChecks: [],
-});
 
 function rig(env: EnvLike, run: SuiteBody = () => {}) {
   const accumulators = freshAccumulators();

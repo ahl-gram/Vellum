@@ -204,8 +204,8 @@ SVG remains the byte-faithful artifact.
 - **A markup lift into components cannot be pinned byte-identical.** The build adds slot whitespace,
   entity-encodes text, and expands self-closing SVG children. Pin the rendered SHAPES instead, the
   way the `KIT_` patterns in `test/site/astro-scaffold.test.ts` do, and compare two builds only after
-  collapsing whitespace between tags and decoding entities, which is what that file's own `normalize`
-  and `decode` helpers exist for.
+  collapsing whitespace between tags and decoding entities, which is what that file's own `normalize`,
+  and the `decode` it imports from `test-support/built-reads/documents.ts`, exist for.
 - **The escaping rule is about EXPRESSIONS, not about props versus slots.** Text that reaches the
   page through an expression is entity-encoded, whether it arrived as a prop or was interpolated into
   a slot; literal markup you authored passes through as written. The same possessive ships escaped

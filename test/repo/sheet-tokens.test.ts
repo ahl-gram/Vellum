@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { declaredIn, sheetsOnDisk, SRC_CSS_FILES, type ReadDir } from "../../scripts/lint/sheet-tokens.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { type Plant, refusedLines, reportedLines, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const TOKEN = "vellum/css-token-by-name";
 const SHADOW = "vellum/css-shadow-by-token";
@@ -15,22 +15,6 @@ const BUILDER = "vellum/css-builder-token-by-name";
 
 const REFUSE = true;
 const PASS = false;
-type Plant = ReadonlyArray<readonly [string, boolean]>;
-
-const refusedLines = (plant: Plant): number[] => plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
-
-const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> => [
-  ...new Set(
-    (
-      await plantMessages(
-        plant.map(([line]) => line),
-        path,
-      )
-    )
-      .filter((m) => m.ruleId === rule)
-      .map((m) => m.line),
-  ),
-];
 
 const assertRefuses = async (plant: Plant, path: string, rule: string, blindSpots: string): Promise<void> => {
   const refused = refusedLines(plant);
@@ -38,7 +22,7 @@ const assertRefuses = async (plant: Plant, path: string, rule: string, blindSpot
     refused.length > 0 && refused.length < plant.length,
     `the plant at ${path} holds no line to refuse or none to pass, so it cannot tell ${rule} from its negation`,
   );
-  assert.deepEqual(await reported(plant, path, rule), refused, blindSpots);
+  assert.deepEqual(await reportedLines(plant, path, rule), refused, blindSpots);
 };
 
 const COLOUR_PLANT = (home: boolean): Plant => [
@@ -128,12 +112,12 @@ test("every var() with no fallback names a property some sheet under src/styles/
     "a var only src/styles/shared/shell.css or only src/styles/shared/motion.css declares is read off the disk",
   );
   assert.deepEqual(
-    await reported(spread, "src/styles/shared/shell.css", VAR),
+    await reportedLines(spread, "src/styles/shared/shell.css", VAR),
     [1, 3],
     "linting src/styles/shared/shell.css, its own disk copy is not read: only the text being linted declares for it",
   );
   assert.deepEqual(
-    await reported(spread, "src/styles/shared/motion.css", VAR),
+    await reportedLines(spread, "src/styles/shared/motion.css", VAR),
     [2, 3],
     "and linting src/styles/shared/motion.css, its own disk copy is not read either",
   );
@@ -200,9 +184,6 @@ test("the modules that build CSS write no token's rgb in any string they hold, i
   const blind = "BLIND SPOT, declared, a miss: an rgb() split across a template's ${} boundary";
   await assertRefuses(BUILDER_PLANT, "src/render/og-card.ts", BUILDER, blind);
 });
-
-const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
 test("the three sheet rules resolve at error on every sheet and on no script; the builder rule on exactly the modules that build CSS (Issue #779 part 2d)", async () => {
   for (const rule of [TOKEN, SHADOW, VAR]) {

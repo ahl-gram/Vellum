@@ -1,20 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRng, hashString } from "../../src/core/rng.ts";
-import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
+import { foundWorld } from "../../src/world/founding/found.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
+import { founded, phrases } from "../../test-support/founded-world.ts";
 
 const EMPTY_RESIDUAL_SEED = 2166136261;
-
-const founded = (sentence: string): Founding => {
-  const f = foundWorld(sentence);
-  assert.ok(f.ok, `"${sentence}" should found a world, was refused: ${f.ok ? "" : f.reason}`);
-  return f;
-};
-
-const phrases = (list: Founding["steered"]): string[] => list.map((r) => r.phrase);
 
 test("a sentence differing by one unrecognised word, by word order, or by a digit founds a different world", () => {
   assert.notEqual(founded("a cold island of iron towers").seed, founded("a cold island of iron towns").seed);

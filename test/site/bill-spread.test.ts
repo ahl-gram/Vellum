@@ -10,6 +10,7 @@ import {
   type BillSpread,
 } from "../../src/site/explorer/bill-spread.ts";
 import { ZOOM_STEP } from "../../src/site/shared/zoom-keys.ts";
+import { near } from "../../test-support/near.ts";
 
 // 2026-11-05: the Broadside's measures in the probe's two seats at 416 px wide (Issue #1260, Tests section 1 of `handbook/plans/1200/1260/1260-plan.md`); room is the page less the 168.734 px placeSlip keeps above and below it.
 const WIDTH = 416;
@@ -19,10 +20,6 @@ const HELD_SEAT = { natural: 587.59375, rows: 8, groups: 3, width: WIDTH };
 
 function room(seat: typeof DEFAULT_SEAT, page: number, closed = 0): BillRoom {
   return { ...seat, page, room: page - ROOM_LESS, closed };
-}
-
-function near(actual: number, expected: number, message: string): void {
-  assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: ${actual} against ${expected}`);
 }
 
 function within(actual: number, expected: number, message: string, units = 1): void {

@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { CDP_HOMES } from "../../scripts/lint/e2e-cdp-helpers.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages, ruleLines } from "../../test-support/source-shape-reports.ts";
+import { plantMessages, resolvedRule, ruleLines } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/e2e-cdp-through-helper";
@@ -65,9 +65,6 @@ test("no e2e file sends a key event but through its one home, e2e/support/input.
   assert.deepEqual(await reported(HOME), [], "the home itself is refused the method it exists to hold");
 });
 
-const resolvedRule = async (file: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[RULE];
-
 test("the rule resolves at error on every e2e file at any depth and on no other root or sheet", async () => {
   const roots = lintTsRoots();
   assert.ok(roots.includes("e2e") && roots.length > 1, "the lint's roots are not what this sweep expects");
@@ -76,9 +73,9 @@ test("the rule resolves at error on every e2e file at any depth and on no other 
     assert.ok(witness !== undefined && existsSync(join(ROOT, witness)), `${root} has no existing witness`);
     const want = root === "e2e" ? [2] : undefined;
     for (const file of [witness, `${root}/nested/deeper/part.ts`])
-      assert.deepEqual(await resolvedRule(file), want, `${RULE} resolves wrongly on ${file}`);
+      assert.deepEqual(await resolvedRule(file, RULE), want, `${RULE} resolves wrongly on ${file}`);
   }
-  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
+  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!, RULE), undefined, `${RULE} reaches a sheet`);
 });
 
 test("each row's home is a file in the tree, and its method is refused in a suite and passes at its home", async () => {

@@ -7,7 +7,6 @@ import type { NamedSettlement, World } from "../../src/world/types.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { minMax } from "../../src/core/grid.ts";
 import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
-import { renderMap } from "../../src/render/map-renderer.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { nameSetting } from "../../src/render/layers/settlements.ts";
@@ -16,10 +15,8 @@ import { boxMeetsRiver } from "../../src/render/layers/river-clearance.ts";
 import { glyphDensity, glyphsLayer, markStandsOn } from "../../src/render/layers/glyphs.ts";
 import { SYMBOL_EXTENT } from "../../src/render/layers/glyph-symbols.ts";
 import type { MarkKind } from "../../src/render/layers/glyph-clearance.ts";
-import { createProjection, marginFor } from "../../src/render/transform.ts";
 import { glyphPoly, polysOverlap, textNodes, type Poly } from "../../test-support/label-geometry.ts";
-
-const WIDTH = 1500;
+import { SHEET_WIDTH, projOf, sheetOf } from "../../test-support/antique-sheet.ts";
 
 function closeUp(seed: number, window: { u0: number; v0: number; u1: number; v1: number }): World {
   const world = generateWorld(defaultRecipe(seed));
@@ -36,12 +33,6 @@ const STAL_PLATE = ((): World => {
   assert.ok(stal, "Stal is a settlement of chart 15");
   return generateRegionWorld(world, regionPlateSpec(world, stal));
 })();
-
-const sheetOf = (region: World): string => renderMap(region, { style: "antique", widthPx: WIDTH, legend: true });
-
-function projOf(region: World): ReturnType<typeof createProjection> {
-  return createProjection(region.elev.w, region.elev.h, WIDTH, marginFor(WIDTH));
-}
 
 type DrawnName = { readonly tier: SettlementTier; readonly slice: string };
 
@@ -243,7 +234,7 @@ const markKey = (m: ReadMark): string => `${m.symbol}|${m.x}|${m.y}|${m.scale}`;
 
 test("a slid mark moves no farther than half its kind's spacing at the sheet's spread", () => {
   for (const region of [SEVEN_B5, STAL_PLATE]) {
-    const spread = (WIDTH / 1500) * glyphDensity(region.elev.w, region.region).zoom;
+    const spread = (SHEET_WIDTH / 1500) * glyphDensity(region.elev.w, region.region).zoom;
     const uncleared = marksIn(renderSvg(glyphsLayer(witnessCtx(region), [])!));
     const built = marksIn(sheetOf(region));
     const left = new Map<string, number>();

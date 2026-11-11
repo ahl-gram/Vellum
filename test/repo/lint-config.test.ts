@@ -3,17 +3,14 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Linter } from "eslint";
-import lintConfig from "../../eslint.config.ts";
+import { blocks, shortName } from "../../test-support/lint-wiring-scope.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const blocks: readonly Linter.Config[] = lintConfig;
-const nameOf = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
 
 test("every block lets ESLint parse the program it lints: no block carries a processor, only the stylesheet block names a language, and only typescript-eslint's base layer names a parser (Issue #728)", () => {
   assert.ok(blocks.length > 0, "the config exports no blocks, so this guard is reading the wrong thing");
   assert.deepEqual(
-    blocks.filter((b) => "processor" in b).map(nameOf),
+    blocks.filter((b) => "processor" in b).map(shortName),
     [],
     "a block hands its files to a processor, which can give ESLint no program for a subtree and pass every rule there unread",
   );
@@ -23,7 +20,7 @@ test("every block lets ESLint parse the program it lints: no block carries a pro
     "a block other than the stylesheet block names a language, so the files it matches are parsed as something the TypeScript rules never read",
   );
   assert.deepEqual(
-    blocks.filter((b) => b.languageOptions?.parser !== undefined).map(nameOf),
+    blocks.filter((b) => b.languageOptions?.parser !== undefined).map(shortName),
     ["typescript-eslint/base"],
     "a block other than typescript-eslint's base layer sets a parser, which can swap the program the type-checked rules read for a subtree",
   );

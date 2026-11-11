@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { regionPlateSpec } from "../../src/atlas/compose.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
@@ -9,16 +8,7 @@ import { growRealmLabels, regionRealmBorders, regionRealmRings, REALM_REACH_CAP 
 import type { RealmRings } from "../../src/world/realm-carry.ts";
 import { nearestParentCells } from "../../src/world/region-parent.ts";
 import type { World } from "../../src/world/types.ts";
-
-const worlds = new Map<number, World>();
-const worldFor = (seed: number): World => {
-  let w = worlds.get(seed);
-  if (!w) {
-    w = generateWorld(defaultRecipe(seed));
-    worlds.set(seed, w);
-  }
-  return w;
-};
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 const isSeaOf = (world: World): ((i: number) => boolean) => {
   const { data } = world.elev;

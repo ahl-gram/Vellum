@@ -18,6 +18,7 @@ import {
   OG_WIDTH,
   OG_WORDMARK,
 } from "../../src/render/og-card.ts";
+import { attr } from "../../test-support/dress-svg.ts";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -35,10 +36,6 @@ const FELL_ITALIC_X_HEIGHT = 0.44;
 const FELL_SC_SMALL_CAP = 0.44;
 
 const token = (name: string): string => SITE_PALETTE[`--${name}` as keyof typeof SITE_PALETTE];
-
-function attr(tag: string, name: string): string | undefined {
-  return new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
-}
 
 function num(tag: string, name: string): number {
   const v = attr(tag, name);

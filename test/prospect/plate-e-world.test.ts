@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import type { World } from "../../src/world/types.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
@@ -12,16 +10,9 @@ import { skylineOf, type Box } from "../../src/prospect/dress/rise.ts";
 import { engraver } from "../../src/prospect/dress/burin.ts";
 import { createLettering } from "../../src/prospect/letter/letter.ts";
 import type { Surroundings } from "../../src/prospect/surroundings.ts";
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 // No byte pins here: world-sourced geometry descends from Math.hypot (the compose-world.test.ts caveat); these are layout claims, read from the boxes the plate reports.
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  const cached = worlds.get(seed);
-  if (cached) return cached;
-  const w = generateWorld(defaultRecipe(seed));
-  worlds.set(seed, w);
-  return w;
-}
 
 const surroundingsOf = (seed: number, index: number, year?: number): Surroundings =>
   plateSurroundings(worldFor(seed), index, year ?? worldFor(seed).title.year);

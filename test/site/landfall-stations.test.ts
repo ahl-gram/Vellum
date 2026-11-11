@@ -17,6 +17,7 @@ import {
   DRIFT_SCALE,
   driftTarget,
 } from "../../src/site/home/drift.ts";
+import { near } from "../../test-support/near.ts";
 
 // Landfall Sub 3 (Issue #458): the stations, the cards, the legend, and the idle drift; the spec is the archived mockup (design/atelier-map, PR #466) and the ratified comments on Issue #458.
 
@@ -159,9 +160,6 @@ test("the station flight frames the anchor beside the card, at the mockup's dept
 });
 
 test("UR1 an opened slip on a window narrower than the page takes the least sideways scroll that shows it whole, a margin clear (Alex, 2026-10-06, Issue #762; the slip measured at page 608 to 960)", () => {
-  const near = (got: number, want: number, why: string) => {
-    assert.ok(Math.abs(got - want) < 1e-9, `${why}: got ${got}, want ${want}`);
-  };
   near(revealLeft(0, 640, 608, 960, 25.6), 345.6, "640: the slip's right edge comes in by the margin");
   near(revealLeft(0, 800, 608, 960, 25.6), 185.6, "800");
   near(revealLeft(0, 900, 608, 960, 25.6), 85.6, "900");

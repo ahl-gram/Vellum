@@ -1,21 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { chooseQuarry, revealLore, revealFormerLine } from "../../src/world/daily-hunt.ts";
 import { buildDocket } from "../../src/site/explorer/verso.ts";
 import { capitalBlurb } from "../../src/world/seed-of-the-day.ts";
 import type { World } from "../../src/world/types.ts";
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 // Issue #49 ruling 7: the prospect page, the Daily Hunt reveal, Seed of the Day and the verso docket.
-
-const worlds = new Map<number, World>();
-const worldFor = (seed: number): World => {
-  const cached = worlds.get(seed);
-  if (cached) return cached;
-  const w = generateWorld(defaultRecipe(seed));
-  worlds.set(seed, w);
-  return w;
-};
 
 const SEEDS = [1, 3, 7, 42];
 

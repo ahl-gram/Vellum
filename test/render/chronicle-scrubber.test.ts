@@ -2,8 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
-import type { PlaceMark } from "../../src/render/place-manifest.ts";
-import type { HistoricalEvent } from "../../src/society/history.ts";
 import {
   scrubRange,
   buildScrubMarks,
@@ -16,31 +14,9 @@ import {
   sweepYearAt,
   sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
+import { ev, mark } from "../../test-support/chronicle-fixtures.ts";
 
 // The pure core only; the DOM wiring lives in src/site/shared/living-chart/chronicle.ts, covered by the Explorer e2e.
-
-const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
-  idx: 0,
-  worldIdx: 0,
-  name: "Aelmoor",
-  kind: "town",
-  founded: 300,
-  ruined: false,
-  seat: false,
-  roads: false,
-  nx: 0.5,
-  ny: 0.5,
-  gx: 0,
-  gy: 0,
-  ...over,
-});
-
-const ev = (over: Partial<HistoricalEvent> = {}): HistoricalEvent => ({
-  year: 100,
-  kind: "founding",
-  text: "An event of no special note.",
-  ...over,
-});
 
 test("scrubRange spans the earliest founding to the present year", () => {
   const places = [
