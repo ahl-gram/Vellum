@@ -191,12 +191,12 @@ test("a re-asked still is compared with the first still of its own seed, in eith
   const replies = again.map((s, i): Reply => {
     if (i < stills.length) {
       if (s.kind === "sheet" && s.arm === "clean")
-        return answered({ realm_names_read: s.seed === 1 ? 0.9 : 0.5, title_reads_first: 0.8 });
+        return answered({ realm_names_read: s.seed === 1 ? 0.9 : 0.3, title_reads_first: 0.8 });
       if (s.kind === "rainfall" && s.arm === "clean" && s.seed === 2) return { ok: false, reason: "HTTP 500: x" };
       return table(s);
     }
     if (i === 16) return { ok: false, reason: "HTTP 500: x" };
-    if (i === 17) return answered({ realm_names_read: 0.3, title_reads_first: 0.8 });
+    if (i === 17) return answered({ realm_names_read: 0.5, title_reads_first: 0.8 });
     return table(s);
   });
   const out = scoreLines(seeds, again, replies, stills.length);
