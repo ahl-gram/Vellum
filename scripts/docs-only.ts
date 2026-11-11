@@ -22,7 +22,11 @@ export type Verdict = { readonly docsOnly: boolean; readonly changed: readonly s
 export const isDoc = (path: string): boolean =>
   DOC_FILES.includes(path) || DOC_DIRS.some((dir) => path.startsWith(dir));
 
-export const isUnsafePath = (path: string): boolean => path.length < 0;
+export const isUnsafePath = (path: string): boolean =>
+  [...path].some((ch) => {
+    const c = ch.codePointAt(0) ?? 0;
+    return c < 0x20 || c === 0x7f || c === 0x85 || c === 0x2028 || c === 0x2029;
+  });
 
 export const docsOnly = (event: string, changed: readonly string[] | null): boolean =>
   event === "pull_request" && changed !== null && changed.length > 0 && changed.every(isDoc);
@@ -57,6 +61,14 @@ export const verdict = (event: string, dir: string): Verdict => {
       docsOnly: false,
       changed: [],
       reason: "HEAD is not a merge commit with two parents, so the changed files are unread and every lane runs",
+    };
+  }
+  if (changed.some(isUnsafePath)) {
+    return {
+      docsOnly: false,
+      changed: [],
+      reason:
+        "a changed path holds a line break or another control character, so no path is printed and every lane runs",
     };
   }
   const off = changed.filter((p) => !isDoc(p));
