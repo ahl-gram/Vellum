@@ -58,8 +58,10 @@ test("every land cell on a real island drains to the ocean", () => {
   const sea = pickSeaLevel(f, 0.35);
   const { dir } = computeFlow(f, sea);
   const n = f.data.length;
+  let walked = 0;
   for (let start = 0; start < n; start++) {
     if ((f.data[start] as number) <= sea) continue;
+    walked++;
     let i = start;
     let steps = 0;
     while ((dir[i] as number) !== -1) {
@@ -68,6 +70,7 @@ test("every land cell on a real island drains to the ocean", () => {
       assert.ok(steps <= n, `cycle from cell ${start}`);
     }
   }
+  assert.ok(walked >= 1, `seed 7's island has no cell above sea level ${sea}, so no cell was walked`);
 });
 
 test("flow is deterministic", () => {
