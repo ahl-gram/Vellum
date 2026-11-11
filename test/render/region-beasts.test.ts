@@ -1,18 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
 import { beastSpot } from "../../test-support/beast-spot.ts";
+import { digest } from "../../test-support/svg-digest.ts";
 
 const OFF = { style: "antique", widthPx: 1500, legend: true } as const;
 const ON = { ...OFF, beasts: true } as const;
-
-/** A region sheet is ~300KB, and node:test renders a failed equal() of two of them character by character; the digest is the same byte comparison with a message a human can read. */
-const digest = (svg: string): string => `${createHash("sha256").update(svg).digest("hex").slice(0, 16)}/${svg.length}`;
 
 const proj = createProjection(320, 240, 1500, marginFor(1500));
 

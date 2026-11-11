@@ -2,11 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { placeLegendRow } from "../../src/site/shared/room-seats.ts";
 import { El } from "../../test-support/element-shim.ts";
+import { press } from "../../test-support/press-button.ts";
 
 type Box = { left: number; top: number; right: number; bottom: number };
 const boxed = (tag: string, rect: Box): El => Object.assign(new El(tag), { rect });
-const press = (offsetTop: number): El =>
-  Object.assign(new El("button"), { offsetTop, rect: { left: 0, top: 0, right: 80, bottom: 32 } });
 
 class StackedRow extends El {
   override querySelectorAll(): El[] {

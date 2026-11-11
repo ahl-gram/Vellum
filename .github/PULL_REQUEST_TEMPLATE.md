@@ -18,7 +18,7 @@ Closes #NNN
 ## Ran
 
 - unit: `npm test` (`<pass count from the log>`)
-- e2e: `<suite names run locally>`; NOT run: `<the rest>`, CI runs them
+- e2e: `<suite names run locally>`; NOT run: `<the rest>`, CI runs them, or passes them unbuilt when every file is a doc
 - `npm run check`, `npm run lint`, `npm run format:check`
 
 ## Records

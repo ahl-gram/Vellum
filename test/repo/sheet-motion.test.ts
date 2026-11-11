@@ -13,7 +13,13 @@ import { sheetsOnDisk, SRC_CSS_FILES } from "../../scripts/lint/sheet-tokens.ts"
 import { STYLES } from "../../scripts/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import {
+  type Plant,
+  eslint,
+  plantMessages,
+  refusedLines,
+  resolvedRule,
+} from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const LIFT = "vellum/css-lift-by-token";
@@ -22,7 +28,6 @@ const BULLET = "vellum/css-inline-block-bullet";
 
 const REFUSE = true;
 const PASS = false;
-type Plant = ReadonlyArray<readonly [string, boolean]>;
 
 const lintWith = (rule: string, options: unknown): ESLint =>
   new ESLint({
@@ -50,8 +55,6 @@ const found = async (plant: Plant, path: string, rule: string, options?: unknown
 
 const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> =>
   (await found(plant, path, rule)).lines;
-
-const refusedLines = (plant: Plant): number[] => plant.flatMap(([, r], i) => (r ? [i + 1] : []));
 
 const assertRefuses = async (plant: Plant, rule: string, blind: string): Promise<void> => {
   const refused = refusedLines(plant);
@@ -193,9 +196,6 @@ test("every list entry names a sheet under src/styles/ or a module that builds C
     );
   }
 });
-
-const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
 test("the three motion rules resolve at error with the lists as their options on every sheet, and on no script (Issue #779 part 2d)", async () => {
   const expected: ReadonlyArray<readonly [string, unknown]> = [

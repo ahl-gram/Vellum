@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { nameSetOf, worldNameSet } from "../../src/society/hamlets.ts";
 import { assignFormerNames } from "../../src/society/renames.ts";
 import { CULTURES, isNearExisting, type Culture } from "../../src/society/names.ts";
@@ -8,19 +7,11 @@ import { createRng } from "../../src/core/rng.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { editDistanceWithin1 } from "../../src/core/text.ts";
 import type { World } from "../../src/world/types.ts";
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 // A few living towns carry a former name, a different word from the same tongue, drawn on rng.fork("renames") so no current name moves.
 
 const SEEDS = [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 42, 99];
-
-const worlds = new Map<number, World>();
-const worldFor = (seed: number): World => {
-  const cached = worlds.get(seed);
-  if (cached) return cached;
-  const w = generateWorld(defaultRecipe(seed));
-  worlds.set(seed, w);
-  return w;
-};
 
 const renamed = (w: World): ReadonlyArray<{ name: string; formerName: string }> =>
   w.settlements.flatMap((s) => (s.formerName === undefined ? [] : [{ name: s.name, formerName: s.formerName }]));

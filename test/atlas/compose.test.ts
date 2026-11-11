@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { composeAtlas, prospectPlates, ribbonPlates } from "../../src/atlas/compose.ts";
 import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
@@ -16,8 +15,9 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { decideSettle, FULL_WINDOW } from "../../src/world/lod.ts";
 import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
 import type { World } from "../../src/world/types.ts";
+import { digest } from "../../test-support/svg-digest.ts";
+import { decode } from "../../test-support/built-reads/documents.ts";
 
-const digest = (svg: string): string => `${createHash("sha256").update(svg).digest("hex").slice(0, 16)}/${svg.length}`;
 const PLATE_RENDER = { style: "antique", widthPx: 1500, legend: true } as const;
 
 function glassWindow(world: World, name: string): UvWindow {
@@ -263,21 +263,13 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.equal(a.chronicleHtml, b.chronicleHtml);
 });
 
-const unescape = (s: string): string =>
-  s
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&");
-
 // The walk the notes are written in IS the printed order (a writer's prose depends on call order), so the order is what keeps the bound atlas's gazetteer byte-stable; the expectation is derived with the test's own rank map, never read back from the composer.
 test("the gazetteer's rows run capital, then the towns, then the villages, each rank alphabetical", () => {
   const world = generateWorld(defaultRecipe(42));
   const html = composeAtlas(world).gazetteerHtml;
   const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({
     kind: m[1]!,
-    name: unescape(m[2]!),
+    name: decode(m[2]!),
   }));
   const RANK: Record<string, number> = { capital: 0, town: 1, village: 2, hamlet: 3 };
   const expected = world.settlements

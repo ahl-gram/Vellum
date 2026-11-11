@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { plantMessages, resolvedRule } from "../../test-support/source-shape-reports.ts";
 import { SHARED_BINDINGS, type SharedBinding } from "../../scripts/lint/shared-bindings.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -276,18 +276,15 @@ test("home, the Explorer's Glass and the kit's Glass keys, each binding the char
   for (const [name, path, lines, want] of TOUCH_PLANTS) assert.deepEqual(await reported(lines, path), want, name);
 });
 
-const resolvedRule = async (file: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[RULE];
-
 test("the rule resolves at error, with the roster as its options, on every site script at any depth and on no other root or sheet", async () => {
   for (const file of [...Object.keys(SHARED_BINDINGS), "src/site/nested/deeper/part.ts"])
     assert.deepEqual(
-      await resolvedRule(file),
+      await resolvedRule(file, RULE),
       [2, { required: SHARED_BINDINGS }],
       `${RULE} resolves wrongly on ${file}`,
     );
   for (const [glob, file] of Object.entries(WITNESSES))
-    assert.equal(await resolvedRule(file), undefined, `${RULE} reaches ${file}, the witness of ${glob}`);
+    assert.equal(await resolvedRule(file, RULE), undefined, `${RULE} reaches ${file}, the witness of ${glob}`);
 });
 
 const MAP_WORDS_BINDING: SharedBinding = ["MAP_WORDS", "../shared/map-words.ts"];

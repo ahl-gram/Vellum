@@ -1,20 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fieldFrom, type Field } from "../../src/core/grid.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-
-/** Build a Field from ASCII: '#' land (elev 1), '.' ocean (elev 0); with seaLevel 0 land is elev > seaLevel, the engine convention. */
-function fieldFromRows(rows: string[]): Field {
-  const h = rows.length;
-  const w = rows[0]!.length;
-  const data = new Float64Array(w * h);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      data[x + y * w] = rows[y]![x] === "#" ? 1 : 0;
-    }
-  }
-  return fieldFrom(w, h, data);
-}
+import { fieldFromRows } from "../../test-support/ascii-field.ts";
 
 const idAt = (labels: { ids: Int32Array }, w: number, x: number, y: number) => labels.ids[x + y * w] as number;
 
@@ -22,7 +9,7 @@ test("labels three separate islands with correct first-seen ids and sizes", () =
   // Three fully isolated islands: (0,0) size 3, cols 3-4 size 4, (2,5) size 1.
   const rows = ["##....", "#.....", "...##.", "...##.", "......", "..#..."];
   const w = rows[0]!.length;
-  const out = labelLandmasses(fieldFromRows(rows), 0);
+  const out = labelLandmasses(fieldFromRows(rows, 1, 0), 0);
 
   // First-seen row-major ordering: (0,0)->0, (3,2)->1, (2,5)->2.
   assert.deepEqual([...out.sizes], [3, 4, 1]);
@@ -48,7 +35,7 @@ test("labels three separate islands with correct first-seen ids and sizes", () =
 test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
   const rows = ["#..", "...", "..."];
   const w = rows[0]!.length;
-  const out = labelLandmasses(fieldFromRows(rows), 0);
+  const out = labelLandmasses(fieldFromRows(rows, 1, 0), 0);
   assert.equal(idAt(out, w, 0, 0), 0, "the lone island is landmass 0");
   assert.equal(idAt(out, w, 2, 2), -1, "open ocean is -1");
   assert.equal(idAt(out, w, 1, 0), -1, "ocean beside the island is -1");
@@ -58,7 +45,7 @@ test("4-connectivity: corner-touching cells are separate landmasses", () => {
   // Land at (1,1) and (2,2) share no land 4-neighbour, so 4-connectivity yields two ids (8-connectivity would give 1).
   const rows = ["....", ".#..", "..#.", "...."];
   const w = rows[0]!.length;
-  const out = labelLandmasses(fieldFromRows(rows), 0);
+  const out = labelLandmasses(fieldFromRows(rows, 1, 0), 0);
   assert.equal(out.sizes.length, 2, "diagonal gap is not bridged");
   assert.deepEqual([...out.sizes], [1, 1]);
   const a = idAt(out, w, 1, 1);
@@ -68,28 +55,28 @@ test("4-connectivity: corner-touching cells are separate landmasses", () => {
 
 test("flood traverses all four directions, not just right/down", () => {
   // First-seen seeds at the topmost-leftmost cell, so right/down-only fixtures would pass a broken flood; the plus forces LEFT and RIGHT, the U forces UP.
-  const plus = labelLandmasses(fieldFromRows([".#.", "###", ".#."]), 0);
+  const plus = labelLandmasses(fieldFromRows([".#.", "###", ".#."], 1, 0), 0);
   assert.deepEqual([...plus.sizes], [5], "plus is one landmass (needs left+right)");
 
-  const u = labelLandmasses(fieldFromRows(["#.#", "#.#", "###"]), 0);
+  const u = labelLandmasses(fieldFromRows(["#.#", "#.#", "###"], 1, 0), 0);
   assert.deepEqual([...u.sizes], [7], "U is one landmass (needs up the far column)");
 });
 
 test("does not mutate the input field", () => {
-  const f = fieldFromRows(["##.", "..#", ".##"]);
+  const f = fieldFromRows(["##.", "..#", ".##"], 1, 0);
   const before = Float64Array.from(f.data);
   labelLandmasses(f, 0);
   assert.deepEqual([...f.data], [...before], "input elevation is untouched");
 });
 
 test("all-ocean field: no landmasses, every cell -1", () => {
-  const out = labelLandmasses(fieldFromRows(["...", "..."]), 0);
+  const out = labelLandmasses(fieldFromRows(["...", "..."], 1, 0), 0);
   assert.deepEqual([...out.sizes], []);
   assert.ok([...out.ids].every((v) => v === -1));
 });
 
 test("pure and deterministic: identical output across calls", () => {
-  const f = fieldFromRows(["#.#", ".#.", "#.#"]);
+  const f = fieldFromRows(["#.#", ".#.", "#.#"], 1, 0);
   const a = labelLandmasses(f, 0);
   const b = labelLandmasses(f, 0);
   assert.deepEqual([...a.ids], [...b.ids]);

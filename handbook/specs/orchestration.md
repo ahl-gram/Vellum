@@ -41,8 +41,10 @@ home's line wins for the lane and this file's for the orchestrator.
   expensive part.
 - **No agent in a parallel run runs the full local e2e lanes.** A starved machine stalls the lanes
   beside it rather than failing them, which is why local suites run one at a time (`vellum-footguns`
-  Gate 2 item 11); CI runs every lane on every pull request. The implementer's and every review
-  agent's own definition carries this, and the scratch prefix where the agent writes scratch.
+  Gate 2 item 11); CI runs every lane on every pull request that changes more than the docs
+  (`handbook/specs/site-architecture.md`, the bullet opening "A pull request runs every check"). The
+  implementer's and every review agent's own definition carries this, and the scratch prefix where
+  the agent writes scratch.
 - **The orchestrator's own scratch files carry a prefix too**, since the scratchpad is shared with
   every lane and every agent a lane dispatches.
 

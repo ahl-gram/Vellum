@@ -1,4 +1,5 @@
 import { buildRibbonInput, type RibbonInput } from "../src/itinerary/input.ts";
+import type { RibbonEvent } from "../src/itinerary/events.ts";
 import { roadMask, roadReachable } from "../src/itinerary/route.ts";
 import type { StripLayout } from "../src/itinerary/dress/layout.ts";
 import type { World } from "../src/world/types.ts";
@@ -24,3 +25,6 @@ export function namedJourney(world: World, from: string, to: string): RibbonInpu
 export function stripNearestX(strips: ReadonlyArray<StripLayout>, x: number): StripLayout {
   return strips.reduce((a, b) => (Math.abs(x - (b.x0 + b.w / 2)) < Math.abs(x - (a.x0 + a.w / 2)) ? b : a));
 }
+
+export const only = <K extends RibbonEvent["kind"]>(input: RibbonInput, kind: K): Extract<RibbonEvent, { kind: K }>[] =>
+  input.events.filter((e): e is Extract<RibbonEvent, { kind: K }> => e.kind === kind);

@@ -1,20 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import type { World } from "../../src/world/types.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { PLATE_H, VIEW_X0, VIEW_X1, groundingViolations } from "../../src/prospect/geometry.ts";
-
-const worlds = new Map<number, World>();
-function worldFor(seed: number): World {
-  let w = worlds.get(seed);
-  if (w === undefined) {
-    w = generateWorld(defaultRecipe(seed));
-    worlds.set(seed, w);
-  }
-  return w;
-}
+import { fnv1a } from "../../test-support/dress-svg.ts";
+import { worldFor } from "../../test-support/seed-worlds.ts";
 
 test("every settlement in real worlds composes grounded, in-frame geometry", () => {
   for (const seed of [1, 42]) {
@@ -48,15 +39,6 @@ function quantize(v: unknown): unknown {
     return Object.fromEntries(Object.entries(v).map(([k, val]) => [k, quantize(val)]));
   }
   return v;
-}
-
-function fnv1a(s: string): number {
-  let h = 0x811c9dc5 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h >>> 0;
 }
 
 // Pinned 2026-08-10 from a measured run over the same five inputs input.test.ts pins; a deliberate grammar change re-pins these with the cause named in the commit.

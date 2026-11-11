@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { eslint, plantMessages } from "../../test-support/source-shape-reports.ts";
+import { type Plant, refusedLines, reportedLines, resolvedRule } from "../../test-support/source-shape-reports.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
@@ -12,7 +12,6 @@ const TS_RULE = "vellum/no-narrow-width";
 
 const REFUSE = true;
 const PASS = false;
-type Plant = ReadonlyArray<readonly [string, boolean]>;
 
 const CSS_PLANT: Plant = [
   ["@import url(x.css) (max-width: 900px);", REFUSE],
@@ -124,22 +123,8 @@ const TS_PLANT: Plant = [
   ],
 ];
 
-const refusedLines = (plant: Plant): number[] => plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOTS =
   "BLIND SPOTS, declared, each erring toward passing (the PR #807 row in handbook/errata/guards.md; outside the guard as the plan Issue #763 ruling 2A was taken on listed them, the ruling itself naming a length that shrinks with the window, a height, the window's shape and a box's own size): a length that shrinks with the window (vw and its kin, or a Math.min or Math.max of a width read against a constant), a comparison with a value the checker cannot fold, a width read or a matchMedia stored in a variable first, a computed key the checker cannot read as a literal, height, the window's shape (orientation, aspect-ratio), a box's own size (@container, an element's clientWidth or rect), a ResizeObserver on the root, <source media> and sizes, a matchMedia in an .astro inline script, which this lint never reads";
-
-const lintPlant = async (plant: Plant, filePath: string, rule: string): Promise<number[]> => [
-  ...new Set(
-    (
-      await plantMessages(
-        plant.map(([line]) => line),
-        filePath,
-      )
-    )
-      .filter((m) => m.ruleId === rule)
-      .map((m) => m.line),
-  ),
-];
 
 test("no sheet switches layout at a fixed window width at or below the 1024 floor, in either media query form, and a width it cannot read in px is refused (Issue #763 ruling 2A)", async () => {
   const refused = refusedLines(CSS_PLANT);
@@ -147,7 +132,7 @@ test("no sheet switches layout at a fixed window width at or below the 1024 floo
     refused.length > 0 && refused.length < CSS_PLANT.length,
     "the plant holds no line to refuse or none to pass, so this test cannot tell the rule from its negation",
   );
-  assert.deepEqual(await lintPlant(CSS_PLANT, WITNESSES["src/styles/**/*.css"]!, CSS_RULE), refused, BLIND_SPOTS);
+  assert.deepEqual(await reportedLines(CSS_PLANT, WITNESSES["src/styles/**/*.css"]!, CSS_RULE), refused, BLIND_SPOTS);
 });
 
 test("no script asks a media query for a fixed window width at or below the 1024 floor, or compares the window's or the screen's width with one, and a query it cannot read is refused (Issue #763 ruling 2A)", async () => {
@@ -156,11 +141,8 @@ test("no script asks a media query for a fixed window width at or below the 1024
     refused.length > 0 && refused.length < TS_PLANT.length,
     "the plant holds no line to refuse or none to pass, so this test cannot tell the rule from its negation",
   );
-  assert.deepEqual(await lintPlant(TS_PLANT, "src/site/prospect/app.ts", TS_RULE), refused, BLIND_SPOTS);
+  assert.deepEqual(await reportedLines(TS_PLANT, "src/site/prospect/app.ts", TS_RULE), refused, BLIND_SPOTS);
 });
-
-const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
-  ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
 test("the sheet rule resolves at error on every sheet under src/styles/ and on no script; the script rule on every file under src/, in a room not yet written too, and on no other root and no sheet (Issue #763)", async () => {
   const sheet = WITNESSES["src/styles/**/*.css"]!;

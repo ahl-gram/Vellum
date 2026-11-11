@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInline } from "../../src/site/explorer/worker-client.ts";
@@ -11,6 +10,7 @@ import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts"
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "../../src/world/lod.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
+import { digest } from "../../test-support/svg-digest.ts";
 
 // What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region spec is proved live by e2e Z15, and only its held cache is read from source at the foot of this file.
 
@@ -20,9 +20,6 @@ const CY = 0.4375;
 const RENDER: RenderOptions = { style: "antique", widthPx: 1500, legend: true };
 const world = generateWorld(defaultRecipe(SEED));
 const REGION_BANDS = LOD_BANDS.filter((b) => b.isRegion);
-
-/** A region sheet is ~300KB, and node:test renders a failed equal() of two of them character by character; the digest is the same byte comparison with a message a human can read. */
-const digest = (svg: string): string => `${createHash("sha256").update(svg).digest("hex").slice(0, 16)}/${svg.length}`;
 
 const jobFor = (band: LodBand) => ({
   kind: "region" as const,

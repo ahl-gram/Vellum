@@ -1,25 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createField } from "../../src/core/grid.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 import { realmTintIndices, realmCentroids } from "../../src/render/realm-tints.ts";
 import { STYLES } from "../../src/render/style.ts";
 import type { Settlement } from "../../src/society/sites.ts";
+import { land, noRivers, settle, type Rect } from "../../test-support/hand-built-realms.ts";
 
 // Hand-built worlds DRIVE paths no natural seed reaches (real worlds cap at ~5 realms): the generation ceiling, over-ceiling attachment, the >BASE_TINTS tint path (Issue #78), and BY-SEA-ROUTE attachment, the one behaviour a generated-world test would still pass with the old Euclidean fallback.
 
 const SEA = 0.5;
-type Rect = { x0: number; y0: number; x1: number; y1: number };
-const inRect = (x: number, y: number, r: Rect) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
-
-function land(w: number, h: number, rects: ReadonlyArray<Rect>) {
-  return createField(w, h, (x, y) => (rects.some((r) => inRect(x, y, r)) ? 1 : 0));
-}
-function settle(x: number, y: number, kind: Settlement["kind"], score = 1): Settlement {
-  return { x, y, kind, harbor: false, onRiver: false, score };
-}
-const noRivers = (w: number, h: number) => new Uint8Array(w * h);
 
 test("#79 ceiling: 9 substantial inhabited islands yield 8 realms, the smallest attaches", () => {
   const W = 150;

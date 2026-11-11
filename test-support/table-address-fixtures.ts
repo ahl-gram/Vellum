@@ -32,3 +32,17 @@ export const prospect: ProspectItem = {
 export const hashOf = (value: string): string => `#seed=42&style=antique&${TABLE_KEY}=${value}`;
 
 export const TEXAS = placeId("ne-1159315211");
+
+export const surveyAt = (lx: number): SurveyItem => ({
+  kind: "survey",
+  seed: 42,
+  overrides: {},
+  rung: 2,
+  lx,
+  ly: 3,
+  style: "antique",
+  legend: true,
+  arms: false,
+  beasts: false,
+  theme: null,
+});

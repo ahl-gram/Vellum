@@ -52,18 +52,30 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - name: Docs-only diff
+        id: scope
+        run: node scripts/docs-only.ts
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.docs_only != 'true'
         with:
           node-version: '26'
           cache: npm
       - run: npm ci
+        if: steps.scope.outputs.docs_only != 'true'
       # Build the deploy artifact and run the e2e against it, so CI validates the
       # exact dist/ that gets published. Since Sub 5 (#206) `npm run build` IS the
       # Astro build: astro:generate refreshes the generated/ runtime trees (engine,
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
+        if: steps.scope.outputs.docs_only != 'true'
         run: npm run build
       - name: Runner shape and dist/ hash
+        if: steps.scope.outputs.docs_only != 'true'
         run: |
           echo "cores: $(nproc)"
           free -m
@@ -73,6 +85,7 @@ jobs:
       # matrix" (#381): #266 wanted the matrix and deferred it only on build-once-and-upload artifact
       # plumbing, and the per-shard rebuild above is the ruling that means that plumbing is never built.
       - name: Explorer e2e lane ${{ matrix.lane }} (headless browser, against dist/)
+        if: steps.scope.outputs.docs_only != 'true'
         run: npm run test:e2e:lanes -- --lane ${{ matrix.lane }}
         env:
           # ubuntu-latest ships a real (non-snap) Google Chrome here. Point at it

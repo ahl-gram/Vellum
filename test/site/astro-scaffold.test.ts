@@ -9,6 +9,7 @@ import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
 import { PLACES } from "../../src/layouts/atelier-chart.ts";
 import { cleanGenerated, GENERATED } from "../../scripts/clean-generated.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
+import { decode } from "../../test-support/built-reads/documents.ts";
 
 // The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
 
@@ -18,13 +19,6 @@ const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url)
 const outDir = root("out/test-astro-build");
 
 const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
-const decode = (s: string) =>
-  s
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&");
 
 // Per-page expectations (Issue #268): room is the layout prop and title is COMPUTED from it; ogTitle feeds the og/twitter twins; current is the aria-current nav label, absent on home (the wordmark carries the home link).
 type PageSpec = {

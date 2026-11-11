@@ -9,16 +9,14 @@ import { minMax } from "../../src/core/grid.ts";
 import { largestBlob } from "../../src/render/blobs.ts";
 import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
 import { boxesOverlap, centroidOf, spacedTextBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
-import { renderMap } from "../../src/render/map-renderer.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES } from "../../src/render/style.ts";
-import { createProjection, marginFor, type Projection } from "../../src/render/transform.ts";
+import type { Projection } from "../../src/render/transform.ts";
 import { boxMeetsRiver } from "../../src/render/layers/river-clearance.ts";
 import { insideSheet } from "../../src/render/layers/sheet-room.ts";
 import { nameSetting, settlementsLayer } from "../../src/render/layers/settlements.ts";
 import { glyphPoly, textNodes, type Poly } from "../../test-support/label-geometry.ts";
-
-const WIDTH = 1500;
+import { projOf, sheetOf } from "../../test-support/antique-sheet.ts";
 
 const win = (u0: number, v0: number, size: number): UvWindow => ({ u0, v0, u1: u0 + size, v1: v0 + size });
 
@@ -32,10 +30,6 @@ function closeUp(seed: number, window: UvWindow): World {
     detail: true,
   });
 }
-
-const sheetOf = (world: World): string => renderMap(world, { style: "antique", widthPx: WIDTH, legend: true });
-
-const projOf = (world: World): Projection => createProjection(world.elev.w, world.elev.h, WIDTH, marginFor(WIDTH));
 
 function boundsOf(poly: Poly): Box {
   const xs = poly.map((p) => p.x);

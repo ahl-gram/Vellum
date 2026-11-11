@@ -11,6 +11,7 @@ import {
   type NoticeHost,
   type NoticeView,
 } from "../../src/site/shared/shell/desk-notice.ts";
+import { refusing, store } from "../../test-support/fake-storage.ts";
 
 // The desk notice (Issue #761): a phone that had to shrink the 1024 page to fit sees a note, once per browser; the scale and height fixtures are the ones measured under emulation on 2026-10-04 (plan, measurement 4), the boundary ones exact binary fractions so float error cannot decide them.
 
@@ -44,23 +45,6 @@ test("a tablet held upright shrinks the page but stands 1024 or more tall: no no
   assert.equal(noticeDue(0.80078125, 1474), false, "820x1180 upright: 1474 x 0.801 = 1180");
 });
 
-const store = (initial: Record<string, string> = {}) => {
-  const items = new Map(Object.entries(initial));
-  const storage = {
-    getItem: (k: string) => items.get(k) ?? null,
-    setItem: (k: string, v: string) => void items.set(k, v),
-  } as unknown as Storage;
-  return { items, get: () => storage };
-};
-const refusing = (): Storage =>
-  ({
-    getItem: () => {
-      throw new Error("SecurityError");
-    },
-    setItem: () => {
-      throw new Error("QuotaExceededError");
-    },
-  }) as unknown as Storage;
 const unreachable = (): Storage => {
   throw new Error("SecurityError: localStorage is not available");
 };

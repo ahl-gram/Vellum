@@ -1,10 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createSheetSlide, foldTiming, slideStart, type SheetBox } from "../../src/site/shared/sheet-slide.ts";
-
-const near = (actual: number, expected: number, what: string): void => {
-  assert.ok(Math.abs(actual - expected) < 1e-9, `${what}: ${actual} against ${expected}`);
-};
+import { near } from "../../test-support/near.ts";
 
 test("SS1 a fold's slide starts where the sheet stood: the old centre less the new, in the sheet's own pixels, and the old width over the new (Issue #1261)", () => {
   const explorer = slideStart(

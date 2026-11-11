@@ -5,6 +5,7 @@ import type { Accumulators, RunnerContext } from "../../e2e/support/runner.ts";
 import { makeStep } from "../../e2e/support/step.ts";
 import { runSelected } from "../../e2e/support/suites.ts";
 import type { SuiteTagged } from "../../e2e/support/suites.ts";
+import { freshAccumulators } from "../../test-support/runner-accumulators.ts";
 
 const MEDIA = "Emulation.setEmulatedMedia";
 const REDUCE = { features: [{ name: "prefers-reduced-motion", value: "reduce" }] };
@@ -13,16 +14,9 @@ type Logged = [string, Record<string, unknown> | undefined];
 
 const NEXT: Logged = ["the next suite starts", undefined];
 const VIEWPORT: Logged = ["the viewport is reset", undefined];
-const fresh = (): Accumulators => ({
-  results: [],
-  consoleErrors: [],
-  http4xx: [],
-  skippedGroups: [],
-  skippedChecks: [],
-});
 
 function lane(first: (c: SuiteTagged<RunnerContext>, acc: Accumulators) => Promise<void>, refuse = false) {
-  const acc = fresh();
+  const acc = freshAccumulators();
   const log: Logged[] = [];
   const ctx: RunnerContext = {
     send: <T>(method: string, params?: Record<string, unknown>): Promise<T> => {
@@ -98,7 +92,7 @@ test("the media clear after a suite that did not run whole is bounded, so a clea
     alive: () => Promise.resolve(true),
     clearMobile: () => Promise.resolve(),
   };
-  const acc = fresh();
+  const acc = freshAccumulators();
   const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteNotWhole;
   assert.ok(handler, "the runner hands runSelected no handler for a suite that did not run whole");
   let guard: NodeJS.Timeout | undefined;
