@@ -75,6 +75,9 @@ export function oneOf<T extends string>(raw: string | null, list: readonly T[]):
   return raw !== null && (list as readonly string[]).includes(raw) ? (raw as T) : null;
 }
 
+export const keptKeys = (hash: string, drop: RegExp): string[] =>
+  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
+
 const scaled = (raw: string | null, divisor: number, lo: number, hi: number): number | null => {
   const n = seedFromHash(raw);
   return n === null ? null : Math.min(hi, Math.max(lo, n / divisor));

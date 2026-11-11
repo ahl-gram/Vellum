@@ -1,9 +1,9 @@
+import { r3 } from "../../core/math.ts";
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Pt } from "../geometry.ts";
 import { hatchPolygon, poly, r1, washOr, type Engraver } from "./burin.ts";
 
 export const W = 0.7;
-const sw = (w: number): number => Math.round(w * 1000) / 1000;
 
 export function garment(e: Engraver, pts: ReadonlyArray<Pt>, fill: string, slope: number, spacing: number): SvgNode[] {
   const out: SvgNode[] = [
@@ -21,7 +21,7 @@ export function garment(e: Engraver, pts: ReadonlyArray<Pt>, fill: string, slope
         d: hatchPolygon(pts, slope, spacing),
         fill: "none",
         stroke: e.ink,
-        "stroke-width": sw(W * 0.55),
+        "stroke-width": r3(W * 0.55),
         "stroke-opacity": 0.85,
       }),
     );
@@ -33,20 +33,20 @@ export const line = (e: Engraver, d: string, w = W): SvgNode =>
     d,
     fill: "none",
     stroke: e.ink,
-    "stroke-width": sw(w),
+    "stroke-width": r3(w),
     "stroke-linecap": "round",
     "stroke-linejoin": "round",
   });
 export const head = (e: Engraver, cx: number, cy: number, r: number): SvgNode =>
   el("circle", { cx: r1(cx), cy: r1(cy), r: r1(r), fill: washOr(e, "skin"), stroke: e.ink, "stroke-width": W });
 export const hand = (e: Engraver, x: number, y: number): SvgNode =>
-  el("circle", { cx: r1(x), cy: r1(y), r: 0.9, fill: washOr(e, "skin"), stroke: e.ink, "stroke-width": sw(W * 0.6) });
+  el("circle", { cx: r1(x), cy: r1(y), r: 0.9, fill: washOr(e, "skin"), stroke: e.ink, "stroke-width": r3(W * 0.6) });
 export const ruff = (e: Engraver, cy: number, rx: number): SvgNode =>
   el("path", {
     d: `M${r1(-rx)} ${r1(cy)}q${r1(rx / 3)} -1.6 ${r1((rx * 2) / 3)} 0q${r1(rx / 3)} -1.6 ${r1((rx * 2) / 3)} 0q${r1(rx / 3)} -1.6 ${r1((rx * 2) / 3)} 0q${r1(-rx)} 2.6 ${r1(-rx * 2)} 0Z`,
     fill: e.paper,
     stroke: e.ink,
-    "stroke-width": sw(W * 0.8),
+    "stroke-width": r3(W * 0.8),
   });
 
 export function hat(e: Engraver, cy: number, brim: number, crown: number): SvgNode[] {
@@ -93,7 +93,7 @@ export function horse(e: Engraver): SvgNode[] {
       d: hatchPolygon(body, 0.6, 1.5),
       fill: "none",
       stroke: e.ink,
-      "stroke-width": sw(W * 0.45),
+      "stroke-width": r3(W * 0.45),
       "stroke-opacity": e.wash === null ? 0.8 : 0.45,
     }),
     el("path", {

@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../svg.ts";
-import { spacedTextBox, type Box } from "../geometry.ts";
+import { clearOfCircles, spacedTextBox, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { SeaBeast } from "../../society/bestiary.ts";
 import type { CartouchePlan } from "./cartouche.ts";
@@ -182,8 +182,7 @@ export function beastsLayer(ctx: RenderCtx, cartouche: CartouchePlan, compass: C
     },
   ];
   if (compass) avoid.push({ x: compass.cx, y: compass.cy, r: compass.r * 2.2 });
-  const clearOf = (px: number, py: number, extra: number): boolean =>
-    avoid.every((a) => Math.hypot(px - a.x, py - a.y) > a.r + extra);
+  const clearOf = clearOfCircles(avoid);
 
   const open = openBeastWater(ctx);
   const nodes = world.beasts

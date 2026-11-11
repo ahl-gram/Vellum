@@ -8,6 +8,7 @@ import {
   buildChainedField,
   createChainCache,
   detailForWindow,
+  gridForWindow,
   maxOfSurfaces,
   type ChainSpec,
 } from "../../src/world/detail-chain.ts";
@@ -16,12 +17,6 @@ import type { World } from "../../src/world/types.ts";
 import { bandWindows } from "./sweep-windows.ts";
 
 /** Issue #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds the floor Issue #397 and Issue #398 shipped, UNGATED and bilinear, rejected against that same blurred max with today's bridge rule (the neck cut since Issue #1036, not their whole-patch sinking), so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
-
-function gridForWindow(win: UvWindow): { gridW: number; gridH: number } {
-  const size = win.u1 - win.u0;
-  const b = LOD_BANDS.find((x) => Math.abs(x.sizeUV - size) < 1e-9) ?? LOD_BANDS[0]!;
-  return { gridW: b.gridW, gridH: b.gridH };
-}
 
 function buildOldField(spec: ChainSpec, cache: Map<string, Field>): Field {
   const w = spec.window;
