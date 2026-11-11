@@ -2,21 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField } from "../../src/core/grid.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
-import type { Settlement } from "../../src/society/sites.ts";
+import { noRivers, settle } from "../../test-support/hand-built-realms.ts";
 
 // Issue #140: opts.barrier is a HARD frontier: the realm flood may claim a barrier cell but never propagate across it, so realms meet ON the river. Hand-drawn masks on a synthetic grid; seats must sit > MIN_SEAT_SPACING (24) apart to be picked.
 
 const SEA = 0.5;
 const allLand = (w: number, h: number) => createField(w, h, () => 1);
-const settle = (x: number, y: number, kind: Settlement["kind"], score = 1): Settlement => ({
-  x,
-  y,
-  kind,
-  harbor: false,
-  onRiver: false,
-  score,
-});
-const noRivers = (w: number, h: number) => new Uint8Array(w * h);
 function vBarrier(w: number, h: number, col: number, y0 = 0, y1 = h - 1): Uint8Array {
   const b = new Uint8Array(w * h);
   for (let y = y0; y <= y1; y++) b[col + y * w] = 1;
