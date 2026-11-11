@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { embeddedFaces } from "../../scripts/build-og.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
-import { buildOgCard } from "../../src/render/og-card.ts";
+import { OG_HEIGHT, OG_WIDTH, buildOgCard } from "../../src/render/og-card.ts";
 import { OG_STAMP_KEYWORD, cardStamp, readStamps, stampPng, stripStamps } from "../../src/render/og-stamp.ts";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
@@ -22,6 +22,17 @@ test("src/static/og.png carries exactly one vellum-card stamp, the hash of the c
     stamps[0],
     cardStamp(await shippingCard()),
     "src/static/og.png was rendered from an older card: run npm run og and commit the PNG",
+  );
+});
+
+test("src/static/og.png is the card at scale 1, OG_WIDTH by OG_HEIGHT pixels, so a regeneration at another scale fails", () => {
+  const bytes = readFileSync(root("src/static/og.png"));
+  assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", "a PNG signature");
+  assert.equal(bytes.subarray(12, 16).toString("latin1"), "IHDR", "the header chunk comes first");
+  assert.deepEqual(
+    { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) },
+    { width: OG_WIDTH, height: OG_HEIGHT },
+    "src/static/og.png is not the card's own size: npm run og rasterizes at scale 1; regenerate and commit the PNG",
   );
 });
 

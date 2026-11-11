@@ -112,6 +112,23 @@ test("settlement attributes and realm identity flow through", () => {
   }
 });
 
+test("a settlement on unclaimed land reads realm -1, with no realm name and no arms", () => {
+  const w = worldFor(1);
+  const s = w.settlements[0]!;
+  const claimed = buildProspectInput(w, 0);
+  assert.ok(
+    claimed.realm >= 0 && claimed.realmName !== null && claimed.arms !== null,
+    "fixture: the site is claimed in the generated world, so the -1 below comes from its label alone",
+  );
+  const labels = Int16Array.from(w.realms.labels);
+  labels[s.x + s.y * w.elev.w] = -1;
+  const unclaimed = buildProspectInput({ ...w, realms: { ...w.realms, labels } }, 0);
+  assert.deepEqual(
+    { realm: unclaimed.realm, realmName: unclaimed.realmName, arms: unclaimed.arms },
+    { realm: -1, realmName: null, arms: null },
+  );
+});
+
 test("chronicle facts flow through and stay year-agnostic", () => {
   let ruinsSeen = 0;
   let datedRuinsSeen = 0;

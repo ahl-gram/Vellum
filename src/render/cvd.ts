@@ -51,22 +51,34 @@ function linearToLab([R, G, B]: Vec3): Vec3 {
 
 const deltaE = (a: Vec3, b: Vec3): number => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
-export function washesConfusable(a: string, b: string, paper: string, opacity: number, threshold = 2.5): boolean {
+export const CONFUSABLE_DE = 2.5;
+
+export type WashDistances = { readonly normal: number; readonly deuteranopia: number; readonly protanopia: number };
+
+export function washDistances(a: string, b: string, paper: string, opacity: number): WashDistances {
   const la = compositeLinear(hexToRgb(a), hexToRgb(paper), opacity);
   const lb = compositeLinear(hexToRgb(b), hexToRgb(paper), opacity);
-  for (const m of [null, DEUTERANOPIA, PROTANOPIA] as const) {
-    const va = m ? applyMatrix(m, la) : la;
-    const vb = m ? applyMatrix(m, lb) : lb;
-    if (deltaE(linearToLab(va), linearToLab(vb)) < threshold) return true;
-  }
-  return false;
+  const seen = (m: Mat3 | null): number =>
+    deltaE(linearToLab(m ? applyMatrix(m, la) : la), linearToLab(m ? applyMatrix(m, lb) : lb));
+  return { normal: seen(null), deuteranopia: seen(DEUTERANOPIA), protanopia: seen(PROTANOPIA) };
+}
+
+export function washesConfusable(
+  a: string,
+  b: string,
+  paper: string,
+  opacity: number,
+  threshold = CONFUSABLE_DE,
+): boolean {
+  const d = washDistances(a, b, paper, opacity);
+  return d.normal < threshold || d.deuteranopia < threshold || d.protanopia < threshold;
 }
 
 export function washConflictMatrix(
   palette: readonly string[],
   paper: string,
   opacity: number,
-  threshold = 2.5,
+  threshold = CONFUSABLE_DE,
 ): boolean[][] {
   const n = palette.length;
   const m: boolean[][] = Array.from({ length: n }, () => new Array<boolean>(n).fill(false));

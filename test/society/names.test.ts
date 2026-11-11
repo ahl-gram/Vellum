@@ -1,7 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
-import { CULTURES, ENGLISH_BLOCKLIST, createNamer, isStandaloneSlot, makeMapTitle } from "../../src/society/names.ts";
+import {
+  CULTURES,
+  ENGLISH_BLOCKLIST,
+  createNamer,
+  isStandaloneSlot,
+  makeMapTitle,
+  type Culture,
+} from "../../src/society/names.ts";
 
 test("there are at least four distinct cultures", () => {
   assert.ok(CULTURES.length >= 4);
@@ -167,6 +174,51 @@ test("the near-dup screen rarely forces the Roman-numeral fallback", () => {
     }
     assert.ok(fallbacks / total < 0.05, `${culture.id}: ${fallbacks}/${total} fallbacks`);
   }
+});
+
+const TIGHT: Culture = {
+  id: "tight",
+  onsets: ["m", "b"],
+  nuclei: ["o"],
+  codas: ["re", "an"],
+  patterns: ["ONC"],
+  townSuffixes: ["haven"],
+  riverTemplates: ["%"],
+  peakTemplates: ["%"],
+  seaTemplates: ["%"],
+  lakeTemplates: ["%"],
+  forestTemplates: ["%"],
+  realmTemplates: ["%"],
+};
+const NUMERAL_FALLBACK = /^(\S+) (?:II|III|IV|V|VI|VII|VIII|IX|X)$/;
+
+test("the Roman-numeral fallback skips the near-dup screen but keeps the English-word screen, whatever slot asked", () => {
+  assert.deepEqual(
+    ["more", "moan", "bore", "boan"].map((b) => ENGLISH_BLOCKLIST.has(b)),
+    [true, true, true, false],
+    "fixture premise: three of the four bases are English words",
+  );
+  const namer = createNamer(createRng(1).fork("names"), TIGHT);
+  assert.deepEqual(
+    [namer.name("bare"), namer.name("bare")],
+    ["Boan", "Boan II"],
+    "the fallback reuses a base the near-dup screen already holds, since the numeral keeps the name unique",
+  );
+  const bases: string[] = [];
+  for (let seed = 1; seed <= 20; seed++) {
+    const settler = createNamer(createRng(seed).fork("names"), TIGHT);
+    for (let i = 0; i < 10; i++) bases.push(NUMERAL_FALLBACK.exec(settler.name("settlement"))?.[1] ?? "");
+  }
+  const fallbacks = bases.filter((b) => b !== "");
+  assert.ok(
+    fallbacks.length > 0,
+    `fixture premise: the settlement names reach the fallback (${fallbacks.length} of ${bases.length})`,
+  );
+  assert.deepEqual(
+    fallbacks.filter((b) => ENGLISH_BLOCKLIST.has(b.toLowerCase())),
+    [],
+    "a fallback base renders as its own word, so the English-word screen applies to it even after a town suffix was drawn",
+  );
 });
 
 test("map titles are deterministic and themed by map type", () => {

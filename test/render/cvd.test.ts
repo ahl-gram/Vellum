@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { washesConfusable, washConflictMatrix } from "../../src/render/cvd.ts";
+import { CONFUSABLE_DE, washDistances, washesConfusable, washConflictMatrix } from "../../src/render/cvd.ts";
+import { STYLES } from "../../src/render/style.ts";
 
 const ANTIQUE_PAPER = "#f2e8cf";
 const TOPO_PAPER = "#f7f4ee";
@@ -24,6 +25,23 @@ test("the two new antique tints are not confusable with each other", () => {
 
 test("red-green tints collapse under CVD even when distinct normally", () => {
   assert.ok(washesConfusable("#c46d5e", "#7d9a6a", ANTIQUE_PAPER, 0.11));
+});
+
+const BUILT_LIGHT_OLIVE = "#98ab4a";
+
+test("antique's deep olive is dark on purpose: under deuteranopia it stays clear of the frozen ochre, where the same olive lightened is its twin", () => {
+  const { paper, realmTints } = STYLES.antique;
+  const ochre = realmTints[2]!;
+  const olive = realmTints[6]!;
+  assert.ok(
+    washDistances(BUILT_LIGHT_OLIVE, ochre, paper, 0.11).deuteranopia < CONFUSABLE_DE,
+    "witness, built for this test: the olive's channels scaled by 1.6 are an ochre twin under deuteranopia",
+  );
+  const seen = washDistances(olive, ochre, paper, 0.11);
+  assert.ok(
+    seen.deuteranopia >= CONFUSABLE_DE,
+    `antique's olive sits ${seen.deuteranopia.toFixed(3)} from ochre under deuteranopia, inside the ${CONFUSABLE_DE} the conflict matrix calls confusable`,
+  );
 });
 
 test("washConflictMatrix is symmetric with a false diagonal", () => {
