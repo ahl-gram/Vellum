@@ -31,7 +31,7 @@ test("roads connect every town to the network, over land only", () => {
   const { elev, sea, riverCells, settlements, realms } = makeWorld(42);
   const roads = buildRoads(elev, sea, riverCells, settlements, realms);
   const towns = settlements.filter((s) => s.kind !== "village");
-  if (towns.length < 2) return;
+  assert.ok(towns.length >= 2, `seed 42 places ${towns.length} towns, too few to network`);
 
   assert.ok(roads.length >= towns.length - 1, "every town links in");
   for (const road of roads) {
@@ -59,22 +59,6 @@ test("road endpoints touch settlements or other roads", () => {
       assert.ok(anchors.has(key) || roadCells.has(key), `dangling road end at ${key}`);
     }
   }
-});
-
-test("later roads reuse existing corridors (trunk roads emerge)", () => {
-  const { elev, sea, riverCells, settlements, realms } = makeWorld(7);
-  const towns = settlements.filter((s) => s.kind !== "village");
-  if (towns.length < 3) return;
-  const roads = buildRoads(elev, sea, riverCells, settlements, realms);
-  const counts = new Map<string, number>();
-  for (const road of roads) {
-    for (const p of road.points) {
-      const k = `${p.x},${p.y}`;
-      counts.set(k, (counts.get(k) ?? 0) + 1);
-    }
-  }
-  const shared = [...counts.values()].filter((c) => c >= 2).length;
-  assert.ok(shared >= 0, "smoke: shared corridor metric computed");
 });
 
 test("roads are deterministic", () => {
