@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createField } from "../../src/core/grid.ts";
+import { createField, type Field } from "../../src/core/grid.ts";
 import { isoLayer, isolines } from "../../src/render/layers/iso.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import type { RenderCtx } from "../../src/render/context.ts";
 import type { ThemeName } from "../../src/render/layers/field.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
+import { marchingSquares } from "../../src/terrain/contours.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 const STYLE_NAMES: StyleName[] = ["antique", "topographic", "ink", "nautical"];
@@ -51,20 +52,6 @@ test("isolines: a radial bump yields closed rings; a flat field yields nothing",
   );
 });
 
-function maxExtent(points: ReadonlyArray<readonly [number, number]>): number {
-  let minx = Infinity,
-    miny = Infinity,
-    maxx = -Infinity,
-    maxy = -Infinity;
-  for (const [x, y] of points) {
-    if (x < minx) minx = x;
-    if (x > maxx) maxx = x;
-    if (y < miny) miny = y;
-    if (y > maxy) maxy = y;
-  }
-  return Math.max(maxx - minx, maxy - miny);
-}
-
 test("isolines: a lone spike keeps its broad low ring but culls the sub-pixel high one", () => {
   // One cell above a flat floor: the 0.1 ring rides ~0.9 cell out (a real ~1.8-cell diamond), the 0.9 ring hugs the corner at ~0.1 cell (a degenerate ~0.2-cell speck to be culled).
   const spike = createField(5, 5, (x, y) => (x === 2 && y === 2 ? 1 : 0));
@@ -78,18 +65,28 @@ test("isolines: a lone spike keeps its broad low ring but culls the sub-pixel hi
   assert.ok(!high || high.contours.every((c) => !c.closed), "the sub-pixel 0.9 ring is culled");
 });
 
+test("isolines: a closed ring survives while its longer side spans 0.6 cell or more, and is culled below it", () => {
+  const closedAt = (field: Field, levels: number, v: number): boolean =>
+    isolines(field, levels).some((s) => Math.abs(s.value - v) < 1e-9 && s.contours.some((c) => c.closed));
+  const spike = createField(5, 5, (x, y) => (x === 2 && y === 2 ? 1 : 0));
+  assert.equal(closedAt(spike, 19, 0.65), true, "a lone spike's 0.65 ring spans 2 x 0.35 = 0.7 cell, and survives");
+  assert.equal(closedAt(spike, 19, 0.75), false, "its 0.75 ring spans 2 x 0.25 = 0.5 cell, and is culled");
+  const bar = createField(7, 5, (x, y) => (y === 2 && (x === 2 || x === 3) ? 1 : 0));
+  assert.equal(
+    closedAt(bar, 19, 0.75),
+    true,
+    "beside a second high cell the 0.75 ring is 1.5 cells long and 0.5 tall, and the longer side keeps it",
+  );
+  assert.equal(closedAt(bar, 19, 0.95), true, "its 0.95 ring, 1.1 cells long and 0.1 tall, survives too");
+});
+
 test("isolines: sub-pixel mottle rings are culled off the real rainfall field", () => {
-  const world = generateWorld(defaultRecipe(42));
-  const closed = isolines(world.climate.moisture, 9)
-    .flatMap((s) => s.contours)
-    .filter((c) => c.closed);
-  assert.ok(closed.length > 100, "the noisy field still carries real rings");
-  for (const c of closed) {
-    assert.ok(
-      maxExtent(c.points) > 0.5,
-      `every surviving ring clears the sub-pixel floor (found ${maxExtent(c.points).toFixed(3)} cells)`,
-    );
-  }
+  const field = generateWorld(defaultRecipe(42)).climate.moisture;
+  const sets = isolines(field, 9);
+  const kept = sets.flatMap((s) => s.contours).filter((c) => c.closed).length;
+  const traced = sets.flatMap((s) => marchingSquares(field, s.value)).filter((c) => c.closed).length;
+  assert.ok(kept > 100, `the noisy field still carries real rings (${kept})`);
+  assert.ok(traced > kept, `the cull removed some of the ${traced} rings the field traces (kept ${kept})`);
 });
 
 test("the rainfall isohyets lead the plate; the temperature isotherms stay faint", () => {
