@@ -1,3 +1,4 @@
+import { tokenize, tokenTypes } from "@eslint/css-tree";
 import ts from "typescript";
 
 export type Token = { readonly text: string; readonly line: number };
@@ -25,6 +26,18 @@ export const scriptTokens = (path: string, text: string): Token[] => {
   return out;
 };
 
-export const sheetTokens: (css: string, lineOf: (offset: number) => number) => Token[] = (css) => [
-  { text: css, line: 1 },
-];
+export const sheetTokens = (css: string, lineOf: (offset: number) => number): Token[] => {
+  const out: Token[] = [];
+  let spaced = false;
+  tokenize(css, (type, start, end) => {
+    if (type === tokenTypes["Comment"]) return;
+    if (type === tokenTypes["WhiteSpace"]) {
+      spaced = true;
+      return;
+    }
+    if (spaced && out.length > 0) out.push({ text: " ", line: lineOf(start) });
+    spaced = false;
+    out.push({ text: css.slice(start, end), line: lineOf(start) });
+  });
+  return out;
+};
