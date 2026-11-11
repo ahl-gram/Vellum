@@ -31,7 +31,7 @@ its definition under `.claude/agents/`.
 
 | agent | step | what it runs | the failure it catches |
 |---|---|---|---|
-| `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
+| `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree in the order `npm run recon-triage` ranks them, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
 | `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
 | `vellum-pr-skeptic` | 14 | the pull request, read cold through the lenses its diff calls for, in its own sandbox with commands of its own, to a merge verdict | what the implementing session believed and never checked, against the issue and the house contracts |

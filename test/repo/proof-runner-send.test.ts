@@ -174,3 +174,22 @@ test("an edit's replacement is taken literally, never as a replacement pattern",
   ]);
   assert.equal(after.get("src/c.ts"), "const a = '$&$';\nconst b = '$`$&';\n");
 });
+
+test("a file over a mebibyte is read whole at the commit, not refused as missing", async () => {
+  const big = "x".repeat(2 * 1024 * 1024) + "\n";
+  await withTempRepo({ "big.svg": big }, (dir, sha) => {
+    let text = "";
+    assert.doesNotThrow(() => {
+      text = readAt(dir, sha)("big.svg");
+    });
+    assert.equal(text.length, big.length);
+  });
+});
+
+test("a directory at the commit is not a file, so reading it throws instead of returning its listing", async () => {
+  await withTempRepo({ "dir/a.ts": "export const a = 1;\n" }, (dir, sha) => {
+    assert.equal(readAt(dir, sha)("dir/a.ts"), "export const a = 1;\n");
+    assert.throws(() => readAt(dir, sha)("dir"), { message: /^dir is not a file at /u });
+    assert.throws(() => readAt(dir, sha)("dir/"), { message: /^dir\/ is not a file at /u });
+  });
+});

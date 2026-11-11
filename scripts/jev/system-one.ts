@@ -1,3 +1,5 @@
+import { join } from "node:path";
+
 export const ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 export const MODEL = "jev-1.14.0";
 export const KEY_VAR = "TYPESAFE_API_KEY";
@@ -5,6 +7,11 @@ export const TIMEOUT_MS = 10_000;
 export const KEY_SHAPE = /^[!#-[\]-~]+$/;
 export const KEY_MASK = `<${KEY_VAR}>`;
 export const KEY_REFUSED = `${KEY_VAR} holds a character a request header cannot carry, so nothing was sent`;
+export const KEY_FILE_SHOWN = "~/.config/typesafe/key";
+export const NO_KEY = `${KEY_VAR} is not set and ${KEY_FILE_SHOWN} holds no key`;
+export type Env = Readonly<Record<string, string | undefined>>;
+export type ReadText = (path: string) => string;
+export const keyFileOf = (home: string): string => join(home, ".config", "typesafe", "key");
 export type NoulQuestion = {
   readonly type: "noul";
   readonly instructions: string | Readonly<Record<string, unknown>>;
@@ -96,6 +103,22 @@ export const senderFor = (key: string | undefined, fetcher: Fetch): Send => {
   if (trimmed === "") return () => Promise.resolve(fail(`${KEY_VAR} is not set`));
   if (!KEY_SHAPE.test(trimmed)) return () => Promise.resolve(fail(KEY_REFUSED));
   return (request) => ask(request, trimmed, fetcher);
+};
+
+export const readKey = (env: Env, home: string, readText: ReadText): string | undefined => {
+  const fromEnv = env[KEY_VAR];
+  if (typeof fromEnv === "string" && fromEnv.trim() !== "") return fromEnv;
+  try {
+    const text = readText(keyFileOf(home));
+    return text.trim() === "" ? undefined : text;
+  } catch {
+    return undefined;
+  }
+};
+
+export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch): Send => {
+  const key = readKey(env, home, readText);
+  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher);
 };
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));
