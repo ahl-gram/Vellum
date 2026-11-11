@@ -75,6 +75,10 @@ export const deletedFiles = (repo: string, from: string, head: string): string[]
 export const typeChangedFiles = (repo: string, from: string, head: string): string[] =>
   pathsWith(repo, from, head, "T");
 
+export type ModeChange = { readonly path: string; readonly oldMode: string; readonly newMode: string };
+
+export const modeChangedFiles: (repo: string, from: string, head: string) => ModeChange[] = () => [];
+
 export const ensureCommit = (repo: string, sha: string, ref: string): void => {
   const has = (): boolean =>
     spawnSync("git", ["cat-file", "-e", `${sha}^{commit}`], { cwd: repo, timeout: GIT_MS }).status === 0;

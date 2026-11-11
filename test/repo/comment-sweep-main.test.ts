@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { rmSync, symlinkSync } from "node:fs";
+import { chmodSync, rmSync, symlinkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
 import { main, verify } from "../../scripts/comment-sweep/main.ts";
@@ -10,7 +10,7 @@ import { git } from "../../test-support/sandbox-repo.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const THREE_IDENTICAL =
-  "comment-sweep verify: 3 changed files; identical 3, differ 0, added 0, deleted 0, renamed 0, type changed 0, not read 0, prose 0";
+  "comment-sweep verify: 3 changed files; identical 3, differ 0, added 0, deleted 0, renamed 0, type changed 0, mode changed 0, not read 0, prose 0";
 
 test("the report lists every finding but an identical one, in order, with the first difference on each side, and counts each kind", () => {
   const findings: Finding[] = [
@@ -27,6 +27,7 @@ test("the report lists every finding but an identical one, in order, with the fi
     { kind: "differs", path: "src/c.ts", difference: { base: { line: 9, text: "x" }, head: null } },
     { kind: "deleted", path: "src/d.ts" },
     { kind: "type changed", path: "src/t.ts" },
+    { kind: "mode changed", path: "src/m.ts", oldMode: "100644", newMode: "100755" },
   ];
   assert.deepEqual(reportLines(findings, "b1", "h1"), [
     "comment-sweep verify, read from b1 to h1",
@@ -38,7 +39,8 @@ test("the report lists every finding but an identical one, in order, with the fi
     'DIFFERS src/c.ts: base line 9 "x", head the end of the file',
     "DELETED src/d.ts",
     "TYPE CHANGED src/t.ts",
-    "comment-sweep verify: 9 changed files; identical 1, differ 2, added 1, deleted 1, renamed 1, type changed 1, not read 1, prose 1",
+    "MODE CHANGED src/m.ts 100644->100755",
+    "comment-sweep verify: 10 changed files; identical 1, differ 2, added 1, deleted 1, renamed 1, type changed 1, mode changed 1, not read 1, prose 1",
   ]);
   assert.equal(exitOf(findings), 1);
   assert.equal(
@@ -113,7 +115,7 @@ test("a branch that changes code, adds, renames and deletes files, and touches a
           "ADDED src/n.ts",
           "RENAMED src/r.ts to src/s.ts",
           "DELETED src/d.ts",
-          "comment-sweep verify: 6 changed files; identical 0, differ 1, added 1, deleted 1, renamed 1, type changed 0, not read 1, prose 1",
+          "comment-sweep verify: 6 changed files; identical 0, differ 1, added 1, deleted 1, renamed 1, type changed 0, mode changed 0, not read 1, prose 1",
         ],
         code: 1,
       });
@@ -131,11 +133,37 @@ test("a branch that makes a file a symbolic link reports its type change and exi
       lines: [
         `comment-sweep verify, read from ${base} to ${head}`,
         "TYPE CHANGED src/l.ts",
-        "comment-sweep verify: 1 changed files; identical 0, differ 0, added 0, deleted 0, renamed 0, type changed 1, not read 0, prose 0",
+        "comment-sweep verify: 1 changed files; identical 0, differ 0, added 0, deleted 0, renamed 0, type changed 1, mode changed 0, not read 0, prose 0",
       ],
       code: 1,
     });
   });
+});
+
+test("a branch that flips the executable bit on a script, a sheet and a page, content unchanged, reports each mode change and exits 1", async () => {
+  await withTempRepo(
+    {
+      "src/a.ts": "export const a = 1;\n",
+      "src/styles/a.css": ".a {\n  color: red;\n}\n",
+      "src/pages/p.astro": "---\nconst x = 1;\n---\n<p>{x}</p>\n",
+    },
+    (dir, base) => {
+      git(["config", "core.fileMode", "true"], dir);
+      git(["checkout", "-q", "-b", "sweep"], dir);
+      for (const path of ["src/a.ts", "src/styles/a.css", "src/pages/p.astro"]) chmodSync(join(dir, path), 0o755);
+      const head = commitAll(dir, "executable");
+      assert.deepEqual(verify(dir, "main", "HEAD"), {
+        lines: [
+          `comment-sweep verify, read from ${base} to ${head}`,
+          "MODE CHANGED src/a.ts 100644->100755",
+          "MODE CHANGED src/pages/p.astro 100644->100755",
+          "MODE CHANGED src/styles/a.css 100644->100755",
+          "comment-sweep verify: 3 changed files; identical 0, differ 0, added 0, deleted 0, renamed 0, type changed 0, mode changed 3, not read 0, prose 0",
+        ],
+        code: 1,
+      });
+    },
+  );
 });
 
 test("the command takes verify and two refs, and anything else is a usage error", () => {

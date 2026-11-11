@@ -1,4 +1,4 @@
-import type { Changed, Tree } from "../comment-judge/tree.ts";
+import type { Changed, ModeChange, Tree } from "../comment-judge/tree.ts";
 import { isDoc } from "../docs-only.ts";
 import { pageTokens } from "./page-tokens.ts";
 import { lineFinder, scriptTokens, sheetTokens, type Token } from "./tokens.ts";
@@ -8,6 +8,7 @@ export type Difference = { readonly base: Excerpt | null; readonly head: Excerpt
 export type Finding =
   | { readonly kind: "identical" | "added" | "deleted" | "type changed" | "not read" | "prose"; readonly path: string }
   | { readonly kind: "renamed"; readonly path: string; readonly before: string }
+  | { readonly kind: "mode changed"; readonly path: string; readonly oldMode: string; readonly newMode: string }
   | { readonly kind: "differs"; readonly path: string; readonly difference: Difference };
 
 export const readerOf = (path: string): ((text: string) => Token[]) | null => {
@@ -51,10 +52,12 @@ export const findingsOf = (
   changed: readonly Changed[],
   deleted: readonly string[],
   typeChanged: readonly string[],
+  modeChanged: readonly ModeChange[],
   before: Tree,
   after: Tree,
 ): Finding[] => [
   ...changed.map((c) => findingOf(c, before, after)),
   ...deleted.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "deleted", path })),
   ...typeChanged.map((path): Finding => ({ kind: isDoc(path) ? "prose" : "type changed", path })),
+  ...modeChanged.map((m): Finding => ({ kind: "identical", path: m.path })),
 ];

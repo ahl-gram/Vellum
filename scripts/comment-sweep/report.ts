@@ -17,6 +17,8 @@ const findingLine = (f: Finding): string | null => {
       return `DELETED ${f.path}`;
     case "type changed":
       return `TYPE CHANGED ${f.path}`;
+    case "mode changed":
+      return null;
     case "not read":
       return `NOT READ ${f.path}: ${NOT_READ}`;
     case "renamed":
@@ -31,7 +33,7 @@ export const reportLines = (findings: readonly Finding[], from: string, head: st
   return [
     `comment-sweep verify, read from ${from} to ${head}`,
     ...findings.flatMap((f) => findingLine(f) ?? []),
-    `comment-sweep verify: ${findings.length} changed files; identical ${count("identical")}, differ ${count("differs")}, added ${count("added")}, deleted ${count("deleted")}, renamed ${count("renamed")}, type changed ${count("type changed")}, not read ${count("not read")}, prose ${count("prose")}`,
+    `comment-sweep verify: ${findings.length} changed files; identical ${count("identical")}, differ ${count("differs")}, added ${count("added")}, deleted ${count("deleted")}, renamed ${count("renamed")}, type changed ${count("type changed")}, mode changed ${count("mode changed")}, not read ${count("not read")}, prose ${count("prose")}`,
   ];
 };
 
