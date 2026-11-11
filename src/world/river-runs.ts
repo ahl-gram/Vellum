@@ -1,5 +1,6 @@
 import { isMajorRiver, type River } from "../hydrology/rivers.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
+import { clipSegment, windowFrame, type WindowFrame } from "./region-parent.ts";
 import type { World } from "./types.ts";
 
 export type GridPoint = { readonly x: number; readonly y: number };
@@ -12,37 +13,6 @@ export type RiverRun = {
   readonly leavesAtEdge: boolean;
   readonly endsInOcean: boolean;
 };
-
-type Box = { readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number };
-
-type Frame = {
-  readonly box: Box;
-  readonly toRegion: (p: GridPoint) => GridPoint;
-};
-
-function clipSegment(a: GridPoint, b: GridPoint, box: Box): readonly [number, number] | null {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  let t0 = 0;
-  let t1 = 1;
-  const edges: ReadonlyArray<readonly [number, number]> = [
-    [-dx, a.x - box.x0],
-    [dx, box.x1 - a.x],
-    [-dy, a.y - box.y0],
-    [dy, box.y1 - a.y],
-  ];
-  for (const [p, q] of edges) {
-    if (p === 0) {
-      if (q < 0) return null;
-      continue;
-    }
-    const r = q / p;
-    if (p < 0) t0 = Math.max(t0, r);
-    else t1 = Math.min(t1, r);
-    if (t0 > t1) return null;
-  }
-  return [t0, t1];
-}
 
 function courseLength(course: ReadonlyArray<GridPoint>): number {
   let length = 0;
@@ -67,7 +37,7 @@ export function densifyCourse(course: ReadonlyArray<GridPoint>): GridPoint[] {
   return out;
 }
 
-function runsOfRiver(river: River, index: number, frame: Frame): RiverRun[] {
+function runsOfRiver(river: River, index: number, frame: WindowFrame): RiverRun[] {
   const runs: RiverRun[] = [];
   const major = isMajorRiver(river);
   let course: GridPoint[] = [];
@@ -112,15 +82,7 @@ function runsOfRiver(river: River, index: number, frame: Frame): RiverRun[] {
 const peak = (run: RiverRun): number => Math.max(...run.acc);
 
 export function worldRiverRuns(world: World, window: UvWindow, gridW: number, gridH: number): RiverRun[] {
-  const ww = world.recipe.gridW - 1;
-  const wh = world.recipe.gridH - 1;
-  const frame: Frame = {
-    box: { x0: window.u0 * ww, x1: window.u1 * ww, y0: window.v0 * wh, y1: window.v1 * wh },
-    toRegion: (p) => ({
-      x: ((p.x / ww - window.u0) / (window.u1 - window.u0)) * (gridW - 1),
-      y: ((p.y / wh - window.v0) / (window.v1 - window.v0)) * (gridH - 1),
-    }),
-  };
+  const frame = windowFrame(world.recipe.gridW, world.recipe.gridH, window, gridW, gridH);
   const runs = world.rivers.flatMap((river, index) => runsOfRiver(river, index, frame));
   return runs.sort((a, b) => Number(b.major) - Number(a.major) || peak(b) - peak(a));
 }
