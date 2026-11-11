@@ -139,19 +139,29 @@ test("seed 526413615 sails: it has at least one sea leg and many road legs", () 
 
 test("on a real world, every road-leg vertex is dry land and every sea-leg interior vertex is water", () => {
   const { s, routed } = realWorld(526413615);
-  const modes = new Set(routed.map((l) => l.mode));
-  assert.ok(
-    modes.has("road") && modes.has("sea"),
-    `seed 526413615 routes ${[...modes].join(" and ") || "no"} legs, so a road or a sea leg is never checked`,
-  );
+  const walked = { road: 0, sea: 0 };
   for (const l of routed) {
     if (l.mode === "road") {
-      for (const p of l.points) assert.ok(isLand(s, p), `road vertex ${p.x},${p.y} is on water`);
+      for (const p of l.points) {
+        walked.road++;
+        assert.ok(isLand(s, p), `road vertex ${p.x},${p.y} is on water`);
+      }
     }
     if (l.mode === "sea") {
-      for (const p of l.points.slice(1, -1)) assert.ok(!isLand(s, p), `sea vertex ${p.x},${p.y} is on land`);
+      for (const p of l.points.slice(1, -1)) {
+        walked.sea++;
+        assert.ok(!isLand(s, p), `sea vertex ${p.x},${p.y} is on land`);
+      }
     }
   }
+  assert.ok(
+    walked.road >= 1,
+    "no road vertex of seed 526413615's legs was walked, so no road leg was held to dry land",
+  );
+  assert.ok(
+    walked.sea >= 1,
+    "no sea leg of seed 526413615 has an interior vertex, so no sea leg was held to open water",
+  );
 });
 
 test("on a real world, routed legs have real geometry (not the v1 two-point lerp)", () => {
@@ -193,7 +203,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
   const nearest = nearestOf(s);
 
   const isWaterVertex = (p: { x: number; y: number }) => s.land[p.x + p.y * s.gridW] === 0;
-  let sampled = 0;
+  const chords: Record<RoutedLeg["mode"], number> = { road: 0, sea: 0, straight: 0 };
 
   for (const l of routed) {
     // A sea leg's ends are LAND ports joined by short overland stubs; the invariant concerns the open water between, so scan from the first water vertex to the last.
@@ -207,11 +217,11 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
     // A straight leg's endpoints are the ports themselves, so every chord counts (a two-vertex chord would otherwise scan nothing).
     if (l.mode === "straight") lo = 0;
     for (let i = lo + 1; i <= hi; i++) {
+      chords[l.mode]++;
       const a = l.points[i - 1]!;
       const b = l.points[i]!;
       const steps = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 4));
       for (let k = 0; k <= steps; k++) {
-        sampled++;
         const t = k / steps;
         const x = a.x + (b.x - a.x) * t;
         const y = a.y + (b.y - a.y) * t;
@@ -226,7 +236,11 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
       }
     }
   }
-  assert.ok(sampled >= 1, "no chord of seed 526413615's legs was sampled, so no leg was held to its terrain");
+  assert.ok(
+    chords.road >= 1,
+    "no road chord of seed 526413615's legs was sampled, so no road leg was held to its terrain",
+  );
+  assert.ok(chords.sea >= 1, "no sea chord of seed 526413615's legs was sampled, so no sea leg was held to its water");
 });
 
 test("a straight fallback leg walks the land, never across open water (#298)", () => {
