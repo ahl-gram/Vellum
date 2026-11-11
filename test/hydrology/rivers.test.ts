@@ -48,7 +48,10 @@ test("tributaries end at a junction point shared with another river", () => {
   const flow = computeFlow(f, sea);
   const rivers = extractRivers(f, flow, sea);
   const tribs = rivers.filter((r) => !r.endsInOcean);
-  if (tribs.length === 0) return; // seed-dependent; nothing to assert
+  assert.ok(
+    tribs.length >= 1,
+    `the fixture grows no tributary among its ${rivers.length} rivers, so nothing below runs`,
+  );
 
   const allPoints = new Set<string>();
   for (const r of rivers) {
