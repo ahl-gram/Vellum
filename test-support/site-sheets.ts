@@ -1,22 +1,11 @@
-import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { listWorkingTree } from "./working-tree.ts";
 
 const REPO = resolve(import.meta.dirname, "..");
-// A cap on a hang, never a budget (2026-09-27: the listing ran in 6 to 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw, and no test drives that path.
-const GIT_TIMEOUT_MS = 30_000;
 const WITNESSES = ["src/styles/shared/house.css", "src/styles/explorer/broadside.css"] as const;
 
 function listSheets(): ReadonlyArray<string> {
-  const listing = spawnSync(
-    "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", "src/styles/*.css"],
-    { cwd: REPO, encoding: "utf8", timeout: GIT_TIMEOUT_MS },
-  );
-  if (listing.status !== 0)
-    throw new Error(
-      `git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr}): the sheet roster would be empty or partial`,
-    );
-  const sheets = listing.stdout.split("\0").filter(Boolean).sort();
+  const sheets = listWorkingTree(REPO, ["src/styles/*.css"]);
   const missing = WITNESSES.filter((witness) => !sheets.includes(witness));
   if (missing.length > 0)
     throw new Error(

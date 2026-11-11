@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import ts from "typescript";
-import { isTsUnderLintRoots, lintTsRoots } from "../../test-support/lint-roots.ts";
+import { isTsUnderRoots } from "../../test-support/ts-under-roots.ts";
 import { parseTs, withoutComments } from "../comment-judge/parse.ts";
 import type { Tree } from "../comment-judge/tree.ts";
 
@@ -18,7 +18,6 @@ export type Fn = {
   readonly hash: string;
 };
 export type Unread = { readonly file: string; readonly reason: string };
-export const HUNT_ROOTS: readonly string[] = lintTsRoots();
 
 const COMMON = new Set(
   "const let var function return if else for of in while do new await async true false null undefined typeof instanceof this break continue throw try catch finally switch case default import export from as type interface readonly void number string boolean test it assert equal deepEqual strictEqual deepStrictEqual ok match throws length map filter some every forEach push slice join Math".split(
@@ -97,12 +96,15 @@ export const functionsIn = (path: string, text: string): Fn[] => {
   return out;
 };
 
-export const functionsAt = (tree: Tree): { readonly fns: readonly Fn[]; readonly unread: readonly Unread[] } => {
+export const functionsAt = (
+  tree: Tree,
+  roots: readonly string[],
+): { readonly fns: readonly Fn[]; readonly unread: readonly Unread[] } => {
   const fns: Fn[] = [];
   const unread: Unread[] = [];
-  for (const root of HUNT_ROOTS)
+  for (const root of roots)
     for (const file of tree.list(root)) {
-      if (!isTsUnderLintRoots(file)) continue;
+      if (!isTsUnderRoots(roots, file)) continue;
       try {
         fns.push(...functionsIn(file, tree.read(file)));
       } catch (error) {

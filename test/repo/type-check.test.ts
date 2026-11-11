@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
 import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
+import { listWorkingTree } from "../../test-support/working-tree.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const rel = (path: string): string => relative(ROOT, path);
@@ -23,15 +23,7 @@ const ROOT_OPTIONS = parse("tsconfig.json").options;
 const withoutDom = (libs: readonly string[] | undefined): string[] =>
   (libs ?? []).filter((lib) => !lib.startsWith("lib.dom"));
 
-function listed(pathspecs: readonly string[]): string[] {
-  const run = spawnSync(
-    "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", ...pathspecs],
-    { cwd: ROOT, encoding: "utf8", timeout: 30_000 },
-  );
-  assert.equal(run.status, 0, `git ls-files failed: ${run.stderr}`);
-  return run.stdout.split("\0").filter(Boolean).sort();
-}
+const listed = (pathspecs: readonly string[]): string[] => listWorkingTree(ROOT, pathspecs);
 
 const witnessProgram = (
   options: ts.CompilerOptions,
