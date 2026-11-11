@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { rmSync } from "node:fs";
+import { rmSync, symlinkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
 import { main, verify } from "../../scripts/comment-sweep/main.ts";
@@ -10,7 +10,7 @@ import { git } from "../../test-support/sandbox-repo.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const THREE_IDENTICAL =
-  "comment-sweep verify: 3 changed files; identical 3, differ 0, added 0, deleted 0, renamed 0, not read 0, prose 0";
+  "comment-sweep verify: 3 changed files; identical 3, differ 0, added 0, deleted 0, renamed 0, type changed 0, not read 0, prose 0";
 
 test("the report lists every finding but an identical one, in order, with the first difference on each side, and counts each kind", () => {
   const findings: Finding[] = [
@@ -26,6 +26,7 @@ test("the report lists every finding but an identical one, in order, with the fi
     { kind: "not read", path: "data/x.json" },
     { kind: "differs", path: "src/c.ts", difference: { base: { line: 9, text: "x" }, head: null } },
     { kind: "deleted", path: "src/d.ts" },
+    { kind: "type changed", path: "src/t.ts" },
   ];
   assert.deepEqual(reportLines(findings, "b1", "h1"), [
     "comment-sweep verify, read from b1 to h1",
@@ -36,7 +37,8 @@ test("the report lists every finding but an identical one, in order, with the fi
     "NOT READ data/x.json: the verifier reads TypeScript, JavaScript, sheets and pages only",
     'DIFFERS src/c.ts: base line 9 "x", head the end of the file',
     "DELETED src/d.ts",
-    "comment-sweep verify: 8 changed files; identical 1, differ 2, added 1, deleted 1, renamed 1, not read 1, prose 1",
+    "TYPE CHANGED src/t.ts",
+    "comment-sweep verify: 9 changed files; identical 1, differ 2, added 1, deleted 1, renamed 1, type changed 1, not read 1, prose 1",
   ]);
   assert.equal(exitOf(findings), 1);
   assert.equal(
@@ -111,12 +113,29 @@ test("a branch that changes code, adds, renames and deletes files, and touches a
           "ADDED src/n.ts",
           "RENAMED src/r.ts to src/s.ts",
           "DELETED src/d.ts",
-          "comment-sweep verify: 6 changed files; identical 0, differ 1, added 1, deleted 1, renamed 1, not read 1, prose 1",
+          "comment-sweep verify: 6 changed files; identical 0, differ 1, added 1, deleted 1, renamed 1, type changed 0, not read 1, prose 1",
         ],
         code: 1,
       });
     },
   );
+});
+
+test("a branch that makes a file a symbolic link reports its type change and exits 1", async () => {
+  await withTempRepo({ "src/a.ts": "export const a = 1;\n", "src/l.ts": "export const a = 1;\n" }, (dir, base) => {
+    git(["checkout", "-q", "-b", "sweep"], dir);
+    rmSync(join(dir, "src/l.ts"));
+    symlinkSync("a.ts", join(dir, "src/l.ts"));
+    const head = commitAll(dir, "a link");
+    assert.deepEqual(verify(dir, "main", "HEAD"), {
+      lines: [
+        `comment-sweep verify, read from ${base} to ${head}`,
+        "TYPE CHANGED src/l.ts",
+        "comment-sweep verify: 1 changed files; identical 0, differ 0, added 0, deleted 0, renamed 0, type changed 1, not read 0, prose 0",
+      ],
+      code: 1,
+    });
+  });
 });
 
 test("the command takes verify and two refs, and anything else is a usage error", () => {

@@ -1,4 +1,4 @@
-import { changedFiles, deletedFiles, gitTree, mergeBase, revParse } from "../comment-judge/tree.ts";
+import { changedFiles, deletedFiles, gitTree, mergeBase, revParse, typeChangedFiles } from "../comment-judge/tree.ts";
 import { exitOf, reportLines } from "./report.ts";
 import { findingsOf } from "./verify.ts";
 
@@ -14,6 +14,7 @@ export const verify = (
   const findings = findingsOf(
     changedFiles(repo, from, sha),
     deletedFiles(repo, from, sha),
+    typeChangedFiles(repo, from, sha),
     gitTree(repo, from),
     gitTree(repo, sha),
   );

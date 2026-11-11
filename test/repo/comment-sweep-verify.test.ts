@@ -60,7 +60,7 @@ test("the first difference is the first pair of token texts that differ, its lin
   assert.equal(firstDifference([], []), null);
 });
 
-test("each changed path gets one finding, prose first, then added, renamed, not read, and the token comparison, and each deleted path is deleted or prose", () => {
+test("each changed path gets one finding, prose first, then added, renamed, not read, and the token comparison, each deleted path is deleted or prose, and each path whose type changed is type changed or prose", () => {
   const before = memoryTree("b1", {
     "src/a.ts": "const a = 1; // c\n",
     "src/b.ts": "const b = 1;\n",
@@ -85,7 +85,7 @@ test("each changed path gets one finding, prose first, then added, renamed, not 
     { path: "handbook/m.md", before: "handbook/m.md" },
     { path: "handbook/z.md", before: "src/z.ts" },
   ];
-  assert.deepEqual(findingsOf(changed, ["src/d.ts", "handbook/old.md"], before, after), [
+  assert.deepEqual(findingsOf(changed, ["src/d.ts", "handbook/old.md"], ["src/t.ts", "handbook/t.md"], before, after), [
     { kind: "prose", path: "handbook/x.md" },
     { kind: "identical", path: "src/a.ts" },
     { kind: "differs", path: "src/b.ts", difference: { base: { line: 1, text: "1" }, head: { line: 1, text: "2" } } },
@@ -98,6 +98,8 @@ test("each changed path gets one finding, prose first, then added, renamed, not 
     { kind: "renamed", path: "handbook/z.md", before: "src/z.ts" },
     { kind: "deleted", path: "src/d.ts" },
     { kind: "prose", path: "handbook/old.md" },
+    { kind: "type changed", path: "src/t.ts" },
+    { kind: "prose", path: "handbook/t.md" },
   ]);
 });
 

@@ -56,10 +56,24 @@ export const changedFiles = (repo: string, from: string, head: string): Changed[
       return { path: first!, before: status === "A" ? null : first! };
     });
 
-export const deletedFiles = (repo: string, from: string, head: string): string[] =>
-  git(repo, ["-c", "core.quotepath=false", "diff", "--name-only", "--find-renames", "--diff-filter=D", from, head])
+const pathsWith = (repo: string, from: string, head: string, filter: "D" | "T"): string[] =>
+  git(repo, [
+    "-c",
+    "core.quotepath=false",
+    "diff",
+    "--name-only",
+    "--find-renames",
+    `--diff-filter=${filter}`,
+    from,
+    head,
+  ])
     .split("\n")
     .filter((line) => line !== "");
+
+export const deletedFiles = (repo: string, from: string, head: string): string[] => pathsWith(repo, from, head, "D");
+
+export const typeChangedFiles = (repo: string, from: string, head: string): string[] =>
+  pathsWith(repo, from, head, "T");
 
 export const ensureCommit = (repo: string, sha: string, ref: string): void => {
   const has = (): boolean =>
