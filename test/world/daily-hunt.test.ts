@@ -37,6 +37,7 @@ test("the quarry is a real, non-seat village (the broad uniform-glyph pool)", ()
 });
 
 test("chooseQuarry picks are pinned: the #335 pool refactor changed nothing", () => {
+  // Measured before the pool moved to src/world/daily-hunt-clue-facts.ts by a 120-seed equivalence run with 0 mismatches (Issue #335, 2026-07-31); these two pins keep the class guarded.
   assert.equal(chooseQuarry(DAILY[0]!)!.idx, 11);
   assert.equal(DAILY[0]!.settlements[11]!.name, "Sharakhara");
   assert.equal(chooseQuarry(DAILY[14]!)!.idx, 19);

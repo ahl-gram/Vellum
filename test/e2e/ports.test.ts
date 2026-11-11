@@ -51,6 +51,7 @@ test("surrounding whitespace is tolerated", () => {
   assert.equal(resolvePort({ VELLUM_E2E_PORT: " 8790 " }, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), 8790);
 });
 
+// Setting one port onto the other's default fails deep inside the browser launch rather than at the setting, which is why `resolveE2ePorts` in `e2e/support/ports.ts` throws instead.
 test("the two ports may not collide, including against the other's default", () => {
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: "9333", VELLUM_E2E_DPORT: "9333" }), /9333/);
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: String(DEFAULT_E2E_DPORT) }), /9222/);

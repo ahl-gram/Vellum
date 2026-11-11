@@ -13,6 +13,7 @@ export const anchorAt = (now: number, elapsed0: number, pace: number): SweepAnch
   floor: elapsed0,
 });
 
+// A vsync-aligned rAF stamp can precede the performance.now() that struck the anchor; CI's slower runner showed it at Play in PR #311.
 export const storyAt = (a: SweepAnchor, now: number, pace: number): number => Math.max((now - a.begin) * pace, a.floor);
 
 export const repaced = (a: SweepAnchor, now: number, pace: number, next: number): SweepAnchor =>

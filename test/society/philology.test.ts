@@ -162,6 +162,7 @@ test("tongueName names each of the ten speeches from its culture id", () => {
   assert.equal(tongueName("tezcal"), "Tezcal");
 });
 
+// Sixty worlds took about half a minute to generate (recorded 2026-08-14, Issue #124), so the acceptance sweep builds the corpus once and every assertion below reads it.
 const CORPUS = Array.from({ length: 60 }, (_, i) => {
   const world = generateWorld(defaultRecipe(i + 1));
   return { seed: i + 1, cultureId: world.culture.id, names: world.settlements.map((s) => s.name) };

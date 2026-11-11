@@ -6,6 +6,7 @@ export type RiverLabelPlacement = {
   readonly angleDeg: number;
 };
 
+// Total absolute turning, in radians, of the polyline between indices i and j.
 function reachTurn(pts: ReadonlyArray<readonly [number, number]>, i: number, j: number): number {
   let turn = 0;
   for (let m = i + 1; m < j; m++) {

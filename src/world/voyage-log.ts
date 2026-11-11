@@ -29,6 +29,7 @@ export type VoyageLogEntry = {
   readonly text: string;
 };
 
+// Measured 2026-07-28 over seeds 42, 7, 100, 953 and 2024 on the 320x240 grid with 24-leg round trips: totals ran 994 to 1212 units and legs 7 to 200 with a median of 30 to 50, so at 14 a voyage ran 70 to 90 days and a median leg 2 to 3 days (Issue #312).
 export const GRID_UNITS_PER_DAY = 14;
 
 export type VoyageLog = {
