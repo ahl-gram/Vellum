@@ -227,9 +227,11 @@ belongs in.
     questions in `scripts/still-judge/questions.ts` (each realm name readable, the rainfall lines leading, every name
     in a piece readable, the title read first), a difference under 0.12 counting as none and no one picture's number
     read as a pass or a fail, its trial scored against three defects the house fixed and one invented, put back on
-    today's chart (Issue #1309); its `trial` scores the 30 charts of seeds 1 to 35 whose sheets carried every
-    subject the restages needed, and a question reworded after its score is scored again on charts from seed 36 up,
-    which `--seeds <from>-<to>` picks (at most a hundred seeds, those whose sheets lack a subject left out);
+    today's chart (Issue #1309), which `vellum-plate-reader` runs beside its measurements wherever a change reaches
+    how a world sheet is drawn (`.claude/agents/vellum-plate-reader.md`, Two versions of one sheet, asked of Jev);
+    its `trial` scores the 30 charts of seeds 1 to 35 whose sheets carried every subject the restages needed, and a
+    question reworded after its score is scored again on charts from seed 36 up, which `--seeds <from>-<to>` picks
+    (at most a hundred seeds, those whose sheets lack a subject left out);
   - `npm run copy-hunt` (`scripts/copy-hunt/main.ts`), whether a function a diff adds or changes
     implements the same logic as another under the lint's roots, which `vellum-pr-skeptic` runs on
     every pull request (Issue #1319); the exact copies it lists are found by code, with no call,

@@ -32,7 +32,7 @@ its definition under `.claude/agents/`.
 | agent | step | what it runs | the failure it catches |
 |---|---|---|---|
 | `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree in the order `npm run recon-triage` ranks them, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
-| `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
+| `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured, with `npm run still-judge -- compare` beside the measurements wherever the work changes how a world sheet is drawn | a layout, overlap, contrast or motion defect that no test reading the DOM can see, and, as a hypothesis its measurements check, a sheet that reads worse at a glance than today's |
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
 | `vellum-pr-skeptic` | 14 | the pull request, read cold through the lenses its diff calls for, in its own sandbox with commands of its own, `npm run copy-hunt` among them, to a merge verdict | what the implementing session believed and never checked, against the issue and the house contracts, and a function the diff writes a second time |
 
@@ -146,7 +146,11 @@ one and reads the WORKING tree anyway, since its plumbing builds and serves `dis
 **Arms that coexist in one spike are cheaper to read.** `vellum-plate-reader` writes only into `out/`
 and never edits source, so it cannot switch the tree itself: a spike that exposes every arm at once,
 behind a flag, a query parameter or separate mock pages, is read by a single run. Where the arms
-cannot coexist, whoever dispatches it re-renders between them and says so in the menu.
+cannot coexist, whoever dispatches it re-renders between them and says so in the menu. Where the arms
+change how a world sheet is drawn, the dispatch names, for each arm, the command that writes its
+sheet once `--seed`, `--legend`, `--theme` and `--out` are added, or the sheet files themselves, so
+the plate reader can set each arm beside today's sheet through the still judge
+(`.claude/agents/vellum-plate-reader.md`, Two versions of one sheet, asked of Jev).
 
 **`out/` inside a worktree is not where Alex looks.** Any session standing in one copies the stills
 to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot reach outside its own
