@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  ARM_NAME,
   expectFor,
   fits,
   heldBy,
@@ -109,6 +110,10 @@ test("PJ3 expectFor holds a tablet step hidden but on the tablet and a motion st
   assert.deepEqual(
     (["desk", "tablet", "motion"] as const).flatMap((arm) => [step(), touch, motion].map((s) => onItsArm(s, arm))),
     [true, false, false, false, true, false, false, false, true],
+  );
+  assert.deepEqual(
+    (["desk", "tablet", "motion"] as const).map((arm) => `walk${ARM_NAME[arm]}`),
+    ["walk", "walk on a tablet", "walk with motion on"],
   );
 });
 

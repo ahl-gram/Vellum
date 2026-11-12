@@ -2,6 +2,7 @@
 import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
 export type Arm = "desk" | "tablet" | "motion";
+export const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
 export type Expect = "reachable" | "held" | "hidden" | "any";
 export type Reach =
   "absent" | "hidden" | "no box" | "held" | "disabled" | "off screen" | "reachable" | `covered by ${string}`;

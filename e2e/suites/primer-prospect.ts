@@ -1,4 +1,4 @@
-// The Primer's drift check over the Prospect's ladder (Issue #1252): every step at 1280x800 with motion reduced; its first step, opened in the Explorer, reads exactly what the Explorer's own card step reads, so it is walked there.
+// The Primer's drift check over the Prospect's ladder (Issue #1252): every step at 1280x800 with motion reduced.
 import { PROSPECT } from "../../src/site/shared/primer/prospect.ts";
 import { walkLadder } from "../support/primer-walk.ts";
 import type { SuiteContext } from "../types.ts";

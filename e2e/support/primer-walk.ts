@@ -6,6 +6,7 @@ import { dropExpectedCancellations } from "./console.ts";
 import { bounce } from "./nav.ts";
 import { perform } from "./primer-acts.ts";
 import {
+  ARM_NAME,
   expectFor,
   fits,
   heldBy,
@@ -35,7 +36,6 @@ const TABLET = { width: 1024, height: 768 } as const;
 const NAMES = "names every control as it stands, worded as quoted and reachable, held or hidden as the step says";
 const KEPT = "keeps every key of its address";
 const SHOWS = "shows what it says once the step is done";
-const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
 
 export type Read = {
   readonly css: string;
