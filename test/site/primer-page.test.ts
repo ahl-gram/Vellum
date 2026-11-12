@@ -40,7 +40,12 @@ test("PP2 a sentence's braced words become the controls they name", () => {
     { text: ", " },
     { chip: "road", text: "Turn The Sheet", verb: "Turn", place: "The Sheet" },
     { text: " or " },
-    { chip: "road", text: "Read the journal in The Reading Room", verb: "Read the journal in", place: "The Reading Room" },
+    {
+      chip: "road",
+      text: "Read the journal in The Reading Room",
+      verb: "Read the journal in",
+      place: "The Reading Room",
+    },
     { text: ", choose " },
     { chip: "opt", text: "Fast" },
     { text: ", tap " },
@@ -59,7 +64,12 @@ const ladder = (route: string, lessons: Ladder["lessons"], entered?: string): La
   ...(entered === undefined ? {} : { entered }),
   lessons,
 });
-const lesson = (id: string, steps: Step[]): Ladder["lessons"][number] => ({ id, title: `T ${id}`, gloss: `g ${id}`, steps });
+const lesson = (id: string, steps: Step[]): Ladder["lessons"][number] => ({
+  id,
+  title: `T ${id}`,
+  gloss: `g ${id}`,
+  steps,
+});
 
 const tree: RouteTree = {
   routes: ["/a/", "/a/sub/", "/b/"],
@@ -69,7 +79,14 @@ const tree: RouteTree = {
 
 test("PP3 the page counts and links what the data holds", () => {
   const ladders: Ladder[] = [
-    ladder("/a/", [lesson("one", [step("a1", "/a/"), step("a2", "/a/sub/", { only: "touch" })]), lesson("two", [step("a3", "/b/", { kind: "play" })])], "by the road"),
+    ladder(
+      "/a/",
+      [
+        lesson("one", [step("a1", "/a/"), step("a2", "/a/sub/", { only: "touch" })]),
+        lesson("two", [step("a3", "/b/", { kind: "play" })]),
+      ],
+      "by the road",
+    ),
     ladder("/a/sub/", [lesson("one", [step("s1", "/a/", { kind: "commission" })])]),
     ladder("/b/", [lesson("one", [step("b1", "/b/")])]),
   ];
@@ -90,9 +107,15 @@ test("PP3 the page counts and links what the data holds", () => {
   );
   assert.deepEqual(
     page.rooms[0]!.lessons.map((l) => [l.id, l.numeral]),
-    [["a-one", "i"], ["a-two", "ii"]],
+    [
+      ["a-one", "i"],
+      ["a-two", "ii"],
+    ],
   );
-  assert.deepEqual(page.rooms[0]!.lessons[0]!.steps.map((s) => s.opens), ["opens the Alpha Room at this step", "opens the Sub Room at this step"]);
+  assert.deepEqual(
+    page.rooms[0]!.lessons[0]!.steps.map((s) => s.opens),
+    ["opens the Alpha Room at this step", "opens the Sub Room at this step"],
+  );
   assert.equal(page.rooms[0]!.lessons[1]!.steps[0]!.opens, "opens Beta at this step");
   assert.deepEqual(page.rooms[0]!.lessons[0]!.steps[1]!.marks, [{ text: "on a tablet", comm: false }]);
   assert.deepEqual(page.rooms[0]!.lessons[1]!.steps[0]!.marks, [{ text: "play: no wrong answer", comm: false }]);

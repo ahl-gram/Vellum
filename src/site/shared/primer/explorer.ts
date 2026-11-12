@@ -58,7 +58,7 @@ export const EXPLORER: Ladder = {
       id: "land",
       title: "The Land",
       gloss: "these shape the world itself",
-      aside: "Every list starts at seed's choice: choose it again to hand the row back to the seed.",
+      aside: "Choose seed's choice again on any row to give it back to the seed.",
       steps: [
         {
           id: "explorer-archipelago",
@@ -124,8 +124,7 @@ export const EXPLORER: Ladder = {
       id: "strand",
       title: "The Strand",
       gloss: "these set the water's edge",
-      aside:
-        "A row that cannot act on the world on screen waits in a held box, and the note under it says what holds it.",
+      aside: "A row that cannot change this world waits behind a dashed rule; the note under it says why.",
       steps: [
         {
           id: "explorer-sea-level",
@@ -173,7 +172,7 @@ export const EXPLORER: Ladder = {
       id: "hand",
       title: "The Hand",
       gloss: "these dress the same world",
-      aside: "Nothing in the Hand changes the land: the same world, dressed another way.",
+      aside: "The Hand only dresses: the land stays exactly as it was.",
       steps: [
         {
           id: "explorer-style",
