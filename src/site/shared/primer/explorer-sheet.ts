@@ -1,8 +1,19 @@
-import { ROUTE_NAMES } from "../../../layouts/nav.ts";
 import { countLine, LAY_ON_CARD, tabLine } from "../../explorer/chart-drawer.ts";
 import { PLATE_TAB, PLATE_VERB } from "../../explorer/portfolio/how-plate.ts";
 import { parseTableValue, TABLE_CAP } from "../table-address.ts";
-import { aria, click, option, road, text, wait, type Act, type Lesson, type Words } from "./shape.ts";
+import {
+  aria,
+  click,
+  countWord,
+  option,
+  road,
+  roomOf,
+  text,
+  wait,
+  type Act,
+  type Lesson,
+  type Words,
+} from "./shape.ts";
 
 export const AT = "/explorer/#seed=42";
 const SURVEYED = "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600";
@@ -10,14 +21,7 @@ const ONE_SHEET = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-
 const LAID = `${SURVEYED}&table=${ONE_SHEET}`;
 const LAID_ITEMS = parseTableValue(ONE_SHEET);
 const DOG_EAR = "#map .region-inset .dog-ear";
-const COUNT = ["no", "one", "two", "three", "four", "five", "six"] as const;
-const countWord = (n: number): string => COUNT[n] ?? String(n);
 
-const roomOf = (route: string): string => {
-  const name = ROUTE_NAMES[route];
-  if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${route}`);
-  return name;
-};
 const TO_PRINT = `Take to ${roomOf("/print-room/")}`;
 const TO_JOURNAL = `Read the journal in ${roomOf("/reading-room/")}`;
 const TO_PORTFOLIO = `${PLATE_VERB} ${roomOf("/explorer/portfolio/")}`;
@@ -29,7 +33,7 @@ export const chart = (attr: string, says: string): Words => ({
   attr,
 });
 const pressed = (css: string): Words => ({ css, says: "true", read: "attr", attr: "aria-pressed" });
-const card: Act = click('.place-hit[data-idx="0"]');
+export const card: Act = click('.place-hit[data-idx="0"]');
 
 export const SHEET_LESSONS: readonly Lesson[] = [
   {

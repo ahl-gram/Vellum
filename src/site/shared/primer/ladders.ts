@@ -1,8 +1,11 @@
 import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, seatOf } from "../../../layouts/nav.ts";
 import { EXPLORER } from "./explorer.ts";
+import { PRINT_ROOM } from "./print-room.ts";
+import { PROSPECT } from "./prospect.ts";
+import { READING_ROOM } from "./reading-room.ts";
 import type { Ladder } from "./shape.ts";
 
-export const LADDERS: readonly Ladder[] = [EXPLORER];
+export const LADDERS: readonly Ladder[] = [EXPLORER, PROSPECT, READING_ROOM, PRINT_ROOM];
 
 export const LEANED_ON: readonly string[] = ["/faq/", "/glossary/"];
 
@@ -10,10 +13,7 @@ const AWAITS = "its ladder lands with Issue #1252";
 export const LEFT_UNTAUGHT: Readonly<Record<string, string>> = {
   "/seed-of-the-day/": AWAITS,
   "/writing-room/": AWAITS,
-  "/reading-room/": AWAITS,
-  "/print-room/": AWAITS,
   "/gallery/": AWAITS,
-  "/prospect/": AWAITS,
   "/ribbon/": AWAITS,
   "/explorer/portfolio/": AWAITS,
   "/primer/": "the Primer is the guide itself",
