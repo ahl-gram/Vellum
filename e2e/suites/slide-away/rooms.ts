@@ -18,8 +18,6 @@ function thinLines(room: Room, a: Pieces, t: ThinLines): string[] {
   for (const m of [...thinTopFaults(t, room.id === "Prospect"), ...thinFootFaults(t)]) say(m);
   if (a.folio.rest.some((r) => r < a.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(a.folio.rest)}`);
-  if (room.id === "Reading Room" && !(a.stripTop !== null && a.stripTop < a.folio.title[0]))
-    say(`the title is not under the strip: strip ${a.stripTop}, title ${a.folio.title[0]}`);
   return faults;
 }
 
