@@ -166,10 +166,11 @@ const show = (i: Instance): string =>
   i.reads
     .map(
       ({ press, r }) =>
-        `${i.id} ${press}: between ${r.distinctBetween}, pace ${r.worstPaceGap.toFixed(4)}, sheet off ${r.sheetOffAfter.toFixed(2)}, press row off ${r.pressOffAfter.toFixed(2)}, framing ${num(r.framingEveryFrame)} at rest ${num(r.framingAtRest)} (tolerance ${r.tolerance.toFixed(5)})`,
+        `${i.id} ${press}: travel ${r.travel.toFixed(2)}, width ${r.widthChange.toFixed(2)}, press row moved ${r.pressRowMoved.toFixed(2)}, between ${r.distinctBetween}, pace ${r.worstPaceGap.toFixed(4)}, sheet off ${r.sheetOffAfter.toFixed(2)}, press row off ${r.pressOffAfter.toFixed(2)}, framing ${num(r.framingEveryFrame)} at rest ${num(r.framingAtRest)} (tolerance ${r.tolerance.toFixed(5)})`,
     )
     .join("; ");
 
+// 2026-11-12: at 1024x768 the side panel's fold and tab move the sheet 338.47, change its width 233.84 and move the Press row 500.02 px on the Seed of the Day, and 188.31, 188.31 and 384.52 px in the Explorer, on the Mac harness browser, and 338.47, 233.84, 500.10, 188.31, 188.31 and 383.46 px on the CI runner (run 43180780683, lane C), each the least of its room's reads across the fold, the tab and, in the Explorer, both motion arms; the least of all, 188.31 px, against the half pixel REST_PX.
 function witnesses(i: Instance, zoomed: number | null): string[] {
   const faults: string[] = [];
   for (const { press, r } of i.reads) {

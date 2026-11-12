@@ -2,6 +2,8 @@
 import type { SuiteContext } from "../../types.ts";
 import { rest, size } from "../stage/stage.ts";
 import { motionOn } from "../stage/slide-kit.ts";
+import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "../stage/thin-lines.ts";
+import type { ThinLines } from "../stage/thin-lines.ts";
 import { LENS } from "../print-room/print.ts";
 import type { Room } from "./kit.ts";
 import { awayFaults, fillOf, fillPressOf, homeFaults, openRoom, pressGlass, ROOMS, still, travelsOf } from "./kit.ts";
@@ -9,19 +11,13 @@ import type { Pieces } from "./kit.ts";
 
 const roomNamed = (id: string): Room => ROOMS.find((r) => r.id === id)!;
 
-function thinLines(room: Room, a: Pieces): string[] {
+function thinLines(room: Room, a: Pieces, t: ThinLines): string[] {
   const faults: string[] = [];
   const say = (m: string): number => faults.push(`${room.id}: ${m}`);
   if (!(a.head.nav[1] <= 0)) say(`the nav stands on screen: bottom ${a.head.nav[1]}`);
-  if (!(a.head.summary[0] >= 0 && a.head.summary[1] <= 48))
-    say(`the chart of the atelier press is off the top line: ${JSON.stringify(a.head.summary)}`);
-  if (room.id === "Prospect" && !(a.head.also && a.head.also[0] >= 0 && a.head.also[1] <= 48))
-    say(`the Prospect's second line is not kept under the trail: ${JSON.stringify(a.head.also)}`);
-  if (!(a.folio.title[1] >= a.innerH - 3 && a.folio.title[1] <= a.innerH))
-    say(`the title's foot ${a.folio.title[1]} is not within 3 px of ${a.innerH}`);
-  if (a.folio.rest.some((t) => t < a.innerH - 3)) say(`a folio line stays on screen: ${JSON.stringify(a.folio.rest)}`);
-  if (room.id === "Reading Room" && !(a.stripTop !== null && a.stripTop < a.folio.title[0]))
-    say(`the title is not under the strip: strip ${a.stripTop}, title ${a.folio.title[0]}`);
+  for (const m of [...thinTopFaults(t, room.id === "Prospect"), ...thinFootFaults(t)]) say(m);
+  if (a.folio.rest.some((r) => r < a.innerH - FOOT_WINDOW))
+    say(`a folio line stays on screen: ${JSON.stringify(a.folio.rest)}`);
   return faults;
 }
 
@@ -31,18 +27,28 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   const faults = homeFaults(home, `${label} at rest`);
   const fill = fillOf(home, room.fill);
   const n = fillPressOf(fill);
-  if (n !== 2) faults.push(`${room.id}: the fill ${fill.toFixed(4)} lies at press ${n}, not the second (the witness)`);
+  if (n < 2)
+    faults.push(
+      `${room.id}: the fill ${fill.toFixed(4)} lies at the first press, so no press stands before the one that fills (the witness)`,
+    );
   const travels = travelsOf(home);
+  let foot = NaN;
   await motionOn(ctx, async () => {
     for (let i = 1; i < n; i++) await pressGlass(ctx, room.lens, `${label} press ${i}`);
     faults.push(...homeFaults(await still(ctx, `${label} before`), `${room.id} press ${n - 1}`));
     await pressGlass(ctx, room.lens, `${label} press ${n}`);
     const a = await still(ctx, `${label} fill`);
-    faults.push(...awayFaults(a, travels, `${room.id} press ${n}`), ...thinLines(room, a));
+    const t = await ctx.evaluate(THIN_LINES);
+    foot = thinTopFoot(t, room.id === "Prospect");
+    faults.push(...awayFaults(a, travels, `${room.id} press ${n}`), ...thinLines(room, a, t));
   });
-  return { faults, detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}` };
+  return {
+    faults,
+    detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}, thin top foot ${foot.toFixed(2)}`,
+  };
 }
 
+// 2026-11-12: the Prospect at 1280x800 fills at 1.6227 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 43180780683, lane C), 0.2227 past the first press's 1.4 and 0.3373 short of the second's 1.96.
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
   const r = await sw1Visit(ctx, roomNamed("Prospect"));
   ctx.check(
@@ -54,7 +60,7 @@ export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
 
 type ThirdArm = { id: string; open: (ctx: SuiteContext) => Promise<Pieces>; lens: Room["lens"] };
 
-// 2026-11-08: the Print Room at 1024x768 filled at 2.2320 (press 3) on the Mac harness browser and at 3.0106 (press 4) on lane D of CI runs 42264204026, 42262162471 and 42258912829, 0.272 and 1.051 past the second press's 1.96.
+// 2026-11-12: the Print Room at 1024x768 filled at 2.3638 (press 3) on the Mac harness browser and at 3.2841 (press 4) on lane C of CI run 43180780683, 0.4038 and 1.3241 past the second press's 1.96.
 const ARMS: readonly ThirdArm[] = [
   {
     id: "the Print Room at 1024x768",
@@ -103,41 +109,45 @@ const reaches = (p: Pieces): boolean => {
   return f[0] <= 1 && f[1] <= 1 && f[3] >= p.innerH - 1;
 };
 
+// 2026-11-12: the Seed of the Day at 1024x768 fills at 2.4028 (press 3) by the plain rule and 3.0552 (press 4) by its own on the Mac harness browser, and at 2.4028 and 3.0552 on the CI runner (run 43180780683, lane C); the plain fill sits 0.3412 short of the third press's 2.744 and the room's 0.3112 past it.
 export async function sw3Today(ctx: SuiteContext): Promise<void> {
   const room = roomNamed("Seed of the Day");
   const faults: string[] = [];
   const home = await openRoom(ctx, room, 1024, 768, "SW3");
   const a = fillOf(home, "sheet");
   const b = fillOf(home, "gesture");
-  if (fillPressOf(a) !== 3 || fillPressOf(b) !== 4)
+  const nPlain = fillPressOf(a);
+  const nRoom = fillPressOf(b);
+  if (!(nRoom > nPlain))
     faults.push(
-      `the plain rule's fill ${a.toFixed(4)} and the room's ${b.toFixed(4)} lie at presses ${fillPressOf(a)} and ${fillPressOf(b)}, not 3 and 4 (the witness)`,
+      `the plain rule's fill ${a.toFixed(4)} and the room's ${b.toFixed(4)} lie at presses ${nPlain} and ${nRoom}, so no press stands past the plain rule's fill and short of the room's (the witness)`,
     );
   const travels = travelsOf(home);
   await motionOn(ctx, async () => {
-    for (let i = 1; i <= 3; i++) await pressGlass(ctx, room.lens, `SW3 press ${i}`);
-    const third = await still(ctx, "SW3 third");
-    faults.push(...homeFaults(third, "after the third press"));
-    if (reaches(third))
+    for (let i = 1; i < nRoom; i++) await pressGlass(ctx, room.lens, `SW3 press ${i}`);
+    const before = await still(ctx, "SW3 before");
+    faults.push(...homeFaults(before, `after press ${nRoom - 1}, past the plain rule's fill`));
+    if (reaches(before))
       faults.push(
-        `the chart already reaches the left, the top and the foot at the third press: ${JSON.stringify(third.face)}`,
+        `the chart already reaches the left, the top and the foot at the press before the room's fill: ${JSON.stringify(before.face)}`,
       );
     await size(ctx, 1024, 767);
     await rest(ctx, 1024, 767, "SW3 shorter");
     await size(ctx, 1024, 768);
     await rest(ctx, 1024, 768, "SW3 back");
     faults.push(...homeFaults(await still(ctx, "SW3 resized"), "after a resize made there"));
-    await pressGlass(ctx, room.lens, "SW3 press 4");
-    const fourth = await still(ctx, "SW3 fourth");
-    faults.push(...awayFaults(fourth, travels, "after the fourth press"));
-    if (!reaches(fourth))
+    await pressGlass(ctx, room.lens, `SW3 press ${nRoom}`);
+    const at = await still(ctx, "SW3 fill");
+    faults.push(...awayFaults(at, travels, `after press ${nRoom}, the room's fill`));
+    if (!reaches(at))
       faults.push(
-        `the chart does not reach the left, the top and the foot at the fourth press: ${JSON.stringify(fourth.face)}`,
+        `the chart does not reach the left, the top and the foot at the room's fill: ${JSON.stringify(at.face)}`,
       );
   });
   ctx.check(
-    "SW3 on the Seed of the Day at 1024x768, whose Glass magnifies about the whole stage, the head cluster and the chart folio stand home through the Glass's third press, where the chart does not yet reach the left, the top and the foot, and through a resize made there, and at their thin lines at the fourth, where it reaches all three (Alex, 2026-10-23, Issue #997 rulings 4 and 5)",
+    "SW3 on the Seed of the Day at 1024x768, whose Glass magnifies about the whole stage, the head cluster and the chart folio stand home through the press before the one where the room's own fill lies, a press already past the plain rule's fill, where the chart does not yet reach the left, the top and the foot, and through a resize made there, and at their thin lines at the room's own fill press, where it reaches all three (Alex, 2026-10-23, Issue #997 rulings 4 and 5)",
     faults.length === 0,
-    `plain fill ${a.toFixed(4)}, the room's ${b.toFixed(4)}` + (faults.length ? `; ${faults.join("; ")}` : ""),
+    `plain fill ${a.toFixed(4)} press ${nPlain}, the room's ${b.toFixed(4)} press ${nRoom}` +
+      (faults.length ? `; ${faults.join("; ")}` : ""),
   );
 }

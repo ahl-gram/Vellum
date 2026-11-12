@@ -29,6 +29,7 @@ export const CHART_ROOM_FLOOR = [
 export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
 export const DESK_FRAME_H = 768;
+// 2026-11-12: ruled, the 4.5:1 floor for reading over the chart (handbook/specs/ui-design.md, the paragraph opening "The floor is 4.5:1").
 export const FLOOR_PLAIN = 4.5;
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
@@ -375,6 +376,7 @@ export async function ea4Reads(ctx: SuiteContext): Promise<void> {
     deviceScaleFactor: 1,
     mobile: false,
   });
+  // 2026-11-12: on the Explorer at 1024x474 with the pools taken away, the cluster, the chart folio and the Press read 1.66, 3.03 and 1.25 on the Mac harness browser and 1.68, 3.04 and 1.26 on the CI runner (run 43180780683, lane B), the nearest the 4.5 floor the chart folio on the runner, 3.04, 1.46 under it.
   const readings = [
     await readFixture(ctx, "the Explorer", "/explorer/", false, "Press", ["cluster", "chart folio", "Press"]),
     await readFixture(ctx, "the Print Room, its slip folded", "/print-room/", true, "room folio", []),

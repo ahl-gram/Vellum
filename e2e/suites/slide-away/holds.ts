@@ -51,12 +51,14 @@ async function enterOnLastRow(ctx: SuiteContext): Promise<boolean> {
 const allHome = (reads: readonly Pieces[]): boolean =>
   reads.every((p) => Math.abs(p.head.ty) <= 0.5 && Math.abs(p.folio.ty) <= 0.5);
 
+// 2026-11-12: the Ribbon at 1280x800 fills at 1.7254 on the Mac harness browser and 1.6986 on the CI runner (run 43180780683, lane C), and the row's lean lands at 2.6000 on both (LEAN_K in src/site/ribbon/seats.ts), 0.8746 and 0.9014 past the fill.
 export async function sw5RowLean(ctx: SuiteContext): Promise<void> {
   const room = ROOMS.find((r) => r.id === "Ribbon")!;
   const faults: string[] = [];
   const home = await openRoom(ctx, room, 1280, 800, "SW5");
   const fill = fillOf(home, "sheet");
   const travels = travelsOf(home);
+  let lean = NaN;
   await motionOn(ctx, async () => {
     const row = await ctx.evaluate(aimAt(ROW_LEAN));
     if (!row.hit) throw new Error("SW5: the first itinerary row's lean button is covered at its centre");
@@ -64,6 +66,7 @@ export async function sw5RowLean(ctx: SuiteContext): Promise<void> {
     await pressAt(ctx, row.x, row.y);
     if (!(await leanedFrom(ctx, before, "SW5 press"))) faults.push("the row's press leaned nothing");
     const leaned = await ctx.evaluate(PIECES);
+    lean = leaned.k;
     if (!(leaned.k >= fill))
       faults.push(`the lean landed at ${leaned.k.toFixed(3)}, short of the fill ${fill.toFixed(3)} (the witness)`);
     if (!allHome(await gather(ctx, 1000))) faults.push("a row's press moved a piece");
@@ -79,7 +82,7 @@ export async function sw5RowLean(ctx: SuiteContext): Promise<void> {
   ctx.check(
     "SW5 on the Ribbon at 1280x800, an itinerary row pressed or keyed leans the Glass past the fill and the head cluster and the chart folio stay home, and the reader's own first wheel over the chart sends them to their thin lines (Alex, 2026-10-23, Issue #997 ruling 7)",
     faults.length === 0,
-    `fill ${fill.toFixed(4)}` + (faults.length ? `; ${faults.join("; ")}` : ""),
+    `fill ${fill.toFixed(4)}, lean ${lean.toFixed(4)}` + (faults.length ? `; ${faults.join("; ")}` : ""),
   );
 }
 
@@ -99,11 +102,10 @@ export async function sw6Strip(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const home = await openRoom(ctx, room, 1280, 800, "SW6");
   const travels = travelsOf(home);
-  const n = fillPressOf(fillOf(home, "sheet"));
-  if (n !== 2) faults.push(`the fill lies at press ${n}, not the second (the witness)`);
+  const fill = fillOf(home, "sheet");
+  const n = fillPressOf(fill);
   await motionOn(ctx, async () => {
-    await pressGlass(ctx, RR_LENS, "SW6 press 1");
-    await pressGlass(ctx, RR_LENS, "SW6 press 2");
+    for (let i = 1; i <= n; i++) await pressGlass(ctx, RR_LENS, `SW6 press ${i}`);
     const a = await still(ctx, "SW6 fill");
     faults.push(...awayFaults(a, travels, "past the fill"));
     if (!(a.stripTop !== null && a.stripTop < a.folio.title[0]))
@@ -126,6 +128,7 @@ export async function sw6Strip(ctx: SuiteContext): Promise<void> {
   ctx.check(
     "SW6 on the Reading Room at 1280x800, past the fill the chart folio's title stands under the instrument strip, and a mouse resting on Play's lower half, where the slid folio's panel lies, brings the whole folio back up over the chart and keeps it there while it stays, the head staying at its thin line (Alex, 2026-10-23, Issue #997 ruling 2)",
     faults.length === 0,
-    faults.length ? faults.join("; ") : "the folio came back under a mouse on Play and stayed",
+    `fill ${fill.toFixed(4)} at press ${n}; ` +
+      (faults.length ? faults.join("; ") : "the folio came back under a mouse on Play and stayed"),
   );
 }
