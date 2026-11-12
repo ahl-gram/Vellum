@@ -33,6 +33,9 @@ import { run as runDocumentRooms } from "../suites/document-rooms.ts";
 import { run as runSpecimen } from "../suites/specimen.ts";
 import { run as runWritingRoom } from "../suites/writing-room.ts";
 import { run as runPrimerExplorer } from "../suites/primer-explorer.ts";
+import { run as runPrimerProspect } from "../suites/primer-prospect.ts";
+import { run as runPrimerReadingRoom } from "../suites/primer-reading-room.ts";
+import { run as runPrimerPrintRoom } from "../suites/primer-print-room.ts";
 
 export const SUITES = {
   render: runRender,
@@ -68,4 +71,7 @@ export const SUITES = {
   stage: runStage,
   "slide-away": runSlideAway,
   "primer-explorer": runPrimerExplorer,
+  "primer-prospect": runPrimerProspect,
+  "primer-reading-room": runPrimerReadingRoom,
+  "primer-print-room": runPrimerPrintRoom,
 } satisfies Record<E2eSuiteName, (ctx: SuiteContext) => Promise<void>>;
