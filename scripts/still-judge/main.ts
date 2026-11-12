@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { shootAll } from "../design/shoot.ts";
-import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { askAll } from "../recon-triage/triage.ts";
 import { askStills } from "./compare.ts";
 import { isKind, requestFor, type Kind } from "./questions.ts";
@@ -29,7 +29,13 @@ export const RUN_INPUT_TOKEN_CAP = 4_000_000;
 const NOTES =
   "# Issue #1309: the still judge's trial\n\nLook first at score.md: it sets today's chart beside each of four restaged defects over 30 charts. requests.jsonl names every request's image by its path and sha256, replies.jsonl holds every reply, and stills/ every image sent.\n";
 
-const compare = async (repo: string, kind: Kind, paths: readonly string[], args: Args): Promise<number> => {
+const compare = async (
+  repo: string,
+  kind: Kind,
+  paths: readonly string[],
+  args: Args,
+  sendFor: SendFor,
+): Promise<number> => {
   const stills = paths.map((path) => ({ path, bytes: readFileSync(resolve(repo, path)) }));
   const asked = await askStills(kind, stills, sendFor(args.dryRun), RUN_INPUT_TOKEN_CAP);
   console.log(compareLines(kind, asked).join("\n"));
@@ -48,7 +54,7 @@ const compare = async (repo: string, kind: Kind, paths: readonly string[], args:
   return unanswered && !args.dryRun ? 1 : 0;
 };
 
-const trial = async (out: string, args: Args, chosen: readonly number[] | null): Promise<number> => {
+const trial = async (out: string, args: Args, chosen: readonly number[] | null, sendFor: SendFor): Promise<number> => {
   const files = new Map<string, string>();
   const stills: TrialStill[] = [];
   const seeds: number[] = [];
@@ -98,7 +104,7 @@ const trial = async (out: string, args: Args, chosen: readonly number[] | null):
   return !args.dryRun && replies.some((reply) => !reply.ok) ? 1 : 0;
 };
 
-export const main = async (argv: readonly string[]): Promise<number> => {
+export const main = async (argv: readonly string[], sendFor: SendFor): Promise<number> => {
   const taken = takeSeeds(argv);
   const args = taken === null ? null : parseArgs(taken.rest);
   const range = taken?.range ?? null;
@@ -114,16 +120,11 @@ export const main = async (argv: readonly string[]): Promise<number> => {
     paths.length >= 2 &&
     range === null
   )
-    return compare(repo, word, paths, args);
+    return compare(repo, word, paths, args, sendFor);
   if (args !== null && command === "trial" && word === undefined && args.out !== null && !badSeeds)
-    return trial(resolve(args.out), args, chosen);
+    return trial(resolve(args.out), args, chosen, sendFor);
   console.error(USAGE);
   return 2;
 };
 
-if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2)).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    return 1;
-  });
-}
+if (import.meta.main) process.exitCode = await runCommand("still-judge", main, process.argv.slice(2), processDeps());

@@ -7,7 +7,7 @@ import { requestFor } from "../../scripts/copy-hunt/questions.ts";
 import { BLIND_SPOTS, pairLines, replyLines, reportLines, requestLines } from "../../scripts/copy-hunt/report.ts";
 import { liveSender } from "../../scripts/jev/system-one.ts";
 import { alphaFns, asked, fnOf, pair, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
-import { keyEchoingFetch } from "../../test-support/jev-fakes.ts";
+import { keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 
 const STALE: AcceptedCopy = {
   a: { file: "src/gone.ts", name: "gone", hash: "0123456789abcdef" },
@@ -110,7 +110,7 @@ test("a run over every function says so in its header", () => {
 
 test("no line of the report, the request log, the reply log or the pair log carries the key", async () => {
   const KEY = "k-copy-secret-77";
-  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY));
+  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY), unmetered);
   const fns = alphaFns();
   const hunted = await hunt(fns, null, { send, cap: RUN_INPUT_TOKEN_CAP, accepted: [] });
   const written = [

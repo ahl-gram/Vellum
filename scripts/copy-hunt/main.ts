@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ensureCommit, gitTree, type Tree } from "../comment-judge/tree.ts";
-import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { ACCEPTED_COPIES } from "./accepted-copies.ts";
 import { functionsIn, type Fn } from "./functions.ts";
 import { askPair, RUN_INPUT_TOKEN_CAP, type Found, type HuntOptions, type Run } from "./hunt.ts";
@@ -17,7 +17,7 @@ const USAGE =
 const NOTES =
   "# Issue #1319: the copy hunt's regression\n\nLook first at trial.md: it sets this run's answers to the trial's 24 pairs beside the scan's at jev-1.14.0. requests.jsonl holds every request as built and replies.jsonl every reply.\n";
 
-const optionsFor = (args: Args): HuntOptions => ({
+const optionsFor = (args: Args, sendFor: SendFor): HuntOptions => ({
   send: sendFor(args.dryRun),
   cap: RUN_INPUT_TOKEN_CAP,
   accepted: ACCEPTED_COPIES,
@@ -34,7 +34,7 @@ const finish = (run: Run, args: Args): number => {
   return !args.dryRun && run.found.some((f) => f.outcome.kind === "skipped") ? 1 : 0;
 };
 
-const trial = async (repo: string, out: string, args: Args): Promise<number> => {
+const trial = async (repo: string, out: string, args: Args, sendFor: SendFor): Promise<number> => {
   ensureCommit(repo, SCAN, SCAN);
   ensureCommit(repo, CONTROL, CONTROL);
   const trees = new Map<string, Tree>();
@@ -76,23 +76,18 @@ const trial = async (repo: string, out: string, args: Args): Promise<number> => 
   return !args.dryRun && founds.some((f) => f.outcome.kind === "skipped") ? 1 : 0;
 };
 
-export const main = async (argv: readonly string[]): Promise<number> => {
+export const main = async (argv: readonly string[], sendFor: SendFor): Promise<number> => {
   const args = parseArgs(argv);
   const [command, ...rest] = args?.positional ?? [];
   const repo = process.cwd();
   if (args !== null && command === "diff" && rest.length === 2)
-    return finish(await diffRun(repo, rest[0]!, rest[1]!, optionsFor(args)), args);
+    return finish(await diffRun(repo, rest[0]!, rest[1]!, optionsFor(args, sendFor)), args);
   if (args !== null && command === "full" && rest.length <= 1)
-    return finish(await fullRun(repo, rest[0] ?? "HEAD", optionsFor(args)), args);
+    return finish(await fullRun(repo, rest[0] ?? "HEAD", optionsFor(args, sendFor)), args);
   if (args !== null && command === "trial" && rest.length === 0 && args.out !== null)
-    return trial(repo, resolve(args.out), args);
+    return trial(repo, resolve(args.out), args, sendFor);
   console.error(USAGE);
   return 2;
 };
 
-if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2)).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    return 1;
-  });
-}
+if (import.meta.main) process.exitCode = await runCommand("copy-hunt", main, process.argv.slice(2), processDeps());
