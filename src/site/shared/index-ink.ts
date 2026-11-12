@@ -36,9 +36,10 @@ interface Span {
 const EDGE_SLACK = 1;
 
 export function edgesOf(box: Scrolled): { readonly above: boolean; readonly below: boolean } {
-  void box;
-  void EDGE_SLACK;
-  return { above: false, below: false };
+  return {
+    above: box.scrollTop > EDGE_SLACK,
+    below: box.scrollHeight - box.clientHeight - box.scrollTop > EDGE_SLACK,
+  };
 }
 
 export function markEdges(box: HTMLElement): void {
@@ -48,8 +49,7 @@ export function markEdges(box: HTMLElement): void {
 }
 
 export function inViewBy(r: Span, b: Span, inset: number): number {
-  void inset;
-  const pad = 0;
+  const pad = inset > 0 ? inset : 0;
   const top = b.top + pad;
   const bottom = b.bottom - pad;
   const taller = r.bottom - r.top > bottom - top;

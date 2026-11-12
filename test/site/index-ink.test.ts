@@ -188,9 +188,12 @@ test("IK4 the inked row is kept clear of the slip's fades: the body scrolls unti
     ["a", row("a", 120)],
     ["b", row("b", 610)],
   ]);
-  const head = (id: string, top: number) => ({ id, getBoundingClientRect: at(top) }) as unknown as Element;
+  const heads = [
+    { id: "a", getBoundingClientRect: at(-400) },
+    { id: "b", getBoundingClientRect: at(60) },
+  ] as unknown as Element[];
   const ink = indexInk({
-    heads: [head("a", -400), head("b", 60)],
+    heads,
     entries: [],
     rows,
     entryRows: new Map(),
