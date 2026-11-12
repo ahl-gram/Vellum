@@ -34,4 +34,4 @@ function main(): void {
   }).listen(port, "127.0.0.1");
 }
 
-if (process.argv[1] === STAND_IN_BROWSER) main();
+if (import.meta.main) main();

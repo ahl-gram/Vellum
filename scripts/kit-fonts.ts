@@ -11,7 +11,7 @@ export async function copyKitFonts(root: string, from: string = KIT_FONTS): Prom
   await cp(from, join(root, "fonts"), { recursive: true });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const root = resolve(process.argv[2] ?? GENERATED);
   copyKitFonts(root).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);

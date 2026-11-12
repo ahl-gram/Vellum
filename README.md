@@ -114,7 +114,7 @@ npm install
 npm run dev        # the full site, Explorer included, on a local Astro dev server
 ```
 
-Vellum needs **Node 24+**.
+Vellum needs **Node 24.2+**.
 
 ### The CLI
 

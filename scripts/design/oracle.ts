@@ -1,6 +1,5 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 import { BUNDLE_ENTRIES } from "../build-app-bundles.ts";
 import { shootAll, type Shot, type ShotResult } from "./shoot.ts";
 
@@ -126,7 +125,7 @@ export function parseSweepArgs(args: readonly string[]): SweepArgs {
   return { dist, out, label, reducedMotion: !args.includes("--motion") };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   try {
     const { dist, out, label, reducedMotion } = parseSweepArgs(process.argv.slice(2));
     sweep(dist, out, { label, reducedMotion }).catch((err: unknown) => {

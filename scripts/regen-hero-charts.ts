@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "./hero-charts.ts";
 
 /** npm run charts:regen (Issue #205): the ONLY writer of the committed src/static/charts goldens. Run on a ratified re-roll or hero refresh, then npm run og, and land the regen ALONE, verified by diffing the committed charts old-vs-new (the Issue #40 drift guard is circular right after a regen). */
@@ -18,7 +17,7 @@ export async function regenHeroCharts(dirs: ReadonlyArray<string>): Promise<void
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   regenHeroCharts(HERO_CHART_DIRS).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);
     process.exitCode = 1;

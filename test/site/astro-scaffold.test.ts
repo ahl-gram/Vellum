@@ -1385,5 +1385,9 @@ test("the deploy build IS the Astro build (Sub 5 cutover, #206)", async () => {
   );
   assert.equal(pkg.scripts["astro:build"], undefined, "astro:build folds into build at the cutover");
   assert.equal(pkg.scripts.serve, undefined, "npm run serve retires with docs/ (use npm run dev)");
-  assert.equal(pkg.engines?.node, ">=24", "Astro does not support odd Node majors; 23 is odd");
+  assert.equal(
+    pkg.engines?.node,
+    ">=24.2",
+    "Astro does not support odd Node majors (23 is odd), and every script asks import.meta.main whether it is the entry, which Node added in 24.2 (Issue #1180)",
+  );
 });

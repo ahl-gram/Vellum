@@ -211,8 +211,7 @@ export async function main(argv: string[]): Promise<void> {
   if (values.png) await rasterizeChart(out, o.scale);
 }
 
-const isDirectRun = process.argv[1]?.endsWith("main.ts") ?? false;
-if (isDirectRun) {
+if (import.meta.main) {
   main(process.argv.slice(2)).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);
     process.exitCode = 1;

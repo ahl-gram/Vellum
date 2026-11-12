@@ -23,6 +23,7 @@ import sheetOwners from "./scripts/lint/sheet-owners.ts";
 import sharedBindings, { SHARED_BINDINGS } from "./scripts/lint/shared-bindings.ts";
 import packageImports from "./scripts/lint/package-imports.ts";
 import wordForWord from "./scripts/lint/word-for-word.ts";
+import entryGuard from "./scripts/lint/entry-guard.ts";
 import { ACCEPTED_COPIES } from "./scripts/copy-hunt/accepted-copies.ts";
 import skippableChecks, { SKIPPABLE_TESTS } from "./scripts/lint/skippable-checks.ts";
 import sheetMotion, {
@@ -33,7 +34,7 @@ import sheetMotion, {
   TIPS_AWAITING_A_RULING,
 } from "./scripts/lint/sheet-motion.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...emDashString.rules, ...narrowWidth.rules, ...e2eCdpHelpers.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...e2eSleep.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules, ...skippableChecks.rules, ...wordForWord.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...emDashString.rules, ...narrowWidth.rules, ...e2eCdpHelpers.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...e2eSleep.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules, ...skippableChecks.rules, ...wordForWord.rules, ...entryGuard.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
@@ -145,6 +146,7 @@ export default defineConfig(
       "vellum/param-excuse-holds-element": ["error", { names: PAGE_ELEMENT_PARAMETERS }],
       "vellum/package-import-declared": "error",
       "vellum/no-word-for-word-copy": ["error", { root: import.meta.dirname, roots: TS_ROOTS.map((glob) => glob.slice(0, glob.indexOf("/"))), accepted: ACCEPTED_COPIES }],
+      "vellum/no-argv-entry-path": "error",
     },
   },
   {
