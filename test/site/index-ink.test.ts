@@ -145,3 +145,30 @@ test("IK2 a section row taller than the index's body is aligned by its top once 
     "a row that already fills the body past both its edges is left where the reader put it",
   );
 });
+
+test("IK3 an entry in a folded room is never the one being read: its box is empty and its top reads as the window's own (Issue #1251)", () => {
+  const rect = (top: number, size: number) => () => ({ top, bottom: top + size, width: size, height: size }) as DOMRect;
+  const el = (id: string, top: number, size: number) =>
+    ({ id, getBoundingClientRect: rect(top, size) }) as unknown as Element;
+  const row = () => {
+    const on: Record<string, boolean> = {};
+    return { on, classList: { toggle: (name: string, force: boolean) => (on[name] = force) } };
+  };
+  const rows = new Map([["one", row()]]);
+  const entryRows = new Map([
+    ["seen", row()],
+    ["folded", row()],
+    ["next", row()],
+  ]);
+  indexInk({
+    heads: [el("one", -400, 30)],
+    entries: [el("seen", -50, 20), el("folded", 0, 0), el("next", 300, 20)],
+    rows: rows as unknown as ReadonlyMap<string, HTMLElement>,
+    entryRows: entryRows as unknown as ReadonlyMap<string, HTMLElement>,
+    line: () => 145,
+    keepInView: () => null,
+  })();
+  assert.equal(entryRows.get("seen")?.on["now"], true, "the visible entry above the line is the one being read");
+  assert.equal(entryRows.get("folded")?.on["now"], false, "a folded room's entry, in no box, is not");
+  assert.equal(entryRows.get("next")?.on["now"], false);
+});
