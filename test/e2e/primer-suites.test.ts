@@ -19,7 +19,7 @@ test("PS1 every ladder in the guide has its own suite in the runner's order, in 
     );
     assert.ok(PRIMER_ROOMS[route] !== undefined, `PRIMER_ROOMS opens ${route}`);
   }
-  assert.deepEqual(primerGaps([...routes, "/ribbon/"], E2E_SUITE_ORDER), ["/ribbon/"]);
+  assert.deepEqual(primerGaps([...routes, "/explorer/sounding-room/"], E2E_SUITE_ORDER), ["/explorer/sounding-room/"]);
   assert.deepEqual(["/explorer/", "/explorer/portfolio/", "/seed-of-the-day/"].map(primerSuiteOf), [
     "primer-explorer",
     "primer-portfolio",
