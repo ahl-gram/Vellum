@@ -3,16 +3,18 @@ import assert from "node:assert/strict";
 import {
   expectFor,
   fits,
+  heldBy,
   keyOf,
   keysLost,
   onItsArm,
   pressPoint,
+  routeOf,
   stateOf,
   wordsHold,
   wordsOf,
   type Facts,
 } from "../../e2e/support/primer-judge.ts";
-import type { Step, Words } from "../../src/site/shared/primer/shape.ts";
+import type { Ladder, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
 const FACTS: Facts = {
   found: true,
@@ -86,30 +88,27 @@ test("PJ2 wordsHold matches whole words, or by their start or by what they conta
   );
 });
 
-test("PJ3 expectFor holds a tablet step hidden on the desk and reachable on the tablet, a motion step hidden, takes the data's own state, and asks nothing of an outcome's reach", () => {
+test("PJ3 expectFor holds a tablet step hidden but on the tablet and a motion step hidden but with motion on, takes the data's own state, and asks nothing of an outcome's reach; onItsArm does each device step only on its own arm", () => {
   const touch = step({ only: "touch" });
+  const motion = step({ only: "motion" });
   assert.deepEqual(
     [
       expectFor(w("aria", "x"), step(), "desk", false),
       expectFor(w("aria", "x"), touch, "desk", false),
       expectFor(w("aria", "x"), touch, "tablet", false),
-      expectFor(w("aria", "x"), step({ only: "motion" }), "desk", false),
+      expectFor(w("aria", "x"), touch, "motion", false),
+      expectFor(w("aria", "x"), motion, "desk", false),
+      expectFor(w("aria", "x"), motion, "tablet", false),
+      expectFor(w("aria", "x"), motion, "motion", false),
       expectFor(w("text", "x", { state: "held" }), step(), "desk", true),
       expectFor(w("text", "x", { state: "hidden" }), step(), "desk", false),
       expectFor(w("text", "x"), step(), "desk", true),
     ],
-    ["reachable", "hidden", "reachable", "hidden", "held", "hidden", "any"],
+    ["reachable", "hidden", "reachable", "hidden", "hidden", "hidden", "reachable", "held", "hidden", "any"],
   );
   assert.deepEqual(
-    [
-      onItsArm(step(), "desk"),
-      onItsArm(step(), "tablet"),
-      onItsArm(touch, "desk"),
-      onItsArm(touch, "tablet"),
-      onItsArm(step({ only: "motion" }), "desk"),
-      onItsArm(step({ only: "motion" }), "tablet"),
-    ],
-    [true, false, false, true, false, false],
+    (["desk", "tablet", "motion"] as const).flatMap((arm) => [step(), touch, motion].map((s) => onItsArm(s, arm))),
+    [true, false, false, false, true, false, false, false, true],
   );
 });
 
@@ -181,4 +180,41 @@ test("PJ7 a named key carries its key, code and text, Enter the carriage return 
     ],
   );
   assert.throws(() => keyOf("F13"), /no key named "F13"/);
+});
+
+test("PJ8 routeOf names the room an address opens, the path before its query or its hash (Issue #1252)", () => {
+  assert.deepEqual(
+    ["/explorer/#seed=42", "/prospect/#seed=42&i=0", "/print-room/", "/explorer/portfolio/?step=x#table=y"].map(
+      routeOf,
+    ),
+    ["/explorer/", "/prospect/", "/print-room/", "/explorer/portfolio/"],
+  );
+});
+
+test("PJ9 heldBy names the earlier step whose reads are the same in every field, and none where any one field differs (Issue #1252)", () => {
+  const lad = (route: string, steps: readonly Step[]): Ladder => ({
+    route,
+    what: "",
+    lessons: [{ id: "l", title: "", gloss: "", steps }],
+  });
+  const a = step({ id: "explorer-a", first: [{ kind: "click", css: "#c" }], words: [w("text", "Go")] });
+  const twin: Step = { ...a, id: "prospect-a", act: "Say it otherwise.", see: "Otherwise." };
+  const ladders = [lad("/explorer/", [a]), lad("/prospect/", [twin])];
+  assert.deepEqual([heldBy(a, ladders), heldBy(twin, ladders)], [null, "explorer-a"]);
+  const differing: readonly Partial<Step>[] = [
+    { at: "/explorer/#seed=7" },
+    { first: [] },
+    { words: [w("text", "Stop")] },
+    { relies: [w("aria", "x")] },
+    { do: [{ kind: "click", css: "#c" }] },
+    { then: [w("text", "x")] },
+    { only: "touch" },
+  ];
+  assert.deepEqual(
+    differing.map((d) => {
+      const other: Step = { ...twin, ...d };
+      return heldBy(other, [lad("/explorer/", [a]), lad("/prospect/", [other])]);
+    }),
+    differing.map(() => null),
+  );
 });

@@ -1,7 +1,7 @@
 // The Primer check's judgement, apart from the page (Issue #1250): what a step expects of each control it names, what the page's facts say it reads, and where a reader's press lands.
-import type { Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
+import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
-export type Arm = "desk" | "tablet";
+export type Arm = "desk" | "tablet" | "motion";
 export type Expect = "reachable" | "held" | "hidden" | "any";
 export type Reach =
   "absent" | "hidden" | "no box" | "held" | "disabled" | "off screen" | "reachable" | `covered by ${string}`;
@@ -65,6 +65,12 @@ export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Exp
 
 export function onItsArm(step: Step, arm: Arm): boolean {
   return step.only === undefined ? arm === "desk" : step.only === "touch" && arm === "tablet";
+}
+
+export const routeOf = (address: string): string => address;
+
+export function heldBy(step: Step, ladders: readonly Ladder[]): string | null {
+  return ladders.length === 0 || step.id === "" ? null : null;
 }
 
 export function stateOf(f: Facts, hit: string): Reach {
