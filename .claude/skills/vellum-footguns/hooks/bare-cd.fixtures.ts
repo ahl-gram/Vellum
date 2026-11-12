@@ -3,7 +3,7 @@ export type CdRow = readonly [name: string, command: string, cwd: string | null,
 
 const SPACED = "<S>/a dir";
 const OUTSIDE = "<S>/..";
-const RECIPE = `cd <ROOT>/.claude/worktrees/skeptic-781-1 && cat "$(sed 's/^gitdir: //' .git)/HEAD" && npm test`;
+const RECIPE = `cd <ROOT>/.claude/worktrees/skeptic-781-1 && pwd && npm test`;
 
 const PLACES: ReadonlyArray<CdRow> = [
   ["a bare cd into another directory inside the project denied", "cd src && ls", "<ROOT>", "deny"],
