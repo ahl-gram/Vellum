@@ -115,11 +115,12 @@ test("a run that throws still logs what it spent, and returns 1 with the error o
   });
 });
 
-test("an interrupt logs what the run spent, a request still in flight included, once, and exits 130 for SIGINT and 143 for SIGTERM", async (t) => {
+test("an interrupt logs what the run spent, a request still in flight included, once, and exits 130 for SIGINT, 143 for SIGTERM and 129 for SIGHUP", async (t) => {
   noExit(t);
   for (const [signal, code] of [
     ["SIGINT", 130],
     ["SIGTERM", 143],
+    ["SIGHUP", 129],
   ] as const)
     await withHome(async (home) => {
       const first = answeringFetch([300]);
@@ -135,7 +136,7 @@ test("an interrupt logs what the run spent, a request still in flight included, 
       };
       const { deps, registered, handlers, exits } = harness(home, fetcher);
       const run = runCommand("copy-hunt", sendTwice, ["full"], deps);
-      assert.deepEqual(registered, ["SIGINT", "SIGTERM"]);
+      assert.deepEqual(registered, ["SIGINT", "SIGTERM", "SIGHUP"]);
 
       await secondSent;
       handlers.get(signal)!();
@@ -227,36 +228,41 @@ test("the line names the command by its script and the subcommand its arguments 
 // 2026-11-11: WAIT_MS sits above the child's HOLD_MS of 30 s so a handler that never exits ends the child by itself with code 0; the child reached "asked" in 80 ms and exited in 83 ms on an idle Mac (this file, 1 run), so 60 s is a cap on a hang and no budget.
 const WAIT_MS = 60_000;
 
-test("a real SIGINT reaches the run: it logs what was spent and the process exits 130", async () => {
-  await withHome(async (home) => {
-    const child = spawn(process.execPath, [CHILD, home], { stdio: ["ignore", "pipe", "pipe"] });
-    let out = "";
-    let err = "";
-    child.stderr.on("data", (chunk: Buffer) => (err += String(chunk)));
-    const exited = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((done) =>
-      child.once("exit", (code, signal) => done({ code, signal })),
-    );
-    const asked = new Promise<void>((done) =>
-      child.stdout.on("data", (chunk: Buffer) => {
-        out += String(chunk);
-        if (out.includes("asked")) done();
-      }),
-    );
-    const cap = setTimeout(() => child.kill("SIGKILL"), WAIT_MS);
-    try {
-      await Promise.race([asked, exited]);
-      child.kill("SIGINT");
-      const { code, signal } = await exited;
-      assert.equal(
-        signal,
-        null,
-        `the child ended by signal ${signal} and not by exiting (the test caps it at ${WAIT_MS} ms): ${err}`,
+test("a real SIGINT, SIGTERM or SIGHUP reaches the run: it logs what was spent and the process exits 130, 143 or 129", async () => {
+  for (const [name, expectedCode] of [
+    ["SIGINT", 130],
+    ["SIGTERM", 143],
+    ["SIGHUP", 129],
+  ] as const)
+    await withHome(async (home) => {
+      const child = spawn(process.execPath, [CHILD, home], { stdio: ["ignore", "pipe", "pipe"] });
+      let out = "";
+      let err = "";
+      child.stderr.on("data", (chunk: Buffer) => (err += String(chunk)));
+      const exited = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((done) =>
+        child.once("exit", (code, signal) => done({ code, signal })),
       );
-      assert.equal(code, 130, err);
-      assert.deepEqual(usageLinesIn(home), [line({ input_tokens: 250, requests: 1, command: "interrupted probe" })]);
-    } finally {
-      clearTimeout(cap);
-      child.kill("SIGKILL");
-    }
-  });
+      const asked = new Promise<void>((done) =>
+        child.stdout.on("data", (chunk: Buffer) => {
+          out += String(chunk);
+          if (out.includes("asked")) done();
+        }),
+      );
+      const cap = setTimeout(() => child.kill("SIGKILL"), WAIT_MS);
+      try {
+        await Promise.race([asked, exited]);
+        child.kill(name);
+        const { code, signal } = await exited;
+        assert.equal(
+          signal,
+          null,
+          `the child ended by signal ${signal} and not by exiting (the test caps it at ${WAIT_MS} ms): ${err}`,
+        );
+        assert.equal(code, expectedCode, `${name}: ${err}`);
+        assert.deepEqual(usageLinesIn(home), [line({ input_tokens: 250, requests: 1, command: "interrupted probe" })]);
+      } finally {
+        clearTimeout(cap);
+        child.kill("SIGKILL");
+      }
+    });
 });

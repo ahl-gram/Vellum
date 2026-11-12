@@ -26,8 +26,8 @@ export const parseArgs = (argv: readonly string[]): Args | null => {
 
 export type SendFor = (dryRun: boolean) => Send;
 export type Main = (argv: readonly string[], sendFor: SendFor) => Promise<number>;
-export type Signal = "SIGINT" | "SIGTERM";
-export const SIGNAL_EXITS: Readonly<Record<Signal, number>> = { SIGINT: 130, SIGTERM: 143 };
+export type Signal = "SIGINT" | "SIGTERM" | "SIGHUP";
+export const SIGNAL_EXITS: Readonly<Record<Signal, number>> = { SIGINT: 130, SIGTERM: 143, SIGHUP: 129 };
 export type RunDeps = {
   readonly env: Env;
   readonly home: string;
