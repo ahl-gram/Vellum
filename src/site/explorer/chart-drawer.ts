@@ -52,7 +52,6 @@ export function refusalLine(why: Refusal, kind: TableItem["kind"] = "survey"): s
   return `this ${kind} is already on the table`;
 }
 
-/** The sheet a filing is made FROM: the drawn world and the present year of that same world, in one value because they may never disagree. */
 export interface FilingSheet {
   readonly seed: number;
   readonly overrides: TableOverrides;

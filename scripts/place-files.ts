@@ -17,7 +17,6 @@ export async function writePlaceFiles(root: string, table: string = PLACE_TABLE)
   return ids.length;
 }
 
-/** Copies the name index, byte for byte, to <root>/outlines/names.json. */
 export async function writePlaceNames(root: string, names: string = PLACE_NAMES): Promise<void> {
   await mkdir(join(root, PLACE_FOLDER), { recursive: true });
   await writeFile(join(root, NAMES_FILE), await readFile(names));
