@@ -136,3 +136,19 @@ test("when today's picture is not answered, no other version is compared", () =>
     "a.png: not compared: today's picture was refused unsent: 279 by 1000 pixels: each side must be 280 to 1568",
   );
 });
+
+test("when today's picture and another are both not answered, the other's line names today's reason", () => {
+  const busy: Reply = { ok: false, reason: "HTTP 429: slow down" };
+  assert.deepEqual(compareLines("sheet", [refused("today.png", TOO_BIG), gave("b.png", busy)]), [
+    "still-judge compare sheet at jev-1.14.0: 2 pictures, 0 answered, 1 refused unsent, 1 skipped, 0 input tokens reported",
+    "today: today.png",
+    `b.png: not compared: today's picture was refused unsent: ${TOO_BIG}`,
+    COMPARISON_RULE,
+  ]);
+  assert.deepEqual(compareLines("sheet", [gave("today.png", busy), refused("b.png", TOO_BIG)]), [
+    "still-judge compare sheet at jev-1.14.0: 2 pictures, 0 answered, 1 refused unsent, 1 skipped, 0 input tokens reported",
+    "today: today.png",
+    "b.png: not compared: today's picture was skipped: HTTP 429: slow down",
+    COMPARISON_RULE,
+  ]);
+});
