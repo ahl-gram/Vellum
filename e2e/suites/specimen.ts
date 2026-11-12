@@ -52,7 +52,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("SB6 setup", async () => {
     await toState("rest", "SB6 at rest again");
   });
-  await sb6RestAgain(k);
+  await step("SB6", () => sb6RestAgain(k));
   await step("SB10", () => sb10Route(k));
   await step("SB11", () => sb11Pieces(k));
   await step("SB12", () => sb12StatusVoice(k));

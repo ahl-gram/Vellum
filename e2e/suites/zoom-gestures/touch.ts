@@ -152,10 +152,9 @@ export async function zg8TouchTaken(k: GesturesKit): Promise<void> {
       types.includes("touchmove"),
     JSON.stringify({ r, types }),
   );
-  await zg8bDoubleTapOn(k);
 }
 
-async function zg8bDoubleTapOn(k: GesturesKit): Promise<void> {
+export async function zg8bDoubleTapOn(k: GesturesKit): Promise<void> {
   const p = await centre(k);
   await doubleTap(k, p);
   const now = await kLeft(k, "ZG8b the double tap's zoom rests");
@@ -164,6 +163,10 @@ async function zg8bDoubleTapOn(k: GesturesKit): Promise<void> {
     Math.abs(now - 2) < 0.01,
     JSON.stringify({ k: now }),
   );
+}
+
+export async function standHome(k: GesturesKit): Promise<void> {
+  await centre(k);
   await k.evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
