@@ -177,7 +177,7 @@ refuses the mechanical never-list items outright, the ones `.claude/skills/vellu
 
 **The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-guard-prover` on every new or strengthened guard before the PR,
-`vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
+`vellum-plate-reader` when the deliverable is an appearance or step 11 owes its still-judge comparison, and `vellum-pr-skeptic` COLD on every
 pushed PR (the cloud routine runs the guard prover and the cold skeptic only as `handbook/specs/cloud-routine.md` says, and neither plan nor plate reader). A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
 what lands on the PR**. `vellum-planner` runs one issue through step 6 on the most capable model and
 hands back a plan with no decision left open; `vellum-implementer` builds that plan in its own tree

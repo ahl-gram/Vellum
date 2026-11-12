@@ -297,8 +297,12 @@ guard, and step 8's commits have to exist first: it mutates in its own detached 
 tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
 the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
 deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
-measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
-pass, and a guard proved unable to bite is deleted rather than shipped.
+measured a spike and this run measures what was built. Wherever the diff in step 1 of that agent's
+section Two versions of one sheet, asked of Jev (`.claude/agents/vellum-plate-reader.md`) prints a
+change, it is owed here for the still judge's comparison that section runs, whether or not the
+deliverable is an appearance, and a dispatch owed for nothing else asks for the comparison alone.
+Zero red from the prover is a hole, not a pass, and a guard proved unable to bite is deleted rather
+than shipped.
 
 **A mutation proof may run on the CI proof runner instead of locally**
 (`.github/workflows/proof-runner.yml`); a local proof stays valid, and the runner only runs many at

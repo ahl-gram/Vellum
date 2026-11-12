@@ -24,7 +24,7 @@ Closes #NNN
 ## Records
 
 - vellum-guard-prover: `<link to comment>` / in flight / not owed (no new guard); guards changed or added after its one round, proven by this session only: `<each>`, or none
-- vellum-plate-reader: `<link to comment>` / in flight / not owed (no presentation change); and, where the ruling at workflow step 6 was made from stills, `<that sitting's run>` / not owed (the ruling was not an appearance); presentation fixes after its one round, measured by this session only: `<each>`, or none
+- vellum-plate-reader: `<link to comment>` / in flight / not owed (no presentation change, and nothing workflow step 11 owes the still judge's comparison for); and, where the ruling at workflow step 6 was made from stills, `<that sitting's run>` / not owed (the ruling was not an appearance); presentation fixes after its one round, measured by this session only: `<each>`, or none
 - vellum-pr-skeptic: `<link to its ledger on the PR, or "relayed in chat <date>" since CLAUDE.md leaves what lands on the PR to Alex>`; its verdict: `<Blocking: yes / no>`; not fixed here: `<each as Issue #N or a handbook/errata/ row, with the reason>`, or none; NITs left: `<each>`, or none
 
 ## Rulings
