@@ -16,6 +16,7 @@ export const LEFT_UNTAUGHT: Readonly<Record<string, string>> = {
   "/prospect/": AWAITS,
   "/ribbon/": AWAITS,
   "/explorer/portfolio/": AWAITS,
+  "/primer/": "the Primer is the guide itself",
 };
 
 export interface RouteTree {
@@ -41,7 +42,7 @@ export interface Seated {
   readonly under: readonly Seated[];
 }
 
-const nameIn = (tree: RouteTree, route: string): string => {
+export const nameIn = (tree: RouteTree, route: string): string => {
   const name = tree.names[route];
   if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${route}`);
   return name;

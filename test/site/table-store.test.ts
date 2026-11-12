@@ -12,48 +12,11 @@ import {
   TRAVERSAL,
 } from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type TableItem } from "../../src/site/shared/table-address.ts";
+import { asStorage, FakeStore, shut } from "../../test-support/fake-store.ts";
 import { surveyAt } from "../../test-support/table-address-fixtures.ts";
 
 // The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
 const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => surveyAt(i));
-
-/** Records what was ASKED of it, not only what it ends up holding: removing a key and storing an empty string leave the same bytes behind and mean different things to the next arrival. */
-class FakeStore {
-  readonly calls: string[] = [];
-  held: Record<string, string>;
-  constructor(held: Record<string, string> = {}) {
-    this.held = held;
-  }
-  getItem(key: string): string | null {
-    this.calls.push(`get ${key}`);
-    return Object.prototype.hasOwnProperty.call(this.held, key) ? (this.held[key] as string) : null;
-  }
-  setItem(key: string, value: string): void {
-    this.calls.push(`set ${key}`);
-    this.held[key] = value;
-  }
-  removeItem(key: string): void {
-    this.calls.push(`remove ${key}`);
-    delete this.held[key];
-  }
-  clear(): void {
-    this.held = {};
-  }
-  key(): string | null {
-    return null;
-  }
-  get length(): number {
-    return Object.keys(this.held).length;
-  }
-}
-const asStorage =
-  (fake: FakeStore): (() => Storage) =>
-  () =>
-    fake;
-
-const shut: () => Storage = () => {
-  throw new Error("storage is disabled in this browsing mode");
-};
 
 test("TS1 a link beats what this device holds: arriving with a table key means THAT table (#634's stated constraint)", () => {
   const carried = fill(2);

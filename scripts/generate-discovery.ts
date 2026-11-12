@@ -60,6 +60,11 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
     title: "The Gallery",
     blurb: "A contact sheet of twelve imaginary worlds, drawn as antique charts and hung for viewing.",
   },
+  "/primer/": {
+    title: "The Primer",
+    blurb:
+      "Every room taught one small step at a time: each step names the control to touch, and its Try it opens the room already set for that step.",
+  },
   "/faq/": {
     title: "Questions & Answers",
     blurb:

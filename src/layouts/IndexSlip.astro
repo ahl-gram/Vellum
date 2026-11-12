@@ -5,18 +5,19 @@ import type { IndexSection } from "./room-sections.ts";
 
 interface Props {
   sections: readonly IndexSection[];
-  kind: "questions" | "terms";
+  kind: "questions" | "terms" | "lessons";
+  where?: string;
 }
-const { sections, kind } = Astro.props;
+const { sections, kind, where = "the section you are reading is inked" } = Astro.props;
 ---
-<Slip id="index" verb="Find your way" title="On this page" where="the section you are reading is inked" fold="Fold the index away">
+<Slip id="index" verb="Find your way" title="On this page" where={where} fold="Fold the index away">
   <ol class="index">
     {sections.map((s) => (
-      <li data-sec={s.id}>
-        <a class="sec" href={`#${s.id}`}>{s.title}<span class="count">{s.entries.length}</span></a>
-        {kind === "questions"
-          ? <ol class="entries">{s.entries.map((e) => <li data-for={e.id}><a href={`#${e.id}`}>{e.text}</a></li>)}</ol>
-          : <p class="terms">{s.entries.map((e) => <Fragment><a href={`#${e.id}`} data-for={e.id}>{e.text}</a>{" "}</Fragment>)}</p>}
+      <li data-sec={s.id} class={s.tone}>
+        <a class="sec" href={`#${s.id}`}>{s.title}{s.count !== null && <span class="count">{s.count ?? s.entries.length}</span>}</a>
+        {kind === "terms"
+          ? <p class="terms">{s.entries.map((e) => <Fragment><a href={`#${e.id}`} data-for={e.id}>{e.text}</a>{" "}</Fragment>)}</p>
+          : (kind === "questions" || s.entries.length > 0) && <ol class="entries">{s.entries.map((e) => <li data-for={e.id}><a href={`#${e.id}`}>{e.text}</a></li>)}</ol>}
       </li>
     ))}
   </ol>
@@ -49,7 +50,7 @@ const { sections, kind } = Astro.props;
       new Map([...slip.querySelectorAll<HTMLElement>(sel)].map((el) => [el.dataset[key] ?? "", el]));
     const ink = indexInk({
       heads: [...document.querySelectorAll(".sheet h2[id]")],
-      entries: [...document.querySelectorAll(".sheet :is(.q, .term)[id]")],
+      entries: [...document.querySelectorAll(".sheet :is(.q, .term, .lesson)[id]")],
       rows: byData(".index > li[data-sec]", "sec"),
       entryRows: byData("[data-for]", "for"),
       // The reading line sits just under the band, where a followed anchor lands its head.

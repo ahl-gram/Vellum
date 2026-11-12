@@ -1,0 +1,346 @@
+.primer {
+  max-width: 46rem;
+  margin: 0 auto;
+  color: var(--ink-dark);
+}
+.primer :is(h2, .lesson, li.step)[id] {
+  scroll-margin-top: calc(var(--band-h) + 1rem);
+}
+.primer .opening {
+  border-bottom: 1px solid var(--line-tan);
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.6rem;
+}
+.primer .lede {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  font-size: 1.32rem;
+  line-height: 1.35;
+  color: var(--ink-brown);
+  margin: 0 0 0.6rem;
+}
+.primer .opening p {
+  margin: 0.3rem 0;
+  font-size: 1.04rem;
+}
+.primer .room-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin: 2.6rem 0 0.5rem;
+  border-bottom: 1px solid var(--line-tan);
+  padding-bottom: 0.25rem;
+}
+.primer .room:first-of-type .room-head {
+  margin-top: 0;
+}
+.primer .room-head h2 {
+  column-span: none;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+}
+.primer .room.sub {
+  margin-left: 1.6rem;
+  padding-left: 1.1rem;
+  border-left: 3px double var(--line-tan);
+}
+.primer .room.sub h2 {
+  font-size: 1.22rem;
+}
+.primer .room.folded {
+  margin-bottom: 0.4rem;
+}
+.primer h2 .of {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  color: var(--ink-brown);
+}
+.primer .unfold {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--ink-dark);
+  border-radius: 3px;
+  padding: 0.1rem 0.5rem;
+  cursor: pointer;
+}
+.primer .what {
+  font-size: 1.05rem;
+  margin: 0.2rem 0 1rem;
+}
+.primer .what .entered {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+}
+.primer h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.06rem;
+  letter-spacing: 0.09em;
+  margin: 1.5rem 0 0.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.primer h3 .rn {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+  letter-spacing: 0;
+}
+.primer h3 .gloss {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  color: var(--ink-brown);
+}
+.primer .aside {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+  margin: 0.1rem 0 0.7rem;
+  font-size: 0.98rem;
+}
+.primer ol.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.primer li.step {
+  display: grid;
+  grid-template-columns: 2.3rem 1fr 13.5rem;
+  gap: 0 1rem;
+  padding: 0.75rem 0 0.8rem;
+  border-top: 1px solid var(--line-faint);
+  align-items: start;
+}
+.primer li.step .num {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink-brown);
+  text-align: right;
+  padding-top: 0.08rem;
+}
+.primer li.step.sealed .num {
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgb(from var(--parchment-bright) r g b / 0.22),
+      rgb(from var(--parchment-bright) r g b / 0) 62%
+    ),
+    var(--iron-red);
+  color: var(--parchment-bright);
+  font-size: 0.85rem;
+  box-shadow:
+    0 1px 2px rgb(from var(--chart-ink) r g b / 0.5),
+    inset 0 0 0 2px rgb(255 255 255 / 0.12);
+}
+.primer .act {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.primer .see {
+  margin: 0.2rem 0 0.35rem;
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+  font-size: 1.02rem;
+  line-height: 1.4;
+}
+.primer .try {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+  font-size: 0.9rem;
+}
+.primer .try a {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  font-size: 0.86rem;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--ink-dark);
+  border-radius: 3px;
+  padding: 0.06rem 0.6rem 0.1rem;
+  text-decoration: none;
+}
+.primer .try .in {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+}
+.primer .mark {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  font-variant-caps: small-caps;
+  color: var(--ink-brown);
+  border: 1px dashed var(--line-tan);
+  padding: 0 0.35rem;
+  border-radius: 2px;
+}
+.primer .mark.comm {
+  border-style: solid;
+  border-color: var(--iron-red);
+  color: var(--iron-red);
+}
+.primer .pic {
+  width: 13.5rem;
+}
+.primer li.commission {
+  background: linear-gradient(90deg, rgb(from var(--control-gold) r g b / 0.55), transparent 80%);
+}
+.primer .ch {
+  font-weight: 400;
+  white-space: nowrap;
+  font-size: 0.95em;
+  padding: 0 0.34em 0.04em;
+  border-radius: 3px;
+  border: 1px solid var(--ink-faded);
+  background: var(--control-cream);
+  color: var(--ink-dark);
+}
+.primer .ch.opt::after {
+  content: " \25BE";
+  font-size: 0.75em;
+  color: var(--ink-brown);
+}
+.primer .ch.word {
+  border: none;
+  background: none;
+  padding: 0;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.03em;
+  border-bottom: 1px dotted var(--ink-brown);
+  border-radius: 0;
+}
+.primer .ch.glyph {
+  font-family: var(--font-serif-fallback);
+  font-size: 1.05em;
+}
+.primer .ch.road {
+  background: var(--control-gold);
+  border-color: var(--ink-dark);
+}
+.primer .ch.road i {
+  font-family: var(--font-flourish);
+  font-size: 0.92em;
+}
+.primer .ch.road b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 0.86em;
+  letter-spacing: 0.07em;
+}
+.primer .ch.btn {
+  font-family: var(--font-body);
+}
+.primer .next {
+  margin: 1.2rem 0 0;
+  text-align: right;
+}
+.primer .next a {
+  display: inline-block;
+  vertical-align: top;
+  text-decoration: none;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--ink-dark);
+  border-radius: 3px;
+  padding: 0.25rem 0.8rem;
+}
+.primer .next i {
+  font-family: var(--font-flourish);
+  display: block;
+  font-size: 0.85rem;
+}
+.primer .next b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.primer .closing {
+  margin: 3rem 0 0;
+  padding: 1.4rem 1.6rem 1.2rem;
+  border: 1px solid var(--ink-dark);
+  outline: 3px double var(--line-tan);
+  outline-offset: 5px;
+  background: var(--parchment-bright);
+}
+.primer .closing .c-verb {
+  margin: 0;
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+}
+.primer .closing .c-title {
+  column-span: none;
+  border: none;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}
+.primer .closing .c-where {
+  margin: 0 0 0.8rem;
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-brown);
+}
+.primer .closing p {
+  font-size: 1.06rem;
+}
+.primer .closing .c-foot {
+  text-align: right;
+  margin: 0.6rem 0 0;
+}
+.primer .closing .wipe {
+  font-family: var(--font-display);
+  font-size: 1.06rem;
+  letter-spacing: 0.08em;
+  color: var(--parchment-bright);
+  background: var(--ink-dark);
+  border: 0;
+  border-radius: 3px;
+  padding: 0.2rem 0.9rem;
+  cursor: pointer;
+}
+#index .index > li.sub {
+  margin-left: 1rem;
+}
+#index .index > li.lean {
+  margin-top: 0.6rem;
+}
+@media print {
+  .primer .room-body[hidden] {
+    display: block;
+  }
+  .primer :is(.unfold, .wipe) {
+    display: none;
+  }
+}

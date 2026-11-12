@@ -63,6 +63,14 @@ const TRAILS: Record<string, Want> = {
     current: false,
     also: [],
   },
+  "/primer/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Primer", "/primer/"],
+    ],
+    current: false,
+    also: [["Questions & Answers", "/faq/"]],
+  },
   "/faq/": {
     crumbs: [
       ["Vellum", "/"],
@@ -122,9 +130,10 @@ test("a route's seat is its FIRST appearance: the Prospect hangs off the Explore
     assert.equal(seatOf(child), "/explorer/", `${child} is seated under the Explorer`);
 });
 
-test("an alias is every later appearance: the Prospect alone has one, the Reading Room", () => {
+test("an alias is every later appearance: the Prospect has one, the Reading Room, and the Primer has one, Questions & Answers", () => {
   assert.deepEqual(aliasesOf("/prospect/"), ["/reading-room/"]);
-  for (const route of SEATED.filter((r) => r !== "/prospect/"))
+  assert.deepEqual(aliasesOf("/primer/"), ["/faq/"]);
+  for (const route of SEATED.filter((r) => r !== "/prospect/" && r !== "/primer/"))
     assert.deepEqual(aliasesOf(route), [], `${route} has no alias`);
 });
 

@@ -22,6 +22,7 @@ export const PLACES: Readonly<Record<string, Place>> = {
   "/faq/": { x: 158, y: 330, rank: "village", name: "Q & A" },
   "/glossary/": { x: 352, y: 336, rank: "village", name: "The Glossary" },
   "/atlas/": { x: 44, y: 128, rank: "isle", name: "The Atlas" },
+  "/primer/": { x: 52, y: 376, rank: "isle", name: "The Primer" },
 };
 
 export const ROADS: readonly (readonly [string, string])[] = [
@@ -35,9 +36,13 @@ export const ROADS: readonly (readonly [string, string])[] = [
   ["/print-room/", "/glossary/"],
   ["/reading-room/", "/faq/"],
   ["/", "/atlas/"],
+  ["/", "/primer/"],
 ];
 
-export const TRACKS: readonly (readonly [string, string])[] = [["/reading-room/", "/prospect/"]];
+export const TRACKS: readonly (readonly [string, string])[] = [
+  ["/faq/", "/primer/"],
+  ["/reading-room/", "/prospect/"],
+];
 
 export const COAST =
   "M74 196 C 70 150 108 108 156 96 C 196 86 222 104 256 92 C 296 78 330 86 356 74 " +

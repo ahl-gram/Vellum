@@ -453,7 +453,12 @@ checks against.
   room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads and `test/site/atelier-chart.test.ts` holds the chart of the atelier to. Revisit the top
   line only on a named trigger: the nav no longer fitting beside the room's corner on its one line at
   1024, at the browser's default text size (Alex, 2026-10-07, Issue #764), or a ninth surface scheduled
-  for it, which replaced Issue #764's eighth (Alex, 2026-11-01, Issue #393 comment 6558742855 ruling 3). The eighth, the Writing Room, joined the flat line after the Explorer (Alex,
+  for it, which replaced Issue #764's eighth (Alex, 2026-11-01, Issue #393 comment 6558742855 ruling 3). The ninth, the Primer, joined the flat line before Q & A
+  (Alex, 2026-11-05, Issue #1155 comment 6663627921 ruling 2), with the nav's dots set 0.3em from
+  their words in every room so the top row keeps its gap (Alex, 2026-11-09, Issue #1155 comment
+  6754985610 ruling 1) and the Print Room's controls wrapping to two lines at 1024 where one would
+  cut its style list (Alex, 2026-11-09, Issue #1155 comment 6754142680 ruling 4); the next trigger is
+  a tenth surface scheduled for it. The eighth, the Writing Room, joined the flat line after the Explorer (Alex,
   2026-10-31, Issue #393 comment 6550522707 ruling 2): the nav keeps its one line at 1024, the Print Room's
   and the Ribbon's corners giving way to it by script, and with scripts off those two corners run under
   its last item at 1024, a cost accepted and recorded in `handbook/errata/site.md` (Alex, 2026-11-01,
