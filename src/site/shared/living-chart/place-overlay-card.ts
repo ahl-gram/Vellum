@@ -3,8 +3,8 @@ import type { PlaceMark } from "../../../render/place-manifest.ts";
 import type { Hold } from "./place-card-hold.ts";
 import type { LayProspectHost, PlaceOverlayDeps, PlaceOverlayState } from "./place-overlay.ts";
 
-export const PROSPECT_ON_CARD = "";
-export const ROAD_ON_CARD = "";
+export const PROSPECT_ON_CARD = "View the prospect";
+export const ROAD_ON_CARD = "Take the road";
 
 function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   const press = document.createElement("button");
@@ -50,13 +50,13 @@ export function cardActs(
   if (prospectHref) {
     prospectLink = document.createElement("a");
     prospectLink.className = "pc-prospect";
-    prospectLink.textContent = "View the prospect";
+    prospectLink.textContent = PROSPECT_ON_CARD;
   }
   let ribbonLink: HTMLAnchorElement | null = null;
   if (ribbonHref) {
     ribbonLink = document.createElement("a");
     ribbonLink.className = "pc-ribbon";
-    ribbonLink.textContent = "Take the road";
+    ribbonLink.textContent = ROAD_ON_CARD;
   }
   const layPress = layProspect ? makeLayPress(layProspect) : null;
   const acts = prospectLink || ribbonLink || layPress ? document.createElement("div") : null;
