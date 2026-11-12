@@ -1,0 +1,74 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import IndexSlip from "../../layouts/IndexSlip.astro";
+import { LEANED_ON } from "../../site/shared/primer/ladders.ts";
+import { AFTERWARD, primerPage } from "../../site/primer/page.ts";
+import { CLOSING_HEAD, CLOSING_VERB, CLOSING_WHERE, DESCRIPTION, LEDE, NEXT, ROOM, TAGLINE, TRY, UNFOLD, WHERE, WIPE } from "../../site/primer/words.ts";
+
+const page = primerPage();
+const first = page.rooms[0]?.id ?? AFTERWARD;
+const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
+---
+
+<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/document-room.css"]} desk="open">
+<Fog />
+<RoomFolio slot="desk" region room={ROOM} tagline={TAGLINE}>
+  <p class="dateline">0 steps in 0 rooms</p>
+</RoomFolio>
+<IndexSlip slot="desk" sections={page.index} kind="lessons" where={WHERE} />
+<div class="sheet">
+<div class="primer">
+<div class="opening">
+<p class="lede">{LEDE}</p>
+<p>Press <a class="inline-try" href={`#${first}`}>{TRY}</a> beside a step and its room opens already set for that step, so you may begin anywhere and skip whatever you know. Nothing you do there can spoil a world: every world comes back from its number.</p>
+</div>
+{page.rooms.map((r) => (
+  <section class={r.of === undefined ? "room" : "room sub"} data-route={r.route}>
+    <div class="room-head"><h2 id={r.id}>{r.name}{r.of !== undefined && <span class="of">{r.of}</span>}</h2><button class="unfold" type="button" aria-controls={`${r.id}-steps`} aria-expanded="true" hidden>{UNFOLD} ›</button></div>
+    <p class="what">{r.what}{r.entered !== undefined && <Fragment> <span class="entered">{r.entered}</span></Fragment>}</p>
+    <div class="room-body" id={`${r.id}-steps`}>
+      {r.lessons.map((l) => (
+        <section class="lesson" id={l.id}>
+          <h3><span class="rn">{l.numeral}</span> {l.title}<span class="gloss">{l.gloss}</span></h3>
+          {l.aside !== undefined && <p class="aside">{l.aside}</p>}
+          <ol class="steps">
+            {l.steps.map((s) => (
+              <li class={s.commission ? "step commission" : "step"} id={s.id} data-only={s.only}>
+                <span class="num">{s.n}</span>
+                <div class="body">
+                  <p class="act">{s.act.map((seg) => "chip" in seg
+                    ? seg.chip === "road"
+                      ? <span class="ch road"><i>{seg.verb}</i> <b>{seg.place}</b></span>
+                      : <span class={`ch ${seg.chip}`}>{seg.text}</span>
+                    : seg.text)}</p>
+                  <p class="see">{s.see}</p>
+                  <p class="try"><a href="#">{TRY}</a><span class="in">{s.opens}</span>{s.marks.map((m) => <span class={m.comm ? "mark comm" : "mark"}>{m.text}</span>)}</p>
+                </div>
+                <span class="pic none"></span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+      {r.next !== undefined && <p class="next"><a href={`#${r.next.id}`}><i>{NEXT}</i> <b>{r.next.name}</b></a></p>}
+    </div>
+  </section>
+))}
+<section class="closing">
+<p class="c-verb">{CLOSING_VERB}</p>
+<h2 class="c-title" id={AFTERWARD}>{CLOSING_HEAD}</h2>
+<p class="c-where">{CLOSING_WHERE}</p>
+<p>You may take these steps again whenever you like, from the first. <span class="ch btn">{WIPE}</span> clears the marks of the steps you have done from this browser, and touches nothing else: your worlds and your Chart Table stay as you left them.</p>
+<p>For a quicker answer than a whole ladder, <a href={faq}>Questions &amp; Answers</a> says how the worlds are made, and <a href={glossary}>the Glossary</a> says what every word on a chart means.</p>
+<p class="c-foot"><button class="wipe" type="button">{WIPE}</button></p>
+</section>
+</div>
+</div>
+</BaseLayout>
+<script>
+  import { bindPrimer } from "../../site/primer/bind.ts";
+
+  bindPrimer();
+</script>

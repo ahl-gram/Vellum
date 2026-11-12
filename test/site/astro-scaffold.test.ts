@@ -41,6 +41,8 @@ type PageSpec = {
   chartRoom?: true;
   /** A document room's index script, Astro-processed and inlined (Issue #483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
+  /** A document room's own script beside its index script. */
+  ownScript?: RegExp;
   noindex?: true;
   trail?: readonly (readonly [string, string])[];
   also?: readonly [string, string];
@@ -95,6 +97,24 @@ const PAGES: readonly PageSpec[] = [
       "A glossary of the cartography, heraldry, seamanship, and geography vocabulary printed on Vellum's charts, in its gazetteer, its voyage journal, and across its realm names.",
     tagline: "the words on the charts",
     pageScript: /classList\.toggle\([`"']inked[`"']/,
+  },
+  {
+    route: "primer/index.html",
+    dir: "/primer/",
+    current: "Primer",
+    trail: [
+      ["Vellum", "/"],
+      ["The Primer", "/primer/"],
+    ],
+    also: ["Questions & Answers", "/faq/"],
+    room: "The Primer",
+    title: "The Primer · Vellum",
+    ogTitle: "The Primer · Vellum",
+    description:
+      "Learn every room of Vellum one small step at a time: each step opens its room already set for it, so you may begin anywhere.",
+    tagline: "every room, one small step at a time",
+    pageScript: /classList\.toggle\([`"']inked[`"']/,
+    ownScript: /vellum\.primer\.v1/,
   },
   {
     route: "explorer/index.html",
@@ -424,7 +444,11 @@ const SHARED_ROOM_SHEETS: ReadonlyArray<readonly [string, (p: PageSpec) => boole
       "specimen/index.html",
     ],
   ],
-  ["/shared/document-room.css", (p) => p.pageScript !== undefined, ["faq/index.html", "glossary/index.html"]],
+  [
+    "/shared/document-room.css",
+    (p) => p.pageScript !== undefined,
+    ["faq/index.html", "glossary/index.html", "primer/index.html"],
+  ],
 ];
 
 test("the chart rooms whose sheet stands in their stage link /shared/chart-stage.css, and the document rooms /shared/document-room.css, each the shared sheet just before the page's own, no other page links either, and the build serves both (Issue #1013)", () => {
@@ -722,7 +746,12 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
   }
 });
 
-const DESK_ROOMS: readonly string[] = ["faq/index.html", "glossary/index.html", "gallery/index.html"];
+const DESK_ROOMS: readonly string[] = [
+  "faq/index.html",
+  "glossary/index.html",
+  "gallery/index.html",
+  "primer/index.html",
+];
 
 function roomHeadingStands(route: string, room: string, html: string, firstHeading: number): void {
   const [headClose, mainOpen, mainClose] = [html.indexOf("</header>"), html.search(/<main\b/), html.indexOf("</main>")];
@@ -885,10 +914,11 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
       const scripts = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
       assert.deepEqual(
         scripts,
-        ['<script type="module">'],
-        `${p.route} carries exactly one script of its own, inlined by Astro`,
+        ['<script type="module">', ...(p.ownScript === undefined ? [] : ['<script type="module">'])],
+        `${p.route} carries exactly its index script${p.ownScript === undefined ? "" : " and its own"}, inlined by Astro`,
       );
       assert.match(html, p.pageScript, `${p.route}'s script binds the index`);
+      if (p.ownScript !== undefined) assert.match(html, p.ownScript, `${p.route}'s own script is the page's`);
       assert.ok(
         html.indexOf("<script") < html.indexOf("<footer>"),
         `${p.route} script renders inside <main>, before the footer`,
