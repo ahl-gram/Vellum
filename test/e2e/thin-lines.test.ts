@@ -4,7 +4,14 @@ import { thinFootFaults, thinTopFaults, type ThinLine, type ThinLines } from "..
 
 // The fixtures are the probe's reads on the build of Issue #1076's plan, handbook/plans/1000/1076/1076-plan.md, Tests T1 to T3.
 const line = (t: string, row: number, piece = "cluster"): ThinLine => ({ piece, t, row });
-const reads = (over: Partial<ThinLines>): ThinLines => ({ innerH: 800, trail: null, also: null, title: null, lines: [], ...over });
+const reads = (over: Partial<ThinLines>): ThinLines => ({
+  innerH: 800,
+  trail: null,
+  also: null,
+  title: null,
+  lines: [],
+  ...over,
+});
 
 const EXPLORER: ThinLines = reads({
   trail: [6.40625, 22.40625],
@@ -21,7 +28,12 @@ test("thinTopFaults keeps the Explorer's trail line and faults a row the head gr
   assert.deepEqual(thinTopFaults(EXPLORER), []);
   const above = reads({
     trail: [59.40625, 75.40625],
-    lines: [line("a row the probe mounts a", 23), line("Vellum", 67), line("The Explorer", 67), line("the chart of the atelier", 67)],
+    lines: [
+      line("a row the probe mounts a", 23),
+      line("Vellum", 67),
+      line("The Explorer", 67),
+      line("the chart of the atelier", 67),
+    ],
   });
   assert.equal(thinTopFaults(above).length, 2);
   const under = reads({ ...EXPLORER, lines: [...EXPLORER.lines, line("a row the probe mounts u", 49)] });

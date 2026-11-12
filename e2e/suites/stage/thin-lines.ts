@@ -26,10 +26,34 @@ export const THIN_LINES: Payload<ThinLines> = `(() => {
   };
 })()`;
 
-export function thinTopFaults(_t: ThinLines): string[] {
-  return [];
+export function thinTopFaults(t: ThinLines): string[] {
+  const { trail, also, innerH } = t;
+  if (trail === null) return ["no trail stands in the head cluster"];
+  const faults: string[] = [];
+  if (!(trail[0] >= 0 && trail[0] < trail[1] - trail[0]))
+    faults.push(
+      `the trail stands off its thin top line: its top ${trail[0].toFixed(2)} is not on screen within its own height ${(trail[1] - trail[0]).toFixed(2)} of the page's top`,
+    );
+  const on = t.lines.filter((l) => l.piece === "cluster" && l.row >= 0 && l.row < innerH);
+  if (!on.some((l) => l.t.startsWith("the chart of the atelier")))
+    faults.push("the chart of the atelier press is not on the thin top line");
+  const band = [trail[0], (also ?? trail)[1]] as const;
+  for (const l of on)
+    if (l.row < band[0] || l.row > band[1])
+      faults.push(
+        `the head cluster line "${l.t}" stands at ${l.row}, outside the thin top line's ${band[0].toFixed(2)} to ${band[1].toFixed(2)}`,
+      );
+  if (also !== null && !(also[0] >= trail[1] && on.some((l) => l.t.startsWith("also reached from"))))
+    faults.push("the alias line is not kept under the trail with its text on screen");
+  return faults;
 }
 
-export function thinFootFaults(_t: ThinLines): string[] {
-  return [];
+export function thinFootFaults(t: ThinLines): string[] {
+  if (t.title === null) return ["no chart folio title stands on the page"];
+  const foot = t.title[1];
+  return foot >= t.innerH - FOOT_WINDOW && foot <= t.innerH
+    ? []
+    : [
+        `the chart folio title's foot ${foot.toFixed(2)} is not within ${FOOT_WINDOW} px above the page's foot ${t.innerH}`,
+      ];
 }
