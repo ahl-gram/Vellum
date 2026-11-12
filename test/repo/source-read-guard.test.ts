@@ -265,6 +265,21 @@ test("(j) a test started by an absolute path through a symlinked folder is still
   );
 });
 
+test("(k) a start path that names no file leaves the guard loaded and unwatching, since it resolves the path only when the path exists (Issue #1180)", () => {
+  const nameless = "data:text/javascript,process.argv[1]='/nowhere/x.test.ts'";
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT"));
+  const ran = spawnSync(
+    process.execPath,
+    ["--import", nameless, "--import", GUARD, "--input-type=module", "-e", "process.stdout.write('loaded')"],
+    { cwd: ROOT, env, encoding: "utf8", timeout: CHILD_TIMEOUT_MS },
+  );
+  assert.deepEqual(
+    [ran.status, ran.stdout, ran.stderr],
+    [0, "loaded", ""],
+    "the guard threw at load over a start path that names no file, so a run started that way dies before any test",
+  );
+});
+
 const KINDS: readonly ReadKind[] = ["data", "witness", "kept"];
 
 test("the list names only test files that exist, source it can read, and kinds the spec names", () => {
