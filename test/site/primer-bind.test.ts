@@ -14,8 +14,8 @@ const PAGE =
   `<div class="primer">${room("a", step("a1") + step("a2", "touch"))}${room("b", step("b1"))}` +
   `<section class="closing"><h2 id="afterward">x</h2><button class="wipe"></button></section></div>`;
 
-function bound(hash: string, sealed: string) {
-  const { document, Element } = parseHTML(`<!doctype html><html><body>${PAGE}</body></html>`);
+function bound(hash: string, sealed: string, press?: string) {
+  const { document, Element, Event } = parseHTML(`<!doctype html><html><body>${PAGE}</body></html>`);
   const scrolled: string[] = [];
   Element.prototype.scrollIntoView = function (this: Element) {
     scrolled.push(this.id);
@@ -30,6 +30,12 @@ function bound(hash: string, sealed: string) {
   } catch (e) {
     error = e;
   }
+  if (press !== undefined)
+    document
+      .getElementById(press)
+      ?.closest("section.room")
+      ?.querySelector(".unfold")
+      ?.dispatchEvent(new Event("click", { bubbles: true }));
   const folded = [...document.querySelectorAll("section.room")].map((r) => [
     r.querySelector("h2")!.id,
     r.classList.contains("folded"),
@@ -71,4 +77,13 @@ test("PB3 a returner with no address resumes at the first room with a step still
     ["b", false],
   ]);
   assert.deepEqual(named.scrolled, ["b-one"]);
+});
+
+test("PB4 a press on a folded room's head opens that room, folds the open one and lands on its head (Issue #1252)", () => {
+  const got = bound("", "", "b");
+  assert.deepEqual(got.folded, [
+    ["a", true],
+    ["b", false],
+  ]);
+  assert.deepEqual(got.scrolled, ["b"]);
 });

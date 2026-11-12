@@ -1,4 +1,4 @@
-// Each room the Primer teaches, as its check opens and rests it (Issue #1250): the token its boot sets, and the read that says nothing is in flight; a ladder whose route has no entry here fails each of its steps by name.
+// Each room the Primer teaches, as its check opens and rests it (Issue #1250): the token its boot sets, and the read that says nothing is in flight; a step whose address opens a route with no entry here fails by name.
 import { DEEPEST_K } from "../../src/world/lod.ts";
 import { ZOOM_STEP } from "../../src/site/shared/zoom-keys.ts";
 import type { Payload } from "../types.ts";
@@ -20,11 +20,38 @@ const EXPLORER_REST: Payload<Rest> = `(() => {
   return { marks: w.marks, frames: w.frames, quiet, view: [z.k.toFixed(4), z.x.toFixed(2), z.y.toFixed(2)].join(",") };
 })()`;
 
+const restWhen = (quiet: string): Payload<Rest> =>
+  `(() => { const w = window.__primer; const quiet = (${quiet}) && ${MOVING} === 0; return { marks: w.marks, frames: w.frames, quiet, view: "" }; })()`;
+
 export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
   "/explorer/": {
     booted: `({ up: typeof window.__vellumUsesWorker === "function" && !!document.querySelector("#map svg") })`,
     rest: EXPLORER_REST,
     pickFirst: "#place-options > li .pl-name",
     repeatCap: Math.ceil(Math.log(DEEPEST_K) / Math.log(ZOOM_STEP)),
+  },
+  "/prospect/": {
+    booted: `({ up: typeof window.__vellumProspectUsesWorker === "function" && typeof window.__vellumProspectState === "function" && window.__vellumProspectState() !== null })`,
+    rest: restWhen(
+      `window.__vellumProspectState() !== null && document.getElementById("pp-status").textContent === ""`,
+    ),
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/reading-room/": {
+    booted: `({ up: typeof window.__vellumReadingRoomAges === "function" && !!window.__vellumReadingRoomState().title })`,
+    rest: restWhen(
+      `!!window.__vellumReadingRoomState().title && !!document.querySelector(".rf-chart svg") && document.querySelector(".rf-status").textContent === "" && !window.__vellumReadingRoomAges().playing`,
+    ),
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/print-room/": {
+    booted: `({ up: typeof window.__vellumPrintRoomUsesWorker === "function" && !!window.__vellumPrintRoomState().title })`,
+    rest: restWhen(
+      `!!window.__vellumPrintRoomState().title && !!document.querySelector("#pr-preview svg") && document.getElementById("pr-status").textContent === ""`,
+    ),
+    pickFirst: null,
+    repeatCap: 0,
   },
 };

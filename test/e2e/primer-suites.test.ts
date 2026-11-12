@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
-import { primerGaps, primerSuiteOf } from "../../e2e/support/primer-judge.ts";
+import { primerGaps, primerSuiteOf, routeOf } from "../../e2e/support/primer-judge.ts";
 import { PRIMER_ROOMS } from "../../e2e/support/primer-rooms.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
@@ -25,4 +25,16 @@ test("PS1 every ladder in the guide has its own suite in the runner's order, in 
     "primer-portfolio",
     "primer-seed-of-the-day",
   ]);
+});
+
+test("PS2 every step's address opens a room the check can open, the room its Try it opens and not only its ladder's (Issue #1252)", () => {
+  const steps = LADDERS.flatMap((l) => l.lessons.flatMap((lesson) => lesson.steps.map((s) => ({ s, route: l.route }))));
+  assert.deepEqual(
+    steps.filter(({ s }) => PRIMER_ROOMS[routeOf(s.at)] === undefined).map(({ s }) => s.id),
+    [],
+  );
+  assert.ok(
+    steps.some(({ s, route }) => routeOf(s.at) !== route),
+    "no step opens a room other than its ladder's, so nothing here tells the two keys apart",
+  );
 });

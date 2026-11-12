@@ -675,9 +675,11 @@ body.chart-room .stage {
 }
 .index > li {
   padding: 0.45rem 0;
-  border-bottom: 1px solid var(--line-faint);
-  opacity: 0.55;
+  opacity: 0.93;
   transition: opacity 0.2s;
+}
+.index > li:not(:last-child) {
+  border-bottom: 1px solid var(--line-faint);
 }
 .index > li.inked {
   opacity: 1;
