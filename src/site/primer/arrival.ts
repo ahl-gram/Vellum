@@ -15,9 +15,14 @@ export const applies = (only: Only | undefined, device: Device): boolean =>
 
 export function roomOnArrival(
   rooms: readonly ArrivalRoom[],
-  _targetRoom: string | null,
-  _sealed: ReadonlySet<string>,
-  _device: Device,
+  targetRoom: string | null,
+  sealed: ReadonlySet<string>,
+  device: Device,
 ): string | null {
-  return rooms[0]?.id ?? null;
+  const first = rooms[0];
+  if (first === undefined) return null;
+  if (targetRoom !== null && rooms.some((r) => r.id === targetRoom)) return targetRoom;
+  if (sealed.size === 0) return first.id;
+  const unsealed = rooms.find((r) => r.steps.some((s) => !sealed.has(s.id) && applies(s.only, device)));
+  return (unsealed ?? first).id;
 }
