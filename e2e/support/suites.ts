@@ -38,6 +38,8 @@ export const E2E_SUITE_ORDER = [
   "slide-away",
   "primer-explorer",
   "primer-prospect",
+  "primer-ribbon",
+  "primer-portfolio",
   "primer-reading-room",
   "primer-print-room",
 ] as const;

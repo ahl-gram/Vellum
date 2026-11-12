@@ -54,4 +54,18 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
     pickFirst: null,
     repeatCap: 0,
   },
+  "/ribbon/": {
+    booted: `({ up: typeof window.__vellumRibbonUsesWorker === "function" && typeof window.__vellumRibbonState === "function" && window.__vellumRibbonState() !== null })`,
+    rest: restWhen(`window.__vellumRibbonState() !== null && document.getElementById("rb-status").textContent === ""`),
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/explorer/portfolio/": {
+    booted: `({ up: typeof window.__vellumPortfolio === "function" })`,
+    rest: restWhen(
+      `window.__vellumPortfolio().drawn === window.__vellumPortfolio().items && document.getElementById("pf-status").textContent === ""`,
+    ),
+    pickFirst: null,
+    repeatCap: 0,
+  },
 };

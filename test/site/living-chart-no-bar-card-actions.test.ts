@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { barlessHost, realWorld } from "../../test-support/living-chart-hosts.ts";
 import { armShow, layHost } from "../../test-support/living-chart-no-bar-card-fixtures.ts";
 import type { PlaceManifest } from "../../src/render/place-manifest.ts";
+import { PROSPECT_ON_CARD, ROAD_ON_CARD } from "../../src/site/shared/living-chart/place-overlay-card.ts";
 
 const BOX = { x: 0.25, y: 0.25, w: 0.5, h: 0.5 };
 const SHIFT = 7;
@@ -24,6 +25,7 @@ test("the place card carries the prospect way in wherever its host provides one,
   assert.ok(link, "a world-sheet card holds the way in to the prospect page");
   assert.equal(link.tagName, "A", "and it is a real link, not a button");
   assert.match(link.textContent, /prospect/i, "named for what it opens");
+  assert.equal(link.textContent, PROSPECT_ON_CARD, "in the words the card exports, which the Primer quotes");
 
   linked.lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
   const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
@@ -123,6 +125,7 @@ test("LP5 the card carries the road to the Ribbon only where its host provides o
   assert.ok(road, "a world-sheet card whose host has a Ribbon holds the road to it");
   assert.equal(road.tagName, "A", "a real link, not a button");
   assert.equal(road.textContent, "Take the road", "named for what it opens");
+  assert.equal(road.textContent, ROAD_ON_CARD, "in the words the card exports, which the Primer quotes");
 
   linked.lc.buildPlaceOverlay(insetOf(manifest), { box: BOX });
   const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
