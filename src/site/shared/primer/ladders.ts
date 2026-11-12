@@ -16,6 +16,7 @@ export const LEFT_UNTAUGHT: Readonly<Record<string, string>> = {
   "/prospect/": AWAITS,
   "/ribbon/": AWAITS,
   "/explorer/portfolio/": AWAITS,
+  "/primer/": "the Primer is the guide itself",
 };
 
 export interface RouteTree {
