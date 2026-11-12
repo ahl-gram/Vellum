@@ -56,7 +56,8 @@ export const verdictLines = (testFile: string, v: Verdict): string[] => [
 ];
 
 const root = fs.realpathSync(process.env["VELLUM_SOURCE_READ_ROOT"] ?? resolve(import.meta.dirname, ".."));
-const entry = process.argv[1] ?? "";
+const typed = process.argv[1] ?? "";
+const entry = fs.existsSync(typed) ? fs.realpathSync(typed) : typed;
 const active = entry.startsWith(join(root, "test") + sep) && entry.endsWith(".test.ts");
 export const watching: boolean = active;
 
