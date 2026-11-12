@@ -7,7 +7,9 @@ export interface StepWant {
 
 export function datelineFaults(doc: Document, want: string): string[] {
   const got = text(doc.querySelector(".folio-room .dateline"));
-  return faults([got === want || `the count line reads ${JSON.stringify(got)}, the data's tally is ${JSON.stringify(want)}`]);
+  return faults([
+    got === want || `the count line reads ${JSON.stringify(got)}, the data's tally is ${JSON.stringify(want)}`,
+  ]);
 }
 
 export function stepFaults(doc: Document, want: readonly StepWant[]): string[] {
@@ -32,7 +34,10 @@ export function stepFaults(doc: Document, want: readonly StepWant[]): string[] {
     const wantQuery = new URLSearchParams(query);
     wantQuery.set("step", s.id);
     out.push(
-      (got.pathname === pathname && got.hash === hash && got.searchParams.get("step") === s.id && got.search === `?${wantQuery}`) ||
+      (got.pathname === pathname &&
+        got.hash === hash &&
+        got.searchParams.get("step") === s.id &&
+        got.search === `?${wantQuery}`) ||
         `${s.id}'s Try it is ${href}, not its own address ${s.at} with step=${s.id}`,
     );
   }
@@ -44,9 +49,7 @@ export function anchorFaults(doc: Document): string[] {
   const twice = ids.filter((id, i) => ids.indexOf(id) !== i);
   const links = [...doc.querySelectorAll(".sheet a[href^='#'], #index a[href^='#']")]
     .filter((a) => a.closest(".try") === null)
-    .map((a) =>
-    (a.getAttribute("href") ?? "").slice(1),
-  );
+    .map((a) => (a.getAttribute("href") ?? "").slice(1));
   const stray = links.filter((id) => doc.getElementById(id) === null);
   const heads = [...doc.querySelectorAll(".sheet h2[id]")].map((h) => h.id);
   const rows = [...doc.querySelectorAll("#index .index > li[data-sec]")].map((li) => li.getAttribute("data-sec"));

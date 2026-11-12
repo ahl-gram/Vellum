@@ -15,7 +15,7 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 <BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/document-room.css"]} desk="open">
 <Fog />
 <RoomFolio slot="desk" region room={ROOM} tagline={TAGLINE}>
-  <p class="dateline">0 steps in 0 rooms</p>
+  <p class="dateline">{page.dateline}</p>
 </RoomFolio>
 <IndexSlip slot="desk" sections={page.index} kind="lessons" where={WHERE} />
 <div class="sheet">
@@ -44,7 +44,7 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
                       : <span class={`ch ${seg.chip}`}>{seg.text}</span>
                     : seg.text)}</p>
                   <p class="see">{s.see}</p>
-                  <p class="try"><a href="#">{TRY}</a><span class="in">{s.opens}</span>{s.marks.map((m) => <span class={m.comm ? "mark comm" : "mark"}>{m.text}</span>)}</p>
+                  <p class="try"><a href={s.href}>{TRY}</a><span class="in">{s.opens}</span>{s.marks.map((m) => <span class={m.comm ? "mark comm" : "mark"}>{m.text}</span>)}</p>
                 </div>
                 <span class="pic none"></span>
               </li>
@@ -66,9 +66,9 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 </section>
 </div>
 </div>
-</BaseLayout>
 <script>
   import { bindPrimer } from "../../site/primer/bind.ts";
 
   bindPrimer();
 </script>
+</BaseLayout>
