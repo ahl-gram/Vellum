@@ -18,6 +18,7 @@ export const FOOT_WINDOW = 3;
 // 2026-11-12: GLYPH_LINES rounds each line box's centre to the pixel, and the boxes of one line, set in one face and size, centre under a pixel apart (every box on the trail's, the alias line's and the title's line read one row on the Prospect at 1280x800 and the Explorer at 1280x800 and 1024x768 on the Mac, handbook/plans/1000/1076/1076-r1-plan.md), so they read at most 1 apart, where a second line stands a whole line lower, 13 px at the least (the alias line's).
 const ROW_SPREAD = 1;
 
+// 2026-11-12: ruled, Alex, 2026-11-12, Issue #1076 comment 6825295330, main's 48 px ceiling on the thin top line's foot kept beside the read from the layout, under Issue #1048's ruling on a number that stays: the foot stands at 44.20 on the Prospect at 1280x800 and 22.41 on the Explorer at 1280x800 and 1024x768 on the Mac harness browser, and at 44.20, 22.41 and 22.41 on the CI runner (run 43233995537, lanes C and B), the nearest 3.80 under it (the Prospect on both machines).
 const TOP_CEILING = 48;
 
 export const THIN_LINES: Payload<ThinLines> = `(() => {
