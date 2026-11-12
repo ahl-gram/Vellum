@@ -58,19 +58,28 @@ export function wordsHold(got: string | null, w: Words): boolean {
 
 export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Expect {
   if (step.only === "touch" && arm !== "tablet") return "hidden";
-  if (step.only === "motion") return "hidden";
+  if (step.only === "motion" && arm !== "motion") return "hidden";
   if (w.state !== undefined) return w.state;
   return outcome ? "any" : "reachable";
 }
 
 export function onItsArm(step: Step, arm: Arm): boolean {
-  return step.only === undefined ? arm === "desk" : step.only === "touch" && arm === "tablet";
+  if (step.only === undefined) return arm === "desk";
+  return arm === (step.only === "touch" ? "tablet" : "motion");
 }
 
-export const routeOf = (address: string): string => address;
+export const routeOf = (address: string): string => address.split(/[?#]/)[0] ?? address;
+
+const readsOf = (s: Step): string =>
+  JSON.stringify([s.at, s.first ?? [], s.words, s.relies ?? [], s.do ?? [], s.then ?? [], s.only ?? null]);
 
 export function heldBy(step: Step, ladders: readonly Ladder[]): string | null {
-  return ladders.length === 0 || step.id === "" ? null : null;
+  const mine = readsOf(step);
+  for (const s of ladders.flatMap((l) => l.lessons.flatMap((lesson) => lesson.steps))) {
+    if (s === step) return null;
+    if (readsOf(s) === mine) return s.id;
+  }
+  return null;
 }
 
 export function stateOf(f: Facts, hit: string): Reach {
