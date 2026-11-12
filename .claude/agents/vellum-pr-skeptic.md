@@ -55,13 +55,15 @@ Resolve the PR's head sha from `gh api` when your round starts, not from anythin
 node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>
 ```
 
-`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing, STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly. One call per line, and no shell variable, because a dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable and any `git` run in a directory other than that worktree, while a plain single command passes (measured 2026-09-13, PR #582).
+`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing, STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly. One call per line, and no shell variable, because a dispatcher standing in a harness-isolated worktree puts you inside its fence, and `CLAUDE.md` Worktrees lists what that fence refuses. So the two reads below are calls of their own, and the `cd` stays in the call that runs the suite, which names no git.
 
 ```bash
-cd /the/path/create/printed && cat "$(sed 's/^gitdir: //' .git)/HEAD" && npm test
+cat /the/path/create/printed/.git
+cat /the/directory/that/gitdir/line/named/HEAD
+cd /the/path/create/printed && pwd && npm test
 ```
 
-The `cat` prints the sandbox's detached HEAD, which is the sha your numbers came from, read inside the sandbox from the `.git` FILE every worktree carries; it is spelled without `git` because the fence refuses `git` there.
+The first `cat` prints the `gitdir:` line of the `.git` FILE every worktree carries, and the second reads `HEAD` in the directory that line names: the sandbox's detached HEAD, which is the sha your numbers came from. Both are spelled without `git` because the fence refuses `git` there. The `cd` and the suite share one call, so the suite runs in the sandbox or not at all, and the `pwd` it prints first is the path the two reads named. Keep `git`, `.git` and `gitdir` out of that call, and a redirect of its output to a log still passes.
 
 Then, always, even when you fail or run out of room, and from the tree you were dispatched from rather than from inside the sandbox:
 
