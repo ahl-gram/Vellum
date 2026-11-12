@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { isTsUnderLintRoots } from "../../test-support/lint-roots.ts";
 import { addedRuns } from "./collect.ts";
 import { judgeAll, RUN_INPUT_TOKEN_CAP, type Judged } from "./judge.ts";
@@ -23,7 +23,7 @@ const NOTES = [
 const exitFor = (judged: readonly Judged[], dryRun: boolean): number =>
   !dryRun && judged.some((j) => j.outcome.kind === "skipped") ? 1 : 0;
 
-const diff = async (repo: string, base: string, head: string, args: Args): Promise<number> => {
+const diff = async (repo: string, base: string, head: string, args: Args, sendFor: SendFor): Promise<number> => {
   const from = mergeBase(repo, base, head);
   const before = gitTree(repo, from);
   const after = gitTree(repo, head);
@@ -42,7 +42,7 @@ const diff = async (repo: string, base: string, head: string, args: Args): Promi
   return exitFor(judged, args.dryRun);
 };
 
-const trial = async (repo: string, out: string, args: Args): Promise<number> => {
+const trial = async (repo: string, out: string, args: Args, sendFor: SendFor): Promise<number> => {
   const trees = new Map<string, Tree>();
   for (const row of TRIAL_ROWS) {
     if (trees.has(row.sha)) continue;
@@ -68,20 +68,15 @@ const trial = async (repo: string, out: string, args: Args): Promise<number> => 
   return exitFor(judged, args.dryRun);
 };
 
-export const main = async (argv: readonly string[]): Promise<number> => {
+export const main = async (argv: readonly string[], sendFor: SendFor): Promise<number> => {
   const args = parseArgs(argv);
   const [command, ...rest] = args?.positional ?? [];
   const repo = process.cwd();
-  if (args !== null && command === "diff" && rest.length === 2) return diff(repo, rest[0]!, rest[1]!, args);
+  if (args !== null && command === "diff" && rest.length === 2) return diff(repo, rest[0]!, rest[1]!, args, sendFor);
   if (args !== null && command === "trial" && rest.length === 0 && args.out !== null)
-    return trial(repo, resolve(args.out), args);
+    return trial(repo, resolve(args.out), args, sendFor);
   console.error(USAGE);
   return 2;
 };
 
-if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2)).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    return 1;
-  });
-}
+if (import.meta.main) process.exitCode = await runCommand("comment-judge", main, process.argv.slice(2), processDeps());

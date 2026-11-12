@@ -1,13 +1,13 @@
 import { replyLines, requestLines } from "../comment-judge/report.ts";
 import { changedFiles, deletedFiles, gitTree, mergeBase, revParse } from "../comment-judge/tree.ts";
-import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { deletedRuns, filesToRead } from "./collect.ts";
 import { reportLines } from "./report.ts";
 import { RUN_INPUT_TOKEN_CAP, scanAll } from "./scan.ts";
 
 const USAGE = "usage: npm run keeper-scan -- diff <base> <head> [--dry-run] [--out <dir>]";
 
-const diff = async (repo: string, base: string, head: string, args: Args): Promise<number> => {
+const diff = async (repo: string, base: string, head: string, args: Args, sendFor: SendFor): Promise<number> => {
   const sha = revParse(repo, head);
   const from = mergeBase(repo, base, sha);
   const before = gitTree(repo, from);
@@ -24,17 +24,13 @@ const diff = async (repo: string, base: string, head: string, args: Args): Promi
   return !args.dryRun && scanned.some((s) => s.outcome.kind === "skipped") ? 1 : 0;
 };
 
-export const main = async (argv: readonly string[]): Promise<number> => {
+export const main = async (argv: readonly string[], sendFor: SendFor): Promise<number> => {
   const args = parseArgs(argv);
   const [command, ...rest] = args?.positional ?? [];
-  if (args !== null && command === "diff" && rest.length === 2) return diff(process.cwd(), rest[0]!, rest[1]!, args);
+  if (args !== null && command === "diff" && rest.length === 2)
+    return diff(process.cwd(), rest[0]!, rest[1]!, args, sendFor);
   console.error(USAGE);
   return 2;
 };
 
-if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2)).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    return 1;
-  });
-}
+if (import.meta.main) process.exitCode = await runCommand("keeper-scan", main, process.argv.slice(2), processDeps());

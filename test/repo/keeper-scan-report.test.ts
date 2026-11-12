@@ -6,7 +6,7 @@ import { BY_HAND } from "../../scripts/keeper-scan/collect.ts";
 import { keeperRequest } from "../../scripts/keeper-scan/questions.ts";
 import { reportLines } from "../../scripts/keeper-scan/report.ts";
 import { RUN_INPUT_TOKEN_CAP, scanAll, type Scanned } from "../../scripts/keeper-scan/scan.ts";
-import { answered, keyEchoingFetch } from "../../test-support/jev-fakes.ts";
+import { answered, keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 import { RUN } from "../../test-support/keeper-scan-fixtures.ts";
 
 const NOT_READ = [{ path: "src/styles/a.css", reason: BY_HAND }];
@@ -100,7 +100,7 @@ test("the report lists each lost, unsettled and skipped comment with its confide
 
 test("no line of the report, the request log or the reply log carries the key", async () => {
   const KEY = "k-keeper-secret-31";
-  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY));
+  const send = liveSender({}, "/h", () => `${KEY}\n`, keyEchoingFetch(KEY), unmetered);
   const scanned = await scanAll([{ sha: "b1", run: RUN, fileAfter: "F" }], send, RUN_INPUT_TOKEN_CAP);
   const written = [
     ...reportLines(scanned, [], { base: "b1", head: "h1" }, false),
