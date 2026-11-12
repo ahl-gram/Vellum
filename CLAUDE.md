@@ -263,10 +263,14 @@ the sandbox for both review agents that build one, so the depth lives in one pla
 - **`vellum-planner` and `vellum-implementer` get their worktrees a third way**: `isolation: worktree`
   in their frontmatter, so the harness builds and locks one at dispatch, a separate one for each. Inside such a tree, and inside any EnterWorktree tree,
   the harness is a fence: it refuses a compound command whose `cd` goes to a shell variable, any `git`
-  run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot
-  parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
-  take `create`'s printed path literally and read the sandbox's sha from its `.git` file. How a
-  session runs several such lanes at once is `handbook/specs/orchestration.md`'s.
+  run in a directory other than that worktree, a `for` loop around `git`, some quoted `jq` or `sed`
+  constructs it cannot parse, and a call that names git (a `.git` path or the bare word `gitdir`
+  included) once that call reads `$?`, while a plain single command passes (measured 2026-09-13 and
+  2026-11-11, Issue #1340). A dispatched agent stands inside its dispatcher's fence, and its directory
+  does not carry from one call to the next. That is why the sandbox recipes take `create`'s printed
+  path literally, read the sandbox's sha from its `.git` file in calls of their own, and keep the `cd`
+  in the call that runs. How a session runs several such lanes at once is
+  `handbook/specs/orchestration.md`'s.
 - **`vellum-designer` gets its tree a fourth way, never through isolation**: what it delivers is
   files under `out/`, which a harness tree does not keep, so a session standing in the main checkout builds a
   detached tree for it and dispatches it without isolation, as
