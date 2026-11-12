@@ -166,7 +166,7 @@ const show = (i: Instance): string =>
   i.reads
     .map(
       ({ press, r }) =>
-        `${i.id} ${press}: between ${r.distinctBetween}, pace ${r.worstPaceGap.toFixed(4)}, sheet off ${r.sheetOffAfter.toFixed(2)}, press row off ${r.pressOffAfter.toFixed(2)}, framing ${num(r.framingEveryFrame)} at rest ${num(r.framingAtRest)} (tolerance ${r.tolerance.toFixed(5)})`,
+        `${i.id} ${press}: travel ${r.travel.toFixed(2)}, width ${r.widthChange.toFixed(2)}, press row moved ${r.pressRowMoved.toFixed(2)}, between ${r.distinctBetween}, pace ${r.worstPaceGap.toFixed(4)}, sheet off ${r.sheetOffAfter.toFixed(2)}, press row off ${r.pressOffAfter.toFixed(2)}, framing ${num(r.framingEveryFrame)} at rest ${num(r.framingAtRest)} (tolerance ${r.tolerance.toFixed(5)})`,
     )
     .join("; ");
 

@@ -29,6 +29,7 @@ export const CHART_ROOM_FLOOR = [
 export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
 export const DESK_FRAME_H = 768;
+// 2026-11-12: ruled, the 4.5:1 floor for reading over the chart (handbook/specs/ui-design.md, the paragraph opening "The floor is 4.5:1").
 export const FLOOR_PLAIN = 4.5;
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };

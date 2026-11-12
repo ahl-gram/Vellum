@@ -4,9 +4,11 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { lensRest } from "../print-room/print.ts";
 import { LINGER_MS, REST_MS } from "../../../src/site/shared/slide-away-bind.ts";
 import { rest } from "./stage.ts";
+import { fillPressOf } from "../slide-away/kit.ts";
 import {
   aimAt,
   draftsLanded,
+  fillOf,
   lineAim,
   LINK,
   motionOn,
@@ -24,6 +26,8 @@ import {
 import { mouseDown, mouseMove, mouseUp, sendKey } from "../../support/input.ts";
 
 const EASE_WAIT = 340;
+// 2026-11-12: d3-zoom 3.0.0's defaultWheelDelta (in the package's zoom source under node_modules/d3-zoom/src) scales the camera by 2^(100 x 0.002) = 1.1487 a 100 px notch and the product sets no wheelDelta, so from the press before the fill, at most the Glass's 1.4 short of it, ceil(ln 1.4 / ln 1.1487) = 3 notches cross any fill.
+const NOTCHES = 3;
 const ROOM_BOX: Payload<number[]> =
   `(() => { const r = document.getElementById("map-viewport").getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`;
 
@@ -55,8 +59,9 @@ export async function es3Rest(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   await motionOn(ctx, async () => {
     await openAt(ctx, SEED_42, 1280, 800, "ES3");
-    const { up, down } = travelsOf(await ctx.evaluate(PIECES_READ));
-    await press(ctx, 2);
+    const home = await ctx.evaluate(PIECES_READ);
+    const { up, down } = travelsOf(home);
+    await press(ctx, fillPressOf(fillOf(home)));
     await settleTy(ctx, "head", up, "ES3 head away");
     await settleTy(ctx, "folio", down, "ES3 folio away");
     const headAt = await toLine(ctx, "header.chrome .trail");
@@ -118,20 +123,28 @@ async function emptySpot(ctx: SuiteContext): Promise<[number, number]> {
 
 export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
+  let fill = NaN,
+    notches = 0,
+    kLast = NaN;
   await motionOn(ctx, async () => {
     await openAt(ctx, SEED_42, 1280, 800, "ES8");
     const home = await ctx.evaluate(PIECES_READ);
     const { up } = travelsOf(home);
-    await press(ctx, 1);
+    fill = fillOf(home);
+    await press(ctx, fillPressOf(fill) - 1);
     const [x, y] = await emptySpot(ctx);
     await mouseTo(ctx, x, y);
-    for (let i = 1; i <= 2; i++) {
+    let k = (await ctx.evaluate(PIECES_READ)).k;
+    while (notches < NOTCHES && k < fill) {
+      notches++;
       await ctx.wheel(x, y, -100);
-      await lensRest(ctx, "leaned", `ES8 notch ${i}`);
+      k = (await lensRest(ctx, "leaned", `ES8 notch ${notches}`)).k;
     }
     const reads = await readsFor(ctx, REST_MS + EASE_WAIT + 300);
     const last = reads[reads.length - 1]!;
-    if (!(last.k >= 1.54)) faults.push(`two notches reached only k ${last.k.toFixed(3)}, short of the fill`);
+    kLast = last.k;
+    if (!(last.k >= fill))
+      faults.push(`${notches} notches reached only k ${last.k.toFixed(3)}, short of the fill ${fill.toFixed(4)}`);
     if (reads.some((p) => !near(p.head.ty, up, 0.5)))
       faults.push(
         `a still mouse over the chart held the head: ${JSON.stringify(reads.map((p) => p.head.ty.toFixed(1)))}`,
@@ -158,7 +171,8 @@ export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
   ctx.check(
     "ES8 a mouse standing still over the chart under the head cluster while the reader wheels in past the fill depth does not hold the head there: it slides to its thin line and stays, a mouse moving there with no button down, or a pan dragged across the line, does not bring it home, and a mouse then brought onto that line brings it home (Issue #996)",
     faults.length === 0,
-    faults.length ? faults.join("; ") : "the head slid away under a still mouse and came home for a moving one",
+    `fill ${fill.toFixed(4)}, past it at k ${kLast.toFixed(3)} after ${notches} notches; ` +
+      (faults.length ? faults.join("; ") : "the head slid away under a still mouse and came home for a moving one"),
   );
 }
 
@@ -166,8 +180,9 @@ export async function es10Drawer(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   await motionOn(ctx, async () => {
     await openAt(ctx, SEED_42, 1280, 800, "ES10");
-    const { down } = travelsOf(await ctx.evaluate(PIECES_READ));
-    await press(ctx, 2);
+    const home = await ctx.evaluate(PIECES_READ);
+    const { down } = travelsOf(home);
+    await press(ctx, fillPressOf(fillOf(home)));
     await settleTy(ctx, "folio", down, "ES10 folio away");
     await pressSelector(ctx, "#chart-drawer-tab");
     const opened: Payload<boolean> = `document.getElementById("chart-drawer").classList.contains("open")`;
@@ -214,8 +229,9 @@ async function keysInto(ctx: SuiteContext): Promise<string> {
 export async function es4Keys(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   await openAt(ctx, SEED_42, 1280, 800, "ES4", true);
-  const { up } = travelsOf(await ctx.evaluate(PIECES_READ));
-  await press(ctx, 2);
+  const home = await ctx.evaluate(PIECES_READ);
+  const { up } = travelsOf(home);
+  await press(ctx, fillPressOf(fillOf(home)));
   await settleTy(ctx, "head", up, "ES4 head away");
   await ctx.evaluate(`document.getElementById("map-viewport").focus()`);
   const landed = await keysInto(ctx);
@@ -241,8 +257,9 @@ const FOLD_RECT: Payload<number[]> =
 export async function es5Atelier(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   await openAt(ctx, SEED_42, 1280, 800, "ES5", true);
-  const { up } = travelsOf(await ctx.evaluate(PIECES_READ));
-  await press(ctx, 2);
+  const home = await ctx.evaluate(PIECES_READ);
+  const { up } = travelsOf(home);
+  await press(ctx, fillPressOf(fillOf(home)));
   await settleTy(ctx, "head", up, "ES5 head away");
   await pressSelector(ctx, "header.chrome summary");
   await settleTy(ctx, "head", 0, "ES5 head home under the opened fold");

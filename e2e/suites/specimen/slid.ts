@@ -95,7 +95,7 @@ async function sb18SlidFromFolded(
   k.check(
     "SB18 slid away chosen from folded unfolds the slip and leans the Glass to the press that fills the open room, where the head cluster and the chart folio stand at their thin lines (Alex, 2026-10-23, Issue #997 ruling 6)",
     faults.length === 0,
-    JSON.stringify({ k: slid.k, want, foldedFill, open: slid.slip?.open }) +
+    JSON.stringify({ k: slid.k, want, foldedFill, openFill, open: slid.slip?.open }) +
       (faults.length ? `; ${faults.join("; ")}` : ""),
   );
 }

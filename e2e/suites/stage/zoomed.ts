@@ -4,8 +4,12 @@ import { GRADIENT_STOPS, nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pi
 import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
+import { fillPressOf } from "../slide-away/kit.ts";
 import { RR_LENS } from "../reading-room/kit.ts";
 import { GLYPH_LINES } from "./glyphs.ts";
+import { fillOf, PIECES_READ } from "./slide-kit.ts";
+import { THIN_LINES, thinFootFaults, thinTopFaults } from "./thin-lines.ts";
+import type { ThinLines } from "./thin-lines.ts";
 import type { Glyph } from "./glyphs.ts";
 import { FLOOR_PLAIN, grounds, open, rest, size, withStyle, worstOf } from "./stage.ts";
 import type { Stage } from "./stage.ts";
@@ -47,6 +51,7 @@ type Ask = {
   lineTan: readonly Sub[];
   held: boolean;
   onScreen: boolean;
+  presses: "two" | "fill";
 };
 type Ring = {
   visible: boolean;
@@ -91,12 +96,12 @@ type Zoomed = {
   lineTan: Record<Sub, Reads | null>;
   ring: { mark: Ring; control: Ring } | null;
 };
-type RoomRead = Zoomed & { page: string; at: Stage | null; s: Stage | null; zoomed: boolean };
+type RoomRead = Zoomed & { page: string; at: Stage | null; s: Stage | null; zoomed: boolean; presses: number };
 
-export async function zoomIn(ctx: SuiteContext, page: string): Promise<boolean> {
+export async function zoomIn(ctx: SuiteContext, page: string, presses: number): Promise<boolean> {
   const lens = page === "/reading-room/" ? RR_LENS : LENS;
   let zoomed = false;
-  for (const n of [1, 2]) {
+  for (let n = 1; n <= presses; n++) {
     const at = await ctx.evaluate(ZOOM_IN);
     if (!at || at.hit !== "zoom-in") return false;
     await pressAt(ctx, at.x, at.y);
@@ -126,12 +131,13 @@ async function settleSlid(ctx: SuiteContext, page: string): Promise<void> {
 async function readRoom(ctx: SuiteContext, page: string, w: number, h: number, ask: Ask): Promise<RoomRead> {
   await size(ctx, w, h);
   const at = await open(ctx, page, w, h, { w, h }, "EZ");
-  const zoomed = at !== null && (await zoomIn(ctx, page));
+  const presses = ask.presses === "fill" && at !== null ? fillPressOf(fillOf(await ctx.evaluate(PIECES_READ))) : 2;
+  const zoomed = at !== null && (await zoomIn(ctx, page, presses));
   const s = await rest(ctx, w, h, `EZ ${page} zoomed`);
   if (!ask.held && page.split("#")[0] === "/explorer/") await settleSlid(ctx, page);
   const read = () => readZoomed(ctx, page, h, ask);
   const zoomedRead = ask.held ? await withStyle(ctx, "ez-held", HELD, read) : await read();
-  return { page, at, s, zoomed, ...zoomedRead };
+  return { page, at, s, zoomed, presses, ...zoomedRead };
 }
 
 async function readZoomed(ctx: SuiteContext, page: string, h: number, ask: Ask): Promise<Zoomed> {
@@ -230,7 +236,8 @@ const detail = (r: RoomRead, ask: Ask): string =>
   (ask.bare
     ? `, bare cluster ${worstOf(r.bare, "cluster").toFixed(2)}, chart folio ${worstOf(r.bare, "chart folio").toFixed(2)}`
     : "") +
-  ask.lineTan.map((k) => `, ${k} in line-tan ${worstOf(r.lineTan[k] ?? [], "chart folio").toFixed(2)}`).join("");
+  ask.lineTan.map((k) => `, ${k} in line-tan ${worstOf(r.lineTan[k] ?? [], "chart folio").toFixed(2)}`).join("") +
+  (ask.presses === "fill" ? `, zoomed by ${r.presses} presses` : "");
 
 export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
@@ -239,11 +246,27 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   const EZ1_ROOMS: readonly { page: string; ask: Ask }[] = [
     {
       page: "/explorer/",
-      ask: { pieces: ["cluster", "chart folio"], mark: true, bare: true, lineTan: [], held: true, onScreen: false },
+      ask: {
+        pieces: ["cluster", "chart folio"],
+        mark: true,
+        bare: true,
+        lineTan: [],
+        held: true,
+        onScreen: false,
+        presses: "two",
+      },
     },
     {
       page: "/reading-room/",
-      ask: { pieces: ["cluster", "chart folio"], mark: false, bare: true, lineTan: [], held: true, onScreen: false },
+      ask: {
+        pieces: ["cluster", "chart folio"],
+        mark: false,
+        bare: true,
+        lineTan: [],
+        held: true,
+        onScreen: false,
+        presses: "two",
+      },
     },
     {
       page: "/ribbon/",
@@ -254,6 +277,7 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
         lineTan: ["coords"],
         held: true,
         onScreen: false,
+        presses: "two",
       },
     },
   ];
@@ -284,6 +308,7 @@ export async function ez2Short(ctx: SuiteContext): Promise<void> {
     lineTan: [],
     held: true,
     onScreen: false,
+    presses: "two",
   };
   const r = await readRoom(ctx, "/explorer/", 1024, 474, ask);
   const faults = roomFaults(r, ask, true);
@@ -301,23 +326,17 @@ const THIN_ASK: Ask = {
   lineTan: [],
   held: false,
   onScreen: true,
+  presses: "fill",
 };
 const TITLE: Payload<string> = `document.getElementById("folio-title").textContent.trim().slice(0, 24)`;
 
-function thinFaults(r: RoomRead, title: string, h: number): string[] {
+function thinFaults(r: RoomRead, title: string, t: ThinLines): string[] {
   const faults: string[] = [];
   const say = (m: string): number => faults.push(m);
-  const top = r.read.filter((g) => g.piece === "cluster");
   const foot = r.read.filter((g) => g.piece === "chart folio");
-  if (!r.zoomed) say("two presses of the Glass left the chart unzoomed");
-  if (top.length === 0) say("no cluster line is on screen");
+  if (!r.zoomed) say("the Glass's presses left the chart unzoomed");
   if (foot.length === 0) say("no chart folio line is on screen");
-  for (const g of top.filter((x) => x.row >= 48))
-    say(`cluster "${g.t}" stands at row ${g.row}, below the thin top line`);
-  if (!top.some((g) => g.t.startsWith("the chart of the atelier")))
-    say("the chart of the atelier press is not on the thin top line");
-  for (const g of foot.filter((x) => x.row < h - 32))
-    say(`chart folio "${g.t}" stands at row ${g.row}, above the thin bottom line`);
+  for (const m of [...thinTopFaults(t), ...thinFootFaults(t)]) say(m);
   for (const g of foot.filter((x) => !x.t.startsWith(title)))
     say(`chart folio "${g.t}" at row ${g.row} is not the chart's name`);
   for (const g of r.read.filter((x) => x.ratio < FLOOR_PLAIN)) say(`${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);
@@ -332,9 +351,10 @@ function thinFaults(r: RoomRead, title: string, h: number): string[] {
 export async function ez3Thin(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const r = await readRoom(ctx, "/explorer/#seed=42", 1280, 800, THIN_ASK);
-  const faults = thinFaults(r, await ctx.evaluate(TITLE), 800);
+  const t = await ctx.evaluate(THIN_LINES);
+  const faults = thinFaults(r, await ctx.evaluate(TITLE), t);
   ctx.check(
-    "EZ3 zoomed past the fill depth at 1280x800 by two presses of the Glass on seed 42, the Explorer's head cluster has slid up to its thin top line, the trail with the chart of the atelier press, and its chart folio down to its thin bottom line, the chart's name and number, every line left on screen reads at 4.5:1 or better on the panels, and in the same run with the panels taken away they read under 4.5:1 (Alex, 2026-10-22, Issue #989; Issue #996)",
+    "EZ3 zoomed at 1280x800 on seed 42 to the Glass's press that fills the screen, the Explorer's head cluster has slid up to its thin top line, the trail with the chart of the atelier press and nothing else, and its chart folio down to its thin bottom line, the chart's name and number 2 px above the foot, every line left on screen reads at 4.5:1 or better on the panels, and in the same run with the panels taken away they read under 4.5:1 (Alex, 2026-10-22, Issue #989; Issue #996)",
     faults.length === 0,
     detail(r, THIN_ASK) + (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
   );
