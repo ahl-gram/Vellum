@@ -32,7 +32,7 @@ its definition under `.claude/agents/`.
 | agent | step | what it runs | the failure it catches |
 |---|---|---|---|
 | `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree in the order `npm run recon-triage` ranks them, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
-| `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
+| `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured, with `npm run still-judge -- compare` beside the measurements wherever the work changes how a world sheet is drawn | a layout, overlap, contrast or motion defect that no test reading the DOM can see, and, as a hypothesis its measurements check, a sheet that reads worse at a glance than today's |
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
 | `vellum-pr-skeptic` | 14 | the pull request, read cold through the lenses its diff calls for, in its own sandbox with commands of its own, `npm run copy-hunt` among them, to a merge verdict | what the implementing session believed and never checked, against the issue and the house contracts, and a function the diff writes a second time |
 
@@ -146,7 +146,11 @@ one and reads the WORKING tree anyway, since its plumbing builds and serves `dis
 **Arms that coexist in one spike are cheaper to read.** `vellum-plate-reader` writes only into `out/`
 and never edits source, so it cannot switch the tree itself: a spike that exposes every arm at once,
 behind a flag, a query parameter or separate mock pages, is read by a single run. Where the arms
-cannot coexist, whoever dispatches it re-renders between them and says so in the menu.
+cannot coexist, whoever dispatches it re-renders between them and says so in the menu. Where the arms
+change how a world sheet is drawn, the dispatch names, for each arm, the command that writes its
+sheet once `--seed`, `--legend`, `--theme` and `--out` are added, or the sheet files themselves, so
+the plate reader can set each arm beside today's sheet through the still judge
+(`.claude/agents/vellum-plate-reader.md`, Two versions of one sheet, asked of Jev).
 
 **`out/` inside a worktree is not where Alex looks.** Any session standing in one copies the stills
 to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot reach outside its own
@@ -293,8 +297,12 @@ guard, and step 8's commits have to exist first: it mutates in its own detached 
 tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
 the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
 deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
-measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
-pass, and a guard proved unable to bite is deleted rather than shipped.
+measured a spike and this run measures what was built. Wherever the diff in step 1 of that agent's
+section Two versions of one sheet, asked of Jev (`.claude/agents/vellum-plate-reader.md`) prints a
+change, it is owed here for the still judge's comparison that section runs, whether or not the
+deliverable is an appearance, and a dispatch owed for nothing else asks for the comparison alone.
+Zero red from the prover is a hole, not a pass, and a guard proved unable to bite is deleted rather
+than shipped.
 
 **A mutation proof may run on the CI proof runner instead of locally**
 (`.github/workflows/proof-runner.yml`); a local proof stays valid, and the runner only runs many at
