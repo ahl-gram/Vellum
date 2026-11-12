@@ -53,11 +53,11 @@ export async function sb1Boots({ check, shoot }: SpecimenKit, rest: Specimen | n
   );
   sb2AtRest({ check }, rest);
   check(
-    "SB3 the dress resolves from the kit sheet: the contents numeral in ink-brown, the inked index row at full ink and the rest at 0.55, the featured road in control gold, a disabled press at 0.45, a missed term hidden",
+    "SB3 the dress resolves from the kit sheet: the contents numeral in ink-brown, the inked index row at full ink and the rest at 0.93, the featured road in control gold, a disabled press at 0.45, a missed term hidden",
     !!rest &&
       rest.crNum === INK_BROWN &&
       rest.inked === "1" &&
-      rest.unInked === "0.55" &&
+      rest.unInked === "0.93" &&
       rest.gold === CONTROL_GOLD &&
       rest.disabled === "0.45" &&
       rest.missDisp === "none",
