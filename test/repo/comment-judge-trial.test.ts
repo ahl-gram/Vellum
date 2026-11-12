@@ -37,6 +37,7 @@ const answered = (nouls: Record<string, number>): Reply => ({
   model: "jev-1.14.0",
   nouls,
   inputTokens: 100,
+  estimated: false,
   ms: 50,
 });
 const request: SystemOneRequest = { model: "jev-1.14.0", state: {}, questions: {} };

@@ -28,6 +28,7 @@ const answered = (holds: number, contradicts: number): Answered => ({
   model: "jev-1.14.0",
   nouls: { holds, contradicts },
   inputTokens: 500,
+  estimated: false,
   ms: 5,
 });
 
