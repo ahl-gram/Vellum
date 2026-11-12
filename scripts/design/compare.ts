@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 /** Compares a branch's sweep against two sweeps of the unchanged build, row by row, trusting a row only where the unchanged build matched itself; the method is `handbook/specs/settle-doctrine.md`'s. */
 
@@ -125,7 +124,7 @@ function compareSweeps(controlA: string, controlB: string, branch: string): Row[
 const shown = (ae: number | null): string =>
   ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size or layout differs" : String(ae);
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   let dirs: readonly [string, string, string];
   try {
     dirs = parseCompareArgs(process.argv.slice(2));

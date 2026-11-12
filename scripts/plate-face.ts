@@ -157,7 +157,7 @@ export function faceModuleSource(name: FaceName): string {
 
 export const faceModulePath = (name: FaceName): string => join(FACE_DIR, `face-${name}.ts`);
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   for (const name of Object.keys(PLATE_FACES) as FaceName[])
     writeFileSync(faceModulePath(name), faceModuleSource(name));
 }

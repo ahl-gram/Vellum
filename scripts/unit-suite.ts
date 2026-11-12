@@ -25,7 +25,7 @@ export const unitArgs = (forwarded: readonly string[]): string[] => {
   return [...prelude, ...clock, ...rest, ...shardOf(globSync(SUITE).sort(), Number(shard[1]), Number(shard[2]))];
 };
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const run = spawnSync(process.execPath, unitArgs(process.argv.slice(2)), { stdio: "inherit" });
   process.exitCode = run.status ?? 1;
 }

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { lstatSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { UNIT_SECONDS } from "../../scripts/unit-shards.ts";
@@ -46,6 +46,8 @@ const ONE_RED = {
 
 const RUNNER_KILLED = { "test/a.test.ts": `process.kill(process.ppid, "SIGKILL");\n` };
 
+const LAUNCHER_LINK = "linked/unit-suite.ts";
+
 const PRELOAD_SEEN = {
   "test-support/source-read-guard.ts": "Object.assign(globalThis, { vellumPreload: true });\n",
   "test/a.test.ts": `import { test } from "node:test";\ntest("vellumPreload" in globalThis ? "after the preload" : "without the preload", () => {});\n`,
@@ -53,13 +55,25 @@ const PRELOAD_SEEN = {
 
 type Run = { status: number | null; ran: string[]; output: string };
 
-const runIn = (files: Readonly<Record<string, string>>, argv: readonly string[]): Run => {
+const runIn = (
+  files: Readonly<Record<string, string>>,
+  argv: readonly string[],
+  links: Readonly<Record<string, string>> = {},
+): Run => {
   const dir = mkdtempSync(join(tmpdir(), "vellum-unit-suite-"));
   try {
     const seeded = { "package.json": TYPE_MODULE, "test-support/source-read-guard.ts": "export {};\n", ...files };
     for (const [rel, body] of Object.entries(seeded)) {
       mkdirSync(join(dir, dirname(rel)), { recursive: true });
       writeFileSync(join(dir, rel), body);
+    }
+    for (const [rel, target] of Object.entries(links)) {
+      mkdirSync(join(dir, dirname(rel)), { recursive: true });
+      symlinkSync(target, join(dir, rel));
+      assert.ok(
+        lstatSync(join(dir, rel)).isSymbolicLink(),
+        `${rel} is not a symbolic link, so the fixture starts the launcher by its own path and carries no hazard`,
+      );
     }
     const env = { ...process.env };
     delete env["NODE_TEST_CONTEXT"];
@@ -118,6 +132,16 @@ test("a red suite reds npm test, since the launcher hands back the runner's exit
   const run = runIn(ONE_RED, [LAUNCHER, TAP]);
   assert.deepEqual(run.ran, ["red"], `the red suite never ran:\n${run.output}`);
   assert.equal(run.status, 1, `npm test exited ${run.status} over a red suite, so CI reads a red run as green`);
+});
+
+test("a red suite reds the launcher started through a symlink, since it asks import.meta.main whether it is the entry rather than comparing the path it was typed as (Issue #1180)", () => {
+  const run = runIn(ONE_RED, [LAUNCHER_LINK, TAP], { [LAUNCHER_LINK]: LAUNCHER });
+  assert.equal(
+    run.status,
+    1,
+    `the launcher started through a symlink exited ${run.status} over a red suite, having run ${run.ran.length} tests: its entry check skipped, so a symlinked checkout reads a red run as green`,
+  );
+  assert.deepEqual(run.ran, ["red"], `the red suite never ran through the symlinked launcher:\n${run.output}`);
 });
 
 test("a runner killed by a signal reds npm test, since the launcher reads no exit status as a failure", () => {
