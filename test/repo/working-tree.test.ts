@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 import { listWorkingTree } from "../../test-support/working-tree.ts";
@@ -34,10 +34,21 @@ test("a file left conflicted by a merge is listed once, not once per stage (Issu
   });
 });
 
-test("a listing that runs past the time it is given throws, naming git ls-files, rather than return a partial tree (Issue #1332)", async () => {
-  await withTempRepo(FILES, (dir) => {
-    assert.throws(() => listWorkingTree(dir, [], 1), /git ls-files under .+ failed/);
-  });
+test("a listing that runs past the time it is given throws, naming git ls-files and the timeout, rather than return a partial tree (Issue #1332, Issue #1354)", () => {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "working-tree-slow-git-")));
+  const saved = process.env["PATH"];
+  try {
+    writeFileSync(join(dir, "git"), "#!/bin/sh\nexec sleep 5\n", { mode: 0o755 });
+    process.env["PATH"] = `${dir}${delimiter}${saved ?? ""}`;
+    assert.throws(
+      () => listWorkingTree(dir, [], 200),
+      /git ls-files under .+ failed \(null, Error: spawnSync git ETIMEDOUT\)/,
+    );
+  } finally {
+    if (saved === undefined) delete process.env["PATH"];
+    else process.env["PATH"] = saved;
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("outside a git repository the listing throws, naming git ls-files, rather than return an empty tree (Issue #1332)", () => {
