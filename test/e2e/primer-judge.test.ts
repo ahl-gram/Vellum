@@ -201,6 +201,9 @@ test("PJ9 heldBy names the earlier step whose reads are the same in every field,
   const twin: Step = { ...a, id: "prospect-a", act: "Say it otherwise.", see: "Otherwise." };
   const ladders = [lad("/explorer/", [a]), lad("/prospect/", [twin])];
   assert.deepEqual([heldBy(a, ladders), heldBy(twin, ladders)], [null, "explorer-a"]);
+  const second: Step = { ...twin, id: "prospect-b" };
+  const three = [lad("/explorer/", [a]), lad("/prospect/", [second, twin])];
+  assert.deepEqual([heldBy(second, three), heldBy(twin, three)], ["explorer-a", "explorer-a"]);
   const differing: readonly Partial<Step>[] = [
     { at: "/explorer/#seed=7" },
     { first: [] },
