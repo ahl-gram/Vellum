@@ -262,7 +262,16 @@ line, the outline, the cut on a short window, and the press's gap under the nav.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
-view. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
+view. **Where its list runs past the slip, the list fades evenly into the paper, `--index-fade` deep,
+at the slip's foot while more lies below and at its head once it has scrolled**
+(`src/styles/shared/document-room.css`), and that fade stands in place of the rule that no row is cut
+at the slip's edge at 1024 by 768. The row the slip keeps in view, and an index link a keyboard
+reaches, stop just clear of the fade, so they stand in full ink (`inViewBy` in
+`src/site/shared/index-ink.ts`) (Alex, 2026-11-12, Issue #1363 comments 6834904585, 6834927955 and
+6836048723). **The Primer's index lists every room and the open room's lessons alone**, and every
+lesson with scripts off (`bindPrimer` in `src/site/primer/bind.ts`; Issue #1363 comment
+6834904585). **Provisional until the post-use review:** the fade, its depth and even ramp, its head,
+the stop short of it, and the Primer listing the open room's lessons alone. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
 way. **The band buys the ground for what the cluster carries**: its height is keyed to the
 cluster's contents, never to a page's name, and raised only on a room that renders a band.
 
@@ -411,6 +420,12 @@ on a panel.** Assume a small label taken from a mockup needs this until you have
 (Alex, 2026-11-02, Issue #1160 comment 6569036260): the house keeps one floor for every glyph a
 reader reads, and no lower one for a mark that is part of a control (`SB20` in
 `e2e/suites/specimen/slip-ink.ts`).
+
+**The words inside the index slip's fade are the floor's one exception** (Alex, 2026-11-12, Issue
+#1363 comment 6836048723): they fall under 4.5:1 on purpose, to about 1:1 at the fade's very edge, as
+the sign that more of the list lies beyond, and the slip is scrolled to bring a line to full ink
+before it is read. Every line wholly outside the fade still reads 4.5:1 or better, which
+`vellum-plate-reader` measures whenever the fade or the slip's inks change.
 
 **Sample a ground with the median of a wide run**, never a single point, and never a maximum or a
 minimum: a maximum passes on one bright control sitting under the sample, a minimum fails on one
