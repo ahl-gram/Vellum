@@ -37,8 +37,8 @@ export const compareLines = (kind: Kind, asked: readonly Asked[]): string[] => {
   const todayOut = notAnswered(today!);
   for (const other of others) {
     const otherOut = notAnswered(other);
-    if (otherOut !== null) lines.push(`${other.path}: not compared: ${otherOut}`);
-    else if (todayOut !== null) lines.push(`${other.path}: not compared: today's picture was ${todayOut}`);
+    if (todayOut !== null) lines.push(`${other.path}: not compared: today's picture was ${todayOut}`);
+    else if (otherOut !== null) lines.push(`${other.path}: not compared: ${otherOut}`);
     else {
       const before = today!.reply!.ok ? today!.reply!.nouls : {};
       const after = other.reply!.ok ? other.reply!.nouls : {};

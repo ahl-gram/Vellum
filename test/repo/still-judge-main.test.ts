@@ -30,17 +30,20 @@ const judge = (args: readonly string[], inside: (dir: string) => void = () => {}
 test("a comparison asked with no key exits 1 and says why, and the same comparison in a dry run exits 0", () => {
   const run = judge(["compare", "sheet", "a.png", "a.png"]);
   assert.equal(run.status, 1, run.stderr);
-  assert.ok(run.stdout.includes(`a.png: not compared: skipped: ${NO_KEY}`), run.stdout);
+  assert.ok(run.stdout.includes(`a.png: not compared: today's picture was skipped: ${NO_KEY}`), run.stdout);
   assert.ok(run.stdout.includes(COMPARISON_RULE), run.stdout);
   const dry = judge(["compare", "sheet", "a.png", "a.png", "--dry-run"]);
   assert.equal(dry.status, 0, dry.stderr);
-  assert.ok(dry.stdout.includes("a.png: not compared: skipped: dry run: nothing was sent"), dry.stdout);
+  assert.ok(
+    dry.stdout.includes("a.png: not compared: today's picture was skipped: dry run: nothing was sent"),
+    dry.stdout,
+  );
 });
 
 test("a picture outside the limits is refused unsent, and the run exits 1", () => {
-  const run = judge(["compare", "crop", "a.png", "big.png"]);
+  const run = judge(["compare", "crop", "big.png", "a.png"]);
   assert.equal(run.status, 1, run.stderr);
-  assert.ok(run.stdout.includes(`big.png: not compared: refused unsent: ${TOO_BIG}`), run.stdout);
+  assert.ok(run.stdout.includes(`a.png: not compared: today's picture was refused unsent: ${TOO_BIG}`), run.stdout);
   const alone = judge(["compare", "crop", "big.png", "big.png"]);
   assert.equal(alone.status, 1, alone.stderr);
   assert.ok(alone.stdout.includes("2 pictures, 0 answered, 2 refused unsent, 0 skipped"), alone.stdout);
