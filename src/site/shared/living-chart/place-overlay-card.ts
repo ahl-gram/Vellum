@@ -3,6 +3,9 @@ import type { PlaceMark } from "../../../render/place-manifest.ts";
 import type { Hold } from "./place-card-hold.ts";
 import type { LayProspectHost, PlaceOverlayDeps, PlaceOverlayState } from "./place-overlay.ts";
 
+export const PROSPECT_ON_CARD = "";
+export const ROAD_ON_CARD = "";
+
 function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   const press = document.createElement("button");
   press.type = "button";
