@@ -1,7 +1,8 @@
 // The Primer check's judgement, apart from the page (Issue #1250): what a step expects of each control it names, what the page's facts say it reads, and where a reader's press lands.
-import type { Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
+import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
-export type Arm = "desk" | "tablet";
+export type Arm = "desk" | "tablet" | "motion";
+export const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
 export type Expect = "reachable" | "held" | "hidden" | "any";
 export type Reach =
   "absent" | "hidden" | "no box" | "held" | "disabled" | "off screen" | "reachable" | `covered by ${string}`;
@@ -58,13 +59,28 @@ export function wordsHold(got: string | null, w: Words): boolean {
 
 export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Expect {
   if (step.only === "touch" && arm !== "tablet") return "hidden";
-  if (step.only === "motion") return "hidden";
+  if (step.only === "motion" && arm !== "motion") return "hidden";
   if (w.state !== undefined) return w.state;
   return outcome ? "any" : "reachable";
 }
 
 export function onItsArm(step: Step, arm: Arm): boolean {
-  return step.only === undefined ? arm === "desk" : step.only === "touch" && arm === "tablet";
+  if (step.only === undefined) return arm === "desk";
+  return arm === (step.only === "touch" ? "tablet" : "motion");
+}
+
+export const routeOf = (address: string): string => address.split(/[?#]/)[0] ?? address;
+
+const readsOf = (s: Step): string =>
+  JSON.stringify([s.at, s.first ?? [], s.words, s.relies ?? [], s.do ?? [], s.then ?? [], s.only ?? null]);
+
+export function heldBy(step: Step, ladders: readonly Ladder[]): string | null {
+  const mine = readsOf(step);
+  for (const s of ladders.flatMap((l) => l.lessons.flatMap((lesson) => lesson.steps))) {
+    if (s === step) return null;
+    if (readsOf(s) === mine) return s.id;
+  }
+  return null;
 }
 
 export function stateOf(f: Facts, hit: string): Reach {

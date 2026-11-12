@@ -1,15 +1,19 @@
 // The Primer check walks a ladder (Issue #1250): each step opened at its own address on a bare device, its first acts done, every control it names read where it stands, its address read for every key, and, where it writes a then, the step done and the outcome read.
+import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import type { Ladder, Step, Words } from "../../src/site/shared/primer/shape.ts";
 import type { SuiteContext } from "../types.ts";
 import { dropExpectedCancellations } from "./console.ts";
 import { bounce } from "./nav.ts";
 import { perform } from "./primer-acts.ts";
 import {
+  ARM_NAME,
   expectFor,
   fits,
+  heldBy,
   keysLost,
   onItsArm,
   pressPoint,
+  routeOf,
   stateOf,
   wordsHold,
   wordsOf,
@@ -116,7 +120,7 @@ const told = (reads: readonly Read[]): string => {
 };
 
 export async function walkStep(k: PrimerKit, step: Step, arm: Arm): Promise<void> {
-  const name = arm === "tablet" ? `${step.id} on a tablet` : step.id;
+  const name = `${step.id}${ARM_NAME[arm]}`;
   await k.bare(name);
   const threw = await k.arrive(step.at, name);
   if (threw !== null) {
@@ -151,14 +155,23 @@ export async function walkStep(k: PrimerKit, step: Step, arm: Arm): Promise<void
 export async function walkLadder(ctx: SuiteContext, ladder: Ladder, health: string): Promise<void> {
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
-  const k = primerKit(ctx, ladder.route);
-  const steps = ladder.lessons.flatMap((l) => l.steps);
+  const kitOf = (s: Step): PrimerKit => primerKit(ctx, routeOf(s.at));
+  const steps = ladder.lessons
+    .flatMap((l) => l.steps)
+    .filter((s) => {
+      const holder = heldBy(s, LADDERS);
+      if (holder !== null) console.log(`  ${s.id}: reads exactly what ${holder} reads, so it is walked there`);
+      return holder === null;
+    });
+  const walk = (s: Step, arm: Arm): Promise<void> => step(`${s.id}${ARM_NAME[arm]}`, () => walkStep(kitOf(s), s, arm));
   await ctx.send("Emulation.setDeviceMetricsOverride", DESK);
   await withReducedMotion(ctx, async () => {
-    for (const s of steps) await step(s.id, () => walkStep(k, s, "desk"));
+    for (const s of steps) await walk(s, "desk");
+  });
+  for (const s of steps.filter((x) => onItsArm(x, "motion"))) await walk(s, "motion");
+  await withReducedMotion(ctx, async () => {
     await ctx.setMobileViewport(TABLET.width, TABLET.height);
-    for (const s of steps.filter((x) => x.only === "touch"))
-      await step(`${s.id} on a tablet`, () => walkStep(k, s, "tablet"));
+    for (const s of steps.filter((x) => onItsArm(x, "tablet"))) await walk(s, "tablet");
     await ctx.clearMobile();
   });
   gate.check(health);

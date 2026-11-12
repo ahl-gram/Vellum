@@ -1,3 +1,5 @@
+import { ROUTE_NAMES } from "../../../layouts/nav.ts";
+
 // How a control's words are read: text, its own text; aria, its aria-label; label, the text of the label it sits in; option, a list offering an option in these words; road, a road press's verb and room joined by a space; attr, the attribute attr names; title and placeholder, those attributes; match starts or contains loosens the match; state held is a control standing in the held box, hidden one in the page but not shown until the step's own condition.
 export interface Words {
   readonly css: string;
@@ -52,6 +54,15 @@ export interface Ladder {
   readonly entered?: string;
   readonly lessons: readonly Lesson[];
 }
+
+export const roomOf = (route: string): string => {
+  const name = ROUTE_NAMES[route];
+  if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${route}`);
+  return name;
+};
+
+const COUNT = ["no", "one", "two", "three", "four", "five", "six"] as const;
+export const countWord = (n: number): string => COUNT[n] ?? String(n);
 
 export function phrasesOf(sentence: string): readonly string[] {
   return [...sentence.matchAll(/\{([^{}]+)\}/g)].map((m) => m[1] ?? "");
