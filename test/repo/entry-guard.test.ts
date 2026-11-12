@@ -2,9 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { eslint, plantMessages, resolvedRule } from "../../test-support/source-shape-reports.ts";
-import { lintTsRoots } from "../../test-support/lint-roots.ts";
-import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { assertRuleReach } from "../../test-support/lint-rule-reach.ts";
+import { plantMessages } from "../../test-support/source-shape-reports.ts";
 import { ARGV_PATH_READS } from "../../scripts/lint/entry-guard.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -93,22 +92,5 @@ test("test-support/source-read-guard.ts may read process.argv[1] once, to learn 
 });
 
 test("the rule resolves at error on every TypeScript root the lint reads, at any depth and in a room not yet written, and on no sheet (Issue #1180)", async () => {
-  const roots = lintTsRoots();
-  assert.ok(roots.length > 0, "the lint reads no TypeScript root, so this sweep reads nothing");
-  for (const root of roots) {
-    const witness = WITNESSES[`${root}/**/*.ts`];
-    assert.ok(
-      witness !== undefined && existsSync(join(ROOT, witness)),
-      `${root} has no existing witness in test-support/lint-witnesses.ts, so the rule's reach there is unpinned`,
-    );
-    assert.equal(await eslint.isPathIgnored(witness), false, `${witness} is ignored, so ${root} reaches nothing`);
-    for (const file of [witness, `${root}/nested/deeper/part.ts`])
-      assert.deepEqual(await resolvedRule(file, RULE), [2], `${RULE} does not resolve at error on ${file}`);
-  }
-  assert.deepEqual(
-    await resolvedRule("src/site/zz-new-room/part.ts", RULE),
-    [2],
-    `${RULE} does not reach a room written tomorrow`,
-  );
-  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!, RULE), undefined, `${RULE} reaches a sheet`);
+  await assertRuleReach(RULE);
 });
