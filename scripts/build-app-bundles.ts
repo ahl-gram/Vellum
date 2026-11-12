@@ -99,7 +99,7 @@ export async function bundleToString(absEntry: string): Promise<string> {
   throw new Error(`vite produced no entry chunk for ${absEntry}`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const root = resolve(process.argv[2] ?? GENERATED);
   bundleAppSurfaces(root)
     .then(() => {

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-# The VM ships Node 20, 21 and 22 (22 on PATH); Vellum needs 24 (package.json engines).
+# The VM ships Node 20, 21 and 22 (22 on PATH); Vellum needs 24.2 (package.json engines).
 # 24.22.1 was the latest v24 on nodejs.org on 2026-10-22: https://nodejs.org/dist/latest-v24.x/
 curl -fsSL https://nodejs.org/dist/latest-v24.x/node-v24.22.1-linux-x64.tar.xz -o /tmp/node24.tar.xz
 mkdir -p /opt/node24 && tar -xJf /tmp/node24.tar.xz -C /opt/node24 --strip-components=1

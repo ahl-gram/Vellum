@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -11,10 +11,9 @@ import { functionsIn } from "../../scripts/copy-hunt/functions.ts";
 import wordForWord, { readCounts } from "../../scripts/lint/word-for-word.ts";
 import { ALPHA, ALPHA_COPY, ALPHA_NEAR, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
-import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { assertRuleReach } from "../../test-support/lint-rule-reach.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
-import { eslint, resolvedRule } from "../../test-support/source-shape-reports.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const RULE = "vellum/no-word-for-word-copy";
@@ -125,25 +124,7 @@ test("outside a git repository the rule throws, naming git ls-files, rather than
 });
 
 test("the rule resolves at error on every TypeScript root the lint reads, with the lint's roots and the accepted-copies list, at any depth and in a room not yet written, and on no sheet (Issue #1332)", async () => {
-  const roots = lintTsRoots();
-  const wired = [2, { root: ROOT, roots, accepted: ACCEPTED_COPIES }];
-  assert.ok(roots.length > 0, "the lint reads no TypeScript root, so this sweep reads nothing");
-  for (const root of roots) {
-    const witness = WITNESSES[`${root}/**/*.ts`];
-    assert.ok(
-      witness !== undefined && existsSync(join(ROOT, witness)),
-      `${root} has no existing witness in test-support/lint-witnesses.ts, so the rule's reach there is unpinned`,
-    );
-    assert.equal(await eslint.isPathIgnored(witness), false, `${witness} is ignored, so ${root} reaches nothing`);
-    for (const file of [witness, `${root}/nested/deeper/part.ts`])
-      assert.deepEqual(await resolvedRule(file, RULE), wired, `${RULE} does not resolve as wired on ${file}`);
-  }
-  assert.deepEqual(
-    await resolvedRule("src/site/zz-new-room/part.ts", RULE),
-    wired,
-    `${RULE} does not reach a room written tomorrow`,
-  );
-  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!, RULE), undefined, `${RULE} reaches a sheet`);
+  await assertRuleReach(RULE, [2, { root: ROOT, roots: lintTsRoots(), accepted: ACCEPTED_COPIES }]);
 });
 
 test("a function with copies in an earlier file, its own file and a later file names them in file and line order, and is reported over its own lines (Issue #1332)", async () => {

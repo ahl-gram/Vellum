@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
@@ -120,6 +120,7 @@ interface Plant {
   readonly list?: readonly SourceRead[];
   readonly nodeFlags?: readonly string[];
   readonly testFlags?: readonly string[];
+  readonly throughLink?: boolean;
 }
 interface Ran {
   readonly status: number | null;
@@ -139,6 +140,7 @@ const HEAD = 'import { test } from "node:test";\n';
 
 const plantRun = (plant: Plant): Ran => {
   const dir = mkdtempSync(join(tmpdir(), "source-read-guard-"));
+  const linkHome = plant.throughLink === true ? mkdtempSync(join(tmpdir(), "source-read-guard-link-")) : null;
   try {
     const files: Record<string, string> = {
       ...FILES,
@@ -148,6 +150,13 @@ const plantRun = (plant: Plant): Ran => {
     for (const [rel, text] of Object.entries(files)) {
       mkdirSync(dirname(join(dir, rel)), { recursive: true });
       writeFileSync(join(dir, rel), text);
+    }
+    if (linkHome !== null) {
+      symlinkSync(dir, join(linkHome, "tree"));
+      assert.ok(
+        lstatSync(join(linkHome, "tree")).isSymbolicLink(),
+        "the plant's folder link is not a symbolic link, so the plant is started by its own path and carries no hazard",
+      );
     }
     const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT"));
     const ran = spawnSync(
@@ -159,12 +168,13 @@ const plantRun = (plant: Plant): Ran => {
         "--test",
         "--test-reporter=tap",
         ...(plant.testFlags ?? []),
-        "test/plant.test.ts",
+        linkHome === null ? "test/plant.test.ts" : join(linkHome, "tree", "test", "plant.test.ts"),
       ],
       { cwd: dir, env: { ...env, VELLUM_SOURCE_READ_ROOT: dir }, encoding: "utf8", timeout: CHILD_TIMEOUT_MS },
     );
     return { status: ran.status, out: `${ran.stdout}${ran.stderr}` };
   } finally {
+    if (linkHome !== null) rmSync(linkHome, { recursive: true, force: true });
     rmSync(dir, { recursive: true, force: true });
   }
 };
@@ -236,6 +246,38 @@ test("(i) a module load, static or dynamic, is Node's read and not the test's, h
   const body =
     'import { a } from "../src/a.ts";\ntest("plant", async () => { await import("../src/a.ts"); void a; });\n';
   verdictOf(plantRun({ body, nodeFlags: ["--stack-trace-limit=100"] }), 0, "a module load was counted as a read");
+});
+
+test("(j) a test started by an absolute path through a symlinked folder is still watched, since the guard resolves the path it was started by before comparing it with its real root (Issue #1180)", () => {
+  const ran = plantRun({
+    body: READS_A + 'test("plant", () => { readFileSync("src/a.ts", "utf8"); });\n',
+    throughLink: true,
+  });
+  verdictOf(
+    ran,
+    1,
+    `a test started through a symlinked folder went unwatched, so its unlisted read passed. ${BLIND_SPOTS}`,
+  );
+  assert.match(
+    ran.out,
+    /test\/plant\.test\.ts reads src\/a\.ts/,
+    "the verdict names the file by its path under the real root, and the read",
+  );
+});
+
+test("(k) a start path that names no file leaves the guard loaded and unwatching, since it resolves the path only when the path exists (Issue #1180)", () => {
+  const nameless = "data:text/javascript,process.argv[1]='/nowhere/x.test.ts'";
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT"));
+  const ran = spawnSync(
+    process.execPath,
+    ["--import", nameless, "--import", GUARD, "--input-type=module", "-e", "process.stdout.write('loaded')"],
+    { cwd: ROOT, env, encoding: "utf8", timeout: CHILD_TIMEOUT_MS },
+  );
+  assert.deepEqual(
+    [ran.status, ran.stdout, ran.stderr],
+    [0, "loaded", ""],
+    "the guard threw at load over a start path that names no file, so a run started that way dies before any test",
+  );
 });
 
 const KINDS: readonly ReadKind[] = ["data", "witness", "kept"];

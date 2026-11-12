@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { GENERATED } from "./clean-generated.ts";
 import { NAV_ITEMS } from "../src/layouts/nav.ts";
 
@@ -187,7 +186,7 @@ export async function configuredSite(): Promise<string> {
   return config.site;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const root = resolve(process.argv[2] ?? GENERATED);
   configuredSite()
     .then((site) => generateDiscovery(root, site))

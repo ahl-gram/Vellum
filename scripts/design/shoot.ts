@@ -263,7 +263,7 @@ export function parseShootArgs(args: readonly string[]): ShootArgs {
   return { list: positional[0]!, site, reducedMotion };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   let args: ShootArgs, shots: Shot[];
   try {
     args = parseShootArgs(process.argv.slice(2));
