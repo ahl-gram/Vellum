@@ -20,6 +20,7 @@ export const SOURCE_READS: Readonly<Record<string, readonly SourceRead[]>> = {
   "test/repo/constant-contracts.test.ts": [witness("src/site/**")],
   "test/repo/e2e-tiers.test.ts": [witness("e2e/harness.ts")],
   "test/repo/lint-wiring.test.ts": [witness("e2e/**"), witness("scripts/**"), witness("src/**")],
+  "test/repo/plate-reader-trigger.test.ts": [witness("src/**")],
   "test/repo/type-check.test.ts": [data("src/**")],
   "test/site/astro-app-surfaces.test.ts": [data("src/styles/explorer/index.css")],
   "test/site/atelier-kit.test.ts": [witness("src/site/shared/glass-keys.ts")],
