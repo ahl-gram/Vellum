@@ -84,7 +84,7 @@ export const runCommand = async (
       deps.warn(notLogged(line, error));
     }
   };
-  for (const signal of ["SIGINT", "SIGTERM"] as const)
+  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const)
     deps.onSignal(signal, () => {
       log();
       deps.exit(SIGNAL_EXITS[signal]);
