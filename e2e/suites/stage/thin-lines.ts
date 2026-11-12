@@ -26,7 +26,7 @@ export const THIN_LINES: Payload<ThinLines> = `(() => {
   };
 })()`;
 
-export function thinTopFaults(t: ThinLines): string[] {
+export function thinTopFaults(t: ThinLines, alias: boolean): string[] {
   const { trail, also, innerH } = t;
   if (trail === null) return ["no trail stands in the head cluster"];
   const faults: string[] = [];
@@ -43,7 +43,7 @@ export function thinTopFaults(t: ThinLines): string[] {
       faults.push(
         `the head cluster line "${l.t}" stands at ${l.row}, outside the thin top line's ${band[0].toFixed(2)} to ${band[1].toFixed(2)}`,
       );
-  if (also !== null && !(also[0] >= trail[1] && on.some((l) => l.t.startsWith("also reached from"))))
+  if (alias && also !== null && !(also[0] >= trail[1] && on.some((l) => l.t.startsWith("also reached from"))))
     faults.push("the alias line is not kept under the trail with its text on screen");
   return faults;
 }

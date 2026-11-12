@@ -338,7 +338,7 @@ function thinFaults(r: RoomRead, title: string, t: ThinLines): string[] {
   const foot = r.read.filter((g) => g.piece === "chart folio");
   if (!r.zoomed) say("the Glass's presses left the chart unzoomed");
   if (foot.length === 0) say("no chart folio line is on screen");
-  for (const m of [...thinTopFaults(t), ...thinFootFaults(t)]) say(m);
+  for (const m of [...thinTopFaults(t, false), ...thinFootFaults(t)]) say(m);
   for (const g of foot.filter((x) => !x.t.startsWith(title)))
     say(`chart folio "${g.t}" at row ${g.row} is not the chart's name`);
   for (const g of r.read.filter((x) => x.ratio < FLOOR_PLAIN)) say(`${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`);

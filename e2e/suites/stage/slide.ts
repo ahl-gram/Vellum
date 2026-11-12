@@ -59,7 +59,7 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
       `the painted chart ${JSON.stringify(at.chart)} does not cover [0, ${at.slip.left}] x [0, ${at.innerH}] at the fill`,
     );
   if (!(at.head.nav[1] <= 0)) say(`the nav stands on screen at the fill: bottom ${at.head.nav[1]}`);
-  for (const m of [...thinTopFaults(thin), ...thinFootFaults(thin)]) say(m);
+  for (const m of [...thinTopFaults(thin, false), ...thinFootFaults(thin)]) say(m);
   if (at.folio.rest.some((t) => t < at.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {

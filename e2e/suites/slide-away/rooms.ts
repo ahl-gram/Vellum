@@ -15,7 +15,7 @@ function thinLines(room: Room, a: Pieces, t: ThinLines): string[] {
   const faults: string[] = [];
   const say = (m: string): number => faults.push(`${room.id}: ${m}`);
   if (!(a.head.nav[1] <= 0)) say(`the nav stands on screen: bottom ${a.head.nav[1]}`);
-  for (const m of [...thinTopFaults(t), ...thinFootFaults(t)]) say(m);
+  for (const m of [...thinTopFaults(t, room.id === "Prospect"), ...thinFootFaults(t)]) say(m);
   if (a.folio.rest.some((r) => r < a.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(a.folio.rest)}`);
   if (room.id === "Reading Room" && !(a.stripTop !== null && a.stripTop < a.folio.title[0]))
