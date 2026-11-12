@@ -421,11 +421,14 @@ on a panel.** Assume a small label taken from a mockup needs this until you have
 reader reads, and no lower one for a mark that is part of a control (`SB20` in
 `e2e/suites/specimen/slip-ink.ts`).
 
-**The words inside the index slip's fade are the floor's one exception** (Alex, 2026-11-12, Issue
-#1363 comment 6836048723): they fall under 4.5:1 on purpose, to about 1:1 at the fade's very edge, as
-the sign that more of the list lies beyond, and the slip is scrolled to bring a line to full ink
-before it is read. Every line wholly outside the fade still reads 4.5:1 or better, which
-`vellum-plate-reader` measures whenever the fade or the slip's inks change.
+**The floor has two exceptions, each a sign and not a line to read** (Alex, 2026-11-12, on PR
+#1368). **The words inside the index slip's fade** (Issue #1363 comment 6836048723) fall under 4.5:1
+on purpose, to about 1:1 at the fade's very edge, as the sign that more of the list lies beyond, and
+the slip is scrolled to bring a line to full ink before it is read. Every line wholly outside the
+fade still reads 4.5:1 or better, which `vellum-plate-reader` measures whenever the fade or the
+slip's inks change. **The journal strip's rows not yet inked** (`.rf-log-strip li` in
+`src/styles/shared/reading-frame.css`, Issue #434) are dimmed under the floor on purpose, as the
+sign of rows not yet reached, and come to full ink as each is inked.
 
 **Sample a ground with the median of a wide run**, never a single point, and never a maximum or a
 minimum: a maximum passes on one bright control sitting under the sample, a minimum fails on one
