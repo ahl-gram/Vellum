@@ -20,7 +20,7 @@ Rules already exist for this (the guard lines of `vellum-footguns` Gate 1, and C
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR #582). So `$WT` and `git rev-parse` inside the sandbox are both out. It refuses the Edit tool on a sandbox file as well, and its refusal names the dispatch tree's copy of that file as the one to edit instead, which is the one tree you must never edit (measured 2026-09-27, Issue #707): that is why you hold no Edit tool, and change a sandbox file only through the commands under "Changing a sandbox file" below.
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatcher standing in a harness-isolated worktree puts you inside its fence, and `CLAUDE.md` Worktrees lists what that fence refuses. So `$WT` and `git rev-parse` inside the sandbox are both out, the two reads below are calls of their own, and the `cd` stays in the call that runs the test, which names no git. The fence refuses the Edit tool on a sandbox file as well, and its refusal names the dispatch tree's copy of that file as the one to edit instead, which is the one tree you must never edit (measured 2026-09-27, Issue #707): that is why you hold no Edit tool, and change a sandbox file only through the commands under "Changing a sandbox file" below.
 
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
@@ -31,10 +31,12 @@ node scripts/agent-sandbox.ts create guard-<topic>-<round>
 `create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing (a reused name, a bad sha, a directory already at that path), STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly.
 
 ```bash
-cd /the/path/create/printed && cat "$(sed 's/^gitdir: //' .git)/HEAD" && node --test test/path/to/target.test.ts
+cat /the/path/create/printed/.git
+cat /the/directory/that/gitdir/line/named/HEAD
+cd /the/path/create/printed && pwd && node --test test/path/to/target.test.ts
 ```
 
-The `cat` prints the sandbox's detached HEAD, the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one. It reads the `.git` FILE every worktree carries (against a `.git` directory it fails closed with `cat: /HEAD`), and it is spelled without `git` because the fence refuses `git` there.
+The first `cat` prints the `gitdir:` line of the `.git` FILE every worktree carries (against a `.git` directory it fails closed with `Is a directory`), and the second reads `HEAD` in the directory that line names: the sandbox's detached HEAD, the sha you report. Both are spelled without `git` because the fence refuses `git` there. The `cd` and the test share one call, so the test runs inside the sandbox or not at all, and the `pwd` it prints first is the path the two reads named, so the sha you report cannot name a run that never entered the sandbox. Keep `git`, `.git` and `gitdir` out of that call, the sandbox's own path included, and a redirect of its output to a log still passes.
 
 `create` builds the sandbox at the dispatch tree's HEAD, which is the code under review: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, and `test/repo/agent-sandbox.test.ts` pins that along with the anchor to the main checkout and the `node_modules` link (#575 is what a hand-written copy of this shell cost: it proved the wrong commit in silence). The script refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
 
