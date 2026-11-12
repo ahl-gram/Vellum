@@ -243,6 +243,7 @@ export async function ez1Zoomed(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const rows: { r: RoomRead; ask: Ask }[] = [];
   // 2026-11-01: zoomed by two presses at 1024x768 the Ribbon's coordinates in line-tan read 3.94 on the Mac harness browser and 3.92 (0.58 under the 4.5 floor) on the CI runner (run 41353331462, lane B), where the Explorer's folio reads 5.48 and 5.50, so the Ribbon is the room the line-tan witness can fail in (Issue #1159, Issue #1273 ruling 6).
+  // 2026-11-12: zoomed by two presses at 1024x768 with the panels taken away, the Explorer's cluster and chart folio read 1.62 and 2.03 and the Reading Room's 1.68 and 1.19 on the Mac harness browser, 1.63, 2.04, 1.70 and 1.20 on the CI runner (run 43180780683, lane B), the nearest the 4.5 floor the Explorer's chart folio on the runner, 2.04, 2.46 under it (2.47 on the Mac).
   const EZ1_ROOMS: readonly { page: string; ask: Ask }[] = [
     {
       page: "/explorer/",
@@ -319,6 +320,7 @@ export async function ez2Short(ctx: SuiteContext): Promise<void> {
   );
 }
 
+// 2026-11-12: zoomed past the fill at 1280x800 on seed 42 with the panels taken away, the cluster reads 3.55 and the chart folio 3.75 on the Mac harness browser, 3.55 and 3.76 on the CI runner (run 43180780683, lane B), the nearer the 4.5 floor 0.75 and 0.74 under it.
 const THIN_ASK: Ask = {
   pieces: ["cluster", "chart folio"],
   mark: false,

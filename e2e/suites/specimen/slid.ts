@@ -66,6 +66,7 @@ function sb5gSpills({ check }: SpecimenKit, slid: Specimen): void {
   );
 }
 
+// 2026-11-12: the Specimen Book at 1280x800 fills folded at 1.9775 (press 3) on the Mac harness browser (1.9735 on a first local run) and 1.9735 on the CI runner (run 43180780683, lane C), 0.0175 and 0.0135 past the second press's 1.96, and open at 1.7503 (press 2; 1.7448 on the first) and 1.7448, 0.2097 and 0.2152 short of it.
 async function sb18SlidFromFolded(
   k: SpecimenKit,
   openFill: number,

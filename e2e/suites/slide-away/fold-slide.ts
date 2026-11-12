@@ -170,6 +170,7 @@ const show = (i: Instance): string =>
     )
     .join("; ");
 
+// 2026-11-12: at 1024x768 the side panel's fold and tab move the sheet 338.47, change its width 233.84 and move the Press row 500.02 px on the Seed of the Day, and 188.31, 188.31 and 384.52 px in the Explorer, on the Mac harness browser, and 338.47, 233.84, 500.10, 188.31, 188.31 and 383.46 px on the CI runner (run 43180780683, lane C), each the least of its room's reads across the fold, the tab and, in the Explorer, both motion arms; the least of all, 188.31 px, against the half pixel REST_PX.
 function witnesses(i: Instance, zoomed: number | null): string[] {
   const faults: string[] = [];
   for (const { press, r } of i.reads) {

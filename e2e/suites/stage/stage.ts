@@ -376,6 +376,7 @@ export async function ea4Reads(ctx: SuiteContext): Promise<void> {
     deviceScaleFactor: 1,
     mobile: false,
   });
+  // 2026-11-12: on the Explorer at 1024x474 with the pools taken away, the cluster, the chart folio and the Press read 1.66, 3.03 and 1.25 on the Mac harness browser and 1.68, 3.04 and 1.26 on the CI runner (run 43180780683, lane B), the nearest the 4.5 floor the chart folio on the runner, 3.04, 1.46 under it.
   const readings = [
     await readFixture(ctx, "the Explorer", "/explorer/", false, "Press", ["cluster", "chart folio", "Press"]),
     await readFixture(ctx, "the Print Room, its slip folded", "/print-room/", true, "room folio", []),

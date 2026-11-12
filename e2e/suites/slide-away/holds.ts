@@ -51,6 +51,7 @@ async function enterOnLastRow(ctx: SuiteContext): Promise<boolean> {
 const allHome = (reads: readonly Pieces[]): boolean =>
   reads.every((p) => Math.abs(p.head.ty) <= 0.5 && Math.abs(p.folio.ty) <= 0.5);
 
+// 2026-11-12: the Ribbon at 1280x800 fills at 1.7254 on the Mac harness browser and 1.6986 on the CI runner (run 43180780683, lane C), and the row's lean lands at 2.6000 on both (LEAN_K in src/site/ribbon/seats.ts), 0.8746 and 0.9014 past the fill.
 export async function sw5RowLean(ctx: SuiteContext): Promise<void> {
   const room = ROOMS.find((r) => r.id === "Ribbon")!;
   const faults: string[] = [];

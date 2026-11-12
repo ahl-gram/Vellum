@@ -28,6 +28,7 @@ const GESTURE_POINT: Payload<{ x: number; y: number; ok: boolean }> = `(() => {
   return { x, y, ok: !!e && !!e.closest("#map-viewport") && !e.closest("header.chrome, .corner") };
 })()`;
 
+// 2026-11-12: the Print Room at 1280x800 fills open at 1.8142 (press 2) on the Mac harness browser and 1.7826 on the CI runner (run 43180780683, lane C), and folded at 2.1254 (press 3) and 2.0984; the open fill sits 0.4142 and 0.3826 past the first press's 1.4 and 0.1458 and 0.1774 short of the second's 1.96, the folded 0.1654 and 0.1384 past the second and 0.6186 and 0.6456 short of the third's 2.744.
 const ARMS: readonly Arm[] = [
   {
     id: "the Print Room at 1280x800",
