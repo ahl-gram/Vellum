@@ -24,12 +24,13 @@ const { sections, kind, where = "the section you are reading is inked" } = Astro
 </Slip>
 <script>
   import { bindSlip } from "../site/shared/slip.ts";
-  import { indexInk } from "../site/shared/index-ink.ts";
+  import { indexInk, inViewBy, markEdges } from "../site/shared/index-ink.ts";
   import { findMarks, sectionEmpty } from "../site/glossary/term-find.ts";
 
   const slip = document.getElementById("index");
   const folio = document.querySelector(".corner.tr");
   const rootPx = (prop: string) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(prop));
+  const fade = () => rootPx("--index-fade") * rootPx("font-size");
 
   // The slip hangs below the room's folio, the chart rooms' seat, floored at the root's client height, which a sideways scrollbar shortens where innerHeight does not.
   const place = () => {
@@ -48,6 +49,20 @@ const { sections, kind, where = "the section you are reading is inked" } = Astro
     });
     const byData = (sel: string, key: string) =>
       new Map([...slip.querySelectorAll<HTMLElement>(sel)].map((el) => [el.dataset[key] ?? "", el]));
+    const body = slip.querySelector<HTMLElement>(".slip-body");
+    if (body !== null) {
+      const edges = () => markEdges(body);
+      body.addEventListener("scroll", edges, { passive: true });
+      // A keyboard's focus only: moving the list under a pressed pointer would take its release off the link it pressed.
+      body.addEventListener("focusin", (e) => {
+        if (e.target instanceof Element && e.target.matches(":focus-visible"))
+          body.scrollTop += inViewBy(e.target.getBoundingClientRect(), body.getBoundingClientRect(), fade());
+      });
+      const sizes = new ResizeObserver(edges);
+      sizes.observe(body);
+      const list = body.querySelector(".index");
+      if (list !== null) sizes.observe(list);
+    }
     const ink = indexInk({
       heads: [...document.querySelectorAll(".sheet h2[id]")],
       entries: [...document.querySelectorAll(".sheet :is(.q, .term, .lesson)[id]")],
@@ -55,7 +70,8 @@ const { sections, kind, where = "the section you are reading is inked" } = Astro
       entryRows: byData("[data-for]", "for"),
       // The reading line sits just under the band, where a followed anchor lands its head.
       line: () => rootPx("--band-h") * rootPx("font-size") + 24,
-      keepInView: () => slip.querySelector(".slip-body"),
+      keepInView: () => body,
+      inset: fade,
     });
     window.addEventListener("scroll", ink, { passive: true });
     window.addEventListener("resize", () => { place(); ink(); });

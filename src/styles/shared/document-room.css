@@ -46,6 +46,22 @@ h3 {
 }
 :root {
   --slip-w: 16rem;
+  --index-fade: 2rem;
+}
+#index > .slip-body.more-below {
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--index-fade)), transparent);
+}
+#index > .slip-body.more-above {
+  mask-image: linear-gradient(to bottom, transparent, black var(--index-fade));
+}
+#index > .slip-body.more-above.more-below {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--index-fade),
+    black calc(100% - var(--index-fade)),
+    transparent
+  );
 }
 body.room main {
   margin: 0 calc(var(--slip-w) + 2.4rem) 0 0;

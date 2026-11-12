@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { entryAt, indexInk, readingAt } from "../../src/site/shared/index-ink.ts";
+import { edgesOf, entryAt, indexInk, inViewBy, markEdges, readingAt } from "../../src/site/shared/index-ink.ts";
 
 // Issue #462 document-room ruling 1: the section being read is the last head at or above the reading line.
 
@@ -93,6 +93,7 @@ test("IK1 the inked row is brought into view by scrolling the index's own body a
     entryRows: new Map(),
     line: () => 145,
     keepInView: () => box,
+    inset: () => 0,
   });
   ink();
   assert.deepEqual(intoView, [], "no scrollIntoView: it would scroll the window as well as the index");
@@ -130,6 +131,7 @@ test("IK2 a section row taller than the index's body is aligned by its top once 
     entryRows: new Map(),
     line: () => 145,
     keepInView: () => box,
+    inset: () => 0,
   });
   const seen: number[] = [];
   for (let i = 0; i < 4; i++) {
@@ -167,8 +169,113 @@ test("IK3 an entry in a folded room is never the one being read: its box is empt
     entryRows: entryRows as unknown as ReadonlyMap<string, HTMLElement>,
     line: () => 145,
     keepInView: () => null,
+    inset: () => 0,
   })();
   assert.equal(entryRows.get("seen")?.on["now"], true, "the visible entry above the line is the one being read");
   assert.equal(entryRows.get("folded")?.on["now"], false, "a folded room's entry, in no box, is not");
   assert.equal(entryRows.get("next")?.on["now"], false);
+});
+
+test("IK4 the inked row is kept clear of the slip's fades: the body scrolls until the row stands the fade's depth inside its foot, or inside its head, and a row already clear of both moves nothing (Issue #1363)", () => {
+  const at =
+    (top: number, bottom = top + 20) =>
+    () =>
+      ({ top, bottom }) as DOMRect;
+  const row = (id: string, top: number) =>
+    ({ id, classList: { toggle: () => false }, getBoundingClientRect: at(top) }) as unknown as HTMLElement;
+  const box = { scrollTop: 40, getBoundingClientRect: at(100, 500) } as unknown as HTMLElement;
+  const rows = new Map([
+    ["a", row("a", 120)],
+    ["b", row("b", 610)],
+  ]);
+  const heads = [
+    { id: "a", getBoundingClientRect: at(-400) },
+    { id: "b", getBoundingClientRect: at(60) },
+  ] as unknown as Element[];
+  const ink = indexInk({
+    heads,
+    entries: [],
+    rows,
+    entryRows: new Map(),
+    line: () => 145,
+    keepInView: () => box,
+    inset: () => 32,
+  });
+  ink();
+  assert.equal(box.scrollTop, 40 + (630 - (500 - 32)), "a row below the foot stops the fade's depth above it");
+  rows.set("b", row("b", 300));
+  ink();
+  assert.equal(box.scrollTop, 202, "a row already clear of both fades moves nothing");
+  rows.set("b", row("b", 120));
+  ink();
+  assert.equal(
+    box.scrollTop,
+    202 - (100 + 32 - 120),
+    "a row inside the head's fade stops the fade's depth below the head",
+  );
+});
+
+test("IK5 a fade depth the page cannot read, not a number, zero or below, leaves the row at the body's very edge as the slip stood before it faded (Issue #1363)", () => {
+  const row = { top: 610, bottom: 630 };
+  const box = { top: 100, bottom: 500 };
+  for (const inset of [Number.NaN, 0, -5]) assert.equal(inViewBy(row, box, inset), 130, `inset ${inset}`);
+  assert.equal(inViewBy(row, box, 32), 162, "a depth it reads moves it clear");
+});
+
+test("IK6 a row taller than the body less its two fades, though shorter than the body, is aligned by its top at the head fade's foot once and then left still, never flipped between the fades on every pass (Issue #1363, after IK2)", () => {
+  const box = {
+    scrollTop: 40,
+    getBoundingClientRect: () => ({ top: 100, bottom: 300 }) as DOMRect,
+  } as unknown as HTMLElement;
+  const tall = {
+    id: "a",
+    classList: { toggle: () => false },
+    getBoundingClientRect: () => {
+      const top = 190 - box.scrollTop;
+      return { top, bottom: top + 150 } as DOMRect;
+    },
+  } as unknown as HTMLElement;
+  const head = { id: "a", getBoundingClientRect: () => ({ top: 60 }) as DOMRect } as unknown as Element;
+  const ink = indexInk({
+    heads: [head],
+    entries: [],
+    rows: new Map([["a", tall]]),
+    entryRows: new Map(),
+    line: () => 145,
+    keepInView: () => box,
+    inset: () => 40,
+  });
+  const seen: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    ink();
+    seen.push(box.scrollTop);
+  }
+  assert.deepEqual(seen, [50, 50, 50, 50], "the row's top meets the head fade's foot and stays there");
+});
+
+test("IK7 the list fades at its foot while more of it lies below and at its head once it has scrolled, a pixel's slack at either end reading as that end, since the scroll sizes are whole pixels rounded from the layout (Issue #1363)", () => {
+  const at = (scrollTop: number, scrollHeight = 900, clientHeight = 400) =>
+    edgesOf({ scrollTop, scrollHeight, clientHeight });
+  assert.deepEqual(at(0), { above: false, below: true }, "at the head only the foot fades");
+  assert.deepEqual(at(200), { above: true, below: true }, "mid-list both fade");
+  assert.deepEqual(at(500), { above: true, below: false }, "at the end only the head fades");
+  assert.deepEqual(at(0, 400), { above: false, below: false }, "a list that fits fades nowhere");
+  assert.deepEqual(at(0.6), { above: false, below: true }, "under a pixel from the head is the head");
+  assert.deepEqual(at(499.4), { above: true, below: false }, "under a pixel from the end is the end");
+  assert.deepEqual(at(1.5), { above: true, below: true }, "past the slack is off the head");
+});
+
+test("IK8 the body itself carries the fades' marks, more-above and more-below, read from its own scroll (Issue #1363)", () => {
+  const on: Record<string, boolean> = {};
+  const fake = {
+    scrollTop: 200,
+    scrollHeight: 900,
+    clientHeight: 400,
+    classList: { toggle: (name: string, force: boolean) => (on[name] = force) },
+  };
+  markEdges(fake as unknown as HTMLElement);
+  assert.deepEqual(on, { "more-above": true, "more-below": true });
+  fake.scrollTop = 500;
+  markEdges(fake as unknown as HTMLElement);
+  assert.deepEqual(on, { "more-above": true, "more-below": false });
 });

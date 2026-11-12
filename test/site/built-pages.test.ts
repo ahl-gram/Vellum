@@ -120,7 +120,7 @@ test("BP-P3 every id on the Primer is unique, every index link and every next ro
   assert.deepEqual(anchorFaults(documentOf(page("/primer/"))), []);
 });
 
-test("BP-P4 with scripts off the Primer is the whole guide: no room folded, no fold press shown, no step sealed (Issue #1251)", () => {
+test("BP-P4 with scripts off the Primer is the whole guide: no room folded, no fold press shown, no step sealed, and every room's lessons listed in its index (Issue #1251, Issue #1363)", () => {
   assert.deepEqual(openFaults(documentOf(page("/primer/"))), []);
 });
 

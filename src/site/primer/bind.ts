@@ -19,7 +19,12 @@ export function bindPrimer(doc: Document = document): void {
       return only !== undefined && ONLY.has(only) ? { id: li.id, only: only as Only } : { id: li.id };
     }),
   }));
+  const lessons = [...doc.querySelectorAll<HTMLElement>("#index .index > li[data-sec]")].flatMap((row) => {
+    const list = row.querySelector<HTMLElement>(".entries");
+    return list === null ? [] : [{ id: row.dataset["sec"] ?? "", list }];
+  });
   const open = (id: string): void => {
+    for (const l of lessons) l.list.hidden = l.id !== id;
     for (const room of rooms) {
       const on = idOf(room) === id;
       room.classList.toggle("folded", !on);
