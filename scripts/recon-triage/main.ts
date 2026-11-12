@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ensureCommit, gitTree, type Tree } from "../comment-judge/tree.ts";
-import { parseArgs, sendFor, writeAll, type Args } from "../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { parseClaims } from "./claims.ts";
 import { excerptOf } from "./excerpt.ts";
 import { requestFor } from "./questions.ts";
@@ -26,7 +26,7 @@ const headOf = (repo: string): string => {
   return r.stdout.trim();
 };
 
-const rank = async (repo: string, file: string, args: Args): Promise<number> => {
+const rank = async (repo: string, file: string, args: Args, sendFor: SendFor): Promise<number> => {
   const rows = parseClaims(readFileSync(file, "utf8"));
   const sha = headOf(repo);
   const triaged = await triage(rows, gitTree(repo, sha), sendFor(args.dryRun), RUN_INPUT_TOKEN_CAP);
@@ -37,7 +37,7 @@ const rank = async (repo: string, file: string, args: Args): Promise<number> => 
   return failed && !args.dryRun ? 1 : 0;
 };
 
-const trial = async (repo: string, out: string, args: Args): Promise<number> => {
+const trial = async (repo: string, out: string, args: Args, sendFor: SendFor): Promise<number> => {
   const rows = parseTrialSet(readFileSync(new URL("./trial-set.jsonl", import.meta.url), "utf8"));
   const trees = new Map<string, Tree>();
   for (const row of rows) {
@@ -66,20 +66,16 @@ const trial = async (repo: string, out: string, args: Args): Promise<number> => 
   return replies.some((reply) => !reply.ok) ? 1 : 0;
 };
 
-export const main = async (argv: readonly string[]): Promise<number> => {
+export const main = async (argv: readonly string[], sendFor: SendFor): Promise<number> => {
   const args = parseArgs(argv);
   const [command, ...rest] = args?.positional ?? [];
   const repo = process.cwd();
-  if (args !== null && command === "rank" && rest.length === 1) return rank(repo, resolve(repo, rest[0]!), args);
+  if (args !== null && command === "rank" && rest.length === 1)
+    return rank(repo, resolve(repo, rest[0]!), args, sendFor);
   if (args !== null && command === "trial" && rest.length === 0 && args.out !== null)
-    return trial(repo, resolve(args.out), args);
+    return trial(repo, resolve(args.out), args, sendFor);
   console.error(USAGE);
   return 2;
 };
 
-if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2)).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    return 1;
-  });
-}
+if (import.meta.main) process.exitCode = await runCommand("recon-triage", main, process.argv.slice(2), processDeps());

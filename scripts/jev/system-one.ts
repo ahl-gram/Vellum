@@ -13,7 +13,8 @@ export const KEY_FILE_SHOWN = "~/.config/typesafe/key";
 export const NO_KEY = `${KEY_VAR} is not set and ${KEY_FILE_SHOWN} holds no key`;
 export type Env = Readonly<Record<string, string | undefined>>;
 export type ReadText = (path: string) => string;
-export const keyFileOf = (home: string): string => join(home, ".config", "typesafe", "key");
+export const typesafeDirOf = (home: string): string => join(home, ".config", "typesafe");
+export const keyFileOf = (home: string): string => join(typesafeDirOf(home), "key");
 export type NoulQuestion = {
   readonly type: "noul";
   readonly instructions: string | Readonly<Record<string, unknown>>;
@@ -31,12 +32,17 @@ export type Answered = {
   readonly model: string;
   readonly nouls: Readonly<Record<string, number>>;
   readonly inputTokens: number;
+  readonly estimated: boolean;
   readonly ms: number;
 };
 export type Failed = { readonly ok: false; readonly reason: string };
 export type Reply = Answered | Failed;
 export type Send = (request: SystemOneRequest) => Promise<Reply>;
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
+export type Meter = {
+  readonly sent: (request: SystemOneRequest) => void;
+  readonly replied: (reply: Reply) => void;
+};
 
 const fail = (reason: string): Failed => ({ ok: false, reason });
 const isProbability = (value: unknown): value is number =>
@@ -55,7 +61,7 @@ const readAnswers = (request: SystemOneRequest, body: unknown): Reply => {
   }
   const usage = isRecord(body.usage) ? body.usage.input_tokens : undefined;
   const inputTokens = typeof usage === "number" ? usage : Math.ceil(JSON.stringify(request).length / 2);
-  return { ok: true, model: body.model, nouls, inputTokens, ms: 0 };
+  return { ok: true, model: body.model, nouls, inputTokens, estimated: typeof usage !== "number", ms: 0 };
 };
 
 const hide = (text: string, key: string): string => (key === "" ? text : text.split(key).join(KEY_MASK));
@@ -104,11 +110,16 @@ export const ask = async (request: SystemOneRequest, key: string, fetcher: Fetch
   return reply.ok ? { ...reply, ms: Math.round(performance.now() - began) } : reply;
 };
 
-export const senderFor = (key: string | undefined, fetcher: Fetch): Send => {
+export const senderFor = (key: string | undefined, fetcher: Fetch, meter: Meter): Send => {
   const trimmed = key?.trim() ?? "";
   if (trimmed === "") return () => Promise.resolve(fail(`${KEY_VAR} is not set`));
   if (!KEY_SHAPE.test(trimmed)) return () => Promise.resolve(fail(KEY_REFUSED));
-  return (request) => ask(request, trimmed, fetcher);
+  return async (request) => {
+    meter.sent(request);
+    const reply = await ask(request, trimmed, fetcher);
+    meter.replied(reply);
+    return reply;
+  };
 };
 
 export const readKey = (env: Env, home: string, readText: ReadText): string | undefined => {
@@ -122,9 +133,9 @@ export const readKey = (env: Env, home: string, readText: ReadText): string | un
   }
 };
 
-export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch): Send => {
+export const liveSender = (env: Env, home: string, readText: ReadText, fetcher: Fetch, meter: Meter): Send => {
   const key = readKey(env, home, readText);
-  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher);
+  return key === undefined ? () => Promise.resolve(fail(NO_KEY)) : senderFor(key, fetcher, meter);
 };
 
 export const dryRunSender: Send = () => Promise.resolve(fail("dry run: nothing was sent"));
