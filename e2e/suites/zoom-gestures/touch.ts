@@ -163,7 +163,6 @@ export async function zg8bDoubleTapOn(k: GesturesKit): Promise<void> {
     Math.abs(now - 2) < 0.01,
     JSON.stringify({ k: now }),
   );
-  await standHome(k);
 }
 
 export async function standHome(k: GesturesKit): Promise<void> {
