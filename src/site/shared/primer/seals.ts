@@ -28,6 +28,6 @@ export function writeSeal(getStorage: () => Storage, stepId: string): void {
 
 export function clearSeals(getStorage: () => Storage): void {
   try {
-    getStorage().clear();
+    getStorage().removeItem(PRIMER_STORE_KEY);
   } catch {}
 }
