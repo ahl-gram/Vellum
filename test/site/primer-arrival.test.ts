@@ -16,7 +16,8 @@ test("PA1 a bare first visit opens the first room, at its first step (ruling 16)
 });
 
 test("PA2 a room's own press opens that room whatever the seals say (N4)", () => {
-  assert.equal(roomOnArrival(ROOMS, "B", new Set(["a1"]), DESKTOP), "B");
+  assert.equal(roomOnArrival(ROOMS, "C", new Set(["a1"]), DESKTOP), "C", "the seals alone would resume at B");
+  assert.equal(roomOnArrival(ROOMS, "A", new Set(["a1", "a2", "b1"]), STILL), "A", "the seals alone would resume at C");
   assert.equal(
     roomOnArrival(ROOMS, "nowhere", new Set(["a1"]), DESKTOP),
     "B",
