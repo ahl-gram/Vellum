@@ -1,7 +1,13 @@
 // The Explorer's slide-away, the follow and the seats (Issue #996): the head cluster and the chart folio stay home through the Glass's first press, follow the zoom by the log of depth to their thin lines at the depth the chart fills the screen, stand home or away at that depth alone under reduced motion, follow a fold, and leave every seat where it stands with them home.
 import type { SuiteContext } from "../../types.ts";
 import { rest, size } from "./stage.ts";
-import { fillPressOf, pressDepths } from "../slide-away/kit.ts";
+import {
+  fillOf as roomFillOf,
+  fillPressOf,
+  foldLanded,
+  PIECES as ROOM_PIECES,
+  pressDepths,
+} from "../slide-away/kit.ts";
 import type { Pieces } from "./slide-kit.ts";
 import {
   fillOf,
@@ -17,8 +23,9 @@ import {
   settleSlid,
   travelsOf,
 } from "./slide-kit.ts";
+import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
 
-// 2026-10-30: the fill against the first press's 1.4, this machine's layout 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over); the runner's 1280x800 1.5334 (0.13 over) and 1024x768 2.0560 (0.66 over), CI run 41153518333.
+// 2026-11-12: the fill against the first press's 1.4, the Mac's layout 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over); the runner's 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over), CI run 43180780683.
 const FIRST_PRESS = 1.4;
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
@@ -43,6 +50,7 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
   const short = await poseAt(ctx, 0.99 * fill);
   if (!(short.head.ty >= up + 1)) say(`at 0.99 of the fill the head already stands ${short.head.ty} of ${up}`);
   const at = await poseAt(ctx, fill);
+  const thin = await ctx.evaluate(THIN_LINES);
   if (!near(at.head.ty, up, 0.5) || !near(at.folio.ty, down, 0.5))
     say(`at the fill the head stands ${at.head.ty} of ${up} and the folio ${at.folio.ty} of ${down}`);
   const [cl, ct, cr, cb] = at.chart;
@@ -51,15 +59,12 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
       `the painted chart ${JSON.stringify(at.chart)} does not cover [0, ${at.slip.left}] x [0, ${at.innerH}] at the fill`,
     );
   if (!(at.head.nav[1] <= 0)) say(`the nav stands on screen at the fill: bottom ${at.head.nav[1]}`);
-  if (!(at.head.trail[0] >= 0 && at.head.trail[1] <= 60))
-    say(`the trail is off its thin line: ${JSON.stringify(at.head.trail)}`);
-  if (!(at.folio.title[1] >= at.innerH - 3 && at.folio.title[1] <= at.innerH))
-    say(`the title's foot ${at.folio.title[1]} is not within 3 px of the page's foot ${at.innerH}`);
-  if (at.folio.rest.some((t) => t < at.innerH - 3))
+  for (const m of [...thinTopFaults(thin, false), ...thinFootFaults(thin)]) say(m);
+  if (at.folio.rest.some((t) => t < at.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {
     faults,
-    detail: `${w}x${h} fill ${fill.toFixed(4)} at press ${n}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}`,
+    detail: `${w}x${h} fill ${fill.toFixed(4)} at press ${n}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}, thin top foot ${thinTopFoot(thin, false).toFixed(2)}`,
   };
 }
 
@@ -82,7 +87,7 @@ export async function es2HomeSeats(ctx: SuiteContext): Promise<void> {
   const home = await ctx.evaluate(PIECES_READ);
   if (home.legendBottom === "") faults.push("the Press is not risen at 1024x768, so its seat reads no folio");
   const want = seats(home);
-  await press(ctx, 3);
+  await press(ctx, fillPressOf(fillOf(home)));
   const away = await settleSlid(ctx, "folio", "ES2 folio away");
   const agree = (p: Pieces): boolean => seats(p).every((v, i) => near(v, want[i]!, 0.5));
   if (!agree(away))
@@ -125,14 +130,23 @@ export async function es7Reduced(ctx: SuiteContext): Promise<void> {
   );
 }
 
+// 2026-11-12: the Explorer at 1280x800 fills open at 1.5334 (press 2) on the Mac harness browser and on the CI runner (run 43180780683, lane B), and folded at 1.8209 on both, 0.1391 short of the press the fold is made at, 1.96, and 0.2875 past the open fill.
 export async function es9Fold(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const last = <T>(a: readonly T[]): T => a[a.length - 1]!;
+  let open = NaN,
+    folded = NaN,
+    between = NaN,
+    n = 0;
   await motionOn(ctx, async () => {
     await openAt(ctx, SEED_42, 1280, 800, "ES9");
-    const { up } = travelsOf(await ctx.evaluate(PIECES_READ));
-    await press(ctx, 2);
+    const home = await ctx.evaluate(PIECES_READ);
+    const { up } = travelsOf(home);
+    open = fillOf(home);
+    n = fillPressOf(open);
+    await press(ctx, n);
     await settleSlid(ctx, "head", "ES9 head away");
+    const before = await ctx.evaluate(ROOM_PIECES);
     await pressSelector(ctx, ".slip-fold");
     // Wiring, said at the check: a regional survey landing in the folio mid-fold is a race, so the folio's growth by a line is made inside the fold's slide by hand.
     await ctx.evaluate(
@@ -143,19 +157,32 @@ export async function es9Fold(ctx: SuiteContext): Promise<void> {
       faults.push(
         `folding past both fill depths moved the head: ${JSON.stringify(held.map((p) => p.head.ty.toFixed(1)))}`,
       );
+    folded = roomFillOf(await foldLanded(ctx, before, "ES9 folded sheet"), "sheet");
+    if (!(folded <= pressDepths(n)))
+      faults.push(
+        `the folded fill ${folded.toFixed(4)} lies past the press ${n} the fold was made at, ${pressDepths(n).toFixed(4)} (the witness)`,
+      );
+    if (!(folded > open))
+      faults.push(
+        `the folded fill ${folded.toFixed(4)} is no deeper than the open fill ${open.toFixed(4)}, so no depth lies between them (the witness)`,
+      );
+    between = Math.sqrt(open * folded);
     await pressSelector(ctx, ".slip-tab");
     await rest(ctx, 1280, 800, "ES9 unfolded");
-    await poseAt(ctx, 1.65);
+    await poseAt(ctx, between);
     await pressSelector(ctx, ".slip-fold");
     const part = last(await readsFor(ctx, 1000));
     if (!(part.head.ty >= up + 10 && part.head.ty <= -10))
-      faults.push(`folding at 1.65 left the head at ${part.head.ty}, not part way between ${up} and 0`);
+      faults.push(
+        `folding at ${between.toFixed(3)} left the head at ${part.head.ty}, not part way between ${up} and 0`,
+      );
   });
   ctx.check(
     "ES9 folding the Broadside while the chart fills the screen past both its fill depths leaves the head cluster at its thin line throughout the fold, with the chart folio growing by a line mid-fold, and folding it at a depth between them brings the head part way home (Alex, 2026-10-23, Issue #996 step 6 ruling 4)",
     faults.length === 0,
-    faults.length
-      ? faults.join("; ")
-      : "the head held its thin line through the fold and came part way home between the fill depths",
+    `open fill ${open.toFixed(4)} at press ${n}, folded fill ${folded.toFixed(4)}, folded again at ${between.toFixed(3)}; ` +
+      (faults.length
+        ? faults.join("; ")
+        : "the head held its thin line through the fold and came part way home between the fill depths"),
   );
 }

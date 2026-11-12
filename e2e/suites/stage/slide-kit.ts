@@ -93,9 +93,13 @@ export type Travelling = {
   readonly folio: { readonly title: readonly [number, number] };
 };
 
+// 2026-11-12: ruled, Alex, 2026-10-23, Issue #996 step 6 ruling 7 (comment 6361760242): the thin lines sit 3 px past the top and 2 px above the bottom, the product's HEAD_CLEAR and FOOT_CLEAR in src/site/shared/slide-away.ts written again.
+const HEAD_CLEAR = 3;
+const FOOT_CLEAR = 2;
+
 export const travelsOf = (p: Travelling): { up: number; down: number } => ({
-  up: -Math.ceil(p.head.nav[1] + 3),
-  down: Math.ceil(p.innerH - 2 - p.folio.title[1]),
+  up: -Math.ceil(p.head.nav[1] + HEAD_CLEAR),
+  down: Math.ceil(p.innerH - FOOT_CLEAR - p.folio.title[1]),
 });
 
 export async function press(ctx: SuiteContext, n: number): Promise<void> {
