@@ -34,7 +34,10 @@ interface InkParts {
 /** Builds the ink pass; the caller wires it to scroll and resize. */
 export function indexInk(p: InkParts): () => void {
   const placed = (els: readonly Element[]): Placed[] =>
-    els.flatMap((el) => (el.id ? [{ id: el.id, top: el.getBoundingClientRect().top }] : []));
+    els.flatMap((el) => {
+      const r = el.getBoundingClientRect();
+      return el.id && !(r.width === 0 && r.height === 0) ? [{ id: el.id, top: r.top }] : [];
+    });
   const ink = () => {
     const line = p.line();
     const heads = placed(p.heads);

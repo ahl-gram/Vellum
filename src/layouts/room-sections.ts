@@ -9,6 +9,8 @@ export interface IndexSection {
   readonly id: string;
   readonly title: string;
   readonly entries: readonly IndexEntry[];
+  readonly count?: number | null;
+  readonly tone?: "sub" | "lean";
 }
 
 export type EntryClass = "q" | "term";

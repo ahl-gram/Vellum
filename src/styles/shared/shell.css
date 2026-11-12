@@ -106,7 +106,7 @@ header.chrome :is(a, summary) {
   margin: 0.55rem 0 0;
 }
 .rooms .sep {
-  margin: 0 0.35em;
+  margin: 0 0.3em;
   opacity: 0.7;
 }
 .rooms a {

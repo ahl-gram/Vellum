@@ -160,15 +160,27 @@
   color: var(--ink-brown);
 }
 
-/* The style picker keeps 7.4rem at every width (the kit's would leave "topographic" 4.6rem of box beside the chevron), in the room's 25rem folio. */
+/* The seed box and the style picker start from widths that hold what they show and share what is left, so the controls wrap only where the corner cannot hold one line, as at 1024 beside the nine-item nav (Issue #1155 comment 6754142680 ruling 4). */
 .folio-room {
   max-width: 25rem;
 }
-.folio-controls input.control {
-  width: 5.6rem;
+.corner.tr .folio-controls {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
-.folio-controls select.control {
-  width: 7.4rem;
+.corner.tr .folio-controls #pr-seed {
+  flex: 1 1 95px;
+  min-width: 0;
+  width: auto;
+  box-sizing: border-box;
+}
+.corner.tr .folio-controls #pr-style {
+  flex: 1 1 112px;
+  min-width: 0;
+  width: auto;
+}
+.corner.tr .folio-controls #pr-draw {
+  flex: 0 0 auto;
 }
 
 .slip .bound-line {

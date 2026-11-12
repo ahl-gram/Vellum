@@ -14,6 +14,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Reading Room", href: "/reading-room/", kind: "room" },
   { label: "Print Room", href: "/print-room/", kind: "room" },
   { label: "Gallery", href: "/gallery/", kind: "room" },
+  { label: "Primer", href: "/primer/", kind: "reference" },
   { label: "Q & A", href: "/faq/", kind: "reference" },
   { label: "Glossary", href: "/glossary/", kind: "reference" },
 ];
@@ -26,6 +27,7 @@ export const ROUTE_NAMES: Readonly<Record<string, string>> = {
   "/reading-room/": "The Reading Room",
   "/print-room/": "The Print Room",
   "/gallery/": "The Gallery",
+  "/primer/": "The Primer",
   "/faq/": "Questions & Answers",
   "/glossary/": "The Glossary",
   "/prospect/": "The Prospect",
@@ -36,6 +38,7 @@ export const ROUTE_NAMES: Readonly<Record<string, string>> = {
 export const ROUTE_CHILDREN: Readonly<Record<string, readonly string[]>> = {
   "/explorer/": ["/prospect/", "/ribbon/", "/explorer/portfolio/"],
   "/reading-room/": ["/prospect/"],
+  "/faq/": ["/primer/"],
 };
 
 export interface Crumb {

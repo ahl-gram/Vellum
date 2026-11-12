@@ -4,6 +4,7 @@ import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { ix8Landmark } from "./document-rooms/landmark.ts";
+import { ix9Seals } from "./document-rooms/primer.ts";
 import { bounce } from "../support/nav.ts";
 
 const FAQ = "/faq/";
@@ -98,7 +99,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
   await step("IX3", () => ix3Folds(k, faq!));
   await step("IX8", () => ix8Landmark(k));
-  gate.check("IX7 the document-room suite drove the Q & A with no console error and no 4xx");
+  await step("IX9", () => ix9Seals(k));
+  gate.check("IX7 the document-room suite drove the Q & A and the Primer with no console error and no 4xx");
 }
 
 export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
