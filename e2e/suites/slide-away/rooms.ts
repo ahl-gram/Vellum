@@ -2,7 +2,7 @@
 import type { SuiteContext } from "../../types.ts";
 import { rest, size } from "../stage/stage.ts";
 import { motionOn } from "../stage/slide-kit.ts";
-import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults } from "../stage/thin-lines.ts";
+import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "../stage/thin-lines.ts";
 import type { ThinLines } from "../stage/thin-lines.ts";
 import { LENS } from "../print-room/print.ts";
 import type { Room } from "./kit.ts";
@@ -34,15 +34,20 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
       `${room.id}: the fill ${fill.toFixed(4)} lies at the first press, so no press stands before the one that fills (the witness)`,
     );
   const travels = travelsOf(home);
+  let foot = NaN;
   await motionOn(ctx, async () => {
     for (let i = 1; i < n; i++) await pressGlass(ctx, room.lens, `${label} press ${i}`);
     faults.push(...homeFaults(await still(ctx, `${label} before`), `${room.id} press ${n - 1}`));
     await pressGlass(ctx, room.lens, `${label} press ${n}`);
     const a = await still(ctx, `${label} fill`);
     const t = await ctx.evaluate(THIN_LINES);
+    foot = thinTopFoot(t, room.id === "Prospect");
     faults.push(...awayFaults(a, travels, `${room.id} press ${n}`), ...thinLines(room, a, t));
   });
-  return { faults, detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}` };
+  return {
+    faults,
+    detail: `${room.id} fill ${fill.toFixed(4)} press ${n}, travels ${travels.up} and ${travels.down}, thin top foot ${foot.toFixed(2)}`,
+  };
 }
 
 // 2026-11-12: the Prospect at 1280x800 fills at 1.6227 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 43180780683, lane C), 0.2227 past the first press's 1.4 and 0.3373 short of the second's 1.96.

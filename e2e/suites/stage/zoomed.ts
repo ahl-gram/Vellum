@@ -8,7 +8,7 @@ import { fillPressOf } from "../slide-away/kit.ts";
 import { RR_LENS } from "../reading-room/kit.ts";
 import { GLYPH_LINES } from "./glyphs.ts";
 import { fillOf, PIECES_READ } from "./slide-kit.ts";
-import { THIN_LINES, thinFootFaults, thinTopFaults } from "./thin-lines.ts";
+import { THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
 import type { ThinLines } from "./thin-lines.ts";
 import type { Glyph } from "./glyphs.ts";
 import { FLOOR_PLAIN, grounds, open, rest, size, withStyle, worstOf } from "./stage.ts";
@@ -358,6 +358,8 @@ export async function ez3Thin(ctx: SuiteContext): Promise<void> {
   ctx.check(
     "EZ3 zoomed at 1280x800 on seed 42 to the Glass's press that fills the screen, the Explorer's head cluster has slid up to its thin top line, the trail with the chart of the atelier press and nothing else, and its chart folio down to its thin bottom line, the chart's name and number 2 px above the foot, every line left on screen reads at 4.5:1 or better on the panels, and in the same run with the panels taken away they read under 4.5:1 (Alex, 2026-10-22, Issue #989; Issue #996)",
     faults.length === 0,
-    detail(r, THIN_ASK) + (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
+    detail(r, THIN_ASK) +
+      `, thin top foot ${thinTopFoot(t, false).toFixed(2)}` +
+      (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
   );
 }

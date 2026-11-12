@@ -23,7 +23,7 @@ import {
   settleSlid,
   travelsOf,
 } from "./slide-kit.ts";
-import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults } from "./thin-lines.ts";
+import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
 
 // 2026-11-12: the fill against the first press's 1.4, the Mac's layout 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over); the runner's 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over), CI run 43180780683.
 const FIRST_PRESS = 1.4;
@@ -64,7 +64,7 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
     say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {
     faults,
-    detail: `${w}x${h} fill ${fill.toFixed(4)} at press ${n}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}`,
+    detail: `${w}x${h} fill ${fill.toFixed(4)} at press ${n}, travels ${up} and ${down}, half ${mid.head.ty} and ${mid.folio.ty}, thin top foot ${thinTopFoot(thin, false).toFixed(2)}`,
   };
 }
 
