@@ -98,5 +98,8 @@ export function openFaults(doc: Document): string[] {
     doc.querySelector(".primer .room-body[hidden]") === null || "a room is folded before any script runs",
     presses.every((p) => p.hasAttribute("hidden")) || "a fold press shows before any script runs",
     doc.querySelector(".primer li.step.sealed") === null || "a step is sealed before any script runs",
+    doc.querySelector("#index .entries") !== null || "the index lists no lessons to read",
+    doc.querySelector("#index .entries[hidden]") === null ||
+      "a room's lessons are hidden in the index before any script runs",
   ]);
 }

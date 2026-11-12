@@ -14,8 +14,15 @@ const PAGE =
   `<div class="primer">${room("a", step("a1") + step("a2", "touch"))}${room("b", step("b1"))}` +
   `<section class="closing"><h2 id="afterward">x</h2><button class="wipe"></button></section></div>`;
 
+const row = (sec: string, lessons: string): string =>
+  `<li data-sec="${sec}"><a class="sec" href="#${sec}">${sec}</a>${lessons === "" ? "" : `<ol class="entries">${lessons}</ol>`}</li>`;
+const INDEX =
+  `<aside id="index"><div class="slip-body"><ol class="index">` +
+  `${row("a", `<li data-for="a-one"><a href="#a-one">one</a></li>`)}${row("b", `<li data-for="b-one"><a href="#b-one">one</a></li>`)}${row("afterward", "")}` +
+  `</ol></div></aside>`;
+
 function bound(hash: string, sealed: string, press?: string) {
-  const { document, Element, Event } = parseHTML(`<!doctype html><html><body>${PAGE}</body></html>`);
+  const { document, Element, Event } = parseHTML(`<!doctype html><html><body>${INDEX}${PAGE}</body></html>`);
   const scrolled: string[] = [];
   Element.prototype.scrollIntoView = function (this: Element) {
     scrolled.push(this.id);
@@ -40,7 +47,11 @@ function bound(hash: string, sealed: string, press?: string) {
     r.querySelector("h2")!.id,
     r.classList.contains("folded"),
   ]);
-  return { error, scrolled, folded, ready: document.querySelector(".primer")!.hasAttribute("data-bound") };
+  const lessons = [...document.querySelectorAll("#index .index > li")].map((li) => [
+    li.getAttribute("data-sec"),
+    li.querySelector(".entries")?.hasAttribute("hidden") ?? null,
+  ]);
+  return { error, scrolled, folded, lessons, ready: document.querySelector(".primer")!.hasAttribute("data-bound") };
 }
 
 test("PB1 a hash that is not a valid percent-encoding leaves the page as bound as any other (Issue #1251 skeptic)", () => {
@@ -86,4 +97,34 @@ test("PB4 a press on a folded room's head opens that room, folds the open one an
     ["b", false],
   ]);
   assert.deepEqual(got.scrolled, ["b"]);
+});
+
+test("PB5 the Primer's index lists the open room's lessons alone: on arrival the first room's, after a press on a folded room's head that room's, after a hash naming a lesson its room's, and the closing row, which lists none, untouched (Issue #1363)", () => {
+  assert.deepEqual(
+    bound("", "").lessons,
+    [
+      ["a", false],
+      ["b", true],
+      ["afterward", null],
+    ],
+    "on arrival",
+  );
+  assert.deepEqual(
+    bound("", "", "b").lessons,
+    [
+      ["a", true],
+      ["b", false],
+      ["afterward", null],
+    ],
+    "after the press",
+  );
+  assert.deepEqual(
+    bound("#b-one", "").lessons,
+    [
+      ["a", true],
+      ["b", false],
+      ["afterward", null],
+    ],
+    "after the hash",
+  );
 });
