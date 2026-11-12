@@ -490,8 +490,8 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
 test("the canonical nav renders the typed items flat, root-absolute, one aria-current span (#461 ruling 1)", () => {
   assert.deepEqual(
     NAV_ITEMS.map((i) => i.label),
-    ["Today", "Explorer", "Writing Room", "Reading Room", "Print Room", "Gallery", "Q & A", "Glossary"],
-    "the Running Head six (#268) plus the Reading Room (#221), seated beside the Explorer it watches, and the Writing Room (Issue #393), seated after the Explorer",
+    ["Today", "Explorer", "Writing Room", "Reading Room", "Print Room", "Gallery", "Primer", "Q & A", "Glossary"],
+    "the Running Head six (#268) plus the Reading Room (#221), seated beside the Explorer it watches, the Writing Room (Issue #393), seated after the Explorer, and the Primer (Issue #1155), seated before Q & A",
   );
   for (const item of NAV_ITEMS) {
     assert.match(item.href, /^\/([a-z0-9-]+\/)*$/, `${item.label} href must be root-absolute directory form`);
