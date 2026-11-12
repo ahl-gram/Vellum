@@ -246,7 +246,8 @@
 }
 .primer .ch.road {
   display: inline-block;
-  max-width: 100%;
+  box-sizing: border-box;
+  max-width: calc(100% - 0.6em);
   background: var(--control-gold);
   border-color: var(--ink-dark);
 }
