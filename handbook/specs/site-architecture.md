@@ -267,10 +267,10 @@ other way, which is what earns them a section of their own.
 - **A room's index is derived at build time** from the page's own source, by `roomSections` in
   `src/layouts/room-sections.ts`, or, where the page is rendered from data, from that data (the
   Primer's, through `primerPage` in `src/site/primer/page.ts`), and rendered through
-  `src/layouts/IndexSlip.astro`, so the index cannot drift from what it indexes. An entry or a
-  section without an id throws at build. **That mechanism is the rule for any new document room**:
-  derive the index from the page or from the data the page renders, never maintain a second copy
-  beside it.
+  `src/layouts/IndexSlip.astro`, so the index cannot drift from what it indexes. In `roomSections`,
+  an entry or a section without an id throws at build; the Primer's ids are held by a built-page
+  test. **That mechanism is the rule for any new document room**: derive the index from the page or
+  from the data the page renders, never maintain a second copy beside it.
 - **Why a page pauses before navigating is usually bandwidth.** A click's html request queues behind
   still-streaming plate bytes, which is what the reserved frames and the low fetch priority for
   below-the-fold plates in `handbook/specs/rulebook.md` are for. That rule lives there; this line is only the

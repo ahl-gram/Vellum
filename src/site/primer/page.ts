@@ -137,7 +137,7 @@ export function primerPage(ladders: readonly Ladder[] = LADDERS, tree: RouteTree
           act: segmentsOf(step),
           see: step.see,
           href: tryItHref(step),
-          opens: OPENS(lowerThe(nameIn(tree, `${step.at.split(/[?#]/)[0]}`))),
+          opens: OPENS(lowerThe(nameIn(tree, step.at.split(/[?#]/)[0]!))),
           ...(step.only === undefined ? {} : { only: step.only }),
           marks: marksOf(step),
           commission: step.kind === "commission",

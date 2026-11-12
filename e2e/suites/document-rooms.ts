@@ -100,7 +100,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("IX3", () => ix3Folds(k, faq!));
   await step("IX8", () => ix8Landmark(k));
   await step("IX9", () => ix9Seals(k));
-  gate.check("IX7 the document-room suite drove the Q & A with no console error and no 4xx");
+  gate.check("IX7 the document-room suite drove the Q & A and the Primer with no console error and no 4xx");
 }
 
 export function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {

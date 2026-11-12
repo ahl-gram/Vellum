@@ -6,7 +6,6 @@ import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { AFTERWARD, roomIdOf } from "../../src/site/primer/page.ts";
 import { datelineOf } from "../../src/site/primer/words.ts";
-import type { Ladder } from "../../src/site/shared/primer/shape.ts";
 import { LADDERS, seated } from "../../src/site/shared/primer/ladders.ts";
 import { CULTURES } from "../../src/society/names.ts";
 import { documentOf } from "../../test-support/built-dom.ts";
@@ -105,11 +104,10 @@ test("the Glossary's, the Gallery's and the Primer's room name stands in a regio
 });
 
 const primerRooms = seated(LADDERS).flatMap((s) => [s, ...s.under]);
-const stepsOf = (l: Ladder): number => l.lessons.reduce((n, lesson) => n + lesson.steps.length, 0);
 const primerSteps = primerRooms.flatMap((s) => s.ladder.lessons.flatMap((lesson) => lesson.steps));
 
 test("BP-P1 the Primer's count line is its data's own tally (Issue #1251)", () => {
-  const steps = primerRooms.reduce((n, s) => n + stepsOf(s.ladder), 0);
+  const steps = primerSteps.length;
   assert.ok(steps > 0, "the guide has steps to count");
   assert.deepEqual(datelineFaults(documentOf(page("/primer/")), datelineOf(steps, primerRooms.length)), []);
 });
@@ -127,7 +125,9 @@ test("BP-P4 with scripts off the Primer is the whole guide: no room folded, no f
 });
 
 test("BP-P5 the index slip counts what each kind of room lists: the Primer's rows their room's steps and its closing row nothing, the Q & A's and the Glossary's rows their own entries (Issue #1251)", () => {
-  const steps = new Map(primerRooms.map((s) => [roomIdOf(s.ladder.route), stepsOf(s.ladder)]));
+  const steps = new Map(
+    primerRooms.map((s) => [roomIdOf(s.ladder.route), s.ladder.lessons.flatMap((l) => l.steps).length]),
+  );
   assert.deepEqual(indexCountFaults(documentOf(page("/primer/")), steps, AFTERWARD), []);
   for (const route of ["/faq/", "/glossary/"]) assert.deepEqual(entryCountFaults(documentOf(page(route))), [], route);
 });

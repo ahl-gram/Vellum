@@ -41,7 +41,6 @@ type PageSpec = {
   chartRoom?: true;
   /** A document room's index script, Astro-processed and inlined (Issue #483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
-  /** A document room's own script beside its index script. */
   ownScript?: RegExp;
   noindex?: true;
   trail?: readonly (readonly [string, string])[];

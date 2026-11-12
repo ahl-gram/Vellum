@@ -56,7 +56,7 @@ export function bindPrimer(doc: Document = document): void {
   };
   const show = (id: string): void => doc.getElementById(id)?.scrollIntoView({ block: "start", inline: "nearest" });
 
-  const hash = decodeURIComponent(location.hash.slice(1));
+  const hash = location.hash.slice(1);
   const target = roomOf(hash);
   const sealed = drawSeals();
   const first = roomOnArrival(arrival, target, sealed, {
@@ -66,7 +66,7 @@ export function bindPrimer(doc: Document = document): void {
   if (first !== null) {
     open(first);
     if (target !== null) show(hash);
-    else if (first !== arrival[0]?.id) show(first);
+    else if (first !== arrival[0]?.id && (hash === "" || doc.getElementById(hash) === null)) show(first);
   }
 
   doc.addEventListener("click", (e) => {
@@ -81,11 +81,11 @@ export function bindPrimer(doc: Document = document): void {
       return;
     }
     const link = el?.closest<HTMLAnchorElement>('a[href^="#"]');
-    const room = link ? roomOf(decodeURIComponent(link.hash.slice(1))) : null;
+    const room = link ? roomOf(link.hash.slice(1)) : null;
     if (room !== null) open(room);
   });
   window.addEventListener("hashchange", () => {
-    const room = roomOf(decodeURIComponent(location.hash.slice(1)));
+    const room = roomOf(location.hash.slice(1));
     if (room !== null) open(room);
   });
   primer.querySelector(".wipe")?.addEventListener("click", () => {

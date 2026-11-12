@@ -26,7 +26,7 @@ function bound(hash: string, sealed: string) {
   Object.assign(g, { location: { hash }, window: win, matchMedia: win.matchMedia, localStorage: store, Element });
   let error: unknown = null;
   try {
-    bindPrimer(document as unknown as Document);
+    bindPrimer(document);
   } catch (e) {
     error = e;
   }
