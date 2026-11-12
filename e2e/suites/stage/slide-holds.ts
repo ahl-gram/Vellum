@@ -144,7 +144,9 @@ export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
     const last = reads[reads.length - 1]!;
     kLast = last.k;
     if (!(last.k >= fill))
-      faults.push(`${notches} notches reached only k ${last.k.toFixed(3)}, short of the fill ${fill.toFixed(4)}`);
+      faults.push(
+        `${notches} ${notches === 1 ? "notch" : "notches"} reached only k ${last.k.toFixed(3)}, short of the fill ${fill.toFixed(4)}`,
+      );
     if (reads.some((p) => !near(p.head.ty, up, 0.5)))
       faults.push(
         `a still mouse over the chart held the head: ${JSON.stringify(reads.map((p) => p.head.ty.toFixed(1)))}`,
@@ -171,7 +173,7 @@ export async function es8StillPointer(ctx: SuiteContext): Promise<void> {
   ctx.check(
     "ES8 a mouse standing still over the chart under the head cluster while the reader wheels in past the fill depth does not hold the head there: it slides to its thin line and stays, a mouse moving there with no button down, or a pan dragged across the line, does not bring it home, and a mouse then brought onto that line brings it home (Issue #996)",
     faults.length === 0,
-    `fill ${fill.toFixed(4)}, past it at k ${kLast.toFixed(3)} after ${notches} notches; ` +
+    `fill ${fill.toFixed(4)}, past it at k ${kLast.toFixed(3)} after ${notches} ${notches === 1 ? "notch" : "notches"}; ` +
       (faults.length ? faults.join("; ") : "the head slid away under a still mouse and came home for a moving one"),
   );
 }

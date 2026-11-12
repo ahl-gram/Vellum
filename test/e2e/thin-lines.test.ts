@@ -61,9 +61,15 @@ test("thinTopFaults keeps the Prospect's alias line under the trail", () => {
   assert.equal(thinTopFaults(under).length, 1);
   const bare = reads({ ...PROSPECT, lines: PROSPECT.lines.filter((l) => l.row !== 38) });
   assert.equal(thinTopFaults(bare).length, 1);
+  const over = reads({ ...PROSPECT, also: [10, 20], lines: PROSPECT.lines.map((l) => ({ ...l, row: 14 })) });
+  assert.equal(thinTopFaults(over).length, 1);
 });
 
-test("thinFootFaults keeps the title 1 to 2 px above the foot", () => {
+test("thinTopFaults faults a head with no trail at all", () => {
+  assert.equal(thinTopFaults(reads({ lines: EXPLORER.lines })).length, 1);
+});
+
+test("thinFootFaults keeps the title's foot within FOOT_WINDOW above the page's foot", () => {
   assert.deepEqual(thinFootFaults(reads({ title: [780.703125, 798.703125] })), []);
   assert.equal(thinFootFaults(reads({ title: [775.703125, 793.703125] })).length, 1);
   assert.equal(thinFootFaults(reads({ title: [783, 801] })).length, 1);
