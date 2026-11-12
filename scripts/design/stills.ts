@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 /** Palette-reduces chosen full-colour PNGs into a design round's `stills/`, the same bytes on every run. */
 
@@ -40,7 +39,7 @@ function makeStills(from: string, to: string, names: readonly string[] = []): st
   return chosen;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const [from, to, ...names] = process.argv.slice(2);
   if (from === undefined || to === undefined) {
     console.error("usage: node scripts/design/stills.ts <from-dir> <stills-dir> [name ...]");

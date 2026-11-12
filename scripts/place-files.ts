@@ -23,7 +23,7 @@ export async function writePlaceNames(root: string, names: string = PLACE_NAMES)
   await writeFile(join(root, NAMES_FILE), await readFile(names));
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const root = resolve(process.argv[2] ?? GENERATED);
   writePlaceFiles(root)
     .then(() => writePlaceNames(root))

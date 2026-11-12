@@ -1,5 +1,4 @@
 import { resolve, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { GENERATED } from "./clean-generated.ts";
 import { buildAtlas } from "../src/cli/atlas.ts";
 import { buildGallery, GALLERY_COUNT, GALLERY_SEED } from "../src/cli/gallery.ts";
@@ -14,7 +13,7 @@ export async function generateShowcases(root: string): Promise<void> {
   console.log(`${root}/gallery/`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const root = resolve(process.argv[2] ?? GENERATED);
   generateShowcases(root).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);

@@ -2,7 +2,6 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 
 /** The sandbox lifecycle a dispatched review agent needs, in one reviewed place: Issue #575 is what four hand-retyped copies of it cost. The git argv is returned as data by the *Plan functions so a test can pin which commands run, which is the only way to pin the absence of one. */
 
@@ -274,7 +273,7 @@ export const main = (argv: string[]): number => {
   return 1;
 };
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   try {
     process.exitCode = main(process.argv.slice(2));
   } catch (err: unknown) {
