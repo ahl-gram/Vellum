@@ -1,5 +1,6 @@
 import { countLine, LAY_ON_PAGE, layPressFace } from "../../explorer/chart-drawer.ts";
 import { eraLine } from "../../prospect/note-lines.ts";
+import { PROSPECT_ON_CARD } from "../living-chart/place-overlay-card.ts";
 import { parseTableValue } from "../table-address.ts";
 import { card } from "./explorer-sheet.ts";
 import { click, labelled, road, roomOf, set, text, type Ladder } from "./shape.ts";
@@ -11,8 +12,7 @@ const LAID = parseTableValue("k-p.seed-42.style-antique.i-0.year-1059");
 export const PROSPECT: Ladder = {
   route: "/prospect/",
   what: "The Prospect is the second camera: one town engraved side-on from its own ground, the way the old printers drew a city.",
-  entered:
-    "from a town's card in the Explorer (View the prospect), from a town's row on the Ribbon, or from the Reading Room",
+  entered: `from a town's card in the Explorer (${PROSPECT_ON_CARD}), from a town's row on the Ribbon, or from the Reading Room`,
   lessons: [
     {
       id: "plate",
@@ -21,11 +21,11 @@ export const PROSPECT: Ladder = {
       steps: [
         {
           id: "prospect-enter",
-          act: "In the Explorer, click a town and press {View the prospect}.",
+          act: `In the Explorer, click a town and press {${PROSPECT_ON_CARD}}.`,
           see: "The Prospect opens on that town.",
           at: "/explorer/#seed=42",
           first: [card],
-          words: [text("#place-card .pc-prospect", "View the prospect")],
+          words: [text("#place-card .pc-prospect", PROSPECT_ON_CARD)],
         },
         {
           id: "prospect-note",

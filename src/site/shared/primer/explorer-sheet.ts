@@ -1,5 +1,6 @@
 import { countLine, LAY_ON_CARD, tabLine } from "../../explorer/chart-drawer.ts";
 import { PLATE_TAB, PLATE_VERB } from "../../explorer/portfolio/how-plate.ts";
+import { PROSPECT_ON_CARD, ROAD_ON_CARD } from "../living-chart/place-overlay-card.ts";
 import { parseTableValue, TABLE_CAP } from "../table-address.ts";
 import {
   aria,
@@ -16,11 +17,11 @@ import {
 } from "./shape.ts";
 
 export const AT = "/explorer/#seed=42";
-const SURVEYED = "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600";
-const ONE_SHEET = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8";
-const LAID = `${SURVEYED}&table=${ONE_SHEET}`;
+export const SURVEYED = "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.9600";
+export const ONE_SHEET = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-8.ly-8";
+export const LAID = `${SURVEYED}&table=${ONE_SHEET}`;
 const LAID_ITEMS = parseTableValue(ONE_SHEET);
-const DOG_EAR = "#map .region-inset .dog-ear";
+export const DOG_EAR = "#map .region-inset .dog-ear";
 
 const TO_PRINT = `Take to ${roomOf("/print-room/")}`;
 const TO_JOURNAL = `Read the journal in ${roomOf("/reading-room/")}`;
@@ -124,19 +125,19 @@ export const SHEET_LESSONS: readonly Lesson[] = [
       },
       {
         id: "explorer-view-prospect",
-        act: "On the card, press {View the prospect}.",
+        act: `On the card, press {${PROSPECT_ON_CARD}}.`,
         see: "The Prospect opens: the town engraved side-on, from its own ground.",
         at: AT,
         first: [card],
-        words: [text("#place-card .pc-prospect", "View the prospect")],
+        words: [text("#place-card .pc-prospect", PROSPECT_ON_CARD)],
       },
       {
         id: "explorer-take-road",
-        act: "Or press {Take the road}.",
+        act: `Or press {${ROAD_ON_CARD}}.`,
         see: "The Wayfarer's Ribbon unrolls the road from the town.",
         at: AT,
         first: [card],
-        words: [text("#place-card .pc-ribbon", "Take the road")],
+        words: [text("#place-card .pc-ribbon", ROAD_ON_CARD)],
       },
       {
         id: "explorer-lay-prospect",
