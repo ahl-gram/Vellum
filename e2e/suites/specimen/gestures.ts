@@ -32,6 +32,8 @@ export async function sb15OutPress(k: SpecimenKit): Promise<void> {
     outAt: null,
   };
   try {
+    await setState("rest");
+    await homeCamera(k);
     await send("Emulation.setEmulatedMedia", { features: [] });
     read0.before = await evaluate(LENS);
     read0.inAt = await evaluate(AT("zoom-in"));

@@ -12,6 +12,8 @@ import {
   zg1cDeskHidesTouch,
   zg4BrowserPinch,
   zg8TouchTaken,
+  zg8bDoubleTapOn,
+  standHome,
   zg6Pinches,
   zg8cTakenBack,
   zgTouchOff,
@@ -41,8 +43,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await makeSettle(k)(touchRead("#map-viewport"), (d) => d.shown, "ZG10 the Writing Room shows the touch press", 200);
     await zg10Carried(k);
   });
-  await step("ZG8, ZG8b, ZG11, ZG2, ZG3, ZG4, ZG8c", async () => {
-    await zg8TouchTaken(k);
+  await step("ZG8", () => zg8TouchTaken(k));
+  await step("ZG8b", () => zg8bDoubleTapOn(k));
+  await step("ZG11, ZG2, ZG3, ZG4, ZG8c", async () => {
+    await standHome(k);
     await zg11LoupeDrag(k);
     await zg2TouchGestures(k);
     await zg4BrowserPinch(k);
