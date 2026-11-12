@@ -245,7 +245,8 @@
   font-size: 1.05em;
 }
 .primer .ch.road {
-  box-decoration-break: clone;
+  display: inline-block;
+  max-width: 100%;
   background: var(--control-gold);
   border-color: var(--ink-dark);
 }
