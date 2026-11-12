@@ -61,6 +61,36 @@ export function anchorFaults(doc: Document): string[] {
   ]);
 }
 
+const countOf = (row: Element): string | null => text(row.querySelector(".count"));
+
+export function indexCountFaults(doc: Document, steps: ReadonlyMap<string, number>, closing: string): string[] {
+  const rows = new Map(
+    [...doc.querySelectorAll("#index .index > li[data-sec]")].map((li) => [li.getAttribute("data-sec")!, li]),
+  );
+  const out: (true | string)[] = [rows.size > 0 || "the index has no rows to read"];
+  for (const [id, n] of steps) {
+    const got = rows.get(id) ? countOf(rows.get(id)!) : undefined;
+    out.push(got === String(n) || `the index row ${id} counts ${JSON.stringify(got)}, the room holds ${n} steps`);
+  }
+  const last = rows.get(closing);
+  out.push(
+    (last !== undefined && last.querySelector(".count") === null) || `the closing row ${closing} carries a count`,
+  );
+  return faults(out);
+}
+
+export function entryCountFaults(doc: Document): string[] {
+  const rows = [...doc.querySelectorAll("#index .index > li[data-sec]")];
+  return faults([
+    rows.length > 0 || "the index has no rows to read",
+    ...rows.map(
+      (li) =>
+        countOf(li) === String(li.querySelectorAll("[data-for]").length) ||
+        `the row ${li.getAttribute("data-sec")} counts ${JSON.stringify(countOf(li))}, it lists ${li.querySelectorAll("[data-for]").length}`,
+    ),
+  ]);
+}
+
 export function openFaults(doc: Document): string[] {
   const presses = [...doc.querySelectorAll(".primer .unfold")];
   return faults([

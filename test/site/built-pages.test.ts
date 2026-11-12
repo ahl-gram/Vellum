@@ -4,14 +4,23 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:f
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
+import { AFTERWARD, roomIdOf } from "../../src/site/primer/page.ts";
 import { datelineOf } from "../../src/site/primer/words.ts";
+import type { Ladder } from "../../src/site/shared/primer/shape.ts";
 import { LADDERS, seated } from "../../src/site/shared/primer/ladders.ts";
 import { CULTURES } from "../../src/society/names.ts";
 import { documentOf } from "../../test-support/built-dom.ts";
 import { br1Faults, br11Faults, br9Faults, cd55Faults } from "../../test-support/built-reads/explorer.ts";
 import { l13Faults, l14Faults, l15Faults, l16Faults, l17Faults } from "../../test-support/built-reads/home.ts";
 import { pr36Faults } from "../../test-support/built-reads/print-room.ts";
-import { anchorFaults, datelineFaults, openFaults, stepFaults } from "../../test-support/built-reads/primer.ts";
+import {
+  anchorFaults,
+  datelineFaults,
+  entryCountFaults,
+  indexCountFaults,
+  openFaults,
+  stepFaults,
+} from "../../test-support/built-reads/primer.ts";
 import { pb12Faults, pb16Faults, rb11Faults } from "../../test-support/built-reads/prospect-ribbon.ts";
 import { hg6Faults, r16Faults, rr38Faults } from "../../test-support/built-reads/rooms.ts";
 import {
@@ -96,10 +105,11 @@ test("the Glossary's, the Gallery's and the Primer's room name stands in a regio
 });
 
 const primerRooms = seated(LADDERS).flatMap((s) => [s, ...s.under]);
+const stepsOf = (l: Ladder): number => l.lessons.reduce((n, lesson) => n + lesson.steps.length, 0);
 const primerSteps = primerRooms.flatMap((s) => s.ladder.lessons.flatMap((lesson) => lesson.steps));
 
 test("BP-P1 the Primer's count line is its data's own tally (Issue #1251)", () => {
-  const steps = primerRooms.reduce((n, s) => n + s.ladder.lessons.reduce((m, l) => m + l.steps.length, 0), 0);
+  const steps = primerRooms.reduce((n, s) => n + stepsOf(s.ladder), 0);
   assert.ok(steps > 0, "the guide has steps to count");
   assert.deepEqual(datelineFaults(documentOf(page("/primer/")), datelineOf(steps, primerRooms.length)), []);
 });
@@ -114,6 +124,12 @@ test("BP-P3 every id on the Primer is unique, every index link and every next ro
 
 test("BP-P4 with scripts off the Primer is the whole guide: no room folded, no fold press shown, no step sealed (Issue #1251)", () => {
   assert.deepEqual(openFaults(documentOf(page("/primer/"))), []);
+});
+
+test("BP-P5 the index slip counts what each kind of room lists: the Primer's rows their room's steps and its closing row nothing, the Q & A's and the Glossary's rows their own entries (Issue #1251)", () => {
+  const steps = new Map(primerRooms.map((s) => [roomIdOf(s.ladder.route), stepsOf(s.ladder)]));
+  assert.deepEqual(indexCountFaults(documentOf(page("/primer/")), steps, AFTERWARD), []);
+  for (const route of ["/faq/", "/glossary/"]) assert.deepEqual(entryCountFaults(documentOf(page(route))), [], route);
 });
 
 test("the Glossary keeps its #353 shape in the built page: no section past 8 terms (Zoryan and Ordai to 10), the sections Issues #353 and #430 added 5 to 8 each, the chart section split in three, every term Vellum prints documented, no headword twice, terms alphabetical in each section, and a definition for every term (from e2e IX12)", () => {
