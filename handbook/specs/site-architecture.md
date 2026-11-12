@@ -189,6 +189,11 @@ SVG remains the byte-faithful artifact.
   emits a module file and the test "the deploy artifact serves no raw app source, no `.d.ts`, and no
   engine emit (#260)" in `test/site/astro-scaffold.test.ts` reds on it. That test builds its own
   tree, so it runs under the unit suite rather than only where a build already exists.
+- **A page's processed script imports nothing another processed script on the page imports.** A
+  module two of them share is split into a chunk of its own, and every script importing it is then
+  emitted as a file rather than inlined: on the Primer's first build, its script's import of
+  `src/site/shared/storage.ts`, which the shell's script imports, turned the shell's own script into
+  a file on every page. The same test as the cliff above reds on it.
 
 ## What the build does to authored markup, and what that costs a test
 
@@ -259,11 +264,13 @@ other way, which is what earns them a section of their own.
 - **The head carries only allowlisted links**, matched in `test/site/astro-scaffold.test.ts` as icon,
   apple-touch icon, stylesheet and prefetch. The prefetch list is derived from `NAV_ITEMS` with the
   current page excluded, and its own guard reds on a hand-copied route list.
-- **A room's index is read from the page's OWN source at build time**, by `roomSections` in
-  `src/layouts/room-sections.ts` and rendered through `src/layouts/IndexSlip.astro`, so the index
-  cannot drift from the prose it indexes. An entry or a section without an id throws at build. **That
-  mechanism is the rule for any new document room**: derive the index from the page, never maintain
-  a second copy beside it.
+- **A room's index is derived at build time** from the page's own source, by `roomSections` in
+  `src/layouts/room-sections.ts`, or, where the page is rendered from data, from that data (the
+  Primer's, through `primerPage` in `src/site/primer/page.ts`), and rendered through
+  `src/layouts/IndexSlip.astro`, so the index cannot drift from what it indexes. An entry or a
+  section without an id throws at build. **That mechanism is the rule for any new document room**:
+  derive the index from the page or from the data the page renders, never maintain a second copy
+  beside it.
 - **Why a page pauses before navigating is usually bandwidth.** A click's html request queues behind
   still-streaming plate bytes, which is what the reserved frames and the low fetch priority for
   below-the-fold plates in `handbook/specs/rulebook.md` are for. That rule lives there; this line is only the
