@@ -97,6 +97,8 @@ Explorer panels. **One ruled exception** (2026-09-07, the #518 sitting): the Cha
 the gathered sheets. Its destination still complies, since the gathering lands on The Portfolio, its
 own page, under the Explorer (Issue #521). The rule stands for everything else.
 
+**A second ruled exception** (Alex, 2026-11-05, Issue #1155 comment 6664332669, N6): the Primer's pointing hand, a slip and a ring a room lays over its own furniture for the one step a reader arrived to do. Its destination is the Primer, its own page.
+
 ## How a design decision is made
 
 **The six steps, the fidelity rule for building to a ruled still, and what a design round owes are
