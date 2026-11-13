@@ -36,8 +36,11 @@ import { run as runPrimerExplorer } from "../suites/primer-explorer.ts";
 import { run as runPrimerProspect } from "../suites/primer-prospect.ts";
 import { run as runPrimerRibbon } from "../suites/primer-ribbon.ts";
 import { run as runPrimerPortfolio } from "../suites/primer-portfolio.ts";
+import { run as runPrimerWritingRoom } from "../suites/primer-writing-room.ts";
 import { run as runPrimerReadingRoom } from "../suites/primer-reading-room.ts";
 import { run as runPrimerPrintRoom } from "../suites/primer-print-room.ts";
+import { run as runPrimerSeedOfTheDay } from "../suites/primer-seed-of-the-day.ts";
+import { run as runPrimerGallery } from "../suites/primer-gallery.ts";
 
 export const SUITES = {
   render: runRender,
@@ -76,6 +79,9 @@ export const SUITES = {
   "primer-prospect": runPrimerProspect,
   "primer-ribbon": runPrimerRibbon,
   "primer-portfolio": runPrimerPortfolio,
+  "primer-writing-room": runPrimerWritingRoom,
   "primer-reading-room": runPrimerReadingRoom,
   "primer-print-room": runPrimerPrintRoom,
+  "primer-seed-of-the-day": runPrimerSeedOfTheDay,
+  "primer-gallery": runPrimerGallery,
 } satisfies Record<E2eSuiteName, (ctx: SuiteContext) => Promise<void>>;

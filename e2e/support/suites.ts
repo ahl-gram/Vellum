@@ -40,8 +40,11 @@ export const E2E_SUITE_ORDER = [
   "primer-prospect",
   "primer-ribbon",
   "primer-portfolio",
+  "primer-writing-room",
   "primer-reading-room",
   "primer-print-room",
+  "primer-seed-of-the-day",
+  "primer-gallery",
 ] as const;
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
