@@ -4,18 +4,12 @@ import { parseHTML } from "linkedom";
 import { EXPLORER } from "../../src/site/shared/primer/explorer.ts";
 import { handSpot, noteWidth, ringBox, ringTargets } from "../../src/site/shared/primer/hand-geometry.ts";
 import { buildNote, markDone } from "../../src/site/shared/primer/hand-note.ts";
-import { handSteps, type HandStep } from "../../src/site/shared/primer/hand-steps.ts";
-import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
+import type { HandStep } from "../../src/site/shared/primer/hand-steps.ts";
 import { PRIMER_STORE_KEY } from "../../src/site/shared/primer/seals.ts";
 import { bootHand, type HandEnv } from "../../src/site/shared/primer-hand.ts";
 import { FakeStore } from "../../test-support/fake-store.ts";
+import { STEPS, stepOf } from "../../test-support/hand-steps.ts";
 
-const STEPS = handSteps(LADDERS);
-const stepOf = (id: string): HandStep => {
-  const s = STEPS.find((x) => x.id === id);
-  assert.ok(s !== undefined, `no step ${id}`);
-  return s;
-};
 const noteOf = (
   id: string,
   sealed: readonly string[] = [],
@@ -72,8 +66,9 @@ test("PK12 the note carries the step: where it comes from, its lesson and place,
   assert.equal(act?.querySelectorAll("span.ch.word").length, 3);
   assert.equal(note.querySelector("a.primer-slip-back")?.getAttribute("href"), "/primer/#explorer-islands");
   const next = note.querySelector("a.primer-slip-next");
-  assert.equal(next?.getAttribute("href"), "/explorer/?step=explorer-sizes#seed=42&type=archipelago&islands=20");
-  assert.equal(next?.className, "primer-slip-next dim");
+  assert.ok(next !== null, "the press onward");
+  assert.equal(next.getAttribute("href"), "/explorer/?step=explorer-sizes#seed=42&type=archipelago&islands=20");
+  assert.equal(next.className, "primer-slip-next dim");
   assert.equal(text(next), "Next step");
   assert.equal(note.querySelector("button.primer-slip-aside")?.getAttribute("aria-label"), "Set the step aside");
   const sealed = noteOf("explorer-islands", ["explorer-archipelago"]).note;
@@ -126,11 +121,11 @@ function booted(address: string, steps: readonly HandStep[] = STEPS, chrome = tr
     doc: document,
     location,
     replace: (url) => void replaced.push(url),
-    store: () => store as unknown as Storage,
+    store: () => store,
     device: { touch: false, motion: false },
-    fetchSteps: async () => {
+    fetchSteps: () => {
       fetched++;
-      return steps;
+      return Promise.resolve(steps);
     },
     frame: () => 1,
     cancelFrame: () => {},

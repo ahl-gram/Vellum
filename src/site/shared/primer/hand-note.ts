@@ -62,7 +62,7 @@ export function markDone(note: HTMLElement, step: HandStep, sealed: ReadonlySet<
   const row = note.querySelector(".primer-slip-row");
   if (row === null || row.querySelector(".primer-slip-done") !== null) return;
   [...note.querySelectorAll(".primer-slip-dots i")].forEach((dot, i) => {
-    dot.className = dotsOf(step, sealed, true)[i] ?? "";
+    dot.setAttribute("class", dotsOf(step, sealed, true)[i] ?? "");
   });
   const done = make(doc, "span", "primer-slip-done");
   done.append(make(doc, "b", "primer-seal", String(step.n)), doc.createTextNode(DONE));

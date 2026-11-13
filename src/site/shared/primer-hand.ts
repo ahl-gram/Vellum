@@ -35,9 +35,9 @@ const MANICULE = "☞";
 const boxOf = (r: DOMRect): Box => ({ x: r.left, y: r.top, w: r.width, h: r.height });
 
 function boxesOf(el: Element): Box[] {
-  const labels = (el as HTMLInputElement).labels;
-  const control = (el as HTMLLabelElement).control;
-  const parts = [el, ...(labels ?? []), ...(control === null || control === undefined ? [] : [control])];
+  const labels = (el as Partial<HTMLInputElement>).labels ?? [];
+  const control = (el as Partial<HTMLLabelElement>).control;
+  const parts = [el, ...labels, ...(control ? [control] : [])];
   return parts.map((e) => boxOf(e.getBoundingClientRect()));
 }
 
@@ -69,7 +69,7 @@ export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
   const put = (el: HTMLElement, css: string): void => {
     if (written.get(el) === css) return;
     written.set(el, css);
-    el.style.cssText = css;
+    el.setAttribute("style", css);
   };
   const show = (on: boolean): void => {
     if (ring.hidden === on) ring.hidden = !on;

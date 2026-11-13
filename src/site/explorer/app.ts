@@ -38,6 +38,7 @@ import { errorText } from "../shared/error-text.ts";
 import { mapNoun } from "../shared/map-words.ts";
 import { $ } from "../shared/by-id.ts";
 import { prefersReduce } from "../shared/reduced-motion.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -370,6 +371,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       if (myGen !== drawGen) return;
       keepDraw(res, seed, t0);
       landDraw(res, seed, overrides, style, theme, legend, arms, beasts, quiet, isTurn, hadChart, myGen);
+      void bootHandOnce({ route: "/explorer/" });
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;

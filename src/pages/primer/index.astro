@@ -12,7 +12,7 @@ const first = page.rooms[0]?.id ?? AFTERWARD;
 const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 ---
 
-<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/document-room.css"]} desk="open">
+<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/primer-marks.css", "/shared/document-room.css"]} desk="open">
 <Fog />
 <RoomFolio slot="desk" region room={ROOM} tagline={TAGLINE}>
   <p class="dateline">{page.dateline}</p>

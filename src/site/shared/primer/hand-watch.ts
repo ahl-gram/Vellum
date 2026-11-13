@@ -25,8 +25,7 @@ export function factsOf(el: Element | null, w: Words): Facts {
   if (el === null) return NONE;
   const style = getComputedStyle(el);
   const box = el.getBoundingClientRect();
-  const labels = (el as HTMLInputElement).labels;
-  const label = labels?.[0] ?? el.closest("label");
+  const label = (el as Partial<HTMLInputElement>).labels?.item(0) ?? el.closest("label");
   const part = (css: string): string => el.querySelector(css)?.textContent ?? "";
   return {
     found: true,
@@ -34,16 +33,16 @@ export function factsOf(el: Element | null, w: Words): Facts {
     box: { x: box.left, y: box.top, w: box.width, h: box.height },
     clip: style.clipPath || "",
     held: el.closest(".held") !== null,
-    disabled: (el as HTMLButtonElement).disabled === true || el.getAttribute("aria-disabled") === "true",
-    text: el.textContent ?? "",
+    disabled: (el as Partial<HTMLButtonElement>).disabled === true || el.getAttribute("aria-disabled") === "true",
+    text: el.textContent,
     aria: el.getAttribute("aria-label"),
     title: el.getAttribute("title"),
     placeholder: el.getAttribute("placeholder"),
     attr: w.attr === undefined ? null : el.getAttribute(w.attr),
     label: label?.textContent ?? "",
     road: [part(".verb"), part(".room")],
-    options: [...((el as HTMLSelectElement).options ?? [])].map((o) => ({
-      text: o.textContent ?? "",
+    options: [...((el as Partial<HTMLSelectElement>).options ?? [])].map((o) => ({
+      text: o.textContent,
       disabled: o.disabled,
     })),
   };
@@ -57,8 +56,13 @@ export const readOutcome = (doc: Document, then: readonly Words[]): readonly Out
     return { got, state, ok: wordsHold(got, w) && fits(state, w.state ?? "any") };
   });
 
-export const outcomeDone = (arrival: readonly OutcomeRead[], now: readonly OutcomeRead[]): boolean =>
-  now.every((r) => r.ok) && now.some((r, i) => r.got !== arrival[i]?.got || r.state !== arrival[i]?.state);
+export function outcomeDone(arrival: readonly OutcomeRead[], now: readonly OutcomeRead[]): boolean {
+  const changed = (r: OutcomeRead, i: number): boolean => {
+    const before = arrival[i];
+    return before === undefined || r.got !== before.got || r.state !== before.state;
+  };
+  return now.every((r) => r.ok) && now.some(changed);
+}
 
 export function watchOutcome(doc: Document, step: HandStep, done: () => void): () => void {
   const then = step.then ?? [];

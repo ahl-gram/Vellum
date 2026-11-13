@@ -3,22 +3,15 @@ import assert from "node:assert/strict";
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import {
   handStepFor,
-  handSteps,
   sealWhen,
   stepAddress,
   stepIdOf,
   useWatches,
   withoutStep,
-  type HandStep,
 } from "../../src/site/shared/primer/hand-steps.ts";
 import { headOf, onward } from "../../src/site/shared/primer/hand-words.ts";
+import { STEPS, stepOf } from "../../test-support/hand-steps.ts";
 
-const STEPS = handSteps(LADDERS);
-const stepOf = (id: string): HandStep => {
-  const s = STEPS.find((x) => x.id === id);
-  assert.ok(s !== undefined, `no step ${id}`);
-  return s;
-};
 const DESK = { touch: false, motion: true };
 
 test("PK1 stepIdOf reads the step key from a search string and refuses one the store could not hold", () => {

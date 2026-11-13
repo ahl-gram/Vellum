@@ -1,16 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { parseHTML } from "linkedom";
-import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
-import { handSteps, type HandStep } from "../../src/site/shared/primer/hand-steps.ts";
 import { outcomeDone, watchUse, type OutcomeRead } from "../../src/site/shared/primer/hand-watch.ts";
+import { stepOf } from "../../test-support/hand-steps.ts";
 
-const STEPS = handSteps(LADDERS);
-const stepOf = (id: string): HandStep => {
-  const s = STEPS.find((x) => x.id === id);
-  assert.ok(s !== undefined, `no step ${id}`);
-  return s;
-};
 const read = (got: string | null, ok = true, state: OutcomeRead["state"] = "reachable"): OutcomeRead => ({
   got,
   state,
