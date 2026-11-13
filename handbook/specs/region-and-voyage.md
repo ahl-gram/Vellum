@@ -90,7 +90,10 @@ about a rule, the rulebook wins.
   sit on a coastline, so no border on a coast holds by construction.
 - **A region's hamlets are grown on a FIXED world-space lattice**, each point forked off the seed by
   its cell indices alone, so existence, spot and name are independent of the window and of the order
-  the reader interacted. Screen them on the PARENT grid, grow them on every window no larger than
+  the reader interacted. Its `harbor` and `onRiver` flags are read where it is drawn, from the
+  close-up's own water and every river it draws beside the hamlet's cell (`placeHamlets` in
+  `src/society/hamlets.ts`), so like a mill they can differ between two overlapping windows, and a
+  surface that quotes one quotes the close-up it read. Screen them on the PARENT grid, grow them on every window no larger than
   `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and never the deepest band read
   from `LOD_BANDS`, and append them after the projected settlements so seats and roads stay valid.
   Never put one on a world sheet or on a seat, and never wire a road to one: a through road may pass
@@ -124,7 +127,8 @@ about a rule, the rulebook wins.
   `src/world/seat-settlements.ts`, after `siteScore` in `src/society/sites.ts`). A drawn river that
   leaves its corridor can lie beyond that reach, and the town then takes the next seat its flags
   allow. Never seat a town by editing `snapToLand`, which the projected towns, the road anchors and the
-  hamlets share. A region hamlet is not seated: its `harbor` flag (Issue #976) and its `onRiver` flag stay at world resolution.
+  hamlets share. A region hamlet is not seated, since nothing in its site's score asks for water: its
+  flags are read where it is drawn instead (the hamlet bullet above).
 - **A deep close-up keeps band 3's density of terrain marks.** A window narrower than
   `GLYPH_DENSITY_WINDOW` (`src/render/layers/glyphs.ts`) spaces its marks as that window does and
   grows their caps with its area; a world sheet and every window at least that size draw as
