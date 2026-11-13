@@ -141,7 +141,7 @@ function shipNode(style: MapStyle, k: number, at: { readonly x: number; readonly
 }
 
 export function firstBerth<T extends Pt>(labels: LabelArena, berths: ReadonlyArray<T>, half: number): T | undefined {
-  return berths.slice(0, 1).find((o) => labels.tryClaim({ x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 }, 6));
+  return berths.find((o) => labels.tryClaim({ x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 }, 6));
 }
 
 export function seaDecorLayer(
