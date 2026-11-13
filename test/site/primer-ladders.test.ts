@@ -12,6 +12,7 @@ import {
   type RouteTree,
   type Seated,
 } from "../../src/site/shared/primer/ladders.ts";
+import { TODAY } from "../../src/site/shared/primer/seed-of-the-day.ts";
 import { phrasesOf, type Ladder, type Step } from "../../src/site/shared/primer/shape.ts";
 
 const stepsOf = (ladders: readonly Ladder[]): readonly Step[] =>
@@ -118,4 +119,11 @@ test("every step id is unique across the guide", () => {
 test("the guide opens on the Explorer, at the dice (Issue #1155 ruling 16)", () => {
   const opening = [LADDERS[0]?.route, LADDERS[0]?.lessons[0]?.steps[0]?.id];
   assert.deepEqual(opening, ["/explorer/", "explorer-dice"]);
+});
+
+test("Today's sound step names the four closeness bands, each a single lowercase word (Issue #1252)", () => {
+  const see = TODAY.lessons.flatMap((l) => l.steps).find((s) => s.id === "seed-of-the-day-sound")?.see ?? "";
+  const named = see.match(/how near you came: ([a-z]+), ([a-z]+), ([a-z]+) or ([a-z]+)\.$/);
+  assert.ok(named, `the see-line names four single lowercase band words: ${see}`);
+  assert.equal(new Set(named.slice(1)).size, 4);
 });
