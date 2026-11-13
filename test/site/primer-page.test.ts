@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import type { RouteTree } from "../../src/site/shared/primer/ladders.ts";
 import { option, road, text, type Ladder, type Step } from "../../src/site/shared/primer/shape.ts";
-import { AFTERWARD, primerPage, segmentsOf, tryItHref } from "../../src/site/primer/page.ts";
+import { AFTERWARD, primerPage, tryItHref } from "../../src/site/primer/page.ts";
+import { segmentsOf } from "../../src/site/shared/primer/segments.ts";
 import { datelineOf } from "../../src/site/primer/words.ts";
 
 const step = (id: string, at: string, over: Partial<Step> = {}): Step => ({

@@ -1,4 +1,5 @@
-import type { Act, Ladder, Words } from "./shape.ts";
+import { routeOf } from "./judge.ts";
+import { phrasesOf, type Act, type Ladder, type Words } from "./shape.ts";
 
 export type Only = "touch" | "motion";
 
@@ -32,30 +33,67 @@ export interface HandStep {
   readonly next: { readonly id: string; readonly at: string; readonly word: string | null } | null;
 }
 
-export function handSteps(_ladders: readonly Ladder[]): readonly HandStep[] {
-  return [];
+export function handSteps(ladders: readonly Ladder[]): readonly HandStep[] {
+  return ladders.flatMap((ladder) => {
+    const flat = ladder.lessons.flatMap((lesson) => lesson.steps);
+    return ladder.lessons.flatMap((lesson) =>
+      lesson.steps.map((step, i): HandStep => {
+        const after = flat[flat.indexOf(step) + 1];
+        return {
+          id: step.id,
+          route: routeOf(step.at),
+          act: step.act,
+          at: step.at,
+          words: step.words,
+          relies: step.relies ?? [],
+          first: step.first ?? [],
+          do: step.do ?? [],
+          then: step.then ?? null,
+          only: step.only ?? null,
+          kind: step.kind ?? null,
+          lesson: lesson.title,
+          n: i + 1,
+          of: lesson.steps.length,
+          siblings: lesson.steps.map((x) => x.id),
+          next: after === undefined ? null : { id: after.id, at: after.at, word: phrasesOf(after.act)[0] ?? null },
+        };
+      }),
+    );
+  });
 }
 
-export function stepIdOf(_search: string): string | null {
-  return null;
+const STEP_ID = /^[a-z0-9-]+$/;
+
+export function stepIdOf(search: string): string | null {
+  const id = new URLSearchParams(search).get(STEP_KEY);
+  return id !== null && STEP_ID.test(id) ? id : null;
 }
 
-export function handStepFor(_steps: readonly HandStep[], _id: string, _route: string): HandStep | null {
-  return null;
+export const handStepFor = (steps: readonly HandStep[], id: string, route: string): HandStep | null =>
+  steps.find((s) => s.id === id && s.route === route) ?? null;
+
+export function stepAddress(id: string, at: string): string {
+  const cut = at.indexOf("#");
+  const path = cut === -1 ? at : at.slice(0, cut);
+  const hash = cut === -1 ? "" : at.slice(cut);
+  if (!path.startsWith("/")) throw new Error(`${id}'s address is not root-absolute: ${at}`);
+  return `${path}${path.includes("?") ? "&" : "?"}${STEP_KEY}=${id}${hash}`;
 }
 
-export function stepAddress(_id: string, at: string): string {
-  return at;
-}
-
-export function withoutStep(path: string, _search: string, _hash: string): string {
-  return path;
+export function withoutStep(path: string, search: string, hash: string): string {
+  const kept = search
+    .replace(/^\?/, "")
+    .split("&")
+    .filter((pair) => pair !== "" && pair.split("=")[0] !== STEP_KEY);
+  return `${path}${kept.length === 0 ? "" : `?${kept.join("&")}`}${hash}`;
 }
 
 export type SealWhen = "never" | "arrival" | "use" | "outcome";
 
-export function sealWhen(_step: HandStep, _device: Device): SealWhen {
-  return "outcome";
+export function sealWhen(step: HandStep, device: Device): SealWhen {
+  if (!applies(step.only ?? undefined, device)) return "never";
+  if (step.kind !== null || (step.do.length > 0 && step.then === null)) return "use";
+  return step.then === null ? "arrival" : "outcome";
 }
 
 export interface UseWatch {
@@ -64,6 +102,20 @@ export interface UseWatch {
   readonly key?: string;
 }
 
-export function useWatches(_step: HandStep): readonly UseWatch[] {
-  return [];
+const WATCH_OF: Readonly<Record<Exclude<Act["kind"], "wait" | "key">, "click" | "change">> = {
+  click: "click",
+  repeat: "click",
+  set: "change",
+  choose: "change",
+  pick: "change",
+};
+
+export function useWatches(step: HandStep): readonly UseWatch[] {
+  if (step.do.length === 0)
+    return [...new Set([...step.words, ...step.relies].map((w) => w.css))].map((css) => ({ event: "change", css }));
+  return step.do.flatMap((act): readonly UseWatch[] => {
+    if (act.kind === "wait") return [];
+    if (act.kind === "key") return [{ event: "keydown", css: act.css, key: act.key }];
+    return [{ event: WATCH_OF[act.kind], css: act.css }];
+  });
 }

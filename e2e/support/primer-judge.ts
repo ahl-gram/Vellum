@@ -1,61 +1,10 @@
 // The Primer check's judgement, apart from the page (Issue #1250): what a step expects of each control it names, what the page's facts say it reads, and where a reader's press lands.
+import type { Box, Expect } from "../../src/site/shared/primer/judge.ts";
 import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
 export type Arm = "desk" | "tablet" | "motion";
 export const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
-export type Expect = "reachable" | "held" | "hidden" | "any";
-export type Reach =
-  "absent" | "hidden" | "no box" | "held" | "disabled" | "off screen" | "reachable" | `covered by ${string}`;
-export type Box = { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
 export type Point = { readonly x: number; readonly y: number };
-
-export type Facts = {
-  readonly found: boolean;
-  readonly shown: boolean;
-  readonly box: Box | null;
-  readonly clip: string;
-  readonly held: boolean;
-  readonly disabled: boolean;
-  readonly text: string;
-  readonly aria: string | null;
-  readonly title: string | null;
-  readonly placeholder: string | null;
-  readonly attr: string | null;
-  readonly label: string;
-  readonly road: readonly [string, string];
-  readonly options: readonly { readonly text: string; readonly disabled: boolean }[];
-};
-
-export const norm = (s: string | null): string => (s ?? "").replace(/\s+/g, " ").trim();
-
-export function wordsOf(f: Facts, w: Words): string | null {
-  if (!f.found) return null;
-  switch (w.read) {
-    case "text":
-      return norm(f.text);
-    case "aria":
-      return norm(f.aria);
-    case "title":
-      return norm(f.title);
-    case "placeholder":
-      return f.placeholder;
-    case "attr":
-      return f.attr;
-    case "label":
-      return norm(f.label);
-    case "road":
-      return `${norm(f.road[0])} ${norm(f.road[1])}`;
-    case "option": {
-      const o = f.options.find((x) => norm(x.text) === w.says);
-      return o === undefined ? "no such option" : o.disabled ? `${w.says} (disabled)` : w.says;
-    }
-  }
-}
-
-export function wordsHold(got: string | null, w: Words): boolean {
-  if (got === null) return false;
-  return w.match === "starts" ? got.startsWith(w.says) : w.match === "contains" ? got.includes(w.says) : got === w.says;
-}
 
 export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Expect {
   if (step.only === "touch" && arm !== "tablet") return "hidden";
@@ -69,8 +18,6 @@ export function onItsArm(step: Step, arm: Arm): boolean {
   return arm === (step.only === "touch" ? "tablet" : "motion");
 }
 
-export const routeOf = (address: string): string => address.split(/[?#]/)[0] ?? address;
-
 const readsOf = (s: Step): string =>
   JSON.stringify([s.at, s.first ?? [], s.words, s.relies ?? [], s.do ?? [], s.then ?? [], s.only ?? null]);
 
@@ -81,22 +28,6 @@ export function heldBy(step: Step, ladders: readonly Ladder[]): string | null {
     if (readsOf(s) === mine) return s.id;
   }
   return null;
-}
-
-export function stateOf(f: Facts, hit: string): Reach {
-  if (!f.found) return "absent";
-  if (!f.shown) return "hidden";
-  if (f.box === null || f.box.w === 0 || f.box.h === 0) return "no box";
-  if (f.held) return "held";
-  if (f.disabled) return "disabled";
-  if (hit === "off screen") return "off screen";
-  return hit === "self" || hit === "label" ? "reachable" : `covered by ${hit}`;
-}
-
-export function fits(state: Reach, expect: Expect): boolean {
-  if (expect === "any") return state !== "absent";
-  if (expect === "hidden") return state === "hidden" || state === "no box";
-  return state === expect;
 }
 
 const corner = (token: string, length: number): number =>

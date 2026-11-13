@@ -5,23 +5,17 @@ import type { SuiteContext } from "../types.ts";
 import { dropExpectedCancellations } from "./console.ts";
 import { bounce } from "./nav.ts";
 import { perform } from "./primer-acts.ts";
+import { ARM_NAME, expectFor, heldBy, keysLost, onItsArm, pressPoint, type Arm } from "./primer-judge.ts";
 import {
-  ARM_NAME,
-  expectFor,
   fits,
-  heldBy,
-  keysLost,
-  onItsArm,
-  pressPoint,
   routeOf,
   stateOf,
   wordsHold,
   wordsOf,
-  type Arm,
   type Expect,
   type Facts,
   type Reach,
-} from "./primer-judge.ts";
+} from "../../src/site/shared/primer/judge.ts";
 import { ARM, BARE, FACTS, HASH, HIT } from "./primer-reads.ts";
 import { PRIMER_ROOMS, type PrimerRoom, type Rest } from "./primer-rooms.ts";
 import { withReducedMotion } from "./reduced-motion.ts";

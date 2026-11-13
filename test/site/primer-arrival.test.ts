@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { applies, roomOnArrival, type ArrivalRoom } from "../../src/site/primer/arrival.ts";
+import { applies } from "../../src/site/shared/primer/hand-steps.ts";
+import { roomOnArrival, type ArrivalRoom } from "../../src/site/primer/arrival.ts";
 
 const ROOMS: readonly ArrivalRoom[] = [
   { id: "A", steps: [{ id: "a1" }, { id: "a2", only: "touch" }] },

@@ -1,20 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  ARM_NAME,
-  expectFor,
-  fits,
-  heldBy,
-  keyOf,
-  keysLost,
-  onItsArm,
-  pressPoint,
-  routeOf,
-  stateOf,
-  wordsHold,
-  wordsOf,
-  type Facts,
-} from "../../e2e/support/primer-judge.ts";
+import { ARM_NAME, expectFor, heldBy, keyOf, keysLost, onItsArm, pressPoint } from "../../e2e/support/primer-judge.ts";
+import { fits, routeOf, stateOf, wordsHold, wordsOf, type Facts } from "../../src/site/shared/primer/judge.ts";
 import type { Ladder, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
 const FACTS: Facts = {
