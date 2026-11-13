@@ -1,8 +1,9 @@
 import { createRng, type Rng } from "../core/rng.ts";
-import { NEIGHBORS_8, type Field } from "../core/grid.ts";
+import type { Field } from "../core/grid.ts";
 import { BIOMES } from "../climate/biomes.ts";
 import { slopeField } from "../terrain/slope.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
+import { besideWater, onOrBesideRiver } from "../world/seat-settlements.ts";
 import { landSnapRadius, snapToLand } from "../world/snap-to-land.ts";
 import type { FeatureNames, NamedSettlement, World } from "../world/types.ts";
 import { BIOME_APPEAL, EDGE_MARGIN } from "./sites.ts";
@@ -31,8 +32,6 @@ export type HamletCandidate = {
   readonly u: number;
   readonly v: number;
   readonly name: string;
-  readonly harbor: boolean;
-  readonly onRiver: boolean;
   readonly score: number;
   readonly founded: number;
 };
@@ -121,22 +120,6 @@ export function hamletSite(world: World, ground: HamletGround, wx: number, wy: n
   return 1 - Math.min(1, (ground.slope.data[i] as number) * 8) + (BIOME_APPEAL[biome] ?? 0.3);
 }
 
-function shoreAndRiver(world: World, wx: number, wy: number): { harbor: boolean; onRiver: boolean } {
-  const { gridW, gridH } = world.recipe;
-  const { data } = world.elev;
-  let harbor = false;
-  let riverNear = false;
-  for (const offset of NEIGHBORS_8) {
-    const nx = wx + offset[0];
-    const ny = wy + offset[1];
-    if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) continue;
-    const ni = nx + ny * gridW;
-    if ((data[ni] as number) <= world.seaLevel) harbor = true;
-    if (world.riverCells[ni] === 1) riverNear = true;
-  }
-  return { harbor, onRiver: world.riverCells[wx + wy * gridW] === 1 || riverNear };
-}
-
 function hamletAtPoint(
   world: World,
   ground: HamletGround,
@@ -163,15 +146,13 @@ function hamletAtPoint(
   );
   if (tooNear) return null;
 
-  const { harbor, onRiver } = shoreAndRiver(world, wx, wy);
-
   const name = hamletName(r.fork("name"), world.culture, taken);
   if (name === null) return null;
 
   const presentYear = world.title.year;
   const founded = presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
 
-  return { u, v, name, harbor, onRiver, score, founded };
+  return { u, v, name, score, founded };
 }
 
 export function hamletSpotAt(
@@ -207,7 +188,7 @@ export function placeHamlets(
 ): NamedSettlement[] {
   const candidates = hamletCandidates(world, window);
   if (candidates.length === 0) return [];
-  const { elev, seaLevel } = land;
+  const { elev, seaLevel, riverCells } = land;
   const gridW = elev.w;
   const gridH = elev.h;
   const du = window.u1 - window.u0;
@@ -225,8 +206,8 @@ export function placeHamlets(
       x: cell.x,
       y: cell.y,
       kind: "hamlet",
-      harbor: c.harbor,
-      onRiver: c.onRiver,
+      harbor: besideWater(elev, seaLevel, cell.x, cell.y),
+      onRiver: onOrBesideRiver(riverCells, gridW, gridH, cell.x, cell.y),
       score: c.score,
       name: c.name,
       founded: c.founded,
