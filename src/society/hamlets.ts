@@ -200,9 +200,14 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   return out;
 }
 
-export function placeHamlets(world: World, window: UvWindow, elev: Field, seaLevel: number): NamedSettlement[] {
+export function placeHamlets(
+  world: World,
+  window: UvWindow,
+  land: { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array },
+): NamedSettlement[] {
   const candidates = hamletCandidates(world, window);
   if (candidates.length === 0) return [];
+  const { elev, seaLevel } = land;
   const gridW = elev.w;
   const gridH = elev.h;
   const du = window.u1 - window.u0;

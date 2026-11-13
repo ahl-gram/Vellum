@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createField, NEIGHBORS_8 } from "../../src/core/grid.ts";
+import { createField } from "../../src/core/grid.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import {
@@ -11,8 +11,8 @@ import {
   seatProjected,
   seatReach,
 } from "../../src/world/seat-settlements.ts";
-import type { World } from "../../src/world/types.ts";
 import { laidRiverCount } from "../../scripts/region-detail/feature-match.ts";
+import { onOrBeside } from "../../test-support/on-or-beside.ts";
 import { quarterWindow } from "../../test-support/uv-window.ts";
 
 const SEA = 0;
@@ -25,16 +25,6 @@ function riversWhere(on: (x: number, y: number) => boolean): Uint8Array {
     for (let x = 0; x < 21; x++) if (on(x, y)) cells[x + y * 21] = 1;
   }
   return cells;
-}
-
-function onOrBeside(region: World, at: { x: number; y: number }, hit: (i: number) => boolean): boolean {
-  const { w, h } = region.elev;
-  if (hit(at.x + at.y * w)) return true;
-  return NEIGHBORS_8.some(([dx, dy]) => {
-    const x = at.x + dx;
-    const y = at.y + dy;
-    return x >= 0 && x < w && y >= 0 && y < h && hit(x + y * w);
-  });
 }
 
 test("the harbour reach is the far corner of a diagonal neighbour cell, in fine cells", () => {
