@@ -109,6 +109,15 @@ test("a hamlet's flags are read at the cell it is drawn on, not the cell it proj
     assert.equal(h.harbor, true, `${h.name} has water to its west where it is drawn`);
     assert.equal(h.onRiver, false, `${h.name} is five cells from the river at the cell it projects to`);
   });
+
+  const ponds = new Set(cells.map((c) => at(c.x, c.y)));
+  const pond = placeHamlets(world, WINDOW, { elev: landWith(ponds), seaLevel: 0, riverCells: riversAt(new Set()) });
+  assert.equal(pond.length, candidates.length, "every candidate finds land beside its pond");
+  pond.forEach((h, k) => {
+    const c = cells[k] as { x: number; y: number };
+    assert.notDeepEqual({ x: h.x, y: h.y }, c, `${h.name} is moved off its pond by the snap`);
+    assert.equal(h.harbor, true, `${h.name} stands beside the pond it projects to, which has no water beside it`);
+  });
 });
 
 test("on chart 42's band-3 close-up at Paukilua, every hamlet's flags say what the close-up draws beside it (Issue #976)", () => {
