@@ -31,7 +31,7 @@ const huntStorage = (): Storage => localStorage;
 export const huntProjection = (world: World): Projection =>
   createProjection(world.elev.w, world.elev.h, 1500, marginFor(1500));
 
-const BAND_PROSE = {
+export const BAND_PROSE = {
   hot: "Hot. You are all but upon it.",
   warm: "Warmer. The place lies near.",
   cool: "Cool. You wander from it.",
