@@ -1,6 +1,6 @@
 import { el, type SvgNode } from "../svg.ts";
-import { clearOfCircles, prunePoints } from "../geometry.ts";
-import type { RenderCtx } from "../context.ts";
+import { clearOfCircles, prunePoints, type Pt } from "../geometry.ts";
+import type { LabelArena, RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { CompassPlan } from "./compass.ts";
@@ -140,12 +140,8 @@ function shipNode(style: MapStyle, k: number, at: { readonly x: number; readonly
   ]);
 }
 
-function claimSpot(
-  ctx: RenderCtx,
-  o: { x: number; y: number } | undefined,
-  half: number,
-): { x: number; y: number } | undefined {
-  return o && ctx.labels.tryClaim({ x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 }, 6) ? o : undefined;
+export function firstBerth<T extends Pt>(labels: LabelArena, berths: ReadonlyArray<T>, half: number): T | undefined {
+  return berths.slice(0, 1).find((o) => labels.tryClaim({ x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 }, 6));
 }
 
 export function seaDecorLayer(
@@ -174,17 +170,10 @@ export function seaDecorLayer(
   const waves = waveNodes(style, k, drng, open);
 
   const deepSpots = open.filter((o) => o.d >= 8 && o.edgeOk && clearOf(o.x, o.y, 90 * k)).sort((a, b) => b.d - a.d);
-  const serpentAt =
-    decor.serpent === false
-      ? undefined
-      : claimSpot(
-          ctx,
-          deepSpots.find((o) => clearOf(o.x, o.y, 90 * k)),
-          60 * k,
-        );
-  const shipAt = claimSpot(
-    ctx,
-    deepSpots.find((o) => !serpentAt || Math.hypot(o.x - serpentAt.x, o.y - serpentAt.y) > 260 * k),
+  const serpentAt = decor.serpent === false ? undefined : firstBerth(ctx.labels, deepSpots.slice(0, 1), 60 * k);
+  const shipAt = firstBerth(
+    ctx.labels,
+    deepSpots.filter((o) => !serpentAt || Math.hypot(o.x - serpentAt.x, o.y - serpentAt.y) > 260 * k),
     45 * k,
   );
 
