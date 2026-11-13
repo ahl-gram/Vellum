@@ -23,6 +23,13 @@ const EXPLORER_REST: Payload<Rest> = `(() => {
 const restWhen = (quiet: string): Payload<Rest> =>
   `(() => { const w = window.__primer; const quiet = (${quiet}) && ${MOVING} === 0; return { marks: w.marks, frames: w.frames, quiet, view: "" }; })()`;
 
+// The Writing Room's rest departs on its founding counter, which moves once a founding is drawn, never on the page's marks: a shaped sentence waits on the name index before its pill shows.
+const WRITING_REST: Payload<Rest> = `(() => {
+  const w = window.__primer, r = window.__vellumWritingRoom();
+  const quiet = r.n > 0 && document.getElementById("status").textContent === "" && !!document.querySelector("#wr-chart svg") && ${MOVING} === 0;
+  return { marks: r.n, frames: w.frames, quiet, view: "" };
+})()`;
+
 export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
   "/explorer/": {
     booted: `({ up: typeof window.__vellumUsesWorker === "function" && !!document.querySelector("#map svg") })`,
@@ -65,6 +72,26 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
     rest: restWhen(
       `window.__vellumPortfolio().drawn === window.__vellumPortfolio().items && document.getElementById("pf-status").textContent === ""`,
     ),
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/writing-room/": {
+    booted: `({ up: typeof window.__vellumWritingRoom === "function" && window.__vellumWritingRoom().n > 0 })`,
+    rest: WRITING_REST,
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/seed-of-the-day/": {
+    booted: `({ up: !!document.querySelector("#map svg") && document.getElementById("clues").children.length > 0 })`,
+    rest: restWhen(
+      `!!document.querySelector("#map svg") && document.getElementById("clues").children.length > 0 && document.getElementById("status").textContent === ""`,
+    ),
+    pickFirst: null,
+    repeatCap: 0,
+  },
+  "/gallery/": {
+    booted: `({ up: document.querySelectorAll(".grid figure").length > 0 })`,
+    rest: restWhen(`document.querySelectorAll(".grid figure").length > 0`),
     pickFirst: null,
     repeatCap: 0,
   },
