@@ -21,7 +21,6 @@ export const MOTION_MOVED_PX = 1;
 function atRest(d: MotionRead, last: MotionRead | null): boolean {
   if (d.size <= 0) return false;
   if (last === null || Math.abs(d.pos - last.pos) > MOTION_STILL_PX) return false;
-  // Non-empty is load bearing on its own: [].every() is TRUE, and a shut panel reports no animations at all.
   return d.anims.length > 0 && d.anims.every((s) => s === "finished");
 }
 

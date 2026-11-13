@@ -53,7 +53,6 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "fallback",
   "hunt",
   "print-room",
-  // Issue #521: the Portfolio ships its own bundle, and e2e-tiers refuses a bundle with no smoke suite booting it.
   "chart-drawer",
   "prospect",
   "ribbon",
