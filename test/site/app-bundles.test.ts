@@ -313,6 +313,23 @@ test("no page downloads the plate's code before it draws a plate, and the page a
   checkWorkerReachesPlate(p, workers, rel, carrying, plateModules);
 });
 
+test("no page's bundle carries the Primer's ladders: a room reads its step from the data file the build writes (Issue #1253)", async () => {
+  const p = await press();
+  const SENTENCE = "A new row has come: drag {islands}";
+  const rel = (f: string): string => relative(p.root, f);
+  for (const twin of p.twins)
+    assert.deepEqual(
+      [...reach(p, [twin], ON_DEMAND)].filter((f) => p.text(f).includes(SENTENCE)).map(rel),
+      [],
+      `${rel(twin)} reaches the islands step's sentence, so it carries a ladder as code and every visit downloads it`,
+    );
+  const explorer = [...reach(p, [join(p.root, "explorer", "app.bundle.js")], STATIC)];
+  assert.ok(
+    explorer.some((f) => p.text(f).includes("/primer/steps.json")),
+    "the Explorer's bundle never names the data file, so no Try it can point its hand",
+  );
+});
+
 test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {
   const p = await press();
   const pages = reach(p, p.twins, ON_DEMAND);
