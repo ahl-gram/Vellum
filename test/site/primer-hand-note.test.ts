@@ -290,5 +290,14 @@ test("PK22 a named control that is greyed does not stand, so the ring holds the 
       "left:894px;top:644px;width:162px;height:47px",
       `${attr}: the ring moves to Print and Download once they can be pressed`,
     );
+    for (const css of ["#pr-bind", "#pr-print", "#pr-download"])
+      b.document.querySelector(css)?.setAttribute(attr, attr === "disabled" ? "" : "true");
+    frames.shift()?.();
+    assert.equal(
+      b.document.querySelector(".primer-ring")?.hidden,
+      true,
+      `${attr}: the ring steps away while nothing the step leans on can be pressed`,
+    );
+    assert.equal(b.document.querySelector(".primer-hand")?.hidden, true, `${attr}: the hand steps away with it`);
   }
 });
