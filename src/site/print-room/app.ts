@@ -38,6 +38,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
 import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } from "../shared/written-world.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 
 declare global {
   interface Window {
@@ -176,6 +177,7 @@ function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: P
   refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
   enableBind();
   askRoad(posterBasis);
+  void bootHandOnce({ route: "/print-room/" });
 }
 
 function draw(): void {

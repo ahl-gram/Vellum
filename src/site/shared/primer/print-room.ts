@@ -27,8 +27,9 @@ const presetOf = (presets: readonly PosterPreset[], key: string): PosterPreset =
 };
 const DESK = presetOf(POSTER_PRESETS, "desk");
 const FIRST_ROAD = ROAD_PRESETS[0]!;
-const room = (p: PosterPreset): Words => text(`[data-poster="${p.key}"] .room`, p.label);
-const press = (p: PosterPreset): Words => road(`[data-poster="${p.key}"]`, `${pressVerb(p)} ${p.label}`);
+const poster = (p: PosterPreset): string => `[data-poster="${p.key}"]`;
+const room = (p: PosterPreset): Words => text(`${poster(p)} .room`, p.label);
+const press = (p: PosterPreset): Words => road(poster(p), `${pressVerb(p)} ${p.label}`);
 
 export const PRINT_ROOM: Ladder = {
   route: "/print-room/",
@@ -83,6 +84,7 @@ export const PRINT_ROOM: Ladder = {
           first: BOUND,
           words: [],
           relies: [text(".turn-gloss", "a thumbnail turns the sheet"), { ...aria(THUMB, "Turn to"), match: "starts" }],
+          do: [click(THUMB)],
         },
         {
           id: "print-room-keep",
@@ -91,6 +93,7 @@ export const PRINT_ROOM: Ladder = {
           at: AT,
           first: BOUND,
           words: [text("#pr-print", "Print"), text("#pr-download", "Download")],
+          do: [click("#pr-print"), click("#pr-download")],
         },
       ],
     },
@@ -106,6 +109,7 @@ export const PRINT_ROOM: Ladder = {
           at: AT,
           words: [option("#pr-format", "An impression (PNG)"), room(DESK)],
           relies: [press(DESK)],
+          do: [click(poster(DESK))],
         },
         {
           id: "print-room-road",
@@ -115,7 +119,7 @@ export const PRINT_ROOM: Ladder = {
           first: [choose("#pr-pressing", ROAD_CHOICE)],
           words: [option("#pr-pressing", ROAD_CHOICE), room(FIRST_ROAD)],
           relies: [press(FIRST_ROAD)],
-          then: [text("#pr-plate-line", "the road from Laukuwelua", "starts")],
+          do: [click(poster(FIRST_ROAD))],
         },
         {
           id: "print-room-back",
