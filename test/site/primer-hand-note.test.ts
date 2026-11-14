@@ -114,7 +114,7 @@ function booted(
     readonly frame?: HandEnv["frame"];
   } = {},
 ) {
-  const { document } = parseHTML(
+  const { document, Event } = parseHTML(
     `<!doctype html><html><body>${chrome ? `<header class="chrome"></header>` : ""}${more.body ?? ""}</body></html>`,
   );
   const [beforeHash = "", hash = ""] = address.split(/(?=#)/);
@@ -144,6 +144,7 @@ function booted(
   };
   return {
     document,
+    Event,
     store,
     replaced,
     fetched: () => fetched,
@@ -183,6 +184,21 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
 
 const rect = (left: number, top: number, width: number, height: number): DOMRect =>
   ({ left, top, width, height, x: left, y: top, right: left + width, bottom: top + height }) as DOMRect;
+
+test("PK18 the × sets the note aside: the ring, the manicule and the note go, the watchers stop, and the key leaves with the hash kept (Issue #1253 skeptic)", async () => {
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, { body: '<button id="random">⚄</button>' });
+  await b.run();
+  const aside = b.document.querySelector(".primer-slip-aside");
+  assert.ok(aside !== null);
+  assert.equal(b.document.querySelector(".primer-ring") !== null, true, "the ring is up before the ×");
+  aside.dispatchEvent(new b.Event("click", { bubbles: true }));
+  assert.equal(b.document.querySelector(".primer-slip") === null, true, "the note is gone");
+  assert.equal(b.document.querySelector(".primer-ring") === null, true, "the ring is gone");
+  assert.equal(b.document.querySelector(".primer-hand") === null, true, "the manicule is gone");
+  assert.equal(b.replaced.at(-1), "/explorer/#seed=42");
+  b.document.querySelector("#random")?.dispatchEvent(new b.Event("click", { bubbles: true }));
+  assert.deepEqual(b.store.held, {}, "a press after the × seals nothing");
+});
 
 test("PK17 bootHand lays the ring and the manicule in page coordinates and takes the note's width against the page, so a page scrolled under the 1024 floor keeps them on the step's control (Issue #1253 revision 1)", async () => {
   let ran = false;

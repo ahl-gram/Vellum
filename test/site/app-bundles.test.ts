@@ -5,6 +5,7 @@ import { existsSync, mkdtempSync, mkdirSync, readdirSync, writeFileSync, readFil
 import { dirname, resolve, join, relative, sep } from "node:path";
 import { tmpdir } from "node:os";
 import ts from "typescript";
+import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import { ROMAN } from "../../src/prospect/letter/face-roman.ts";
 import { CAPS } from "../../src/prospect/letter/face-caps.ts";
 import { ITALIC } from "../../src/prospect/letter/face-italic.ts";
@@ -315,14 +316,23 @@ test("no page downloads the plate's code before it draws a plate, and the page a
 
 test("no page's bundle carries the Primer's ladders: a room reads its step from the data file the build writes (Issue #1253)", async () => {
   const p = await press();
-  const SENTENCE = "A new row has come: drag {islands}";
   const rel = (f: string): string => relative(p.root, f);
+  const SENTENCES = LADDERS.map((ladder) => {
+    const steps = ladder.lessons.flatMap((lesson) => lesson.steps);
+    const run = steps
+      .flatMap((step) => [step.act, step.see])
+      .flatMap((text) => text.split(/[{}]/))
+      .reduce((a, b) => (b.length > a.length ? b : a));
+    assert.ok(run.length >= 40, `${ladder.route}'s longest plain run is too short to name its ladder`);
+    return { route: ladder.route, run };
+  });
   for (const twin of p.twins)
-    assert.deepEqual(
-      [...reach(p, [twin], ON_DEMAND)].filter((f) => p.text(f).includes(SENTENCE)).map(rel),
-      [],
-      `${rel(twin)} reaches the islands step's sentence, so it carries a ladder as code and every visit downloads it`,
-    );
+    for (const { route, run } of SENTENCES)
+      assert.deepEqual(
+        [...reach(p, [twin], ON_DEMAND)].filter((f) => p.text(f).includes(run)).map(rel),
+        [],
+        `${rel(twin)} reaches the ${route} ladder's first sentence, so it carries a ladder as code and every visit downloads it`,
+      );
   const explorer = [...reach(p, [join(p.root, "explorer", "app.bundle.js")], STATIC)];
   assert.ok(
     explorer.some((f) => p.text(f).includes("/primer/steps.json")),
