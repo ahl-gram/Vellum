@@ -276,15 +276,13 @@ function regionPeople(
   parentIdx: (number | null)[];
 } {
   const { world, window } = g;
-  const { elev, seaLevel } = land;
   const placed = projectSettlements(g, spec, land);
   const { settlements } = placed;
   const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
   const roadLabels = regionRoadLabels(g, land, placed);
   const roads = layWorldRoads(world, window, land, placed);
 
-  const hamlets =
-    window.u1 - window.u0 <= HAMLET_MAX_WINDOW_UV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const hamlets = window.u1 - window.u0 <= HAMLET_MAX_WINDOW_UV + 1e-9 ? placeHamlets(world, window, land) : [];
   const farms = window.u1 - window.u0 <= FARMSTEAD_MAX_WINDOW_UV + 1e-9 ? placeFarmsteads(world, window, land) : [];
   const smallest = [...hamlets, ...farms];
   const peopled = smallest.length > 0 ? [...settlements, ...smallest] : settlements;

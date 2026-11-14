@@ -8,6 +8,7 @@ import {
   isStandaloneSlot,
   makeMapTitle,
   type Culture,
+  type NameKind,
 } from "../../src/society/names.ts";
 
 test("there are at least four distinct cultures", () => {
@@ -125,6 +126,62 @@ test("a standalone-slot base is never a blocklisted word", () => {
       }
     }
   }
+});
+
+const ARTICLES = ["The", "An", "A"];
+
+const TEMPLATES_OF: Record<NameKind, (c: Culture) => readonly string[]> = {
+  bare: () => ["%"],
+  settlement: () => ["%"],
+  river: (c) => c.riverTemplates,
+  peak: (c) => c.peakTemplates,
+  sea: (c) => c.seaTemplates,
+  lake: (c) => c.lakeTemplates,
+  forest: (c) => c.forestTemplates,
+  realm: (c) => c.realmTemplates,
+};
+
+const SLOT_TEMPLATES = Object.entries(TEMPLATES_OF) as Array<[NameKind, (c: Culture) => readonly string[]]>;
+
+function articleNames(culture: Culture, kind: NameKind, filled: ReadonlySet<string>): string[] {
+  const found: string[] = [];
+  for (let seed = 1; seed <= 120; seed++) {
+    const namer = createNamer(createRng(seed).fork("names"), culture);
+    for (let i = 0; i < 40; i++) {
+      const name = namer.name(kind);
+      if (filled.has(name)) found.push(`${culture.id} seed ${seed} ${kind}: ${name}`);
+    }
+  }
+  return found;
+}
+
+test("no name of any kind takes an English article for a base that stands alone (Issue #962)", () => {
+  assert.ok(
+    CULTURES.some(
+      (c) =>
+        c.onsets.includes("th") &&
+        c.nuclei.includes("e") &&
+        (c.patterns.includes("ON") || (c.patterns.includes("ONC") && c.codas.includes(""))),
+    ),
+    'fixture premise: some culture\'s sounds spell "the", so the sample can meet the article',
+  );
+  const found = CULTURES.flatMap((culture) =>
+    SLOT_TEMPLATES.flatMap(([kind, templatesOf]) => {
+      const standalone = templatesOf(culture).filter(isStandaloneSlot);
+      return articleNames(culture, kind, new Set(standalone.flatMap((t) => ARTICLES.map((a) => t.replace("%", a)))));
+    }),
+  );
+  assert.deepEqual(found, []);
+});
+
+test('a base glued into its name keeps "the": the article is refused only where a base stands alone (Issue #962)', () => {
+  const found = CULTURES.flatMap((culture) =>
+    SLOT_TEMPLATES.flatMap(([kind, templatesOf]) => {
+      const glued = templatesOf(culture).filter((t) => !isStandaloneSlot(t));
+      return articleNames(culture, kind, new Set(glued.map((t) => t.replace("%", "The"))));
+    }),
+  );
+  assert.ok(found.length > 0, 'a glued slot such as "The %water" still takes the base "the"');
 });
 
 test("isStandaloneSlot classifies template slots by letter-adjacency", () => {

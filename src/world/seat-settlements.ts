@@ -74,11 +74,11 @@ function seatInDisc(
   return null;
 }
 
-function besideWater(elev: Field, seaLevel: number, x: number, y: number): boolean {
+export function besideWater(elev: Field, seaLevel: number, x: number, y: number): boolean {
   return besideWhere(elev.w, elev.h, x, y, (i) => (elev.data[i] as number) <= seaLevel);
 }
 
-function onOrBesideRiver(riverCells: Uint8Array, w: number, h: number, x: number, y: number): boolean {
+export function onOrBesideRiver(riverCells: Uint8Array, w: number, h: number, x: number, y: number): boolean {
   return riverCells[x + y * w] === 1 || besideWhere(w, h, x, y, (i) => riverCells[i] === 1);
 }
 
