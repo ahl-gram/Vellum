@@ -161,6 +161,21 @@ test("PK20 the Reading Room's steps are used as M3 rules: Play at its press, the
   ]);
 });
 
+test("PK21 the Print Room's presses are used as ruling E1 has it: the thumbnail step at a thumbnail, the keep step at Print or Download, the impression at Desk and the road at Ribbon; the proof, the style and the binding on their outcome, and the road back on arrival (Issue #1253 pull request 4)", () => {
+  for (const id of ["print-room-turn", "print-room-keep", "print-room-impression", "print-room-road"])
+    assert.equal(sealWhen(stepOf(id), DESK), "use", id);
+  for (const id of ["print-room-pull", "print-room-style", "print-room-bind"])
+    assert.equal(sealWhen(stepOf(id), DESK), "outcome", id);
+  assert.equal(sealWhen(stepOf("print-room-back"), DESK), "arrival", "print-room-back");
+  assert.deepEqual(useWatches(stepOf("print-room-turn")), [{ event: "click", css: "#pr-contents .thumb" }]);
+  assert.deepEqual(useWatches(stepOf("print-room-keep")), [
+    { event: "click", css: "#pr-print" },
+    { event: "click", css: "#pr-download" },
+  ]);
+  assert.deepEqual(useWatches(stepOf("print-room-impression")), [{ event: "click", css: '[data-poster="desk"]' }]);
+  assert.deepEqual(useWatches(stepOf("print-room-road")), [{ event: "click", css: '[data-poster="ribbon"]' }]);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");

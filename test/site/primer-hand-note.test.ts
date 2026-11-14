@@ -257,3 +257,38 @@ test("PK17 the note's width reads the open slip in page coordinates too (Issue #
   await b.run();
   assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:376px");
 });
+
+test("PK22 a named control that is greyed does not stand, so the ring holds the first thing until the named controls can be pressed and then moves to them: the Print Room's Bind before Print and Download (Issue #1253 pull request 4)", async () => {
+  for (const [attr, grey] of [
+    ["disabled", "disabled"],
+    ["aria-disabled", 'aria-disabled="true"'],
+  ] as const) {
+    const frames: (() => void)[] = [];
+    const b = booted("/print-room/?step=print-room-keep#seed=42", STEPS, true, {
+      body: `<button id="pr-bind">Bind the atlas</button><button id="pr-print" ${grey}>Print</button><button id="pr-download" ${grey}>Download</button>`,
+      frame: (fn) => frames.push(fn),
+    });
+    const at = (css: string, r: DOMRect): void => {
+      const el = b.document.querySelector(css);
+      assert.ok(el !== null, css);
+      el.getBoundingClientRect = () => r;
+    };
+    at("#pr-bind", rect(900, 360, 120, 35));
+    at("#pr-print", rect(900, 650, 60, 35));
+    at("#pr-download", rect(970, 650, 80, 35));
+    await b.run("/print-room/");
+    frames.shift()?.();
+    assert.equal(
+      b.document.querySelector(".primer-ring")?.getAttribute("style"),
+      "left:894px;top:354px;width:132px;height:47px",
+      `${attr}: the ring holds Bind while Print and Download are greyed`,
+    );
+    for (const css of ["#pr-print", "#pr-download"]) b.document.querySelector(css)?.removeAttribute(attr);
+    frames.shift()?.();
+    assert.equal(
+      b.document.querySelector(".primer-ring")?.getAttribute("style"),
+      "left:894px;top:644px;width:162px;height:47px",
+      `${attr}: the ring moves to Print and Download once they can be pressed`,
+    );
+  }
+});
