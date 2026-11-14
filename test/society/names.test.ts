@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
 import {
   CULTURES,
-  ENGLISH_BLOCKLIST,
   createNamer,
   isStandaloneSlot,
   makeMapTitle,
   type Culture,
   type NameKind,
 } from "../../src/society/names.ts";
+import { ENGLISH_BLOCKLIST } from "../../src/society/names-blocklist.ts";
 
 test("there are at least four distinct cultures", () => {
   assert.ok(CULTURES.length >= 4);
