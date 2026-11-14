@@ -1,7 +1,7 @@
 /* The Primer's pointing hand (Issue #1253): the ring and the manicule a room lays on the control a step names, and the slim note under the head cluster's trail. */
 .primer-ring {
   position: fixed;
-  z-index: 60;
+  z-index: 46;
   pointer-events: none;
   border-radius: 6px;
   box-shadow:
@@ -26,7 +26,7 @@
 }
 .primer-hand {
   position: fixed;
-  z-index: 61;
+  z-index: 47;
   pointer-events: none;
   font-family: var(--font-serif-fallback);
   font-size: 2.1rem;
@@ -143,6 +143,7 @@
   white-space: nowrap;
 }
 .primer-slip .primer-seal {
+  font-weight: 400;
   width: 1.5rem;
   height: 1.5rem;
   font-size: 0.72rem;

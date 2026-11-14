@@ -83,7 +83,7 @@ test("PK12 the note carries the step: where it comes from, its lesson and place,
 
 test("PK13 done, the note shows the seal with the step's number, says done and turns its press onward to the next step's word; a step that cannot apply carries its mark and no done row; the last step has no press onward", () => {
   const { note, step } = noteOf("explorer-islands", ["explorer-dice"]);
-  assert.equal(note.querySelector(".primer-slip-done"), null);
+  assert.equal(note.querySelector(".primer-slip-done") === null, true);
   markDone(note, step, new Set(["explorer-dice", "explorer-islands"]));
   assert.equal(text(note.querySelector("b.primer-seal")), "2");
   assert.ok(text(note.querySelector(".primer-slip-done")).includes("done"));
@@ -95,12 +95,12 @@ test("PK13 done, the note shows the seal with the step's number, says done and t
   assert.equal(note.querySelectorAll(".primer-slip-done").length, 1, "done is written once");
   const never = noteOf("explorer-in-hand", [], "never").note;
   assert.equal(text(never.querySelector("span.mark")), "on a tablet");
-  assert.equal(never.querySelector(".primer-slip-done"), null);
+  assert.equal(never.querySelector(".primer-slip-done") === null, true);
   const last = EXPLORER.lessons.flatMap((l) => l.steps).at(-1)!;
   const end = noteOf(last.id);
-  assert.equal(end.note.querySelector("a.primer-slip-next"), null);
+  assert.equal(end.note.querySelector("a.primer-slip-next") === null, true);
   markDone(end.note, end.step, new Set([last.id]));
-  assert.equal(end.note.querySelector("a.primer-slip-next"), null);
+  assert.equal(end.note.querySelector("a.primer-slip-next") === null, true);
 });
 
 function booted(
@@ -170,14 +170,14 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
   const elsewhere = booted("/explorer/?step=explorer-dice#seed=42");
   await elsewhere.run("/prospect/");
   assert.equal(
-    elsewhere.document.querySelector(".primer-slip"),
-    null,
+    elsewhere.document.querySelector(".primer-slip") === null,
+    true,
     "a step addressed to another room than the one booted",
   );
   for (const b of [none, unknown, other]) {
     assert.deepEqual(b.store.held, {});
     assert.deepEqual(b.replaced, []);
-    assert.equal(b.document.querySelector(".primer-slip"), null);
+    assert.equal(b.document.querySelector(".primer-slip") === null, true);
   }
 });
 
