@@ -1,7 +1,8 @@
 import { el, type SvgNode } from "../svg.ts";
-import type { Box } from "../geometry.ts";
+import { boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
+import { landCellsUnder } from "./cartouche-seat.ts";
 
 export const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
@@ -14,6 +15,7 @@ const BAR_W = 215;
 const BAR_H = 34;
 const BAR_INSET = 22;
 const BAR_FOOT = 24;
+const ABOVE_INDENT = 2;
 
 export function scalebarSeat(ctx: RenderCtx): Box {
   const { proj } = ctx;
@@ -26,8 +28,14 @@ export function scalebarSeat(ctx: RenderCtx): Box {
   };
 }
 
-export function planScalebar(ctx: RenderCtx, _cartouche: Box): ScalebarPlan {
-  return { box: scalebarSeat(ctx) };
+export function planScalebar(ctx: RenderCtx, cartouche: Box): ScalebarPlan {
+  const k = ctx.proj.widthPx / 1500;
+  const home = scalebarSeat(ctx);
+  if (!boxesOverlap(scalebarBacking(home, k), cartouche)) return { box: home };
+  const beside = { ...home, x: cartouche.x + cartouche.w + BAR_INSET * k };
+  const above = { ...home, x: cartouche.x + ABOVE_INDENT * k, y: cartouche.y - BAR_FOOT * k - home.h };
+  const aboveLand = landCellsUnder(ctx, scalebarBacking(above, k));
+  return { box: aboveLand < landCellsUnder(ctx, scalebarBacking(beside, k)) ? above : beside };
 }
 
 function leaguesTotal(isRegion: boolean, pxPerLeague: number, target: number): number {
