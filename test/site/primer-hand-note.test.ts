@@ -294,10 +294,14 @@ test("PK22 a named control that is greyed does not stand, so the ring holds the 
       b.document.querySelector(css)?.setAttribute(attr, attr === "disabled" ? "" : "true");
     frames.shift()?.();
     assert.equal(
-      b.document.querySelector(".primer-ring")?.hidden,
+      b.document.querySelector(".primer-ring")?.hasAttribute("hidden"),
       true,
       `${attr}: the ring steps away while nothing the step leans on can be pressed`,
     );
-    assert.equal(b.document.querySelector(".primer-hand")?.hidden, true, `${attr}: the hand steps away with it`);
+    assert.equal(
+      b.document.querySelector(".primer-hand")?.hasAttribute("hidden"),
+      true,
+      `${attr}: the hand steps away with it`,
+    );
   }
 });
