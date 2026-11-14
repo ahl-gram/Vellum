@@ -205,7 +205,7 @@ const PLAIN_WORDS = [
   "wang",
 ];
 
-test("no name of any kind stands alone as a plain English word (Issue #1378)", () => {
+test("no name of any kind stands alone as one of the plain words Issue #1378 screens", () => {
   const capitalized = PLAIN_WORDS.map((w) => w.charAt(0).toUpperCase() + w.slice(1));
   const found = CULTURES.flatMap((culture) =>
     SLOT_TEMPLATES.flatMap(([kind, templatesOf]) => {

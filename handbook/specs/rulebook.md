@@ -201,7 +201,7 @@ committed, only ever appends, and records each run it makes in every extract it 
     `baseRejected` in `src/society/names.ts` refuses a base that stands alone (an unsuffixed town,
     a bare name, a template slot `isStandaloneSlot` reads as standalone) when it is the article
     `ARTICLE` or a word of `ENGLISH_BLOCKLIST` in `src/society/names-blocklist.ts`, and draws
-    again; `createBaseMaker` refuses a word of that list as a numbered spare name's base too. A
+    again; `createBaseMaker` refuses a word of that list as a Roman-numeral spare name's base too. A
     word refused there changes a world only where one of its namers drew that very word, and
     every namer of seed 42 speaks `oromi` (`test/world/covenant-seed42.test.ts`), so a word that
     `oromi`'s onsets, nuclei and codas in `CULTURES` cannot form leaves the golden, the committed
