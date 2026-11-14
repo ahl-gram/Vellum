@@ -317,11 +317,12 @@ test("no page downloads the plate's code before it draws a plate, and the page a
 test("no page's bundle carries the Primer's ladders: a room reads its step from the data file the build writes (Issue #1253)", async () => {
   const p = await press();
   const rel = (f: string): string => relative(p.root, f);
+  // A run with no quote, escape or interpolation mark reads the same in the press's output as in the source.
   const SENTENCES = LADDERS.map((ladder) => {
     const steps = ladder.lessons.flatMap((lesson) => lesson.steps);
     const run = steps
       .flatMap((step) => [step.act, step.see])
-      .flatMap((text) => text.split(/[{}]/))
+      .flatMap((text) => text.split(/[{}"'\\`$\n]/))
       .reduce((a, b) => (b.length > a.length ? b : a));
     assert.ok(run.length >= 40, `${ladder.route}'s longest plain run is too short to name its ladder`);
     return { route: ladder.route, run };
