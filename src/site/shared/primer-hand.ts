@@ -13,6 +13,7 @@ import {
 import { watchOutcome, watchUse } from "./primer/hand-watch.ts";
 import type { Box } from "./primer/judge.ts";
 import { readSeals, writeSeal } from "./primer/seals.ts";
+import { pageBox } from "./page-box.ts";
 import { prefersReduce } from "./reduced-motion.ts";
 
 export interface HandRoom {
@@ -28,6 +29,8 @@ export interface HandEnv {
   readonly fetchSteps: () => Promise<readonly HandStep[]>;
   readonly frame: (fn: () => void) => number;
   readonly cancelFrame: (id: number) => void;
+  readonly scroll: () => { readonly x: number; readonly y: number };
+  readonly pageWidth: () => number;
 }
 
 const MANICULE = "☞";
@@ -146,5 +149,7 @@ export function bootHandOnce(room: HandRoom): Promise<void> {
         .catch(() => []),
     frame: (fn) => requestAnimationFrame(fn),
     cancelFrame: (id) => cancelAnimationFrame(id),
+    scroll: () => ({ x: window.scrollX, y: window.scrollY }),
+    pageWidth: () => pageBox().w,
   });
 }

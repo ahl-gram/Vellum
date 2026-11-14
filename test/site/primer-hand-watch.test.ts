@@ -48,8 +48,13 @@ test("PK10 watchUse seals on the reader's own use of a control the step names, a
   const seed = armed("explorer-enter", `<input id="seed">`);
   seed.fire("#seed", "keydown", { key: "a" });
   assert.equal(seed.calls(), 0, "a letter");
+  seed.fire("#seed", "change");
+  assert.equal(seed.calls(), 0, "a change when the box loses focus is not the use");
   seed.fire("#seed", "keydown", { key: "Enter" });
   assert.equal(seed.calls(), 1, "Enter");
+  const about = armed("explorer-look-about", `<div id="map-viewport"></div>`);
+  about.fire("#map-viewport", "keydown", { key: "ArrowDown" });
+  assert.equal(about.calls(), 1, "an arrow key on the chart");
   const stopped = armed("explorer-dice", `<button id="random">dice</button>`);
   stopped.stop();
   stopped.fire("#random", "click");

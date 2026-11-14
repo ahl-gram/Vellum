@@ -83,13 +83,13 @@ test("PK6 sealWhen: a device step that cannot apply never, a step with nothing t
 test("PK7 useWatches maps each act to the event a reader's use sends", () => {
   assert.deepEqual(useWatches(stepOf("explorer-dice")), [{ event: "click", css: "#random" }]);
   assert.deepEqual(useWatches(stepOf("explorer-theme")), [{ event: "change", css: "#theme" }]);
-  assert.deepEqual(useWatches(stepOf("explorer-enter")), [
-    { event: "change", css: "#seed" },
-    { event: "keydown", css: "#seed", key: "Enter" },
-  ]);
+  assert.deepEqual(useWatches(stepOf("explorer-enter")), [{ event: "keydown", css: "#seed", key: "Enter" }]);
   assert.deepEqual(useWatches(stepOf("explorer-look-about")), [
     { event: "click", css: "#zoom-in" },
+    { event: "keydown", css: "#map-viewport", key: "ArrowLeft" },
     { event: "keydown", css: "#map-viewport", key: "ArrowRight" },
+    { event: "keydown", css: "#map-viewport", key: "ArrowUp" },
+    { event: "keydown", css: "#map-viewport", key: "ArrowDown" },
   ]);
   assert.deepEqual(useWatches(stepOf("explorer-survey")), [{ event: "click", css: "#ages" }]);
   assert.deepEqual(useWatches(stepOf("explorer-commission")), [

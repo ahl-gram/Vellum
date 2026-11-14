@@ -103,9 +103,19 @@ test("PK13 done, the note shows the seal with the step's number, says done and t
   assert.equal(end.note.querySelector("a.primer-slip-next"), null);
 });
 
-function booted(address: string, steps: readonly HandStep[] = STEPS, chrome = true) {
+function booted(
+  address: string,
+  steps: readonly HandStep[] = STEPS,
+  chrome = true,
+  more: {
+    readonly body?: string;
+    readonly scroll?: HandEnv["scroll"];
+    readonly pageWidth?: HandEnv["pageWidth"];
+    readonly frame?: HandEnv["frame"];
+  } = {},
+) {
   const { document } = parseHTML(
-    `<!doctype html><html><body>${chrome ? `<header class="chrome"></header>` : ""}</body></html>`,
+    `<!doctype html><html><body>${chrome ? `<header class="chrome"></header>` : ""}${more.body ?? ""}</body></html>`,
   );
   const [beforeHash = "", hash = ""] = address.split(/(?=#)/);
   const q = beforeHash.indexOf("?");
@@ -127,8 +137,10 @@ function booted(address: string, steps: readonly HandStep[] = STEPS, chrome = tr
       fetched++;
       return Promise.resolve(steps);
     },
-    frame: () => 1,
+    frame: more.frame ?? (() => 1),
     cancelFrame: () => {},
+    scroll: more.scroll ?? (() => ({ x: 0, y: 0 })),
+    pageWidth: more.pageWidth ?? (() => 1024),
   };
   return { document, store, replaced, fetched: () => fetched, run: () => bootHand({ route: "/explorer/" }, env) };
 }
@@ -154,4 +166,36 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
     assert.deepEqual(b.replaced, []);
     assert.equal(b.document.querySelector(".primer-slip"), null);
   }
+});
+
+const rect = (left: number, top: number, width: number, height: number): DOMRect =>
+  ({ left, top, width, height, x: left, y: top, right: left + width, bottom: top + height }) as DOMRect;
+
+test("PK17 bootHand lays the ring and the manicule in page coordinates and takes the note's width against the page, so a page scrolled under the 1024 floor keeps them on the step's control (Issue #1253 revision 1)", async () => {
+  let ran = false;
+  const once: HandEnv["frame"] = (fn) => {
+    if (!ran) {
+      ran = true;
+      fn();
+    }
+    return 1;
+  };
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, {
+    body: '<button id="random">⚄</button>',
+    scroll: () => ({ x: 124, y: 30 }),
+    pageWidth: () => 1024,
+    frame: once,
+  });
+  const dice = b.document.querySelector("#random");
+  const chrome = b.document.querySelector("header.chrome");
+  assert.ok(dice !== null && chrome !== null);
+  dice.getBoundingClientRect = () => rect(1076, 50, 34, 34);
+  chrome.getBoundingClientRect = () => rect(300, 0, 400, 80);
+  await b.run();
+  assert.equal(
+    b.document.querySelector(".primer-ring")?.getAttribute("style"),
+    "left:1194px;top:74px;width:46px;height:46px",
+  );
+  assert.equal(b.document.querySelector(".primer-hand")?.getAttribute("style"), "left:1150px;top:97px");
+  assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:576px");
 });
