@@ -143,9 +143,9 @@ const TEMPLATES_OF: Record<NameKind, (c: Culture) => readonly string[]> = {
 
 const SLOT_TEMPLATES = Object.entries(TEMPLATES_OF) as Array<[NameKind, (c: Culture) => readonly string[]]>;
 
-function articleNames(culture: Culture, kind: NameKind, filled: ReadonlySet<string>): string[] {
+function articleNames(culture: Culture, kind: NameKind, filled: ReadonlySet<string>, lastSeed = 120): string[] {
   const found: string[] = [];
-  for (let seed = 1; seed <= 120; seed++) {
+  for (let seed = 1; seed <= lastSeed; seed++) {
     const namer = createNamer(createRng(seed).fork("names"), culture);
     for (let i = 0; i < 40; i++) {
       const name = namer.name(kind);
@@ -182,6 +182,39 @@ test('a base glued into its name keeps "the": the article is refused only where 
     }),
   );
   assert.ok(found.length > 0, 'a glued slot such as "The %water" still takes the base "the"');
+});
+
+const PLAIN_WORDS = [
+  "git",
+  "homo",
+  "lie",
+  "male",
+  "mong",
+  "nig",
+  "pee",
+  "puke",
+  "rape",
+  "sea",
+  "shag",
+  "shat",
+  "she",
+  "sky",
+  "sum",
+  "tit",
+  "vag",
+  "wang",
+];
+
+test("no name of any kind stands alone as a plain English word (Issue #1378)", () => {
+  const capitalized = PLAIN_WORDS.map((w) => w.charAt(0).toUpperCase() + w.slice(1));
+  const found = CULTURES.flatMap((culture) =>
+    SLOT_TEMPLATES.flatMap(([kind, templatesOf]) => {
+      const standalone = templatesOf(culture).filter(isStandaloneSlot);
+      const filled = new Set(standalone.flatMap((t) => capitalized.map((w) => t.replace("%", w))));
+      return articleNames(culture, kind, filled, 240);
+    }),
+  );
+  assert.deepEqual(found, []);
 });
 
 test("isStandaloneSlot classifies template slots by letter-adjacency", () => {
