@@ -60,7 +60,7 @@ test("the legend stays in frame and clears the other furniture", () => {
     for (const name of ["antique", "topographic", "nautical"] as const) {
       const ctx = ctxFor(w, name);
       const cart = planCartouche(ctx);
-      const scale = planScalebar(ctx);
+      const scale = planScalebar(ctx, cart.rect);
       const compass = planCompass(ctx, cart, scale.box);
       const reserved = [cart.rect, scale.box];
       if (compass) reserved.push(compass.box);

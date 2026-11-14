@@ -3,10 +3,11 @@ import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
 import { engravedLines, foundingNodes, foundingRise } from "./cartouche-founding.ts";
+import { cornerSeats, seatOnSea, type CartoucheScale } from "./cartouche-seat.ts";
 
 export type CartouchePlan = {
   readonly rect: Box;
-  readonly corner: "tl" | "tr" | "bl" | "br";
+  readonly scale: CartoucheScale;
   readonly lines: ReadonlyArray<string>;
   readonly founding: ReadonlyArray<string>;
 };
@@ -52,24 +53,24 @@ function cornerLandFraction(
   return n ? land / n : 1;
 }
 
-export function planCartouche(ctx: RenderCtx): CartouchePlan {
+function titleSize(ctx: RenderCtx): {
+  readonly lines: string[];
+  readonly founding: ReadonlyArray<string>;
+  readonly width: number;
+  readonly height: number;
+} {
   const { proj, world } = ctx;
   const k = proj.widthPx / 1500;
-  const m = proj.margin;
-
   const lines = wrapText(world.title.subtitle, 58);
   const founding = engravedLines(world);
-  const width = Math.min(470 * k, (proj.widthPx - 2 * m) * 0.38);
+  const width = Math.min(470 * k, (proj.widthPx - 2 * proj.margin) * 0.38);
   const height = (72 + lines.length * 15 + 16 + foundingRise(founding.length)) * k;
-  const inset = 20 * k;
+  return { lines, founding, width, height };
+}
 
-  const corners = [
-    { corner: "tr" as const, x: proj.widthPx - m - inset - width, y: m + inset },
-    { corner: "tl" as const, x: m + inset, y: m + inset },
-    { corner: "br" as const, x: proj.widthPx - m - inset - width, y: proj.heightPx - m - inset - height },
-    { corner: "bl" as const, x: m + inset, y: proj.heightPx - m - inset - height },
-  ];
-
+export function cornerChoice(ctx: RenderCtx): Box {
+  const { width, height } = titleSize(ctx);
+  const corners = cornerSeats(ctx, width, height);
   let best = corners[0]!;
   let bestLand = Infinity;
   for (const c of corners) {
@@ -79,13 +80,13 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
       best = c;
     }
   }
+  return best;
+}
 
-  return {
-    rect: { x: best.x, y: best.y, w: width, h: height },
-    corner: best.corner,
-    lines,
-    founding,
-  };
+export function planCartouche(ctx: RenderCtx): CartouchePlan {
+  const { lines, founding } = titleSize(ctx);
+  const seat = seatOnSea(ctx, cornerChoice(ctx));
+  return { rect: seat.rect, scale: seat.scale, lines, founding };
 }
 
 function cartoucheFrame(style: MapStyle, rect: Box, k: number): SvgNode[] {
@@ -204,7 +205,7 @@ function chartNumber(style: MapStyle, rect: Box, seed: number, k: number): SvgNo
 }
 
 export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
-  const k = ctx.proj.widthPx / 1500;
+  const k = (ctx.proj.widthPx / 1500) * plan.scale;
   return el("g", { id: "layer-cartouche" }, [
     ...cartoucheFrame(ctx.style, plan.rect, k),
     ...cartoucheText(ctx, plan, k),

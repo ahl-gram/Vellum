@@ -120,7 +120,7 @@ type ChartPlans = {
 function planFurniture(ctx: RenderCtx, opts: RenderOptions): ChartPlans {
   const cartouchePlan = planCartouche(ctx);
   ctx.labels.claim(cartouchePlan.rect);
-  const scalebarPlan = planScalebar(ctx);
+  const scalebarPlan = planScalebar(ctx, cartouchePlan.rect);
   ctx.labels.claim(scalebarPlan.box);
   const legendPlan = opts.legend ? planLegend(ctx, [cartouchePlan.rect, scalebarPlan.box]) : null;
   if (legendPlan) ctx.labels.claim(legendPlan.box);

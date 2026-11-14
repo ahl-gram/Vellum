@@ -42,11 +42,11 @@ test("the hero chart carries its decor ship (seed 42, antique, legend)", () => {
   assert.ok(svg.includes('<g id="sea-ship"'), "the hero chart drew no decor ship");
 });
 
-test("a walked ship keeps its distance from the decor serpent (seed 82, antique, legend)", () => {
-  const svg = renderMap(generateWorld(defaultRecipe(82)), HERO);
+test("a walked ship keeps its distance from the decor serpent (seed 98, antique, legend)", () => {
+  const svg = renderMap(generateWorld(defaultRecipe(98)), HERO);
   const serpent = decorCentre(svg, "sea-serpent", 51, 0);
   const ship = decorCentre(svg, "sea-ship", 16.25, 2.5);
-  assert.ok(serpent !== null, "fixture drift: seed 82 no longer draws its decor serpent");
+  assert.ok(serpent !== null, "fixture drift: seed 98 no longer draws its decor serpent");
   assert.ok(ship !== null, "the decor ship was lost beside the serpent");
   const apart = Math.hypot(serpent.x - ship.x, serpent.y - ship.y);
   assert.ok(apart > 260, `the ship stands ${apart.toFixed(1)} px from the serpent, inside the 260 px it keeps`);

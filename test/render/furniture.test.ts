@@ -33,7 +33,7 @@ test("the compass rose clears the scale bar and cartouche", () => {
   for (let seed = 1; seed <= 40; seed++) {
     const ctx = ctxFor(seed);
     const cart = planCartouche(ctx);
-    const scale = planScalebar(ctx);
+    const scale = planScalebar(ctx, cart.rect);
     const compass = planCompass(ctx, cart, scale.box);
     if (!compass) continue; // no ocean room for a compass is acceptable
     drawn++;
@@ -49,7 +49,7 @@ test("the compass rose clears the legend", () => {
   for (let seed = 1; seed <= 40; seed++) {
     const ctx = ctxFor(seed);
     const cart = planCartouche(ctx);
-    const scale = planScalebar(ctx);
+    const scale = planScalebar(ctx, cart.rect);
     const legend = planLegend(ctx, [cart.rect, scale.box]);
     assert.ok(legend, `no legend planned for seed ${seed}`);
     const compass = planCompass(ctx, cart, scale.box, legend.box);

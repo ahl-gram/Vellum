@@ -59,7 +59,7 @@ function ctxFor(w: World, name: StyleName): RenderCtx {
 function planFurniture(ctx: RenderCtx): { compass: CompassPlan | null; cart: ReturnType<typeof planCartouche> } {
   const cart = planCartouche(ctx);
   ctx.labels.claim(cart.rect);
-  const scale = planScalebar(ctx);
+  const scale = planScalebar(ctx, cart.rect);
   ctx.labels.claim(scale.box);
   const legend = planLegend(ctx, [cart.rect, scale.box]);
   if (legend) ctx.labels.claim(legend.box);

@@ -117,7 +117,7 @@ test("a sounding stands on water the world charts as land there", () => {
   const ctx = ctxFor(seaRegion);
   const cart = planCartouche(ctx);
   ctx.labels.claim(cart.rect);
-  const scale = planScalebar(ctx);
+  const scale = planScalebar(ctx, cart.rect);
   ctx.labels.claim(scale.box);
   const legend = planLegend(ctx, [cart.rect, scale.box]);
   if (legend) ctx.labels.claim(legend.box);
