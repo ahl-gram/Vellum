@@ -98,7 +98,8 @@ const matches = (e: Event, watch: UseWatch): boolean => {
 };
 
 export function watchUse(doc: Document, step: HandStep, done: () => void): () => void {
-  const listeners = useWatches(step).map((watch) => {
+  const watches = useWatches(step);
+  const listeners = watches.map((watch) => {
     const listener = (e: Event): void => {
       if (!matches(e, watch)) return;
       stop();
@@ -107,8 +108,25 @@ export function watchUse(doc: Document, step: HandStep, done: () => void): () =>
     doc.addEventListener(watch.event, listener, true);
     return { event: watch.event, listener };
   });
+  const valueOf = (css: string): string | null => {
+    const el = doc.querySelector(css) as Partial<HTMLInputElement> | null;
+    return el === null ? null : (el.value ?? null);
+  };
+  const preset = new Map(watches.filter((w) => w.event === "change").map((w) => [w.css, valueOf(w.css)]));
+  const sent = (e: Event): void => {
+    const form = e.target as Element | null;
+    if (typeof form?.closest !== "function") return;
+    const used = (w: UseWatch): boolean =>
+      (form.matches(w.css) || form.querySelector(w.css) !== null) &&
+      (w.event !== "change" || valueOf(w.css) !== preset.get(w.css));
+    if (!watches.some(used)) return;
+    stop();
+    done();
+  };
+  doc.addEventListener("submit", sent, true);
   function stop(): void {
     for (const { event, listener } of listeners) doc.removeEventListener(event, listener, true);
+    doc.removeEventListener("submit", sent, true);
   }
   return stop;
 }
