@@ -81,7 +81,11 @@ test("PK6 sealWhen: a device step that cannot apply never, a step with nothing t
   assert.equal(sealWhen(hand, { touch: true, motion: true }), "arrival");
   const pace = stepOf("reading-room-pace");
   assert.equal(sealWhen(pace, { touch: true, motion: false }), "never", "a motion step with motion off");
-  assert.equal(sealWhen(pace, { touch: false, motion: true }), "arrival", "a motion step with motion on");
+  assert.equal(
+    sealWhen(pace, { touch: false, motion: true }),
+    "use",
+    "a motion step with motion on is judged by its acts",
+  );
   assert.equal(
     sealWhen(hand, { touch: true, motion: false }),
     "arrival",
@@ -136,6 +140,24 @@ test("PK7 useWatches maps each act to the event a reader's use sends", () => {
     { event: "change", css: "#type" },
     { event: "change", css: "#band" },
     { event: "change", css: "#style" },
+  ]);
+});
+
+test("PK20 the Reading Room's steps are used as M3 rules: Play at its press, the pace at 2× or 4×, the ages at a change of its bar, and the read step at the dice, Enter in the seed box or Read; the Journal and the road are sealed on arrival (Issue #1253 pull request 3)", () => {
+  for (const id of ["reading-room-play", "reading-room-pace", "reading-room-ages", "reading-room-read"])
+    assert.equal(sealWhen(stepOf(id), DESK), "use", id);
+  for (const id of ["reading-room-journal", "reading-room-road"])
+    assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+  assert.deepEqual(useWatches(stepOf("reading-room-play")), [{ event: "click", css: ".rf-play" }]);
+  assert.deepEqual(useWatches(stepOf("reading-room-pace")), [
+    { event: "click", css: '.rf-pace [data-pace="2"]' },
+    { event: "click", css: '.rf-pace [data-pace="4"]' },
+  ]);
+  assert.deepEqual(useWatches(stepOf("reading-room-ages")), [{ event: "change", css: ".rf-range" }]);
+  assert.deepEqual(useWatches(stepOf("reading-room-read")), [
+    { event: "click", css: ".rr-dice" },
+    { event: "keydown", css: ".rr-colophon input", key: "Enter" },
+    { event: "click", css: ".rr-read" },
   ]);
 });
 

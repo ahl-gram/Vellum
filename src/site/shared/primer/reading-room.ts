@@ -1,6 +1,6 @@
 import { DEFAULT_PACE, PACES } from "../living-chart/pace.ts";
 import { ROAD_ASK, ROAD_TAKE } from "../living-chart/voyage-log-panel.ts";
-import { aria, countWord, text, type Ladder } from "./shape.ts";
+import { aria, click, countWord, set, text, type Ladder } from "./shape.ts";
 
 const AT = "/reading-room/#seed=42";
 const HURRIED = PACES.filter((k) => k !== DEFAULT_PACE);
@@ -21,6 +21,7 @@ export const READING_ROOM: Ladder = {
           see: "The survey ship sails first, day by day; then the years turn, and towns rise and fall. With motion turned off on your computer, Play goes straight to the last year.",
           at: AT,
           words: [text(".rf-play", "Play")],
+          do: [click(".rf-play")],
         },
         {
           id: "reading-room-pace",
@@ -28,6 +29,7 @@ export const READING_ROOM: Ladder = {
           see: `The voyage and the years run ${HURRIED.map(times).join(" or ")} as fast. With motion turned off there is no pace to choose, since Play is a still frame.`,
           at: AT,
           words: HURRIED.map((k) => text(`.rf-pace [data-pace="${k}"]`, `${k}×`)),
+          do: HURRIED.map((k) => click(`.rf-pace [data-pace="${k}"]`)),
           only: "motion",
         },
         {
@@ -36,6 +38,7 @@ export const READING_ROOM: Ladder = {
           see: "The chart shows the world as it stood that year, and the line under it tells what happened then.",
           at: AT,
           words: [aria(".rf-range", "The ages")],
+          do: [set(".rf-range", "912")],
         },
         {
           id: "reading-room-journal",
@@ -59,6 +62,12 @@ export const READING_ROOM: Ladder = {
           at: AT,
           words: [text(".rr-read", "Read"), text(".rr-dice", "⚄")],
           relies: [aria(".rr-colophon input", "seed")],
+          do: [
+            click(".rr-dice"),
+            { kind: "set", css: ".rr-colophon input", value: "1155", release: false },
+            { kind: "key", css: ".rr-colophon input", key: "Enter" },
+            click(".rr-read"),
+          ],
           kind: "play",
         },
       ],
