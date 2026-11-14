@@ -166,7 +166,7 @@ test("placeHamlets projects candidates onto region land, appended by the region 
     assert.ok((region.elev.data[i] as number) > region.seaLevel, `${h.name} stands on region land`);
   }
 
-  assert.deepEqual(placeHamlets(world, win, region.elev, region.seaLevel), hamlets);
+  assert.deepEqual(placeHamlets(world, win, region), hamlets);
 
   // Independent uv->cell math: the round-trip above runs the same code on the same inputs and cannot catch a scaling bug.
   const byName = new Map(hamletCandidates(world, win).map((c) => [c.name, c]));
@@ -342,7 +342,7 @@ test("hamlets snap on the band's radius too, not the old 8-neighbour scan (#399)
   // Every candidate lands in water with its only land OFFSET cells east.
   const elev = createField(320, 240, (x, y) => (shore.has(x + y * 320) ? 1 : -1));
 
-  const placed = placeHamlets(world, window, elev, 0);
+  const placed = placeHamlets(world, window, { elev, seaLevel: 0, riverCells: new Uint8Array(320 * 240) });
   assert.equal(placed.length, candidates.length, "no candidate is lost to the receded shore");
   for (const h of placed) {
     assert.ok((elev.data[h.x + h.y * 320] as number) > 0, `${h.name} stands on land`);
