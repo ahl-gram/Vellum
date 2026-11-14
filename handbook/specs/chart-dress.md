@@ -158,6 +158,8 @@ drops, so a legend drawn over the haunt moves the beast rather than losing it; a
 only near the haunt, and what it carries is `handbook/specs/region-and-voyage.md`'s. What a beast
 is, and what it does to the anonymous sea decor, is `handbook/specs/engine-invariants.md`'s.
 
+**The decor ship takes the first free berth.** `seaDecorLayer` (`src/render/layers/sea-decor.ts`) lays its deep berths in open sea clear of the cartouche and the compass, deepest first, and draws the anonymous ship at the first whose square the arena grants (`firstBerth` there), more than 260 px from the decor serpent on a 1500 px sheet, so a sheet whose names take the deepest water still carries its ship, and a ship whose first berth is free stands on it. The decor serpent tries the deepest berth alone and is drawn only where it is free. Like the beast, neither forces a berth: a sheet with none free draws neither.
+
 ---
 
 *Companion to `handbook/specs/ui-design.md` (the site's look around the chart), `handbook/specs/engine-invariants.md`
