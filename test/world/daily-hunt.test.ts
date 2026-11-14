@@ -179,7 +179,7 @@ test("days the decisive axis already led are untouched: the coin is still drawn"
 
   assert.equal(sig(DAILY[0]!), "ew:east | onriver: | near:Sahi | road:track | terrain:forest");
   assert.equal(sig(DAILY[3]!), "ew:west | near:Nepai | road:track | realm:Greater Hoaro");
-  assert.equal(sig(DAILY[5]!), "ns:south | near:Tseyama | road:track | realm:The Shogunate of Gaicha | terrain:forest");
+  assert.equal(sig(DAILY[5]!), "ns:south | near:Kaitayou | road:track | realm:Greater Chate | terrain:forest");
 });
 
 test("the road clue reads a trunk within 1.5 cells as a made road, a lane within it as a track, and anything farther as pathless", () => {
