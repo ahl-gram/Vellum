@@ -130,16 +130,18 @@ test("a standalone-slot base is never a blocklisted word", () => {
 
 const ARTICLES = ["The", "An", "A"];
 
-const SLOT_TEMPLATES: ReadonlyArray<readonly [NameKind, (c: Culture) => readonly string[]]> = [
-  ["bare", () => ["%"]],
-  ["settlement", () => ["%"]],
-  ["river", (c) => c.riverTemplates],
-  ["peak", (c) => c.peakTemplates],
-  ["sea", (c) => c.seaTemplates],
-  ["lake", (c) => c.lakeTemplates],
-  ["forest", (c) => c.forestTemplates],
-  ["realm", (c) => c.realmTemplates],
-];
+const TEMPLATES_OF: Record<NameKind, (c: Culture) => readonly string[]> = {
+  bare: () => ["%"],
+  settlement: () => ["%"],
+  river: (c) => c.riverTemplates,
+  peak: (c) => c.peakTemplates,
+  sea: (c) => c.seaTemplates,
+  lake: (c) => c.lakeTemplates,
+  forest: (c) => c.forestTemplates,
+  realm: (c) => c.realmTemplates,
+};
+
+const SLOT_TEMPLATES = Object.entries(TEMPLATES_OF) as Array<[NameKind, (c: Culture) => readonly string[]]>;
 
 function articleNames(culture: Culture, kind: NameKind, filled: ReadonlySet<string>): string[] {
   const found: string[] = [];
