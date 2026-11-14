@@ -142,7 +142,13 @@ function booted(
     scroll: more.scroll ?? (() => ({ x: 0, y: 0 })),
     pageWidth: more.pageWidth ?? (() => 1024),
   };
-  return { document, store, replaced, fetched: () => fetched, run: () => bootHand({ route: "/explorer/" }, env) };
+  return {
+    document,
+    store,
+    replaced,
+    fetched: () => fetched,
+    run: (route = "/explorer/") => bootHand({ route }, env),
+  };
 }
 
 test("PK14 bootHand drops the key with the hash kept once the step is done, writes the seal, and leaves an address with no key, an unknown key or a key for another room alone", async () => {
@@ -161,6 +167,13 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
   const other = booted("/explorer/?step=prospect-year#seed=42");
   await other.run();
   assert.deepEqual([none.fetched(), unknown.fetched(), other.fetched()], [0, 1, 1]);
+  const elsewhere = booted("/explorer/?step=explorer-dice#seed=42");
+  await elsewhere.run("/prospect/");
+  assert.equal(
+    elsewhere.document.querySelector(".primer-slip"),
+    null,
+    "a step addressed to another room than the one booted",
+  );
   for (const b of [none, unknown, other]) {
     assert.deepEqual(b.store.held, {});
     assert.deepEqual(b.replaced, []);
@@ -198,4 +211,28 @@ test("PK17 bootHand lays the ring and the manicule in page coordinates and takes
   );
   assert.equal(b.document.querySelector(".primer-hand")?.getAttribute("style"), "left:1150px;top:97px");
   assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:576px");
+});
+
+test("PK17 the note's width reads the open slip in page coordinates too (Issue #1253 revision 1)", async () => {
+  let ran = false;
+  const once: HandEnv["frame"] = (fn) => {
+    if (!ran) {
+      ran = true;
+      fn();
+    }
+    return 1;
+  };
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, {
+    body: '<button id="random">⚄</button><aside class="slip"></aside>',
+    scroll: () => ({ x: 124, y: 30 }),
+    pageWidth: () => 1024,
+    frame: once,
+  });
+  const chrome = b.document.querySelector("header.chrome");
+  const slip = b.document.querySelector(".slip");
+  assert.ok(chrome !== null && slip !== null);
+  chrome.getBoundingClientRect = () => rect(300, 0, 400, 80);
+  slip.getBoundingClientRect = () => rect(700, 0, 300, 600);
+  await b.run();
+  assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:376px");
 });

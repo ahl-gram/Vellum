@@ -20,6 +20,11 @@ test("PK9 outcomeDone seals only an outcome that holds and has changed since the
     true,
     "all ok and only a state changed",
   );
+  assert.equal(
+    outcomeDone([read("a")], [read("a"), read("b")]),
+    true,
+    "a read the arrival never took counts as changed",
+  );
 });
 
 function armed(id: string, body: string) {
@@ -31,7 +36,7 @@ function armed(id: string, body: string) {
     assert.ok(el !== null, `no ${css}`);
     el.dispatchEvent(Object.assign(new Event(type, { bubbles: true }), init));
   };
-  return { fire, stop, calls: () => calls };
+  return { fire, stop, calls: () => calls, document };
 }
 
 test("PK10 watchUse seals on the reader's own use of a control the step names, and on nothing else", () => {
@@ -55,6 +60,17 @@ test("PK10 watchUse seals on the reader's own use of a control the step names, a
   const about = armed("explorer-look-about", `<div id="map-viewport"></div>`);
   about.fire("#map-viewport", "keydown", { key: "ArrowDown" });
   assert.equal(about.calls(), 1, "an arrow key on the chart");
+  const doc = parseHTML("<!doctype html><html><body></body></html>");
+  let reached = 0;
+  const stopDoc = watchUse(doc.document, stepOf("explorer-dice"), () => reached++);
+  doc.document.dispatchEvent(new doc.Event("click"));
+  assert.equal(reached, 0, "an event whose target is no element reaches nothing and throws nothing");
+  stopDoc();
+  const labelled = armed("explorer-dice", `<label id="lab" for="random">dice</label><button id="random">dice</button>`);
+  // linkedom has no label.control, so the fixture states it as a browser answers it.
+  Object.assign(labelled.document.querySelector("#lab")!, { control: labelled.document.querySelector("#random") });
+  labelled.fire("#lab", "click");
+  assert.equal(labelled.calls(), 1, "a press on the label of the named control");
   const stopped = armed("explorer-dice", `<button id="random">dice</button>`);
   stopped.stop();
   stopped.fire("#random", "click");

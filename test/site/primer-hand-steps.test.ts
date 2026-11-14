@@ -41,6 +41,11 @@ test("PK4 withoutStep drops the key alone and keeps every other key and the hash
   assert.equal(withoutStep("/explorer/", "?step=a", "#seed=42"), "/explorer/#seed=42");
   assert.equal(withoutStep("/x/", "?a=1&step=b&c=2", "#h"), "/x/?a=1&c=2#h");
   assert.equal(withoutStep("/x/", "", ""), "/x/");
+  assert.equal(
+    withoutStep("/x/", "?stepper=1&step=a&steps=2", ""),
+    "/x/?stepper=1&steps=2",
+    "a key that only starts with step stays",
+  );
 });
 
 test("PK5 handSteps places every step once in ladder order, with its lesson, its place, its lesson's steps and the next step, and survives JSON unchanged", () => {
@@ -74,6 +79,14 @@ test("PK6 sealWhen: a device step that cannot apply never, a step with nothing t
   const hand = stepOf("explorer-in-hand");
   assert.equal(sealWhen(hand, { touch: false, motion: true }), "never");
   assert.equal(sealWhen(hand, { touch: true, motion: true }), "arrival");
+  const pace = stepOf("reading-room-pace");
+  assert.equal(sealWhen(pace, { touch: true, motion: false }), "never", "a motion step with motion off");
+  assert.equal(sealWhen(pace, { touch: false, motion: true }), "arrival", "a motion step with motion on");
+  assert.equal(
+    sealWhen(hand, { touch: true, motion: false }),
+    "arrival",
+    "a touch step on a touch device with motion off",
+  );
   assert.equal(sealWhen(stepOf("explorer-to-print"), DESK), "arrival");
   for (const id of ["explorer-dice", "explorer-enter", "explorer-theme", "explorer-commission"])
     assert.equal(sealWhen(stepOf(id), DESK), "use", id);
@@ -91,6 +104,33 @@ test("PK7 useWatches maps each act to the event a reader's use sends", () => {
     { event: "keydown", css: "#map-viewport", key: "ArrowUp" },
     { event: "keydown", css: "#map-viewport", key: "ArrowDown" },
   ]);
+  const dice = stepOf("explorer-dice");
+  assert.deepEqual(
+    useWatches({
+      ...dice,
+      do: [
+        { kind: "set", css: "#a", value: "1" },
+        { kind: "key", css: "#b", key: "Enter" },
+      ],
+    }),
+    [
+      { event: "change", css: "#a" },
+      { event: "keydown", css: "#b", key: "Enter" },
+    ],
+  );
+  assert.deepEqual(
+    useWatches({
+      ...dice,
+      do: [
+        { kind: "click", css: "#a" },
+        { kind: "key", css: "#a", key: "Enter" },
+      ],
+    }),
+    [
+      { event: "click", css: "#a" },
+      { event: "keydown", css: "#a", key: "Enter" },
+    ],
+  );
   assert.deepEqual(useWatches(stepOf("explorer-survey")), [{ event: "click", css: "#ages" }]);
   assert.deepEqual(useWatches(stepOf("explorer-commission")), [
     { event: "change", css: "#type" },
