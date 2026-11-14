@@ -72,17 +72,19 @@ async function open(k: PrimerKit, step: HandStep, label: string): Promise<void> 
   await k.settle(NOTE, (d) => d.up, `${label}: the note comes`, k.waitTries);
 }
 
-async function ringed(k: PrimerKit, css: readonly string[], label: string): Promise<Ring> {
+async function ringed(k: PrimerKit, css: readonly string[], label: string, from?: Box | null): Promise<Ring> {
   return k.settle(
     RING(css),
-    (d, last) => d.up && last !== null && last.up && sameJson(d.ring, last.ring),
+    (d, last) =>
+      d.up &&
+      (from === undefined || !sameJson(d.ring, from)) &&
+      last !== null &&
+      last.up &&
+      sameJson(d.ring, last.ring),
     `${label}: the ring comes to rest`,
     k.waitTries,
   );
 }
-
-const done = (k: PrimerKit, label: string): Promise<Note> =>
-  k.settle(NOTE, (d) => d.done !== null, `${label}: the note says done`, k.waitTries);
 
 export async function handChecks(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
@@ -124,28 +126,29 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
         const islands = handStep("explorer-islands");
         await open(k, islands, "PH2");
         for (const a of islands.do) await perform(k, a, "PH2 do");
-        const note = await done(k, "PH2");
+        const note = await k.evaluate(NOTE);
         const where = await k.evaluate(WHERE(islands.id));
         const lost = keysLost(islands.at, where.hash);
         k.check(
-          "PH2 the store holds the step, the note turns onward and the key has left",
-          where.sealed &&
-            note.done?.includes("done") === true &&
-            note.next === "Next, sizes ›" &&
-            !where.search.includes("step="),
+          "PH2 (a) the store holds the step, and the note says done and turns onward to sizes",
+          where.sealed && note.done?.includes("done") === true && note.next === "Next, sizes ›",
           JSON.stringify({ where, note }),
         );
-        k.check("PH2 every key of the step's address stays", lost.length === 0, `lost ${lost.join(", ") || "none"}`);
-        k.check("PH2 the key is dropped by the hand", !where.search.includes("step="), where.search);
+        k.check("PH2 (b) the key has left the address", !where.search.includes("step="), where.search);
+        k.check(
+          "PH2 (c) every key of the step's address stays",
+          lost.length === 0,
+          `lost ${lost.join(", ") || "none"}`,
+        );
       },
     );
     await step("PH3 a step with nothing to see is sealed on arrival", async () => {
       const toPrint = handStep("explorer-to-print");
       await open(k, toPrint, "PH3");
-      const note = await done(k, "PH3");
+      const note = await k.evaluate(NOTE);
       const where = await k.evaluate(WHERE(toPrint.id));
-      k.check("PH3 the note says done", note.done?.includes("done") === true, JSON.stringify(note));
-      k.check("PH3 the store holds the step", where.sealed, JSON.stringify(where));
+      k.check("PH3 (a) the note says done", note.done?.includes("done") === true, JSON.stringify(note));
+      k.check("PH3 (b) the store holds the step", where.sealed, JSON.stringify(where));
     });
     await step("PH4 a tablet step opened on a desk is never sealed and its note carries its mark", async () => {
       const inHand = handStep("explorer-in-hand");
@@ -158,9 +161,9 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
       );
       const note = await k.evaluate(NOTE);
       const where = await k.evaluate(WHERE(inHand.id));
-      k.check("PH4 the step is not sealed", !where.sealed, JSON.stringify(where));
+      k.check("PH4 (a) the step is not sealed", !where.sealed, JSON.stringify(where));
       k.check(
-        "PH4 the note carries the mark and no done row",
+        "PH4 (b) the note carries the mark and no done row",
         note.mark === "on a tablet" && note.done === null,
         JSON.stringify(note),
       );
@@ -169,11 +172,10 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
       const dice = handStep("explorer-dice");
       await open(k, dice, "PH5");
       const before = await k.evaluate(WHERE(dice.id));
-      k.check("PH5 arriving seals nothing", !before.sealed, JSON.stringify(before));
+      k.check("PH5 (a) arriving seals nothing", !before.sealed, JSON.stringify(before));
       for (const a of dice.do) await perform(k, a, "PH5 do");
-      await done(k, "PH5");
       const after = await k.evaluate(WHERE(dice.id));
-      k.check("PH5 pressing the dice seals the step", after.sealed, JSON.stringify(after));
+      k.check("PH5 (b) pressing the dice seals the step", after.sealed, JSON.stringify(after));
     });
     await step(
       "PH6 a step whose control waits on a town's card rings the town first and the card's press once the card is open",
@@ -183,16 +185,11 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
         const town = prospect.first.flatMap((a) => (a.kind === "click" ? [a.css] : []));
         const press = prospect.words.map((w) => w.css);
         const first = await ringed(k, town, "PH6 town");
-        k.check("PH6 the ring holds the town first", first.inside.every(Boolean), JSON.stringify(first));
+        k.check("PH6 (a) the ring holds the town first", first.inside.every(Boolean), JSON.stringify(first));
         for (const a of prospect.first) await perform(k, a, "PH6 first");
-        const second = await k.settle(
-          RING(press),
-          (d, last) => d.up && d.inside.every(Boolean) && last !== null && sameJson(d.ring, last.ring),
-          "PH6: the ring comes to the card's press",
-          k.waitTries,
-        );
+        const second = await ringed(k, press, "PH6 press", first.ring);
         k.check(
-          "PH6 the ring holds the card's press once the card is open",
+          "PH6 (b) the ring holds the card's press once the card is open",
           second.inside.every(Boolean),
           JSON.stringify(second),
         );
@@ -214,13 +211,17 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
         const where = await k.evaluate(WHERE(islands.id));
         const hash = await k.evaluate(HASH);
         const lost = keysLost(islands.at, hash);
-        k.check("PH7 the note and the ring are gone", !gone.up && !ring.present, JSON.stringify({ gone, ring }));
+        k.check("PH7 (a) the note and the ring are gone", !gone.up && !ring.present, JSON.stringify({ gone, ring }));
         k.check(
-          "PH7 the key left and the step is not sealed",
+          "PH7 (b) the key left and the step is not sealed",
           !where.search.includes("step=") && !where.sealed,
           JSON.stringify(where),
         );
-        k.check("PH7 every key of the step's address stays", lost.length === 0, `lost ${lost.join(", ") || "none"}`);
+        k.check(
+          "PH7 (c) every key of the step's address stays",
+          lost.length === 0,
+          `lost ${lost.join(", ") || "none"}`,
+        );
       },
     );
   });
