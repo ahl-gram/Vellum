@@ -200,11 +200,13 @@ committed, only ever appends, and records each run it makes in every extract it 
   - **A word the namer refuses where a name stands alone, when seed 42's tongue cannot spell it.**
     `baseRejected` in `src/society/names.ts` refuses a base that stands alone (an unsuffixed town,
     a bare name, a template slot `isStandaloneSlot` reads as standalone) when it is the article
-    `ARTICLE` or a word of `ENGLISH_BLOCKLIST`, and draws again. A word refused there changes a
-    world only where one of its namers drew that very word, and every namer of seed 42 speaks
-    `oromi` (`test/world/covenant-seed42.test.ts`), so a word that `oromi`'s onsets, nuclei and
-    codas in `CULTURES` cannot form leaves the golden, the committed charts and the Primer's ladders
-    as they stand. Read those sounds before calling a word one of these.
+    `ARTICLE` or a word of `ENGLISH_BLOCKLIST` in `src/society/names-blocklist.ts`, and draws
+    again; `createBaseMaker` refuses a word of that list as a Roman-numeral spare name's base too. A
+    word refused there changes a world only where one of its namers drew that very word, and
+    every namer of seed 42 speaks `oromi` (`test/world/covenant-seed42.test.ts`), so a word that
+    `oromi`'s onsets, nuclei and codas in `CULTURES` cannot form leaves the golden, the committed
+    charts and the Primer's ladders as they stand. Read those sounds before calling a word one
+    of these.
     It still renames every other world whose namer drew the word, every name that namer drew after
     it included, so run the unit suite and the browser lanes over it as over any change that moves
     a world.
