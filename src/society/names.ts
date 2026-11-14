@@ -82,6 +82,8 @@ export const ENGLISH_BLOCKLIST = new Set<string>([
   "bra",
 ]);
 
+const ARTICLE = "the";
+
 function isShortPrefix(a: string, b: string): boolean {
   const shorter = a.length <= b.length ? a : b;
   const longer = a.length <= b.length ? b : a;
@@ -312,7 +314,7 @@ function baseRejected(s: string, suffix: string, standalone: boolean, usedBases:
   if (s.length < 3 || s.length > 9 || s.length + suffix.length > 13) return true;
   if (/[aeiou]{3}/.test(s) || /(.)\1\1/.test(s)) return true;
   const stem = s.toLowerCase();
-  if (standalone && ENGLISH_BLOCKLIST.has(stem)) return true;
+  if (standalone && (ENGLISH_BLOCKLIST.has(stem) || stem === ARTICLE)) return true;
   return isNearExisting(stem, usedBases);
 }
 

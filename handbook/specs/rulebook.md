@@ -195,6 +195,17 @@ committed, only ever appends, and records each run it makes in every extract it 
     read time, holds no rng, and is imported by neither `src/world/generate.ts` nor
     `src/society/names.ts`, so it can neither re-roll a world nor move a chart. The property is the
     absence of those imports, so a new import into the generator is what breaks it.
+  - **A word the namer refuses where a name stands alone, when seed 42's tongue cannot spell it.**
+    `baseRejected` in `src/society/names.ts` refuses a base that stands alone (an unsuffixed town,
+    a bare name, a template slot `isStandaloneSlot` reads as standalone) when it is the article
+    `ARTICLE` or a word of `ENGLISH_BLOCKLIST`, and draws again. A word refused there changes a
+    world only where one of its namers drew that very word, and every namer of seed 42 speaks
+    `oromi` (`test/world/covenant-seed42.test.ts`), so a word that `oromi`'s onsets, nuclei and
+    codas in `CULTURES` cannot form leaves the golden, the committed charts and the Primer's ladders
+    as they stand. Read those sounds before calling a word one of these.
+    It still renames every other world whose namer drew the word, every name that namer drew after
+    it included, so run the unit suite and the browser lanes over it as over any change that moves
+    a world.
 - **An optional recipe field is guarded at every place the stamp touches it**, never written as a
   key that can hold `undefined`. Read `src/render/recipe-meta.ts` whole before adding one: the emit
   and the parse are conditional spreads, the human-readable metadata summary builds its fragment with
