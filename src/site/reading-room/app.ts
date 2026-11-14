@@ -24,6 +24,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import { $ } from "../shared/by-id.ts";
 import { foundAddress, heldFor, pageFounder, writtenParams, type WrittenWorld } from "../shared/written-world.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 
 // The ages hook is typed as the engine's own ReturnType, so tsc breaks this file if the hook ever grows, loses a member, or silently narrows again.
 declare global {
@@ -289,6 +290,7 @@ function scheduleArm(
       // AFTER the arm, since the survey half's plates are keyed by the travel order the arm decides; every plate either half can reach is pulled in one step, so no reveal can stall the sweep.
       stage.prefetch(plateSpecsFor(plates!.beats, rowsForSurvey()));
       frame.host.statusEl.textContent = "";
+      void bootHandOnce({ route: "/reading-room/" });
     },
   });
 }
