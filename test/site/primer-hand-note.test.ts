@@ -1,0 +1,259 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { parseHTML } from "linkedom";
+import { EXPLORER } from "../../src/site/shared/primer/explorer.ts";
+import { handSpot, noteWidth, ringBox, ringTargets } from "../../src/site/shared/primer/hand-geometry.ts";
+import { buildNote, markDone } from "../../src/site/shared/primer/hand-note.ts";
+import type { HandStep } from "../../src/site/shared/primer/hand-steps.ts";
+import { PRIMER_STORE_KEY } from "../../src/site/shared/primer/seals.ts";
+import { bootHand, type HandEnv } from "../../src/site/shared/primer-hand.ts";
+import { FakeStore } from "../../test-support/fake-store.ts";
+import { STEPS, stepOf } from "../../test-support/hand-steps.ts";
+
+const noteOf = (
+  id: string,
+  sealed: readonly string[] = [],
+  when: "never" | "arrival" | "use" | "outcome" = "outcome",
+) => {
+  const { document } = parseHTML(`<!doctype html><html><body></body></html>`);
+  const step = stepOf(id);
+  return { document, step, note: buildNote(document, step, new Set(sealed), when) };
+};
+const text = (el: Element | null): string => (el?.textContent ?? "").replace(/\s+/g, " ").trim();
+
+test("PK11 ringBox wraps the standing boxes grown by six pixels, handSpot stands the manicule forty-four pixels left and never off the window, noteWidth keeps the note twenty-four pixels short of the open slip, and ringTargets falls back to the first act only while no named control stands", () => {
+  assert.deepEqual(
+    ringBox([
+      { x: 0, y: 0, w: 10, h: 10 },
+      { x: 20, y: 5, w: 10, h: 10 },
+      { x: 50, y: 50, w: 1, h: 1 },
+    ]),
+    { x: -6, y: -6, w: 42, h: 27 },
+  );
+  assert.equal(ringBox([]), null);
+  assert.deepEqual(handSpot({ x: 30, y: 100, w: 50, h: 40 }, { h: 34 }), { x: 4, y: 103 });
+  assert.deepEqual(handSpot({ x: 200, y: 100, w: 50, h: 40 }, { h: 34 }), { x: 156, y: 103 });
+  assert.equal(noteWidth(25.6, 793, 1280), 620);
+  assert.equal(noteWidth(25.6, 544, 1024), 494.4);
+  assert.equal(noteWidth(24, null, 600), 552, "no open slip: the page's right edge is the edge");
+  const prospect = stepOf("explorer-view-prospect");
+  assert.deepEqual(
+    ringTargets(prospect, (c) => c !== "#place-card .pc-prospect"),
+    ['.place-hit[data-idx="0"]'],
+  );
+  assert.deepEqual(
+    ringTargets(prospect, () => true),
+    ["#place-card .pc-prospect"],
+  );
+  assert.deepEqual(
+    ringTargets(stepOf("explorer-dog-ear"), () => true),
+    [],
+  );
+});
+
+test("PK12 the note carries the step: where it comes from, its lesson and place, its sentence with chips, the road back to its own step and the road on", () => {
+  const { note } = noteOf("explorer-islands", ["explorer-dice"]);
+  const dots = [...note.querySelectorAll(".primer-slip-dots i")];
+  assert.equal(dots.length, 6);
+  assert.deepEqual(
+    dots.map((d) => d.className),
+    ["", "now", "", "", "", ""],
+  );
+  assert.equal(text(note.querySelector(".primer-slip-verb")), "From The Primer");
+  assert.equal(text(note.querySelector(".primer-slip-title")), "The Land, step 2 of 6");
+  const act = note.querySelector(".primer-slip-act");
+  assert.equal(text(act), "A new row has come: drag islands from few toward many, then let go.");
+  assert.equal(act?.querySelectorAll("span.ch.word").length, 3);
+  assert.equal(note.querySelector("a.primer-slip-back")?.getAttribute("href"), "/primer/#explorer-islands");
+  const next = note.querySelector("a.primer-slip-next");
+  assert.ok(next !== null, "the press onward");
+  assert.equal(next.getAttribute("href"), "/explorer/?step=explorer-sizes#seed=42&type=archipelago&islands=20");
+  assert.equal(next.className, "primer-slip-next dim");
+  assert.equal(text(next), "Next step");
+  assert.equal(note.querySelector("button.primer-slip-aside")?.getAttribute("aria-label"), "Set the step aside");
+  const sealed = noteOf("explorer-islands", ["explorer-archipelago"]).note;
+  assert.deepEqual(
+    [...sealed.querySelectorAll(".primer-slip-dots i")].map((d) => d.className),
+    ["on", "now", "", "", "", ""],
+  );
+  const road = noteOf("explorer-to-print").note.querySelector(".primer-slip-act span.ch.road");
+  assert.equal(text(road?.querySelector("i") ?? null).length > 0, true, "a road chip carries its verb");
+  assert.equal(text(road?.querySelector("b") ?? null).length > 0, true, "and its place");
+});
+
+test("PK13 done, the note shows the seal with the step's number, says done and turns its press onward to the next step's word; a step that cannot apply carries its mark and no done row; the last step has no press onward", () => {
+  const { note, step } = noteOf("explorer-islands", ["explorer-dice"]);
+  assert.equal(note.querySelector(".primer-slip-done") === null, true);
+  markDone(note, step, new Set(["explorer-dice", "explorer-islands"]));
+  assert.equal(text(note.querySelector("b.primer-seal")), "2");
+  assert.ok(text(note.querySelector(".primer-slip-done")).includes("done"));
+  const next = note.querySelector("a.primer-slip-next");
+  assert.equal(text(next), "Next, sizes ›");
+  assert.equal(next?.className, "primer-slip-next go");
+  assert.equal(note.querySelectorAll(".primer-slip-dots i")[1]?.className, "on");
+  markDone(note, step, new Set(["explorer-islands"]));
+  assert.equal(note.querySelectorAll(".primer-slip-done").length, 1, "done is written once");
+  const never = noteOf("explorer-in-hand", [], "never").note;
+  assert.equal(text(never.querySelector("span.mark")), "on a tablet");
+  assert.equal(never.querySelector(".primer-slip-done") === null, true);
+  const last = EXPLORER.lessons.flatMap((l) => l.steps).at(-1)!;
+  const end = noteOf(last.id);
+  assert.equal(end.note.querySelector("a.primer-slip-next") === null, true);
+  markDone(end.note, end.step, new Set([last.id]));
+  assert.equal(end.note.querySelector("a.primer-slip-next") === null, true);
+});
+
+function booted(
+  address: string,
+  steps: readonly HandStep[] = STEPS,
+  chrome = true,
+  more: {
+    readonly body?: string;
+    readonly scroll?: HandEnv["scroll"];
+    readonly pageWidth?: HandEnv["pageWidth"];
+    readonly frame?: HandEnv["frame"];
+  } = {},
+) {
+  const { document, Event } = parseHTML(
+    `<!doctype html><html><body>${chrome ? `<header class="chrome"></header>` : ""}${more.body ?? ""}</body></html>`,
+  );
+  const [beforeHash = "", hash = ""] = address.split(/(?=#)/);
+  const q = beforeHash.indexOf("?");
+  const location = {
+    pathname: q === -1 ? beforeHash : beforeHash.slice(0, q),
+    search: q === -1 ? "" : beforeHash.slice(q),
+    hash,
+  };
+  const store = new FakeStore();
+  const replaced: string[] = [];
+  let fetched = 0;
+  const env: HandEnv = {
+    doc: document,
+    location,
+    replace: (url) => void replaced.push(url),
+    store: () => store,
+    device: { touch: false, motion: false },
+    fetchSteps: () => {
+      fetched++;
+      return Promise.resolve(steps);
+    },
+    frame: more.frame ?? (() => 1),
+    cancelFrame: () => {},
+    scroll: more.scroll ?? (() => ({ x: 0, y: 0 })),
+    pageWidth: more.pageWidth ?? (() => 1024),
+  };
+  return {
+    document,
+    Event,
+    store,
+    replaced,
+    fetched: () => fetched,
+    run: (route = "/explorer/") => bootHand({ route }, env),
+  };
+}
+
+test("PK14 bootHand drops the key with the hash kept once the step is done, writes the seal, and leaves an address with no key, an unknown key or a key for another room alone", async () => {
+  const done = booted("/explorer/?step=explorer-to-print#seed=42");
+  await done.run();
+  assert.equal(done.store.held[PRIMER_STORE_KEY], "explorer-to-print");
+  assert.equal(done.replaced.at(-1), "/explorer/#seed=42");
+  assert.ok(
+    done.document.querySelector("header.chrome > aside.primer-slip") !== null,
+    "the note is the head's last child",
+  );
+  assert.equal(
+    done.document.querySelector(".primer-slip-done") === null,
+    false,
+    "an arrival step's note says done at once",
+  );
+  const none = booted("/explorer/#seed=42");
+  await none.run();
+  const unknown = booted("/explorer/?step=nope#seed=42");
+  await unknown.run();
+  const other = booted("/explorer/?step=prospect-year#seed=42");
+  await other.run();
+  assert.deepEqual([none.fetched(), unknown.fetched(), other.fetched()], [0, 1, 1]);
+  const elsewhere = booted("/explorer/?step=explorer-dice#seed=42");
+  await elsewhere.run("/prospect/");
+  assert.equal(
+    elsewhere.document.querySelector(".primer-slip") === null,
+    true,
+    "a step addressed to another room than the one booted",
+  );
+  for (const b of [none, unknown, other]) {
+    assert.deepEqual(b.store.held, {});
+    assert.deepEqual(b.replaced, []);
+    assert.equal(b.document.querySelector(".primer-slip") === null, true);
+  }
+});
+
+const rect = (left: number, top: number, width: number, height: number): DOMRect =>
+  ({ left, top, width, height, x: left, y: top, right: left + width, bottom: top + height }) as DOMRect;
+
+test("PK18 the × sets the note aside: the ring, the manicule and the note go, the watchers stop, and the key leaves with the hash kept (Issue #1253 skeptic)", async () => {
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, { body: '<button id="random">⚄</button>' });
+  await b.run();
+  const aside = b.document.querySelector(".primer-slip-aside");
+  assert.ok(aside !== null);
+  assert.equal(b.document.querySelector(".primer-ring") !== null, true, "the ring is up before the ×");
+  aside.dispatchEvent(new b.Event("click", { bubbles: true }));
+  assert.equal(b.document.querySelector(".primer-slip") === null, true, "the note is gone");
+  assert.equal(b.document.querySelector(".primer-ring") === null, true, "the ring is gone");
+  assert.equal(b.document.querySelector(".primer-hand") === null, true, "the manicule is gone");
+  assert.equal(b.replaced.at(-1), "/explorer/#seed=42");
+  b.document.querySelector("#random")?.dispatchEvent(new b.Event("click", { bubbles: true }));
+  assert.deepEqual(b.store.held, {}, "a press after the × seals nothing");
+});
+
+test("PK17 bootHand lays the ring and the manicule in page coordinates and takes the note's width against the page, so a page scrolled under the 1024 floor keeps them on the step's control (Issue #1253 revision 1)", async () => {
+  let ran = false;
+  const once: HandEnv["frame"] = (fn) => {
+    if (!ran) {
+      ran = true;
+      fn();
+    }
+    return 1;
+  };
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, {
+    body: '<button id="random">⚄</button>',
+    scroll: () => ({ x: 124, y: 30 }),
+    pageWidth: () => 1024,
+    frame: once,
+  });
+  const dice = b.document.querySelector("#random");
+  const chrome = b.document.querySelector("header.chrome");
+  assert.ok(dice !== null && chrome !== null);
+  dice.getBoundingClientRect = () => rect(1076, 50, 34, 34);
+  chrome.getBoundingClientRect = () => rect(300, 0, 400, 80);
+  await b.run();
+  assert.equal(
+    b.document.querySelector(".primer-ring")?.getAttribute("style"),
+    "left:1194px;top:74px;width:46px;height:46px",
+  );
+  assert.equal(b.document.querySelector(".primer-hand")?.getAttribute("style"), "left:1150px;top:97px");
+  assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:576px");
+});
+
+test("PK17 the note's width reads the open slip in page coordinates too (Issue #1253 revision 1)", async () => {
+  let ran = false;
+  const once: HandEnv["frame"] = (fn) => {
+    if (!ran) {
+      ran = true;
+      fn();
+    }
+    return 1;
+  };
+  const b = booted("/explorer/?step=explorer-dice#seed=42", STEPS, true, {
+    body: '<button id="random">⚄</button><aside class="slip"></aside>',
+    scroll: () => ({ x: 124, y: 30 }),
+    pageWidth: () => 1024,
+    frame: once,
+  });
+  const chrome = b.document.querySelector("header.chrome");
+  const slip = b.document.querySelector(".slip");
+  assert.ok(chrome !== null && slip !== null);
+  chrome.getBoundingClientRect = () => rect(300, 0, 400, 80);
+  slip.getBoundingClientRect = () => rect(700, 0, 300, 600);
+  await b.run();
+  assert.equal(b.document.querySelector(".primer-slip")?.getAttribute("style"), "width:376px");
+});

@@ -1,7 +1,7 @@
 // What the Primer check reads in the page (Issue #1250): a control's facts, what lies under a point, and the counters a room's rest is read against.
 import type { Payload } from "../types.ts";
 import type { Words } from "../../src/site/shared/primer/shape.ts";
-import type { Box, Facts } from "./primer-judge.ts";
+import type { Box, Facts } from "../../src/site/shared/primer/judge.ts";
 
 const at = (css: string, nth = 0): string => `document.querySelectorAll(${JSON.stringify(css)})[${nth}]`;
 

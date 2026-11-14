@@ -76,7 +76,7 @@ test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
+    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts && node scripts/primer-steps.ts",
     "no tsc step: Vite compiles the engine graph from src/ directly",
   );
 });
@@ -311,6 +311,31 @@ test("no page downloads the plate's code before it draws a plate, and the page a
       );
   }
   checkWorkerReachesPlate(p, workers, rel, carrying, plateModules);
+});
+
+test("no page's bundle carries the Primer's ladders: a room reads its step from the data file the build writes (Issue #1253)", async () => {
+  const p = await press();
+  const rel = (f: string): string => relative(p.root, f);
+  const OWN = /^(hand-.*|judge|segments|seals|shape)\.ts$/;
+  const ladderModules = readdirSync(resolve(REPO, "src/site/shared/primer")).filter((f) => !OWN.test(f));
+  assert.ok(
+    ladderModules.includes("explorer.ts") && ladderModules.includes("ladders.ts"),
+    "the ladder modules were not found",
+  );
+  for (const twin of p.twins)
+    for (const file of ladderModules) {
+      const marker = new RegExp(`^// src/site/shared/primer/${file.replace(".", "\\.")}$`, "m");
+      assert.deepEqual(
+        [...reach(p, [twin], ON_DEMAND)].filter((f) => marker.test(p.text(f))).map(rel),
+        [],
+        `${rel(twin)} reaches src/site/shared/primer/${file}, so it carries a ladder as code and every visit downloads it`,
+      );
+    }
+  const explorer = [...reach(p, [join(p.root, "explorer", "app.bundle.js")], STATIC)];
+  assert.ok(
+    explorer.some((f) => p.text(f).includes("/primer/steps.json")),
+    "the Explorer's bundle never names the data file, so no Try it can point its hand",
+  );
 });
 
 test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {

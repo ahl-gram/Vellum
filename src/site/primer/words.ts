@@ -10,12 +10,6 @@ export const ENTERED = (how: string): string => `You come to it ${how}.`;
 export const UNFOLD = "open these steps";
 export const NEXT = "Turn the page to";
 export const SEALED = "done, kept in this browser";
-export const MARKS = {
-  touch: "on a tablet",
-  motion: "with motion on",
-  play: "play: no wrong answer",
-  commission: "a commission",
-} as const;
 export const LEDE = "Each step is one small thing to do, and each comes easy once the one before it is done.";
 export const CLOSING_VERB = "Lean on these";
 export const CLOSING_HEAD = "When the steps are done";

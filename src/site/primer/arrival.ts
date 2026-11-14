@@ -1,17 +1,9 @@
-export type Only = "touch" | "motion";
+import { applies, type Device, type Only } from "../shared/primer/hand-steps.ts";
 
 export interface ArrivalRoom {
   readonly id: string;
   readonly steps: readonly { readonly id: string; readonly only?: Only }[];
 }
-
-export interface Device {
-  readonly touch: boolean;
-  readonly motion: boolean;
-}
-
-export const applies = (only: Only | undefined, device: Device): boolean =>
-  only === undefined || (only === "touch" ? device.touch : device.motion);
 
 export function roomOnArrival(
   rooms: readonly ArrivalRoom[],

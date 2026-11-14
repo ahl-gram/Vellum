@@ -1,7 +1,8 @@
 import { TOUCH_PRIMARY } from "../shared/chart-touch.ts";
 import { prefersReduce } from "../shared/reduced-motion.ts";
 import { clearSeals, readSeals } from "../shared/primer/seals.ts";
-import { roomOnArrival, type ArrivalRoom, type Only } from "./arrival.ts";
+import type { Only } from "../shared/primer/hand-steps.ts";
+import { roomOnArrival, type ArrivalRoom } from "./arrival.ts";
 import { SEALED } from "./words.ts";
 
 const ONLY: ReadonlySet<string> = new Set(["touch", "motion"]);

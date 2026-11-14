@@ -260,6 +260,8 @@ the drawing (the coast, the places, their ranks and labels, the roads, the atlas
 words, its seat at the trail's end and its lit ground, the panel's size, opacity and seat, the key
 line, the outline, the cut on a short window, and the press's gap under the nav.
 
+**The Primer's pointing hand** (Issue #1155 rulings 1, N2, N3, M4; Issue #1248 item 5; Issue #1253): a reader who arrives from a Try it finds the control the step names ringed in gold over a walnut line with a breathing halo, the house's manicule left of the ring, and a slim note under the head cluster's trail with the step in hand, the road back to its step on the Primer and the press onward; a step the room sees done is sealed and the note says so with the seal, a step that cannot apply on this device carries its mark. The note is part of the head cluster, so the chart is fitted under it and it rides the cluster's slide. Under reduced motion nothing breathes; on paper none of it prints. **Provisional until the post-use review (Issue #1258):** the ring, its halo and breath, the manicule's seat and outline, the note's dress, its width and seat, the dots, the done row and the ×.
+
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
 view. **Where its list runs past the slip, the list fades evenly into the paper, `--index-fade` deep,

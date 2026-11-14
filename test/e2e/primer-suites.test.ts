@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
-import { primerGaps, primerSuiteOf, routeOf } from "../../e2e/support/primer-judge.ts";
+import { primerGaps, primerSuiteOf } from "../../e2e/support/primer-judge.ts";
+import { routeOf } from "../../src/site/shared/primer/judge.ts";
 import { PRIMER_ROOMS } from "../../e2e/support/primer-rooms.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";

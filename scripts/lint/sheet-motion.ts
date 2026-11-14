@@ -52,8 +52,8 @@ export const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS: readonly string[] = [
   "explorer/broadside.css :: a.fn",
   // The Broadside's title, an h2 sharing its line with its mark in the slip's head (Issue #1159), not a list item.
   "explorer/broadside-bill.css :: #broadside .slip-head .card-title",
-  // A road chip, a span inside a step's sentence in `src/pages/primer/index.astro` (Issue #1252), not a list item; it keeps the text's baseline so it wraps only past its column.
-  "primer/index.css :: .primer .ch.road",
+  // A road chip, a span inside a step's sentence in `src/pages/primer/index.astro` and in the note `src/site/shared/primer/hand-note.ts` builds (Issue #1252, Issue #1253), not a list item; it keeps the text's baseline so it wraps only past its column.
+  "shared/primer-marks.css :: :is(.primer, .primer-slip) .ch.road",
 ];
 
 const strings = { type: "array", items: { type: "string" } } as const;
