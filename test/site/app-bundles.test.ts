@@ -10,6 +10,7 @@ import { CAPS } from "../../src/prospect/letter/face-caps.ts";
 import { ITALIC } from "../../src/prospect/letter/face-italic.ts";
 import { NUMERO } from "../../src/prospect/letter/numero.ts";
 import type { FaceTable } from "../../src/prospect/letter/face.ts";
+import { HAND_ROOMS } from "../../test-support/hand-steps.ts";
 
 // One press (Issue #208): one multi-entry Vite build covers every app page, and the worker spawn is the static import-URL form Vite rewrites.
 
@@ -331,11 +332,13 @@ test("no page's bundle carries the Primer's ladders: a room reads its step from 
         `${rel(twin)} reaches src/site/shared/primer/${file}, so it carries a ladder as code and every visit downloads it`,
       );
     }
-  const explorer = [...reach(p, [join(p.root, "explorer", "app.bundle.js")], STATIC)];
-  assert.ok(
-    explorer.some((f) => p.text(f).includes("/primer/steps.json")),
-    "the Explorer's bundle never names the data file, so no Try it can point its hand",
-  );
+  for (const route of HAND_ROOMS)
+    assert.ok(
+      [...reach(p, [join(p.root, route.slice(1), "app.bundle.js")], STATIC)].some((f) =>
+        p.text(f).includes("/primer/steps.json"),
+      ),
+      `${route}'s bundle never names the data file, so no Try it can point its hand`,
+    );
 });
 
 test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {
