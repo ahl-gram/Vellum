@@ -205,7 +205,7 @@ function chartNumber(style: MapStyle, rect: Box, seed: number, k: number): SvgNo
 }
 
 export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
-  const k = ctx.proj.widthPx / 1500;
+  const k = (ctx.proj.widthPx / 1500) * plan.scale;
   return el("g", { id: "layer-cartouche" }, [
     ...cartoucheFrame(ctx.style, plan.rect, k),
     ...cartoucheText(ctx, plan, k),
