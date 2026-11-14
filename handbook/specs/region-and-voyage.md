@@ -93,9 +93,10 @@ about a rule, the rulebook wins.
   the reader interacted. Its `harbor` and `onRiver` flags are read where it is drawn, from the
   close-up's own water and every river it draws beside the hamlet's cell (`placeHamlets` in
   `src/society/hamlets.ts`), so like a mill they can differ between two overlapping windows, and a
-  surface that quotes one quotes the close-up it read. Screen them on the PARENT grid, grow them on every window no larger than
-  `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and never the deepest band read
-  from `LOD_BANDS`, and append them after the projected settlements so seats and roads stay valid.
+  surface that quotes one quotes the close-up it read. Screen them on the PARENT grid, grow them on
+  every window no larger than `HAMLET_MAX_WINDOW_UV` in `src/society/hamlets.ts`, a named size and
+  never the deepest band read from `LOD_BANDS`, and append them after the projected settlements so
+  seats and roads stay valid.
   Never put one on a world sheet or on a seat, and never wire a road to one: a through road may pass
   a hamlet, but no road departs from or arrives at one.
 - **Below the hamlets, farmsteads and mills grow from band 5's window size**

@@ -8,7 +8,7 @@ import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import { onOrBeside } from "../../test-support/on-or-beside.ts";
 
 const world = generateWorld(defaultRecipe(42));
-const WINDOW: UvWindow = { u0: 0.34375, v0: 0.65625, u1: 0.46875, v1: 0.78125 }; // chart 42's band-3 close-up at Paukilua
+const WINDOW: UvWindow = { u0: 0.34375, v0: 0.65625, u1: 0.46875, v1: 0.78125 };
 const W = 320;
 const H = 240;
 const candidates = hamletCandidates(world, WINDOW);
