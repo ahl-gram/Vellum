@@ -7,6 +7,7 @@ import { createProjection, marginFor } from "../../src/render/transform.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
+import { planCartouche } from "../../src/render/layers/cartouche.ts";
 import { planScalebar, scalebarLayer } from "../../src/render/layers/scalebar.ts";
 import type { SvgNode } from "../../src/render/svg.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
@@ -48,7 +49,7 @@ function tickLabels(node: SvgNode): Array<{ x: number; value: string }> {
 /** Numeric league ticks (drops the italic "Leagues" caption). */
 function numericTicks(w: World): { ticks: Array<{ x: number; value: string }>; plan: ReturnType<typeof planScalebar> } {
   const ctx = ctxFor(w);
-  const plan = planScalebar(ctx);
+  const plan = planScalebar(ctx, planCartouche(ctx).rect);
   const labels = tickLabels(scalebarLayer(ctx, plan));
   return { ticks: labels.filter((l) => /^[\d.½¼]+$/.test(l.value)), plan };
 }

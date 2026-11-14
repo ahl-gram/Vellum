@@ -10,19 +10,24 @@ const FRACTIONS: Readonly<Record<string, string>> = { "0.25": "¼", "0.5": "½" 
 
 export type ScalebarPlan = { readonly box: Box };
 
-export function planScalebar(ctx: RenderCtx): ScalebarPlan {
+const BAR_W = 215;
+const BAR_H = 34;
+const BAR_INSET = 22;
+const BAR_FOOT = 24;
+
+export function scalebarSeat(ctx: RenderCtx): Box {
   const { proj } = ctx;
   const k = proj.widthPx / 1500;
-  const w = 215 * k;
-  const h = 34 * k;
   return {
-    box: {
-      x: proj.margin + 22 * k,
-      y: proj.heightPx - proj.margin - 24 * k - h,
-      w,
-      h,
-    },
+    x: proj.margin + BAR_INSET * k,
+    y: proj.heightPx - proj.margin - BAR_FOOT * k - BAR_H * k,
+    w: BAR_W * k,
+    h: BAR_H * k,
   };
+}
+
+export function planScalebar(ctx: RenderCtx, _cartouche: Box): ScalebarPlan {
+  return { box: scalebarSeat(ctx) };
 }
 
 function leaguesTotal(isRegion: boolean, pxPerLeague: number, target: number): number {
