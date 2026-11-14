@@ -110,12 +110,21 @@ const WATCH_OF: Readonly<Record<Exclude<Act["kind"], "wait" | "key">, "click" | 
   pick: "change",
 };
 
+const ARROWS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"] as const;
+
 export function useWatches(step: HandStep): readonly UseWatch[] {
   if (step.do.length === 0)
     return [...new Set([...step.words, ...step.relies].map((w) => w.css))].map((css) => ({ event: "change", css }));
-  return step.do.flatMap((act): readonly UseWatch[] => {
+  return step.do.flatMap((act, i): readonly UseWatch[] => {
     if (act.kind === "wait") return [];
-    if (act.kind === "key") return [{ event: "keydown", css: act.css, key: act.key }];
+    if (act.kind === "key")
+      return (ARROWS.some((k) => k === act.key) ? ARROWS : [act.key]).map((key) => ({
+        event: "keydown",
+        css: act.css,
+        key,
+      }));
+    const next = step.do[i + 1];
+    if (act.kind === "set" && next?.kind === "key" && next.css === act.css) return [];
     return [{ event: WATCH_OF[act.kind], css: act.css }];
   });
 }
