@@ -10,7 +10,7 @@ import {
   type Device,
   type HandStep,
 } from "./primer/hand-steps.ts";
-import { watchOutcome, watchUse } from "./primer/hand-watch.ts";
+import { greyed, watchOutcome, watchUse } from "./primer/hand-watch.ts";
 import type { Box } from "./primer/judge.ts";
 import { readSeals, writeSeal } from "./primer/seals.ts";
 import { pageBox, pageX, pageY } from "./page-box.ts";
@@ -89,7 +89,7 @@ export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
     const s = env.scroll();
     const stands = (css: string): boolean => {
       const el = doc.querySelector(css);
-      return el !== null && ringBox(boxesOf(el, s)) !== null;
+      return el !== null && !greyed(el) && ringBox(boxesOf(el, s)) !== null;
     };
     const boxes = ringTargets(step, stands).flatMap((css) => {
       const el = doc.querySelector(css);

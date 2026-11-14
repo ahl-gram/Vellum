@@ -21,6 +21,9 @@ const NONE: Facts = {
   options: [],
 };
 
+export const greyed = (el: Element): boolean =>
+  (el as Partial<HTMLButtonElement>).disabled === true || el.getAttribute("aria-disabled") === "true";
+
 export function factsOf(el: Element | null, w: Words): Facts {
   if (el === null) return NONE;
   const style = getComputedStyle(el);
@@ -33,7 +36,7 @@ export function factsOf(el: Element | null, w: Words): Facts {
     box: { x: box.left, y: box.top, w: box.width, h: box.height },
     clip: style.clipPath || "",
     held: el.closest(".held") !== null,
-    disabled: (el as Partial<HTMLButtonElement>).disabled === true || el.getAttribute("aria-disabled") === "true",
+    disabled: greyed(el),
     text: el.textContent,
     aria: el.getAttribute("aria-label"),
     title: el.getAttribute("title"),
