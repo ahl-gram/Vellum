@@ -31,11 +31,11 @@ test("PK11 ringBox wraps the standing boxes grown by six pixels, handSpot stands
     { x: -6, y: -6, w: 42, h: 27 },
   );
   assert.equal(ringBox([]), null);
-  assert.deepEqual(handSpot({ x: 30, y: 100, w: 50, h: 40 }, { w: 34, h: 34 }), { x: 4, y: 103 });
-  assert.deepEqual(handSpot({ x: 200, y: 100, w: 50, h: 40 }, { w: 34, h: 34 }), { x: 156, y: 103 });
+  assert.deepEqual(handSpot({ x: 30, y: 100, w: 50, h: 40 }, { h: 34 }), { x: 4, y: 103 });
+  assert.deepEqual(handSpot({ x: 200, y: 100, w: 50, h: 40 }, { h: 34 }), { x: 156, y: 103 });
   assert.equal(noteWidth(25.6, 793, 1280), 620);
   assert.equal(noteWidth(25.6, 544, 1024), 494.4);
-  assert.equal(noteWidth(24, null, 600), 552, "no open slip: the window is the edge");
+  assert.equal(noteWidth(24, null, 600), 552, "no open slip: the page's right edge is the edge");
   const prospect = stepOf("explorer-view-prospect");
   assert.deepEqual(
     ringTargets(prospect, (c) => c !== "#place-card .pc-prospect"),

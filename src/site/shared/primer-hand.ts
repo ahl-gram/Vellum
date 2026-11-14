@@ -13,7 +13,7 @@ import {
 import { watchOutcome, watchUse } from "./primer/hand-watch.ts";
 import type { Box } from "./primer/judge.ts";
 import { readSeals, writeSeal } from "./primer/seals.ts";
-import { pageBox } from "./page-box.ts";
+import { pageBox, pageX, pageY } from "./page-box.ts";
 import { prefersReduce } from "./reduced-motion.ts";
 
 export interface HandRoom {
@@ -35,13 +35,20 @@ export interface HandEnv {
 
 const MANICULE = "☞";
 
-const boxOf = (r: DOMRect): Box => ({ x: r.left, y: r.top, w: r.width, h: r.height });
+type Scroll = ReturnType<HandEnv["scroll"]>;
 
-function boxesOf(el: Element): Box[] {
+const boxOf = (r: DOMRect, s: Scroll): Box => ({
+  x: pageX(r.left, s.x),
+  y: pageY(r.top, s.y),
+  w: r.width,
+  h: r.height,
+});
+
+function boxesOf(el: Element, s: Scroll): Box[] {
   const labels = (el as Partial<HTMLInputElement>).labels ?? [];
   const control = (el as Partial<HTMLLabelElement>).control;
   const parts = [el, ...labels, ...(control ? [control] : [])];
-  return parts.map((e) => boxOf(e.getBoundingClientRect()));
+  return parts.map((e) => boxOf(e.getBoundingClientRect(), s));
 }
 
 export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
@@ -79,25 +86,32 @@ export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
     if (hand.hidden === on) hand.hidden = !on;
   };
   const place = (): void => {
+    const s = env.scroll();
     const stands = (css: string): boolean => {
       const el = doc.querySelector(css);
-      return el !== null && ringBox(boxesOf(el)) !== null;
+      return el !== null && ringBox(boxesOf(el, s)) !== null;
     };
     const boxes = ringTargets(step, stands).flatMap((css) => {
       const el = doc.querySelector(css);
-      return el === null ? [] : boxesOf(el);
+      return el === null ? [] : boxesOf(el, s);
     });
     const around = ringBox(boxes);
     show(around !== null);
     if (around !== null) {
-      const spot = handSpot(around, boxOf(hand.getBoundingClientRect()));
+      const spot = handSpot(around, { h: hand.getBoundingClientRect().height });
       put(ring, `left:${px(around.x)};top:${px(around.y)};width:${px(around.w)};height:${px(around.h)}`);
       put(hand, `left:${px(spot.x)};top:${px(spot.y)}`);
     }
     const slip = doc.querySelector(".slip:not(.folded)");
     put(
       note,
-      `width:${px(noteWidth(chrome.getBoundingClientRect().left, slip === null ? null : slip.getBoundingClientRect().left, doc.documentElement.clientWidth))}`,
+      `width:${px(
+        noteWidth(
+          pageX(chrome.getBoundingClientRect().left, s.x),
+          slip === null ? null : pageX(slip.getBoundingClientRect().left, s.x),
+          env.pageWidth(),
+        ),
+      )}`,
     );
     frameId = env.frame(place);
   };
