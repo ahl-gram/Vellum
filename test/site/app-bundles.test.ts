@@ -339,6 +339,18 @@ test("no page's bundle carries the Primer's ladders: a room reads its step from 
       ),
       `${route}'s bundle never names the data file, so no Try it can point its hand`,
     );
+  const routeOfTwin = (twin: string): string => {
+    const dir = dirname(rel(twin)).split(sep).join("/");
+    return dir === "." ? "/" : `/${dir}/`;
+  };
+  assert.deepEqual(
+    p.twins
+      .filter((twin) => [...reach(p, [twin], ON_DEMAND)].some((f) => p.text(f).includes("/primer/steps.json")))
+      .map(routeOfTwin)
+      .sort(),
+    [...HAND_ROOMS].sort(),
+    "the rooms whose bundle reaches the data file are not HAND_ROOMS: a room that boots the hand and is not on the list goes unread by BP-H1, and a room the list names that boots no hand is read for nothing",
+  );
 });
 
 test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {
