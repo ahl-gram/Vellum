@@ -87,7 +87,7 @@ export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
     const around = ringBox(boxes);
     show(around !== null);
     if (around !== null) {
-      const spot = handSpot(around, { h: hand.getBoundingClientRect().height });
+      const spot = handSpot(around, boxOf(hand.getBoundingClientRect()));
       put(ring, `left:${px(around.x)};top:${px(around.y)};width:${px(around.w)};height:${px(around.h)}`);
       put(hand, `left:${px(spot.x)};top:${px(spot.y)}`);
     }

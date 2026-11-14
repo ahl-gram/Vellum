@@ -54,7 +54,7 @@ const WHERE = (id: string): Payload<Where> =>
   `(() => ({ sealed: (localStorage.getItem(${JSON.stringify(PRIMER_STORE_KEY)}) || "").split(",").includes(${JSON.stringify(id)}), search: location.search, hash: location.hash }))()`;
 
 const STEP_ROADS: Payload<readonly string[]> =
-  `[...document.querySelectorAll("a[href]")].filter((a) => !a.closest(".primer-slip")).map((a) => a.href).filter((h) => new URL(h).searchParams.has("step"))`;
+  `[...document.querySelectorAll("a[href]")].filter((a) => !a.closest(".primer-slip")).map((a) => a.getAttribute("href")).filter((h) => new URL(h, location.href).searchParams.has("step"))`;
 
 const STEPS = handSteps(LADDERS);
 const handStep = (id: string): HandStep => {
