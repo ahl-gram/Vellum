@@ -161,6 +161,11 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
     done.document.querySelector("header.chrome > aside.primer-slip") !== null,
     "the note is the head's last child",
   );
+  assert.equal(
+    done.document.querySelector(".primer-slip-done") === null,
+    false,
+    "an arrival step's note says done at once",
+  );
   const none = booted("/explorer/#seed=42");
   await none.run();
   const unknown = booted("/explorer/?step=nope#seed=42");
