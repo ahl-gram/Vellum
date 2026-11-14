@@ -173,7 +173,7 @@ test("a shrunk title draws every word at its own size (Issue #1109)", () => {
     );
   });
   assert.ok(sized >= 6, `the text nodes carrying a size were found (${sized})`);
-  const number = smallNodes.find((n) => n.tag === "text" && n.children.join("").startsWith("CHART"));
+  const number = smallNodes.find((n) => n.tag === "text" && n.children[0] === "CHART № 6");
   assert.ok(number, "the chart number is found");
   const y = Number(number.attrs["y"]);
   assert.ok(y > shrunk.rect.y && y < shrunk.rect.y + shrunk.rect.h, "the chart number stands inside the shrunk frame");
