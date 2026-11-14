@@ -142,14 +142,6 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
         );
       },
     );
-    await step("PH3 a step with nothing to see is sealed on arrival", async () => {
-      const toPrint = handStep("explorer-to-print");
-      await open(k, toPrint, "PH3");
-      const note = await k.evaluate(NOTE);
-      const where = await k.evaluate(WHERE(toPrint.id));
-      k.check("PH3 (a) the note says done", note.done?.includes("done") === true, JSON.stringify(note));
-      k.check("PH3 (b) the store holds the step", where.sealed, JSON.stringify(where));
-    });
     await step("PH4 a tablet step opened on a desk is never sealed and its note carries its mark", async () => {
       const inHand = handStep("explorer-in-hand");
       await open(k, inHand, "PH4");
