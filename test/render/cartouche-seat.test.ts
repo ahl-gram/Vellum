@@ -217,3 +217,60 @@ test("the drawn sheet seats its bar against the title it draws (Issues #1108 and
     assert.equal(close(paper, homePaper(ctx)), seed === 11, `seed ${seed}: the bar ${seed === 11 ? "stays" : "moves"}`);
   }
 });
+
+test("a close-up's title keeps its corner, and its scale bar still gives way to it (Issues #1108 and #1109)", () => {
+  const world = worldOf(2);
+  const window = windowAround(world, world.settlements[0]!, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: regionTitle(world, window) });
+  const ctx = ctxOf(region);
+  const plan = planCartouche(ctx);
+  assert.deepEqual(plan.rect, cornerChoice(ctx), "the close-up's title keeps its corner");
+  assert.ok(boxesOverlap(plan.rect, homePaper(ctx)), "the title stands over the bar's home");
+  const bar = planScalebar(ctx, plan.rect).box;
+  assert.ok(!boxesOverlap(plan.rect, scalebarBacking(bar, 1)), "the bar's paper clears the title");
+  const { margin, widthPx, heightPx } = ctx.proj;
+  assert.ok(bar.x >= margin && bar.y >= margin, "the bar stays inside the frame, top left");
+  assert.ok(bar.x + bar.w <= widthPx - margin && bar.y + bar.h <= heightPx - margin, "bottom right");
+});
+
+test("the title tries the corners first, then the edge seats nearest the chosen corner first (Issue #1109)", () => {
+  const near = (a: Box, b: Box): boolean =>
+    [a.x - b.x, a.y - b.y, a.w - b.w, a.h - b.h].every((d) => Math.abs(d) < 1e-6);
+  const edgeSeatsAt = (ctx: RenderCtx, width: number, height: number): Box[] => {
+    const [topRight, topLeft, bottomRight] = cornerSeats(ctx, width, height) as [Box, Box, Box, Box];
+    return [1, 2, 3, 4, 5, 6, 7].flatMap((i) => {
+      const x = topRight.x + ((topLeft.x - topRight.x) * i) / 8;
+      return [
+        { ...topRight, x },
+        { ...bottomRight, x },
+      ];
+    });
+  };
+
+  const counted = ctxOf(worldOf(8, COUNT_100));
+  const chosen = cornerChoice(counted);
+  const corners = cornerSeats(counted, chosen.w, chosen.h);
+  assert.ok(
+    corners.every((seat) => landCellsUnder(counted, seat) > 0),
+    "asked 100, seed 8: no corner is clear at full size",
+  );
+  const clear = edgeSeatsAt(counted, chosen.w, chosen.h).filter((seat) => landCellsUnder(counted, seat) === 0);
+  const apart = (seat: Box): number => Math.hypot(seat.x - chosen.x, seat.y - chosen.y);
+  const byDistance = [...clear].sort((a, b) => apart(a) - apart(b));
+  assert.ok(
+    byDistance.length >= 2 && apart(byDistance[0]!) < apart(byDistance[1]!),
+    "several edge seats are clear, at different distances",
+  );
+  const plan = planCartouche(counted);
+  assert.equal(plan.scale, 1);
+  assert.ok(near(plan.rect, byDistance[0]!), "the nearest clear edge seat is taken");
+
+  const plain = ctxOf(worldOf(1));
+  const first = cornerChoice(plain);
+  const bottomRight = cornerSeats(plain, first.w, first.h)[2]!;
+  assert.ok(
+    edgeSeatsAt(plain, first.w, first.h).some((seat) => landCellsUnder(plain, seat) === 0),
+    "plain seed 1: a clear edge seat exists beside the clear corner",
+  );
+  assert.ok(near(planCartouche(plain).rect, bottomRight), "a clear corner is taken before any edge seat");
+});
