@@ -9,3 +9,5 @@ export function stepOf(id: string): HandStep {
   assert.ok(s !== undefined, `no step ${id}`);
   return s;
 }
+
+export const HAND_ROOMS: readonly string[] = ["/explorer/", "/writing-room/"];

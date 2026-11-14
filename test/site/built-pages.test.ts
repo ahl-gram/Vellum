@@ -9,6 +9,7 @@ import { datelineOf } from "../../src/site/primer/words.ts";
 import { LADDERS, seated } from "../../src/site/shared/primer/ladders.ts";
 import { CULTURES } from "../../src/society/names.ts";
 import { documentOf } from "../../test-support/built-dom.ts";
+import { HAND_ROOMS } from "../../test-support/hand-steps.ts";
 import { br1Faults, br11Faults, br9Faults, cd55Faults } from "../../test-support/built-reads/explorer.ts";
 import { l13Faults, l14Faults, l15Faults, l16Faults, l17Faults } from "../../test-support/built-reads/home.ts";
 import { pr36Faults } from "../../test-support/built-reads/print-room.ts";
@@ -238,4 +239,16 @@ test("home's corner hook is the share card's, line for line, broken where the ca
 
 test("the Hunt's skeleton in the built page: the stage holds the gesture box, the gesture box the transform target alone, the target the chart's own sheet alone; the box is a focusable application; no caption; the folio stands outside the stage after it, its first line the title (from e2e HG6)", () => {
   assert.deepEqual(hg6Faults(documentOf(page("/seed-of-the-day/"))), []);
+});
+
+test("BP-H1 every room the pointing hand is taught in links the Primer's marks and the hand's sheet, the marks first (Issue #1253)", () => {
+  assert.ok(HAND_ROOMS.includes("/writing-room/"), "the rooms list names the Writing Room");
+  const faults = HAND_ROOMS.flatMap((route) => {
+    const links = [...documentOf(page(route)).querySelectorAll('head link[rel="stylesheet"]')].map(
+      (l) => new URL(l.getAttribute("href") ?? "", `http://127.0.0.1${route}`).pathname,
+    );
+    const marks = links.indexOf("/shared/primer-marks.css");
+    return marks === -1 || links[marks + 1] !== "/shared/primer-hand.css" ? [`${route} links ${links.join(", ")}`] : [];
+  });
+  assert.deepEqual(faults, []);
 });

@@ -79,3 +79,22 @@ test("PK10 watchUse seals on the reader's own use of a control the step names, a
   inner.fire("#glyph", "click");
   assert.equal(inner.calls(), 1, "a press on the glyph inside the control");
 });
+
+test("PK19 watchUse counts a form sent from inside it as a press of the press it holds, and as a change of a field it holds only once that field has changed since the hand armed: Enter in the Writing Room's box seals the name step at once and the commission once its sentence is the reader's own, and a form holding no watched control seals nothing (Issue #1253 pull request 2)", () => {
+  const FORMS = `<form id="wr-form"><textarea id="wr-line">a preset sentence</textarea><button type="submit">Found</button></form><form id="other"><input id="x"></form>`;
+  const name = armed("writing-room-your-word", FORMS);
+  name.fire("#other", "submit");
+  assert.equal(name.calls(), 0, "a form with no watched control");
+  name.fire("#wr-form", "submit");
+  assert.equal(name.calls(), 1, "Enter in the box is a press of Found");
+  const commission = armed("writing-room-commission", FORMS);
+  commission.fire("#wr-form", "submit");
+  assert.equal(commission.calls(), 0, "the preset sentence sent unchanged");
+  (commission.document.querySelector("#wr-line") as HTMLTextAreaElement).value = "a sentence of the reader's own";
+  commission.fire("#wr-form", "submit");
+  assert.equal(commission.calls(), 1, "the reader's own sentence sent");
+  const stopped = armed("writing-room-your-word", FORMS);
+  stopped.stop();
+  stopped.fire("#wr-form", "submit");
+  assert.equal(stopped.calls(), 0, "after stop");
+});

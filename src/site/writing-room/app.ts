@@ -9,6 +9,7 @@ import { initWorker, runJob } from "../explorer/worker-client.ts";
 import { $ } from "../shared/by-id.ts";
 import { errorText } from "../shared/error-text.ts";
 import { MAP_WORDS } from "../shared/map-words.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { accountOf, refusalWords } from "./account.ts";
 import { readWritten, writtenHash } from "../shared/written-address.ts";
@@ -76,6 +77,7 @@ async function draw(f: Founding, plate: boolean, onDrawn: () => void = () => {})
     onDrawn();
     held = { founding: f, plate };
     settled++;
+    void bootHandOnce({ route: "/writing-room/" });
     return true;
   } catch (err) {
     if (mine === turn) $("status").textContent = "The ink would not take: " + errorText(err);
