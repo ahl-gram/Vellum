@@ -4,11 +4,29 @@
  * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
  */
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
+import {
+  decide,
+  gateText,
+  headingCheck,
+  requiredHeadings,
+  statePath,
+  type Decision,
+  type Payload,
+} from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { ROUTE_ROWS, SEQUENCE_ROWS } from "./gate-routes.fixtures.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
@@ -28,12 +46,19 @@ const SETTINGS = JSON.parse(execFileSync("cat", [join(ROOT, ".claude", "settings
 };
 const WIRED = SETTINGS.hooks.PreToolUse[0]?.hooks[0]?.command ?? "";
 
-const bash = (command: string, cwd?: string): Payload => ({ tool_name: "Bash", tool_input: { command }, ...(cwd ? { cwd } : {}) });
+const bash = (command: string, cwd?: string): Payload => ({
+  tool_name: "Bash",
+  tool_input: { command },
+  ...(cwd ? { cwd } : {}),
+});
 const edit = (tool: string, path: string, text: string): Payload => ({
   tool_name: tool,
   tool_input: { file_path: path, ...(tool === "Write" ? { content: text } : { new_string: text }) },
 });
-const multi = (path: string, text: string): Payload => ({ tool_name: "MultiEdit", tool_input: { file_path: path, edits: [{ new_string: text }] } });
+const multi = (path: string, text: string): Payload => ({
+  tool_name: "MultiEdit",
+  tool_input: { file_path: path, edits: [{ new_string: text }] },
+});
 
 export const readDeployed = (run: () => string): Decision => {
   let out: string;
@@ -61,7 +86,8 @@ type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string, strin
 const STASH_POP = bash("git stash pop");
 // The five section names are written out HERE and derived in the hook. That asymmetry is the guard: a heading renamed in the template changes only one side, so these rows red instead of the hook silently enforcing yesterday's shape.
 const SECTIONS = ["## Guards", "## Ran", "## Records", "## Rulings", "## Look for these when you use it"];
-const bodyWith = (sections: string[]): string => `#577 a title\n\nwhat changed.\n\n${sections.join("\n\nprose under it\n\n")}\n\nprose under it\n`;
+const bodyWith = (sections: string[]): string =>
+  `#577 a title\n\nwhat changed.\n\n${sections.join("\n\nprose under it\n\n")}\n\nprose under it\n`;
 const WHOLE_BODY = bodyWith(SECTIONS);
 const prBody = (text: string): Payload => bash(`gh pr create --body '${text}'`);
 const headingRows = (): Fixture[] =>
@@ -76,12 +102,19 @@ const filled = (text: string): string => text.replaceAll("<D>", DASH).replaceAll
 const codeFile = (row: number, k: number): string => `code-${row}-${k}.md`;
 const CODE_FIXTURES: Fixture[] = CODE_ROWS.map(([name, command, bodies, want, needle], row): Fixture => [
   name,
-  bash(filled(bodies.reduce((text, _, k) => text.replaceAll(`{${k}}`, codeFile(row, k)), command)), bodies.length ? SCRATCH : undefined),
+  bash(
+    filled(bodies.reduce((text, _, k) => text.replaceAll(`{${k}}`, codeFile(row, k)), command)),
+    bodies.length ? SCRATCH : undefined,
+  ),
   want,
   needle ? filled(needle) : want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : "",
 ]);
-const placed = (text: string): string => text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
-const setProject = (dir: string | undefined): void => { if (dir === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = dir; };
+const placed = (text: string): string =>
+  text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
+const setProject = (dir: string | undefined): void => {
+  if (dir === undefined) delete process.env.CLAUDE_PROJECT_DIR;
+  else process.env.CLAUDE_PROJECT_DIR = dir;
+};
 const inProject = (payload: Payload, project: string | undefined) => async (): Promise<Decision> => {
   const before = process.env.CLAUDE_PROJECT_DIR;
   const session = `cd-${process.pid}`;
@@ -93,19 +126,49 @@ const inProject = (payload: Payload, project: string | undefined) => async (): P
     rmSync(statePath(session), { force: true });
   }
 };
-const PROJECTS: Record<string, string | undefined> = { "no project": undefined, "project via link": LINK, "project at home": homedir() };
-const NEEDLES: Record<string, string> = { deny: "inside the project", unplaced: "cannot work out", stash: "refs/stash", escape: "inside a backtick string" };
+const PROJECTS: Record<string, string | undefined> = {
+  "no project": undefined,
+  "project via link": LINK,
+  "project at home": homedir(),
+};
+const NEEDLES: Record<string, string> = {
+  deny: "inside the project",
+  unplaced: "cannot work out",
+  stash: "refs/stash",
+  escape: "inside a backtick string",
+};
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
-  const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : who === "directory does not persist" ? { cwd_persists: false } : who === "directory persists" ? { cwd_persists: true } : {};
+  const agent =
+    who === "subagent"
+      ? { agent_id: "a781" }
+      : who === "with --agent"
+        ? { agent_type: "vellum-implementer" }
+        : who === "directory does not persist"
+          ? { cwd_persists: false }
+          : who === "directory persists"
+            ? { cwd_persists: true }
+            : {};
   const project = who !== undefined && who in PROJECTS ? PROJECTS[who] : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
-  return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", NEEDLES[who ?? ""] ?? (want ? (NEEDLES[want] ?? "") : "")];
+  return [
+    name,
+    inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project),
+    want && "deny",
+    NEEDLES[who ?? ""] ?? (want ? (NEEDLES[want] ?? "") : ""),
+  ];
 });
-const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
+const asContext = (text: string): Decision => ({
+  hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text },
+});
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
 const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => {
   const session = `rootless-${process.pid}`;
   try {
-    return readDeployed(() => execFileSync(process.execPath, [ROOTLESS_HOOK], { input: JSON.stringify({ ...payload, session_id: session }), encoding: "utf8" }));
+    return readDeployed(() =>
+      execFileSync(process.execPath, [ROOTLESS_HOOK], {
+        input: JSON.stringify({ ...payload, session_id: session }),
+        encoding: "utf8",
+      }),
+    );
   } finally {
     try {
       unlinkSync(statePath(session));
@@ -126,10 +189,22 @@ const inLaunchCheckout = (payload: Payload) => async (): Promise<Decision> => {
 const templateCheck = (file: string) => async (): Promise<Decision> => {
   const { deny: reason, warn } = headingCheck(WHOLE_BODY, file);
   return reason
-    ? { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: reason } }
+    ? {
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          permissionDecision: "deny",
+          permissionDecisionReason: reason,
+        },
+      }
     : asContext(warn ?? "");
 };
-const ROUTE_FIXTURES: Fixture[] = ROUTE_ROWS.map(([name, tool, path, text, want, needle, absent]): Fixture => [name, edit(tool, placed(path), text), want, needle, absent]);
+const ROUTE_FIXTURES: Fixture[] = ROUTE_ROWS.map(([name, tool, path, text, want, needle, absent]): Fixture => [
+  name,
+  edit(tool, placed(path), text),
+  want,
+  needle,
+  absent,
+]);
 const lastOf = (payloads: Payload[], session: string) => async (): Promise<Decision> => {
   try {
     let last: Decision = null;
@@ -139,7 +214,16 @@ const lastOf = (payloads: Payload[], session: string) => async (): Promise<Decis
     rmSync(statePath(session), { force: true });
   }
 };
-const SEQUENCE_FIXTURES: Fixture[] = SEQUENCE_ROWS.map(([name, paths, want, needle, absent]): Fixture => [name, lastOf(paths.map((p) => edit("Edit", placed(p), "x")), `route-${process.pid}-${name}`), want, needle, absent]);
+const SEQUENCE_FIXTURES: Fixture[] = SEQUENCE_ROWS.map(([name, paths, want, needle, absent]): Fixture => [
+  name,
+  lastOf(
+    paths.map((p) => edit("Edit", placed(p), "x")),
+    `route-${process.pid}-${name}`,
+  ),
+  want,
+  needle,
+  absent,
+]);
 
 const FIXTURES: Fixture[] = [
   ["bare stash denied", bash("git stash"), "deny", "shared"],
@@ -161,61 +245,226 @@ const FIXTURES: Fixture[] = [
   ["grep for git stash allowed", bash("grep -rn 'git stash' .claude/"), null, ""],
   ["grep with paren before git stash allowed", bash('grep -rn "(git stash" .claude/'), null, ""],
   ["pr comment quoting the rule allowed", bash("gh pr comment 549 --body 'never use a bare git stash here'"), null, ""],
-  ["issue comment with parenthesised stash allowed", bash('gh issue comment 1 --body "we should not run (git stash pop) in a worktree"'), null, ""],
+  [
+    "issue comment with parenthesised stash allowed",
+    bash('gh issue comment 1 --body "we should not run (git stash pop) in a worktree"'),
+    null,
+    "",
+  ],
   ["heredoc mentioning git stash allowed", bash("cat > notes.md <<'EOF'\nnever run git stash pop here\nEOF"), null, ""],
   ["perl wide char denied", bash("perl -0pi -e 's/a/−/' f.ts"), "deny", "re-encodes"],
   ["perl x-escape denied", bash("perl -pi -e 's/a/\\x{2212}/' f.ts"), "deny", "re-encodes"],
   ["perl ascii allowed", bash("perl -pi -e 's/foo/bar/' f.ts"), null, ""],
   ["grep mentioning perl -pi allowed", bash("grep -n 'perl -pi −' notes.md"), null, ""],
-  ["perl pipe delimiter escaped in the pattern denied", bash("perl -0pi -e 's|world\\||PLANET|' f.ts"), "deny", "METACHARACTER"],
+  [
+    "perl pipe delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's|world\\||PLANET|' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
   ["perl pipe delimiter under double quotes denied", bash('perl -pi -e "s|a\\|b|c|" f.ts'), "deny", "METACHARACTER"],
   // The class, not the instance: each of these was measured 2026-09-14 to replace the target on input the author's literal pattern does not contain, because perl strips the backslash before ANY delimiter and the bare metacharacter is then live.
-  ["perl plus delimiter escaped in the pattern denied", bash("perl -0pi -e 's+world\\++PLANET+' f.ts"), "deny", "METACHARACTER"],
-  ["perl star delimiter escaped in the pattern denied", bash("perl -0pi -e 's*world\\**PLANET*' f.ts"), "deny", "METACHARACTER"],
-  ["perl question delimiter escaped in the pattern denied", bash("perl -0pi -e 's?world\\??PLANET?' f.ts"), "deny", "METACHARACTER"],
-  ["perl dot delimiter escaped in the pattern denied", bash("perl -0pi -e 's.world\\..PLANET.' f.ts"), "deny", "METACHARACTER"],
-  ["perl dollar delimiter escaped in the pattern denied", bash("perl -0pi -e 's$world\\$$PLANET$' f.ts"), "deny", "METACHARACTER"],
+  [
+    "perl plus delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's+world\\++PLANET+' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
+  [
+    "perl star delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's*world\\**PLANET*' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
+  [
+    "perl question delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's?world\\??PLANET?' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
+  [
+    "perl dot delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's.world\\..PLANET.' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
+  [
+    "perl dollar delimiter escaped in the pattern denied",
+    bash("perl -0pi -e 's$world\\$$PLANET$' f.ts"),
+    "deny",
+    "METACHARACTER",
+  ],
   ["perl hash delimiter is not a metacharacter and is allowed", bash("perl -pi -e 's#a\\#b#c#' f.ts"), null, ""],
-  ["perl an unrelated metacharacter escaped, not the delimiter, allowed", bash('perl -0pi -e "s|a\\+b|c|" f.ts'), null, ""],
+  [
+    "perl an unrelated metacharacter escaped, not the delimiter, allowed",
+    bash('perl -0pi -e "s|a\\+b|c|" f.ts'),
+    null,
+    "",
+  ],
   ["perl escaped pipe in the REPLACEMENT allowed", bash("perl -pi -e 's|a|b\\|c|' f.ts"), null, ""],
   ["perl pipe delimiter with nothing escaped allowed", bash("perl -pi -e 's|/usr/local|/opt|' f.ts"), null, ""],
   ["perl pipe substitution without -i allowed", bash("perl -pe 's|a\\|b|c|' f.ts"), null, ""],
   ["grep quoting a pipe-delimited substitution allowed", bash("grep -n 's|a\\|b|c|' notes.md"), null, ""],
-  ["perl -i beside an unrelated pipe substitution is refused, by design", bash("perl -pi -e 's/a/b/' f.ts && echo 's|x\\|y|z|'"), "deny", "METACHARACTER"],
+  [
+    "perl -i beside an unrelated pipe substitution is refused, by design",
+    bash("perl -pi -e 's/a/b/' f.ts && echo 's|x\\|y|z|'"),
+    "deny",
+    "METACHARACTER",
+  ],
   ["pr body negated close denied", bash("gh pr create --body 'this PR does not close #518'"), "deny", "CLOSING"],
-  ["pr body qualified negated close denied", bash("gh pr create --body 'does not close ahl-gram/Vellum#518'"), "deny", "CLOSING"],
+  [
+    "pr body qualified negated close denied",
+    bash("gh pr create --body 'does not close ahl-gram/Vellum#518'"),
+    "deny",
+    "CLOSING",
+  ],
   ["pr body em-dash denied", bash("gh pr edit 5 --body 'a — b'"), "deny", "em-dash"],
   ["issue body em-dash denied", bash("gh issue create --title t --body 'a — b'"), "deny", "em-dash"],
   ["pr comment em-dash denied", bash("gh pr comment 5 --body 'a — b'"), "deny", "em-dash"],
   // The line-continuation join reaches these two refusals as well as the gh api one, and the join is what puts the body on the same segment as the command that carries it.
-  ["pr body em-dash across a line continuation denied", bash("gh pr create --title t \\\n  --body 'a — b'"), "deny", "em-dash"],
-  ["pr body negated close across a line continuation denied", bash("gh pr create --title t \\\n  --body 'this does not close #518'"), "deny", "CLOSING"],
+  [
+    "pr body em-dash across a line continuation denied",
+    bash("gh pr create --title t \\\n  --body 'a — b'"),
+    "deny",
+    "em-dash",
+  ],
+  [
+    "pr body negated close across a line continuation denied",
+    bash("gh pr create --title t \\\n  --body 'this does not close #518'"),
+    "deny",
+    "CLOSING",
+  ],
   ...CODE_FIXTURES,
   ...CD_FIXTURES,
   ["issue comment negated close allowed", bash("gh issue comment 5 --body 'does not close #3'"), null, ""],
   ["typed -F field is not a body file", bash("gh issue comment 549 -F body=hello"), null, ""],
-  ["gh api issue body overwrite denied", bash("gh api repos/o/r/issues/193 -f body='new text'"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api combined short flags denied", bash("gh api repos/o/r/issues/193 -if body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api across a line continuation denied", bash("gh api repos/o/r/issues/193 \\\n  -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api a continuation still does not fuse the read-then-comment pair", bash("gh api repos/o/r/issues/193 \\\n  --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
-  ["gh api a bare newline is two commands, not one", bash("gh api repos/o/r/issues/193 --jq .title\ngh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
-  ["gh api two methods takes the LAST, as gh does", bash("gh api --method GET repos/o/r/issues/193 -f q=1 -X POST -f body=y"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api quoted body assignment denied", bash('gh api repos/o/r/issues/193 -f "body=new text"'), "deny", "bare issue or pull-request endpoint"],
-  ["gh api glued short field denied", bash("gh api repos/o/r/issues/193 -fbody=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api typed field denied", bash("gh api repos/o/r/issues/193 -F body=@body.md"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api --field denied", bash("gh api repos/o/r/issues/193 --field body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api --raw-field denied", bash("gh api repos/o/r/issues/193 --raw-field body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api --input denied", bash("gh api repos/o/r/issues/193 --input body.json"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api owner placeholders denied", bash("gh api repos/{owner}/{repo}/issues/193 -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api leading-slash path denied", bash("gh api /repos/o/r/issues/193 -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api absolute url denied", bash("gh api https://api.github.com/repos/o/r/issues/193 -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api trailing-slash path denied", bash("gh api repos/o/r/issues/193/ -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api explicit POST denied", bash("gh api repos/o/r/issues/193 -X POST -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api lowercase explicit post denied", bash("gh api repos/o/r/issues/193 -X post -f body=x"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api non-body field denied too", bash("gh api repos/o/r/issues/193 -f state=closed"), "deny", "bare issue or pull-request endpoint"],
-  ["gh api bare pull-request path denied", bash("gh api repos/o/r/pulls/550 -f body=x"), "deny", "bare issue or pull-request endpoint"],
+  [
+    "gh api issue body overwrite denied",
+    bash("gh api repos/o/r/issues/193 -f body='new text'"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api combined short flags denied",
+    bash("gh api repos/o/r/issues/193 -if body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api across a line continuation denied",
+    bash("gh api repos/o/r/issues/193 \\\n  -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api a continuation still does not fuse the read-then-comment pair",
+    bash("gh api repos/o/r/issues/193 \\\n  --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"),
+    null,
+    "",
+  ],
+  [
+    "gh api a bare newline is two commands, not one",
+    bash("gh api repos/o/r/issues/193 --jq .title\ngh api repos/o/r/issues/193/comments -f body='x'"),
+    null,
+    "",
+  ],
+  [
+    "gh api two methods takes the LAST, as gh does",
+    bash("gh api --method GET repos/o/r/issues/193 -f q=1 -X POST -f body=y"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api quoted body assignment denied",
+    bash('gh api repos/o/r/issues/193 -f "body=new text"'),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api glued short field denied",
+    bash("gh api repos/o/r/issues/193 -fbody=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api typed field denied",
+    bash("gh api repos/o/r/issues/193 -F body=@body.md"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api --field denied",
+    bash("gh api repos/o/r/issues/193 --field body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api --raw-field denied",
+    bash("gh api repos/o/r/issues/193 --raw-field body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api --input denied",
+    bash("gh api repos/o/r/issues/193 --input body.json"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api owner placeholders denied",
+    bash("gh api repos/{owner}/{repo}/issues/193 -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api leading-slash path denied",
+    bash("gh api /repos/o/r/issues/193 -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api absolute url denied",
+    bash("gh api https://api.github.com/repos/o/r/issues/193 -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api trailing-slash path denied",
+    bash("gh api repos/o/r/issues/193/ -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api explicit POST denied",
+    bash("gh api repos/o/r/issues/193 -X POST -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api lowercase explicit post denied",
+    bash("gh api repos/o/r/issues/193 -X post -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api non-body field denied too",
+    bash("gh api repos/o/r/issues/193 -f state=closed"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
+  [
+    "gh api bare pull-request path denied",
+    bash("gh api repos/o/r/pulls/550 -f body=x"),
+    "deny",
+    "bare issue or pull-request endpoint",
+  ],
   ["gh api comments endpoint allowed", bash("gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
-  ["gh api comments with placeholders allowed", bash("gh api repos/{owner}/{repo}/issues/123/comments -f body='Hi from CLI'"), null, ""],
+  [
+    "gh api comments with placeholders allowed",
+    bash("gh api repos/{owner}/{repo}/issues/123/comments -f body='Hi from CLI'"),
+    null,
+    "",
+  ],
   ["gh api issue sub-resource allowed", bash("gh api repos/o/r/issues/193/labels -f labels[]=chore"), null, ""],
   ["gh api pull-request sub-resource allowed", bash("gh api repos/o/r/pulls/550/reviews -f body=x"), null, ""],
   ["gh api -X PATCH allowed", bash("gh api repos/o/r/issues/193 -X PATCH -f body=x"), null, ""],
@@ -223,66 +472,242 @@ const FIXTURES: Fixture[] = [
   ["gh api --method PATCH allowed", bash("gh api repos/o/r/issues/193 --method PATCH -f body=x"), null, ""],
   ["gh api --method=PATCH allowed", bash("gh api repos/o/r/issues/193 --method=PATCH -f body=x"), null, ""],
   ["gh api glued -XPATCH allowed", bash("gh api repos/o/r/issues/193 -XPATCH -f body=x"), null, ""],
-  ["gh api double-quoted PATCH is the remedy and is allowed", bash('gh api repos/o/r/issues/193 -X "PATCH" -f body=x'), null, ""],
-  ["gh api single-quoted PATCH is the remedy and is allowed", bash("gh api repos/o/r/issues/193 --method 'PATCH' -f body=x"), null, ""],
+  [
+    "gh api double-quoted PATCH is the remedy and is allowed",
+    bash('gh api repos/o/r/issues/193 -X "PATCH" -f body=x'),
+    null,
+    "",
+  ],
+  [
+    "gh api single-quoted PATCH is the remedy and is allowed",
+    bash("gh api repos/o/r/issues/193 --method 'PATCH' -f body=x"),
+    null,
+    "",
+  ],
   ["gh api -X GET on an issue allowed", bash("gh api -X GET repos/o/r/issues/193 -f q=foo"), null, ""],
   ["gh api -X GET with query params allowed", bash("gh api -X GET search/issues -f q=foo"), null, ""],
   ["gh api issue create allowed", bash("gh api repos/o/r/issues -f title=t -f body=b"), null, ""],
   ["gh api pull-request create allowed", bash("gh api repos/o/r/pulls -f title=t"), null, ""],
   // The prover's one escape: with the number quantifier relaxed to \d*, every mutation-visible row still passed, so the digits were dead precision. This row is what makes them load-bearing, and it is an over-refusal that is being pinned out, not a footgun being let in.
   ["gh api issue create with a trailing slash allowed", bash("gh api repos/o/r/issues/ -f title=t"), null, ""],
-  ["gh api an item path inside a field VALUE is not the endpoint", bash("gh api repos/o/r/issues -f body=see-repos/o/r/issues/193"), null, ""],
+  [
+    "gh api an item path inside a field VALUE is not the endpoint",
+    bash("gh api repos/o/r/issues -f body=see-repos/o/r/issues/193"),
+    null,
+    "",
+  ],
   ["gh api bare read allowed", bash("gh api repos/o/r/issues/193"), null, ""],
   ["gh api read with jq allowed", bash("gh api repos/o/r/issues/193 --jq .body"), null, ""],
   ["gh api a QUOTED path is a known miss, not a boundary", bash('gh api "repos/o/r/issues/193" -f body=x'), null, ""],
-  ["gh api a variable-built path is a known miss, not a boundary", bash("gh api repos/$OWNER/$REPO/issues/$N -f body=x"), null, ""],
-  ["gh api read then comment in one call allowed", bash("gh api repos/o/r/issues/193 --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
+  [
+    "gh api a variable-built path is a known miss, not a boundary",
+    bash("gh api repos/$OWNER/$REPO/issues/$N -f body=x"),
+    null,
+    "",
+  ],
+  [
+    "gh api read then comment in one call allowed",
+    bash("gh api repos/o/r/issues/193 --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"),
+    null,
+    "",
+  ],
   ["pr body via subshell cat read", bash('gh pr create --body "$(cat body.md)"', SCRATCH), "deny", "em-dash"],
   ["relative body-file resolved against cwd", bash("gh pr create --body-file body.md", SCRATCH), "deny", "em-dash"],
   ["unreadable body-file warns", bash("gh pr create --body-file nope.md", "/"), "context", "could not read"],
-  ["pr body clean and whole gets gate 5 once", prBody(`Closes #519. #518 stays open.\n\n${WHOLE_BODY}`), "context", "## Gate 5"],
+  [
+    "pr body clean and whole gets gate 5 once",
+    prBody(`Closes #519. #518 stays open.\n\n${WHOLE_BODY}`),
+    "context",
+    "## Gate 5",
+  ],
   ...headingRows(),
-  ["a section named mid-line does not count as the section", prBody(bodyWith(["see the ## Guards section above", ...SECTIONS.slice(1)])), "deny", "## Guards"],
+  [
+    "a section named mid-line does not count as the section",
+    prBody(bodyWith(["see the ## Guards section above", ...SECTIONS.slice(1)])),
+    "deny",
+    "## Guards",
+  ],
   ["short -b body carrying every section allowed", bash(`gh pr create -b '${WHOLE_BODY}'`), "context", "## Gate 5"],
-  ["pr edit with no body at all is not held to the shape", bash("gh pr edit 5 --add-label chore"), "context", "## Gate 5"],
+  [
+    "pr edit with no body at all is not held to the shape",
+    bash("gh pr edit 5 --add-label chore"),
+    "context",
+    "## Gate 5",
+  ],
   ["--fill builds the body inside gh and is not checked", bash("gh pr create --fill"), "context", "## Gate 5"],
   ["an inline body in a shell variable is not checked", bash('gh pr create --body "$BODY"'), "context", "## Gate 5"],
-  ["an inline body from an unreadable file is not checked", bash('gh pr create --body "$(cat nope.md)"', "/"), "context", "could not read"],
+  [
+    "an inline body from an unreadable file is not checked",
+    bash('gh pr create --body "$(cat nope.md)"', "/"),
+    "context",
+    "could not read",
+  ],
   ["pr comment is not held to the PR body shape", bash("gh pr comment 5 --body 'a note'"), null, ""],
   ["issue create is not held to the PR body shape", bash("gh issue create --title t --body 'a note'"), null, ""],
-  ["a missing template warns and never denies", templateCheck("/nonexistent/PULL_REQUEST_TEMPLATE.md"), "context", "there is no PR template"],
-  ["a readable --body-file missing a section is denied", bash("gh pr create --body-file no-ran.md", SCRATCH), "deny", '"## Ran"'],
-  ["a readable --body-file carrying every section is allowed", bash("gh pr create --body-file whole.md", SCRATCH), "context", "## Gate 5"],
-  ["a $(cat file) on a non-body flag is not a PR body", bash("gh pr edit 5 --add-label \"$(cat no-ran.md)\"", SCRATCH), "context", "## Gate 5"],
-  ["a literal $ in a single-quoted body does not disarm the check", prBody(`${bodyWith(SECTIONS.filter((x) => x !== "## Ran"))}\nit cost $5\n`), "deny", '"## Ran"'],
+  [
+    "a missing template warns and never denies",
+    templateCheck("/nonexistent/PULL_REQUEST_TEMPLATE.md"),
+    "context",
+    "there is no PR template",
+  ],
+  [
+    "a readable --body-file missing a section is denied",
+    bash("gh pr create --body-file no-ran.md", SCRATCH),
+    "deny",
+    '"## Ran"',
+  ],
+  [
+    "a readable --body-file carrying every section is allowed",
+    bash("gh pr create --body-file whole.md", SCRATCH),
+    "context",
+    "## Gate 5",
+  ],
+  [
+    "a $(cat file) on a non-body flag is not a PR body",
+    bash('gh pr edit 5 --add-label "$(cat no-ran.md)"', SCRATCH),
+    "context",
+    "## Gate 5",
+  ],
+  [
+    "a literal $ in a single-quoted body does not disarm the check",
+    prBody(`${bodyWith(SECTIONS.filter((x) => x !== "## Ran"))}\nit cost $5\n`),
+    "deny",
+    '"## Ran"',
+  ],
   // decide() down the real no-template path, not headingCheck in isolation: these two are the only rows that can see a warning returned through ghRefusal's DECISION slot, which short-circuits checkBash before the Gate 5 note is pushed.
-  ["a checkout with no template warns through the deployed path", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)), "context", "there is no PR template"],
-  ["a checkout with no template still shows gate 5", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)), "context", "## Gate 5"],
-  ["the launch checkout's gate text wins over the edited checkout's", inLaunchCheckout({ ...edit("Edit", join(OPERATION, "test", "x.test.ts"), "x"), cwd: OPERATION }), "context", "## Gate 1: before writing a test or a guard", "the operation checkout's gate"],
-  ["a headingless template says so rather than missing", templateCheck(join(SCRATCH, "headingless.md")), "context", "carries no `## ` heading"],
+  [
+    "a checkout with no template warns through the deployed path",
+    inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)),
+    "context",
+    "there is no PR template",
+  ],
+  [
+    "a checkout with no template still shows gate 5",
+    inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)),
+    "context",
+    "## Gate 5",
+  ],
+  [
+    "the launch checkout's gate text wins over the edited checkout's",
+    inLaunchCheckout({ ...edit("Edit", join(OPERATION, "test", "x.test.ts"), "x"), cwd: OPERATION }),
+    "context",
+    "## Gate 1: before writing a test or a guard",
+    "the operation checkout's gate",
+  ],
+  [
+    "a headingless template says so rather than missing",
+    templateCheck(join(SCRATCH, "headingless.md")),
+    "context",
+    "carries no `## ` heading",
+  ],
   // The same payload as the row above it, with the other needle: a warning returned in ghRefusal's DECISION slot short-circuits checkBash before the Gate 5 note is pushed, and every row that asserts only the warning's own text passes while the gate is gone.
   ["a warning does not swallow the gate 5 note", bash("gh pr create --body-file nope.md", "/"), "context", "## Gate 5"],
   ["git push gets gate 5 once", bash("git push -u origin footguns-skill"), "context", "## Gate 5"],
   ["git status gets nothing", bash("git status"), null, ""],
-  ["heredoc into e2e denied", bash("cat > e2e/suites/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
-  ["heredoc into out probe denied", bash("cat > out/probe.mjs <<'EOF'\nawait evaluate(`a.match(/b\\.c/)`)\nEOF"), "deny", "backtick"],
-  ["e2e single-escaped class denied", edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  ["e2e single-escaped dot denied", edit("Edit", "e2e/suites/x/part.ts", "await evaluate(`x.match(/a\\.b/)`)"), "deny", "backtick"],
+  [
+    "heredoc into e2e denied",
+    bash("cat > e2e/suites/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "heredoc into out probe denied",
+    bash("cat > out/probe.mjs <<'EOF'\nawait evaluate(`a.match(/b\\.c/)`)\nEOF"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "e2e single-escaped class denied",
+    edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "e2e single-escaped dot denied",
+    edit("Edit", "e2e/suites/x/part.ts", "await evaluate(`x.match(/a\\.b/)`)"),
+    "deny",
+    "backtick",
+  ],
   ["multiedit edits[] denied", multi("e2e/support/x.ts", "`split(/\\s/)`"), "deny", "backtick"],
-  ["out probe single-escaped denied", edit("Write", "out/probe-x.mjs", "const P = `s.replace(/\\s+/g, ' ')`;"), "deny", "backtick"],
-  ["String.raw is the remedy and is allowed", edit("Write", "out/probe-x.mjs", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
-  ["odd backtick in a regex literal does not swallow code", edit("Write", "out/rewrap.mjs", "const md = /^```/;\nconst r = s.match(/\\s+/);"), "context", "## Gate 2"],
-  ["escape inside a substitution template denied", edit("Write", "out/p.mjs", "const P = `a${1}b.split(/\\d/)`;"), "deny", "backtick"],
-  ["e2e double-escaped gets gate 2", edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\\\s+/))()`;"), "context", "## Gate 2"],
-  ["e2e regex literal outside backticks gets gate 2", edit("Write", "e2e/suites/x.ts", "const a = s.match(/\\s+/);"), "context", "## Gate 2"],
+  [
+    "out probe single-escaped denied",
+    edit("Write", "out/probe-x.mjs", "const P = `s.replace(/\\s+/g, ' ')`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "String.raw is the remedy and is allowed",
+    edit("Write", "out/probe-x.mjs", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"),
+    "context",
+    "## Gate 2",
+  ],
+  [
+    "odd backtick in a regex literal does not swallow code",
+    edit("Write", "out/rewrap.mjs", "const md = /^```/;\nconst r = s.match(/\\s+/);"),
+    "context",
+    "## Gate 2",
+  ],
+  [
+    "escape inside a substitution template denied",
+    edit("Write", "out/p.mjs", "const P = `a${1}b.split(/\\d/)`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "e2e double-escaped gets gate 2",
+    edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\\\s+/))()`;"),
+    "context",
+    "## Gate 2",
+  ],
+  [
+    "e2e regex literal outside backticks gets gate 2",
+    edit("Write", "e2e/suites/x.ts", "const a = s.match(/\\s+/);"),
+    "context",
+    "## Gate 2",
+  ],
   ["e2e .click() warns", edit("Edit", "e2e/suites/x/part.ts", "el.click();"), "context", "pointer-events"],
-  ["e2e .ts single-escaped class denied", edit("Write", "e2e/harness.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  ["a template after a generic arrow in a .ts file denied", edit("Write", "e2e/suites/x.ts", "const id = <T>(x: T): T => x;\nconst R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  ["a template after an angle-bracket assertion denied", edit("Write", "out/probe-x.ts", "const P = <string>`s.split(/\\s+/)`;"), "deny", "backtick"],
-  ["a single escape in a non-e2e scripts .ts denied", edit("Write", "scripts/lint/x.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
-  ["heredoc into an e2e .ts denied", bash("cat > e2e/support/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
-  ["String.raw in a .ts is allowed", edit("Write", "e2e/suites/x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
-  ["a single escape in a unit test under test/e2e is denied too", edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
+  [
+    "e2e .ts single-escaped class denied",
+    edit("Write", "e2e/harness.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "a template after a generic arrow in a .ts file denied",
+    edit("Write", "e2e/suites/x.ts", "const id = <T>(x: T): T => x;\nconst R = `(() => 'a b'.split(/\\s+/))()`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "a template after an angle-bracket assertion denied",
+    edit("Write", "out/probe-x.ts", "const P = <string>`s.split(/\\s+/)`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "a single escape in a non-e2e scripts .ts denied",
+    edit("Write", "scripts/lint/x.ts", "const P = `s.split(/\\d/)`;"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "heredoc into an e2e .ts denied",
+    bash("cat > e2e/support/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"),
+    "deny",
+    "backtick",
+  ],
+  [
+    "String.raw in a .ts is allowed",
+    edit("Write", "e2e/suites/x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"),
+    "context",
+    "## Gate 2",
+  ],
+  [
+    "a single escape in a unit test under test/e2e is denied too",
+    edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"),
+    "deny",
+    "backtick",
+  ],
   ...ROUTE_FIXTURES,
   ...SEQUENCE_FIXTURES,
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
@@ -295,7 +720,8 @@ const HOOK_CONTEXT_LIMIT = 9_000;
 // Every lead quotes the edited path, and the longest root a session edits under is an EnterWorktree directory named for its branch: the longest branch among the closed PRs read 2026-10-02 was 47 characters, and a shorter root here under-measures every probe.
 const LONG_ROOT = `/Users/someone/CodeProjects/Vellum/.claude/worktrees/${"b".repeat(47)}`;
 const NOISY_AND_CLICK = "const R = `a\\(b`; el.click();";
-const EVERY_SHELL_NOTE = "cat > scripts/a-probe.ts <<'EOF'\nconst R = `a\\(b`;\nEOF\npkill -f brave; git push; gh pr create --body-file a-missing-body-file.md";
+const EVERY_SHELL_NOTE =
+  "cat > scripts/a-probe.ts <<'EOF'\nconst R = `a\\(b`;\nEOF\npkill -f brave; git push; gh pr create --body-file a-missing-body-file.md";
 const longestName = (dir: string, suffix: string, recursive: boolean): string =>
   readdirSync(join(ROOT, dir), { recursive, encoding: "utf8" })
     .map((p) => basename(p))
@@ -305,17 +731,50 @@ const longestName = (dir: string, suffix: string, recursive: boolean): string =>
 const sizeProbes = (test: string, suite: string): [string, Payload, string[], Payload?][] => {
   return [
     ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/${test}`, "x"), ["## Gate 1"]],
-    ["a test that reads the repo, once gate 1 is spent", edit("Edit", `${LONG_ROOT}/test/repo/${test}`, "x"), ["## Gate 7"], edit("Edit", `${LONG_ROOT}/test/render/${test}`, "x")],
-    ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
-    ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-${suite}`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
-    ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
-    ["a new stylesheet", edit("Write", `${LONG_ROOT}/src/styles/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
-    ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
+    [
+      "a test that reads the repo, once gate 1 is spent",
+      edit("Edit", `${LONG_ROOT}/test/repo/${test}`, "x"),
+      ["## Gate 7"],
+      edit("Edit", `${LONG_ROOT}/test/render/${test}`, "x"),
+    ],
+    [
+      "a browser-harness unit test that clicks and escapes",
+      edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK),
+      ["## Gate 1", "for wiring only", "double the backslash"],
+    ],
+    [
+      "a new e2e suite that clicks and escapes",
+      edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-${suite}`, NOISY_AND_CLICK),
+      ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"],
+    ],
+    [
+      "a new unit test under a suite-shaped path that clicks and escapes",
+      edit("Write", `${LONG_ROOT}/test/e2e/suites/${test}`, NOISY_AND_CLICK),
+      ["## Gate 1", "for wiring only", "double the backslash"],
+    ],
+    [
+      "a new stylesheet",
+      edit("Write", `${LONG_ROOT}/src/styles/a-new-sheet-name.css`, "x"),
+      ["## Gate 4", "## Gate 3"],
+    ],
+    [
+      "a new page",
+      edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"),
+      ["## Gate 4", "## Gate 3"],
+    ],
     ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
     ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
     ["a push", bash("git push -u origin a-long-branch-name", LONG_ROOT), ["## Gate 5"]],
-    ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", LONG_ROOT), ["## Gate 5", "could not read"]],
-    ["a shell line that writes a script, kills a browser, pushes and opens a PR", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["## Gate 5", "could not read", "double the backslash", "browser profile"]],
+    [
+      "a PR body from an unreadable file",
+      bash("gh pr create --body-file a-missing-body-file.md", LONG_ROOT),
+      ["## Gate 5", "could not read"],
+    ],
+    [
+      "a shell line that writes a script, kills a browser, pushes and opens a PR",
+      bash(EVERY_SHELL_NOTE, LONG_ROOT),
+      ["## Gate 5", "could not read", "double the backslash", "browser profile"],
+    ],
   ];
 };
 
@@ -324,20 +783,34 @@ const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<
   const suite = longestName(join("e2e", "suites"), ".ts", false);
   const probes = sizeProbes(test, suite);
   const quoted = probes.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
-  report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters, naming test files of ${test.length} and suites of ${suite.length} characters`);
+  report(
+    LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)),
+    `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters, naming test files of ${test.length} and suites of ${suite.length} characters`,
+  );
   for (const [name, payload, needles, before] of probes) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
     if (before) await decide({ ...before, session_id: sessionId });
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";
     rmSync(statePath(sessionId), { force: true });
     const found = needles.filter((n) => text.includes(n));
-    report(found.length === needles.length && text.length <= HOOK_CONTEXT_LIMIT, `${name}: the pasted note carries ${found.join(", ")} in ${text.length} of ${HOOK_CONTEXT_LIMIT} characters`);
+    report(
+      found.length === needles.length && text.length <= HOOK_CONTEXT_LIMIT,
+      `${name}: the pasted note carries ${found.join(", ")} in ${text.length} of ${HOOK_CONTEXT_LIMIT} characters`,
+    );
   }
 };
 
 const ORDER_PROBES: [string, Payload, string[]][] = [
-  ["the notes of a new e2e suite that clicks and escapes keep their order", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-order.ts`, NOISY_AND_CLICK), ["double the backslash", "for wiring only", "## Gate 4", "## Gate 2"]],
-  ["the notes of a shell line that writes a script, kills a browser, pushes and opens a PR keep their order", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["could not read", "double the backslash", "## Gate 5", "browser profile"]],
+  [
+    "the notes of a new e2e suite that clicks and escapes keep their order",
+    edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-order.ts`, NOISY_AND_CLICK),
+    ["double the backslash", "for wiring only", "## Gate 4", "## Gate 2"],
+  ],
+  [
+    "the notes of a shell line that writes a script, kills a browser, pushes and opens a PR keep their order",
+    bash(EVERY_SHELL_NOTE, LONG_ROOT),
+    ["could not read", "double the backslash", "## Gate 5", "browser profile"],
+  ],
 ];
 
 const orderChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
@@ -346,7 +819,10 @@ const orderChecks = async (report: (ok: boolean, line: string) => void): Promise
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput.additionalContext ?? "";
     rmSync(statePath(sessionId), { force: true });
     const at = needles.map((needle) => text.indexOf(needle));
-    report(at.every((i, k) => i !== -1 && (k === 0 || i > (at[k - 1] ?? -1))), `${name}: ${needles.join(", ")}`);
+    report(
+      at.every((i, k) => i !== -1 && (k === 0 || i > (at[k - 1] ?? -1))),
+      `${name}: ${needles.join(", ")}`,
+    );
   }
 };
 
@@ -361,29 +837,46 @@ const run = async (): Promise<number> => {
   writeFileSync(join(SCRATCH, "headingless.md"), "# a template with no sections\n\nprose only.\n");
   writeFileSync(join(SCRATCH, "no-ran.md"), bodyWith(SECTIONS.filter((x) => x !== "## Ran")));
   writeFileSync(join(SCRATCH, "whole.md"), WHOLE_BODY);
-  CODE_ROWS.forEach(([, , bodies], row) => bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))));
+  CODE_ROWS.forEach(([, , bodies], row) =>
+    bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))),
+  );
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(ROOT, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts"), ROOTLESS_HOOK);
   mkdirSync(join(ROOTLESS, "scripts", "agent-infra", "hooks"), { recursive: true });
-  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"]) cpSync(join(ROOT, "scripts", "agent-infra", "hooks", module), join(ROOTLESS, "scripts", "agent-infra", "hooks", module));
-  cpSync(join(ROOT, ".claude", "skills", "vellum-footguns", "SKILL.md"),join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
+  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"])
+    cpSync(
+      join(ROOT, "scripts", "agent-infra", "hooks", module),
+      join(ROOTLESS, "scripts", "agent-infra", "hooks", module),
+    );
+  cpSync(
+    join(ROOT, ".claude", "skills", "vellum-footguns", "SKILL.md"),
+    join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"),
+  );
   symlinkSync(ROOT, LINK);
   mkdirSync(join(OPERATION, ".claude", "skills", "vellum-footguns"), { recursive: true });
   writeFileSync(join(OPERATION, ".claude", "skills", "vellum-footguns", "SKILL.md"), OPERATION_SKILL);
-  for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"]) mkdirSync(join(SCRATCH, dir), { recursive: true });
+  for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"])
+    mkdirSync(join(SCRATCH, dir), { recursive: true });
   symlinkSync(join(SCRATCH, "a dir"), join(SCRATCH, "to-a-dir"));
-  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6", "Gate 7"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6", "Gate 7"])
+    report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   await sizeChecks(report);
   await orderChecks(report);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
-  report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");
+  report(
+    !readFileSync(TEMPLATE_PATH, "utf8").includes("—"),
+    "the PR template carries no em-dash to prefill a body with",
+  );
   for (const [name, subject, want, needle, absent] of FIXTURES) {
     const sessionId = `selftest-${process.pid}-${name}`;
     const got = typeof subject === "function" ? await subject() : await decide({ ...subject, session_id: sessionId });
     const out = got?.hookSpecificOutput;
     const kind: Kind = out ? (out.permissionDecision === "deny" ? "deny" : "context") : null;
     const text = out?.permissionDecisionReason ?? out?.additionalContext ?? "";
-    report(kind === want && text.includes(needle) && (absent === undefined || !text.includes(absent)), `${name}: want ${want} with ${JSON.stringify(needle)}${absent === undefined ? "" : ` and without ${JSON.stringify(absent)}`}, got ${kind}`);
+    report(
+      kind === want && text.includes(needle) && (absent === undefined || !text.includes(absent)),
+      `${name}: want ${want} with ${JSON.stringify(needle)}${absent === undefined ? "" : ` and without ${JSON.stringify(absent)}`}, got ${kind}`,
+    );
     try {
       unlinkSync(statePath(sessionId));
     } catch {
@@ -396,7 +889,9 @@ const run = async (): Promise<number> => {
 
 const isEntry = (): boolean => {
   try {
-    return process.argv[1] !== undefined && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+    return (
+      process.argv[1] !== undefined && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+    );
   } catch {
     return false;
   }

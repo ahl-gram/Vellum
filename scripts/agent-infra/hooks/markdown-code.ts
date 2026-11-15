@@ -6,7 +6,7 @@ const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})[ \t]*$/;
 const TABLE_DELIMITER = /^[\s|:-]*$/;
 const CELL_PIPE = /(?<!\\)\|/;
 const LIST_ITEM = /^\s*(?:[-*+]|\d{1,9}[.)])(?:\s|$)/;
-const HTML_BLOCK =/^ {0,3}<\/?[A-Za-z][A-Za-z0-9-]*(?:[\s/>]|$)/;
+const HTML_BLOCK = /^ {0,3}<\/?[A-Za-z][A-Za-z0-9-]*(?:[\s/>]|$)/;
 const AUTOLINK = /<[A-Za-z][A-Za-z0-9+.-]{1,31}:[^\s<>]*>/y;
 const TAG = /<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/y;
 
@@ -79,7 +79,7 @@ const inlineStep = (cell: string, at: number): readonly [string, number] => {
 
 const withoutSpans = (cell: string): string => {
   let prose = "";
-  for (let at = 0; at < cell.length; ) {
+  for (let at = 0; at < cell.length;) {
     const [text, next] = inlineStep(cell, at);
     prose += text;
     at = next;
@@ -87,7 +87,8 @@ const withoutSpans = (cell: string): string => {
   return prose;
 };
 
-const proseOfLine = (line: string, inTable: boolean): string => (inTable ? line.split(CELL_PIPE).map(withoutSpans).join("|") : withoutSpans(line));
+const proseOfLine = (line: string, inTable: boolean): string =>
+  inTable ? line.split(CELL_PIPE).map(withoutSpans).join("|") : withoutSpans(line);
 
 const startsTable = (lines: readonly string[], at: number): boolean => {
   const next = lines[at + 1] ?? "";
