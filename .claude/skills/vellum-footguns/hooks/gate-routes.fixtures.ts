@@ -30,6 +30,7 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
   ["a new shared sheet gets gate 4", "Write", "src/styles/shared/never-exists-zz.css", "x", "context", "## Gate 4"],
   ["a new sheet at the top of src/styles gets gate 4", "Write", "src/styles/never-exists-zz.css", "x", "context", "## Gate 4"],
   ["a new sheet in a page's folder gets gate 4", "Write", "src/styles/explorer/never-exists-zz.css", "x", "context", "## Gate 4"],
+  ["a Write over a sheet that exists gets gate 3 and no gate 4", "Write", "<ROOT>/src/styles/shared/atelier.css", "x", "context", "## Gate 3", "## Gate 4"],
   ["a new part in a suite's folder gets gate 2 and no gate 4", "Write", "e2e/suites/never-exists-zz/part.ts", "x", "context", "## Gate 2", "## Gate 4"],
   ["a new unit test under test/e2e/suites gets gate 1 and no gate 4", "Write", "test/e2e/suites/never-exists-zz.test.ts", "x", "context", "## Gate 1", "## Gate 4"],
   ["a new unit test under test/src/site gets gate 1 and no gate 4", "Write", "test/src/site/never-exists-zz.test.ts", "x", "context", "## Gate 1", "## Gate 4"],

@@ -156,6 +156,8 @@ const CD_ROWS: ReadonlyArray<readonly [string, "deny" | "null"]> = [
   ["a main session started with --agent is still the main session", "deny"],
   ["the review agents' sandbox recipe allowed in a subagent", "null"],
   ["the same recipe denied in the main session", "deny"],
+  ["a main-session cd whose directory does not persist allowed", "null"],
+  ["a main-session cd whose directory is said to persist denied", "deny"],
 ];
 
 // Written out for the same reason as the code rows: each is the only guard of its arm of the cd reader (Issue #781), and deleting one from the fixture table prints no FAIL.

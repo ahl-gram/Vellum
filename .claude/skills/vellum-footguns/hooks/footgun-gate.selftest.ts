@@ -21,6 +21,8 @@ const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
 // A checkout of the hook with no .github/ beside it. TEMPLATE resolves from the hook file's own directory, so this is the only way to drive decide() down the no-template path: an env override would be a seam that exists for the test, and calling headingCheck directly skips ghRefusal, which is where the warning could be returned in the wrong tuple slot.
 const ROOTLESS = join(SCRATCH, "rootless");
 const ROOTLESS_HOOK = join(ROOTLESS, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts");
+const OPERATION = join(SCRATCH, "operation-checkout");
+const OPERATION_SKILL = "# a skill\n\n## Gate 1: the operation checkout's gate\n\nthe operation checkout's gate text\n";
 const SETTINGS = JSON.parse(execFileSync("cat", [join(ROOT, ".claude", "settings.json")], { encoding: "utf8" })) as {
   hooks: { PreToolUse: { hooks: { command: string }[] }[] };
 };
@@ -94,7 +96,7 @@ const inProject = (payload: Payload, project: string | undefined) => async (): P
 const PROJECTS: Record<string, string | undefined> = { "no project": undefined, "project via link": LINK, "project at home": homedir() };
 const NEEDLES: Record<string, string> = { deny: "inside the project", unplaced: "cannot work out", stash: "refs/stash", escape: "inside a backtick string" };
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
-  const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : {};
+  const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : who === "directory does not persist" ? { cwd_persists: false } : who === "directory persists" ? { cwd_persists: true } : {};
   const project = who !== undefined && who in PROJECTS ? PROJECTS[who] : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
   return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", NEEDLES[who ?? ""] ?? (want ? (NEEDLES[want] ?? "") : "")];
 });
@@ -110,6 +112,14 @@ const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => 
     } catch {
       /* nothing was written when no gate fired */
     }
+  }
+};
+const inLaunchCheckout = (payload: Payload) => async (): Promise<Decision> => {
+  const session = `launch-${process.pid}`;
+  try {
+    return await deployed({ ...payload, session_id: session }, ROOTLESS)();
+  } finally {
+    rmSync(statePath(session), { force: true });
   }
 };
 // Returns a deny when the check denied, so a row wanting context reds on the channel itself rather than on the text: warn and deny are different slots and only one of them stops the call.
@@ -248,6 +258,7 @@ const FIXTURES: Fixture[] = [
   // decide() down the real no-template path, not headingCheck in isolation: these two are the only rows that can see a warning returned through ghRefusal's DECISION slot, which short-circuits checkBash before the Gate 5 note is pushed.
   ["a checkout with no template warns through the deployed path", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)), "context", "there is no PR template"],
   ["a checkout with no template still shows gate 5", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`)), "context", "## Gate 5"],
+  ["the launch checkout's gate text wins over the edited checkout's", inLaunchCheckout({ ...edit("Edit", join(OPERATION, "test", "x.test.ts"), "x"), cwd: OPERATION }), "context", "## Gate 1: before writing a test or a guard", "the operation checkout's gate"],
   ["a headingless template says so rather than missing", templateCheck(join(SCRATCH, "headingless.md")), "context", "carries no `## ` heading"],
   // The same payload as the row above it, with the other needle: a warning returned in ghRefusal's DECISION slot short-circuits checkBash before the Gate 5 note is pushed, and every row that asserts only the warning's own text passes while the gate is gone.
   ["a warning does not swallow the gate 5 note", bash("gh pr create --body-file nope.md", "/"), "context", "## Gate 5"],
@@ -324,6 +335,21 @@ const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<
   }
 };
 
+const ORDER_PROBES: [string, Payload, string[]][] = [
+  ["the notes of a new e2e suite that clicks and escapes keep their order", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-order.ts`, NOISY_AND_CLICK), ["double the backslash", "for wiring only", "## Gate 4", "## Gate 2"]],
+  ["the notes of a shell line that writes a script, kills a browser, pushes and opens a PR keep their order", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["could not read", "double the backslash", "## Gate 5", "browser profile"]],
+];
+
+const orderChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
+  for (const [name, payload, needles] of ORDER_PROBES) {
+    const sessionId = `selftest-order-${process.pid}-${name}`;
+    const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput.additionalContext ?? "";
+    rmSync(statePath(sessionId), { force: true });
+    const at = needles.map((needle) => text.indexOf(needle));
+    report(at.every((i, k) => i !== -1 && (k === 0 || i > (at[k - 1] ?? -1))), `${name}: ${needles.join(", ")}`);
+  }
+};
+
 const run = async (): Promise<number> => {
   let fails = 0;
   const report = (ok: boolean, line: string): void => {
@@ -341,10 +367,13 @@ const run = async (): Promise<number> => {
   for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"]) cpSync(join(HERE, module), join(dirname(ROOTLESS_HOOK), module));
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
+  mkdirSync(join(OPERATION, ".claude", "skills", "vellum-footguns"), { recursive: true });
+  writeFileSync(join(OPERATION, ".claude", "skills", "vellum-footguns", "SKILL.md"), OPERATION_SKILL);
   for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"]) mkdirSync(join(SCRATCH, dir), { recursive: true });
   symlinkSync(join(SCRATCH, "a dir"), join(SCRATCH, "to-a-dir"));
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6", "Gate 7"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   await sizeChecks(report);
+  await orderChecks(report);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
   report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");
   for (const [name, subject, want, needle, absent] of FIXTURES) {

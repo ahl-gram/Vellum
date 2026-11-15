@@ -1,5 +1,5 @@
 // The cd reader's rows (Issue #781), as data: footgun-gate.selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
-export type CdRow = readonly [name: string, command: string, cwd: string | null, want: "deny" | "unplaced" | null, who?: "subagent" | "with --agent" | "no project" | "project via link" | "project at home" | "stash" | "escape"];
+export type CdRow = readonly [name: string, command: string, cwd: string | null, want: "deny" | "unplaced" | null, who?: "subagent" | "with --agent" | "no project" | "project via link" | "project at home" | "stash" | "escape" | "directory does not persist" | "directory persists"];
 
 const SPACED = "<S>/a dir";
 const OUTSIDE = "<S>/..";
@@ -173,6 +173,8 @@ const WHO: ReadonlyArray<CdRow> = [
   ["a main session started with --agent is still the main session", "cd src && ls", "<ROOT>", "deny", "with --agent"],
   ["the review agents' sandbox recipe allowed in a subagent", RECIPE, "<ROOT>", null, "subagent"],
   ["the same recipe denied in the main session", RECIPE, "<ROOT>", "deny"],
+  ["a main-session cd whose directory does not persist allowed", "cd src && ls", "<ROOT>", null, "directory does not persist"],
+  ["a main-session cd whose directory is said to persist denied", "cd src && ls", "<ROOT>", "deny", "directory persists"],
 ];
 
 export const CD_ROWS: ReadonlyArray<CdRow> = [...PLACES, ...UNPLACED, ...OPTIONS, ...BOUNDARIES, ...TEXT, ...WHO];

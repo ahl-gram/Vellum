@@ -13,6 +13,7 @@ test("the footgun hook's fixture table passes, including the deployed settings.j
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   assert.doesNotMatch(out, /^FAIL/m, out);
   assert.match(out, /^ok +deployed: symlinked project dir denies stash pop/m, out);
+  assert.match(out, /^ok +the launch checkout's gate text wins over the edited checkout's: /m, out);
 });
 
 // The table's only other assertion is "no FAIL", which an EMPTY roster satisfies: a headingRows() that returned [] would leave npm test green with the whole PR-section guard gone (Issue #140's deletable-guard shape). The required row per section is derived from the template rather than listed here, so this cannot drift from it either.
@@ -100,9 +101,23 @@ test("every row on whether a new unit test, suite, site module or sheet joins a 
     ["a new shared sheet gets gate 4", 'want context with "## Gate 4", got context'],
     ["a new sheet at the top of src/styles gets gate 4", 'want context with "## Gate 4", got context'],
     ["a new sheet in a page's folder gets gate 4", 'want context with "## Gate 4", got context'],
+    [
+      "a Write over a sheet that exists gets gate 3 and no gate 4",
+      'want context with "## Gate 3" and without "## Gate 4", got context',
+    ],
   ];
   for (const [row, wants] of rows)
     assert.ok(out.split("\n").includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
+});
+
+test("the notes of one call keep the order its checks met them in (Issue #1395)", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const lines = out.split("\n");
+  for (const row of [
+    "the notes of a new e2e suite that clicks and escapes keep their order: double the backslash, for wiring only, ## Gate 4, ## Gate 2",
+    "the notes of a shell line that writes a script, kills a browser, pushes and opens a PR keep their order: could not read, double the backslash, ## Gate 5, browser profile",
+  ])
+    assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
 });
 
 const GATE1_NOT_7 = 'want context with "## Gate 1" and without "## Gate 7", got context';
