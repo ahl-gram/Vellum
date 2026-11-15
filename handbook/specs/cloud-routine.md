@@ -11,7 +11,7 @@
 - **The environment's setup script installs Node 24 ahead of the VM's own.** The routine runs `node -v` first and stops if it is not v24.x. Its prompt names the `PATH` entry and authorises the repository attach below.
 - **The repository is attached with push access.** Where a session finds no checkout, or `gh` refuses with the `add_repo` message, it calls `add_repo` for `ahl-gram/Vellum` ONLY, with `access: "push"`, which Alex authorises in the routine's prompt; it attaches nothing else.
 - **The repo's hook fires there, one command per call.** A command the hook refuses (a bare `cd` into a directory inside the repo, Issue #781) fails every other command chained in the same line, so each command goes in its own call.
-- **The hook does not read what it posts.** `.claude/skills/vellum-footguns/hooks/` gates `gh pr create` and `gh pr edit`, not a REST call, so the routine runs the body checks itself (the loop below).
+- **The hook does not read what it posts.** The footgun hook (`scripts/agent-infra/hooks/`) gates `gh pr create` and `gh pr edit`, not a REST call, so the routine runs the body checks itself (the loop below).
 
 ## What qualifies
 

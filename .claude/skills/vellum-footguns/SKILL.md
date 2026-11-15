@@ -359,7 +359,7 @@ are copied here.
 
 ## Never
 
-The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the issue-body overwrite (#193, PR #550), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
+The hook (launched from `hooks/`, its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the issue-body overwrite (#193, PR #550), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
