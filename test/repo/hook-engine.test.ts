@@ -83,7 +83,7 @@ test("operations are read in order, so the first denial is the one shown (Issue 
   const verdict = await evaluate(
     request(
       [
-        { kind: "shell", command: "perl -pi -e 's/a/−/' f.ts" },
+        { kind: "shell", command: "perl -pi -e 's/a/\u2212/' f.ts" },
         { kind: "shell", command: "git stash pop" },
       ],
       "first-denial",

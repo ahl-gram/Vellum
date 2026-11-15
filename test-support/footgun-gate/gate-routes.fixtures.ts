@@ -1,4 +1,4 @@
-// The edit-routing rows (gate-routes.ts), as data: test-support/footgun-gate/selftest.ts fills <ROOT> (the checkout), sends each row's text as the Write's content or the Edit's new string, and reads the decision for the needle and the absent text.
+// The edit-routing rows (scripts/agent-infra/hooks/gate-routes.ts), as data: test-support/footgun-gate/selftest.ts fills <ROOT> (the checkout), sends each row's text as the Write's content or the Edit's new string, and reads the decision for the needle and the absent text.
 export type RouteRow = readonly [
   name: string,
   tool: "Edit" | "Write",
