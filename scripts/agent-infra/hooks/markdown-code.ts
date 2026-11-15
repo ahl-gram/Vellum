@@ -59,8 +59,9 @@ const closingRun = (text: string, from: number, length: number): number => {
 };
 
 const matchAt = (pattern: RegExp, text: string, at: number): string | null => {
-  pattern.lastIndex = at;
-  return pattern.exec(text)?.[0] ?? null;
+  const sticky = new RegExp(pattern);
+  sticky.lastIndex = at;
+  return sticky.exec(text)?.[0] ?? null;
 };
 
 const inlineStep = (cell: string, at: number): readonly [string, number] => {
