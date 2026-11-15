@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readDeployed } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts";
+import { readDeployed } from "../../test-support/footgun-gate/selftest.ts";
 
 // A cap on a hang, not a performance budget: an ETIMEDOUT here is the darwin wedge of Issue #564, where a child that DRAINS a payload larger than one write leaves the parent holding the socketpair with the completion never delivered. Measured 2026-09-11 under four other agents: no run of any shape in this file took over 7ms unless it wedged outright.
 const BOUND_MS = 30_000;

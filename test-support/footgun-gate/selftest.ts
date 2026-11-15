@@ -8,13 +8,13 @@ import { cpSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, sym
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
+import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { ROUTE_ROWS, SEQUENCE_ROWS } from "./gate-routes.fixtures.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(HERE, "..", "..", "..", "..");
+const ROOT = resolve(HERE, "..", "..");
 const SCRATCH = join(tmpdir(), `footgun-selftest-${process.pid}`); // named here, created in run(): FIXTURES needs the path at module scope, and a module that mints a temp dir just by being imported leaks one per import
 const LINK = join(SCRATCH, "linked-root");
 const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
@@ -363,9 +363,10 @@ const run = async (): Promise<number> => {
   writeFileSync(join(SCRATCH, "whole.md"), WHOLE_BODY);
   CODE_ROWS.forEach(([, , bodies], row) => bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))));
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
-  cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
-  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"]) cpSync(join(HERE, module), join(dirname(ROOTLESS_HOOK), module));
-  cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
+  cpSync(join(ROOT, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts"), ROOTLESS_HOOK);
+  mkdirSync(join(ROOTLESS, "scripts", "agent-infra", "hooks"), { recursive: true });
+  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"]) cpSync(join(ROOT, "scripts", "agent-infra", "hooks", module), join(ROOTLESS, "scripts", "agent-infra", "hooks", module));
+  cpSync(join(ROOT, ".claude", "skills", "vellum-footguns", "SKILL.md"),join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   mkdirSync(join(OPERATION, ".claude", "skills", "vellum-footguns"), { recursive: true });
   writeFileSync(join(OPERATION, ".claude", "skills", "vellum-footguns", "SKILL.md"), OPERATION_SKILL);

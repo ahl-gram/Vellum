@@ -9,9 +9,9 @@ import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
-import { bareCdReason } from "./bare-cd.ts";
-import { dueGate, ROSTER_NEW_FILE, TEST_HELPER, UNIT_TEST } from "./gate-routes.ts";
-import { proseOf } from "./markdown-code.ts";
+import { bareCdReason } from "../../../../scripts/agent-infra/hooks/bare-cd.ts";
+import { dueGate, ROSTER_NEW_FILE, TEST_HELPER, UNIT_TEST } from "../../../../scripts/agent-infra/hooks/gate-routes.ts";
+import { proseOf } from "../../../../scripts/agent-infra/hooks/markdown-code.ts";
 
 export type ToolInput = {
   file_path?: string;
