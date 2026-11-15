@@ -51,7 +51,6 @@ test("the gate text comes from the request's policy root, not from the checkout 
   const r = request([change], "policy-root");
   const delivery = deliver(r, await evaluate(r));
   assert.equal(delivery?.kind, "context");
-  assert.ok(delivery?.kind === "context");
   assert.ok(delivery.text.includes("the launch checkout's gate"), delivery.text);
   assert.ok(!delivery.text.includes("the operation checkout's gate"), delivery.text);
 });

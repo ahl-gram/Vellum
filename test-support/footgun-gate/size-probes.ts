@@ -1,6 +1,7 @@
 import { readdirSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
-import { decide, statePath, type Payload } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
+import { decide, type Payload } from "../../scripts/agent-infra/hooks/claude-adapter.ts";
+import { statePath } from "../../scripts/agent-infra/hooks/gate-state.ts";
 import { bash, edit, ROOT } from "./kit.ts";
 
 // Claude Code 2.1.322, measured 2026-11-11 with a project hook in a non-interactive session, an interactive one and an agent dispatched from each: added text of 9,900 characters arrived whole and 10,100 became a 2,000-character preview in the interactive session and the agents (the non-interactive session itself was read at 9,499, whole, and 10,499, a preview), and the 8,000-character cut the program carries reached none of them (the cloud routine unmeasured), so the limit sits 1,000 under that switch (Issue #1338).

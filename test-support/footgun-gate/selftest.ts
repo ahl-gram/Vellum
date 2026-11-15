@@ -1,20 +1,11 @@
-/**
- * The footgun hook's fixture table. `node footgun-gate.selftest.ts` prints one line per fixture and exits with the
- * number of misses; test/repo/footgun-gate.test.ts runs it under npm test. The deployed rows run the exact command
- * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
- */
+// The footgun hook's fixture table: `node test-support/footgun-gate/selftest.ts` prints one line per fixture and exits with the number of misses, and test/repo/footgun-gate.test.ts runs it under npm test.
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import {
-  decide,
-  gateText,
-  requiredHeadings,
-  statePath,
-  type Decision,
-  type Payload,
-} from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
+import { decide, type Decision, type Payload } from "../../scripts/agent-infra/hooks/claude-adapter.ts";
+import { gateText, statePath } from "../../scripts/agent-infra/hooks/gate-state.ts";
+import { requiredHeadings } from "../../scripts/agent-infra/hooks/pr-body.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { ESCAPE_ROWS } from "./escape.fixtures.ts";
 import { GH_API_ROWS } from "./gh-api.fixtures.ts";
@@ -38,7 +29,7 @@ import { SHELL_ROWS } from "./shell.fixtures.ts";
 import { orderChecks, sizeChecks } from "./size-probes.ts";
 
 const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
-// A checkout of the hook with no .github/ beside it. TEMPLATE resolves from the hook file's own directory, so this is the only way to drive decide() down the no-template path: an env override would be a seam that exists for the test, and calling headingCheck directly skips ghRefusal, which is where the warning could be returned in the wrong tuple slot.
+// A checkout of the hook with no .github/ beside it. The Claude adapter reads the template from the checkout it sits in, so this is the only way to drive decide() down the no-template path: an env override would be a seam that exists for the test, and calling headingCheck directly skips ghRefusal, which is where the warning could be returned in the wrong tuple slot.
 const ROOTLESS = join(SCRATCH, "rootless");
 const ROOTLESS_HOOK = join(ROOTLESS, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts");
 const OPERATION = join(SCRATCH, "operation-checkout");
@@ -235,12 +226,9 @@ const run = async (): Promise<number> => {
   );
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(ROOT, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts"), ROOTLESS_HOOK);
-  mkdirSync(join(ROOTLESS, "scripts", "agent-infra", "hooks"), { recursive: true });
-  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"])
-    cpSync(
-      join(ROOT, "scripts", "agent-infra", "hooks", module),
-      join(ROOTLESS, "scripts", "agent-infra", "hooks", module),
-    );
+  cpSync(join(ROOT, "scripts", "agent-infra", "hooks"), join(ROOTLESS, "scripts", "agent-infra", "hooks"), {
+    recursive: true,
+  });
   cpSync(
     join(ROOT, ".claude", "skills", "vellum-footguns", "SKILL.md"),
     join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"),
@@ -252,10 +240,10 @@ const run = async (): Promise<number> => {
     mkdirSync(join(SCRATCH, dir), { recursive: true });
   symlinkSync(join(SCRATCH, "a dir"), join(SCRATCH, "to-a-dir"));
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6", "Gate 7"])
-    report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+    report(gateText(ROOT, label).length > 200, `${label} text found in SKILL.md`);
   await sizeChecks(report);
   await orderChecks(report);
-  report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
+  report(requiredHeadings(TEMPLATE_PATH) !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
   report(
     !readFileSync(TEMPLATE_PATH, "utf8").includes("—"),
     "the PR template carries no em-dash to prefill a body with",

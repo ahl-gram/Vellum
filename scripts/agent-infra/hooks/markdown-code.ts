@@ -1,4 +1,4 @@
-// The footgun hook's code reader (Issue #644): a body with its fenced blocks and inline spans taken out, read as GitHub renders them where that is cheap and as prose where it is not; its blind spots and their direction are in README.md.
+// The footgun hook's code reader (Issue #644): a body with its fenced blocks and inline spans taken out, read as GitHub renders them where that is cheap and as prose where it is not; its blind spots and their direction are in .claude/skills/vellum-footguns/hooks/README.md.
 type Fence = { readonly char: string; readonly length: number; readonly indent: number };
 
 const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})(.*)$/;

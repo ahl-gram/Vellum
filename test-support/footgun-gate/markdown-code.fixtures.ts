@@ -1,4 +1,4 @@
-// The code reader's rows (Issue #644), as data: footgun-gate.selftest.ts writes each body to a scratch file named in the command's {0}, {1}, writes <D> as the em-dash and <WHOLE> as a body with every PR section, and wants the decision given, with the needle given or its default.
+// The code reader's rows (Issue #644), as data: test-support/footgun-gate/selftest.ts writes each body to a scratch file named in the command's {0}, {1}, writes <D> as the em-dash and <WHOLE> as a body with every PR section, and wants the decision given, with the needle given or its default.
 export type CodeRow = readonly [
   name: string,
   command: string,

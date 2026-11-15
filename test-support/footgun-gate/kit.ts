@@ -1,7 +1,7 @@
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Decision, Payload } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
+import type { Decision, Payload } from "../../scripts/agent-infra/hooks/claude-adapter.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(HERE, "..", "..");

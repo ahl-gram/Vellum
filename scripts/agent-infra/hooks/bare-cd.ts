@@ -1,4 +1,4 @@
-// The footgun hook's bare `cd` reader (Issue #781): a `cd`, `chdir`, `pushd` or `popd` the main session's own shell would run, and whether it moves the session to another directory inside the project; what it reads and where it errs are in README.md.
+// The footgun hook's bare `cd` reader (Issue #781): a `cd`, `chdir`, `pushd` or `popd` the main session's own shell would run, and whether it moves the session to another directory inside the project; what it reads and where it errs are in .claude/skills/vellum-footguns/hooks/README.md.
 import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve, sep } from "node:path";

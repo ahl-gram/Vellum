@@ -1,5 +1,6 @@
 import { join } from "node:path";
-import { headingCheck, type Decision } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.ts";
+import type { Decision } from "../../scripts/agent-infra/hooks/claude-adapter.ts";
+import { headingCheck } from "../../scripts/agent-infra/hooks/pr-body.ts";
 import { bash, bodyWith, prBody, SCRATCH, SECTIONS, WHOLE_BODY, type Fixture } from "./kit.ts";
 
 const asContext = (text: string): Decision => ({

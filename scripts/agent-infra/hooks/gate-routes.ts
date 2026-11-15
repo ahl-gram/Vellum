@@ -1,4 +1,4 @@
-// Which gate an edit owes, read by footgun-gate.ts; the routes and their reasons are in README.md, and the rows that pin them are gate-routes.fixtures.ts.
+// Which gate an edit owes, read by `checkEdit` in `scripts/agent-infra/hooks/edit-checks.ts`; the routes and their reasons are in .claude/skills/vellum-footguns/hooks/README.md, and the rows that pin them are test-support/footgun-gate/gate-routes.fixtures.ts.
 type Gate = readonly [stateKey: string, label: string];
 const GUARD: Gate = ["guard", "Gate 1"];
 const SCAN: Gate = ["scan", "Gate 7"];

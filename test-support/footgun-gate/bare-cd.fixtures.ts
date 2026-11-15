@@ -1,4 +1,4 @@
-// The cd reader's rows (Issue #781), as data: footgun-gate.selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
+// The cd reader's rows (Issue #781), as data: test-support/footgun-gate/selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
 export type CdRow = readonly [
   name: string,
   command: string,
