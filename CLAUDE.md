@@ -172,7 +172,7 @@ the moment you are about to write a test or guard, an e2e check or CDP probe, a 
 that joins a roster, anything that can move a chart or the golden, or a PR body. This file and the
 specs are the narrative; the skill is the same doctrine as a checklist read at the moment it applies,
 which is the difference that stopped the same defects reaching PR after PR. Its
-`.claude/skills/vellum-footguns/hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
+`.claude/skills/vellum-footguns/hooks/footgun-gate.ts` (its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, puts the matching gate in front of you and
 refuses the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
 
 **The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at

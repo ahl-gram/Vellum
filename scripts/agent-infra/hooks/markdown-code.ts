@@ -1,4 +1,4 @@
-// The footgun hook's code reader (Issue #644): a body with its fenced blocks and inline spans taken out, read as GitHub renders them where that is cheap and as prose where it is not; its blind spots and their direction are in README.md.
+// The footgun hook's code reader (Issue #644): a body with its fenced blocks and inline spans taken out, read as GitHub renders them where that is cheap and as prose where it is not; its blind spots and their direction are in .claude/skills/vellum-footguns/hooks/README.md.
 type Fence = { readonly char: string; readonly length: number; readonly indent: number };
 
 const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})(.*)$/;
@@ -6,7 +6,7 @@ const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})[ \t]*$/;
 const TABLE_DELIMITER = /^[\s|:-]*$/;
 const CELL_PIPE = /(?<!\\)\|/;
 const LIST_ITEM = /^\s*(?:[-*+]|\d{1,9}[.)])(?:\s|$)/;
-const HTML_BLOCK =/^ {0,3}<\/?[A-Za-z][A-Za-z0-9-]*(?:[\s/>]|$)/;
+const HTML_BLOCK = /^ {0,3}<\/?[A-Za-z][A-Za-z0-9-]*(?:[\s/>]|$)/;
 const AUTOLINK = /<[A-Za-z][A-Za-z0-9+.-]{1,31}:[^\s<>]*>/y;
 const TAG = /<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/y;
 
@@ -59,8 +59,9 @@ const closingRun = (text: string, from: number, length: number): number => {
 };
 
 const matchAt = (pattern: RegExp, text: string, at: number): string | null => {
-  pattern.lastIndex = at;
-  return pattern.exec(text)?.[0] ?? null;
+  const sticky = new RegExp(pattern);
+  sticky.lastIndex = at;
+  return sticky.exec(text)?.[0] ?? null;
 };
 
 const inlineStep = (cell: string, at: number): readonly [string, number] => {
@@ -79,7 +80,7 @@ const inlineStep = (cell: string, at: number): readonly [string, number] => {
 
 const withoutSpans = (cell: string): string => {
   let prose = "";
-  for (let at = 0; at < cell.length; ) {
+  for (let at = 0; at < cell.length;) {
     const [text, next] = inlineStep(cell, at);
     prose += text;
     at = next;
@@ -87,7 +88,8 @@ const withoutSpans = (cell: string): string => {
   return prose;
 };
 
-const proseOfLine = (line: string, inTable: boolean): string => (inTable ? line.split(CELL_PIPE).map(withoutSpans).join("|") : withoutSpans(line));
+const proseOfLine = (line: string, inTable: boolean): string =>
+  inTable ? line.split(CELL_PIPE).map(withoutSpans).join("|") : withoutSpans(line);
 
 const startsTable = (lines: readonly string[], at: number): boolean => {
   const next = lines[at + 1] ?? "";

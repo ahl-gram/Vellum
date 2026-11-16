@@ -1,10 +1,12 @@
-// The footgun hook's bare `cd` reader (Issue #781): a `cd`, `chdir`, `pushd` or `popd` the main session's own shell would run, and whether it moves the session to another directory inside the project; what it reads and where it errs are in README.md.
+// The footgun hook's bare `cd` reader (Issue #781): a `cd`, `chdir`, `pushd` or `popd` the main session's own shell would run, and whether it moves the session to another directory inside the project; what it reads and where it errs are in .claude/skills/vellum-footguns/hooks/README.md.
 import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve, sep } from "node:path";
 
-const LEX = /\\\n|\\[\s\S]|\$'(?:[^'\\]|\\[\s\S])*'|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|`(?:[^`\\]|\\[\s\S])*`|\$\(\((?:[^()]|\([^()]*\))*\)\)|(?<=^|[\s;&|)])#[^\n]*|(?<!<)<<(-?)[ \t]*(?:'([^'\n]*)'|"([^"\n]*)"|\\?([A-Za-z_][\w-]*))|\n/g;
-const BOUNDARY = /\n|;|&&|\|\||\||(?<![<>])&(?!>)|\(|\)|\{(?=\s)|(?<=\s)\}|(?<![\w-])(?:if|then|do|else|elif|while|until|!)(?!\w)/g;
+const LEX =
+  /\\\n|\\[\s\S]|\$'(?:[^'\\]|\\[\s\S])*'|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|`(?:[^`\\]|\\[\s\S])*`|\$\(\((?:[^()]|\([^()]*\))*\)\)|(?<=^|[\s;&|)])#[^\n]*|(?<!<)<<(-?)[ \t]*(?:'([^'\n]*)'|"([^"\n]*)"|\\?([A-Za-z_][\w-]*))|\n/g;
+const BOUNDARY =
+  /\n|;|&&|\|\||\||(?<![<>])&(?!>)|\(|\)|\{(?=\s)|(?<=\s)\}|(?<![\w-])(?:if|then|do|else|elif|while|until|!)(?!\w)/g;
 const WORD_PART = /'[^']*'|"(?:[^"\\]|\\[\s\S])*"|\\[\s\S]|[^'"\\]+/g;
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
 const CD_OPTION = /^-[LPeqs@]+$/;
@@ -143,7 +145,9 @@ const REASON = (said: string, cwd: string, move: string): string =>
 export const bareCdReason = (command: string, cwd: string, project: string | undefined): string | null => {
   const masked = mask(command);
   for (const [start, end] of topLevel(masked)) {
-    const words = [...masked.slice(start, end).matchAll(/\S+/g)].map((w) => command.slice(start + w.index, start + w.index + w[0].length));
+    const words = [...masked.slice(start, end).matchAll(/\S+/g)].map((w) =>
+      command.slice(start + w.index, start + w.index + w[0].length),
+    );
     const i = commandWord(words);
     const verb = literal(words[i] ?? "");
     if (verb === null || !VERBS.has(verb)) continue;

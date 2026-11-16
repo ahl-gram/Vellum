@@ -15,11 +15,11 @@ is ever removed.
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
   modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
   it the same way rather than by adding paths that look related.
-  The routes are `gate-routes.ts`. Each names its gates in order, an edit is read against the first
+  The routes are `scripts/agent-infra/hooks/gate-routes.ts`. Each names its gates in order, an edit is read against the first
   route its path matches, and the first of that route's gates this session has not been shown is
   the one pasted. Two routes name two gates, Gate 1 and then Gate 7, one per edit, because the two
   in one note pass the bound the size probes hold (`HOOK_CONTEXT_LIMIT` in
-  `.claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts`; Issue #782): tests under
+  `test-support/footgun-gate/size-probes.ts`; Issue #782): tests under
   `test/repo/` and `test/site/`, the first route, and `test-support/*.ts`, the last, so a helper
   folder inside a directory an earlier route owns keeps that route's gate.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
@@ -67,7 +67,7 @@ is ever removed.
   - `gh pr create` / `gh pr edit` / `gh pr comment` / `gh issue create` / `gh issue edit` /
     `gh issue comment` whose text carries an em-dash in its prose (Issue #644). Each quoted argument
     of the command (a title, an inline body), the rest of the command, and each body file are read
-    apart, and `markdown-code.ts` takes out of each a fenced code block (backticks or tildes, indented
+    apart, and `scripts/agent-infra/hooks/markdown-code.ts` takes out of each a fenced code block (backticks or tildes, indented
     at most three spaces, closed by the same character at least as long, a backtick fence's info
     string holding no backtick, and a fence inside a list item ending where its item does) and an
     inline span (a run of backticks closed by an equal run on its own line, or in its own cell of a
@@ -75,7 +75,7 @@ is ever removed.
     pipes; a run after an odd number of backslashes opens nothing). HTML tags and autolinks bind
     before spans, as CommonMark orders them, and an HTML block (a line opening with a tag, to the next
     blank line) is read as prose whole. An unclosed fence or span is prose, so it opens no loophole;
-    the rows are `markdown-code.fixtures.ts`. And a PR body (create or edit) carrying a
+    the rows are `test-support/footgun-gate/markdown-code.fixtures.ts`. And a PR body (create or edit) carrying a
     negated closing keyword such as "does not close #N" or "does not fix owner/repo#N". The body is
     read inline, from `--body-file` (resolved against the call's cwd), and from `$(cat file)`; a body
     file it cannot read is named in a warning instead of skipped. A `-F name=value` typed field is
@@ -101,7 +101,7 @@ is ever removed.
     payload carries no `agent_id`, which Claude Code sets only for a call from inside a subagent (a
     main session started with `--agent` carries `agent_type` and is still the main one), and
     a subagent's directory never carries over between calls, so its `cd` is never refused; the review
-    agents' sandbox recipes rely on that. `bare-cd.ts` reads the RAW command, because the segmenter
+    agents' sandbox recipes rely on that. `scripts/agent-infra/hooks/bare-cd.ts` reads the RAW command, because the segmenter
     splits on `(` and blanks quotes. One left-to-right pass, in the order the shell reads, builds a
     mask of the same length that blanks escapes (a backslash-newline becomes a space, so a
     continued line splits words as the shell does), comments (`#` at a word start, so a quote in a
@@ -128,7 +128,7 @@ is ever removed.
     refused at its first leg. The way through is a subshell with a literal path,
     `( cd <path> && ... )`, `git -C <path>`, or an absolute path. It runs after every refusal above,
     the escape scan of a script written from the shell included, so nothing it does can hide one,
-    and the rows are `bare-cd.fixtures.ts`;
+    and the rows are `test-support/footgun-gate/bare-cd.fixtures.ts`;
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
@@ -264,17 +264,22 @@ is ever removed.
 ## How it is wired
 
 The block lives in `.claude/settings.json` (shared, committed); read it there rather than from a copy
-here. It runs `node` on this script (Node's native TypeScript, the same way `scripts/*.ts` run) only
-if it exists at `${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/`, and exits 0
-otherwise, so a checkout without the script (a worktree cut before this merged) is not blocked. The
-entry check compares real paths, so a symlinked project directory still runs it. Do NOT copy the
+here. It runs `node` on the launcher `footgun-gate.ts` beside this file (Node's native TypeScript, the
+same way `scripts/*.ts` run) only if it exists at `${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/`,
+and exits 0 otherwise, so a checkout without it is not blocked. The launcher holds no policy: it hands
+the call to `runClaudeHook` in `scripts/agent-infra/hooks/claude-adapter.ts`, the one place that reads
+`CLAUDE_PROJECT_DIR`, which turns the payload into the request typed in `scripts/agent-infra/hooks/request.ts`
+that `evaluate` in `scripts/agent-infra/hooks/engine.ts` judges. The gate text and the PR template are
+read from the checkout the adapter sits in, which is the checkout the session was launched in, as
+Issue #1395 ruled. The launcher's entry check is `import.meta.main`, so a symlinked project directory
+still runs it. Do NOT copy the
 block to `~/.claude/settings.json`: `${CLAUDE_PROJECT_DIR}` would resolve to whatever project is
 open. Hook entries merge across levels, so user-level hooks keep running beside it.
 
 ## Prove it
 
 ```
-node .claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts
+node test-support/footgun-gate/selftest.ts
 ```
 
 One line per fixture, `ok` or `FAIL` with the decision and the text it expected; the exit code is
@@ -283,23 +288,25 @@ the number of misses. Every gate's text is asserted non-empty first, so a rename
 carry sections and no em-dash, so a template that would prefill an unusable body fails here too.
 The five section names are written out in the fixture table and derived in the hook; that asymmetry
 is deliberate, since fixtures built by reading the template would follow a rename and red nothing.
-The routing rows are data in `gate-routes.fixtures.ts`. Gate 7's each edit a list of paths in one
+The routing rows are data in `test-support/footgun-gate/gate-routes.fixtures.ts`. Gate 7's each edit a list of paths in one
 session and judge the last decision, which is what pins the one-per-edit order and the record the
 routes share. Gate 6's rows are generated one per
 ARM of its roster regex, because a roster is only as strong as its least-swept alternative: the
 prover found 10 of 19 arms carried no fixture, so a typo in any of them would have shipped silent.
 Two of its rows exist for shapes no relative path can reach, an absolute `file_path` (which is what
 a real tool call passes) and a path matching two gates at once, both of which escaped the first
-table. The last three rows run the exact
+table. The deployed rows run the exact
 command string from `.claude/settings.json` through `sh` with a real, a symlinked, and a missing
-`CLAUDE_PROJECT_DIR`, so the deployed path is exercised and not only the function.
+`CLAUDE_PROJECT_DIR`, and once from a copy of the checkout while the edit lands in a second checkout
+whose gate text differs, so the deployed path is exercised and not only the function, and the gate
+text is held to the launch checkout.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
-lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`
-types every file here through the tsconfig include, and the selftest copies `markdown-code.ts`,
-`bare-cd.ts` and `gate-routes.ts` beside the hook in its rootless checkout, since the hook imports
-all three; leave one out and the rootless hook cannot import it, `readDeployed` rethrows, and the
-selftest aborts with no `FAIL` line at all, which still reds `npm test`. The cd rows set
+lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`,
+`npm run lint` and `npm run format:check` read every file under `scripts/agent-infra/hooks/` and
+`test-support/footgun-gate/`, and the selftest copies the launcher and the whole of
+`scripts/agent-infra/hooks/` into its rootless checkout, so no module the hook imports is left out of
+it. The cd rows set
 `CLAUDE_PROJECT_DIR` for themselves and put it back, so a session's own value never reaches one.
 
 ## Cost
@@ -312,6 +319,6 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
   Neither figure is written here: they move whenever a gate gains a line, nothing sweeps a claim in markdown,
   and the copy that used to sit here went stale twice. This prints each gate's characters and their
   total, which is the aggregate term; divide by about four for tokens:
-  `node --input-type=module -e 'const {gateText}=await import("./.claude/skills/vellum-footguns/hooks/footgun-gate.ts");let t=0;for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6","Gate 7"]){const n=gateText(g).length;t+=n;console.log(g,n);}console.log("TOTAL",t)'`;
+  `node --input-type=module -e 'const {gateText}=await import("./scripts/agent-infra/hooks/gate-state.ts");let t=0;for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6","Gate 7"]){const n=gateText(".",g).length;t+=n;console.log(g,n);}console.log("TOTAL",t)'`;
 - every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.

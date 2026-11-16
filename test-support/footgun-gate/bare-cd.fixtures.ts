@@ -1,5 +1,20 @@
-// The cd reader's rows (Issue #781), as data: footgun-gate.selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
-export type CdRow = readonly [name: string, command: string, cwd: string | null, want: "deny" | "unplaced" | null, who?: "subagent" | "with --agent" | "no project" | "project via link" | "project at home" | "stash" | "escape"];
+// The cd reader's rows (Issue #781), as data: test-support/footgun-gate/selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
+export type CdRow = readonly [
+  name: string,
+  command: string,
+  cwd: string | null,
+  want: "deny" | "unplaced" | null,
+  who?:
+    | "subagent"
+    | "with --agent"
+    | "no project"
+    | "project via link"
+    | "project at home"
+    | "stash"
+    | "escape"
+    | "directory does not persist"
+    | "directory persists",
+];
 
 const SPACED = "<S>/a dir";
 const OUTSIDE = "<S>/..";
@@ -7,7 +22,12 @@ const RECIPE = `cd <ROOT>/.claude/worktrees/skeptic-781-1 && pwd && npm test`;
 
 const PLACES: ReadonlyArray<CdRow> = [
   ["a bare cd into another directory inside the project denied", "cd src && ls", "<ROOT>", "deny"],
-  ["a bare cd into a worktree denied, the incident's shape", "cd .claude/worktrees/orch-779 && git status", "<S>", "deny"],
+  [
+    "a bare cd into a worktree denied, the incident's shape",
+    "cd .claude/worktrees/orch-779 && git status",
+    "<S>",
+    "deny",
+  ],
   ["a bare cd into a directory under out denied, the incident's shape", "cd out/762/baseline-phone", "<S>", "deny"],
   ["a cd to the cwd spelled absolute allowed", "cd <ROOT> && git status", "<ROOT>", null],
   ["cd . allowed", "cd . && ls", "<ROOT>/src", null],
@@ -24,13 +44,36 @@ const PLACES: ReadonlyArray<CdRow> = [
   ["a cd into a directory the same call creates denied", "mkdir -p out/781-new && cd out/781-new", "<ROOT>", "deny"],
   ["a bare cd goes home, outside the project, and is allowed", "cd", "<ROOT>", null],
   ["cd ~ goes home and is allowed", "cd ~", "<ROOT>", null],
-  ["the session-end backup step outside the project allowed", "cd ~/CodeProjects/claude-config && git add -A", "<ROOT>", null],
+  [
+    "the session-end backup step outside the project allowed",
+    "cd ~/CodeProjects/claude-config && git add -A",
+    "<ROOT>",
+    null,
+  ],
   ["a cd out of the project from its root allowed", "cd ..", "<ROOT>", null],
   ["a cd back to the project root from inside it denied", "cd <ROOT>", "<ROOT>/src", "deny"],
   ["a directory whose name only begins with the project's is outside it", "cd <S>-781-sibling", "<S>", null],
-  ["with no project directory known every move is denied", "cd ~/CodeProjects/claude-config", "<ROOT>", "unplaced", "no project"],
-  ["a project spelled through a link still holds its own directories", "cd ../test", "<ROOT>/src", "deny", "project via link"],
-  ["a path spelled through the project's link is inside it", "cd <LINK>/781-nope", "<ROOT>", "deny", "project via link"],
+  [
+    "with no project directory known every move is denied",
+    "cd ~/CodeProjects/claude-config",
+    "<ROOT>",
+    "unplaced",
+    "no project",
+  ],
+  [
+    "a project spelled through a link still holds its own directories",
+    "cd ../test",
+    "<ROOT>/src",
+    "deny",
+    "project via link",
+  ],
+  [
+    "a path spelled through the project's link is inside it",
+    "cd <LINK>/781-nope",
+    "<ROOT>",
+    "deny",
+    "project via link",
+  ],
   ["a bare cd to a home that is the project root denied", "cd", "<ROOT>", "deny", "project at home"],
 ];
 
@@ -59,8 +102,19 @@ const UNPLACED: ReadonlyArray<CdRow> = [
   ["popd denied", "popd", "<ROOT>", "unplaced"],
   ["no cwd in the payload denied", "cd .", null, "unplaced"],
   ["a cwd that does not exist denied", "cd .", "<S>/781-gone", "unplaced"],
-  ["a cwd that does not exist denies a target outside the project too", "cd <S>-781-sibling", "<S>/781-gone", "unplaced"],
-  ["a cd the reader cannot place leaves the stash refusal standing", "cd .; git stash pop", "<S>/781-gone", "deny", "stash"],
+  [
+    "a cwd that does not exist denies a target outside the project too",
+    "cd <S>-781-sibling",
+    "<S>/781-gone",
+    "unplaced",
+  ],
+  [
+    "a cd the reader cannot place leaves the stash refusal standing",
+    "cd .; git stash pop",
+    "<S>/781-gone",
+    "deny",
+    "stash",
+  ],
 ];
 
 const OPTIONS: ReadonlyArray<CdRow> = [
@@ -139,7 +193,12 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a comment glued after a paren is a comment", "(ls)# x; cd src", "<ROOT>", null],
   ["a hash inside a word is not a comment", "echo a#b; cd src", "<ROOT>", "deny"],
   ["a cd in a heredoc body is not a cd", "cat > n.md <<'EOF'\nls\ncd src\nEOF", "<ROOT>", null],
-  ["a cd in a heredoc body whose operator is not last on its line is not a cd", "cat <<EOF | tee n.md\ncd src\nEOF", "<ROOT>", null],
+  [
+    "a cd in a heredoc body whose operator is not last on its line is not a cd",
+    "cat <<EOF | tee n.md\ncd src\nEOF",
+    "<ROOT>",
+    null,
+  ],
   ["a cd in a heredoc whose delimiter follows a space is not a cd", "cat << EOF\ncd src\nEOF", "<ROOT>", null],
   ["a cd in a heredoc with a double-quoted delimiter is not a cd", 'cat <<"EOF"\ncd src\nEOF', "<ROOT>", null],
   ["a cd in a heredoc with no terminator is not a cd", "cat <<EOF\ncd src", "<ROOT>", null],
@@ -149,23 +208,59 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a cd in the second of two heredocs is not a cd", "cat <<A <<B\nx\nA\ncd src\nB", "<ROOT>", null],
   ["a cd after two heredocs denied", "cat <<A <<B\nx\nA\ny\nB\ncd src", "<ROOT>", "deny"],
   ["a cd after a heredoc and another line denied", "cat <<EOF\nx\nEOF\nls\ncd src", "<ROOT>", "deny"],
-  ["a cd after a heredoc whose body opens a quote and a paren denied", "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && gh pr view", "<S>", "deny"],
+  [
+    "a cd after a heredoc whose body opens a quote and a paren denied",
+    "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && gh pr view",
+    "<S>",
+    "deny",
+  ],
   ["a here-string is not a heredoc", "cat <<<note\ncd src", "<ROOT>", "deny"],
   ["an arithmetic shift is not a heredoc", "echo $((1 << 2))\ncd src", "<ROOT>", "deny"],
   ["an arithmetic command shifting by a number is not a heredoc", "(( x = 1 << 2 ))\ncd src", "<ROOT>", "deny"],
   ["an arithmetic shift by a name is not a heredoc", "n=1; echo $((1 << n))\ncd src && pwd", "<ROOT>", "deny"],
-  ["an apostrophe in a comment does not hide a later cd", "# the sandbox's path\ncd src && jq '.x' a.json", "<ROOT>", "deny"],
+  [
+    "an apostrophe in a comment does not hide a later cd",
+    "# the sandbox's path\ncd src && jq '.x' a.json",
+    "<ROOT>",
+    "deny",
+  ],
   ["a double quote in a comment does not hide a later cd", 'ls # a " mark\ncd src && echo "x"', "<ROOT>", "deny"],
   ["a backtick in a comment does not hide a later cd", "ls # see `x\ncd src && echo `pwd`", "<ROOT>", "deny"],
-  ["a heredoc operator in a comment does not hide a later cd", "ls >/dev/null # see <<EOF for the body\ncd src && pwd\nls >/dev/null", "<ROOT>", "deny"],
-  ["a quoted heredoc whose last body line ends in a backslash ends at its terminator", "cat >/dev/null <<'END'\nnpm test \\\nEND\ncd src && pwd", "<ROOT>", "deny"],
+  [
+    "a heredoc operator in a comment does not hide a later cd",
+    "ls >/dev/null # see <<EOF for the body\ncd src && pwd\nls >/dev/null",
+    "<ROOT>",
+    "deny",
+  ],
+  [
+    "a quoted heredoc whose last body line ends in a backslash ends at its terminator",
+    "cat >/dev/null <<'END'\nnpm test \\\nEND\ncd src && pwd",
+    "<ROOT>",
+    "deny",
+  ],
   ["an escaped backslash at a line's end is not a continuation", "echo a\\\\\ncd src && pwd", "<ROOT>", "deny"],
-  ["a heredoc delimiter holding a dash is a heredoc", "cat >/dev/null <<'END-NOTE'\nIt's fine\nEND-NOTE\ncd src && echo 'x' && pwd", "<ROOT>", "deny"],
-  ["an unquoted heredoc delimiter holding a dash is a heredoc", "cat >/dev/null <<END-NOTE\nIt's fine\nEND-NOTE\ncd src && echo 'x'", "<ROOT>", "deny"],
+  [
+    "a heredoc delimiter holding a dash is a heredoc",
+    "cat >/dev/null <<'END-NOTE'\nIt's fine\nEND-NOTE\ncd src && echo 'x' && pwd",
+    "<ROOT>",
+    "deny",
+  ],
+  [
+    "an unquoted heredoc delimiter holding a dash is a heredoc",
+    "cat >/dev/null <<END-NOTE\nIt's fine\nEND-NOTE\ncd src && echo 'x'",
+    "<ROOT>",
+    "deny",
+  ],
   ["a comment after a cd that stays is not an argument", "cd . # back where we were", "<ROOT>", null],
   ["a heredoc delimiter quoted with a backslash is a heredoc", "cat <<\\EOF\ncd src\nEOF", "<ROOT>", null],
   ["an ANSI-C quoted apostrophe does not hide a later cd", "echo $'it\\'s'; cd src; echo 'x'", "<ROOT>", "deny"],
-  ["an escape script after a cd keeps its own refusal", "cd src && cat > scripts/781-x.ts <<'END'\nconst R = `a\\s`;\nEND", "<ROOT>", "deny", "escape"],
+  [
+    "an escape script after a cd keeps its own refusal",
+    "cd src && cat > scripts/781-x.ts <<'END'\nconst R = `a\\s`;\nEND",
+    "<ROOT>",
+    "deny",
+    "escape",
+  ],
 ];
 
 const WHO: ReadonlyArray<CdRow> = [
@@ -173,6 +268,20 @@ const WHO: ReadonlyArray<CdRow> = [
   ["a main session started with --agent is still the main session", "cd src && ls", "<ROOT>", "deny", "with --agent"],
   ["the review agents' sandbox recipe allowed in a subagent", RECIPE, "<ROOT>", null, "subagent"],
   ["the same recipe denied in the main session", RECIPE, "<ROOT>", "deny"],
+  [
+    "a main-session cd whose directory does not persist allowed",
+    "cd src && ls",
+    "<ROOT>",
+    null,
+    "directory does not persist",
+  ],
+  [
+    "a main-session cd whose directory is said to persist denied",
+    "cd src && ls",
+    "<ROOT>",
+    "deny",
+    "directory persists",
+  ],
 ];
 
 export const CD_ROWS: ReadonlyArray<CdRow> = [...PLACES, ...UNPLACED, ...OPTIONS, ...BOUNDARIES, ...TEXT, ...WHO];

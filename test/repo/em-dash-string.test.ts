@@ -20,7 +20,7 @@ test("the escape, a comment and the out-of-scope roots pass (Issue #981)", async
   assert.equal(await refusals(`export const a = "x ${ESCAPE} y";`, "src/atlas/document.ts"), 0);
   assert.equal(await refusals(`// ${D}\nexport const a = 1; /* ${D} */`, "src/atlas/document.ts"), 0);
   assert.equal(await refusals(`export const a = "${D}";`, "test/repo/error-cast.test.ts"), 0);
-  assert.equal(await refusals(`export const a = "${D}";`, ".claude/skills/vellum-footguns/hooks/bare-cd.ts"), 0);
+  assert.equal(await refusals(`export const a = "${D}";`, ".claude/skills/vellum-footguns/hooks/footgun-gate.ts"), 0);
 });
 
 test("the allow count tolerates that many literals in its file and refuses the next (Issue #981)", async () => {
