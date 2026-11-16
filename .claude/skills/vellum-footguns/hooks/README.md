@@ -3,8 +3,8 @@
 A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test
 or a shared test helper, a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
 file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
-every session launched from the Vellum root or a worktree. The skill works without it if that block
-is ever removed.
+every session launched from the Vellum root or a worktree, and for Codex in `.codex/hooks.json`, where it
+judges shell calls (Under Codex, below). The skill works without it if that block is ever removed.
 
 ## What it does
 
@@ -252,6 +252,10 @@ is ever removed.
   `src/site/` would get Gate 1 and Gate 7. None is tracked today, and the error is a paste too many,
   never one missing.
 - A gate spent on a call the user then rejects is not shown again that session.
+- Two calls that owe the same gate at the same moment each read the record before either adds to it,
+  so both paste the gate. A repeat, never a gate lost: each gate is appended to the record on a line of
+  its own, so one call never writes over a gate another remembered (Issue #1396), and a line read while
+  it is still being written names no gate, which repeats that gate once more.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES
   reach this hook (a dispatched agent's `perl -i` came back refused with `PERL_REASON` verbatim), and
@@ -276,6 +280,40 @@ still runs it. Do NOT copy the
 block to `~/.claude/settings.json`: `${CLAUDE_PROJECT_DIR}` would resolve to whatever project is
 open. Hook entries merge across levels, so user-level hooks keep running beside it.
 
+## Under Codex
+
+`.codex/hooks.json` registers the hook for Codex (Issue #1396). Codex skips a project hook until Alex
+trusts it in `/hooks`, and again after any change to that file, so the file is written once and frozen,
+holds no logic, and `test/repo/codex-hook.test.ts` pins it byte for byte. Its one command runs in the
+folder the Codex session was started in, climbs from there to that folder's repository with
+`git rev-parse --show-toplevel`, and runs `scripts/agent-infra/hooks/codex-launcher.ts` there when it
+exists, exiting 0 with no answer when it does not, so a worktree cut before the launcher existed is
+neither blocked nor checked. The launcher hands the call to `runCodexHook` in
+`scripts/agent-infra/hooks/codex-adapter.ts`, and nothing on the Codex path reads `CLAUDE_PROJECT_DIR`.
+
+- **Which checkout's rules.** The gate text and the PR template come from the checkout the adapter sits
+  in, which is the checkout the Codex session was started in, never the folder a call runs in: a helper
+  working in a lane's folder reads the rules of the checkout its session started in, and a session
+  started inside a lane's worktree reads that worktree's, as a Claude session does (Issue #1396). The
+  payload's `cwd` is the call's own folder, and a relative body file is read against it.
+- **What it judges.** A shell call, which Codex names `Bash`, through the same checks as a Claude one. A
+  patch (`apply_patch`) reaches the hook and is answered with nothing until Issue #1397; no other tool
+  reaches it.
+- **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
+  (Issue #1394's evidence), so the move the refusal exists to stop cannot happen. A helper's payload
+  carries `agent_id`, as a Claude subagent's does.
+- **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it
+  shares the record of what was shown. The registration sets `additionalContextLimit` to 0, so a note
+  reaches the model whole, never as a preview, and the size probes keep every note under 9,000
+  characters.
+- **Time.** The registration's `timeout` is 10 seconds, at least 20 times the slowest run measured when
+  it was set (Issue #1396). A hook that runs past it lets the call run unchecked, as a hook that fails does.
+- **What it does not see**, each of them silence: input sent to a shell that is already running
+  (`write_stdin`), which Codex does not pass through the hook again; a patch, until Issue #1397; a
+  session in a worktree with no Codex launcher, though `/hooks` there still shows the hook Trusted, so
+  the lane check of Issue #1393's D3 cannot catch it; and a session whose `/hooks` shows the hook
+  untrusted, which is why each Codex lane checks that before it works (Issue #1393, D3).
+
 ## Prove it
 
 ```
@@ -299,10 +337,14 @@ table. The deployed rows run the exact
 command string from `.claude/settings.json` through `sh` with a real, a symlinked, and a missing
 `CLAUDE_PROJECT_DIR`, and once from a copy of the checkout while the edit lands in a second checkout
 whose gate text differs, so the deployed path is exercised and not only the function, and the gate
-text is held to the launch checkout.
+text is held to the launch checkout. Every shell row of the table, and every `cd` row, runs once more
+through the Codex adapter as a `codex:` row (`test-support/footgun-gate/codex-rows.ts`), and
+`test/repo/codex-hook.test.ts` runs the exact command from `.codex/hooks.json` through `sh` with no
+`CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a lane's worktree, from an older worktree
+with no Codex launcher and from a folder in no repository.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
-lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`,
+lives at `$TMPDIR/vellum-footguns-<session_id>.txt`, one gate to a line; delete it to see a gate again. `npm run check`,
 `npm run lint` and `npm run format:check` read every file under `scripts/agent-infra/hooks/` and
 `test-support/footgun-gate/`, and the selftest copies the launcher and the whole of
 `scripts/agent-infra/hooks/` into its rootless checkout, so no module the hook imports is left out of
