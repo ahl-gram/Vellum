@@ -260,10 +260,11 @@ judges shell calls (Under Codex, below). The skill works without it if that bloc
   live dispatch: a subagent's Bash DOES
   reach this hook (a dispatched agent's `perl -i` came back refused with `PERL_REASON` verbatim), and
   it SHARES the parent's `session_id`, so that agent's `git push --dry-run` spent the parent session's
-  Gate 5 and the parent never saw it. The once-per-session limit lives in `gateNote` alone, so a
-  subagent cannot re-show a gate the parent spent; `deny` carries no such state and fires on every
-  matching call, so refusals reach a subagent unaffected, all but the bare `cd`, which reads the
-  payload's `agent_id` and is never refused there.
+  Gate 5 and the parent never saw it. The remembered gates are read by `evaluate` in
+  `scripts/agent-infra/hooks/engine.ts` and checked by `checkBash` in
+  `scripts/agent-infra/hooks/shell-checks.ts`, so a subagent cannot re-show a gate the parent spent;
+  `deny` carries no such state and fires on every matching call, so refusals reach a subagent
+  unaffected, all but the bare `cd`, which reads the payload's `agent_id` and is never refused there.
 
 ## How it is wired
 
@@ -299,15 +300,16 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
 - **What it judges.** A shell call, which Codex names `Bash`, through the same checks as a Claude one. A
   patch (`apply_patch`) reaches the hook and is answered with nothing until Issue #1397; no other tool
   reaches it.
+- **The caller.** A helper's payload carries `agent_id`, as a Claude subagent's does.
 - **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
-  (Issue #1394's evidence), so the move the refusal exists to stop cannot happen. A helper's payload
-  carries `agent_id`, as a Claude subagent's does.
+  (Issue #1394's evidence), so the move the refusal exists to stop cannot happen.
 - **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it
   shares the record of what was shown. The registration sets `additionalContextLimit` to 0, so a note
   reaches the model whole, never as a preview, and the size probes keep every note under 9,000
   characters.
 - **Time.** The registration's `timeout` is 10 seconds, at least 20 times the slowest run measured when
-  it was set (Issue #1396). A hook that runs past it lets the call run unchecked, as a hook that fails does.
+  it was set (Issue #1396). A hook that runs past it lets the call run unchecked, as a hook whose check
+  throws does, since `runHook` exits 0.
 - **What it does not see**, each of them silence: input sent to a shell that is already running
   (`write_stdin`), which Codex does not pass through the hook again; a patch, until Issue #1397; a
   session in a worktree with no Codex launcher, though `/hooks` there still shows the hook Trusted, so

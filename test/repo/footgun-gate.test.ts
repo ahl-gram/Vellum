@@ -120,7 +120,7 @@ test("the notes of one call keep the order its checks met them in (Issue #1395)"
     assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
 });
 
-// Written out for the same reason as the size probes: a Codex pass that ran no row prints no FAIL, so each table it reads is named here by a row the stub adapter of Issue #1396's first commit fails.
+// Written out for the same reason as the size probes: a Codex pass that ran no row prints no FAIL, so each table it reads is named here.
 test("the table's shell rows and its cd rows pass through the Codex adapter too (Issue #1396)", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const lines = out.split("\n");
