@@ -1,8 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { deliver, evaluate } from "./engine.ts";
+import { existsSync } from "node:fs";
+import { decisionFor, HOOK_CHECKOUT, runHook, type Decision } from "./hook-io.ts";
 import type { HookRequest, Operation } from "./request.ts";
 
+export type { Decision } from "./hook-io.ts";
 export type ToolInput = {
   file_path?: string;
   content?: string;
@@ -18,15 +18,6 @@ export type Payload = {
   cwd_persists?: boolean;
   tool_input?: ToolInput;
 };
-type Output = {
-  hookEventName: "PreToolUse";
-  permissionDecision?: "deny";
-  permissionDecisionReason?: string;
-  additionalContext?: string;
-};
-export type Decision = { hookSpecificOutput: Output } | null;
-
-const POLICY_ROOT = resolve(import.meta.dirname, "..", "..", "..");
 
 const editFragment = (input: ToolInput): string =>
   [input.content ?? "", input.new_string ?? "", ...(input.edits ?? []).map((e) => e?.new_string ?? "")]
@@ -48,7 +39,7 @@ const operationOf = (payload: Payload): Operation | null => {
 export const toRequest = (
   payload: Payload,
   projectDir: string | undefined,
-  policyRoot: string = POLICY_ROOT,
+  policyRoot: string = HOOK_CHECKOUT,
 ): HookRequest | null => {
   const operation = operationOf(payload);
   if (operation === null) return null;
@@ -64,28 +55,7 @@ export const toRequest = (
   };
 };
 
-export const decide = async (payload: Payload): Promise<Decision> => {
-  const request = toRequest(payload, process.env.CLAUDE_PROJECT_DIR);
-  if (request === null) return null;
-  const delivery = deliver(request, await evaluate(request));
-  if (delivery === null) return null;
-  return delivery.kind === "deny"
-    ? {
-        hookSpecificOutput: {
-          hookEventName: "PreToolUse",
-          permissionDecision: "deny",
-          permissionDecisionReason: delivery.reason,
-        },
-      }
-    : { hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: delivery.text } };
-};
+export const decide = (payload: Payload): Promise<Decision> =>
+  decisionFor(toRequest(payload, process.env.CLAUDE_PROJECT_DIR));
 
-export const runClaudeHook = async (): Promise<void> => {
-  try {
-    const result = await decide(JSON.parse(readFileSync(0, "utf8")) as Payload);
-    if (result) process.stdout.write(JSON.stringify(result));
-  } catch {
-    /* a malformed payload or a missing SKILL.md fails open */
-  }
-  process.exit(0);
-};
+export const runClaudeHook = (): Promise<void> => runHook(decide);

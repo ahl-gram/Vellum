@@ -24,6 +24,23 @@ export const multi = (path: string, text: string): Payload => ({
 
 export type Kind = "deny" | "context" | null;
 export type Fixture = [string, Payload | (() => Decision | Promise<Decision>), Kind, string, string?];
+export const placed = (text: string): string =>
+  text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
+export const NEEDLES: Record<string, string> = {
+  deny: "inside the project",
+  unplaced: "cannot work out",
+  stash: "refs/stash",
+  escape: "inside a backtick string",
+};
+export const judged = (got: Decision, want: Kind, needle: string, absent?: string): readonly [boolean, string] => {
+  const out = got?.hookSpecificOutput;
+  const kind: Kind = out ? (out.permissionDecision === "deny" ? "deny" : "context") : null;
+  const text = out?.permissionDecisionReason ?? out?.additionalContext ?? "";
+  return [
+    kind === want && text.includes(needle) && (absent === undefined || !text.includes(absent)),
+    `want ${want} with ${JSON.stringify(needle)}${absent === undefined ? "" : ` and without ${JSON.stringify(absent)}`}, got ${kind}`,
+  ];
+};
 export const STASH_POP = bash("git stash pop");
 // The five section names are written out HERE and derived in the hook. That asymmetry is the guard: a heading renamed in the template changes only one side, so these rows red instead of the hook silently enforcing yesterday's shape.
 export const SECTIONS = ["## Guards", "## Ran", "## Records", "## Rulings", "## Look for these when you use it"];

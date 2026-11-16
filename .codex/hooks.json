@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "F=\"$(git rev-parse --show-toplevel 2>/dev/null)/scripts/agent-infra/hooks/codex-launcher.ts\"; if [ -f \"$F\" ]; then exec node \"$F\"; fi; exit 0",
+            "timeout": 10,
+            "additionalContextLimit": 0
+          }
+        ]
+      }
+    ]
+  }
+}

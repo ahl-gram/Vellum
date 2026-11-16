@@ -120,6 +120,25 @@ test("the notes of one call keep the order its checks met them in (Issue #1395)"
     assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
 });
 
+// Written out for the same reason as the size probes: a Codex pass that ran no row prints no FAIL, so each table it reads is named here.
+test("the table's shell rows and its cd rows pass through the Codex adapter too (Issue #1396)", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const lines = out.split("\n");
+  for (const row of [
+    'codex: bare stash denied: want deny with "shared", got deny',
+    'codex: git push gets gate 5 once: want context with "## Gate 5", got context',
+    'codex: an em-dash in prose beside a span denied: want deny with "em-dash outside code", got deny',
+    'codex: gh api issue body overwrite denied: want deny with "bare issue or pull-request endpoint", got deny',
+    'codex: relative body-file resolved against cwd: want deny with "em-dash", got deny',
+    'codex: heredoc into e2e denied: want deny with "backtick", got deny',
+    'codex: a cd: a bare cd into another directory inside the project denied: want null with "", got null',
+    'codex: a cd: the same recipe denied in the main session: want null with "", got null',
+    'codex: a cd: a cd the reader cannot place leaves the stash refusal standing: want deny with "refs/stash", got deny',
+    'codex: a cd: an escape script after a cd keeps its own refusal: want deny with "inside a backtick string", got deny',
+  ])
+    assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
+});
+
 const GATE1_NOT_7 = 'want context with "## Gate 1" and without "## Gate 7", got context';
 const GATE7_NOT_1 = 'want context with "## Gate 7" and without "## Gate 1", got context';
 const NOTHING = 'want null with "", got null';
