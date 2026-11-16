@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -15,11 +15,15 @@ export const gateText = (policyRoot: string, label: string): string => {
 };
 
 export const statePath = (sessionId: string): string =>
-  join(tmpdir(), `vellum-footguns-${(sessionId || "nosession").replace(/[^A-Za-z0-9_-]/g, "")}.json`);
+  join(tmpdir(), `vellum-footguns-${(sessionId || "nosession").replace(/[^A-Za-z0-9_-]/g, "")}.txt`);
 
 export const shownGates = (sessionId: string): Set<string> => {
   try {
-    return new Set(JSON.parse(readFileSync(statePath(sessionId), "utf8")) as string[]);
+    return new Set(
+      readFileSync(statePath(sessionId), "utf8")
+        .split("\n")
+        .filter((key) => key !== ""),
+    );
   } catch {
     return new Set();
   }
@@ -27,7 +31,7 @@ export const shownGates = (sessionId: string): Set<string> => {
 
 export const rememberGate = (sessionId: string, gate: string): void => {
   try {
-    writeFileSync(statePath(sessionId), JSON.stringify([...shownGates(sessionId), gate].sort()));
+    appendFileSync(statePath(sessionId), `${gate}\n`);
   } catch {
     /* state is a convenience; a missing tmpdir only repeats a gate */
   }
