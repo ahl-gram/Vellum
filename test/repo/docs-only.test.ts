@@ -56,6 +56,7 @@ test("a path is a doc only when DOC_FILES names it or it lies under a DOC_DIRS f
     "e2e/suites/zoom/notes.md",
     ".github/workflows/ci.yml",
     ".claude/settings.json",
+    ".codex/hooks.json",
     ".claude/skills/vellum-footguns/hooks/footgun-gate.ts",
     "scripts/docs-only.ts",
     "package.json",

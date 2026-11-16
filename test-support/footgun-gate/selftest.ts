@@ -7,6 +7,7 @@ import { decide, type Decision, type Payload } from "../../scripts/agent-infra/h
 import { gateText, statePath } from "../../scripts/agent-infra/hooks/gate-state.ts";
 import { requiredHeadings } from "../../scripts/agent-infra/hooks/pr-body.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
+import { codexChecks } from "./codex-rows.ts";
 import { ESCAPE_ROWS } from "./escape.fixtures.ts";
 import { GH_API_ROWS } from "./gh-api.fixtures.ts";
 import { ROUTE_ROWS, SEQUENCE_ROWS } from "./gate-routes.fixtures.ts";
@@ -14,14 +15,16 @@ import {
   bash,
   bodyWith,
   edit,
+  judged,
   LINK,
+  NEEDLES,
+  placed,
   ROOT,
   SCRATCH,
   SECTIONS,
   STASH_POP,
   WHOLE_BODY,
   type Fixture,
-  type Kind,
 } from "./kit.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 import { PR_BODY_ROWS } from "./pr-body.fixtures.ts";
@@ -72,8 +75,6 @@ const CODE_FIXTURES: Fixture[] = CODE_ROWS.map(([name, command, bodies, want, ne
   want,
   needle ? filled(needle) : want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : "",
 ]);
-const placed = (text: string): string =>
-  text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
 const setProject = (dir: string | undefined): void => {
   if (dir === undefined) delete process.env.CLAUDE_PROJECT_DIR;
   else process.env.CLAUDE_PROJECT_DIR = dir;
@@ -93,12 +94,6 @@ const PROJECTS: Record<string, string | undefined> = {
   "no project": undefined,
   "project via link": LINK,
   "project at home": homedir(),
-};
-const NEEDLES: Record<string, string> = {
-  deny: "inside the project",
-  unplaced: "cannot work out",
-  stash: "refs/stash",
-  escape: "inside a backtick string",
 };
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
   const agent =
@@ -251,19 +246,15 @@ const run = async (): Promise<number> => {
   for (const [name, subject, want, needle, absent] of FIXTURES) {
     const sessionId = `selftest-${process.pid}-${name}`;
     const got = typeof subject === "function" ? await subject() : await decide({ ...subject, session_id: sessionId });
-    const out = got?.hookSpecificOutput;
-    const kind: Kind = out ? (out.permissionDecision === "deny" ? "deny" : "context") : null;
-    const text = out?.permissionDecisionReason ?? out?.additionalContext ?? "";
-    report(
-      kind === want && text.includes(needle) && (absent === undefined || !text.includes(absent)),
-      `${name}: want ${want} with ${JSON.stringify(needle)}${absent === undefined ? "" : ` and without ${JSON.stringify(absent)}`}, got ${kind}`,
-    );
+    const [ok, line] = judged(got, want, needle, absent);
+    report(ok, `${name}: ${line}`);
     try {
       unlinkSync(statePath(sessionId));
     } catch {
       /* nothing was written for a null decision */
     }
   }
+  await codexChecks(report, FIXTURES);
   rmSync(SCRATCH, { recursive: true, force: true });
   return fails;
 };

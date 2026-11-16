@@ -67,6 +67,21 @@ test("the session directory comes from the request, never from CLAUDE_PROJECT_DI
   }
 });
 
+test("with no session directory the cd reader refuses, and never falls back to CLAUDE_PROJECT_DIR (Issue #1396)", async () => {
+  const saved = process.env.CLAUDE_PROJECT_DIR;
+  process.env.CLAUDE_PROJECT_DIR = ELSEWHERE;
+  try {
+    const r: HookRequest = {
+      ...request([{ kind: "shell", command: "cd a" }], "no-session-directory"),
+      sessionDirectory: null,
+    };
+    assert.match((await evaluate(r)).denial ?? "", /cannot work out where the project is/);
+  } finally {
+    if (saved === undefined) delete process.env.CLAUDE_PROJECT_DIR;
+    else process.env.CLAUDE_PROJECT_DIR = saved;
+  }
+});
+
 test("a later operation's denial wins, and the gate an earlier one owed is not marked shown (Issue #1395)", async () => {
   const r = request([change, { kind: "shell", command: "git stash pop" }], "denial-wins");
   const verdict = await evaluate(r);
