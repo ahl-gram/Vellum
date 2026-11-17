@@ -1,11 +1,14 @@
 import { readdirSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
 import { decide, type Payload } from "../../scripts/agent-infra/hooks/claude-adapter.ts";
+import { decideCodex } from "../../scripts/agent-infra/hooks/codex-adapter.ts";
 import { statePath } from "../../scripts/agent-infra/hooks/gate-state.ts";
 import { bash, edit, ROOT } from "./kit.ts";
 
 // Claude Code 2.1.322, measured 2026-11-11 with a project hook in a non-interactive session, an interactive one and an agent dispatched from each: added text of 9,900 characters arrived whole and 10,100 became a 2,000-character preview in the interactive session and the agents (the non-interactive session itself was read at 9,499, whole, and 10,499, a preview), and the 8,000-character cut the program carries reached none of them (the cloud routine unmeasured), so the limit sits 1,000 under that switch (Issue #1338).
 const HOOK_CONTEXT_LIMIT = 9_000;
+// Issue #1396's live check, row A9: a note of 58,980 characters reached Codex whole under `additionalContextLimit: 0`, the longest seen whole; Codex's own cap is unmeasured.
+const CODEX_WHOLE_NOTE = 58_980;
 // Every lead quotes the edited path, and the longest root a session edits under is an EnterWorktree directory named for its branch: the longest branch among the closed PRs read 2026-10-02 was 47 characters, and a shorter root here under-measures every probe.
 const LONG_ROOT = `/Users/someone/CodeProjects/Vellum/.claude/worktrees/${"b".repeat(47)}`;
 const NOISY_AND_CLICK = "const R = `a\\(b`; el.click();";
@@ -113,4 +116,49 @@ export const orderChecks = async (report: (ok: boolean, line: string) => void): 
       `${name}: ${needles.join(", ")}`,
     );
   }
+};
+
+const EVERY_EDIT_GATE = [
+  "## Gate 1",
+  "## Gate 7",
+  "## Gate 4",
+  "## Gate 2",
+  "## Gate 3",
+  "## Gate 6",
+  "for wiring only",
+  "double the backslash",
+];
+
+export const patchSizeCheck = async (report: (ok: boolean, line: string) => void): Promise<void> => {
+  const test = longestName("test", ".test.ts", true);
+  const suite = longestName(join("e2e", "suites"), ".ts", false);
+  const command = [
+    "*** Begin Patch",
+    `*** Update File: test/repo/${test}`,
+    "@@",
+    "+x",
+    `*** Update File: test/site/${test}`,
+    "@@",
+    "+x",
+    `*** Add File: e2e/suites/never-exists-${suite}`,
+    `+${NOISY_AND_CLICK}`,
+    "*** Add File: src/styles/a-new-sheet-name.css",
+    "+x",
+    "*** Update File: src/render/layers/a-layer-name.ts",
+    "@@",
+    "+x",
+    "*** End Patch",
+  ].join("\n");
+  const session = `selftest-size-${process.pid}-patch`;
+  const got = await decideCodex(
+    { session_id: session, cwd: LONG_ROOT, tool_name: "apply_patch", tool_input: { command } },
+    LONG_ROOT,
+  );
+  rmSync(statePath(session), { force: true });
+  const text = got?.hookSpecificOutput.additionalContext ?? "";
+  const found = EVERY_EDIT_GATE.filter((n) => text.includes(n));
+  report(
+    found.length === EVERY_EDIT_GATE.length && text.length <= CODEX_WHOLE_NOTE,
+    `codex: patch: a patch owing every gate an edit can owe: the pasted note carries ${found.join(", ")} in ${text.length} of ${CODEX_WHOLE_NOTE} characters`,
+  );
 };

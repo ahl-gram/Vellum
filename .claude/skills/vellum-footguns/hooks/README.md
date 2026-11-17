@@ -4,13 +4,13 @@ A PreToolUse hook that puts the skill's gates in front of the model at the momen
 or a shared test helper, a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
 file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
 every session launched from the Vellum root or a worktree, and for Codex in `.codex/hooks.json`, where it
-judges shell calls (Under Codex, below). The skill works without it if that block is ever removed.
+judges shell calls and file patches (Under Codex, below). The skill works without it if that block is ever removed.
 
 ## What it does
 
 - **Injects a gate once per session**, reading the text from `.claude/skills/vellum-footguns/SKILL.md` so the skill stays the single
   source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites, their helpers and the two proof tools; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
-  `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
+  `*.css` and `*.astro`; Gate 4 on a Write that creates a new file, or a Codex patch that adds or moves one, under `src/pages/`, `src/site/`,
   `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or a sheet anywhere under `src/styles/` (a page can gain a sheet without a new page file), never a `*.test.ts` or a file in a `test-support/` folder, since a test or its helper joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
   modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
@@ -58,12 +58,14 @@ judges shell calls (Under Codex, below). The skill works without it if that bloc
     from the SEGMENT only, never the raw command, so that reading an issue and then commenting on it
     in one call is not refused. Pull requests are covered on Alex's ruling of 2026-09-14, which
     widened #607's filed scope;
-  - a Write, Edit or MultiEdit into `.mjs` or `.ts` under `scripts/`, `out/` or `e2e/` (which also
+  - a Write, Edit or MultiEdit, or a Codex patch that adds, updates or moves a file, into `.mjs` or `.ts` under `scripts/`, `out/` or `e2e/` (which also
     reaches the unit tests under `test/e2e/`), or a shell redirect or heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
     `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`, parsing
     every fragment as TypeScript, since a JavaScript parse reads a generic arrow's `<T>(` as JSX and
     swallows every template after it), never a hand-rolled lexer, so a stray backtick in a regex or a string does not swallow the code after it,
-    and a `String.raw` tag is skipped because it is the remedy;
+    and a `String.raw` tag is skipped because it is the remedy. Each of a MultiEdit's edits, and each
+    of a patch's hunks, is a fragment of its own, so a template one leaves open cannot hide the next
+    one's escape (Issue #1397);
   - `gh pr create` / `gh pr edit` / `gh pr comment` / `gh issue create` / `gh issue edit` /
     `gh issue comment` whose text carries an em-dash in its prose (Issue #644). Each quoted argument
     of the command (a title, an inline body), the rest of the command, and each body file are read
@@ -297,24 +299,52 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   working in a lane's folder reads the rules of the checkout its session started in, and a session
   started inside a lane's worktree reads that worktree's, as a Claude session does (Issue #1396). The
   payload's `cwd` is the call's own folder, and a relative body file is read against it.
-- **What it judges.** A shell call, which Codex names `Bash`, through the same checks as a Claude one. A
-  patch (`apply_patch`) reaches the hook and is answered with nothing until Issue #1397; no other tool
-  reaches it.
+- **What it judges.** A shell call, which Codex names `Bash`, through the same checks as a Claude one,
+  and a file patch, which Codex names `apply_patch` and whose text arrives as its `command`; no other
+  tool reaches it.
+- **How it reads a patch.** `decodePatch` in `scripts/agent-infra/hooks/codex-patch.ts` reads the text
+  into one change a file, in the patch's order, and never runs it. It reads the grammar the patch tool
+  gives the model, and each path and line the way codex-cli 0.169.0's own patch tool reads them, measured
+  with `codex --codex-run-as-apply-patch` (Issue #1397): a header line is trimmed, a move line's leading
+  padding is kept and its trailing whitespace is trimmed, a blank line in a hunk is an empty context
+  line, and CRLF line ends are read as LF. U+2028, U+2029 and a mid-line CR are kept in update lines,
+  including the text after `@@ `. A file-header or move path holding U+0085 is refused as unreadable,
+  because the client's whitespace trimming can change which path the hook would check. Anything else
+  is refused with the form to send instead (Issue #1393's D11), a refusal the client would not make
+  for a heredoc wrapper and an `*** Environment ID:` line, which its own tool accepts; and so is a patch
+  whose payload carries no absolute `cwd`.
+- **Which file each change is.** A relative path is read against the payload's `cwd`, the call's own
+  folder, never the checkout the rules come from; a path that leaves that folder is checked where it
+  lands, never dropped or moved back inside. Each file then meets the checks a Claude edit to its path
+  does, under that path. An added file's text is a Write's content, and under a roster path it owes
+  Gate 4, even where it overwrites a file already there, which pastes the gate once too often and
+  never misses it. An update's hunks are each one Edit's new text: its context lines, its added lines
+  and the text after its `@@`, never its removed lines (Issue #1393's D10). A deleted file owes nothing,
+  as a Claude `rm` does. A moved file is judged where it lands: its hunks are read under its new path,
+  the route there owes its gate, and it owes Gate 4 there as an added file does.
 - **The caller.** A helper's payload carries `agent_id`, as a Claude subagent's does.
 - **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
   (Issue #1394's evidence), so the move the refusal exists to stop cannot happen.
 - **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it
   shares the record of what was shown. The registration sets `additionalContextLimit` to 0, so a note
-  reaches the model whole, never as a preview, and the size probes keep every note under 9,000
-  characters.
+  reaches the model whole, never as a preview. A shell call's note stays under the 9,000 characters
+  the size probes hold; a patch's note carries every gate its files owe, in their order, Gate 1 and
+  then Gate 7 for two tests, and the Codex pass's size row holds its every-gate patch under the
+  58,980 characters Issue #1396's live check saw reach Codex whole.
 - **Time.** The registration's `timeout` is 10 seconds, at least 20 times the slowest run measured when
   it was set (Issue #1396). A hook that runs past it lets the call run unchecked, as a hook whose check
   throws does, since `runHook` exits 0.
 - **What it does not see**, each of them silence: input sent to a shell that is already running
-  (`write_stdin`), which Codex does not pass through the hook again; a patch, until Issue #1397; a
-  session in a worktree with no Codex launcher, though `/hooks` there still shows the hook Trusted, so
-  the lane check of Issue #1393's D3 cannot catch it; and a session whose `/hooks` shows the hook
-  untrusted, which is why each Codex lane checks that before it works (Issue #1393, D3).
+  (`write_stdin`), which Codex does not pass through the hook again; the part of a file a patch does
+  not carry, so a template opened above an update's hunk and outside its `@@` line is not seen, as
+  outside a Claude edit's new text, and neither is the text a move takes to its new path outside its
+  hunks; a patch typed into a shell command (`apply_patch <<'EOF'`), which, if it reaches the hook at
+  all, is read as the shell command it is; a session in a worktree with no Codex launcher, though
+  `/hooks` there still shows the hook Trusted, so the lane check of Issue #1393's D3 cannot catch it;
+  and a session whose `/hooks` shows the hook untrusted, which is why each Codex lane checks that
+  before it works (Issue #1393, D3).
+  A patch note over 58,980 characters is unmeasured: each file can add warnings, so the every-gate
+  patch is not a bound on every possible note. Q5 still delivers every gate in full.
 
 ## Prove it
 
@@ -340,10 +370,13 @@ command string from `.claude/settings.json` through `sh` with a real, a symlinke
 `CLAUDE_PROJECT_DIR`, and once from a copy of the checkout while the edit lands in a second checkout
 whose gate text differs, so the deployed path is exercised and not only the function, and the gate
 text is held to the launch checkout. Every shell row of the table, and every `cd` row, runs once more
-through the Codex adapter as a `codex:` row (`test-support/footgun-gate/codex-rows.ts`), and
-`test/repo/codex-hook.test.ts` runs the exact command from `.codex/hooks.json` through `sh` with no
-`CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a lane's worktree, from an older worktree
-with no Codex launcher and from a folder in no repository.
+through the Codex adapter as a `codex:` row (`test-support/footgun-gate/codex-rows.ts`), every Edit,
+Write and MultiEdit row runs once more as the patch that makes the same edit, a `codex: patch:` row
+with the same expected decision, and `test/repo/codex-hook.test.ts` runs the exact command from
+`.codex/hooks.json` through `sh` with no `CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a
+lane's worktree, from an older worktree with no Codex launcher and from a folder in no repository.
+`test/repo/codex-patch.test.ts` holds the patch reader to what Codex's own patch tool reads, row by
+row, and each rule above for a patch to a fixture of its own.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.txt`, one gate to a line; delete it to see a gate again. `npm run check`,

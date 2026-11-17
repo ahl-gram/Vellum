@@ -148,7 +148,7 @@ test("a worktree cut before the Codex launcher existed, and a folder in no repos
   assert.equal(launch(deep(NOWHERE), codex("nowhere-stash", "git stash pop", deep(NOWHERE))), null);
 });
 
-test("the Codex adapter reads a shell call as Codex 0.169.0 sends it, and answers no other tool (Issue #1396)", () => {
+test("the Codex adapter reads a shell call and a patch as Codex 0.169.0 sends them, and answers no other tool (Issue #1396, Issue #1397)", () => {
   const main = codex("mapping", "git status", "/s/nested");
   assert.deepEqual(toCodexRequest(main, "/s", "/policy"), {
     harness: "codex",
@@ -161,8 +161,13 @@ test("the Codex adapter reads a shell call as Codex 0.169.0 sends it, and answer
     operations: [{ kind: "shell", command: "git status" }],
   });
   assert.equal(toCodexRequest(codex("mapping", "git status", "/s/nested", true), "/s", "/policy")?.caller, "subagent");
-  for (const tool of ["apply_patch", "request_user_input_async"])
-    assert.equal(toCodexRequest({ ...main, tool_name: tool }, "/s", "/policy"), null, tool);
+  const patch = {
+    ...main,
+    tool_name: "apply_patch",
+    tool_input: { command: "*** Begin Patch\n*** Delete File: gone.ts\n*** End Patch" },
+  };
+  assert.deepEqual(toCodexRequest(patch, "/s", "/policy")?.operations, [{ kind: "delete", path: "/s/nested/gone.ts" }]);
+  assert.equal(toCodexRequest({ ...main, tool_name: "request_user_input_async" }, "/s", "/policy"), null);
 });
 
 test("a gate is pasted once per Codex session, again in another session, and a refusal every time (Issue #1396)", async () => {

@@ -27,6 +27,18 @@ export const ESCAPE_ROWS: Fixture[] = [
   ],
   ["multiedit edits[] denied", multi("e2e/support/x.ts", "`split(/\\s/)`"), "deny", "backtick"],
   [
+    "a multiedit's second edit is read on its own after a first that leaves a template open",
+    {
+      tool_name: "MultiEdit",
+      tool_input: {
+        file_path: "e2e/support/x.ts",
+        edits: [{ new_string: "const a = `x" }, { new_string: "const R = `y.split(/\\s+/)`;" }],
+      },
+    },
+    "deny",
+    "backtick",
+  ],
+  [
     "out probe single-escaped denied",
     edit("Write", "out/probe-x.mjs", "const P = `s.replace(/\\s+/g, ' ')`;"),
     "deny",

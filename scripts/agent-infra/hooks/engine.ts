@@ -8,7 +8,11 @@ export const evaluate = async (request: HookRequest): Promise<Verdict> => {
   const notes: Note[] = [];
   for (const operation of request.operations) {
     const result =
-      operation.kind === "shell" ? await checkBash(operation, request, shown) : await checkEdit(operation, shown);
+      operation.kind === "shell"
+        ? await checkBash(operation, request, shown)
+        : operation.kind === "unreadable"
+          ? { denial: operation.reason, notes: [] }
+          : await checkEdit(operation, shown);
     if (result.denial !== null) return { denial: result.denial, notes: [] };
     for (const note of result.notes) {
       if (note.kind === "gate") shown.add(note.gate.key);
