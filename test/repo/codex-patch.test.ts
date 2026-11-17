@@ -14,6 +14,11 @@ const STATE = join(OWN, "state");
 const SAVED_TMPDIR = process.env.TMPDIR;
 const SILENT = "const R = `x.split(/\\s+/)`;";
 const DOUBLED = "const R = `x.split(/\\\\s+/)`;";
+const UPDATE_CHARACTERS = [
+  ["U+2028", "\u2028"],
+  ["U+2029", "\u2029"],
+  ["mid-line CR", "\r"],
+] as const;
 
 before(() => {
   mkdirSync(STATE, { recursive: true });
@@ -165,6 +170,34 @@ test("a patch the reader cannot read is refused, asking for the form the tool's 
   }
 });
 
+test("U+0085 in any file-header or move path makes the patch unreadable (Issue #1397)", async () => {
+  for (const [name, command] of [
+    ["add", patch("*** Add File: scripts/x.ts\u0085", "+" + SILENT)],
+    ["update", patch("*** Update File: scripts/x.ts\u0085", "@@", "+" + SILENT)],
+    ["delete", patch("*** Delete File: scripts/x.ts\u0085")],
+    ["move", patch("*** Update File: notes/x.txt", "*** Move to: scripts/x.ts\u0085", "@@", "+" + SILENT)],
+    ["header interior", patch("*** Add File: scripts/x\u0085.ts", "+" + SILENT)],
+    ["move interior", patch("*** Update File: notes/x.txt", "*** Move to: scripts/x\u0085.ts", "@@", "+" + SILENT)],
+  ] as const) {
+    assert.ok("error" in decodePatch(command), name);
+    const got = await judge(`nel-${name}`, command);
+    assert.equal(got?.hookSpecificOutput.permissionDecision, "deny", name);
+    assert.match(reason(got), /could not be read[\s\S]*U\+0085[\s\S]*Send it again/, name);
+  }
+});
+
+test("Unicode separators and a mid-line CR in added, context and @@ lines are accepted and scanned (Issue #1397)", async () => {
+  for (const [name, character] of UPDATE_CHARACTERS) {
+    for (const prefix of ["+", " ", "@@ "]) {
+      const change = (text: string): string =>
+        patch("*** Update File: scripts/x.ts", prefix + text.replace("x.", "x" + character + "."), "+const after = 1;");
+      assert.equal(await judge(`characters-safe-${name}-${prefix}`, change(DOUBLED)), null, name + prefix);
+      const got = await judge(`characters-scanned-${name}-${prefix}`, change(SILENT));
+      assert.ok(refusedIn(got, join(REPO, "scripts", "x.ts")), name + prefix + ": " + reason(got));
+    }
+  }
+});
+
 test("a patch with no absolute folder to read its paths against is refused (Issue #1397)", async () => {
   assert.equal(await judge("placed", patch("*** Add File: a.txt", "+a")), null);
   for (const cwd of [null, "repo"]) {
@@ -194,6 +227,14 @@ test("one patch's note carries each of its files' gates in their order, Gate 1 f
 
 // Each row is what codex-cli 0.169.0's own patch tool did with that patch, run as `codex --codex-run-as-apply-patch` on 2026-11-16 (Issue #1397); a row's text is the new text a Claude Edit would carry.
 const READ: ReadonlyArray<readonly [name: string, text: string, files: readonly FileChange[]]> = [
+  ...UPDATE_CHARACTERS.map(
+    ([name, character]) =>
+      [
+        name + " in an update line",
+        patch("*** Update File: u.ts", "@@", "-old", "+new" + character + "line"),
+        [{ kind: "update", path: "u.ts", texts: ["new" + character + "line"] }],
+      ] as const,
+  ),
   [
     "a plain add",
     patch("*** Add File: a.ts", "+const a = 1;"),

@@ -305,8 +305,11 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
 - **How it reads a patch.** `decodePatch` in `scripts/agent-infra/hooks/codex-patch.ts` reads the text
   into one change a file, in the patch's order, and never runs it. It reads the grammar the patch tool
   gives the model, and each path and line the way codex-cli 0.169.0's own patch tool reads them, measured
-  with `codex --codex-run-as-apply-patch` (Issue #1397): a header line is trimmed and a move line is
-  not, a blank line in a hunk is an empty context line, and CRLF line ends are read as LF. Anything else
+  with `codex --codex-run-as-apply-patch` (Issue #1397): a header line is trimmed, a move line's leading
+  padding is kept and its trailing whitespace is trimmed, a blank line in a hunk is an empty context
+  line, and CRLF line ends are read as LF. U+2028, U+2029 and a mid-line CR are kept in update lines,
+  including the text after `@@ `. A file-header or move path holding U+0085 is refused as unreadable,
+  because the client's whitespace trimming can change which path the hook would check. Anything else
   is refused with the form to send instead (Issue #1393's D11), a refusal the client would not make
   for a heredoc wrapper and an `*** Environment ID:` line, which its own tool accepts; and so is a patch
   whose payload carries no absolute `cwd`.
@@ -326,8 +329,8 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   shares the record of what was shown. The registration sets `additionalContextLimit` to 0, so a note
   reaches the model whole, never as a preview. A shell call's note stays under the 9,000 characters
   the size probes hold; a patch's note carries every gate its files owe, in their order, Gate 1 and
-  then Gate 7 for two tests, and the Codex pass's size row holds the largest, a patch owing every gate
-  an edit can owe, under the 58,980 characters Issue #1396's live check saw reach Codex whole.
+  then Gate 7 for two tests, and the Codex pass's size row holds its every-gate patch under the
+  58,980 characters Issue #1396's live check saw reach Codex whole.
 - **Time.** The registration's `timeout` is 10 seconds, at least 20 times the slowest run measured when
   it was set (Issue #1396). A hook that runs past it lets the call run unchecked, as a hook whose check
   throws does, since `runHook` exits 0.
@@ -340,6 +343,8 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   `/hooks` there still shows the hook Trusted, so the lane check of Issue #1393's D3 cannot catch it;
   and a session whose `/hooks` shows the hook untrusted, which is why each Codex lane checks that
   before it works (Issue #1393, D3).
+  A patch note over 58,980 characters is unmeasured: each file can add warnings, so the every-gate
+  patch is not a bound on every possible note. Q5 still delivers every gate in full.
 
 ## Prove it
 

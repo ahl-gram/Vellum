@@ -10,7 +10,7 @@ const UPDATE = "*** Update File: ";
 const MOVE = "*** Move to: ";
 const END_OF_FILE = "*** End of File";
 const ENVIRONMENT = "*** Environment ID: ";
-const UPDATE_LINE = /^(?:@@(?: .*)?|[ +-].*)?$/;
+const UPDATE_LINE = /^(?:@@(?: .*)?|[ +-].*)?$/s;
 
 const quoted = (line: string): string => JSON.stringify(line.length > 60 ? `${line.slice(0, 60)}...` : line);
 
@@ -75,6 +75,9 @@ export const decodePatch = (patch: string): DecodedPatch => {
     const raw = lines[at] ?? "";
     const header = raw.trim();
     at += 1;
+    const hasPath = [ADD, DELETE, UPDATE].some((prefix) => header.startsWith(prefix));
+    if (hasPath && header.includes("\u0085"))
+      return { error: `line ${at}, ${quoted(raw)}, contains U+0085 in its path` };
     if (header.startsWith(DELETE)) {
       files.push({ kind: "delete", path: header.slice(DELETE.length) });
     } else if (header.startsWith(ADD)) {
@@ -84,6 +87,7 @@ export const decodePatch = (patch: string): DecodedPatch => {
     } else if (header.startsWith(UPDATE)) {
       const line = lines[at] ?? "";
       const to = line.startsWith(MOVE) ? line.slice(MOVE.length).trimEnd() : null;
+      if (to?.includes("\u0085")) return { error: `line ${at + 1}, ${quoted(line)}, contains U+0085 in its path` };
       const read = readUpdate(lines, to === null ? at : at + 1, end);
       if (typeof read === "string") return { error: read };
       const [texts, next] = read;

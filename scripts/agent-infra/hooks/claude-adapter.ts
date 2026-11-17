@@ -20,9 +20,7 @@ export type Payload = {
 };
 
 const editFragment = (input: ToolInput): string =>
-  [input.content ?? "", input.new_string ?? "", ...(input.edits ?? []).map((e) => e?.new_string ?? "")]
-    .filter(Boolean)
-    .join("\n");
+  [input.content ?? "", input.new_string ?? ""].filter(Boolean).join("\n");
 
 const operationOf = (payload: Payload): Operation | null => {
   const input = payload.tool_input ?? {};
