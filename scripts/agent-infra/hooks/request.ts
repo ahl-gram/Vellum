@@ -1,8 +1,12 @@
 export type HarnessId = "claude-code" | "codex";
 export type CallerKind = "main" | "subagent" | "unknown";
 export type ShellOperation = { readonly kind: "shell"; readonly command: string };
-export type FileChange = { readonly kind: "add" | "update"; readonly path: string; readonly text: string };
-export type Operation = ShellOperation | FileChange;
+export type FileChange =
+  | { readonly kind: "add" | "update"; readonly path: string; readonly texts: readonly string[] }
+  | { readonly kind: "delete"; readonly path: string }
+  | { readonly kind: "move"; readonly from: string; readonly path: string; readonly texts: readonly string[] };
+export type UnreadableCall = { readonly kind: "unreadable"; readonly reason: string };
+export type Operation = ShellOperation | FileChange | UnreadableCall;
 export type OperationDirectory = { readonly path: string | null; readonly provenance: "payload" };
 export type HookRequest = {
   readonly harness: HarnessId;

@@ -139,6 +139,35 @@ test("the table's shell rows and its cd rows pass through the Codex adapter too 
     assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
 });
 
+// Written out for the same reason: a patch pass that ran no row prints no FAIL, so each edit table it reads is named here, and the size row with the limit it is held to.
+test("the table's edit rows pass through the Codex adapter as patches too, and one patch's note stays whole (Issue #1397)", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const lines = out.split("\n");
+  for (const row of [
+    'codex: patch: e2e single-escaped class denied: want deny with "backtick", got deny',
+    'codex: patch: multiedit edits[] denied: want deny with "backtick", got deny',
+    'a multiedit\'s second edit is read on its own after a first that leaves a template open: want deny with "backtick", got deny',
+    'codex: patch: a multiedit\'s second edit is read on its own after a first that leaves a template open: want deny with "backtick", got deny',
+    'codex: patch: String.raw is the remedy and is allowed: want context with "## Gate 2", got context',
+    'codex: patch: a single escape in a non-e2e scripts .ts denied: want deny with "backtick", got deny',
+    'codex: patch: unit test file gets gate 1: want context with "## Gate 1", got context',
+    'codex: patch: stylesheet gets gate 3: want context with "## Gate 3", got context',
+    'codex: patch: new page gets gate 4: want context with "## Gate 4", got context',
+    'codex: patch: a Write over a sheet that exists gets gate 3 and no gate 4: want context with "## Gate 3" and without "## Gate 4", got context',
+    'codex: patch: gate 6 on the ABSOLUTE path a real tool call passes: want context with "## Gate 6", got context',
+    'codex: patch: a non-e2e scripts .ts gets no gate 2: want null with "", got null',
+  ])
+    assert.ok(lines.includes(`ok   ${row}`), `no passing row "${row}"\n${out}`);
+  const size =
+    /^ok {3}codex: patch: a patch owing every gate an edit can owe: the pasted note carries ## Gate 1, ## Gate 7, ## Gate 4, ## Gate 2, ## Gate 3, ## Gate 6, for wiring only, double the backslash in (\d+) of 58980 characters$/m.exec(
+      out,
+    );
+  assert.ok(
+    size && Number(size[1]) <= 58_980,
+    `no passing size row for a patch owing every gate an edit can owe\n${out}`,
+  );
+});
+
 const GATE1_NOT_7 = 'want context with "## Gate 1" and without "## Gate 7", got context';
 const GATE7_NOT_1 = 'want context with "## Gate 7" and without "## Gate 1", got context';
 const NOTHING = 'want null with "", got null';

@@ -32,7 +32,7 @@ const operationOf = (payload: Payload): Operation | null => {
   return {
     kind: payload.tool_name === "Write" && !existsSync(path) ? "add" : "update",
     path,
-    text: editFragment(input),
+    texts: [editFragment(input)],
   };
 };
 

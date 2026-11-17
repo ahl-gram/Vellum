@@ -45,7 +45,7 @@ const request = (operations: readonly Operation[], sessionKey: string, caller: C
   policyRoot: LAUNCH,
   operations,
 });
-const change: Operation = { kind: "update", path: join(OPERATION, "test", "x.test.ts"), text: "x" };
+const change: Operation = { kind: "update", path: join(OPERATION, "test", "x.test.ts"), texts: ["x"] };
 
 test("the gate text comes from the request's policy root, not from the checkout the edit lands in (Issue #1395)", async () => {
   const r = request([change], "policy-root");

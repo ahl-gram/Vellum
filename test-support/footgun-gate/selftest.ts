@@ -29,7 +29,7 @@ import {
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 import { PR_BODY_ROWS } from "./pr-body.fixtures.ts";
 import { SHELL_ROWS } from "./shell.fixtures.ts";
-import { orderChecks, sizeChecks } from "./size-probes.ts";
+import { orderChecks, patchSizeCheck, sizeChecks } from "./size-probes.ts";
 
 const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
 // A checkout of the hook with no .github/ beside it. The Claude adapter reads the template from the checkout it sits in, so this is the only way to drive decide() down the no-template path: an env override would be a seam that exists for the test, and calling headingCheck directly skips ghRefusal, which is where the warning could be returned in the wrong tuple slot.
@@ -255,6 +255,7 @@ const run = async (): Promise<number> => {
     }
   }
   await codexChecks(report, FIXTURES);
+  await patchSizeCheck(report);
   rmSync(SCRATCH, { recursive: true, force: true });
   return fails;
 };
