@@ -32,7 +32,8 @@ const operationOf = (payload: Payload): Operation | null => {
   return {
     kind: payload.tool_name === "Write" && !existsSync(path) ? "add" : "update",
     path,
-    texts: [editFragment(input)],
+    texts:
+      payload.tool_name === "MultiEdit" ? (input.edits ?? []).map((e) => e?.new_string ?? "") : [editFragment(input)],
   };
 };
 
