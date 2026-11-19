@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { HARNESSES, ROLES, adapterPath, roleBodyPath } from "../../scripts/agent-infra/roles.ts";
 
-// A tracked agent or skill file never sends its reader to the private auto-memory for content (Issue #729, handbook/specs/conventions.md). Misses, by Alex's ruling A or by construction: a pointer that names the store by none of its names and no address ("see memory", "Alex's notes"); a memory file's hyphenated name outside wikilink brackets; a typographic variant (a non-breaking hyphen, another apostrophe, a recased file name, "memory-file"); a file under neither root (CLAUDE.md by the ruling, the specs, .claude/settings.json); an untracked file; a copy of a kept phrase elsewhere in its own file. Errs toward a false positive: a MENTION one is reworded or kept when it lands, an ADDRESS one (a future project_id) only reworded.
+// A tracked agent or skill file never sends its reader to the private auto-memory for content (Issue #729, handbook/specs/conventions.md). Misses, by Alex's ruling A or by construction: a pointer that names the store by none of its names and no address ("see memory", "Alex's notes"); a memory file's hyphenated name outside wikilink brackets; a typographic variant (a non-breaking hyphen, another apostrophe, a recased file name, "memory-file"); a file under none of its roots (CLAUDE.md by the ruling, the specs, .claude/settings.json); an untracked file; a copy of a kept phrase elsewhere in its own file. Errs toward a false positive: a MENTION one is reworded or kept when it lands, an ADDRESS one (a future project_id) only reworded.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const ROOTS = [".claude/agents", ".claude/skills"];
+const ROOTS = [".claude/agents", ".claude/skills", "handbook/agents"];
 // 2026-10-04: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
 const GIT_TIMEOUT_MS = 30_000;
 const ADDRESS =
@@ -34,6 +35,21 @@ const KEPT: ReadonlyArray<Kept> = [
   },
   {
     file: ".claude/agents/vellum-spec-recon.md",
+    phrase: "Auto-memory is a pointer, not a citation.",
+    why: "rule of thumb",
+  },
+  {
+    file: "handbook/agents/roles/vellum-pr-skeptic.md",
+    phrase: "or the auto-memory files. They carry the implementing session's framing",
+    why: "forbids reading it",
+  },
+  {
+    file: "handbook/agents/roles/vellum-plate-reader.md",
+    phrase: "This trap was already in auto-memory when",
+    why: "history",
+  },
+  {
+    file: "handbook/agents/roles/vellum-spec-recon.md",
     phrase: "Auto-memory is a pointer, not a citation.",
     why: "rule of thumb",
   },
@@ -102,6 +118,14 @@ test("every kept phrase is still in its file and names the store", () => {
     );
     assert.match(phrase, new RegExp(MENTION.source, "i"), `"${phrase}" names no store, so it keeps nothing`);
   }
+});
+
+test("every role body and adapter the agent generator reads lies under a root this scan reads, so a pointer is caught where it is written", () => {
+  const sources = [...ROLES.map((role) => roleBodyPath(role.name)), ...HARNESSES.map(adapterPath)];
+  assert.deepEqual(
+    sources.filter((source) => !ROOTS.some((root) => source.startsWith(`${root}/`))),
+    [],
+  );
 });
 
 const REAIMED = [

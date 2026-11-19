@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { HARNESSES, OUTPUT_DIRS, ROLES, adapterPath, roleBodyPath } from "../../scripts/agent-infra/roles.ts";
 
 // Issue #1087: vellum-plan-skeptic is retired. The harness loads every file in .claude/agents/, so a file left there is still dispatchable; the archived copy and the rulebook's tombstone are the only places that name it. Misses: .claude/skills, handbook/plans, handbook/errata and the scar rows, which are history by design, and any spelling that is neither "plan skeptic" nor "plan-skeptic".
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const GIT_TIMEOUT_MS = 30_000;
-const LIVE_ROOTS = [".claude/agents", ".github", "handbook/specs", "CLAUDE.md"];
+const LIVE_ROOTS = [".claude/agents", ".codex/agents", "handbook/agents", ".github", "handbook/specs", "CLAUDE.md"];
 const RETIRED = "vellum-plan-skeptic.md";
 const TOMBSTONE = "handbook/specs/rulebook.md";
 const NAME = /plan[- ]skeptic/gi;
@@ -40,6 +41,18 @@ test("no live agent, template, spec or CLAUDE.md names the plan skeptic, bar the
     return [...text.matchAll(NAME)].map((m) => `${f}:${text.slice(0, m.index).split("\n").length}`);
   });
   assert.deepEqual(findings, [], `${findings.length} live mention(s) of a retired agent:\n  ${findings.join("\n  ")}`);
+});
+
+test("every role body, adapter and generated definition lies under a live root, so a retired agent cannot come back through any of them", () => {
+  const sources = [
+    ...ROLES.map((role) => roleBodyPath(role.name)),
+    ...HARNESSES.map(adapterPath),
+    ...HARNESSES.map((harness) => `${OUTPUT_DIRS[harness]}/`),
+  ];
+  assert.deepEqual(
+    sources.filter((source) => !LIVE_ROOTS.some((root) => source.startsWith(`${root}/`))),
+    [],
+  );
 });
 
 test("the rulebook's tombstone names the retired agent and where it went", () => {

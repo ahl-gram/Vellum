@@ -7,7 +7,7 @@ import ts from "typescript";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const ENTRY = "src/cli/main.ts";
-const AGENT = ".claude/agents/vellum-plate-reader.md";
+const AGENT = "handbook/agents/roles/vellum-plate-reader.md";
 
 const closureOf = (root: string, entry: string): string[] => {
   const seen = new Set<string>();

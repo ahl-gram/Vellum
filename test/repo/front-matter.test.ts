@@ -4,11 +4,13 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { format } from "prettier";
+import { parse } from "smol-toml";
 import { frontMatterOf } from "../../test-support/front-matter.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const GIT_TIMEOUT_MS = 30_000;
 const LOADED = /^\.claude\/(?:agents\/[^/]+\.md|skills\/[^/]+\/SKILL\.md)$/;
+const CODEX_KEYS = ["name", "description", "model", "model_reasoning_effort", "developer_instructions"];
 
 async function yamlProblem(frontMatter: string): Promise<string | null> {
   try {
@@ -20,18 +22,18 @@ async function yamlProblem(frontMatter: string): Promise<string | null> {
   }
 }
 
-function trackedLoaded(): ReadonlyArray<string> {
-  const listing = spawnSync("git", ["ls-files", "-z", "--", ".claude/agents", ".claude/skills"], {
+function trackedUnder(...roots: string[]): ReadonlyArray<string> {
+  const listing = spawnSync("git", ["ls-files", "-z", "--", ...roots], {
     cwd: REPO,
     encoding: "utf8",
     timeout: GIT_TIMEOUT_MS,
   });
   assert.equal(listing.status, 0, `git ls-files failed: ${listing.error?.message ?? listing.stderr}`);
-  return listing.stdout
-    .split("\0")
-    .filter(Boolean)
-    .filter((f) => LOADED.test(f));
+  return listing.stdout.split("\0").filter(Boolean);
 }
+
+const trackedLoaded = (): ReadonlyArray<string> =>
+  trackedUnder(".claude/agents", ".claude/skills").filter((f) => LOADED.test(f));
 
 test("every agent and skill file opens with front matter that parses as YAML", async () => {
   const files = trackedLoaded();
@@ -55,6 +57,23 @@ test("every agent and skill file opens with front matter that parses as YAML", a
     `${problems.length} file(s) whose front matter GitHub refuses to render. Quote the value, or reword it, since an unquoted ` +
       `value cannot hold a colon followed by a space.\n  ${problems.join("\n  ")}`,
   );
+});
+
+test("every Codex agent file parses as TOML to a string under each of the five keys Codex reads and no other key, since Codex drops a role silently over a parse error or a key it does not know", () => {
+  const files = trackedUnder(".codex/agents");
+  assert.ok(files.length > 0, "the listing found no Codex agent: it is broken");
+  const problems = files.flatMap((file) => {
+    if (!file.endsWith(".toml")) return [`${file} is not a .toml file`];
+    try {
+      const doc = parse(readFileSync(resolve(REPO, file), "utf8"));
+      const keys = Object.keys(doc);
+      if (keys.join(",") !== CODEX_KEYS.join(",")) return [`${file} holds the keys ${keys.join(", ")}`];
+      return keys.filter((key) => typeof doc[key] !== "string").map((key) => `${file}: ${key} is not a string`);
+    } catch (error) {
+      return [`${file} is not TOML: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`];
+    }
+  });
+  assert.deepEqual(problems, []);
 });
 
 test("the check refuses an unquoted value holding a colon and a space, and passes the quoted form", async () => {
