@@ -46,7 +46,7 @@ Resolve the PR's head sha from `gh api` when your round starts, not from anythin
 node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>
 ```
 
-`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing, STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly. One call per line, and no shell variable, because a dispatcher standing in a harness-isolated worktree puts you inside its fence, and `CLAUDE.md` Worktrees lists what that fence refuses. So the two reads below are calls of their own, and the `cd` stays in the call that runs the suite, which names no git.
+`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing, STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly. One call per line, and no shell variable, because a dispatcher standing in a harness-isolated worktree puts you inside its fence, and the Worktrees section of `.claude/rules/claude-code.md` lists what that fence refuses. So the two reads below are calls of their own, and the `cd` stays in the call that runs the suite, which names no git.
 
 ```bash
 cat /the/path/create/printed/.git

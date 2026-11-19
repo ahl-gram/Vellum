@@ -8,7 +8,15 @@ import { trackedUnder as tracked } from "../../test-support/tracked-files.ts";
 // Issue #1087: vellum-plan-skeptic is retired. The harness loads every file in .claude/agents/, so a file left there is still dispatchable; the archived copy and the rulebook's tombstone are the only places that name it. Misses: .claude/skills, handbook/plans, handbook/errata and the scar rows, which are history by design, and any spelling that is neither "plan skeptic" nor "plan-skeptic".
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const LIVE_ROOTS = [".claude/agents", ".codex/agents", "handbook/agents", ".github", "handbook/specs", "CLAUDE.md"];
+const LIVE_ROOTS = [
+  ".claude/agents",
+  ".claude/rules",
+  ".codex/agents",
+  "handbook/agents",
+  ".github",
+  "handbook/specs",
+  "CLAUDE.md",
+];
 const RETIRED = "vellum-plan-skeptic.md";
 const TOMBSTONE = "handbook/specs/rulebook.md";
 const NAME = /plan[- ]skeptic/gi;

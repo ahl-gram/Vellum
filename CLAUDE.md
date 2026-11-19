@@ -42,14 +42,43 @@ The rules below refine the workspace rules in `~/CodeProjects/CLAUDE.md` for thi
 
 **This file is TRACKED in the repo.** `RESUME-HERE.md`, `session-notes/` and
 `.claude/settings.local.json` stay gitignored: per-session state and personal settings, not
-instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the footgun hook and the subagent cache lifetime) are
-tracked. Because it is tracked, **editing it costs a branch and a PR** (main requires its CI checks
+instructions. `.claude/agents/`, `.claude/rules/`, `.claude/skills/` and `.claude/settings.json` (the footgun hook and the subagent cache lifetime) are
+tracked, and so are Codex's `.codex/` (its agents and its hook) and `.agents/` (its links to the skills, and the model policy). Because it is tracked, **editing it costs a branch and a PR** (main requires its CI checks
 and enforces them for admins); budget for that before adding a rule mid-session.
 
 **If you are not Alex, several things this file points at are not yours to read**: the auto-memory
 files, the private roadmap Project, the claude-config backup, `~/CodeProjects/CLAUDE.md`, and the
 gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and use the repo plus the GitHub issues,
 which are public and carry the ratified decisions. The rules below and the specs stand on their own.
+
+## Codex
+
+Codex reads this file through the `AGENTS.md` link, from the main checkout, from any folder in it
+and from a worktree under `.claude/worktrees/`, each worktree reading its own copy. Of the files
+that tell a session how to work here, it loads no other: `.claude/rules/claude-code.md`, the
+workspace rules this file names and the auto-memory are Claude Code's. Where this file names
+something only Claude Code has, a Codex session does this instead.
+
+- **Start** in the main checkout or in a worktree with `codex -s danger-full-access -a on-request`
+  (Issue #1393, ruling D2). Never pass `--dangerously-bypass-approvals-and-sandbox`,
+  `--dangerously-bypass-hook-trust` or a `-c` override to make an operation work, never edit
+  `~/.codex/` or any other user-level setting, and never trust a hook, a project or an agent for
+  Alex: tell him what was blocked.
+- **The footgun hook** runs under Codex only once Alex has trusted it, so confirm `/hooks` shows it
+  as Trusted before working, and stop if it does not. Follow a refusal it raises; never work around
+  one.
+- **A skill** is read through `.agents/skills/<name>/SKILL.md`: read the named gate in full at the
+  moment Process says it applies.
+- **The scratchpad, your working folder, the patch tool and spawning a role** work for a session as
+  the section Running under Codex at the end of `handbook/agents/adapters/codex-local.md` says they
+  do for a role: read it before your first command.
+- **A worktree** is built as `handbook/specs/development-workflow.md` step 7 says for a session with
+  no worktree isolation.
+- **A decision for Alex** is put to him as `handbook/specs/development-workflow.md` step 6 says for
+  Codex, and your turn ends there.
+- **The roles assigned to Claude Code** in `handbook/specs/development-workflow.md` (The agents)
+  run there, whichever harness builds: hand off at each one as `handbook/specs/orchestration.md`
+  (Lanes that cross harnesses) says, and dispatch none of them yourself.
 
 ## Session handoff: keep the roadmap Project current
 
@@ -172,8 +201,8 @@ the moment you are about to write a test or guard, an e2e check or CDP probe, a 
 that joins a roster, anything that can move a chart or the golden, or a PR body. This file and the
 specs are the narrative; the skill is the same doctrine as a checklist read at the moment it applies,
 which is the difference that stopped the same defects reaching PR after PR. Its
-`.claude/skills/vellum-footguns/hooks/footgun-gate.ts` (its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, puts the matching gate in front of you and
-refuses the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
+`.claude/skills/vellum-footguns/hooks/footgun-gate.ts` (its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, and its Codex launcher, wired in `.codex/hooks.json`, put the matching gate in front of you and
+refuse the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
 
 **The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-guard-prover` on every new or strengthened guard before the PR,
@@ -184,7 +213,7 @@ hands back a plan with no decision left open; `vellum-implementer` builds that p
 on a cheaper model, and hands back rather than decides wherever the plan is wrong.
 `vellum-designer` draws a design round's mockups for Alex's sitting and breaks an epic into its
 subs, handing its menu to whoever dispatched it.
-Every project agent under `.claude/agents/` sets an `effort` in its frontmatter, because an agent without one inherits the session's level: `xhigh` for `vellum-planner` and `vellum-designer`, `high` for `vellum-implementer` and the cold skeptic, `medium` for `vellum-spec-recon`, `vellum-guard-prover` and `vellum-plate-reader` (Alex, 2026-09-13 set every agent to `xhigh`; 2026-10-13 ruled it per agent, after a week of weekly-limit exhaustion). The check is `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some level other than that agent's own, since a session at the same level cannot tell the frontmatter from inheritance.
+Every project agent's model and effort under each harness is in `.agents/model-policy.json`, generated into its definition (`handbook/specs/conventions.md`, Where a rule lives): Alex ruled the effort per agent on 2026-10-13, after a week of weekly-limit exhaustion, and the Process section of `.claude/rules/claude-code.md` says how to check the level an agent runs at.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks, and a
   clearance to merge covers what it names (`handbook/specs/orchestration.md`). The one standing
@@ -207,7 +236,7 @@ Every project agent under `.claude/agents/` sets an `effort` in its frontmatter,
   range swept and the worst case (`test/prospect/input.test.ts` carries the form), which is the
   comment rule's "no test can practically pin it" carve-out rather than an exemption from it.
 - **When asking Alex to make an open decision**, explain it in plain words, no jargon and no acronyms,
-  in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
+  in a menu put to him as `handbook/specs/development-workflow.md` step 6 says for your harness, and STOP there. A decision that is his is not one
   to default your way and mention afterwards. A dispatched `vellum-planner` cannot reach him, so
   it hands the menu to its dispatcher at the same STOP.
 - **No em-dashes** in issue bodies, PR bodies, issue and PR comments, commit messages or published
@@ -249,29 +278,21 @@ NOT ignored, and `scripts/agent-sandbox.ts` assumes that location: it links `nod
 levels up, which resolves only for a sandbox at `<root>/.claude/worktrees/<name>`. That script owns
 the sandbox for both review agents that build one, so the depth lives in one place (#575).
 
-- **EnterWorktree is the normal way in.** It branches from `origin/main` rather than local HEAD, so
-  the tree is current without a pull. One thing needs fixing by hand: any `/` in the name becomes `+`,
-  in the branch AND the directory, and the branch takes a `worktree-` prefix on top. Rename the branch
-  before the first commit, or the PR carries the harness's name instead of yours.
-- **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
+How Claude Code makes a tree, and the fence its worktree isolation puts up, are the Worktrees section
+of `.claude/rules/claude-code.md`; a session with no worktree isolation, which is every Codex session,
+makes one as `handbook/specs/development-workflow.md` step 7 says.
+
+- **`vellum-guard-prover` builds its own tree.** It must mutate the code under review, which
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
   `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
   `vellum-pr-skeptic` builds one for EVERY run (Alex, 2026-09-12): `npm test` deletes the generated
   assets under `generated/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
   requires of a `skeptic-*` sandbox.
-- **`vellum-planner` and `vellum-implementer` get their worktrees a third way**: `isolation: worktree`
-  in their frontmatter, so the harness builds and locks one at dispatch, a separate one for each. Inside such a tree, and inside any EnterWorktree tree,
-  the harness is a fence: it refuses a compound command whose `cd` goes to a shell variable, any `git`
-  run in a directory other than that worktree, a `for` loop around `git`, some quoted `jq` or `sed`
-  constructs it cannot parse, and a call that names git (a `.git` path or the bare word `gitdir`
-  included) once that call reads `$?`, while a plain single command passes (measured 2026-09-13 and
-  2026-11-11, Issue #1340). A dispatched agent stands inside its dispatcher's fence, and its directory
-  does not carry from one call to the next. That is why the sandbox recipes take `create`'s printed
-  path literally, read the sandbox's sha from its `.git` file in calls of their own, and keep the `cd`
-  in the call that runs. How a session runs several such lanes at once is
-  `handbook/specs/orchestration.md`'s.
-- **`vellum-designer` gets its tree a fourth way, never through isolation**: what it delivers is
+- **`vellum-planner` and `vellum-implementer` each get a tree of their own**, a separate one for
+  each: Claude Code builds it at dispatch, and under Codex the dispatcher builds it as that step 7
+  says and names it in the brief.
+- **`vellum-designer` never gets its tree through isolation**: what it delivers is
   files under `out/`, which a harness tree does not keep, so a session standing in the main checkout builds a
   detached tree for it and dispatches it without isolation, as
   `handbook/specs/development-workflow.md` step 6 says.
@@ -280,13 +301,6 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   without leaving a reflog entry, so there is nothing to recover from afterwards.
 - **Never remove the worktree the session is standing in.** Name it for Alex and leave it; the shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
-- **Do not switch worktrees while a dispatched agent is still running.** `EnterWorktree` and
-  `ExitWorktree` in the parent silently disable that agent's commands for the rest of its life, and
-  it goes on reporting what it can rather than failing, so the loss reaches you as a thin report and
-  not as an error. Observed 2026-09-10: a cold skeptic finished its round with no tools left to it
-  and handed the parent a list of probes to run instead of results. Wait for the agent before you
-  move. No command here demonstrates the mechanism, so treat the instruction as the rule and the
-  cause as unverified.
 - **Other sessions hold their own worktrees here.** Leave them alone, and never `git stash` bare: the
   stash stack is shared across every worktree and a parallel session can pop yours. Set work aside
   with a WIP commit instead.

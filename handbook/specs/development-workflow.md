@@ -51,6 +51,13 @@ epic into its subs from the epic and its `vellum-spec-recon` ledger, handing its
 dispatched it as a planner does at step 6. What it delivers is files under `out/`, so it is
 dispatched the way step 6 says such an agent is.
 
+**The planner, the designer and every review agent run from a Claude Code session, whichever
+harness builds the issue** (Alex, 2026-11-19, Issue #1400): recon, the designer's rounds and
+breakdowns, the plan, the guard prover, the plate reader and the cold skeptic. The definitions of
+those roles that `npm run agents:generate` writes under `.codex/agents/` do not stand in for them.
+How a Codex session that builds an issue hands off to each is `handbook/specs/orchestration.md`'s
+(Lanes that cross harnesses).
+
 ## The sequence
 
 **1. Read the issue: the body AND its comments**, through the two `gh api` calls `CLAUDE.md` gives
@@ -94,7 +101,12 @@ the cloud routine.
 **5. Fold in what recon surfaced.** A finding you reject is rejected in writing, with the reason.
 
 **6. Put the open decisions to Alex as a menu, and STOP.** Every option in plain words with its
-consequence, no jargon, no acronyms, in `AskUserQuestion` rather than in prose. **A decision that is
+consequence, no jargon, no acronyms, the recommended one first and marked, through the harness's
+question tool rather than in prose: `AskUserQuestion` in Claude Code, and in Codex, which has no such
+tool, the options written out as a numbered list, after which the turn ends. His answer is the
+option he picks or a clear ruling in his own words, recorded in his words
+(`handbook/specs/conventions.md`, The fidelity rule); ask again when it is ambiguous or leaves a
+decision open, never take silence as his approval, and never pick an option for him. **A decision that is
 his is not one to default your way and mention afterwards**, and **a ruling that rested on a wrong
 premise goes back to him and is re-taken**, never patched underneath. This step is load bearing
 and it is the one most often skipped: on #534 the issue offered three options and ruled none, and
@@ -110,7 +122,7 @@ edit, rather than a description of them.
 
 **When the session running this sequence is a dispatched `vellum-planner`, the menu goes to the
 dispatching session instead**, as the last part of its step 6 report, and the dispatcher puts it to
-Alex in `AskUserQuestion` and relays his rulings back to the planner, which folds them into the plan.
+Alex as this step says and relays his rulings back to the planner, which folds them into the plan.
 The STOP is the same; only who holds the menu changes, because a subagent's question does not reach
 Alex. The dispatcher posts his answer on the issue as he gives it, and the implementer's step 12
 record points at that post; how the dispatcher relays a menu and its rulings is
@@ -189,9 +201,15 @@ its definition makes; a `vellum-implementer` gets a fresh tree of its own and ke
 commits.
 
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
-name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
-all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
-worktree when it starts, and its definition carries the rename.
+name instead of yours. In Claude Code, why the branch needs renaming at all is the Worktrees section
+of `.claude/rules/claude-code.md`, and a `vellum-implementer` lane already stands in a harness
+worktree when it starts, its definition carrying the rename. A session with no worktree isolation,
+which is every Codex session, builds its tree the way a dispatcher builds a non-isolated agent's
+(step 6): `git -C <main checkout> fetch origin`, then use that step's worktree-add command,
+then `[ -e <tree>/node_modules ] || ln -s ../../../node_modules <tree>/node_modules`, then
+`git -C <tree> switch -c <branch>`, each a command of its own, and every later command runs with
+that tree as its working folder. Never run `npm ci` or `npm install` through the link. The rest of
+the worktree conduct is `CLAUDE.md`'s Worktrees section.
 
 **8. Implement.** Five things the word hides, the first a record and the rest each with its own
 scar:
@@ -364,7 +382,7 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
-NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs. Every round it also runs `npm run copy-hunt -- diff` over the pull request in its sandbox (Alex, 2026-11-10, Issue #1319), and a copy it reports is a finding like any other, weighed at step 15. The cloud
+NOTHING else: no summary, no claims about tests, no rationale, and none of the dispatching session's conversation either, so it is dispatched fresh by its name, never as a copy of the session; for an issue Codex builds, a Claude Code session dispatches it (The agents, above). Make no edits while it runs. Every round it also runs `npm run copy-hunt -- diff` over the pull request in its sandbox (Alex, 2026-11-10, Issue #1319), and a copy it reports is a finding like any other, weighed at step 15. The cloud
 routine runs it only for a diff that touches `src/` or changes more than 50 lines (`handbook/specs/cloud-routine.md`).
 
 **Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
