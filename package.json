@@ -23,6 +23,8 @@
     "recon-triage": "node scripts/recon-triage/main.ts",
     "keeper-scan": "node scripts/keeper-scan/main.ts",
     "still-judge": "node scripts/still-judge/main.ts",
+    "agents:generate": "node scripts/agent-infra/main.ts generate",
+    "agents:check": "node scripts/agent-infra/main.ts check",
     "astro:generate": "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts && node scripts/primer-steps.ts",
     "astro:dev": "npm run astro:generate && astro dev",
     "astro:preview": "astro preview",
