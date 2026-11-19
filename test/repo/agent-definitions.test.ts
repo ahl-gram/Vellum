@@ -38,6 +38,19 @@ const RULED: Readonly<Record<HarnessId, Readonly<Record<string, readonly [string
     "vellum-spec-recon": ["gpt-6.2-sol", "medium"],
   },
 };
+const CLAUDE_ONLY = [
+  "AskUserQuestion",
+  "EnterWorktree",
+  "CLAUDE_EFFORT",
+  "Edit tool",
+  "Write tool",
+  "Edit and Write",
+  "no Edit",
+  "harness worktree",
+  "Harness worktree",
+  "isolation through the harness",
+  "baseRef",
+];
 
 const planned = (): ReadonlyMap<string, string> => new Map(planGeneratedFiles(REPO).map((f) => [f.path, f.text]));
 const plannedText = (files: ReadonlyMap<string, string>, path: string): string => {
@@ -103,7 +116,13 @@ test("no Codex definition carries a step only Claude Code can take, and every su
   const slots = [...parseAdapter(readFileSync(resolve(REPO, path), "utf8"), path).slots];
   assert.ok(slots.length > 0, "the Claude adapter defines no harness steps");
   const claude = ROLES.map((role) => plannedText(files, outputPath("claude-code", role.name))).join("\n");
+  for (const phrase of CLAUDE_ONLY) assert.ok(claude.includes(phrase), `no Claude definition says ${phrase} any more`);
   for (const [name, text] of slots) assert.ok(claude.includes(text), `no Claude definition retains the ${name} step`);
+  const phraseLeaks = ROLES.flatMap((role) => {
+    const text = plannedText(files, outputPath("codex-local", role.name));
+    return CLAUDE_ONLY.filter((phrase) => text.includes(phrase)).map((phrase) => `${role.name}: ${phrase}`);
+  });
+  assert.deepEqual(phraseLeaks, []);
   const leaks = ROLES.flatMap((role) => {
     const text = plannedText(files, outputPath("codex-local", role.name));
     return slots.filter(([, step]) => text.includes(step)).map(([name]) => `${role.name}: ${name}`);
