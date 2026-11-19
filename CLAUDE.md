@@ -243,23 +243,32 @@ Every project agent's model and effort under each harness is in `.agents/model-p
   pasted red line keeps its own (Issue #644). The footgun hook refuses one in a body's prose and reads what code
   is the way `.claude/skills/vellum-footguns/hooks/README.md` says.
 - **Attribution is the house's own and replaces the default one the harness supplies.** A commit
-  message ends with one trailer block of three lines: `Drafted-By: <agent> (<model id>)`,
-  `Co-Authored-By: Claude <noreply@anthropic.com>` and `Claude-Session: <session link>`. `<agent>` is
-  the name of the agent definition you run as (`vellum-planner`, `vellum-implementer`)
-  or `main session`, and `<model id>` is the model you are, never one copied from a brief. A pull
-  request body ends with three stacked lines, written as a slip is (`handbook/specs/ui-design.md`,
-  The voice):
+  message ends with one trailer block of these three lines and no other attribution line, neither
+  `Co-Authored-By:` nor `Claude-Session:`:
+
+  ```
+  Drafted-By: <agent> (<model id>)
+  Agent-Harness: <claude-code or codex-cli> <version>
+  Agent-Session: <session>
+  ```
+
+  `<agent>` is the name of the agent definition you run as (`vellum-planner`, `vellum-implementer`)
+  or `main session`, and `<model id>` is the model you are, never one copied from a brief.
+  `<version>` is the version number your own tool prints, read at each commit and never copied: the
+  first word `claude --version` prints under Claude Code, the second word `codex --version` prints
+  under Codex. `<session>` is the session link under Claude Code and `codex session <id>` under
+  Codex. A pull request body ends with three stacked lines, written as a slip is
+  (`handbook/specs/ui-design.md`, The voice), naming the tool and its version the same way:
 
   ```
   *Drafted by*
-  **Claude Code**
-  *the pages above, and the session that set them down: <session link>*
+  **<Claude Code or Codex> <version>**
+  *the pages above, and the session that set them down: <session>*
   ```
 
-  The session link is the dispatching session's, the one part a lane cannot read for itself, so the
-  brief carries it and a lane without it stops and asks before its first commit. A squash merge's
-  closing block carries each distinct `Drafted-By:` line of its commits beside the merging session's
-  own (`handbook/specs/orchestration.md`).
+  The session is the dispatching session's, the one part a lane cannot read for itself, so the
+  brief carries it and a lane without it stops and asks before its first commit. A squash merge
+  closes with the merging session's own three lines alone (`handbook/specs/orchestration.md`).
 - **Comments are the exception, not the rule.** A behavior a test pins needs no comment: the test is
   the record, delete the prose. A local invariant earns a test first; only where no test can
   practically pin it (cross-platform float drift, hand-measured browser quirks) does it keep a single
