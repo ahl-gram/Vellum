@@ -1,6 +1,6 @@
 # The Codex adapter
 
-This file holds the steps a role body leaves to the harness, written for Codex on Alex's Mac. `npm run agents:generate` (`scripts/agent-infra/main.ts`) builds each `.codex/agents/<role>.toml` from its role body under `handbook/agents/roles/`, the role's row in `scripts/agent-infra/roles.ts` and its model in `.agents/model-policy.json`. In place of each `{{harness:<name>}}` marker in a body it puts the one line this file gives under the comment line `<!-- slot: <name> -->`, and it appends to every role what follows the comment line `<!-- appendix -->`. A slot here stands where the role's Claude Code words, kept in `handbook/agents/adapters/claude-code.md`, name a step only Claude Code can take: a tool Codex lacks, a worktree the harness made, the effort Claude Code reports, a tool list it enforces. Everything else in a role body reads the same under both harnesses.
+For the slot and generation rules, read the paragraph **An agent is written once, as its role body, and generated for each harness** under **Where a rule lives** in `handbook/specs/conventions.md`.
 
 <!-- slot: designer-effort -->
 

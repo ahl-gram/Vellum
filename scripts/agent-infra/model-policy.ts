@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { isRecord } from "../is-record.ts";
 import { GenerationError, messageOf } from "./errors.ts";
 import { HARNESSES, POLICY_FILE, type HarnessId, type RoleDefinition } from "./roles.ts";
 
@@ -14,12 +15,10 @@ export type ModelPolicy = ReadonlyMap<HarnessId, HarnessPolicy>;
 
 type Table = Readonly<Record<string, unknown>>;
 
-const isTable = (value: unknown): value is Table =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 const isEffort = (value: unknown): value is Effort => EFFORTS.some((effort) => effort === value);
 
 function exactKeys(value: unknown, keys: readonly string[], where: string): Table {
-  if (!isTable(value)) throw new GenerationError(`${where} is not an object`);
+  if (!isRecord(value)) throw new GenerationError(`${where} is not an object`);
   const extra = Object.keys(value).filter((key) => !keys.includes(key));
   if (extra.length > 0) throw new GenerationError(`${where} holds a key it may not: ${extra.join(", ")}`);
   const missing = keys.filter((key) => !Object.hasOwn(value, key));
@@ -34,7 +33,7 @@ function effortList(value: unknown): readonly Effort[] | null {
 }
 
 function parseModels(value: unknown, where: string): ReadonlyMap<string, readonly Effort[]> {
-  if (!isTable(value) || Object.keys(value).length === 0) throw new GenerationError(`${where} approves no model`);
+  if (!isRecord(value) || Object.keys(value).length === 0) throw new GenerationError(`${where} approves no model`);
   return new Map(
     Object.entries(value).map(([model, efforts]) => {
       const list = effortList(efforts);

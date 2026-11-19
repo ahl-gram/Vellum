@@ -1,14 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { format } from "prettier";
 import { parse } from "smol-toml";
 import { frontMatterOf } from "../../test-support/front-matter.ts";
+import { trackedUnder } from "../../test-support/tracked-files.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const GIT_TIMEOUT_MS = 30_000;
 const LOADED = /^\.claude\/(?:agents\/[^/]+\.md|skills\/[^/]+\/SKILL\.md)$/;
 const CODEX_KEYS = ["name", "description", "model", "model_reasoning_effort", "developer_instructions"];
 
@@ -20,16 +19,6 @@ async function yamlProblem(frontMatter: string): Promise<string | null> {
     const message = error instanceof Error ? error.message : String(error);
     return message.split("\n")[0] ?? message;
   }
-}
-
-function trackedUnder(...roots: string[]): ReadonlyArray<string> {
-  const listing = spawnSync("git", ["ls-files", "-z", "--", ...roots], {
-    cwd: REPO,
-    encoding: "utf8",
-    timeout: GIT_TIMEOUT_MS,
-  });
-  assert.equal(listing.status, 0, `git ls-files failed: ${listing.error?.message ?? listing.stderr}`);
-  return listing.stdout.split("\0").filter(Boolean);
 }
 
 const trackedLoaded = (): ReadonlyArray<string> =>

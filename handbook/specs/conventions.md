@@ -154,11 +154,11 @@ in `ROLES` in `scripts/agent-infra/roles.ts`, and its model and effort under eac
 lists. A step only one harness can take is a `{{harness:<name>}}` marker in the body, whose words
 for each harness are that slot in `handbook/agents/adapters/claude-code.md` and
 `handbook/agents/adapters/codex-local.md`, the Claude Code slot keeping the role's own words; a step
-both harnesses can take stays in the body, even where it gives a Claude Code reason. Edit those
-sources, run `npm run agents:generate`, which writes `.claude/agents/<name>.md` and
-`.codex/agents/<name>.toml` and nothing else, and commit what it writes. Never edit a generated file
-by hand: `npm run agents:check` reads every one without writing, and
-`test/repo/agent-definitions.test.ts` runs it in `npm test`.
+both harnesses can take stays in the body, even where it gives a Claude Code reason. Change a slot
+in both adapter files in one pull request. Edit those sources, run `npm run agents:generate`, which
+writes `.claude/agents/<name>.md` and `.codex/agents/<name>.toml` and nothing else, and commit what
+it writes. Never edit a generated file by hand: `npm run agents:check` reads every one without
+writing, and `test/repo/agent-definitions.test.ts` runs it in `npm test`.
 
 **A tracked agent or skill file never sends its reader to the private auto-memory for content.**
 That memory is private to Alex, so a pointer into it is one no other reader can follow and nothing
@@ -167,8 +167,8 @@ there. A line that names the memory without sending anyone to it for content sta
 not to read it, a record that something was once held there, or a rule of thumb about it. Such a
 line names the store, never a file in it. `test/repo/memory-pointers.test.ts` reads every tracked
 file under `.claude/agents/`, `.claude/skills/` and `handbook/agents/`, refuses a memory file's name
-or a path into the memory directory, and holds the store's names it lists to its kept lines; the test is the list of
-what it reads and what passes.
+or a path into the memory directory, and holds the store's names it lists to its kept lines; the
+test is the list of what it reads and what passes.
 
 **A new spec file joins its reading lists by hand, and none of them checks itself**: the table in
 `CLAUDE.md`, step 3 of `handbook/specs/development-workflow.md`, the reading list in

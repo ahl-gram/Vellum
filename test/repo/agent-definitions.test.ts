@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { parse } from "smol-toml";
+import { parseAdapter } from "../../scripts/agent-infra/adapters.ts";
 import { checkGeneratedFiles, planGeneratedFiles } from "../../scripts/agent-infra/generate.ts";
 import { loadModelPolicy, resolveModel } from "../../scripts/agent-infra/model-policy.ts";
 import {
@@ -37,19 +38,6 @@ const RULED: Readonly<Record<HarnessId, Readonly<Record<string, readonly [string
     "vellum-spec-recon": ["gpt-6.2-sol", "medium"],
   },
 };
-const CLAUDE_ONLY = [
-  "AskUserQuestion",
-  "EnterWorktree",
-  "CLAUDE_EFFORT",
-  "Edit tool",
-  "Write tool",
-  "Edit and Write",
-  "no Edit",
-  "harness worktree",
-  "Harness worktree",
-  "isolation through the harness",
-  "baseRef",
-];
 
 const planned = (): ReadonlyMap<string, string> => new Map(planGeneratedFiles(REPO).map((f) => [f.path, f.text]));
 const plannedText = (files: ReadonlyMap<string, string>, path: string): string => {
@@ -111,11 +99,14 @@ test("each Codex definition parses as TOML to its five keys alone: its file's na
 
 test("no Codex definition carries a step only Claude Code can take, and every such step is still in a Claude definition", () => {
   const files = planned();
+  const path = adapterPath("claude-code");
+  const slots = [...parseAdapter(readFileSync(resolve(REPO, path), "utf8"), path).slots];
+  assert.ok(slots.length > 0, "the Claude adapter defines no harness steps");
   const claude = ROLES.map((role) => plannedText(files, outputPath("claude-code", role.name))).join("\n");
-  for (const phrase of CLAUDE_ONLY) assert.ok(claude.includes(phrase), `no Claude definition says ${phrase} any more`);
+  for (const [name, text] of slots) assert.ok(claude.includes(text), `no Claude definition retains the ${name} step`);
   const leaks = ROLES.flatMap((role) => {
     const text = plannedText(files, outputPath("codex-local", role.name));
-    return CLAUDE_ONLY.filter((phrase) => text.includes(phrase)).map((phrase) => `${role.name}: ${phrase}`);
+    return slots.filter(([, step]) => text.includes(step)).map(([name]) => `${role.name}: ${name}`);
   });
   assert.deepEqual(leaks, []);
 });
