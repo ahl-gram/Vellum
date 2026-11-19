@@ -390,9 +390,10 @@ On PR #576 the cold skeptic reported that its loaded instructions were the pre-P
 dispatch worktree stood at that branch's head. **WHY is UNVERIFIABLE**: that pull request's own body
 says the question was never run down, and nothing since has measured where a dispatched agent's
 definition is read from or when. So do not read that agent's report as evidence the new definition
-works. **A pull request that edits `.claude/agents/*.md` says in its body which version of the
-definition wrote the change and which reviewed it**, which is the part that does not depend on the
-cause. Proving the new definition takes effect is not asked for here: no session can be asked which
+works. **A pull request that changes an agent definition, through its role body or an adapter under
+`handbook/agents/`, its model in `.agents/model-policy.json`, or what `npm run agents:generate`
+writes from them, says in its body which version of the definition wrote the change and which
+reviewed it**, which is the part that does not depend on the cause. Proving the new definition takes effect is not asked for here: no session can be asked which
 definition it loaded, so the check would be unfalsifiable the moment it was written down.
 
 **15. Fix, one round each.** The cold skeptic, the prover and the plate reader each get ONE round
