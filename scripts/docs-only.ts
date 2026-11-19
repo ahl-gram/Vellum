@@ -4,6 +4,7 @@ import { appendFileSync } from "node:fs";
 export const DOC_DIRS: readonly string[] = [
   "handbook/",
   ".claude/agents/",
+  ".codex/agents/",
   ".claude/skills/vellum-footguns/references/",
 ];
 export const DOC_FILES: readonly string[] = [

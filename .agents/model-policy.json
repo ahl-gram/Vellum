@@ -1,0 +1,32 @@
+{
+  "claude-code": {
+    "models": {
+      "opus[1m]": ["low", "medium", "high", "xhigh", "max"],
+      "sonnet[1m]": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "roles": {
+      "vellum-designer": { "model": "opus[1m]", "effort": "xhigh" },
+      "vellum-guard-prover": { "model": "sonnet[1m]", "effort": "medium" },
+      "vellum-implementer": { "model": "sonnet[1m]", "effort": "high" },
+      "vellum-planner": { "model": "opus[1m]", "effort": "xhigh" },
+      "vellum-plate-reader": { "model": "sonnet[1m]", "effort": "medium" },
+      "vellum-pr-skeptic": { "model": "opus[1m]", "effort": "high" },
+      "vellum-spec-recon": { "model": "sonnet[1m]", "effort": "medium" }
+    }
+  },
+  "codex-local": {
+    "models": {
+      "gpt-6.2-astra": ["low", "medium", "high", "xhigh", "max", "ultra"],
+      "gpt-6.2-sol": ["low", "medium", "high", "xhigh", "max", "ultra"]
+    },
+    "roles": {
+      "vellum-designer": { "model": "gpt-6.2-sol", "effort": "xhigh" },
+      "vellum-guard-prover": { "model": "gpt-6.2-sol", "effort": "medium" },
+      "vellum-implementer": { "model": "gpt-6.2-sol", "effort": "high" },
+      "vellum-planner": { "model": "gpt-6.2-astra", "effort": "xhigh" },
+      "vellum-plate-reader": { "model": "gpt-6.2-sol", "effort": "medium" },
+      "vellum-pr-skeptic": { "model": "gpt-6.2-sol", "effort": "high" },
+      "vellum-spec-recon": { "model": "gpt-6.2-sol", "effort": "medium" }
+    }
+  }
+}

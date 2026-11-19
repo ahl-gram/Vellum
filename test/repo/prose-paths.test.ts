@@ -13,12 +13,21 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { HARNESSES, ROLES, adapterPath, roleBodyPath } from "../../scripts/agent-infra/roles.ts";
 import { SERVED_SOURCES } from "../../scripts/served-sources.ts";
 
 // A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling, the comment citation rules in scripts/lint/comment-citation.ts, this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory. Misses: the forms the extraction test pins as never extracted; a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name; a span wrapped across a line, which is not joined; code files under the prose roots, read by neither guard; and a wrong-case or untracked-draft citation, which existsSync accepts on a Mac and CI's Linux checkout does not (green here, red there, never silent). False positives, reworded when they land: a backticked path inside a fenced block, extracted like any other; a unique basename the day a namesake lands; a dotted word whose extension some tracked file happens to carry (`index.html`, an extension tracked only under design/), read as a citation.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const PROSE_ROOTS = ["handbook/specs", ".claude/skills", ".claude/agents", "CLAUDE.md", "README.md", ".github"];
+const PROSE_ROOTS = [
+  "handbook/specs",
+  "handbook/agents",
+  ".claude/skills",
+  ".claude/agents",
+  "CLAUDE.md",
+  "README.md",
+  ".github",
+];
 const MEMORY_PREFIX = /^(project_|feedback_|reference_)/;
 // A cap on a hang, never a budget (2026-09-16: the whole sweep with both git calls ran in 13 to 15 ms on a Mac and in CI's Linux checkout, so 30 s is three orders above the worst case): spawnSync's timeout is the mechanism test/repo/footgun-deployed-run.test.ts pins with a child that outlives it, and a check-ignore batch on stdin is the draining-child shape Issue #564 measured.
 const GIT_TIMEOUT_MS = 30_000;
@@ -138,6 +147,14 @@ test("every backticked file path in the prose roots resolves", () => {
       `deliberately kept out of it: fix the path, cite a generated file with its directory, write a retired file or ` +
       `an example name without backticks, and a file outside this repo at its real home under ~.\n  ` +
       findings.join("\n  "),
+  );
+});
+
+test("every role body and adapter the agent generator reads lies under a prose root, so a path an agent cites is read where it is written", () => {
+  const sources = [...ROLES.map((role) => roleBodyPath(role.name)), ...HARNESSES.map(adapterPath)];
+  assert.deepEqual(
+    sources.filter((source) => !PROSE_ROOTS.some((root) => source.startsWith(`${root}/`))),
+    [],
   );
 });
 

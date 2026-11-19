@@ -45,6 +45,9 @@ test("a path is a doc only when DOC_FILES names it or it lies under a DOC_DIRS f
     "handbook/specs/rulebook.md",
     "handbook/plans/700/779/779-part2h-support/779-2h-rows-kit.json",
     ".claude/agents/vellum-planner.md",
+    ".codex/agents/vellum-planner.toml",
+    "handbook/agents/roles/vellum-planner.md",
+    "handbook/agents/adapters/codex-local.md",
     ".claude/skills/vellum-footguns/references/scars.md",
     ...DOC_FILES,
   ];
@@ -57,6 +60,8 @@ test("a path is a doc only when DOC_FILES names it or it lies under a DOC_DIRS f
     ".github/workflows/ci.yml",
     ".claude/settings.json",
     ".codex/hooks.json",
+    ".agents/model-policy.json",
+    "scripts/agent-infra/roles.ts",
     ".agents/skills/vellum-footguns",
     ".agents/skills/comment-sweep",
     ".claude/skills/vellum-footguns/hooks/footgun-gate.ts",
