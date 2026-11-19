@@ -32,8 +32,7 @@ host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
 `development-workflow.md` the sequence a change moves through, `orchestration.md` how a session
-runs several lanes of it at once, `cloud-routine.md` the cloud session for a small, fully
-planned issue, `settle-doctrine.md` how an e2e
+runs several lanes of it at once, `settle-doctrine.md` how an e2e
 wait is written and what the harness environment does, and `check-placement.md` which check holds
 which kind of rule.
 
@@ -379,9 +378,7 @@ comment. This is a convenience index, not their home.
 presses a page, the stylesheets, and the committed charts. **`scripts/` holds what runs around the
 product**: the commands that produce, check, prove or deliver something, each run with `node`, from
 a `package.json` script or by another command, the unit suite's runner among them, the house's lint
-rules, the design rounds' tools, and the modules those commands, the lint and the tests share. The
-one command that is no `node` file is `scripts/cloud-setup.sh`, the shell script pasted into the
-cloud environment's setup field (`handbook/specs/cloud-routine.md`). `test/`, `test-support/` and `e2e/` hold the checks and their helpers, and `e2e/` the browser lanes'
+rules, the design rounds' tools, and the modules those commands, the lint and the tests share. `test/`, `test-support/` and `e2e/` hold the checks and their helpers, and `e2e/` the browser lanes'
 runner.
 
 **Place a file by what runs it.** Code the site or the CLI runs goes in `src/`, a module a page
@@ -460,6 +457,7 @@ checks against.
 ## Retired rules, do not resurrect
 
 - **The plan skeptic is retired** (Alex, 2026-10-26, Issue #1087). A count over 85 issues found the plans it had read were handed back by the implementer about as often as any, for causes only a browser, CI or the proof runner shows, which it does not run. Its definition is archived byte for byte at `handbook/retired/vellum-plan-skeptic.md`, out of `.claude/agents/` so the harness no longer loads it. To restore it, put its body under `handbook/agents/roles/`, give it a row in `ROLES` in `scripts/agent-infra/roles.ts` and a model under each harness in `.agents/model-policy.json`, and run `npm run agents:generate`. Workflow step 4 keeps its number as a stub.
+- **The cloud quick-win routine is retired** (Alex, 2026-11-19, Issue #1400 comment 7017948819, retired by Issue #1410): "We will be retiring the Claude cloud tool/session for Vellum, so this is not something we have to plan around going forward." No issue is labelled for it, no session merges under its clearance, and no standing clearance to merge remains: Alex clears a merge as `handbook/specs/orchestration.md` says. Its spec is archived byte for byte at `handbook/retired/cloud-routine.md`, and the cloud environment's setup script beside it at `handbook/retired/cloud-setup.sh`, out of `handbook/specs/` and `scripts/`. The label `cloud-quickwin` stays on GitHub for the closed issues that carried it, and no issue is given it again. To restore the routine, move both files back, rejoin the spec to the reading lists `handbook/specs/conventions.md` names (Where a rule lives), and restore its clearance in `CLAUDE.md` and its carve-outs in workflow steps 2, 14 and 16 from the commit that retired it.
 - **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a
   READING page is one `.astro` file plus its entries in `src/layouts/nav.ts`. That prices the
   reading-page kind only; a working page that mounts a bundle owes a good deal more, and
@@ -498,7 +496,7 @@ overlays), to
 `handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `handbook/specs/site-architecture.md` (how the site is authored and shipped), to
 `handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/orchestration.md` (running
-several lanes at once), to `handbook/specs/cloud-routine.md` (the cloud quick-win routine), to `handbook/specs/settle-doctrine.md` (how an e2e
+several lanes at once), to `handbook/specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), to `handbook/specs/check-placement.md` (which
 check holds which kind of rule), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).

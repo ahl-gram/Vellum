@@ -246,7 +246,7 @@ belongs in.
   reader's hypothesis that a command still confirms; and a call that fails is reported as skipped,
   never as nothing found. Each reads the key from `TYPESAFE_API_KEY`, then from
   `~/.config/typesafe/key`, and never prints it (`readKey` in `scripts/jev/system-one.ts`); where
-  neither holds one, as in the cloud routine's environment, every call is skipped before it is
+  neither holds one, every call is skipped before it is
   sent. Every one of them runs through `runCommand` in `scripts/jev/cli.ts`, which appends one line
   of the run's totals (its input tokens, its requests, the model, the command, and whether any
   count was not TypeSafe's own) to `~/.config/typesafe/usage.jsonl` when the run ends, an interrupt

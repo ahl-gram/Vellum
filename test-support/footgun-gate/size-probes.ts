@@ -5,7 +5,7 @@ import { decideCodex } from "../../scripts/agent-infra/hooks/codex-adapter.ts";
 import { statePath } from "../../scripts/agent-infra/hooks/gate-state.ts";
 import { bash, edit, ROOT } from "./kit.ts";
 
-// Claude Code 2.1.322, measured 2026-11-11 with a project hook in a non-interactive session, an interactive one and an agent dispatched from each: added text of 9,900 characters arrived whole and 10,100 became a 2,000-character preview in the interactive session and the agents (the non-interactive session itself was read at 9,499, whole, and 10,499, a preview), and the 8,000-character cut the program carries reached none of them (the cloud routine unmeasured), so the limit sits 1,000 under that switch (Issue #1338).
+// Claude Code 2.1.322, measured 2026-11-11 with a project hook in a non-interactive session, an interactive one and an agent dispatched from each: added text of 9,900 characters arrived whole and 10,100 became a 2,000-character preview in the interactive session and the agents (the non-interactive session itself was read at 9,499, whole, and 10,499, a preview), and the 8,000-character cut the program carries reached none of them, so the limit sits 1,000 under that switch (Issue #1338).
 const HOOK_CONTEXT_LIMIT = 9_000;
 // Issue #1396's live check, row A9: a note of 58,980 characters reached Codex whole under `additionalContextLimit: 0`, the longest seen whole; Codex's own cap is unmeasured.
 const CODEX_WHOLE_NOTE = 58_980;

@@ -26,7 +26,6 @@ READING before the work its row names.
 | `handbook/specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
 | `handbook/specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
 | `handbook/specs/orchestration.md` | how a session runs several lanes at once: briefing them, relaying their menus and Alex's rulings, watching them and CI, a stalled lane or a lost tree, merging what it is cleared to merge, and retiring a lane | dispatching a lane, and handing an issue from one lane to another |
-| `handbook/specs/cloud-routine.md` | the cloud session that takes one small, fully planned issue and merges its own pull request: what a cloud session has and lacks, what qualifies an issue, the loop, the caps, the stop conditions | labelling an issue for the routine, editing its prompt, or changing the cloud environment it runs in |
 | `handbook/specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
 | `handbook/specs/settle-doctrine.md` | how an e2e wait is written, what the harness environment it runs in actually does, where the Mac and the CI runner disagree, and when a browser check leaves the run, pulled out while it is flaky or too slow or deleted where its coverage is needless | any e2e wait, settle or CDP probe, any screenshot, focus state or narrow viewport read in the harness, any check red on CI and green on the Mac, and pulling a browser check out of the run, deleting one, or weighing what one costs against what it holds |
 | `handbook/specs/check-placement.md` | which check holds which kind of rule: the type checker, the lint, the unit suite or the browser, and what a unit test may read | writing a test, a lint rule or a browser check, and moving a rule from one to another |
@@ -207,7 +206,7 @@ refuse the mechanical never-list items outright, the ones `.claude/skills/vellum
 **The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-guard-prover` on every new or strengthened guard before the PR,
 `vellum-plate-reader` when the deliverable is an appearance or step 11 owes its still-judge comparison, and `vellum-pr-skeptic` COLD on every
-pushed PR (the cloud routine runs the guard prover and the cold skeptic only as `handbook/specs/cloud-routine.md` says, and neither plan nor plate reader). A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
+pushed PR. A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
 what lands on the PR**. `vellum-planner` runs one issue through step 6 on the most capable model and
 hands back a plan with no decision left open; `vellum-implementer` builds that plan in its own tree
 on a cheaper model, and hands back rather than decides wherever the plan is wrong.
@@ -216,9 +215,7 @@ subs, handing its menu to whoever dispatched it.
 Every project agent's model and effort under each harness is in `.agents/model-policy.json`, generated into its definition (`handbook/specs/conventions.md`, Where a rule lives): Alex ruled the effort per agent on 2026-10-13, after a week of weekly-limit exhaustion, and the Process section of `.claude/rules/claude-code.md` says how to check the level an agent runs at.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks, and a
-  clearance to merge covers what it names (`handbook/specs/orchestration.md`). The one standing
-  clearance is the cloud routine's, for a pull request of an issue labelled `cloud-quickwin`
-  (`handbook/specs/cloud-routine.md`).
+  clearance to merge covers what it names (`handbook/specs/orchestration.md`).
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
 - **Zero red from the prover is a hole, not a pass.** A guard proved unable to bite is deleted rather
@@ -248,8 +245,8 @@ Every project agent's model and effort under each harness is in `.agents/model-p
 - **Attribution is the house's own and replaces the default one the harness supplies.** A commit
   message ends with one trailer block of three lines: `Drafted-By: <agent> (<model id>)`,
   `Co-Authored-By: Claude <noreply@anthropic.com>` and `Claude-Session: <session link>`. `<agent>` is
-  the name of the agent definition you run as (`vellum-planner`, `vellum-implementer`),
-  `main session` or `cloud quick-win routine`, and `<model id>` is the model you are, never one copied from a brief. A pull
+  the name of the agent definition you run as (`vellum-planner`, `vellum-implementer`)
+  or `main session`, and `<model id>` is the model you are, never one copied from a brief. A pull
   request body ends with three stacked lines, written as a slip is (`handbook/specs/ui-design.md`,
   The voice):
 
