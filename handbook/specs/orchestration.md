@@ -100,13 +100,12 @@ home's line wins for the lane and this file's for the orchestrator.
 
 ## Lanes that cross harnesses
 
-- **An issue Codex builds keeps its designer, its planner and its reviews in Claude Code**
-  (`handbook/specs/development-workflow.md`, The agents). A Claude Code session runs recon, any
-  design round and the planner and puts each menu to Alex; a Codex session builds from the finished
-  plan, in a tree it builds as workflow step 7 says; a Claude Code session runs the guard prover,
-  the plate reader and the cold skeptic. Each session hands the next only what that role's brief
-  takes: the issue number for recon, the designer and the planner, the plan's path for the build,
-  the prover handoff below, and for the cold skeptic the pull request's number and nothing else.
+- **An issue Codex builds keeps the roles assigned to Claude Code there**, as
+  `handbook/specs/development-workflow.md` (The agents) says. That session runs their steps and
+  puts each menu to Alex; a Codex session builds from the finished plan, in a tree it builds as
+  workflow step 7 says. Each session hands the next only what the receiving role's brief takes:
+  preparation starts with the issue number, the build with the finished plan's path, proof with
+  the prover handoff below, and cold review with the pull request's number and nothing else.
 - **The prover handoff.** The guard prover proves the HEAD of the tree it is dispatched from, so a
   sha named in a brief changes nothing. The Codex session commits and pushes, writes
   `out/<issue>/ready-for-prover.md` in the main checkout (the branch, the committed head sha, every

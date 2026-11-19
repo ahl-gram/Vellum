@@ -6,13 +6,12 @@ the section it belongs to there (`handbook/specs/conventions.md`, Where a rule l
 
 ## Process
 
-- **Every definition under `.claude/agents/` carries an `effort`**, because an agent without one
+- **Every project agent under `.claude/agents/` sets an `effort` in its frontmatter**, because an agent without one
   inherits the session's level. The check is `echo $CLAUDE_EFFORT` inside a dispatched agent, run
   from a session at some level other than that agent's own, since a session at the same level
   cannot tell the frontmatter from inheritance.
-- **Dispatch a review agent by its name, never as a fork of the session**: a fork carries the
-  conversation, and a cold review carries none of it (`handbook/specs/development-workflow.md`
-  step 14).
+- **The fork trap in Claude Code**: follow `handbook/specs/development-workflow.md` step 14 when
+  dispatching a review.
 
 ## Worktrees
 

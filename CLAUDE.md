@@ -76,8 +76,8 @@ something only Claude Code has, a Codex session does this instead.
   no worktree isolation.
 - **A decision for Alex** is put to him as `handbook/specs/development-workflow.md` step 6 says for
   Codex, and your turn ends there.
-- **Recon, the designer, the plan, the guard prover, the plate reader and the cold skeptic** run in
-  Claude Code, whichever harness builds: hand off at each one as `handbook/specs/orchestration.md`
+- **The roles assigned to Claude Code** in `handbook/specs/development-workflow.md` (The agents)
+  run there, whichever harness builds: hand off at each one as `handbook/specs/orchestration.md`
   (Lanes that cross harnesses) says, and dispatch none of them yourself.
 
 ## Session handoff: keep the roadmap Project current

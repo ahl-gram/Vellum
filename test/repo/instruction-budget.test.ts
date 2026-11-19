@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
+import { trackedUnder } from "../../test-support/tracked-files.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 // Errs toward a red where one folder holds both names, which Codex never loads together; misses a fallback name a user's own config adds, and any untracked file.
@@ -12,16 +12,7 @@ const INSTRUCTION_NAMES: readonly string[] = ["agents.md", "agents.override.md"]
 const CODEX_LIMIT_BYTES = 32_768;
 // 2026-11-19: Alex ruled that the house's AGENTS.md text may use 31,744 of the 32,768 bytes Codex reads, keeping 1 KB spare (Issue #1400 comment 7017948819).
 const BUDGET_BYTES = 31_744;
-// 2026-11-19: this git ls-files answers in under 5 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
-const GIT_TIMEOUT_MS = 30_000;
-
 const isInstructionFile = (path: string): boolean => INSTRUCTION_NAMES.includes(basename(path).toLowerCase());
-
-function trackedInstructionFiles(root: string): readonly string[] {
-  const listing = spawnSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8", timeout: GIT_TIMEOUT_MS });
-  assert.equal(listing.status, 0, `git ls-files failed: ${listing.error?.message ?? listing.stderr}`);
-  return listing.stdout.split("\0").filter((path) => path !== "" && isInstructionFile(path));
-}
 
 const folderOf = (file: string): string => (dirname(file) === "." ? "" : dirname(file));
 
@@ -68,12 +59,12 @@ function inTree(
 }
 
 test("the root AGENTS.md is read through its link at the bytes of CLAUDE.md, and no folder Codex can start in holds more AGENTS.md text than the budget", () => {
-  const files = trackedInstructionFiles(REPO);
+  const files = trackedUnder().filter(isInstructionFile);
   assert.ok(files.includes("AGENTS.md"), "git lists no root AGENTS.md, so this test would measure nothing");
   assert.equal(
     pathBytes(REPO, files).get(""),
     statSync(join(REPO, "CLAUDE.md")).size,
-    "the root AGENTS.md was not read through its link to CLAUDE.md",
+    "the root AGENTS.md byte count does not match CLAUDE.md",
   );
   assert.deepEqual(
     overBudget(REPO, files, BUDGET_BYTES),

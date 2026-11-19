@@ -205,8 +205,7 @@ name instead of yours. In Claude Code, why the branch needs renaming at all is t
 of `.claude/rules/claude-code.md`, and a `vellum-implementer` lane already stands in a harness
 worktree when it starts, its definition carrying the rename. A session with no worktree isolation,
 which is every Codex session, builds its tree the way a dispatcher builds a non-isolated agent's
-(step 6): `git -C <main checkout> fetch origin`, then
-`git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main`,
+(step 6): `git -C <main checkout> fetch origin`, then use that step's worktree-add command,
 then `[ -e <tree>/node_modules ] || ln -s ../../../node_modules <tree>/node_modules`, then
 `git -C <tree> switch -c <branch>`, each a command of its own, and every later command runs with
 that tree as its working folder. Never run `npm ci` or `npm install` through the link. The rest of
