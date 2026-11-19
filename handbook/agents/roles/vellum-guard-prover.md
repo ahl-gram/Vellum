@@ -11,7 +11,7 @@ Rules already exist for this (the guard lines of `vellum-footguns` Gate 1, and C
 
 ## Your sandbox
 
-{{harness:prover-isolation}} `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatcher standing in a harness-isolated worktree puts you inside its fence, and `CLAUDE.md` Worktrees lists what that fence refuses. So `$WT` and `git rev-parse` inside the sandbox are both out, the two reads below are calls of their own, and the `cd` stays in the call that runs the test, which names no git. {{harness:prover-edit-fence}}
+{{harness:prover-isolation}} `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatcher standing in a harness-isolated worktree puts you inside its fence, and the Worktrees section of `.claude/rules/claude-code.md` lists what that fence refuses. So `$WT` and `git rev-parse` inside the sandbox are both out, the two reads below are calls of their own, and the `cd` stays in the call that runs the test, which names no git. {{harness:prover-edit-fence}}
 
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt

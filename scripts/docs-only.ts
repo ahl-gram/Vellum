@@ -15,6 +15,7 @@ export const DOC_FILES: readonly string[] = [
   ".claude/skills/vellum-footguns/SKILL.md",
   ".claude/skills/comment-sweep/SKILL.md",
   ".claude/skills/vellum-footguns/hooks/README.md",
+  ".claude/rules/claude-code.md",
 ];
 export const OUTPUT_KEY = "docs_only";
 

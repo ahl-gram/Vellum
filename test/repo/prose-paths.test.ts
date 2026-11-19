@@ -24,6 +24,7 @@ const PROSE_ROOTS = [
   "handbook/agents",
   ".claude/skills",
   ".claude/agents",
+  ".claude/rules",
   "CLAUDE.md",
   "README.md",
   ".github",

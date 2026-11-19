@@ -160,6 +160,17 @@ writes `.claude/agents/<name>.md` and `.codex/agents/<name>.toml` and nothing el
 it writes. Never edit a generated file by hand: `npm run agents:check` reads every one without
 writing, and `test/repo/agent-definitions.test.ts` runs it in `npm test`.
 
+**A session's instructions are written once, with each harness's own steps beside them.**
+`CLAUDE.md` is the one file every main session reads: Claude Code loads it, and Codex loads it
+through the `AGENTS.md` link, so a step both harnesses can take is written there in neutral words.
+A step only Claude Code can take is `.claude/rules/claude-code.md`, which Claude Code loads beside
+`CLAUDE.md` and Codex never reads, under the name of the `CLAUDE.md` section it belongs to. A step
+only Codex can take is a bullet of `CLAUDE.md`'s Codex section, and a fact a spawned Codex role
+needs as well lives once, in the appendix of `handbook/agents/adapters/codex-local.md`, which that
+section names. Codex reads no more of `CLAUDE.md` than its byte limit, and
+`test/repo/instruction-budget.test.ts` holds the file under the budget Alex ruled below that
+limit, so text that would pass it moves out or is cut.
+
 **A tracked agent or skill file never sends its reader to the private auto-memory for content.**
 That memory is private to Alex, so a pointer into it is one no other reader can follow and nothing
 notices when it goes stale: write the content into the tracked home the routing rule names and point

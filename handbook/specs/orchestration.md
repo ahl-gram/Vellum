@@ -98,6 +98,39 @@ home's line wins for the lane and this file's for the orchestrator.
   tool checked, a real before and after for code Alex cannot picture. A lane's or an agent's claim
   in it is relayed as workflow step 10 says.
 
+## Lanes that cross harnesses
+
+- **An issue Codex builds keeps its designer, its planner and its reviews in Claude Code**
+  (`handbook/specs/development-workflow.md`, The agents). A Claude Code session runs recon, any
+  design round and the planner and puts each menu to Alex; a Codex session builds from the finished
+  plan, in a tree it builds as workflow step 7 says; a Claude Code session runs the guard prover,
+  the plate reader and the cold skeptic. Each session hands the next only what that role's brief
+  takes: the issue number for recon, the designer and the planner, the plan's path for the build,
+  the prover handoff below, and for the cold skeptic the pull request's number and nothing else.
+- **The prover handoff.** The guard prover proves the HEAD of the tree it is dispatched from, so a
+  sha named in a brief changes nothing. The Codex session commits and pushes, writes
+  `out/<issue>/ready-for-prover.md` in the main checkout (the branch, the committed head sha, every
+  new or strengthened guard with its test file, its test name and the mutation it must catch, and
+  the absolute paths of its tree and of that folder), and then leaves its tree alone. Alex starts a
+  fresh Claude Code session in that tree, which reads `pwd`, `git branch --show-current`,
+  `git rev-parse HEAD` and `git status --porcelain`, checks each against the handoff and that the
+  work under proof is committed, and stops on any mismatch without switching, resetting or
+  restoring a tree. It dispatches `vellum-guard-prover` once, without worktree isolation, accepts
+  the ledger only if the sandbox HEAD it reports is the handoff's sha, saves the report unedited as
+  `out/<issue>/prover-report.md`, relays it to Alex, and is closed before the tree is removed.
+- **A guard the prover's one round left unproven is proved by the Codex session** (workflow step
+  15): it repairs the guard in the same tree, commits before it mutates, and records its proof as
+  `out/<issue>/implementer-proof.md` (the commit, the guard and its test, the mutation, the command,
+  the unmutated passing control, the red line, the restore and the final green), labelled as the
+  implementing session's; the prover's report is never rewritten. The pull request opens only once
+  every required guard has a shown bite on the code it submits, and its Guards record says which
+  proofs are the prover's and which the Codex session's.
+- **The cold skeptic runs once, from a Claude Code session in the main checkout.** After Alex rules
+  on its findings, the Codex session fixes only what he named, proves any guard it adds or changes,
+  pushes and stops; nobody runs the skeptic or a used prover again.
+- **The Codex session removes the tree it built** after the merge,
+  `git -C <main checkout> worktree remove <path>`, once Alex has closed every session standing in it.
+
 ## While lanes run
 
 - **One writer per tree.** Read a lane's tree with `git -C <path>` and write nothing in it. Before

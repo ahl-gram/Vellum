@@ -40,7 +40,7 @@ Rename the branch BEFORE the first commit: `git branch -m <fix|chore|feat>/N-<sl
 
 <!-- slot: implementer-fence -->
 
-Harness worktree isolation is a fence, and `CLAUDE.md` Worktrees lists what it refuses. Run each git command alone, take a printed path literally rather than through a variable, and use the Edit and Write tools for file edits. `echo $CLAUDE_EFFORT` prints the effective level you are running at.
+Harness worktree isolation is a fence, and the Worktrees section of `.claude/rules/claude-code.md` lists what it refuses: read it before your first git command. Run each git command alone, take a printed path literally rather than through a variable, and use the Edit and Write tools for file edits. `echo $CLAUDE_EFFORT` prints the effective level you are running at.
 
 <!-- slot: implementer-gone -->
 
@@ -48,7 +48,7 @@ If your worktree is gone, do not rebuild it yourself: the main checkout is off l
 
 <!-- slot: planner-tree -->
 
-You are in a harness worktree under `.claude/worktrees/`, fenced the way `CLAUDE.md`'s Worktrees section describes, and you never run anything in, edit, or restore the main checkout.
+You are in a harness worktree under `.claude/worktrees/`, fenced the way the Worktrees section of `.claude/rules/claude-code.md` describes, which you read before your first git command, and you never run anything in, edit, or restore the main checkout.
 
 <!-- slot: planner-menu -->
 
