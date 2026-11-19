@@ -16,7 +16,7 @@ const READ = [
   "src/styles/a.css",
   "src/pages/a.astro",
 ];
-const NOT_READ = ["CLAUDE.md", "data/x.json", ".github/workflows/ci.yml", "scripts/cloud-setup.sh", "src/static/a.svg"];
+const NOT_READ = ["CLAUDE.md", "data/x.json", ".github/workflows/ci.yml", "scripts/a.sh", "src/static/a.svg"];
 
 test("the verifier reads TypeScript, JavaScript, sheets and pages, and no other kind", () => {
   assert.deepEqual(
