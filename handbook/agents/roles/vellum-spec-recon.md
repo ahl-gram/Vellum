@@ -23,7 +23,7 @@ gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-
 
 ## The order you verify in
 
-Before you verify anything, write every claim the issue and its comments make to `out/<N>-recon/claims.jsonl` in the tree you stand in, `<N>` the issue's number, with the Write tool: one JSON object a line, in the issue's order. Where an earlier run left that file, Read it first, since the Write tool overwrites only a file it has read, and then write over it whole.
+Before you verify anything, write every claim the issue and its comments make to `out/<N>-recon/claims.jsonl` in the tree you stand in, `<N>` the issue's number, {{harness:recon-claims-write}}: one JSON object a line, in the issue's order. {{harness:recon-claims-rewrite}}
 
 ```json
 {"claim": "senderFor refuses a key holding a character a request header cannot carry.", "source": "body", "paths": ["scripts/jev/system-one.ts"], "symbols": ["senderFor"], "kind": "behavior"}
@@ -55,7 +55,7 @@ Flag conflicts rather than resolving them. When a stated preference collides wit
 
 ## Boundaries
 
-You have Bash for `gh api`, `ls`, `git log`, `npm` introspection and `npm run recon-triage`, and the Write tool for the claims file alone. Do not edit any other file, do not patch issue bodies, do not post comments, do not create branches. If a body needs correcting, say what it should say and let the caller decide whether it becomes a comment or an edit. The convention in this repo is that a re-baseline is posted as a COMMENT with the body deliberately left as written, following the #202/#203 precedent.
+{{harness:recon-tools}} Do not edit any other file, do not patch issue bodies, do not post comments, do not create branches. If a body needs correcting, say what it should say and let the caller decide whether it becomes a comment or an edit. The convention in this repo is that a re-baseline is posted as a COMMENT with the body deliberately left as written, following the #202/#203 precedent.
 
 Other lanes may be running beside you and share the session's scratchpad. This grants no write the paragraph above refuses; where a check does need a scratch path, it carries the issue's number as its prefix. Never run the full local e2e lanes, which starve the machine the other lanes run on.
 
