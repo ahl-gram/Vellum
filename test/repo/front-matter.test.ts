@@ -4,14 +4,11 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { format } from "prettier";
+import { frontMatterOf } from "../../test-support/front-matter.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const GIT_TIMEOUT_MS = 30_000;
 const LOADED = /^\.claude\/(?:agents\/[^/]+\.md|skills\/[^/]+\/SKILL\.md)$/;
-
-function frontMatterOf(text: string): string | null {
-  return /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(text)?.[1] ?? null;
-}
 
 async function yamlProblem(frontMatter: string): Promise<string | null> {
   try {

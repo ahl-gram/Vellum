@@ -141,6 +141,12 @@ the command each runs, or the line that names it, and every step points at the l
 that is its rule, which wins where the two disagree. The `vellum-footguns` gates are the other kind of skill: each is its
 imperative's one home, keyed to the moment of typing.
 
+**A skill is written once, in its folder under `.claude/skills/`, and Codex reads it through a
+link.** Each skill folder has a tracked link at `.agents/skills/<name>` whose text is
+`../../.claude/skills/<name>`, which Codex follows to the same files Claude Code reads. Add the link
+in the commit that adds the skill, edit the skill in its folder, and keep nothing else under
+`.agents/skills/`. `test/repo/skill-links.test.ts` is the list of what it reads and what passes.
+
 **A tracked agent or skill file never sends its reader to the private auto-memory for content.**
 That memory is private to Alex, so a pointer into it is one no other reader can follow and nothing
 notices when it goes stale: write the content into the tracked home the routing rule names and point
