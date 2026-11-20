@@ -24,6 +24,18 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  'setsid g"it" push',
+  "find . -exec gi\\t push {} +",
+  'watch "g"it push',
+  'doas g"it" push',
+  "if $G push; then true; fi",
+  "while $G push; do true; done",
+  "until $G push; do true; done",
+  "! $G push",
+  "case $G in x) true;; esac",
+  "if git push; then true; fi",
+  "! git push",
+  '"g"it push',
   "let $N=0",
   "getopts ab $N",
   "mapfile -t $N",

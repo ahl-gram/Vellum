@@ -16,7 +16,8 @@ const CONFIG_READS = new Set(["--get", "--get-all", "--get-regexp", "--get-urlma
 const PUSHES = new Set(["push", "send-pack", "http-push", "receive-pack"]);
 const CONFIG_SCOPES = new Set(["--global", "--local", "--system", "--worktree", "--show-origin", "-z", "--null"]);
 const PLAIN = /^~?[A-Za-z0-9._/-]+$/;
-const LEADERS = new Set(["!", "{", "(", "time"]);
+const LEADERS = new Set(["!", "{", "(", "time", "if", "while", "until", "case", "then", "do", "elif", "else"]);
+const DISGUISED = /^""[A-Za-z]|^[A-Za-z_](?![A-Za-z0-9_]*=)[^\s]*["\\]/;
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
 const TEST_BRACKETS = new Set(["[", "[["]);
 const SUBCOMMAND = /^[a-z0-9-]+$/;
@@ -113,6 +114,7 @@ export const headlessRefusal = (segment: string): string | null => {
   const raw = tokens.map((t) => t.replace(TRIM, ""));
   const words = raw.map((t) => t.split("/").at(-1) ?? "");
   const refused =
+    tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
     !wrappedWordIsPlain(tokens) ||
     settersWithEscapes(tokens) ||
