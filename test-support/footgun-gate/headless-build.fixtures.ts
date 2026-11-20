@@ -24,6 +24,18 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "let $N=0",
+  "getopts ab $N",
+  "mapfile -t $N",
+  "readarray $N",
+  "export FOO=`id`",
+  "export FOO=a*b",
+  "export FOO=~x",
+  "export FOO=bar $N",
+  "set -a $N",
+  "set -o $N",
+  "unset $N",
+  "(( GIT_CONFIG_COUNT = 0 ))",
   'export G"IT"_CONFIG_COUNT=0',
   "unset GIT\\_CONFIG_COUNT",
   "export $'GIT\\x5fCONFIG_COUNT'=0",
@@ -163,6 +175,11 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "export A=1 B=a/b.c",
+  "unset FOO BAR",
+  "let x=1+2",
+  "set -e",
+  "local x=1",
   "ls scripts",
   "echo hello world",
   "env FOO=bar npm test",

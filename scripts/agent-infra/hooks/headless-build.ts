@@ -44,8 +44,21 @@ const WRAPPERS = new Set(["command", "exec", "env", "nohup", "nice", "timeout", 
 const FEEDERS = new Set(["xargs", "parallel"]);
 const NUMBER = /^\d+[smhd]?$/;
 const LOGIN_ENV = /(?:GIT|GH|GITHUB)_/;
-const SETTERS = new Set(["export", "declare", "typeset", "readonly", "local", "read", "unset"]);
-const ESCAPED = /["'\\$]/;
+const SETTERS = new Set([
+  "export",
+  "declare",
+  "typeset",
+  "readonly",
+  "local",
+  "read",
+  "unset",
+  "let",
+  "getopts",
+  "mapfile",
+  "readarray",
+]);
+const OPTION_CLUSTER = /^-?[A-Za-z]*$/;
+const PLAIN_ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_./:@%+,-]*)?$/;
 const FIRST_WORDS = new Set(["eval", "source", "."]);
 const TRIM = /^[`'"(){};]+|[`'"(){};]+$/g;
 
@@ -91,9 +104,9 @@ const settersWithEscapes = (tokens: readonly string[]): boolean => {
   const args = tokens.slice(at + 1);
   const sets =
     SETTERS.has(word) ||
-    (word === "set" && args.some((t) => /^-[a-z]*a/.test(t))) ||
+    (word === "set" && args.some((t) => /^[-+][A-Za-z]*[aA]/.test(t) || t === "-o" || t === "+o")) ||
     (word === "printf" && args.includes("-v"));
-  return sets && args.some((t) => ESCAPED.test(t));
+  return sets && !args.every((t) => OPTION_CLUSTER.test(t) || PLAIN_ASSIGNMENT.test(t));
 };
 
 export const headlessRefusal = (segment: string): string | null => {
@@ -101,7 +114,6 @@ export const headlessRefusal = (segment: string): string | null => {
   const raw = tokens.map((t) => t.replace(TRIM, ""));
   const words = raw.map((t) => t.split("/").at(-1) ?? "");
   const refused =
-    segment.startsWith('""') ||
     tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
     !wrappedWordIsPlain(tokens) ||
