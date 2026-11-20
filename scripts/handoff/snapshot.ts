@@ -26,10 +26,24 @@ export const LIVE_GH: GhReads = {
     return found[0] ?? null;
   },
   issueJson: (issue) => gh(["api", `repos/${REPO}/issues/${issue}`]),
-  commentsJsonl: (issue) => gh(["api", "--paginate", `repos/${REPO}/issues/${issue}/comments`, "--jq", ".[] | tojson"]),
+  commentsJsonl: (issue) =>
+    trustedComments(gh(["api", "--paginate", `repos/${REPO}/issues/${issue}/comments`, "--jq", ".[] | tojson"])),
 };
 
-export const trustedComments = (jsonl: string): string => jsonl;
+const TRUSTED = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
+
+export const trustedComments = (jsonl: string): string =>
+  jsonl
+    .split("\n")
+    .filter((line) => {
+      try {
+        return TRUSTED.has(String((JSON.parse(line) as { author_association?: unknown }).author_association));
+      } catch {
+        return false;
+      }
+    })
+    .map((line) => `${line}\n`)
+    .join("");
 
 export const isRunning = (run: RunRecord | null): boolean => {
   if (run === null || run.ended !== null) return false;

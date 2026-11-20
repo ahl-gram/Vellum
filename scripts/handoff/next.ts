@@ -1,5 +1,5 @@
 import type { Outcome } from "./launch.ts";
-import { lastRun, runFiles, type HandoffState } from "./state.ts";
+import { BRANCH_NAME, lastRun, PLAN_PATH, runFiles, THREAD_ID, treeOf, type HandoffState } from "./state.ts";
 
 export type PullRequest = { readonly number: number; readonly state: "OPEN" | "MERGED" | "CLOSED" };
 export type Snapshot = {
@@ -44,6 +44,22 @@ const stepOf = (s: Snapshot): Step => {
         };
   }
   const { tree, plan, thread } = state;
+  const planted =
+    tree !== treeOf(root, issue)
+      ? "tree"
+      : !PLAN_PATH.test(plan)
+        ? "plan"
+        : thread !== null && !THREAD_ID.test(thread)
+          ? "thread"
+          : branch !== null && !BRANCH_NAME.test(branch)
+            ? "branch"
+            : null;
+  if (planted !== null) {
+    return {
+      id: "stopped",
+      text: `Issue #${issue}'s build holds a ${planted} that fails validation (the record in ${folder}, or the tree's branch), so no command is printed from it. Ask Alex.`,
+    };
+  }
   const run = lastRun(state);
   if (run === null)
     return { id: "plan", text: `Issue #${issue} has a build record with no run in ${folder}. Ask Alex.` };

@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
-import { loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
+import { EFFORTS, loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
 import { ROLES } from "../agent-infra/roles.ts";
 import { createPlan, resolveRoot, runPlan } from "../agent-sandbox.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, runCodex, threadOf } from "./launch.ts";
@@ -13,6 +13,7 @@ import {
   lastRun,
   readState,
   runFiles,
+  THREAD_ID,
   treeOf,
   writeState,
   type HandoffState,
@@ -55,6 +56,13 @@ const statSafe = (path: string): boolean => {
   } catch {
     return false;
   }
+};
+
+const recordProblem = (state: HandoffState, root: string, issue: number, model: string): string | null => {
+  if (state.tree !== treeOf(root, issue)) return "tree";
+  if (state.thread !== null && !THREAD_ID.test(state.thread)) return "thread";
+  if (!(EFFORTS as readonly string[]).includes(state.effort)) return "effort";
+  return state.model === model ? null : "model";
 };
 
 const refuse = (reason: string): number => {
@@ -132,6 +140,10 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
   const folder = folderOf(root, issue);
   const state = readState(folder);
   if (state === null) return refuse(`Issue #${issue} has no build record in ${folder}; there is nothing to resume`);
+  const policy = resolveModel(loadModelPolicy(HERE_ROOT, ROLES), "codex-local", "vellum-implementer");
+  const planted = recordProblem(state, root, issue, policy.model);
+  if (planted !== null)
+    return refuse(`Issue #${issue}'s record in ${folder} holds a ${planted} that fails validation, so nothing was run`);
   const brief = p.flags.get("brief");
   const plan = p.flags.get("plan");
   if (!isFile(brief)) return refuse("--brief must be the absolute path of the brief file");

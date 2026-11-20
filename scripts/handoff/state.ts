@@ -35,6 +35,10 @@ export const FILES = {
   ghEmpty: "gh-empty",
 } as const;
 
+export const THREAD_ID = /^[0-9A-Za-z][0-9A-Za-z-]{0,63}$/;
+export const BRANCH_NAME = /^(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+$/;
+export const PLAN_PATH = /^\/[A-Za-z0-9._/@+=-]+$/;
+
 export const folderOf = (root: string, issue: number): string => join(root, "out", `${issue}-handoff`);
 export const treeOf = (root: string, issue: number): string => join(root, ".claude", "worktrees", `codex-${issue}`);
 export const runFiles = (folder: string, n: number): RunFiles => ({
