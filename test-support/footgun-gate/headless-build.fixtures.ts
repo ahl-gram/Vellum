@@ -24,6 +24,19 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "$G push",
+  "${G} push",
+  "$(printf git) push",
+  "git $S origin x",
+  "git-push origin x",
+  "git-send-pack origin x",
+  "git-receive-pack x",
+  "git subtree push --prefix=x origin main",
+  "git lfs push origin main",
+  "git --attr-source x push",
+  "git --attr-source=x push",
+  "git --no-such-option status",
+  "git --attr-source x credential-store get",
   'g"it" push',
   'g"h" api user',
   "gi\\t push",
@@ -115,6 +128,14 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "git --no-pager log -1",
+  "git --version",
+  "git status",
+  "git --git-dir=/r/.git log --oneline",
+  "git log --grep=x",
+  "git checkout -b feat/9-x",
+  "FOO=bar npm test",
+  "./scripts/x.sh",
   'git commit -m "feat: x"',
   'git log --format="%h" -1',
   'export FOO="bar"',
