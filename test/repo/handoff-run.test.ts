@@ -1,5 +1,6 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -177,6 +178,36 @@ test("a resume refuses a record whose tree, thread, effort or model was planted,
     assert.equal(readState(folder)?.runs.length, 2);
   }
   writeState(folder, state);
+});
+
+test("a run whose recorded process is alive reads as running, and resume refuses it (Issue #1409)", async () => {
+  const state = readState(folder);
+  assert.ok(state);
+  const child = spawn("sleep", ["30"], { stdio: "ignore" });
+  const messages: string[] = [];
+  const saved = console.error;
+  console.error = (line: string): void => void messages.push(line);
+  try {
+    assert.ok(child.pid !== undefined && child.pid > 1);
+    const live = {
+      ...state,
+      runs: state.runs.map((run, at) => (at === 1 ? { ...run, pid: child.pid ?? 0, ended: null } : run)),
+    };
+    writeState(folder, live);
+    assert.equal(snapshotOf(9, mainRepo, gh).running, true);
+    assert.equal(nextStep(snapshotOf(9, mainRepo, gh)).id, "running");
+    assert.equal(await main(["resume", "9", "--brief", brief], mainRepo, env, gh), 2);
+    assert.ok(
+      messages.some((line) => line.includes("still running")),
+      messages.join("\n"),
+    );
+    assert.equal(readState(folder)?.runs.length, 2);
+  } finally {
+    console.error = saved;
+    child.kill();
+    writeState(folder, state);
+  }
+  assert.equal(snapshotOf(9, mainRepo, gh).running, false);
 });
 
 test("a build refuses a plan path that next would later refuse, and builds nothing (Issue #1409)", async () => {

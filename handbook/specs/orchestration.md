@@ -140,7 +140,7 @@ home's line wins for the lane and this file's for the orchestrator.
   disguised forms of them it can read (`.claude/skills/vellum-footguns/hooks/README.md`). **These
   guard against a build's mistakes and casual attempts, not against a build set on pushing** (Alex,
   comment 7047982050): a build can edit its own tree's copy of the hook, or run a one-line
-  interpreter (`node -e`), and then push with `git -c credential.helper=osxkeychain push`, which
+  interpreter (`node -e`) or one of git's own command runners with a quoted payload (git's own command runners with a quoted payload, which the blanking of quoted spans hides (`git rebase -x "git -c credential.helper=osxkeychain push ..." HEAD~1`, `git submodule foreach "git push"`, `git bisect run "git push"`)), and then push with `git -c credential.helper=osxkeychain push`, which
   brings the login back. Under full access a build can also leave code that later runs as Alex, with
   his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a
   command set there runs on `git ls-remote` and `git status` in the session and in the main

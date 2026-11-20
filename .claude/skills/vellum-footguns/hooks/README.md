@@ -269,12 +269,12 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   the rule itself (tool names matched regardless of case, since the Mac's filesystem ignores it, a
   lone `&` read as a separator, the keychain read in any case), and a further text trick past the
   hook is named here, not chased. The misses, each a command that runs: a push or a GitHub call
-  made from inside another program (a script the build writes and runs, `node -e`, `python3 -c`,
+  made from inside another program (git's own command runners with a quoted payload, which the blanking of quoted spans hides (`git rebase -x "git -c credential.helper=osxkeychain push ..." HEAD~1`, `git submodule foreach "git push"`, `git bisect run "git push"`), a script the build writes and runs, `node -e`, `python3 -c`,
   `perl -e`, a `make` target, an `npm run` script other than `proof`), `find -exec`, `-execdir` and
   `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`, `chrt`, `watch`,
   `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
   `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a
-  command word (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that
+  command word (`\git`, `$G`), the proof run's name hidden behind a runner option that
   takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), a git
   alias already set in a config file the build did not write, the GitHub API reached by another
   client (`curl`), a build started without the wrapper and so without the variable, and a build that
