@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { closeSync, openSync, writeSync } from "node:fs";
+import { HEADLESS_BUILD_VAR } from "../agent-infra/hooks/headless-build.ts";
 
 export const D2_FLAGS: readonly string[] = ["-s", "danger-full-access", "-a", "on-request"];
 export const effortConfig = (effort: string): string => `model_reasoning_effort="${effort}"`;
@@ -46,12 +47,33 @@ export const resumeArgv = (a: {
   a.prompt,
 ];
 
+export const CREDENTIAL_VARS: readonly string[] = [
+  "GH_TOKEN",
+  "GITHUB_TOKEN",
+  "GH_ENTERPRISE_TOKEN",
+  "GITHUB_ENTERPRISE_TOKEN",
+  "GIT_ASKPASS",
+  "SSH_ASKPASS",
+  "SSH_AUTH_SOCK",
+  "GIT_CONFIG_PARAMETERS",
+];
+const GIT_CONFIG_INDEXED = /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+)$/;
+
 export const buildEnv = (
   base: Readonly<Record<string, string | undefined>>,
   issue: number,
   ghConfigDir: string,
-): Record<string, string | undefined> =>
-  ghConfigDir.length < 0 ? {} : { ...base, VELLUM_HEADLESS_BUILD: String(issue) };
+): Record<string, string | undefined> => ({
+  ...Object.fromEntries(
+    Object.entries(base).filter(([name]) => !CREDENTIAL_VARS.includes(name) && !GIT_CONFIG_INDEXED.test(name)),
+  ),
+  [HEADLESS_BUILD_VAR]: String(issue),
+  GIT_CONFIG_COUNT: "1",
+  GIT_CONFIG_KEY_0: "credential.helper",
+  GIT_CONFIG_VALUE_0: "",
+  GIT_TERMINAL_PROMPT: "0",
+  GH_CONFIG_DIR: ghConfigDir,
+});
 
 export type Io = {
   readonly cwd: string;
