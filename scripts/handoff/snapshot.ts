@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { git } from "../agent-sandbox.ts";
 import { outcomeOf } from "./launch.ts";
 import type { PullRequest, Snapshot } from "./next.ts";
 import { FILES, folderOf, lastRun, readState, runFiles, treeOf, type RunRecord } from "./state.ts";
@@ -56,9 +57,6 @@ export const isRunning = (run: RunRecord | null): boolean => {
     return (error as NodeJS.ErrnoException).code === "EPERM";
   }
 };
-
-const git = (args: readonly string[], cwd: string): string =>
-  execFileSync("git", [...args], { cwd, encoding: "utf8", timeout: TIMEOUT_MS }).trim();
 
 export const snapshotOf = (issue: number, root: string, reads: GhReads): Snapshot => {
   const folder = folderOf(root, issue);

@@ -102,8 +102,8 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     starts, with no GitHub login in that environment (Alex, 2026-11-20, Issue #1409, where Codex was
     measured passing both to its hooks and its shell): any push, every `gh` call, the proof run, and
     the wrapped and disguised forms of them it can read, failing closed on these classes. Each
-    segment is read word by word, a word taken by its last path part with quotes, backticks and
-    brackets trimmed, and is refused when its command word, or the word after `env`, `nohup`,
+    segment (split again at a lone `&`) is read word by word, a word taken by its last path part, in lower
+    case because the Mac's filesystem ignores case, with quotes, backticks and brackets trimmed, and is refused when its command word, or the word after `env`, `nohup`,
     `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
     substitution, a quote or a backslash in it), where `if`, `while`, `until`, `case`, `then`, `do`, `!` and
     the like are skipped to find it; when any word starts with a letter and holds a quote or a
@@ -258,28 +258,40 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   - A trailing shell COMMENT is read as part of the command, so it can supply a method the call does
     not have: `gh api repos/o/r/issues/1 -f body=x # -X PATCH` passes, where the same call without
     the comment is refused.
-- **The headless-build refusal is a stop for a build's mistakes and ordinary workarounds, not a
-  wall** (Alex, 2026-11-20, Issue #1409). Its misses are silence, each one a command that runs:
-  a push or a GitHub call made from inside another program (a script the build writes and runs,
-  `node -e`, `python3 -c`, `perl -e`, a `make` target, an `npm run` script other than `proof`),
-  code the build writes that the Claude Code session later runs with its own login (test code the guard prover executes, the shared `.git/config`, his shell startup files; a git hook planted in the shared `.git/hooks` stays inside the accepted gap: only the session's own push of a Codex build runs with hooks off (`-c core.hooksPath=/dev/null`), while the guard prover's sandbox (`scripts/agent-sandbox.ts create` runs `git fetch` and `git worktree add`), the next `handoff build`, and Alex's own commit, pull or checkout in the main checkout run it with his login, and its exit is Issue #1418 (Alex, 2026-11-20, comments 7046605950 and 7047054816)), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
-  `chrt`, `watch`, `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
-  `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a command word
-  (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), `builtin . script.sh`, a git alias already set in a config file the build did not write, the GitHub API
-  reached by another client (`curl`), a build started without the wrapper and so without the
-  variable, and a build that edits the hook's own files in its tree, since the hook it runs is
-  that tree's copy. A direct push by any of them finds no login in the build's environment, so it fails for want of
-  one; but under full access a headless build can leave code that later runs as Alex, with his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on `git ls-remote` and `git status` in the session and in the main checkout), in his shell startup files, and in test code the guard prover runs. Removing the build's login stops it pushing by itself; it does not stop such a trap. The stronger options (a separate macOS user, a build with no network, its own clone) are weighed in Issue #1418 (Alex, 2026-11-20, comment 7047054816). Likewise the build runs with full access, and one that went looking could still reach Alex's
-  login in the macOS keychain or in gh's config folder by a program the hook cannot read. Only a
-  build with its network cut off would be a guarantee, and Alex declined that for its cost, as he
-  declined a separate macOS user. **Its errors the other way are refusals**, each visible and one
-  edit away: every `gh` call, reads included; any word that names a shell or `gh` (`which gh`,
-  `ls ~/.config/gh`); `echo git push`; any `git -c`; a bare `git` or `git --version`;
-  `git config user.name` without `--get`; a command word with a `$` in it; and a quoted command word.
-  A further finding that only gets a command past this text check, and would still meet no login,
-  is a named miss here and not another round of code (Alex's ruling 4 of comment 7046605950,
-  2026-11-20: a finding that only gets a command past the hook's text check and would still meet no
-  login is named in the residual-gap list; one that could restore the login is fixed).
+- **The headless-build refusal and the missing login guard against a build's mistakes and casual
+  attempts, not against a build set on pushing** (Alex, 2026-11-20, Issue #1409, comment 7047982050,
+  which supersedes ruling 4 of comment 7046605950). A build that sets out to push can: any command
+  the hook does not refuse can bring the login back with `git -c credential.helper=osxkeychain
+  push`, which overrides the wrapper's credential reset, and the simplest routes are a build editing
+  its own tree's copy of the hook (Codex runs the hook from the tree, and ruling 6 of comment
+  7046605950 lets a build edit it) and then pushing, or a one-line interpreter (`node -e`) running
+  that push. No list of refused commands can close those. The cheap, common holes are closed in
+  the rule itself (tool names matched regardless of case, since the Mac's filesystem ignores it, a
+  lone `&` read as a separator, the keychain read in any case), and a further text trick past the
+  hook is named here, not chased. The misses, each a command that runs: a push or a GitHub call
+  made from inside another program (a script the build writes and runs, `node -e`, `python3 -c`,
+  `perl -e`, a `make` target, an `npm run` script other than `proof`), `find -exec`, `-execdir` and
+  `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`, `chrt`, `watch`,
+  `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
+  `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a
+  command word (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that
+  takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), a git
+  alias already set in a config file the build did not write, the GitHub API reached by another
+  client (`curl`), a build started without the wrapper and so without the variable, and a build that
+  edits the hook's own files in its tree, since the hook it runs is that tree's copy. Under full
+  access a headless build can also leave code that later runs as Alex, with his login: in the shared
+  git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on
+  `git ls-remote` and `git status` in the session and in the main checkout), in a git hook in the
+  shared `.git/hooks` (only the session's own push of a Codex build runs with hooks off,
+  `-c core.hooksPath=/dev/null`; the guard prover's sandbox, the next `handoff build` and Alex's own
+  commit, pull or checkout run a planted hook), in his shell startup files, and in test code the
+  guard prover runs; and it can reach his login in the macOS keychain or in gh's config folder by a
+  program the hook cannot read. The exits (a separate macOS user, a build with no network, its own
+  clone) are weighed in Issue #1418, before a Codex build is trusted with anything that matters.
+  **Its errors the other way are refusals**, each visible and one edit away: every `gh` call, reads
+  included; any word that names a shell or `gh` (`which gh`, `ls ~/.config/gh`); `echo git push`;
+  any `git -c`; a bare `git` or `git --version`; `git config user.name` without `--get`; a command
+  word with a `$` in it; and a quoted command word.
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
@@ -377,7 +389,7 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   one Codex hands the hook, and passes it into the request as `headlessBuild`; nothing else on
   either path reads it, so a test, a Claude Code session or a Codex call that carries the variable
   without coming through that entry is judged as before. The hook sees the model's bare command:
-  the `/bin/zsh -lc` wrapper Codex runs it in never reaches it (measured, Issue #1409, run A).
+  the `/bin/zsh -lc` wrapper Codex runs it in never reaches it (measured on the planner's run A, `handbook/plans/1400/1409/1409-r1-plan.md`, "The hook sees the model's bare command").
 - **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
   (Issue #1394's evidence), so the move the refusal exists to stop cannot happen.
 - **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it

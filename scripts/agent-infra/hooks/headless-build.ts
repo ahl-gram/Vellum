@@ -83,7 +83,7 @@ const gitRefused = (raw: readonly string[], tokens: readonly string[], at: numbe
 
 const wrappedWordIsPlain = (tokens: readonly string[]): boolean =>
   tokens.every((token, at) => {
-    if (!WRAPPERS.has(token.split("/").at(-1) ?? "")) return true;
+    if (!WRAPPERS.has((token.split("/").at(-1) ?? "").toLowerCase())) return true;
     const word = tokens.slice(at + 1).find((t) => !t.startsWith("-") && !NUMBER.test(t) && !ASSIGNMENT.test(t));
     return word === undefined || PLAIN.test(word);
   });
@@ -117,11 +117,13 @@ const settersWithEscapes = (tokens: readonly string[]): boolean => {
   return sets && !args.every((t) => OPTION_CLUSTER.test(t) || PLAIN_ASSIGNMENT.test(t));
 };
 
-export const headlessRefusal = (segment: string): string | null => {
+const LONE_AMPERSAND = /(?<![&>|])&(?![&>])/;
+
+const segmentRefused = (segment: string): boolean => {
   const tokens = segment.split(" ");
   const raw = tokens.map((t) => t.replace(TRIM, ""));
-  const words = raw.map((t) => t.split("/").at(-1) ?? "");
-  const refused =
+  const words = raw.map((t) => (t.split("/").at(-1) ?? "").toLowerCase());
+  return (
     tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
     !wrappedWordIsPlain(tokens) ||
@@ -137,7 +139,11 @@ export const headlessRefusal = (segment: string): string | null => {
         (w === "git" && gitRefused(raw, tokens, i)) ||
         (w === "security" && KEYCHAIN_READS.has(words[i + 1] ?? "")) ||
         (PACKAGE_RUNNERS.has(w) && words.slice(i + 1).includes("proof")) ||
-        ((raw[i] ?? "").endsWith("proof-runner/main.ts") && words.slice(0, i).some((x) => SCRIPT_RUNNERS.has(x))),
-    );
-  return refused ? HEADLESS_REASON : null;
+        ((raw[i] ?? "").toLowerCase().endsWith("proof-runner/main.ts") &&
+          words.slice(0, i).some((x) => SCRIPT_RUNNERS.has(x))),
+    )
+  );
 };
+
+export const headlessRefusal = (segment: string): string | null =>
+  segment.split(LONE_AMPERSAND).some((part) => segmentRefused(part.trim())) ? HEADLESS_REASON : null;

@@ -133,12 +133,19 @@ home's line wins for the lane and this file's for the orchestrator.
   refusal, which the Codex session file holds (`codex resume --include-non-interactive` lists the
   session). The session is told when the run ends.
 - **A headless build commits, and never pushes, opens a pull request or writes to GitHub** (Alex,
-  2026-11-20, Issue #1409). With no login it cannot, and wherever `VELLUM_HEADLESS_BUILD` is set the
-  footgun hook also refuses any push, every `gh` call, the proof run, and the wrapped and disguised
-  forms of them it can read (`.claude/skills/vellum-footguns/hooks/README.md`). This stops a build's
-  mistakes and its ordinary workarounds, not a build set on pushing: with full access, a build that
-  went looking could still reach Alex's login in the keychain or in gh's config folder, and only a
-  build with its network cut off would be a guarantee, which Alex declined. Stated plainly: under full access a headless build can leave code that later runs as Alex, with his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on `git ls-remote` and `git status` in the session and in the main checkout), in his shell startup files, and in test code the guard prover runs. Removing the build's login stops it pushing by itself; it does not stop such a trap. The stronger options (a separate macOS user, a build with no network, its own clone) are weighed in Issue #1418 (Alex, 2026-11-20, comment 7047054816). The prompt the wrapper
+  2026-11-20, Issue #1409). It has no login in its environment, and wherever `VELLUM_HEADLESS_BUILD`
+  is set the footgun hook also refuses any push, every `gh` call, the proof run, and the wrapped and
+  disguised forms of them it can read (`.claude/skills/vellum-footguns/hooks/README.md`). **These
+  guard against a build's mistakes and casual attempts, not against a build set on pushing** (Alex,
+  comment 7047982050): a build can edit its own tree's copy of the hook, or run a one-line
+  interpreter (`node -e`), and then push with `git -c credential.helper=osxkeychain push`, which
+  brings the login back. Under full access a build can also leave code that later runs as Alex, with
+  his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a
+  command set there runs on `git ls-remote` and `git status` in the session and in the main
+  checkout), in his shell startup files, and in test code the guard prover runs. Removing the
+  build's login stops it pushing by itself; it does not stop such a trap. The exits (a separate
+  macOS user, a build with no network, its own clone) are weighed in Issue #1418, before a Codex
+  build is trusted with anything that matters. The prompt the wrapper
   writes sends what the build would have posted into the record's folder: the step 12 record as
   record.md, the pull request body as pr-body.md, and each new or strengthened guard with the
   mutation that must red it as guards.md. The build stops where its definition would dispatch the

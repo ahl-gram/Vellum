@@ -18,7 +18,7 @@ export type Plan = { git: string[][]; link?: string };
 const gitBytes = (args: string[], cwd: string): Buffer =>
   execFileSync("git", args, { cwd, timeout: GIT_TIMEOUT_MS, maxBuffer: GIT_MAX_BYTES });
 
-const git = (args: string[], cwd: string): string => gitBytes(args, cwd).toString("utf8").trim();
+export const git = (args: string[], cwd: string): string => gitBytes(args, cwd).toString("utf8").trim();
 
 export const validateName = (name: string): string => {
   if (!SANDBOX_NAME.test(name)) {

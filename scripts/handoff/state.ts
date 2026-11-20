@@ -36,7 +36,9 @@ export const FILES = {
 } as const;
 
 export const THREAD_ID = /^[0-9A-Za-z][0-9A-Za-z-]{0,63}$/;
-export const BRANCH_NAME = /^(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+$/;
+const BRANCH_NAME = /^(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+$/;
+export const isIssueBranch = (branch: string, issue: number): boolean =>
+  BRANCH_NAME.test(branch) && new RegExp(`^(?:[a-z]+/)?${issue}-[A-Za-z0-9._-]+$`).test(branch);
 export const PLAN_PATH = /^\/[A-Za-z0-9._/@+=-]+$/;
 
 const TIMESTAMP = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/;
