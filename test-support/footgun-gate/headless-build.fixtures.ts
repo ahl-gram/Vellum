@@ -24,6 +24,18 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "GIT -c credential.helper=osxkeychain push origin x",
+  "Git push",
+  "/usr/bin/GIT push",
+  'BASH -c "echo"',
+  "SECURITY find-internet-password -s github.com -w",
+  "GH api user",
+  "NPM run proof",
+  "node scripts/Proof-Runner/main.ts read 1",
+  "XARGS git status",
+  "G=git; true & $G -c credential.helper=osxkeychain push origin x",
+  "true & Git push",
+  "true & git push",
   '! eval "git push"',
   'if eval "git push"; then true; fi',
   'while eval "gh api user"; do break; done',
@@ -198,6 +210,9 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "true && ls",
+  "npm test 2>&1",
+  "ls > /dev/null 2>&1",
   'npm test -- --grep "x"',
   "ls .",
   'node -e "1"',

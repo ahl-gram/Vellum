@@ -65,6 +65,11 @@ const ROWS: readonly [row: number, over: Snapshot, id: StepId, needle: string, a
   [32, planted({ pid: 1 }), "stopped", "Ask Alex", "Run 1"],
   [33, planted({ pid: 0 }), "stopped", "Ask Alex", "Run 1"],
   [34, planted({ pid: 1.5 }), "stopped", "Ask Alex", "Run 1"],
+  [35, snap({ branch: "main" }), "stopped", "Ask Alex", "origin main"],
+  [36, snap({ branch: "chore/1300-another-lane" }), "stopped", "Ask Alex", "1300"],
+  [37, snap({ branch: "1500x-topic" }), "stopped", "Ask Alex", "1500x"],
+  [38, snap({ branch: "1500-topic", treeHead: "b" }), "push", "push -u origin 1500-topic"],
+  [39, snap({ branch: "chore/1500-a.b_c", treeHead: "b" }), "push", "push -u origin chore/1500-a.b_c"],
   [25, snap({ state: { ...BASE.state!, runs: [] } }), "stopped", "Ask Alex"],
   [
     24,
