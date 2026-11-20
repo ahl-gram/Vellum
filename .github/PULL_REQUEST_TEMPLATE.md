@@ -35,3 +35,8 @@ Closes #NNN
 ## Look for these when you use it
 
 `<feel-dependent choices worth a second look live>`
+
+<!-- The closing slip: CLAUDE.md, Process. -->
+*Drafted by*
+**<Claude Code or Codex> <version>**
+*the pages above, and the session that set them down: <session link or codex session id>*
