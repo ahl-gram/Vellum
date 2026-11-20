@@ -24,6 +24,17 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  '! eval "git push"',
+  'if eval "git push"; then true; fi',
+  'while eval "gh api user"; do break; done',
+  'until eval "x"; do break; done',
+  'case x in x) eval "git push";; esac',
+  "if source ./x.sh; then true; fi",
+  "! . ./x.sh",
+  'trap "git push" EXIT',
+  'npm run "proof" -- send l.json',
+  'npm run-script "proof"',
+  'node "scripts/proof-runner/main.ts" send l.json',
   'setsid g"it" push',
   "find . -exec gi\\t push {} +",
   'watch "g"it push',
@@ -187,6 +198,9 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  'npm test -- --grep "x"',
+  "ls .",
+  'node -e "1"',
   "export A=1 B=a/b.c",
   "unset FOO BAR",
   "let x=1+2",

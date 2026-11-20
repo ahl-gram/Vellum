@@ -80,16 +80,18 @@ const closing = (issue: number, n: number, exit: number, last: string): string =
   let text: string | null = null;
   try {
     text = readFileSync(last, "utf8");
-  } catch {
-    /* no last message was written */
-  }
+  } catch {}
   const outcome = text === null ? null : outcomeOf(text);
   return `run ${n} ended, exit ${exit}, ${outcome === null ? "no outcome line" : `OUTCOME: ${outcome}`}; next: npm run handoff -- next ${issue}`;
 };
 
-const writeIssueFiles = (folder: string, issue: number, gh: GhReads): void => {
-  const issueText = gh.issueJson(issue);
-  const commentsText = gh.commentsJsonl(issue);
+type IssueTexts = { readonly issueText: string; readonly commentsText: string };
+const readIssue = (issue: number, gh: GhReads): IssueTexts => ({
+  issueText: gh.issueJson(issue),
+  commentsText: gh.commentsJsonl(issue),
+});
+
+const writeIssueFiles = (folder: string, { issueText, commentsText }: IssueTexts): void => {
   mkdirSync(join(folder, FILES.ghEmpty), { recursive: true });
   writeFileSync(join(folder, FILES.issue), issueText);
   writeFileSync(join(folder, FILES.comments), commentsText);
@@ -108,12 +110,9 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   }
   if (statSafe(tree)) return refuse(`${tree} already exists; retire it before building Issue #${issue} again`);
   const { model, effort } = resolveModel(loadModelPolicy(HERE_ROOT, ROLES), "codex-local", "vellum-implementer");
-  const issueText = gh.issueJson(issue);
-  const commentsText = gh.commentsJsonl(issue);
+  const texts = readIssue(issue, gh);
   runPlan(createPlan(tree, "origin/main", false), root, tree);
-  mkdirSync(join(folder, FILES.ghEmpty), { recursive: true });
-  writeFileSync(join(folder, FILES.issue), issueText);
-  writeFileSync(join(folder, FILES.comments), commentsText);
+  writeIssueFiles(folder, texts);
   const first: RunRecord = {
     n: 1,
     kind: "build",
@@ -151,7 +150,7 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
   if (isRunning(lastRun(state))) return refuse(`Issue #${issue}'s last run is still running`);
   if (state.thread === null) return refuse(`Issue #${issue}'s build never started a thread, so it cannot be resumed`);
   if (!statSafe(state.tree)) return refuse(`${state.tree} is gone, so Issue #${issue}'s build cannot be resumed`);
-  writeIssueFiles(folder, issue, gh);
+  writeIssueFiles(folder, readIssue(issue, gh));
   const n = state.runs.length + 1;
   const run: RunRecord = {
     n,

@@ -59,7 +59,8 @@ const SETTERS = new Set([
 ]);
 const OPTION_CLUSTER = /^-?[A-Za-z]*$/;
 const PLAIN_ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_./:@%+,-]*)?$/;
-const FIRST_WORDS = new Set(["eval", "source", "."]);
+const EVALUATORS = new Set(["eval", "source", "trap"]);
+const PACKAGE_VERBS = new Set(["run", "run-script", "rum", "urn", "exec", "x", "dlx"]);
 const TRIM = /^[`'"(){};]+|[`'"(){};]+$/g;
 
 const gitRefused = (raw: readonly string[], tokens: readonly string[], at: number): boolean => {
@@ -90,11 +91,18 @@ const wrappedWordIsPlain = (tokens: readonly string[]): boolean =>
 export const headlessEnvRefusal = (command: string): string | null =>
   LOGIN_ENV.test(command) ? HEADLESS_REASON : null;
 
+const commandWordOf = (tokens: readonly string[]): string =>
+  (tokens.find((t) => !LEADERS.has(t) && !t.startsWith("-") && !NUMBER.test(t)) ?? "").replace(/^\(+|[)};]+$/g, "");
+
+const quotedProofName = (words: readonly string[], tokens: readonly string[], at: number): boolean => {
+  const word = words[at] ?? "";
+  if (SCRIPT_RUNNERS.has(word) && tokens[at + 1] === '""') return true;
+  if (!PACKAGE_RUNNERS.has(word)) return false;
+  return tokens.slice(at + 1).find((t) => !t.startsWith("-") && !PACKAGE_VERBS.has(t)) === '""';
+};
+
 const commandWordIsPlain = (tokens: readonly string[]): boolean => {
-  const word = (tokens.find((t) => !LEADERS.has(t) && !t.startsWith("-") && !NUMBER.test(t)) ?? "").replace(
-    /^\(+|[)};]+$/g,
-    "",
-  );
+  const word = commandWordOf(tokens);
   return word === "" || PLAIN.test(word) || ASSIGNMENT.test(word) || TEST_BRACKETS.has(word);
 };
 
@@ -120,7 +128,8 @@ export const headlessRefusal = (segment: string): string | null => {
     settersWithEscapes(tokens) ||
     (words.some((w) => FEEDERS.has(w)) && words.includes("git")) ||
     words.some((w) => GIT_HELPER.test(w)) ||
-    FIRST_WORDS.has(words[0] ?? "") ||
+    commandWordOf(tokens) === "." ||
+    words.some((w, i) => EVALUATORS.has(w) || quotedProofName(words, tokens, i)) ||
     words.some(
       (w, i) =>
         w === "gh" ||

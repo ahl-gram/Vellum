@@ -204,7 +204,7 @@ which is every interactive Codex session, builds its tree the way a dispatcher b
 (step 6): `git -C <main checkout> fetch origin`, then use that step's worktree-add command,
 then `[ -e <tree>/node_modules ] || ln -s ../../../node_modules <tree>/node_modules`, then
 `git -C <tree> switch -c <branch>`, each a command of its own, and every later command runs with
-that tree as its working folder. Never run `npm ci` or `npm install` through the link. `npm run handoff` builds a headless Codex build's tree the same way, before the build starts (`handbook/specs/orchestration.md`, Lanes that cross harnesses). The rest of
+that tree as its working folder. Never run `npm ci` or `npm install` through the link. `npm run handoff` fetches, adds the tree detached at `origin/main` and links `node_modules` for a headless Codex build before it starts, and the build switches to its own branch (`handbook/specs/orchestration.md`, Lanes that cross harnesses). The rest of
 the worktree conduct is `CLAUDE.md`'s Worktrees section.
 
 **8. Implement.** Five things the word hides, the first a record and the rest each with its own

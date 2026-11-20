@@ -107,7 +107,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
     substitution, a quote or a backslash in it), where `if`, `while`, `until`, `case`, `then`, `do`, `!` and
     the like are skipped to find it; when any word starts with a letter and holds a quote or a
-    backslash (`setsid g"it" push`); when its first word is `eval`, `source` or `.`; when any word is a shell (`sh`, `bash`,
+    backslash (`setsid g"it" push`); when any word is `eval`, `source` or `trap`, or its command word is `.`; when a package runner or a script runner is followed by a quoted name (`npm run "proof"`, `node "scripts/proof-runner/main.ts"`); when any word is a shell (`sh`, `bash`,
     `zsh`, `dash`, `ksh`, `fish`, `csh`, `tcsh`), `gh` or a `git-` helper; when `xargs` or
     `parallel` feeds `git`; when any word is `git` and its global options carry `-c`, `--config-env` or
     one the hook does not know, its subcommand word is missing or not plain, a later word is `push`,
@@ -277,8 +277,10 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   `ls ~/.config/gh`); `echo git push`; any `git -c`; a bare `git` or `git --version`;
   `git config user.name` without `--get`; a command word with a `$` in it; and a quoted command word.
   A further finding that only gets a command past this text check, and would still meet no login,
-  is a named miss here and not another round of code (Alex's ruling makes the environment the
-  primary layer and the hook the second).
+  is a named miss here and not another round of code (the dispatching session's rule for the
+  review loop on Issue #1409, 2026-11-20: the build's environment holds no login, so the hook's text
+  check is the second layer; a finding that would restore the login or reach GitHub with one is
+  still fixed).
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not

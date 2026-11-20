@@ -120,9 +120,7 @@ export const threadOf = (stream: string): string | null => {
     try {
       const event = JSON.parse(line) as { type?: unknown; thread_id?: unknown };
       if (event.type === "thread.started" && typeof event.thread_id === "string") return event.thread_id;
-    } catch {
-      /* a line that is not JSON is skipped */
-    }
+    } catch {}
   }
   return null;
 };
