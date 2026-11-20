@@ -1,5 +1,6 @@
 import { isAbsolute, resolve } from "node:path";
 import { decodePatch } from "./codex-patch.ts";
+import { headlessBuildOf } from "./headless-build.ts";
 import { decisionFor, HOOK_CHECKOUT, runHook, type Decision } from "./hook-io.ts";
 import type { FileChange, HookRequest, Operation } from "./request.ts";
 
@@ -44,12 +45,14 @@ export const toCodexRequest = (
   payload: CodexPayload,
   sessionDirectory: string | null,
   policyRoot: string = HOOK_CHECKOUT,
+  headlessBuild = false,
 ): HookRequest | null => {
   const operations = operationsOf(payload);
   return operations === null
     ? null
     : {
         harness: "codex",
+        headlessBuild,
         sessionKey: payload.session_id ?? null,
         caller: payload.agent_id === undefined ? "main" : "subagent",
         directoryPersists: false,
@@ -60,8 +63,11 @@ export const toCodexRequest = (
       };
 };
 
-export const decideCodex = (payload: CodexPayload, sessionDirectory: string | null): Promise<Decision> =>
-  decisionFor(toCodexRequest(payload, sessionDirectory));
+export const decideCodex = (
+  payload: CodexPayload,
+  sessionDirectory: string | null,
+  headlessBuild = false,
+): Promise<Decision> => decisionFor(toCodexRequest(payload, sessionDirectory, HOOK_CHECKOUT, headlessBuild));
 
 export const runCodexHook = (): Promise<void> =>
-  runHook((payload: CodexPayload) => decideCodex(payload, process.cwd()));
+  runHook((payload: CodexPayload) => decideCodex(payload, process.cwd(), headlessBuildOf(process.env)));

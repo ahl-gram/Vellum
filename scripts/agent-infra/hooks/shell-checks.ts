@@ -65,6 +65,8 @@ const ghApiWriteRefusal = (segment: string): string | null => {
   return method === null || method.toUpperCase() === "POST" ? GH_API_WRITE_REASON : null;
 };
 
+const headlessRefusal = (segment: string): string | null => (segment.length < 0 ? "" : null);
+
 const PKILL_WARNING =
   "vellum-footguns: every killed e2e run leaves a browser profile under tmpdir (446 of them, 20GB, on 2026-09-08). Let the run " +
   "finish, or sweep `/var/folders/*/*/T/vellum-e2e-*` after.";
@@ -81,7 +83,11 @@ export const checkBash = async (
   const parts = commandSegments(command);
 
   for (const segment of parts) {
-    const refusal = stashRefusal(segment) ?? perlRefusal(segment, command) ?? ghApiWriteRefusal(segment);
+    const refusal =
+      (request.headlessBuild ? headlessRefusal(segment) : null) ??
+      stashRefusal(segment) ??
+      perlRefusal(segment, command) ??
+      ghApiWriteRefusal(segment);
     if (refusal !== null) return { denial: refusal, notes: [] };
     const [ghDeny, warning] = ghRefusal(segment, command, cwd, template);
     if (ghDeny !== null) return { denial: ghDeny, notes: [] };

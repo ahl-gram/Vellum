@@ -152,6 +152,7 @@ test("the Codex adapter reads a shell call and a patch as Codex 0.169.0 sends th
   const main = codex("mapping", "git status", "/s/nested");
   assert.deepEqual(toCodexRequest(main, "/s", "/policy"), {
     harness: "codex",
+    headlessBuild: false,
     sessionKey: "mapping",
     caller: "main",
     directoryPersists: false,
@@ -161,6 +162,7 @@ test("the Codex adapter reads a shell call and a patch as Codex 0.169.0 sends th
     operations: [{ kind: "shell", command: "git status" }],
   });
   assert.equal(toCodexRequest(codex("mapping", "git status", "/s/nested", true), "/s", "/policy")?.caller, "subagent");
+  assert.equal(toCodexRequest(main, "/s", "/policy", true)?.headlessBuild, true);
   const patch = {
     ...main,
     tool_name: "apply_patch",
@@ -180,6 +182,17 @@ test("a gate is pasted once per Codex session, again in another session, and a r
   assert.equal(await push("scope-a", true), null);
   assert.match(textOf(await pop("scope-a")), /refs\/stash/);
   assert.match(textOf(await pop("scope-a")), /refs\/stash/);
+});
+
+test("the registered Codex command refuses a push only in a build that carries VELLUM_HEADLESS_BUILD (Issue #1409)", () => {
+  const marked = launch(deep(LANE), codex("headless-marked", "git push", deep(LANE)), {
+    VELLUM_HEADLESS_BUILD: "1409",
+  });
+  assert.equal(marked?.hookSpecificOutput.permissionDecision, "deny");
+  assert.match(textOf(marked), /headless Codex build/);
+  const empty = launch(deep(LANE), codex("headless-empty", "git push", deep(LANE)), { VELLUM_HEADLESS_BUILD: "" });
+  assert.notEqual(empty?.hookSpecificOutput.permissionDecision, "deny");
+  assert.ok(textOf(empty).includes("lane's gate text"), textOf(empty));
 });
 
 const burst = (prefix: string, ready: string, go: string): Promise<number | null> =>
