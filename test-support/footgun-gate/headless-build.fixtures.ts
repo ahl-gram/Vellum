@@ -46,6 +46,18 @@ const REFUSED = [
   "npm run proof -- send list.json",
   "npm run --silent proof -- read 1",
   "node scripts/proof-runner/main.ts read 1",
+  "gh api repos/o/r/issues/1/comments -f body=x --jq -X",
+  "gh api repos/o/r/issues/1/comments --input f.json",
+  "gh api repos/o/r/issues/1/comments -F body=@f",
+  "gh api repos/o/r/issues/1/comments --field body=x",
+  "gh api repos/o/r/issues/1/comments --raw-field body=x",
+  'gh api -X "GET" repos/o/r/issues/1/comments -f body=x',
+  "npm run-script proof -- send list.json",
+  "npm rum proof",
+  "npm --silent run proof",
+  "node ./scripts/proof-runner/main.ts read 1",
+  "node --no-warnings scripts/proof-runner/main.ts read 1",
+  "node /abs/scripts/proof-runner/main.ts read 1",
 ];
 
 const PASSED = [

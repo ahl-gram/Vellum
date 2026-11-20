@@ -65,7 +65,8 @@ const ghApiWriteRefusal = (segment: string): string | null => {
   return method === null || method.toUpperCase() === "POST" ? GH_API_WRITE_REASON : null;
 };
 
-const PROOF_RUN = /^npm run(?: -\S+)* proof(?:\s|$)|^node scripts\/proof-runner\/main\.ts(?:\s|$)/;
+const PROOF_RUN =
+  /^npm(?: -\S+)* (?:run|run-script|rum|urn)(?: -\S+)* proof(?:\s|$)|^node(?: -\S+)* (?:\S*\/)?scripts\/proof-runner\/main\.ts(?:\s|$)/;
 const GH_ALONE: readonly string[] = ["", "--version", "--help", "-h", "version", "help"];
 const GH_READS: Readonly<Record<string, readonly string[]>> = {
   pr: ["view", "list", "checks", "diff", "status"],
