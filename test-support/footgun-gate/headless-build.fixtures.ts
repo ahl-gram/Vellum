@@ -24,6 +24,17 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  'g"it" push',
+  'g"h" api user',
+  "gi\\t push",
+  'git p"ush"',
+  "git pu\\sh",
+  "git 'push'",
+  "git send-pack origin x",
+  "git http-push origin x",
+  "git receive-pack x",
+  "git config user.name x --get",
+  "git config --unset credential.helper --get",
   "git push",
   HOOK_CHECK,
   "git -C /tmp/x push -u origin feat/1-x",
@@ -104,6 +115,10 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  'git commit -m "feat: x"',
+  'git log --format="%h" -1',
+  'export FOO="bar"',
+  "git config --global --get user.name",
   "git commit -m x",
   "git fetch origin",
   "git ls-remote origin refs/heads/x",
