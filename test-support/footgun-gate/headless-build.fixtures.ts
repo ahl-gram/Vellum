@@ -24,6 +24,15 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "security -q find-internet-password -s github.com -w",
+  "SECURITY -q find-generic-password -s gh:github.com -w",
+  "security -p x find-internet-password -s github.com",
+  "ENV $G push",
+  "Timeout 60 $G push",
+  "NOHUP $G push",
+  "XARGS $G push",
+  "STDBUF -oL $G push",
+  "PARALLEL $G push",
   "GIT -c credential.helper=osxkeychain push origin x",
   "Git push",
   "/usr/bin/GIT push",
@@ -210,6 +219,8 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "security list-keychains",
+  "ENV FOO=bar npm test",
   "true && ls",
   "npm test 2>&1",
   "ls > /dev/null 2>&1",
