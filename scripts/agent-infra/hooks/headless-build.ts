@@ -6,7 +6,7 @@ export const headlessBuildOf = (env: Readonly<Record<string, string | undefined>
   (env[HEADLESS_BUILD_VAR] ?? "") !== "";
 
 export const HEADLESS_REASON =
-  "vellum-footguns: this is a headless Codex build, which `npm run handoff` launched with VELLUM_HEADLESS_BUILD set and no GitHub login. A headless build commits, and never pushes, opens or edits a pull request, writes to GitHub or sends a proof run, and it runs each command bare: no `gh` call at all, no shell handed a command (`bash -c`, `sh`, `zsh`), no `eval` or `source`, no `git -c`, no `git config` that writes, no `git credential` or keychain read, and no command or subcommand word in quotes, split by a backslash or built by a variable or a substitution (Alex, 2026-11-20, Issue #1409). The Claude Code session that launched it pushes and posts once the build stops. Commit and go on: read the issue from the files your prompt names, and write anything that would be posted to the file your prompt names.";
+  "vellum-footguns: this is a headless Codex build, which `npm run handoff` launched with VELLUM_HEADLESS_BUILD set and no GitHub login. A headless build commits, and never pushes, opens or edits a pull request, writes to GitHub or sends a proof run, and it runs each command bare: no `gh` call at all, no shell handed a command (`bash -c`, `sh`, `zsh`), no `eval` or `source`, no `git -c`, no `git config` that writes, no `git credential` or keychain read, and no command or subcommand word in quotes, split by a backslash or built by a variable or a substitution, and no assignment, export or unset of a GIT_, GH_ or GITHUB_ variable (Alex, 2026-11-20, Issue #1409). The Claude Code session that launched it pushes and posts once the build stops. Commit and go on: read the issue from the files your prompt names, and write anything that would be posted to the file your prompt names.";
 
 const SHELLS = new Set(["sh", "bash", "zsh", "dash", "ksh", "fish", "csh", "tcsh"]);
 const PACKAGE_RUNNERS = new Set(["npm", "npx", "pnpm", "yarn"]);
@@ -39,7 +39,12 @@ const GIT_FLAGS = new Set([
   "--help",
   "-h",
 ]);
-const GIT_VALUED = new Set([...GIT_GLOBAL_WITH_VALUE, "--attr-source"]);
+const GIT_VALUED = new Set([...[...GIT_GLOBAL_WITH_VALUE].filter((name) => name !== "--exec-path"), "--attr-source"]);
+const WRAPPERS = new Set(["command", "exec", "env", "nohup", "nice", "timeout", "stdbuf", "sudo", "xargs", "parallel"]);
+const FEEDERS = new Set(["xargs", "parallel"]);
+const NUMBER = /^\d+[smhd]?$/;
+const LOGIN_ENV =
+  /\b(?:GIT|GH|GITHUB)_[A-Z0-9_]*\s*=|\b(?:unset|export)\s[^;&|]*\b(?:GIT|GH|GITHUB)_|-u\s*(?:GIT|GH|GITHUB)_|--unset=(?:GIT|GH|GITHUB)_/;
 const FIRST_WORDS = new Set(["eval", "source", "."]);
 const TRIM = /^[`'"(){};]+|[`'"(){};]+$/g;
 
@@ -54,15 +59,28 @@ const gitRefused = (raw: readonly string[], tokens: readonly string[], at: numbe
   }
   const sub = raw[i] ?? "";
   const written = tokens[i] ?? "";
-  if (written !== "" && (!SUBCOMMAND.test(sub) || /["'\\$`]/.test(written))) return true;
+  if (!SUBCOMMAND.test(sub) || /["'\\$`]/.test(written)) return true;
   if (raw.slice(i).some((w) => PUSHES.has(w) || w.startsWith("credential"))) return true;
   if (sub !== "config") return false;
   const verb = raw.slice(i + 1).find((w) => !CONFIG_SCOPES.has(w)) ?? "";
   return !CONFIG_READS.has(verb);
 };
 
+const wrappedWordIsPlain = (tokens: readonly string[]): boolean =>
+  tokens.every((token, at) => {
+    if (!WRAPPERS.has(token.split("/").at(-1) ?? "")) return true;
+    const word = tokens.slice(at + 1).find((t) => !t.startsWith("-") && !NUMBER.test(t) && !ASSIGNMENT.test(t));
+    return word === undefined || PLAIN.test(word);
+  });
+
+export const headlessEnvRefusal = (command: string): string | null =>
+  LOGIN_ENV.test(command) ? HEADLESS_REASON : null;
+
 const commandWordIsPlain = (tokens: readonly string[]): boolean => {
-  const word = (tokens.find((t) => !LEADERS.has(t)) ?? "").replace(/^\(+|[)};]+$/g, "");
+  const word = (tokens.find((t) => !LEADERS.has(t) && !t.startsWith("-") && !NUMBER.test(t)) ?? "").replace(
+    /^\(+|[)};]+$/g,
+    "",
+  );
   return word === "" || PLAIN.test(word) || ASSIGNMENT.test(word) || TEST_BRACKETS.has(word);
 };
 
@@ -74,6 +92,8 @@ export const headlessRefusal = (segment: string): string | null => {
     segment.startsWith('""') ||
     tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
+    !wrappedWordIsPlain(tokens) ||
+    (words.some((w) => FEEDERS.has(w)) && words.includes("git")) ||
     words.some((w) => GIT_HELPER.test(w)) ||
     FIRST_WORDS.has(words[0] ?? "") ||
     words.some(

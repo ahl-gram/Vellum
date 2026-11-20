@@ -24,6 +24,25 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "env $G push",
+  "timeout 60 $G push",
+  "nice -n 5 $G push",
+  "command $G push",
+  "stdbuf -oL $G push",
+  "xargs $G push",
+  "sudo $G push",
+  "GIT_CONFIG_COUNT=0 git fetch origin",
+  "export GIT_CONFIG_PARAMETERS=x",
+  "unset GIT_CONFIG_COUNT",
+  "env -u GIT_CONFIG_COUNT git fetch origin",
+  "GIT_SSH_COMMAND=ssh git fetch origin",
+  "GIT_EXEC_PATH=/tmp/x git status",
+  "xargs git status",
+  "parallel git status ::: a",
+  "git",
+  "git --version",
+  "git --exec-path",
+  "git --exec-path=/x status",
   "$G push",
   "${G} push",
   "$(printf git) push",
@@ -128,8 +147,12 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "env FOO=bar npm test",
+  "timeout 60 npm test",
+  "nice -n 5 ls",
+  "xargs -n1 echo",
+  "unset FOO",
   "git --no-pager log -1",
-  "git --version",
   "git status",
   "git --git-dir=/r/.git log --oneline",
   "git log --grep=x",
