@@ -15,7 +15,6 @@ const KEYCHAIN_READS = new Set(["find-internet-password", "find-generic-password
 const CONFIG_READS = new Set(["--get", "--get-all", "--get-regexp", "--get-urlmatch", "--list", "-l", "get", "list"]);
 const PUSHES = new Set(["push", "send-pack", "http-push", "receive-pack"]);
 const CONFIG_SCOPES = new Set(["--global", "--local", "--system", "--worktree", "--show-origin", "-z", "--null"]);
-const DISGUISED = /^[A-Za-z_](?![A-Za-z0-9_]*=)[^\s]*["\\]/;
 const PLAIN = /^~?[A-Za-z0-9._/-]+$/;
 const LEADERS = new Set(["!", "{", "(", "time"]);
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -114,7 +113,6 @@ export const headlessRefusal = (segment: string): string | null => {
   const raw = tokens.map((t) => t.replace(TRIM, ""));
   const words = raw.map((t) => t.split("/").at(-1) ?? "");
   const refused =
-    tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
     !wrappedWordIsPlain(tokens) ||
     settersWithEscapes(tokens) ||

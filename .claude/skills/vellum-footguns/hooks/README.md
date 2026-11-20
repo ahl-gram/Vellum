@@ -105,8 +105,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     segment is read word by word, a word taken by its last path part with quotes, backticks and
     brackets trimmed, and is refused when its command word, or the word after `env`, `nohup`,
     `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
-    substitution, a quote or a backslash in it); when any word starts a letter and holds a quote or a
-    backslash; when its first word is `eval`, `source` or `.`; when any word is a shell (`sh`, `bash`,
+    substitution, a quote or a backslash in it); when its first word is `eval`, `source` or `.`; when any word is a shell (`sh`, `bash`,
     `zsh`, `dash`, `ksh`, `fish`, `csh`, `tcsh`), `gh` or a `git-` helper; when `xargs` or
     `parallel` feeds `git`; when any word is `git` and its global options carry `-c`, `--config-env` or
     one the hook does not know, its subcommand word is missing or not plain, a later word is `push`,
