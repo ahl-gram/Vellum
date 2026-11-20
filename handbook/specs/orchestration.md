@@ -138,17 +138,20 @@ home's line wins for the lane and this file's for the orchestrator.
   forms of them it can read (`.claude/skills/vellum-footguns/hooks/README.md`). This stops a build's
   mistakes and its ordinary workarounds, not a build set on pushing: with full access, a build that
   went looking could still reach Alex's login in the keychain or in gh's config folder, and only a
-  build with its network cut off would be a guarantee, which Alex declined. The prompt the wrapper
+  build with its network cut off would be a guarantee, which Alex declined. Stated plainly: under full access a headless build can leave code that later runs as Alex, with his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on `git ls-remote` and `git status` in the session and in the main checkout), in his shell startup files, and in test code the guard prover runs. Removing the build's login stops it pushing by itself; it does not stop such a trap. The stronger options (a separate macOS user, a build with no network, its own clone) are weighed in Issue #1418 (Alex, 2026-11-20, comment 7047054816). The prompt the wrapper
   writes sends what the build would have posted into the record's folder: the step 12 record as
   record.md, the pull request body as pr-body.md, and each new or strengthened guard with the
   mutation that must red it as guards.md. The build stops where its definition would dispatch the
   guard prover or the plate reader, or open the pull request, and ends its last message with
   `OUTCOME: ready` or `OUTCOME: handback`.
 - **The session pushes each run's commits as soon as the run ends**, ready or handed back, with
-  `git -C <tree> push --no-verify -u origin <branch>`, so the branch carries the plan when a planner
-  counts revisions (workflow step 8). Every push of a Codex build's work is `--no-verify`: a headless
-  build can write a `pre-push` hook into the shared `.git/hooks`, which git would run with the
-  session's login, and Vellum has no git hook of its own to skip (Alex, 2026-11-20, Issue #1409).
+  `git -C <tree> -c core.hooksPath=/dev/null push -u origin <branch>`, so the branch carries the plan
+  when a planner counts revisions (workflow step 8). Every push of a Codex build's work runs with
+  every git hook off: a headless build can write any hook into the shared `.git/hooks`, a
+  `reference-transaction` one included, which `--no-verify` does not skip and git would run with the
+  session's login, and Vellum has no git hook of its own to skip (Alex, 2026-11-20, Issue #1409,
+  comments 7046605950 and 7047054816). A test builds a scratch repository, plants four hooks and runs
+  the printed command (`test/repo/handoff-push.test.ts`).
 - **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
   report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
   session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief

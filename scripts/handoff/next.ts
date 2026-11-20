@@ -62,7 +62,7 @@ const stepOf = (s: Snapshot): Step => {
   }
   const run = lastRun(state);
   if (run === null)
-    return { id: "plan", text: `Issue #${issue} has a build record with no run in ${folder}. Ask Alex.` };
+    return { id: "stopped", text: `Issue #${issue} has a build record with no run in ${folder}. Ask Alex.` };
   const files = runFiles(folder, run.n);
   const unpushed = branch !== null && s.treeHead !== s.remoteHead;
   if (s.running) {
@@ -76,7 +76,9 @@ const stepOf = (s: Snapshot): Step => {
       id: "replan",
       text:
         `Run ${run.n} of Issue #${issue} handed back: ${files.last}.` +
-        (unpushed ? ` First push its commits: git -C ${tree} push --no-verify -u origin ${branch}.` : "") +
+        (unpushed
+          ? ` First push its commits: git -C ${tree} -c core.hooksPath=/dev/null push -u origin ${branch}.`
+          : "") +
         ` Then dispatch a fresh vellum-planner with the issue, the plan ${plan} and that hand-back (handbook/specs/orchestration.md). Once its revision is finished and Alex has seen it, write a brief naming it and run in the background: npm run handoff -- resume ${issue} --brief <the brief's path> --plan <the revision's path>`,
     };
   }
@@ -112,7 +114,7 @@ const stepOf = (s: Snapshot): Step => {
     return {
       id: "push",
       text:
-        `Run ${run.n} of Issue #${issue} is ready and not pushed. Push it: git -C ${tree} push --no-verify -u origin ${branch}` +
+        `Run ${run.n} of Issue #${issue} is ready and not pushed. Push it: git -C ${tree} -c core.hooksPath=/dev/null push -u origin ${branch}` +
         (pr === null
           ? `, then run npm run handoff -- next ${issue} again.`
           : `; pull request #${pr.number} updates with it.`),

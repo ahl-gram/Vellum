@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { EFFORTS, loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
 import { ROLES } from "../agent-infra/roles.ts";
@@ -44,15 +44,6 @@ const isFile = (path: string | undefined): path is string => {
   if (path === undefined || !isAbsolute(path)) return false;
   try {
     return statSync(path).isFile();
-  } catch {
-    return false;
-  }
-};
-
-const statSafe = (path: string): boolean => {
-  try {
-    statSync(path);
-    return true;
   } catch {
     return false;
   }
@@ -108,7 +99,7 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   if (readState(folder) !== null) {
     return refuse(`Issue #${issue} already has a build record in ${folder}; run npm run handoff -- next ${issue}`);
   }
-  if (statSafe(tree)) return refuse(`${tree} already exists; retire it before building Issue #${issue} again`);
+  if (existsSync(tree)) return refuse(`${tree} already exists; retire it before building Issue #${issue} again`);
   const { model, effort } = resolveModel(loadModelPolicy(HERE_ROOT, ROLES), "codex-local", "vellum-implementer");
   const texts = readIssue(issue, gh);
   runPlan(createPlan(tree, "origin/main", false), root, tree);
@@ -149,7 +140,7 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
   if (plan !== undefined && !isFile(plan)) return refuse("--plan must be the absolute path of the revised plan file");
   if (isRunning(lastRun(state))) return refuse(`Issue #${issue}'s last run is still running`);
   if (state.thread === null) return refuse(`Issue #${issue}'s build never started a thread, so it cannot be resumed`);
-  if (!statSafe(state.tree)) return refuse(`${state.tree} is gone, so Issue #${issue}'s build cannot be resumed`);
+  if (!existsSync(state.tree)) return refuse(`${state.tree} is gone, so Issue #${issue}'s build cannot be resumed`);
   writeIssueFiles(folder, readIssue(issue, gh));
   const n = state.runs.length + 1;
   const run: RunRecord = {

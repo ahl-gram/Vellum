@@ -262,14 +262,14 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   wall** (Alex, 2026-11-20, Issue #1409). Its misses are silence, each one a command that runs:
   a push or a GitHub call made from inside another program (a script the build writes and runs,
   `node -e`, `python3 -c`, `perl -e`, a `make` target, an `npm run` script other than `proof`),
-  code the build writes that the Claude Code session later runs with its own login (test code the guard prover executes; a `pre-push` hook in the shared `.git/hooks` is closed, since the session pushes a Codex build's work with `git push --no-verify`, Alex 2026-11-20, comment 7046605950), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
+  code the build writes that the Claude Code session later runs with its own login (test code the guard prover executes, the shared `.git/config`, his shell startup files; a git hook in the shared `.git/hooks` is closed, since the session pushes a Codex build's work with `-c core.hooksPath=/dev/null`, Alex 2026-11-20, comments 7046605950 and 7047054816), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
   `chrt`, `watch`, `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
   `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a command word
   (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), `builtin . script.sh`, a git alias already set in a config file the build did not write, the GitHub API
   reached by another client (`curl`), a build started without the wrapper and so without the
   variable, and a build that edits the hook's own files in its tree, since the hook it runs is
-  that tree's copy. None of them finds a login in the build's environment, so each fails for want
-  of one; but the build runs with full access, and one that went looking could still reach Alex's
+  that tree's copy. A direct push by any of them finds no login in the build's environment, so it fails for want of
+  one; but under full access a headless build can leave code that later runs as Alex, with his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on `git ls-remote` and `git status` in the session and in the main checkout), in his shell startup files, and in test code the guard prover runs. Removing the build's login stops it pushing by itself; it does not stop such a trap. The stronger options (a separate macOS user, a build with no network, its own clone) are weighed in Issue #1418 (Alex, 2026-11-20, comment 7047054816). Likewise the build runs with full access, and one that went looking could still reach Alex's
   login in the macOS keychain or in gh's config folder by a program the hook cannot read. Only a
   build with its network cut off would be a guarantee, and Alex declined that for its cost, as he
   declined a separate macOS user. **Its errors the other way are refusals**, each visible and one
