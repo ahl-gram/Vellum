@@ -137,7 +137,7 @@ const segmentRefused = (segment: string): boolean => {
         w === "gh" ||
         SHELLS.has(w) ||
         (w === "git" && gitRefused(raw, tokens, i)) ||
-        (w === "security" && KEYCHAIN_READS.has(words[i + 1] ?? "")) ||
+        (w === "security" && words.slice(i + 1).some((x) => KEYCHAIN_READS.has(x))) ||
         (PACKAGE_RUNNERS.has(w) && words.slice(i + 1).includes("proof")) ||
         ((raw[i] ?? "").toLowerCase().endsWith("proof-runner/main.ts") &&
           words.slice(0, i).some((x) => SCRIPT_RUNNERS.has(x))),

@@ -112,9 +112,11 @@ home's line wins for the lane and this file's for the orchestrator.
   it prints, which names its exact command. It reads the label, the build's record in
   `out/<issue>-handoff/` in the main checkout, the build's tree, the branch's pushed head, the
   prover's report and the pull request. The build can rewrite everything in that folder, so `next`
-  prints no command from a tree other than the one the wrapper made or from a branch name that is
-  not plain name characters, and says to ask Alex instead; `resume` validates the record's tree, thread id, effort and
-  model before it runs anything. The session runs the wrapper itself: Alex never pastes a
+  prints no command from a record that fails validation (a tree other than the one the wrapper
+  made, a plan path, thread id or run field of an unexpected shape) or from a branch that is not
+  named for the issue (`<n>-topic` or `<prefix>/<n>-topic`, plain name characters only, so not
+  `main` and not another issue's), and says to ask Alex instead; `resume` validates the record's
+  tree, plan path, thread id, effort, model and every run, and runs nothing on a mismatch. The session runs the wrapper itself: Alex never pastes a
   command, starts a session or types one with the `!` prefix (Alex, 2026-11-20, Issue #1409).
 - **The build runs headless, in the background, with no GitHub login.** Once the plan is finished
   and archived (The STOP and the relay, above), the session runs `npm run handoff -- build <issue>

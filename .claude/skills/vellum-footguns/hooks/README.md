@@ -103,8 +103,8 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     measured passing both to its hooks and its shell): any push, every `gh` call, the proof run, and
     the wrapped and disguised forms of them it can read, failing closed on these classes. Each
     segment (split again at a lone `&`) is read word by word, a word taken by its last path part, in lower
-    case because the Mac's filesystem ignores case, with quotes, backticks and brackets trimmed, and is refused when its command word, or the word after `env`, `nohup`,
-    `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
+    case because the Mac's filesystem ignores case, with quotes, backticks and brackets trimmed, and is refused when its command word, or the word after `command`, `exec`, `env`,
+    `nohup`, `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
     substitution, a quote or a backslash in it), where `if`, `while`, `until`, `case`, `then`, `do`, `!` and
     the like are skipped to find it; when any word starts with a letter and holds a quote or a
     backslash (`setsid g"it" push`); when any word is `eval`, `source` or `trap`, or its command word is `.`; when a package runner or a script runner is followed by a quoted name (`npm run "proof"`, `node "scripts/proof-runner/main.ts"`); when any word is a shell (`sh`, `bash`,
@@ -112,7 +112,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     `parallel` feeds `git`; when any word is `git` and its global options carry `-c`, `--config-env` or
     one the hook does not know, its subcommand word is missing or not plain, a later word is `push`,
     `send-pack`, `http-push`, `receive-pack` or starts `credential`, or it is a `config` whose first
-    verb is not a read; when `security` is followed by a keychain read; or when the proof run is
+    verb is not a read; when a `security` call names a keychain read (`find-internet-password`, `find-generic-password`, `dump-keychain`, `export`) anywhere after it; or when the proof run is
     reached through `npm`, `npx`, `pnpm`, `yarn` or a script runner. The whole command, not a segment, is
     refused when its text names a `GIT_`, `GH_` or `GITHUB_` variable anywhere (an assignment, `export`,
     `declare -x`, `read`, `printf -v`, a `$` expansion), which is how a command would undo the
