@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { main } from "../../scripts/handoff/main.ts";
 import { nextStep } from "../../scripts/handoff/next.ts";
 import { snapshotOf, type GhReads } from "../../scripts/handoff/snapshot.ts";
-import { folderOf, readState, writeState } from "../../scripts/handoff/state.ts";
+import { folderOf, readState, writeState, type HandoffState } from "../../scripts/handoff/state.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 const STUB = `#!/bin/sh
@@ -166,13 +166,24 @@ test("a resume refuses a record whose tree, thread, effort or model was planted,
     { ...state, thread: "-x --dangerously-bypass-approvals-and-sandbox" },
     { ...state, effort: "silly" as never },
     { ...state, model: "planted-model" },
+    ...[{ n: 7 }, { kind: "x" }, { exit: "1" }, { ended: "yesterday" }, { pid: 1 }, { pid: 0 }].map((run) => ({
+      ...state,
+      runs: state.runs.map((r, at) => (at === 1 ? { ...r, ...run } : r)),
+    })),
   ];
   for (const bad of planted) {
-    writeState(folder, bad);
+    writeState(folder, bad as HandoffState);
     assert.equal(await main(["resume", "9", "--brief", brief], mainRepo, env, gh), 2);
     assert.equal(readState(folder)?.runs.length, 2);
   }
   writeState(folder, state);
+});
+
+test("a build refuses a plan path that next would later refuse, and builds nothing (Issue #1409)", async () => {
+  const odd = join(dir, "a plan with spaces.md");
+  writeFileSync(odd, "a plan\n");
+  assert.equal(await main(["build", "10", "--plan", odd, "--session", "https://s"], mainRepo, env, gh), 2);
+  assert.equal(readState(folderOf(mainRepo, 10)), null);
 });
 
 test("a second build of the same issue is refused while its record stands (Issue #1409)", async () => {

