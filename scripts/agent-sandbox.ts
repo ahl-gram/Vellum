@@ -60,7 +60,7 @@ export const createPlan = (wt: string, sha: string, hasCommit: boolean): Plan =>
 
 export const teardownPlan = (wt: string): Plan => ({ git: [["worktree", "remove", "--force", wt]] });
 
-const run = (plan: Plan, root: string, wt: string): void => {
+export const runPlan = (plan: Plan, root: string, wt: string): void => {
   for (const args of plan.git) git(args, root);
   if (plan.link) symlinkSync(plan.link, join(wt, "node_modules"));
 };
@@ -75,14 +75,14 @@ export const create = (name: string, sha?: string, cwd: string = process.cwd()):
   const at = sha ?? readHead(cwd);
   const root = resolveRoot(cwd);
   const wt = sandboxPath(root, name);
-  run(createPlan(wt, at, haveCommit(root, at)), root, wt);
+  runPlan(createPlan(wt, at, haveCommit(root, at)), root, wt);
   return wt;
 };
 
 export const teardown = (name: string, cwd: string = process.cwd()): void => {
   const root = resolveRoot(cwd);
   const wt = sandboxPath(root, name);
-  run(teardownPlan(wt), root, wt);
+  runPlan(teardownPlan(wt), root, wt);
 };
 
 export const listing = (dir: string): string[] => {
