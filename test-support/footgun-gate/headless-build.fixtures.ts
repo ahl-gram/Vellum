@@ -24,6 +24,13 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  "declare -x GIT_CONFIG_COUNT=0",
+  "typeset -x GIT_CONFIG_COUNT=0",
+  "read GIT_CONFIG_COUNT",
+  "printf -v GIT_CONFIG_COUNT 0",
+  "set -a; GIT_CONFIG_COUNT=0",
+  "echo $GH_TOKEN",
+  "cat ${GITHUB_TOKEN}",
   "env $G push",
   "timeout 60 $G push",
   "nice -n 5 $G push",
@@ -147,6 +154,8 @@ const REFUSED = [
 ];
 
 const PASSED = [
+  "ls scripts",
+  "echo hello world",
   "env FOO=bar npm test",
   "timeout 60 npm test",
   "nice -n 5 ls",

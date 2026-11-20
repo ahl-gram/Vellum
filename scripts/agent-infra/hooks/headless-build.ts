@@ -6,7 +6,7 @@ export const headlessBuildOf = (env: Readonly<Record<string, string | undefined>
   (env[HEADLESS_BUILD_VAR] ?? "") !== "";
 
 export const HEADLESS_REASON =
-  "vellum-footguns: this is a headless Codex build, which `npm run handoff` launched with VELLUM_HEADLESS_BUILD set and no GitHub login. A headless build commits, and never pushes, opens or edits a pull request, writes to GitHub or sends a proof run, and it runs each command bare: no `gh` call at all, no shell handed a command (`bash -c`, `sh`, `zsh`), no `eval` or `source`, no `git -c`, no `git config` that writes, no `git credential` or keychain read, and no command or subcommand word in quotes, split by a backslash or built by a variable or a substitution, and no assignment, export or unset of a GIT_, GH_ or GITHUB_ variable (Alex, 2026-11-20, Issue #1409). The Claude Code session that launched it pushes and posts once the build stops. Commit and go on: read the issue from the files your prompt names, and write anything that would be posted to the file your prompt names.";
+  "vellum-footguns: this is a headless Codex build, which `npm run handoff` launched with VELLUM_HEADLESS_BUILD set and no GitHub login. A headless build commits, and never pushes, opens or edits a pull request, writes to GitHub or sends a proof run, and it runs each command bare: no `gh` call at all, no shell handed a command (`bash -c`, `sh`, `zsh`), no `eval` or `source`, no `git -c`, no `git config` that writes, no `git credential` or keychain read, and no command or subcommand word in quotes, split by a backslash or built by a variable or a substitution, and no command that names a GIT_, GH_ or GITHUB_ variable (Alex, 2026-11-20, Issue #1409). The Claude Code session that launched it pushes and posts once the build stops. Commit and go on: read the issue from the files your prompt names, and write anything that would be posted to the file your prompt names.";
 
 const SHELLS = new Set(["sh", "bash", "zsh", "dash", "ksh", "fish", "csh", "tcsh"]);
 const PACKAGE_RUNNERS = new Set(["npm", "npx", "pnpm", "yarn"]);
@@ -43,8 +43,7 @@ const GIT_VALUED = new Set([...[...GIT_GLOBAL_WITH_VALUE].filter((name) => name 
 const WRAPPERS = new Set(["command", "exec", "env", "nohup", "nice", "timeout", "stdbuf", "sudo", "xargs", "parallel"]);
 const FEEDERS = new Set(["xargs", "parallel"]);
 const NUMBER = /^\d+[smhd]?$/;
-const LOGIN_ENV =
-  /\b(?:GIT|GH|GITHUB)_[A-Z0-9_]*\s*=|\b(?:unset|export)\s[^;&|]*\b(?:GIT|GH|GITHUB)_|-u\s*(?:GIT|GH|GITHUB)_|--unset=(?:GIT|GH|GITHUB)_/;
+const LOGIN_ENV = /(?:GIT|GH|GITHUB)_/;
 const FIRST_WORDS = new Set(["eval", "source", "."]);
 const TRIM = /^[`'"(){};]+|[`'"(){};]+$/g;
 
