@@ -252,7 +252,7 @@ scar:
   buried.
 
 **9. Push at the first commit**, per the ruled default in `vellum-footguns` ("Defaults this repo has
-already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2. A headless Codex build pushes nothing: the Claude Code session that launched it pushes each of its runs when the run ends (`handbook/specs/orchestration.md`, Lanes that cross harnesses).
+already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2. A headless Codex build pushes nothing: the Claude Code session that launched it pushes each of its runs when the run ends, with `git push --no-verify` (`handbook/specs/orchestration.md`, Lanes that cross harnesses).
 **Read Gate 5 here, in full, even though half of it is not due yet.** The hook shows a gate's text at
 most once a session and keys the push and the PR write to the same gate, so this is the only time it
 will be put in front of you; its body checks are yours to remember at step 13. That is the cost of

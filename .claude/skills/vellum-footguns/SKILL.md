@@ -346,7 +346,7 @@ are copied here.
 ## Defaults this repo has already ruled
 
 - Push the branch at the first commit; eight local commits unpushed was "the wrong default" (#520
-  part 2, 2026-09-08). A headless Codex build is the exception: the hook refuses its push, and the session that launched it pushes each run (`handbook/specs/orchestration.md`, Lanes that cross harnesses).
+  part 2, 2026-09-08). A headless Codex build is the exception: the hook refuses its push, and the session that launched it pushes each run with `git push --no-verify` (`handbook/specs/orchestration.md`, Lanes that cross harnesses).
 - No draft PRs; the convention does not exist here (#542 was opened as one and asked about,
   2026-09-08; none of the last hundred PRs is a draft).
 - Do not stop mid-build to narrate. A status report with no tool call is a stop, and Alex had to

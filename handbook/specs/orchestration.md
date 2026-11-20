@@ -145,8 +145,10 @@ home's line wins for the lane and this file's for the orchestrator.
   guard prover or the plate reader, or open the pull request, and ends its last message with
   `OUTCOME: ready` or `OUTCOME: handback`.
 - **The session pushes each run's commits as soon as the run ends**, ready or handed back, with
-  `git -C <tree> push -u origin <branch>`, so the branch carries the plan when a planner counts
-  revisions (workflow step 8).
+  `git -C <tree> push --no-verify -u origin <branch>`, so the branch carries the plan when a planner
+  counts revisions (workflow step 8). Every push of a Codex build's work is `--no-verify`: a headless
+  build can write a `pre-push` hook into the shared `.git/hooks`, which git would run with the
+  session's login, and Vellum has no git hook of its own to skip (Alex, 2026-11-20, Issue #1409).
 - **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
   report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
   session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief
