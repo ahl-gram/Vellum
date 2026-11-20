@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { main } from "../../scripts/handoff/main.ts";
 import { nextStep } from "../../scripts/handoff/next.ts";
 import { snapshotOf, type GhReads } from "../../scripts/handoff/snapshot.ts";
-import { folderOf, readState } from "../../scripts/handoff/state.ts";
+import { folderOf, readState, writeState } from "../../scripts/handoff/state.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 const STUB = `#!/bin/sh
@@ -156,6 +156,23 @@ test("a resume restates the sandbox, names the thread and records a second run (
       [2, "resume", 0],
     ],
   );
+});
+
+test("a resume refuses a record whose tree, thread, effort or model was planted, and runs nothing (Issue #1409)", async () => {
+  const state = readState(folder);
+  assert.ok(state);
+  const planted = [
+    { ...state, tree: dir },
+    { ...state, thread: "-x --dangerously-bypass-approvals-and-sandbox" },
+    { ...state, effort: "silly" as never },
+    { ...state, model: "planted-model" },
+  ];
+  for (const bad of planted) {
+    writeState(folder, bad);
+    assert.equal(await main(["resume", "9", "--brief", brief], mainRepo, env, gh), 2);
+    assert.equal(readState(folder)?.runs.length, 2);
+  }
+  writeState(folder, state);
 });
 
 test("a second build of the same issue is refused while its record stands (Issue #1409)", async () => {
