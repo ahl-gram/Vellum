@@ -1,6 +1,15 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { main } from "../../scripts/handoff/main.ts";
@@ -19,6 +28,11 @@ done
 echo "marker=$VELLUM_HEADLESS_BUILD" > "$STUB_FACTS"
 echo "cwd=$(pwd -P)" >> "$STUB_FACTS"
 if [ -p /dev/stdin ]; then echo "stdin=pipe" >> "$STUB_FACTS"; else echo "stdin=nopipe" >> "$STUB_FACTS"; fi
+echo "token=$GH_TOKEN" >> "$STUB_FACTS"
+echo "sock=$SSH_AUTH_SOCK" >> "$STUB_FACTS"
+echo "count=$GIT_CONFIG_COUNT" >> "$STUB_FACTS"
+echo "helper=[$GIT_CONFIG_VALUE_0]" >> "$STUB_FACTS"
+echo "ghdir=$GH_CONFIG_DIR" >> "$STUB_FACTS"
 echo "argv=$*" >> "$STUB_FACTS"
 echo '{"type":"thread.started","thread_id":"stub-thread"}'
 if [ "$(pwd -P)" = "$STUB_TREE" ]; then
@@ -39,8 +53,24 @@ const plan = join(dir, "plan.md");
 const brief = join(dir, "brief.md");
 const facts = join(dir, "facts.txt");
 const folder = folderOf(mainRepo, 9);
-const env = { ...process.env, PATH: `${bin}:${process.env.PATH ?? ""}`, STUB_FACTS: facts, STUB_TREE: tree };
-const gh: GhReads = { labels: () => ["builder:codex"], pullRequest: () => null };
+const env = {
+  ...process.env,
+  PATH: `${bin}:${process.env.PATH ?? ""}`,
+  STUB_FACTS: facts,
+  STUB_TREE: tree,
+  GH_TOKEN: "fake-token",
+  SSH_AUTH_SOCK: "/tmp/fake-sock",
+};
+let issueReads = 0;
+const gh: GhReads = {
+  labels: () => ["builder:codex"],
+  pullRequest: () => null,
+  issueJson: () => {
+    issueReads += 1;
+    return '{"number":9}\n';
+  },
+  commentsJsonl: () => '{"id":1}\n',
+};
 
 before(() => {
   mkdirSync(bin, { recursive: true });
@@ -77,6 +107,15 @@ test("a build makes its tree from origin/main, runs codex there headless, and re
   assert.equal(seen.get("marker"), "9");
   assert.equal(seen.get("cwd"), tree);
   assert.equal(seen.get("stdin"), "nopipe");
+  assert.equal(seen.get("token"), "");
+  assert.equal(seen.get("sock"), "");
+  assert.equal(seen.get("count"), "1");
+  assert.equal(seen.get("helper"), "[]");
+  assert.equal(seen.get("ghdir"), join(folder, "gh-empty"));
+  assert.ok(existsSync(join(folder, "gh-empty")));
+  assert.equal(readFileSync(join(folder, "issue.json"), "utf8"), '{"number":9}\n');
+  assert.equal(readFileSync(join(folder, "comments.jsonl"), "utf8"), '{"id":1}\n');
+  assert.equal(issueReads, 1);
   assert.ok(
     seen.get("argv")?.startsWith(`-s danger-full-access -a on-request exec --json -C ${tree} -m `),
     seen.get("argv"),
@@ -101,6 +140,9 @@ test("a resume restates the sandbox, names the thread and records a second run (
   const seen = factsOf();
   assert.equal(seen.get("marker"), "9");
   assert.equal(seen.get("stdin"), "nopipe");
+  assert.equal(seen.get("token"), "");
+  assert.equal(seen.get("count"), "1");
+  assert.equal(issueReads, 2);
   assert.ok(
     seen.get("argv")?.startsWith("-s danger-full-access -a on-request exec resume --json -m "),
     seen.get("argv"),

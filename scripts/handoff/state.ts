@@ -30,6 +30,9 @@ export const FILES = {
   guards: "guards.md",
   proverReport: "prover-report.md",
   implementerProof: "implementer-proof.md",
+  issue: "issue.json",
+  comments: "comments.jsonl",
+  ghEmpty: "gh-empty",
 } as const;
 
 export const folderOf = (root: string, issue: number): string => join(root, "out", `${issue}-handoff`);

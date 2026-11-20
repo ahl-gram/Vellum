@@ -41,10 +41,32 @@ test("a resume restates the sandbox and the effort and names the thread (Issue #
   ]);
 });
 
-test("the build's environment carries the issue in VELLUM_HEADLESS_BUILD and leaves its base alone (Issue #1409)", () => {
-  const base = { PATH: "/bin" };
-  assert.deepEqual(buildEnv(base, 1409), { PATH: "/bin", VELLUM_HEADLESS_BUILD: "1409" });
-  assert.deepEqual(base, { PATH: "/bin" });
+test("the build's environment carries the issue in VELLUM_HEADLESS_BUILD and no GitHub or push login, and leaves its base alone (Issue #1409)", () => {
+  const base = {
+    PATH: "/bin",
+    GH_TOKEN: "t",
+    GITHUB_TOKEN: "t",
+    GH_ENTERPRISE_TOKEN: "t",
+    GITHUB_ENTERPRISE_TOKEN: "t",
+    GIT_ASKPASS: "a",
+    SSH_ASKPASS: "a",
+    SSH_AUTH_SOCK: "s",
+    GIT_CONFIG_PARAMETERS: "'credential.helper=osxkeychain'",
+    GIT_CONFIG_COUNT: "2",
+    GIT_CONFIG_KEY_1: "credential.helper",
+    GIT_CONFIG_VALUE_1: "osxkeychain",
+  };
+  const before = { ...base };
+  assert.deepEqual(buildEnv(base, 1409, "/o/gh-empty"), {
+    PATH: "/bin",
+    VELLUM_HEADLESS_BUILD: "1409",
+    GIT_CONFIG_COUNT: "1",
+    GIT_CONFIG_KEY_0: "credential.helper",
+    GIT_CONFIG_VALUE_0: "",
+    GIT_TERMINAL_PROMPT: "0",
+    GH_CONFIG_DIR: "/o/gh-empty",
+  });
+  assert.deepEqual(base, before);
 });
 
 test("a run's thread is the first thread.started event of its stream (Issue #1409)", () => {
@@ -79,6 +101,8 @@ test("the build's prompt names its plan, tree, session, record files, hook check
     "/o/7-handoff/record.md",
     "/o/7-handoff/pr-body.md",
     "/o/7-handoff/guards.md",
+    "/o/7-handoff/issue.json",
+    "/o/7-handoff/comments.jsonl",
     HOOK_CHECK,
     OUTCOME_READY,
     OUTCOME_HANDBACK,
@@ -86,5 +110,13 @@ test("the build's prompt names its plan, tree, session, record files, hook check
   ])
     assert.ok(build.includes(part), part);
   const resume = resumePrompt({ issue: 7, brief: "/b.md", folder: "/o/7-handoff" });
-  for (const part of ["/b.md", HOOK_CHECK, OUTCOME_READY, OUTCOME_HANDBACK]) assert.ok(resume.includes(part), part);
+  for (const part of [
+    "/b.md",
+    "/o/7-handoff/issue.json",
+    "/o/7-handoff/comments.jsonl",
+    HOOK_CHECK,
+    OUTCOME_READY,
+    OUTCOME_HANDBACK,
+  ])
+    assert.ok(resume.includes(part), part);
 });

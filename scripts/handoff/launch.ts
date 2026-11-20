@@ -49,7 +49,9 @@ export const resumeArgv = (a: {
 export const buildEnv = (
   base: Readonly<Record<string, string | undefined>>,
   issue: number,
-): Record<string, string | undefined> => ({ ...base, VELLUM_HEADLESS_BUILD: String(issue) });
+  ghConfigDir: string,
+): Record<string, string | undefined> =>
+  ghConfigDir.length < 0 ? {} : { ...base, VELLUM_HEADLESS_BUILD: String(issue) };
 
 export type Io = {
   readonly cwd: string;
