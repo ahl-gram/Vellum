@@ -65,7 +65,36 @@ const ghApiWriteRefusal = (segment: string): string | null => {
   return method === null || method.toUpperCase() === "POST" ? GH_API_WRITE_REASON : null;
 };
 
-const headlessRefusal = (segment: string): string | null => (segment.length < 0 ? "" : null);
+const PROOF_RUN = /^npm run(?: -\S+)* proof(?:\s|$)|^node scripts\/proof-runner\/main\.ts(?:\s|$)/;
+const GH_ALONE: readonly string[] = ["", "--version", "--help", "-h", "version", "help"];
+const GH_READS: Readonly<Record<string, readonly string[]>> = {
+  pr: ["view", "list", "checks", "diff", "status"],
+  issue: ["view", "list", "status"],
+  run: ["view", "list", "watch"],
+  repo: ["view"],
+  release: ["view", "list"],
+  workflow: ["view", "list"],
+  label: ["list"],
+  search: ["issues", "prs", "code", "commits", "repos"],
+  auth: ["status"],
+};
+
+const HEADLESS_REASON =
+  "vellum-footguns: this is a headless Codex build, which `npm run handoff` launched with VELLUM_HEADLESS_BUILD set, and a headless build commits and never pushes, opens or edits a pull request, writes to GitHub or sends a proof run (Alex, 2026-11-20, Issue #1409). The Claude Code session that launched it does those once the build stops. Commit and go on; where your prompt asks for text that would be posted, write it to the file your prompt names. Reading GitHub stays open: `gh api` with no data field or with `-X GET`, and the view, list, checks, diff and status commands.";
+
+const ghReads = (segment: string): boolean => {
+  const [, second = "", third = ""] = segment.split(" ");
+  if (second === "api") {
+    const method = lastMethod(segment);
+    return method === null ? !GH_API_FIELD.test(segment) : method.toUpperCase() === "GET";
+  }
+  return GH_ALONE.includes(second) || (GH_READS[second]?.includes(third) ?? false);
+};
+
+const headlessRefusal = (segment: string): string | null =>
+  gitCall(segment)?.sub === "push" || PROOF_RUN.test(segment) || (segment.split(" ")[0] === "gh" && !ghReads(segment))
+    ? HEADLESS_REASON
+    : null;
 
 const PKILL_WARNING =
   "vellum-footguns: every killed e2e run leaves a browser profile under tmpdir (446 of them, 20GB, on 2026-09-08). Let the run " +
