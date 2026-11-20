@@ -262,10 +262,10 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   wall** (Alex, 2026-11-20, Issue #1409). Its misses are silence, each one a command that runs:
   a push or a GitHub call made from inside another program (a script the build writes and runs,
   `node -e`, `python3 -c`, `perl -e`, a `make` target, an `npm run` script other than `proof`),
-  `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
+  code the build writes that the Claude Code session later runs with its own login (a `pre-push` hook in the shared `.git/hooks` that runs when the session pushes the tree, test code the guard prover executes), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
   `chrt`, `watch`, `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
   `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a command word
-  (`\git`, `$G`, `""git`), a git alias already set in a config file the build did not write, the GitHub API
+  (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), `builtin . script.sh`, a git alias already set in a config file the build did not write, the GitHub API
   reached by another client (`curl`), a build started without the wrapper and so without the
   variable, and a build that edits the hook's own files in its tree, since the hook it runs is
   that tree's copy. None of them finds a login in the build's environment, so each fails for want
