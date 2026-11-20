@@ -62,9 +62,9 @@ something only Claude Code has, a Codex session does this instead.
   (Issue #1393, ruling D2). Never pass `--dangerously-bypass-approvals-and-sandbox`,
   `--dangerously-bypass-hook-trust` or a `-c` override to make an operation work, never edit
   `~/.codex/` or any other user-level setting, and never trust a hook, a project or an agent for
-  Alex: tell him what was blocked.
+  Alex: tell him what was blocked. The one `-c` allowed is `model_reasoning_effort`, which `npm run handoff` passes on each headless build it starts, set from `.agents/model-policy.json` (Alex, 2026-11-20, Issue #1409); no other caller and no other key.
 - **The footgun hook** runs under Codex only once Alex has trusted it, so confirm `/hooks` shows it
-  as Trusted before working, and stop if it does not. Follow a refusal it raises; never work around
+  as Trusted before working, and stop if it does not. A headless build, which `npm run handoff` launches and which has no `/hooks`, makes the check its prompt names instead. Follow a refusal it raises; never work around
   one.
 - **A skill** is read through `.agents/skills/<name>/SKILL.md`: read the named gate in full at the
   moment Process says it applies.

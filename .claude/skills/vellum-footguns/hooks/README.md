@@ -97,6 +97,28 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     A body file is a body only when a body FLAG named it: `$(cat f)` is read from any flag for the
     em-dash scan, and counting it here would refuse `gh pr edit N --add-label "$(cat notes.md)"` as a
     PR body skipping sections it was never meant to carry.
+  - in a headless Codex build only, which the Codex adapter knows by `VELLUM_HEADLESS_BUILD` in the
+    environment Codex hands the hook, and which `npm run handoff` sets on every build and resume it
+    starts, with no GitHub login in that environment (Alex, 2026-11-20, Issue #1409, where Codex was
+    measured passing both to its hooks and its shell): any push, every `gh` call, the proof run, and
+    the wrapped and disguised forms of them it can read, failing closed on these classes. Each
+    segment is read word by word, a word taken by its last path part with quotes, backticks and
+    brackets trimmed, and is refused when its command word, or the word after `env`, `nohup`,
+    `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
+    substitution, a quote or a backslash in it); when any word starts a letter and holds a quote or a
+    backslash; when its first word is `eval`, `source` or `.`; when any word is a shell (`sh`, `bash`,
+    `zsh`, `dash`, `ksh`, `fish`, `csh`, `tcsh`), `gh` or a `git-` helper; when `xargs` or
+    `parallel` feeds `git`; when any word is `git` and its global options carry `-c`, `--config-env` or
+    one the hook does not know, its subcommand word is missing or not plain, a later word is `push`,
+    `send-pack`, `http-push`, `receive-pack` or starts `credential`, or it is a `config` whose first
+    verb is not a read; when `security` is followed by a keychain read; or when the proof run is
+    reached through `npm`, `npx`, `pnpm`, `yarn` or a script runner. The whole command, not a segment, is
+    refused when it assigns, exports or unsets a `GIT_`, `GH_` or `GITHUB_` variable, which is how a
+    command would undo the environment's credential reset. Reading every word, not only the first,
+    is what finds `xargs git push`, `env -u X git push`, `timeout 60 git push`, `/usr/bin/git push` and
+    a command in backticks. It is judged before every other refusal, so the build hears why it
+    cannot rather than another way to post. A Claude Code session never reads the variable, and a
+    Codex session started without it is never refused here;
   - a bare `cd`, `chdir`, `pushd` or `popd` in the MAIN session that moves it to another directory
     inside the project, worktrees and `out/` included, so that every later relative path, `git` call
     and dispatched agent would run from there (Issue #781). The session is the main one when the
@@ -230,6 +252,24 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   - A trailing shell COMMENT is read as part of the command, so it can supply a method the call does
     not have: `gh api repos/o/r/issues/1 -f body=x # -X PATCH` passes, where the same call without
     the comment is refused.
+- **The headless-build refusal is a stop for a build's mistakes and ordinary workarounds, not a
+  wall** (Alex, 2026-11-20, Issue #1409). Its misses are silence, each one a command that runs:
+  a push or a GitHub call made from inside another program (a script the build writes and runs,
+  `node -e`, `python3 -c`, `perl -e`, a `make` target, an `npm run` script other than `proof`),
+  `find -exec`, a git alias already set in a config file the build did not write, the GitHub API
+  reached by another client (`curl`), a build started without the wrapper and so without the
+  variable, and a build that edits the hook's own files in its tree, since the hook it runs is
+  that tree's copy. None of them finds a login in the build's environment, so each fails for want
+  of one; but the build runs with full access, and one that went looking could still reach Alex's
+  login in the macOS keychain or in gh's config folder by a program the hook cannot read. Only a
+  build with its network cut off would be a guarantee, and Alex declined that for its cost, as he
+  declined a separate macOS user. **Its errors the other way are refusals**, each visible and one
+  edit away: every `gh` call, reads included; any word that names a shell or `gh` (`which gh`,
+  `ls ~/.config/gh`); `echo git push`; any `git -c`; a bare `git` or `git --version`;
+  `git config user.name` without `--get`; a command word with a `$` in it; and a quoted command word.
+  A further finding that only gets a command past this text check, and would still meet no login,
+  is a named miss here and not another round of code (Alex's ruling makes the environment the
+  primary layer and the hook the second).
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
@@ -323,6 +363,11 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   as a Claude `rm` does. A moved file is judged where it lands: its hunks are read under its new path,
   the route there owes its gate, and it owes Gate 4 there as an added file does.
 - **The caller.** A helper's payload carries `agent_id`, as a Claude subagent's does.
+- **A headless build.** `runCodexHook` reads `VELLUM_HEADLESS_BUILD` from its own environment, the
+  one Codex hands the hook, and passes it into the request as `headlessBuild`; nothing else on
+  either path reads it, so a test, a Claude Code session or a Codex call that carries the variable
+  without coming through that entry is judged as before. The hook sees the model's bare command:
+  the `/bin/zsh -lc` wrapper Codex runs it in never reaches it (measured, Issue #1409, run A).
 - **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
   (Issue #1394's evidence), so the move the refusal exists to stop cannot happen.
 - **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it
@@ -376,7 +421,7 @@ with the same expected decision, and `test/repo/codex-hook.test.ts` runs the exa
 `.codex/hooks.json` through `sh` with no `CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a
 lane's worktree, from an older worktree with no Codex launcher and from a folder in no repository.
 `test/repo/codex-patch.test.ts` holds the patch reader to what Codex's own patch tool reads, row by
-row, and each rule above for a patch to a fixture of its own.
+row, and each rule above for a patch to a fixture of its own. The headless-build rows (`test-support/footgun-gate/headless-build.fixtures.ts`) run through the Codex adapter alone with the build marked, and two of them carry the variable into a Claude call and an unmarked Codex call, which it must not change.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.txt`, one gate to a line; delete it to see a gate again. `npm run check`,
