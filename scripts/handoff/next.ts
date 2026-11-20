@@ -1,5 +1,5 @@
 import type { Outcome } from "./launch.ts";
-import { BRANCH_NAME, lastRun, PLAN_PATH, runFiles, THREAD_ID, treeOf, type HandoffState } from "./state.ts";
+import { BRANCH_NAME, lastRun, runFiles, stateProblem, type HandoffState } from "./state.ts";
 
 export type PullRequest = { readonly number: number; readonly state: "OPEN" | "MERGED" | "CLOSED" };
 export type Snapshot = {
@@ -44,16 +44,7 @@ const stepOf = (s: Snapshot): Step => {
         };
   }
   const { tree, plan, thread } = state;
-  const planted =
-    tree !== treeOf(root, issue)
-      ? "tree"
-      : !PLAN_PATH.test(plan)
-        ? "plan"
-        : thread !== null && !THREAD_ID.test(thread)
-          ? "thread"
-          : branch !== null && !BRANCH_NAME.test(branch)
-            ? "branch"
-            : null;
+  const planted = stateProblem(state, root, issue) ?? (branch !== null && !BRANCH_NAME.test(branch) ? "branch" : null);
   if (planted !== null) {
     return {
       id: "stopped",

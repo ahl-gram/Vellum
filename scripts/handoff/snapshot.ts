@@ -15,7 +15,9 @@ export type GhReads = {
   readonly commentsJsonl: (issue: number) => string;
 };
 
-const gh = (args: readonly string[]): string => execFileSync("gh", [...args], { encoding: "utf8" });
+const TIMEOUT_MS = 120_000;
+const gh = (args: readonly string[]): string =>
+  execFileSync("gh", [...args], { encoding: "utf8", timeout: TIMEOUT_MS });
 
 export const LIVE_GH: GhReads = {
   labels: (issue) => JSON.parse(gh(["api", `repos/${REPO}/issues/${issue}`, "--jq", "[.labels[].name]"])) as string[],
@@ -56,7 +58,7 @@ export const isRunning = (run: RunRecord | null): boolean => {
 };
 
 const git = (args: readonly string[], cwd: string): string =>
-  execFileSync("git", [...args], { cwd, encoding: "utf8" }).trim();
+  execFileSync("git", [...args], { cwd, encoding: "utf8", timeout: TIMEOUT_MS }).trim();
 
 export const snapshotOf = (issue: number, root: string, reads: GhReads): Snapshot => {
   const folder = folderOf(root, issue);

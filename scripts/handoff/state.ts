@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Effort } from "../agent-infra/model-policy.ts";
+import { EFFORTS, type Effort } from "../agent-infra/model-policy.ts";
 
 export type RunKind = "build" | "resume";
 export type RunRecord = {
@@ -38,6 +38,26 @@ export const FILES = {
 export const THREAD_ID = /^[0-9A-Za-z][0-9A-Za-z-]{0,63}$/;
 export const BRANCH_NAME = /^(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+$/;
 export const PLAN_PATH = /^\/[A-Za-z0-9._/@+=-]+$/;
+
+const TIMESTAMP = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/;
+const isStamp = (value: unknown): boolean =>
+  typeof value === "string" && TIMESTAMP.test(value) && !Number.isNaN(Date.parse(value));
+const runProblem = (run: RunRecord, at: number): boolean =>
+  run.n !== at + 1 ||
+  !["build", "resume"].includes(run.kind) ||
+  !isStamp(run.started) ||
+  (run.ended !== null && !isStamp(run.ended)) ||
+  (run.exit !== null && !Number.isInteger(run.exit)) ||
+  !Number.isInteger(run.pid) ||
+  run.pid <= 1;
+
+export const stateProblem = (state: HandoffState, root: string, issue: number): string | null => {
+  if (state.tree !== treeOf(root, issue)) return "tree";
+  if (!PLAN_PATH.test(state.plan)) return "plan";
+  if (state.thread !== null && !THREAD_ID.test(state.thread)) return "thread";
+  if (!(EFFORTS as readonly string[]).includes(state.effort)) return "effort";
+  return state.runs.some(runProblem) ? "run" : null;
+};
 
 export const folderOf = (root: string, issue: number): string => join(root, "out", `${issue}-handoff`);
 export const treeOf = (root: string, issue: number): string => join(root, ".claude", "worktrees", `codex-${issue}`);

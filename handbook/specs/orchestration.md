@@ -147,11 +147,14 @@ home's line wins for the lane and this file's for the orchestrator.
 - **The session pushes each run's commits as soon as the run ends**, ready or handed back, with
   `git -C <tree> -c core.hooksPath=/dev/null push -u origin <branch>`, so the branch carries the plan
   when a planner counts revisions (workflow step 8). Every push of a Codex build's work runs with
-  every git hook off: a headless build can write any hook into the shared `.git/hooks`, a
-  `reference-transaction` one included, which `--no-verify` does not skip and git would run with the
-  session's login, and Vellum has no git hook of its own to skip (Alex, 2026-11-20, Issue #1409,
-  comments 7046605950 and 7047054816). A test builds a scratch repository, plants four hooks and runs
-  the printed command (`test/repo/handoff-push.test.ts`).
+  every git hook off, but only that push does: a headless build can write any hook into the shared
+  `.git/hooks`, a `reference-transaction` one included, which `--no-verify` does not skip, and Vellum
+  has no git hook of its own to skip. A hook so planted still runs with Alex's login when the guard
+  prover's sandbox is made (`scripts/agent-sandbox.ts create` runs `git fetch` and `git worktree
+  add`), at the next `handoff build`, and at his own commit, pull or checkout in the main checkout;
+  that stays inside the accepted gap below, and its exit is Issue #1418 (Alex, 2026-11-20, Issue
+  #1409, comments 7046605950 and 7047054816). A test builds a scratch repository, plants two hooks
+  and runs the printed command (`test/repo/handoff-push.test.ts`).
 - **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
   report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
   session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief

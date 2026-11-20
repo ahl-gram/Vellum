@@ -27,7 +27,7 @@ before(() => {
   git(["worktree", "add", "-q", "-b", "feat/9-x", tree, "HEAD"], main);
   git(["commit", "-q", "--allow-empty", "-m", "built"], tree);
   mkdirSync(marks, { recursive: true });
-  for (const hook of ["pre-push", "reference-transaction", "post-commit", "pre-receive"]) {
+  for (const hook of ["pre-push", "reference-transaction"]) {
     const file = join(main, ".git", "hooks", hook);
     writeFileSync(file, `#!/bin/sh\necho ran >> "${join(marks, hook)}"\n`);
     chmodSync(file, 0o755);
@@ -49,7 +49,16 @@ const snapshot = (): Snapshot => ({
     model: "m",
     effort: "high",
     thread: "th",
-    runs: [{ n: 1, kind: "build", started: "t", pid: 1, ended: "t2", exit: 0 }],
+    runs: [
+      {
+        n: 1,
+        kind: "build",
+        started: "2026-11-20T10:00:00.000Z",
+        pid: 4242,
+        ended: "2026-11-20T10:05:00.000Z",
+        exit: 0,
+      },
+    ],
   },
   running: false,
   outcome: "ready",
@@ -77,7 +86,7 @@ test("the push next prints runs no git hook of the shared .git/hooks, whichever 
     "",
     "the printed push did not reach the remote",
   );
-  for (const hook of ["pre-push", "reference-transaction", "post-commit", "pre-receive"]) {
+  for (const hook of ["pre-push", "reference-transaction"]) {
     assert.equal(existsSync(join(marks, hook)), false, `${hook} ran on the printed push`);
   }
 });

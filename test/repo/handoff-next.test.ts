@@ -2,7 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { nextStep, type Snapshot, type StepId } from "../../scripts/handoff/next.ts";
 
-const RUN = { n: 1, kind: "build", started: "t", pid: 1, ended: "t2", exit: 0 } as const;
+const RUN = {
+  n: 1,
+  kind: "build",
+  started: "2026-11-20T10:00:00.000Z",
+  pid: 4242,
+  ended: "2026-11-20T10:05:00.000Z",
+  exit: 0,
+} as const;
 const BASE: Snapshot = {
   issue: 1500,
   root: "/r",

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
-import { EFFORTS, loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
+import { loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
 import { ROLES } from "../agent-infra/roles.ts";
 import { createPlan, resolveRoot, runPlan } from "../agent-sandbox.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, runCodex, threadOf } from "./launch.ts";
@@ -11,9 +11,10 @@ import {
   FILES,
   folderOf,
   lastRun,
+  PLAN_PATH,
   readState,
   runFiles,
-  THREAD_ID,
+  stateProblem,
   treeOf,
   writeState,
   type HandoffState,
@@ -49,12 +50,8 @@ const isFile = (path: string | undefined): path is string => {
   }
 };
 
-const recordProblem = (state: HandoffState, root: string, issue: number, model: string): string | null => {
-  if (state.tree !== treeOf(root, issue)) return "tree";
-  if (state.thread !== null && !THREAD_ID.test(state.thread)) return "thread";
-  if (!(EFFORTS as readonly string[]).includes(state.effort)) return "effort";
-  return state.model === model ? null : "model";
-};
+const recordProblem = (state: HandoffState, root: string, issue: number, model: string): string | null =>
+  stateProblem(state, root, issue) ?? (state.model === model ? null : "model");
 
 const refuse = (reason: string): number => {
   console.error(reason);
@@ -94,7 +91,9 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   const session = p.flags.get("session") ?? "";
   const folder = folderOf(root, issue);
   const tree = treeOf(root, issue);
-  if (!isFile(plan)) return refuse("--plan must be the absolute path of the finished plan file");
+  if (!isFile(plan) || !PLAN_PATH.test(plan)) {
+    return refuse("--plan must be the absolute path of the finished plan file, in plain path characters");
+  }
   if (session === "") return refuse("--session must be the dispatching session's link");
   if (readState(folder) !== null) {
     return refuse(`Issue #${issue} already has a build record in ${folder}; run npm run handoff -- next ${issue}`);
@@ -137,7 +136,9 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
   const brief = p.flags.get("brief");
   const plan = p.flags.get("plan");
   if (!isFile(brief)) return refuse("--brief must be the absolute path of the brief file");
-  if (plan !== undefined && !isFile(plan)) return refuse("--plan must be the absolute path of the revised plan file");
+  if (plan !== undefined && (!isFile(plan) || !PLAN_PATH.test(plan))) {
+    return refuse("--plan must be the absolute path of the revised plan file, in plain path characters");
+  }
   if (isRunning(lastRun(state))) return refuse(`Issue #${issue}'s last run is still running`);
   if (state.thread === null) return refuse(`Issue #${issue}'s build never started a thread, so it cannot be resumed`);
   if (!existsSync(state.tree)) return refuse(`${state.tree} is gone, so Issue #${issue}'s build cannot be resumed`);

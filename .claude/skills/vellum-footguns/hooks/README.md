@@ -262,7 +262,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   wall** (Alex, 2026-11-20, Issue #1409). Its misses are silence, each one a command that runs:
   a push or a GitHub call made from inside another program (a script the build writes and runs,
   `node -e`, `python3 -c`, `perl -e`, a `make` target, an `npm run` script other than `proof`),
-  code the build writes that the Claude Code session later runs with its own login (test code the guard prover executes, the shared `.git/config`, his shell startup files; a git hook in the shared `.git/hooks` is closed, since the session pushes a Codex build's work with `-c core.hooksPath=/dev/null`, Alex 2026-11-20, comments 7046605950 and 7047054816), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
+  code the build writes that the Claude Code session later runs with its own login (test code the guard prover executes, the shared `.git/config`, his shell startup files; a git hook planted in the shared `.git/hooks` stays inside the accepted gap: only the session's own push of a Codex build runs with hooks off (`-c core.hooksPath=/dev/null`), while the guard prover's sandbox (`scripts/agent-sandbox.ts create` runs `git fetch` and `git worktree add`), the next `handoff build`, and Alex's own commit, pull or checkout in the main checkout run it with his login, and its exit is Issue #1418 (Alex, 2026-11-20, comments 7046605950 and 7047054816)), `find -exec`, `-execdir` and `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`,
   `chrt`, `watch`, `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
   `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a command word
   (`\git`, `$G`, `""git`), the proof run's name hidden behind a runner option that takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), `builtin . script.sh`, a git alias already set in a config file the build did not write, the GitHub API
@@ -277,10 +277,9 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   `ls ~/.config/gh`); `echo git push`; any `git -c`; a bare `git` or `git --version`;
   `git config user.name` without `--get`; a command word with a `$` in it; and a quoted command word.
   A further finding that only gets a command past this text check, and would still meet no login,
-  is a named miss here and not another round of code (the dispatching session's rule for the
-  review loop on Issue #1409, 2026-11-20: the build's environment holds no login, so the hook's text
-  check is the second layer; a finding that would restore the login or reach GitHub with one is
-  still fixed).
+  is a named miss here and not another round of code (Alex's ruling 4 of comment 7046605950,
+  2026-11-20: a finding that only gets a command past the hook's text check and would still meet no
+  login is named in the residual-gap list; one that could restore the login is fixed).
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
