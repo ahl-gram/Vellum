@@ -115,7 +115,10 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     reached through `npm`, `npx`, `pnpm`, `yarn` or a script runner. The whole command, not a segment, is
     refused when its text names a `GIT_`, `GH_` or `GITHUB_` variable anywhere (an assignment, `export`,
     `declare -x`, `read`, `printf -v`, a `$` expansion), which is how a command would undo the
-    environment's credential reset. Reading every word, not only the first,
+    environment's credential reset; and a segment whose command word is a variable-setting builtin
+    (`export`, `declare`, `typeset`, `readonly`, `local`, `read`, `unset`, `set -a`, `printf -v`) with a
+    quote, a backslash or a `$` in an argument is refused too, which catches a name spelled
+    `G"IT"_X` or `$'GIT\x5fX'`. Reading every word, not only the first,
     is what finds `xargs git push`, `env -u X git push`, `timeout 60 git push`, `/usr/bin/git push` and
     a command in backticks. It is judged before every other refusal, so the build hears why it
     cannot rather than another way to post. A Claude Code session never reads the variable, and a

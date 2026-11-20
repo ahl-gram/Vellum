@@ -24,6 +24,15 @@ const marked = async (run: () => Promise<Decision>): Promise<Decision> => {
 };
 
 const REFUSED = [
+  'export G"IT"_CONFIG_COUNT=0',
+  "unset GIT\\_CONFIG_COUNT",
+  "export $'GIT\\x5fCONFIG_COUNT'=0",
+  'declare -x G"IT"_X=0',
+  'readonly G"IT"_X=0',
+  'local G"IT"_X=0',
+  'read G"IT"_X',
+  'printf -v G"IT"_X 0',
+  'set -a; G"IT"_X=0',
   "declare -x GIT_CONFIG_COUNT=0",
   "typeset -x GIT_CONFIG_COUNT=0",
   "read GIT_CONFIG_COUNT",
@@ -170,7 +179,7 @@ const PASSED = [
   "./scripts/x.sh",
   'git commit -m "feat: x"',
   'git log --format="%h" -1',
-  'export FOO="bar"',
+  "export FOO=bar",
   "git config --global --get user.name",
   "git commit -m x",
   "git fetch origin",

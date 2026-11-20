@@ -44,6 +44,8 @@ const WRAPPERS = new Set(["command", "exec", "env", "nohup", "nice", "timeout", 
 const FEEDERS = new Set(["xargs", "parallel"]);
 const NUMBER = /^\d+[smhd]?$/;
 const LOGIN_ENV = /(?:GIT|GH|GITHUB)_/;
+const SETTERS = new Set(["export", "declare", "typeset", "readonly", "local", "read", "unset"]);
+const ESCAPED = /["'\\$]/;
 const FIRST_WORDS = new Set(["eval", "source", "."]);
 const TRIM = /^[`'"(){};]+|[`'"(){};]+$/g;
 
@@ -83,6 +85,17 @@ const commandWordIsPlain = (tokens: readonly string[]): boolean => {
   return word === "" || PLAIN.test(word) || ASSIGNMENT.test(word) || TEST_BRACKETS.has(word);
 };
 
+const settersWithEscapes = (tokens: readonly string[]): boolean => {
+  const at = tokens.findIndex((t) => !LEADERS.has(t) && !t.startsWith("-") && !NUMBER.test(t));
+  const word = tokens[at] ?? "";
+  const args = tokens.slice(at + 1);
+  const sets =
+    SETTERS.has(word) ||
+    (word === "set" && args.some((t) => /^-[a-z]*a/.test(t))) ||
+    (word === "printf" && args.includes("-v"));
+  return sets && args.some((t) => ESCAPED.test(t));
+};
+
 export const headlessRefusal = (segment: string): string | null => {
   const tokens = segment.split(" ");
   const raw = tokens.map((t) => t.replace(TRIM, ""));
@@ -92,6 +105,7 @@ export const headlessRefusal = (segment: string): string | null => {
     tokens.some((t) => DISGUISED.test(t)) ||
     !commandWordIsPlain(tokens) ||
     !wrappedWordIsPlain(tokens) ||
+    settersWithEscapes(tokens) ||
     (words.some((w) => FEEDERS.has(w)) && words.includes("git")) ||
     words.some((w) => GIT_HELPER.test(w)) ||
     FIRST_WORDS.has(words[0] ?? "") ||
