@@ -4,7 +4,6 @@ import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import { treeRound, treePine, treePalm, marshTuft, dune, waveFlourish } from "../../prospect/dress/glyphs.ts";
 import type { XYS } from "../../prospect/geometry.ts";
 import { BIOMES } from "../../climate/biomes.ts";
-import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { eventCaption } from "../prose.ts";
@@ -12,6 +11,7 @@ import type { RibbonEvent } from "../events.ts";
 import { freeSideOf, stripPos, type StripLayout } from "./layout.ts";
 import {
   bridgeMark,
+  clusterSeat,
   fordMark,
   hillProfile,
   mountainProfile,
@@ -29,7 +29,7 @@ import {
 } from "./glyphs.ts";
 import { paintedRiverBand, riverBand, seaWash } from "./water.ts";
 import { paintedCompass, stripCompass } from "./compass.ts";
-import { leagueMarks, roadAngleDeg, roadNodes } from "./road.ts";
+import { continuationLabel, leagueMarks, roadAngleDeg, roadNodes, sideRoadStub } from "./road.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 import { clothFrame, plainFrame, stripBody, type StripBody } from "./cloth.ts";
 import { captionKeep, captionNode, captionRoom, layCaption, type CaptionsLaid } from "./captions.ts";
@@ -124,11 +124,9 @@ function eventArt(
 ): SvgNode[] {
   switch (e.kind) {
     case "waypoint": {
-      const tier = e.tier === "farmstead" || e.tier === "mill" ? "hamlet" : e.tier;
+      const s = clusterSeat(p, e.tier);
       return [
-        c.paint
-          ? paintedSettlementCluster(c, c.paint, p.sx, p.sy - 1, tier)
-          : settlementCluster(c, p.sx, p.sy - 1, tier),
+        c.paint ? paintedSettlementCluster(c, c.paint, s.x, s.y, s.tier) : settlementCluster(c, s.x, s.y, s.tier),
       ];
     }
     case "crossing": {
@@ -142,11 +140,12 @@ function eventArt(
     case "border":
     case "forest":
       return [];
-    case "branch":
+    case "branch": {
+      const stub = sideRoadStub(p, e.side);
       return [
         el("path", {
           class: "road",
-          d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(p.sx + e.side * 20)} ${r1(p.sy - 9)}`,
+          d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(stub.bend.sx)} ${r1(stub.bend.sy)} ${r1(stub.end.sx)} ${r1(stub.end.sy)}`,
           fill: "none",
           stroke: c.paint ? c.ink : c.style.road,
           "stroke-width": 0.9,
@@ -154,6 +153,7 @@ function eventArt(
           "stroke-linecap": "round",
         }),
       ];
+    }
     case "summit": {
       const m = summitMountain(p, freeSide);
       return [c.paint ? paintedMountain(c, c.paint, m.x, m.y, m.s) : mountainProfile(c, m.x, m.y, m.s)];
@@ -186,21 +186,21 @@ function eventNodes(
 }
 
 function continuation(c: DressContext, strip: StripLayout, isLast: boolean): SvgNode[] {
-  if (isLast) return [];
-  const leagues = Math.round(strip.d1 / CELLS_PER_LEAGUE);
+  const label = continuationLabel(strip, isLast);
+  if (label === null) return [];
   return [
     el(
       "text",
       {
-        x: r1(strip.x0 + strip.w / 2),
-        y: r1(strip.y0 + 12),
+        x: r1(label.x),
+        y: r1(label.y),
         "text-anchor": "middle",
         "font-family": c.style.fontFamily,
-        "font-size": 7.5,
+        "font-size": label.size,
         "font-style": "italic",
         fill: c.soft,
       },
-      [`· ${leagues} leagues ·`],
+      [label.text],
     ),
   ];
 }
