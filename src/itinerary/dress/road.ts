@@ -59,13 +59,13 @@ export function leaguesOn(strip: StripLayout): LeagueMark[] {
   });
 }
 
-export type Lettering = { readonly x: number; readonly y: number; readonly size: number; readonly text: string };
+export type StripLettering = { readonly x: number; readonly y: number; readonly size: number; readonly text: string };
 
-export function fifthNumeral(p: { readonly sx: number; readonly sy: number }, l: number): Lettering | null {
+export function fifthNumeral(p: { readonly sx: number; readonly sy: number }, l: number): StripLettering | null {
   return l % 5 === 0 ? { x: p.sx + 5.5, y: p.sy + 2.4, size: 7, text: String(l) } : null;
 }
 
-export function continuationLabel(strip: StripLayout, isLast: boolean): Lettering | null {
+export function continuationLabel(strip: StripLayout, isLast: boolean): StripLettering | null {
   if (isLast) return null;
   const leagues = Math.round(strip.d1 / CELLS_PER_LEAGUE);
   return { x: strip.x0 + strip.w / 2, y: strip.y0 + 12, size: 7.5, text: `· ${leagues} leagues ·` };
