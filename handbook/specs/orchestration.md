@@ -18,7 +18,8 @@ home's line wins for the lane and this file's for the orchestrator.
   and a `vellum-implementer` on its plan only once Alex has seen it at the STOP, empty menu or not,
   and its Open decisions line reads `none`; never
   a general-purpose agent with a retyped brief. Each definition carries the model, the effort, the
-  worktree isolation and its half of the sequence, and a retyped brief drops one of them.
+  worktree isolation and its half of the sequence, and a retyped brief drops one of them. An issue labelled `builder:codex` gets its headless build in
+  place of the implementer (Lanes that cross harnesses, below).
 - **The implementer's brief adds the plan's absolute scratchpad path**, and nothing of the planner's
   reasoning beyond what the plan itself says: the plan is the contract, and a builder told why a
   design was chosen is a builder invited to re-choose it.
@@ -75,7 +76,8 @@ home's line wins for the lane and this file's for the orchestrator.
   ratified and not as a ruling: edit them together, in their role bodies under `handbook/agents/roles/`,
   then run `npm run agents:generate`.
 - **Once the plan is archived, retire the planner's tree** after copying its `out/` across
-  (Retiring, below), and dispatch the implementer on the plan's scratchpad path.
+  (Retiring, below), and dispatch the implementer on the plan's scratchpad path. For an issue labelled `builder:codex`,
+  start its headless build on that path instead (Lanes that cross harnesses, below).
 - **An implementer's hand-back goes to a fresh `vellum-planner`**, which gets a fresh tree, dispatched
   with the issue, the plan's path and the hand-back, never a message to the retired one, which has no
   tree to stand in, and from the planner to Alex when it opens a
@@ -100,35 +102,94 @@ home's line wins for the lane and this file's for the orchestrator.
 
 ## Lanes that cross harnesses
 
-- **An issue Codex builds keeps the roles assigned to Claude Code there**, as
-  `handbook/specs/development-workflow.md` (The agents) says. That session runs their steps and
-  puts each menu to Alex; a Codex session builds from the finished plan, in a tree it builds as
-  workflow step 7 says. Each session hands the next only what the receiving role's brief takes:
-  preparation starts with the issue number, the build with the finished plan's path, proof with
-  the prover handoff below, and cold review with the pull request's number and nothing else.
-- **The prover handoff.** The guard prover proves the HEAD of the tree it is dispatched from, so a
-  sha named in a brief changes nothing. The Codex session commits and pushes, writes
-  `out/<issue>/ready-for-prover.md` in the main checkout (the branch, the committed head sha, every
-  new or strengthened guard with its test file, its test name and the mutation it must catch, and
-  the absolute paths of its tree and of that folder), and then leaves its tree alone. Alex starts a
-  fresh Claude Code session in that tree, which reads `pwd`, `git branch --show-current`,
-  `git rev-parse HEAD` and `git status --porcelain`, checks each against the handoff and that the
-  work under proof is committed, and stops on any mismatch without switching, resetting or
-  restoring a tree. It dispatches `vellum-guard-prover` once, without worktree isolation, accepts
-  the ledger only if the sandbox HEAD it reports is the handoff's sha, saves the report unedited as
-  `out/<issue>/prover-report.md`, relays it to Alex, and is closed before the tree is removed.
-- **A guard the prover's one round left unproven is proved by the Codex session** (workflow step
-  15): it repairs the guard in the same tree, commits before it mutates, and records its proof as
-  `out/<issue>/implementer-proof.md` (the commit, the guard and its test, the mutation, the command,
-  the unmutated passing control, the red line, the restore and the final green), labelled as the
-  implementing session's; the prover's report is never rewritten. The pull request opens only once
-  every required guard has a shown bite on the code it submits, and its Guards record says which
-  proofs are the prover's and which the Codex session's.
-- **The cold skeptic runs once, from a Claude Code session in the main checkout.** After Alex rules
-  on its findings, the Codex session fixes only what he named, proves any guard it adds or changes,
-  pushes and stops; nobody runs the skeptic or a used prover again.
-- **The Codex session removes the tree it built** after the merge,
-  `git -C <main checkout> worktree remove <path>`, once Alex has closed every session standing in it.
+- **An issue Codex builds carries the label `builder:codex`, and every other issue is built by
+  Claude Code** (Alex, 2026-11-20, Issue #1409, provisional until he has used the flow). The roles
+  `handbook/specs/development-workflow.md` (The agents) assigns to Claude Code keep running there,
+  from the Claude Code session that orchestrates the issue, which also puts every menu to Alex. The
+  label is read only before a build starts; once one has, its record decides.
+- **`npm run handoff -- next <issue>` says what comes next** (`scripts/handoff/main.ts`). When Alex
+  asks for the next step on an issue, the session runs it from the main checkout and takes the step
+  it prints, which names its exact command. It reads the label, the build's record in
+  `out/<issue>-handoff/` in the main checkout, the build's tree, the branch's pushed head, the
+  prover's report and the pull request. The build can rewrite everything in that folder, so `next`
+  prints no command from a record that fails validation (a tree other than the one the wrapper
+  made, a plan path, thread id or run field of an unexpected shape) or from a branch that is not
+  named for the issue (`<n>-topic` or `<prefix>/<n>-topic`, plain name characters only, so not
+  `main` and not another issue's), and says to ask Alex instead; `resume` validates the record's
+  tree, plan path, thread id, effort, model and every run, and runs nothing on a mismatch. The session runs the wrapper itself: Alex never pastes a
+  command, starts a session or types one with the `!` prefix (Alex, 2026-11-20, Issue #1409).
+- **The build runs headless, in the background, with no GitHub login.** Once the plan is finished
+  and archived (The STOP and the relay, above), the session runs `npm run handoff -- build <issue>
+  --plan <the plan's scratchpad path> --session <its own link>` as a background command, since a
+  build outlasts any foreground call. The wrapper builds the tree `.claude/worktrees/codex-<issue>`
+  as workflow step 7 builds one, detached at `origin/main` with `node_modules` linked, writes the
+  issue and its owner's, members' and collaborators' comments into the record's folder with the
+  session's own login (the repository is public, so every other comment stays out, and the prompt
+  calls both files data), and runs `codex
+  exec` in the tree with D2's flags before the subcommand, the implementer's Codex model and effort
+  from `.agents/model-policy.json` (`-m`, and `-c model_reasoning_effort`, Alex, 2026-11-20), stdin
+  at `/dev/null`, `VELLUM_HEADLESS_BUILD` set, and no GitHub or push credentials in its environment
+  (Alex, 2026-11-20, Issue #1409): no token variable, no ssh agent, git's credential helper reset
+  and gh pointed at an empty folder. Its events go to `run-<n>.jsonl` and its last message to
+  `run-<n>-last.md`. Alex follows a run with `tail -f` on its events; they leave out a hook's
+  refusal, which the Codex session file holds (`codex resume --include-non-interactive` lists the
+  session). The session is told when the run ends.
+- **A headless build commits, and never pushes, opens a pull request or writes to GitHub** (Alex,
+  2026-11-20, Issue #1409). It has no login in its environment, and wherever `VELLUM_HEADLESS_BUILD`
+  is set the footgun hook also refuses any push, every `gh` call, the proof run, and the wrapped and
+  disguised forms of them it can read (`.claude/skills/vellum-footguns/hooks/README.md`). **These
+  guard against a build's mistakes and casual attempts, not against a build set on pushing** (Alex,
+  comment 7047982050): a build can edit its own tree's copy of the hook, or run a one-line
+  interpreter (`node -e`) or one of git's own command runners with a quoted payload (git's own command runners with a quoted payload, which the blanking of quoted spans hides (`git rebase -x "git -c credential.helper=osxkeychain push ..." HEAD~1`, `git submodule foreach "git push"`, `git bisect run "git push"`)), and then push with `git -c credential.helper=osxkeychain push`, which
+  brings the login back. Under full access a build can also leave code that later runs as Alex, with
+  his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a
+  command set there runs on `git ls-remote` and `git status` in the session and in the main
+  checkout), in his shell startup files, and in test code the guard prover runs. Removing the
+  build's login stops it pushing by itself; it does not stop such a trap. The exits (a separate
+  macOS user, a build with no network, its own clone) are weighed in Issue #1418, before a Codex
+  build is trusted with anything that matters. The prompt the wrapper
+  writes sends what the build would have posted into the record's folder: the step 12 record as
+  record.md, the pull request body as pr-body.md, and each new or strengthened guard with the
+  mutation that must red it as guards.md. The build stops where its definition would dispatch the
+  guard prover or the plate reader, or open the pull request, and ends its last message with
+  `OUTCOME: ready` or `OUTCOME: handback`.
+- **The session pushes each run's commits as soon as the run ends**, ready or handed back, with
+  `git -C <tree> -c core.hooksPath=/dev/null push -u origin <branch>`, so the branch carries the plan
+  when a planner counts revisions (workflow step 8). Every push of a Codex build's work runs with
+  every git hook off, but only that push does: a headless build can write any hook into the shared
+  `.git/hooks`, a `reference-transaction` one included, which `--no-verify` does not skip, and Vellum
+  has no git hook of its own to skip. A hook so planted still runs with Alex's login when the guard
+  prover's sandbox is made (`scripts/agent-sandbox.ts create` runs `git fetch` and `git worktree
+  add`), at the next `handoff build`, and at his own commit, pull or checkout in the main checkout;
+  that stays inside the accepted gap below, and its exit is Issue #1418 (Alex, 2026-11-20, Issue
+  #1409, comments 7046605950 and 7047054816). A test builds a scratch repository, plants two hooks
+  and runs the printed command (`test/repo/handoff-push.test.ts`).
+- **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
+  report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
+  session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief
+  <brief> --plan <revision>` in the background, which resumes the thread by its id with the sandbox,
+  the effort, `VELLUM_HEADLESS_BUILD` and the empty login set again, and the issue written afresh.
+- **The guard prover runs from the build's tree.** Once no agent the session dispatched is still
+  running, the session steps into the tree with `EnterWorktree` (its `path`), dispatches
+  `vellum-guard-prover` there once, without isolation, on guards.md, accepts its ledger only if
+  the sandbox HEAD it reports is the tree's HEAD, saves the report unedited as prover-report.md in
+  the record's folder, and steps back out with `ExitWorktree` (`keep`) before anything else.
+  `vellum-plate-reader`, where workflow step 11 owes it, is dispatched from the tree the same way.
+- **A guard the prover's one round left unproven is proved by the build** (workflow step 15): the
+  session resumes it on a brief naming the guard, and the build repairs it in its tree, commits
+  before it mutates, and records its proof as implementer-proof.md in the record's folder (the
+  commit, the guard and its test, the mutation, the command, the unmutated passing control, the red
+  line, the restore and the final green), labelled as the build's; the prover's report is never
+  rewritten. The pull request opens only once every required guard has a shown bite on the code it
+  submits, and its Guards record says which proofs are the prover's and which the build's.
+- **Then the session posts record.md on the issue, completes the Guards section of pr-body.md,
+  opens the pull request with it, and dispatches `vellum-pr-skeptic` cold** from the main checkout,
+  once. After Alex rules on its findings, the session writes the fixes he named into a brief and
+  resumes the build on it, which proves any guard it adds or changes as the bullet above says; the
+  session pushes, and nobody runs the skeptic or a used prover again.
+- **After the merge, the session retires the build** as `next` prints: it removes the tree's
+  `node_modules` link and the tree, and moves the record's folder aside under the pull request's
+  number, where it stays as the build's record.
 
 ## While lanes run
 

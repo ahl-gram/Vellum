@@ -10,6 +10,7 @@ export type Operation = ShellOperation | FileChange | UnreadableCall;
 export type OperationDirectory = { readonly path: string | null; readonly provenance: "payload" };
 export type HookRequest = {
   readonly harness: HarnessId;
+  readonly headlessBuild: boolean;
   readonly sessionKey: string | null;
   readonly caller: CallerKind;
   readonly directoryPersists: boolean | "unknown";

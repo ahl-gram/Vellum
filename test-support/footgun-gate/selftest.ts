@@ -10,6 +10,7 @@ import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { codexChecks } from "./codex-rows.ts";
 import { ESCAPE_ROWS } from "./escape.fixtures.ts";
 import { GH_API_ROWS } from "./gh-api.fixtures.ts";
+import { HEADLESS_ROWS } from "./headless-build.fixtures.ts";
 import { ROUTE_ROWS, SEQUENCE_ROWS } from "./gate-routes.fixtures.ts";
 import {
   bash,
@@ -198,6 +199,7 @@ const FIXTURES: Fixture[] = [
   ...CODE_FIXTURES,
   ...CD_FIXTURES,
   ...GH_API_ROWS,
+  ...HEADLESS_ROWS,
   ...PR_BODY_ROWS,
   ...ESCAPE_ROWS,
   ...ROUTE_FIXTURES,

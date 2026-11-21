@@ -200,11 +200,11 @@ commits.
 name instead of yours. In Claude Code, why the branch needs renaming at all is the Worktrees section
 of `.claude/rules/claude-code.md`, and a `vellum-implementer` lane already stands in a harness
 worktree when it starts, its definition carrying the rename. A session with no worktree isolation,
-which is every Codex session, builds its tree the way a dispatcher builds a non-isolated agent's
+which is every interactive Codex session, builds its tree the way a dispatcher builds a non-isolated agent's
 (step 6): `git -C <main checkout> fetch origin`, then use that step's worktree-add command,
 then `[ -e <tree>/node_modules ] || ln -s ../../../node_modules <tree>/node_modules`, then
 `git -C <tree> switch -c <branch>`, each a command of its own, and every later command runs with
-that tree as its working folder. Never run `npm ci` or `npm install` through the link. The rest of
+that tree as its working folder. Never run `npm ci` or `npm install` through the link. `npm run handoff` fetches, adds the tree detached at `origin/main` and links `node_modules` for a headless Codex build before it starts, and the build switches to its own branch (`handbook/specs/orchestration.md`, Lanes that cross harnesses). The rest of
 the worktree conduct is `CLAUDE.md`'s Worktrees section.
 
 **8. Implement.** Five things the word hides, the first a record and the rest each with its own
@@ -252,7 +252,7 @@ scar:
   buried.
 
 **9. Push at the first commit**, per the ruled default in `vellum-footguns` ("Defaults this repo has
-already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2.
+already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2. A headless Codex build pushes nothing: the Claude Code session that launched it pushes each of its runs when the run ends, with every git hook off, `git -c core.hooksPath=/dev/null push` (`handbook/specs/orchestration.md`, Lanes that cross harnesses).
 **Read Gate 5 here, in full, even though half of it is not due yet.** The hook shows a gate's text at
 most once a session and keys the push and the PR write to the same gate, so this is the only time it
 will be put in front of you; its body checks are yours to remember at step 13. That is the cost of

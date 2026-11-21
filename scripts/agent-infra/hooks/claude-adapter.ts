@@ -44,6 +44,7 @@ export const toRequest = (
   if (operation === null) return null;
   return {
     harness: "claude-code",
+    headlessBuild: false,
     sessionKey: payload.session_id ?? null,
     caller: payload.agent_id === undefined ? "main" : "subagent",
     directoryPersists: payload.cwd_persists ?? "unknown",

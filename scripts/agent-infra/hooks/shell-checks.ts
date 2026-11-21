@@ -1,6 +1,7 @@
 import { bareCdReason } from "./bare-cd.ts";
 import { escapeScan } from "./escape-scan.ts";
 import { templatePath } from "./gate-state.ts";
+import { headlessEnvRefusal, headlessRefusal } from "./headless-build.ts";
 import { GH_PR_WRITE, ghRefusal } from "./pr-body.ts";
 import type { HookRequest, Note, ShellOperation, Verdict } from "./request.ts";
 import { commandSegments, gitCall, heredocBodies } from "./shell-text.ts";
@@ -79,9 +80,15 @@ export const checkBash = async (
   const template = templatePath(request.policyRoot);
   const notes: Note[] = [];
   const parts = commandSegments(command);
+  const envRefusal = request.headlessBuild ? headlessEnvRefusal(command) : null;
+  if (envRefusal !== null) return { denial: envRefusal, notes: [] };
 
   for (const segment of parts) {
-    const refusal = stashRefusal(segment) ?? perlRefusal(segment, command) ?? ghApiWriteRefusal(segment);
+    const refusal =
+      (request.headlessBuild ? headlessRefusal(segment) : null) ??
+      stashRefusal(segment) ??
+      perlRefusal(segment, command) ??
+      ghApiWriteRefusal(segment);
     if (refusal !== null) return { denial: refusal, notes: [] };
     const [ghDeny, warning] = ghRefusal(segment, command, cwd, template);
     if (ghDeny !== null) return { denial: ghDeny, notes: [] };

@@ -97,6 +97,34 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     A body file is a body only when a body FLAG named it: `$(cat f)` is read from any flag for the
     em-dash scan, and counting it here would refuse `gh pr edit N --add-label "$(cat notes.md)"` as a
     PR body skipping sections it was never meant to carry.
+  - in a headless Codex build only, which the Codex adapter knows by `VELLUM_HEADLESS_BUILD` in the
+    environment Codex hands the hook, and which `npm run handoff` sets on every build and resume it
+    starts, with no GitHub login in that environment (Alex, 2026-11-20, Issue #1409, where Codex was
+    measured passing both to its hooks and its shell): any push, every `gh` call, the proof run, and
+    the wrapped and disguised forms of them it can read, failing closed on these classes. Each
+    segment (split again at a lone `&`) is read word by word, a word taken by its last path part, in lower
+    case because the Mac's filesystem ignores case, with quotes, backticks and brackets trimmed, and is refused when its command word, or the word after `command`, `exec`, `env`,
+    `nohup`, `nice`, `timeout`, `stdbuf`, `sudo`, `xargs` or `parallel`, is not a plain name (a variable, a
+    substitution, a quote or a backslash in it), where `if`, `while`, `until`, `case`, `then`, `do`, `!` and
+    the like are skipped to find it; when any word starts with a letter and holds a quote or a
+    backslash (`setsid g"it" push`); when any word is `eval`, `source` or `trap`, or its command word is `.`; when a package runner or a script runner is followed by a quoted name (`npm run "proof"`, `node "scripts/proof-runner/main.ts"`); when any word is a shell (`sh`, `bash`,
+    `zsh`, `dash`, `ksh`, `fish`, `csh`, `tcsh`), `gh` or a `git-` helper; when `xargs` or
+    `parallel` feeds `git`; when any word is `git` and its global options carry `-c`, `--config-env` or
+    one the hook does not know, its subcommand word is missing or not plain, a later word is `push`,
+    `send-pack`, `http-push`, `receive-pack` or starts `credential`, or it is a `config` whose first
+    verb is not a read; when a `security` call names a keychain read (`find-internet-password`, `find-generic-password`, `dump-keychain`, `export`) anywhere after it; or when the proof run is
+    reached through `npm`, `npx`, `pnpm`, `yarn` or a script runner. The whole command, not a segment, is
+    refused when its text names a `GIT_`, `GH_` or `GITHUB_` variable anywhere (an assignment, `export`,
+    `declare -x`, `read`, `printf -v`, a `$` expansion), which is how a command would undo the
+    environment's credential reset; and a segment whose command word is a variable-setting builtin
+    (`export`, `declare`, `typeset`, `readonly`, `local`, `read`, `unset`, `let`, `getopts`, `mapfile`,
+    `readarray`, `set` with an `a` or `A` option or `-o`, `printf -v`) is refused unless every argument is
+    an option cluster or a plain name with an optional plain value, so a name spelled `G"IT"_X` or
+    `$'GIT\x5fX'` cannot get through. Reading every word, not only the first,
+    is what finds `xargs git push`, `env -u X git push`, `timeout 60 git push`, `/usr/bin/git push` and
+    a command in backticks. It is judged before every other refusal, so the build hears why it
+    cannot rather than another way to post. A Claude Code session never reads the variable, and a
+    Codex session started without it is never refused here;
   - a bare `cd`, `chdir`, `pushd` or `popd` in the MAIN session that moves it to another directory
     inside the project, worktrees and `out/` included, so that every later relative path, `git` call
     and dispatched agent would run from there (Issue #781). The session is the main one when the
@@ -230,6 +258,40 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   - A trailing shell COMMENT is read as part of the command, so it can supply a method the call does
     not have: `gh api repos/o/r/issues/1 -f body=x # -X PATCH` passes, where the same call without
     the comment is refused.
+- **The headless-build refusal and the missing login guard against a build's mistakes and casual
+  attempts, not against a build set on pushing** (Alex, 2026-11-20, Issue #1409, comment 7047982050,
+  which supersedes ruling 4 of comment 7046605950). A build that sets out to push can: any command
+  the hook does not refuse can bring the login back with `git -c credential.helper=osxkeychain
+  push`, which overrides the wrapper's credential reset, and the simplest routes are a build editing
+  its own tree's copy of the hook (Codex runs the hook from the tree, and ruling 6 of comment
+  7046605950 lets a build edit it) and then pushing, or a one-line interpreter (`node -e`) running
+  that push. No list of refused commands can close those. The cheap, common holes are closed in
+  the rule itself (tool names matched regardless of case, since the Mac's filesystem ignores it, a
+  lone `&` read as a separator, the keychain read in any case), and a further text trick past the
+  hook is named here, not chased. The misses, each a command that runs: a push or a GitHub call
+  made from inside another program (git's own command runners with a quoted payload, which the blanking of quoted spans hides (`git rebase -x "git -c credential.helper=osxkeychain push ..." HEAD~1`, `git submodule foreach "git push"`, `git bisect run "git push"`), a script the build writes and runs, `node -e`, `python3 -c`,
+  `perl -e`, a `make` target, an `npm run` script other than `proof`), `find -exec`, `-execdir` and
+  `-ok`, wrappers it does not name (`setsid`, `caffeinate`, `doas`, `ionice`, `chrt`, `watch`,
+  `script`, `flock`, `coproc`), a wrapper's option value read as the wrapped command (`sudo -u`,
+  `timeout -s`, `env -C` and `-S`, `xargs -I`), a launcher followed by a word it cannot read as a
+  command word (`\git`, `$G`), the proof run's name hidden behind a runner option that
+  takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), a git
+  alias already set in a config file the build did not write, the GitHub API reached by another
+  client (`curl`), a build started without the wrapper and so without the variable, and a build that
+  edits the hook's own files in its tree, since the hook it runs is that tree's copy. Under full
+  access a headless build can also leave code that later runs as Alex, with his login: in the shared
+  git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on
+  `git ls-remote` and `git status` in the session and in the main checkout), in a git hook in the
+  shared `.git/hooks` (only the session's own push of a Codex build runs with hooks off,
+  `-c core.hooksPath=/dev/null`; the guard prover's sandbox, the next `handoff build` and Alex's own
+  commit, pull or checkout run a planted hook), in his shell startup files, and in test code the
+  guard prover runs; and it can reach his login in the macOS keychain or in gh's config folder by a
+  program the hook cannot read. The exits (a separate macOS user, a build with no network, its own
+  clone) are weighed in Issue #1418, before a Codex build is trusted with anything that matters.
+  **Its errors the other way are refusals**, each visible and one edit away: every `gh` call, reads
+  included; any word that names a shell or `gh` (`which gh`, `ls ~/.config/gh`); `echo git push`;
+  any `git -c`; a bare `git` or `git --version`; `git config user.name` without `--get`; a command
+  word with a `$` in it; and a quoted command word.
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
@@ -323,6 +385,11 @@ neither blocked nor checked. The launcher hands the call to `runCodexHook` in
   as a Claude `rm` does. A moved file is judged where it lands: its hunks are read under its new path,
   the route there owes its gate, and it owes Gate 4 there as an added file does.
 - **The caller.** A helper's payload carries `agent_id`, as a Claude subagent's does.
+- **A headless build.** `runCodexHook` reads `VELLUM_HEADLESS_BUILD` from its own environment, the
+  one Codex hands the hook, and passes it into the request as `headlessBuild`; nothing else on
+  either path reads it, so a test, a Claude Code session or a Codex call that carries the variable
+  without coming through that entry is judged as before. The hook sees the model's bare command:
+  the `/bin/zsh -lc` wrapper Codex runs it in never reaches it (measured on the planner's run A, `handbook/plans/1400/1409/1409-r1-plan.md`, "The hook sees the model's bare command").
 - **The bare `cd`.** Never refused: a Codex shell call does not carry its folder over to the next one
   (Issue #1394's evidence), so the move the refusal exists to stop cannot happen.
 - **Gates.** Once per session, as under Claude, and a helper shares its parent's `session_id`, so it
@@ -376,7 +443,7 @@ with the same expected decision, and `test/repo/codex-hook.test.ts` runs the exa
 `.codex/hooks.json` through `sh` with no `CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a
 lane's worktree, from an older worktree with no Codex launcher and from a folder in no repository.
 `test/repo/codex-patch.test.ts` holds the patch reader to what Codex's own patch tool reads, row by
-row, and each rule above for a patch to a fixture of its own.
+row, and each rule above for a patch to a fixture of its own. The headless-build rows (`test-support/footgun-gate/headless-build.fixtures.ts`) run through the Codex adapter alone with the build marked, and two of them carry the variable into a Claude call and an unmarked Codex call, which it must not change.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.txt`, one gate to a line; delete it to see a gate again. `npm run check`,

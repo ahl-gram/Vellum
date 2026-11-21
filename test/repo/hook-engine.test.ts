@@ -37,6 +37,7 @@ after(() => {
 
 const request = (operations: readonly Operation[], sessionKey: string, caller: CallerKind = "main"): HookRequest => ({
   harness: "claude-code",
+  headlessBuild: false,
   sessionKey,
   caller,
   directoryPersists: "unknown",
