@@ -4,6 +4,7 @@ import { placed } from "../../prospect/dress/glyphs.ts";
 import type { XYS } from "../../prospect/geometry.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { Box } from "../../render/geometry.ts";
+import type { SettlementKind } from "../../society/sites.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
 
 export function hillProfile(c: DressContext, x: number, y: number, s: number): SvgNode {
@@ -38,6 +39,25 @@ export function summitMountain(p: { readonly sx: number; readonly sy: number }, 
   return { x, y, s: 1.05, box: { x: x - 9.5, y: y - 12.6, w: 19, h: 12.6 } };
 }
 
+export type ClusterTier = "capital" | "town" | "village" | "hamlet";
+
+const CLUSTER_BOX: Record<ClusterTier, Box> = {
+  capital: { x: -11.5, y: -11.6, w: 23, h: 14.8 },
+  town: { x: -9, y: -9.6, w: 18.7, h: 11.1 },
+  village: { x: -6.7, y: -5.4, w: 13.3, h: 5.9 },
+  hamlet: { x: -2.6, y: -5.1, w: 5.2, h: 5.1 },
+};
+
+export type ClusterSeat = { readonly x: number; readonly y: number; readonly tier: ClusterTier; readonly box: Box };
+
+export function clusterSeat(p: { readonly sx: number; readonly sy: number }, kind: SettlementKind): ClusterSeat {
+  const tier = kind === "farmstead" || kind === "mill" ? "hamlet" : kind;
+  const x = p.sx;
+  const y = p.sy - 1;
+  const k = CLUSTER_BOX[tier];
+  return { x, y, tier, box: { x: x + k.x, y: y + k.y, w: k.w, h: k.h } };
+}
+
 function house(c: DressContext, dx: number, dy: number, s: number): SvgNode[] {
   return [
     el("path", {
@@ -58,12 +78,7 @@ function tower(c: DressContext, dx: number, dy: number, s: number): SvgNode[] {
   ];
 }
 
-export function settlementCluster(
-  c: DressContext,
-  x: number,
-  y: number,
-  tier: "capital" | "town" | "village" | "hamlet",
-): SvgNode {
+export function settlementCluster(c: DressContext, x: number, y: number, tier: ClusterTier): SvgNode {
   const parts: SvgNode[] =
     tier === "capital"
       ? [...house(c, -8, 0, 1.15), ...tower(c, 0, 0, 1.2), ...house(c, 8, 0, 1.15), ...house(c, 3, 3, 1)]
@@ -89,6 +104,13 @@ export function fordMark(c: DressContext, x: number, y: number, deg: number): Sv
     el("circle", { cx: 3.4, cy: -0.8, r: 0.7 }),
   ]);
 }
+
+export const crossingMarkBox = (p: { readonly sx: number; readonly sy: number }): Box => ({
+  x: p.sx - 7.5,
+  y: p.sy - 5.5,
+  w: 15,
+  h: 11,
+});
 
 export function paintedHill(c: RibbonContext, paint: RibbonPaint, x: number, y: number, s: number): SvgNode {
   return placed(x, y, s, [
@@ -141,7 +163,7 @@ export function paintedSettlementCluster(
   paint: RibbonPaint,
   x: number,
   y: number,
-  tier: "capital" | "town" | "village" | "hamlet",
+  tier: ClusterTier,
 ): SvgNode {
   const house = (dx: number, dy: number, s: number): SvgNode[] => paintedHouse(c, paint, dx, dy, s);
   const tower = (dx: number, dy: number, s: number): SvgNode[] => paintedTower(c, paint, dx, dy, s);

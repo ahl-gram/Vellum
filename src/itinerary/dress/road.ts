@@ -7,6 +7,10 @@ import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 
 export const ROAD_HALF = 2.3;
 export const PAINTED_ROAD_HALF = 4.2;
+const LEAGUE_DOT_R = 1.4;
+const LEAGUE_DISC_R = 3.6;
+const WIDE_LEAGUE_RX = 5.1;
+const WIDE_FROM = 100;
 
 function offsetPath(pts: ReadonlyArray<StripPoint>, off: number): string {
   let d = "";
@@ -55,10 +59,30 @@ export function leaguesOn(strip: StripLayout): LeagueMark[] {
   });
 }
 
-export type FifthNumeral = { readonly x: number; readonly y: number; readonly size: number; readonly text: string };
+export type Lettering = { readonly x: number; readonly y: number; readonly size: number; readonly text: string };
 
-export function fifthNumeral(p: { readonly sx: number; readonly sy: number }, l: number): FifthNumeral | null {
+export function fifthNumeral(p: { readonly sx: number; readonly sy: number }, l: number): Lettering | null {
   return l % 5 === 0 ? { x: p.sx + 5.5, y: p.sy + 2.4, size: 7, text: String(l) } : null;
+}
+
+export function continuationLabel(strip: StripLayout, isLast: boolean): Lettering | null {
+  if (isLast) return null;
+  const leagues = Math.round(strip.d1 / CELLS_PER_LEAGUE);
+  return { x: strip.x0 + strip.w / 2, y: strip.y0 + 12, size: 7.5, text: `· ${leagues} leagues ·` };
+}
+
+export function leagueMarkReach(l: number, painted: boolean): number {
+  if (!painted) return LEAGUE_DOT_R;
+  return l >= WIDE_FROM ? WIDE_LEAGUE_RX : LEAGUE_DISC_R;
+}
+
+export type SideRoadStub = {
+  readonly bend: { readonly sx: number; readonly sy: number };
+  readonly end: { readonly sx: number; readonly sy: number };
+};
+
+export function sideRoadStub(p: { readonly sx: number; readonly sy: number }, side: -1 | 1): SideRoadStub {
+  return { bend: { sx: p.sx + side * 12, sy: p.sy - 2 }, end: { sx: p.sx + side * 20, sy: p.sy - 9 } };
 }
 
 export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
@@ -104,7 +128,7 @@ export function roadNodes(c: RibbonContext, input: RibbonInput, strip: StripLayo
 function leagueDots(c: RibbonContext, strip: StripLayout): SvgNode[] {
   const nodes: SvgNode[] = [];
   for (const { l, p } of leaguesOn(strip)) {
-    nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 1.4, fill: c.ink }));
+    nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: LEAGUE_DOT_R, fill: c.ink }));
     const n = fifthNumeral(p, l);
     if (n !== null) {
       nodes.push(
@@ -121,9 +145,9 @@ function leagueNumerals(c: RibbonContext, paint: RibbonPaint, strip: StripLayout
   const nodes: SvgNode[] = [];
   for (const { l, p } of leaguesOn(strip)) {
     nodes.push(
-      l >= 100
-        ? el("ellipse", { cx: r1(p.sx), cy: r1(p.sy), rx: 5.1, ry: 3.6, fill: paint.landWash })
-        : el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 3.6, fill: paint.landWash }),
+      l >= WIDE_FROM
+        ? el("ellipse", { cx: r1(p.sx), cy: r1(p.sy), rx: WIDE_LEAGUE_RX, ry: LEAGUE_DISC_R, fill: paint.landWash })
+        : el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: LEAGUE_DISC_R, fill: paint.landWash }),
       el(
         "text",
         {

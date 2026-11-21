@@ -2,6 +2,9 @@ import { el, type SvgNode } from "../../render/svg.ts";
 import { r1, stroke, type DressContext } from "../../prospect/dress/context.ts";
 import { placed } from "../../prospect/dress/glyphs.ts";
 import type { RibbonContext, RibbonPaint } from "./context.ts";
+import type { SeatDisc } from "./seats.ts";
+
+const FLEUR_REACH = 20.5;
 
 /** The genre's signature: the road runs up the strip, so the needle turns to keep true north. */
 export function stripCompass(c: DressContext, x: number, y: number, needleDeg: number): SvgNode {
@@ -52,7 +55,7 @@ function starPath(n: number, rOut: number, rIn: number, rot = 0): string {
 }
 
 function fleur(c: RibbonContext): SvgNode {
-  return placed(0, -20.5, 0.95, [
+  return placed(0, -FLEUR_REACH, 0.95, [
     el("path", { d: "M0 -5C-1.2 -3 -1.2 -1 0 1C1.2 -1 1.2 -3 0 -5Z", fill: c.ink }),
     el("path", {
       d: "M-0.6 -0.4C-2.4 -2.6 -4.6 -1 -3 0.6C-2 1.6 -0.8 1 -0.6 -0.4ZM0.6 -0.4C2.4 -2.6 4.6 -1 3 0.6C2 1.6 0.8 1 0.6 -0.4Z",
@@ -82,4 +85,13 @@ export function paintedCompass(c: RibbonContext, paint: RibbonPaint, x: number, 
     ]),
     el("circle", { cx: 0, cy: 0, r: 1, fill: c.ink }),
   ]);
+}
+
+export function compassDiscs(painted: boolean, x: number, y: number, needleDeg: number): SeatDisc[] {
+  const t = (needleDeg * Math.PI) / 180;
+  const reach = painted ? FLEUR_REACH : 17;
+  return [
+    { x, y, r: painted ? 15.5 : 14 },
+    { x: x + reach * Math.sin(t), y: y - reach * Math.cos(t), r: painted ? 5 : 4.5 },
+  ];
 }
