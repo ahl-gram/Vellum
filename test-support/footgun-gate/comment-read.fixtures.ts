@@ -20,6 +20,8 @@ const DENIED = [
   "gh issue view 1 --comments",
   "gh issue view 1 --comments=true",
   "gh pr view 1 -c",
+  "gh pr view 1 --json number -c",
+  "gh issue view 1 --json number --comments=true",
   "gh pr view 1 --json comments,reviews",
   "gh pr view 1 --json latestReviews",
   "gh issue list --json number,comments",
