@@ -71,7 +71,9 @@ export function homeStations(): ReadonlyArray<Station> {
   const weki = mooring("Weki");
   const poalo = mooring("Poalo");
   return [
-    station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital),
+    station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital, {
+      nameGap: 11,
+    }),
     station(
       "reading-room",
       "The Reading Room",
@@ -79,11 +81,12 @@ export function homeStations(): ReadonlyArray<Station> {
       `off ${lamahai.name}, on the southern shore`,
       "reading-room/",
       lamahai,
-      { slipAbove: true },
+      { slipAbove: true, nameGap: 7 },
     ),
     station("atlas", "The Atlas of Rahai", "Read one", `at ${weki.name}, a seat of the west`, "atlas/", weki, {
       legendName: "The Atlas",
       arms: true,
+      nameGap: 8,
     }),
     station(
       "gallery",
@@ -94,7 +97,9 @@ export function homeStations(): ReadonlyArray<Station> {
       { nx: GALLERY_NX, ny: GALLERY_NY },
       { sea: true },
     ),
-    station("primer", "The Primer", "Start here", `at ${poalo.name}, a harbour of the Ratoa Atolls`, "primer/", poalo),
+    station("primer", "The Primer", "Start here", `at ${poalo.name}, a harbour of the Ratoa Atolls`, "primer/", poalo, {
+      nameGap: 7,
+    }),
   ];
 }
 

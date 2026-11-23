@@ -217,7 +217,7 @@ test("the Portfolio's where-line ships promising the sheets gathered at the Expl
   assert.deepEqual(cd55Faults(documentOf(page("/explorer/portfolio/"))), []);
 });
 
-test("home's stations are real buttons outside the marks' aria shroud, one per station and the how pip from one template, each with its anchor at full precision, its sea flag's dress and its label's side, each with its slip, while the marks are every manifest place the stations leave unclaimed (from e2e L13)", () => {
+test("home's stations are real buttons outside the marks' aria shroud, one per station and the how pip from one template, each with its anchor at full precision, its sea flag's dress, its label's side and its town name's gap, each with its slip, while the marks are every manifest place the stations leave unclaimed (from e2e L13)", () => {
   assert.deepEqual(l13Faults(documentOf(page("/"))), []);
 });
 

@@ -3,6 +3,11 @@ import { homeStage } from "../../src/site/home/stage-data.ts";
 import { homeStations, howStation, unclaimedDots } from "../../src/site/home/stations.ts";
 import { faults, pageText, same } from "../built-dom.ts";
 
+const nameGapOf = (p: Element): number | null => {
+  const m = /--name-gap:\s*([\d.]+)px/.exec(p.getAttribute("style") ?? "");
+  return m ? Number(m[1]) : null;
+};
+
 export function l13Faults(doc: Document): string[] {
   const want = [...homeStations(), howStation()];
   const dots = unclaimedDots(homeStage().dots, homeStations()).length;
@@ -19,6 +24,7 @@ export function l13Faults(doc: Document): string[] {
       p.getAttribute("data-ny") === String(w.ny) || "ny",
       p.classList.contains("at-sea") === w.sea || "at-sea",
       p.classList.contains("slip-above") === w.slipAbove || "slip-above",
+      nameGapOf(p) === w.nameGap || "name-gap",
     ].filter((f) => f !== true);
     return wrong.length ? [`pip ${w.id}: ${wrong.join(", ")}`] : [];
   });
