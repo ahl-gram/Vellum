@@ -52,7 +52,7 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
   const r = await sw1Visit(ctx, roomNamed("Prospect"));
   ctx.check(
-    "SW1 on the Prospect at 1280x800, whose zoom room takes the slide-away from the binder `scripts/lint/shared-bindings.ts` holds every zoom room to (`bindZoomRoom`), the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, the Prospect's second line kept under the trail, the folio's title 2 px above the foot and its other lines below it (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996; one room since Issue #1273)",
+    "SW1 on the Prospect at 1280x800, whose zoom room takes the slide-away from the binder `scripts/lint/shared-bindings.ts` holds every zoom room to (`bindZoomRoom`), the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, the Prospect's second line kept under the trail and the Primer's press under it, the folio's title 2 px above the foot and its other lines below it (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996; one room since Issue #1273)",
     r.faults.length === 0,
     r.detail + (r.faults.length ? `; ${r.faults.length} faults: ${r.faults.slice(0, 6).join("; ")}` : ""),
   );

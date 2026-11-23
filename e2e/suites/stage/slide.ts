@@ -72,7 +72,7 @@ export async function es1Follow(ctx: SuiteContext): Promise<void> {
   const rows = await motionOn(ctx, async () => [await es1At(ctx, 1280, 800), await es1At(ctx, 1024, 768)]);
   const faults = rows.flatMap((r) => r.faults);
   ctx.check(
-    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through every press before the press that fills and then follow the zoom by the log of depth, half way at the geometric mean of that press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7; Issue #1034)",
+    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through every press before the press that fills and then follow the zoom by the log of depth, half way at the geometric mean of that press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box, the Primer's press kept on its own line under the trail (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7; Issue #1034)",
     faults.length === 0,
     rows.map((r) => r.detail).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),

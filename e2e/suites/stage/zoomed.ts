@@ -356,7 +356,7 @@ export async function ez3Thin(ctx: SuiteContext): Promise<void> {
   const t = await ctx.evaluate(THIN_LINES);
   const faults = thinFaults(r, await ctx.evaluate(TITLE), t);
   ctx.check(
-    "EZ3 zoomed at 1280x800 on seed 42 to the Glass's press that fills the screen, the Explorer's head cluster has slid up to its thin top line, the trail with the chart of the atelier press and nothing else, and its chart folio down to its thin bottom line, the chart's name and number 2 px above the foot, every line left on screen reads at 4.5:1 or better on the panels, and in the same run with the panels taken away they read under 4.5:1 (Alex, 2026-10-22, Issue #989; Issue #996)",
+    "EZ3 zoomed at 1280x800 on seed 42 to the Glass's press that fills the screen, the Explorer's head cluster has slid up to its thin top line, the trail with the chart of the atelier press and the Primer's press under it, and nothing else, and its chart folio down to its thin bottom line, the chart's name and number 2 px above the foot, every line left on screen reads at 4.5:1 or better on the panels, and in the same run with the panels taken away they read under 4.5:1 (Alex, 2026-10-22, Issue #989; Issue #996)",
     faults.length === 0,
     detail(r, THIN_ASK) +
       `, thin top foot ${thinTopFoot(t, false).toFixed(2)}` +
