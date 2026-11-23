@@ -25,7 +25,7 @@ import {
 } from "./slide-kit.ts";
 import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
 
-// 2026-11-12: the fill against the first press's 1.4, the Mac's layout 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over); the runner's 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over), CI run 43180780683.
+// 2026-11-23: the fill against the first press's 1.4, the Mac's layout 1280x800 1.6327 (0.2327 over) and 1024x768 2.1389 (0.7389 over); the runner's 1280x800 1.6227 (0.2227 over) and 1024x768 2.1444 (0.7444 over), CI run 45252922447.
 const FIRST_PRESS = 1.4;
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
@@ -130,7 +130,7 @@ export async function es7Reduced(ctx: SuiteContext): Promise<void> {
   );
 }
 
-// 2026-11-12: the Explorer at 1280x800 fills open at 1.5334 (press 2) on the Mac harness browser and on the CI runner (run 43180780683, lane B), and folded at 1.8209 on both, 0.1391 short of the press the fold is made at, 1.96, and 0.2875 past the open fill.
+// 2026-11-23: the Explorer at 1280x800 fills open at 1.6327 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 45252922447, lane B), and folded at 1.8923 and 1.8850, 0.0677 and 0.0750 short of the press the fold is made at, 1.96, and 0.2596 and 0.2623 past the open fill.
 export async function es9Fold(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const last = <T>(a: readonly T[]): T => a[a.length - 1]!;

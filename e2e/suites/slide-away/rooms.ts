@@ -48,7 +48,7 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   };
 }
 
-// 2026-11-12: the Prospect at 1280x800 fills at 1.6227 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 43180780683, lane C), 0.2227 past the first press's 1.4 and 0.3373 short of the second's 1.96.
+// 2026-11-23: the Prospect at 1280x800 fills at 1.7474 (press 2) on the Mac harness browser and 1.7365 on the CI runner (run 45252922447, lane C), 0.3474 and 0.3365 past the first press's 1.4 and 0.2126 and 0.2235 short of the second's 1.96.
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
   const r = await sw1Visit(ctx, roomNamed("Prospect"));
   ctx.check(
@@ -109,7 +109,7 @@ const reaches = (p: Pieces): boolean => {
   return f[0] <= 1 && f[1] <= 1 && f[3] >= p.innerH - 1;
 };
 
-// 2026-11-12: the Seed of the Day at 1024x768 fills at 2.4028 (press 3) by the plain rule and 3.0552 (press 4) by its own on the Mac harness browser, and at 2.4028 and 3.0552 on the CI runner (run 43180780683, lane C); the plain fill sits 0.3412 short of the third press's 2.744 and the room's 0.3112 past it.
+// 2026-11-23: the Seed of the Day at 1024x768 fills at 2.4997 (press 3) by the plain rule and 3.0552 (press 4) by its own on the Mac harness browser, and at 2.4910 and 3.0552 on the CI runner (run 45252922447, lane C); the plain fill sits 0.2443 and 0.2530 short of the third press's 2.744 and the room's 0.3112 past it.
 export async function sw3Today(ctx: SuiteContext): Promise<void> {
   const room = roomNamed("Seed of the Day");
   const faults: string[] = [];
