@@ -1,4 +1,5 @@
 import type { Outcome } from "./launch.ts";
+import { slotOf } from "./slot.ts";
 import { isIssueBranch, lastRun, runFiles, stateProblem, type HandoffState } from "./state.ts";
 
 export type PullRequest = { readonly number: number; readonly state: "OPEN" | "MERGED" | "CLOSED" };
@@ -20,6 +21,7 @@ export type StepId =
   | "claude-builds"
   | "plan"
   | "running"
+  | "trust"
   | "stopped"
   | "replan"
   | "push"
@@ -60,7 +62,13 @@ const stepOf = (s: Snapshot): Step => {
   if (s.running) {
     return {
       id: "running",
-      text: `Run ${run.n} (${run.kind}) of Issue #${issue} is running in ${tree}, thread ${thread ?? "not started yet"}. Alex can follow it with: tail -f ${files.stream}. Wait for the background task's notice.`,
+      text: `Run ${run.n} (${run.kind}) of Issue #${issue} is running in ${slotOf(root)}, thread ${thread ?? "not started yet"}. Alex can follow it with: tail -f ${files.stream}. Wait for the background task's notice.`,
+    };
+  }
+  if (s.outcome === "hook") {
+    return {
+      id: "trust",
+      text: `Run ${run.n} of Issue #${issue} stopped because the project hook did not refuse its check in the build's clone: Codex has not yet trusted the hook at that path. Ask Alex to open Codex once in ${slotOf(root)}, trust the folder if it asks, and trust the hook with /hooks (handbook/specs/orchestration.md, Lanes that cross harnesses). Then write a brief saying the hook is trusted now and to carry on, and run in the background: npm run handoff -- resume ${issue} --brief <the brief's path>`,
     };
   }
   if (s.outcome === "handback") {
@@ -68,9 +76,7 @@ const stepOf = (s: Snapshot): Step => {
       id: "replan",
       text:
         `Run ${run.n} of Issue #${issue} handed back: ${files.last}.` +
-        (unpushed
-          ? ` First push its commits: git -C ${tree} -c core.hooksPath=/dev/null push -u origin ${branch}.`
-          : "") +
+        (unpushed ? ` First push its commits: git -C ${tree} push -u origin ${branch}.` : "") +
         ` Then dispatch a fresh vellum-planner with the issue, the plan ${plan} and that hand-back (handbook/specs/orchestration.md). Once its revision is finished and Alex has seen it, write a brief naming it and run in the background: npm run handoff -- resume ${issue} --brief <the brief's path> --plan <the revision's path>`,
     };
   }
@@ -80,7 +86,7 @@ const stepOf = (s: Snapshot): Step => {
       text:
         `Run ${run.n} of Issue #${issue} ended without its outcome line (exit ${run.exit ?? "none recorded"}). Read ${files.last} and ${files.stream}, and put what they show to Alex. Once he rules, write a brief and run in the background: npm run handoff -- resume ${issue} --brief <the brief's path>` +
         (thread === null
-          ? ` No thread started, so it cannot be resumed: retire ${tree} and move ${folder} aside before building again.`
+          ? ` No thread started, so it cannot be resumed: move ${folder} aside before building again (the next build replaces the clone).`
           : ""),
     };
   }
@@ -93,7 +99,7 @@ const stepOf = (s: Snapshot): Step => {
   if (pr?.state === "MERGED") {
     return {
       id: "retire",
-      text: `Pull request #${pr.number} merged. Retire Issue #${issue}'s build: rm ${tree}/node_modules, then git -C ${root} worktree remove --force ${tree}, then move ${folder} aside as ${folder}-${pr.number}, which keeps the record and lets a later pull request of the issue build.`,
+      text: `Pull request #${pr.number} merged. Retire Issue #${issue}'s build: rm ${tree}/node_modules, then git -C ${root} worktree remove --force ${tree}, then git -C ${root} update-ref -d refs/handoff/${issue}, then move ${folder} aside as ${folder}-${pr.number}, which keeps the record and lets a later pull request of the issue build. The build's clone stays until the next build replaces it.`,
     };
   }
   if (pr?.state === "CLOSED") {
@@ -106,7 +112,7 @@ const stepOf = (s: Snapshot): Step => {
     return {
       id: "push",
       text:
-        `Run ${run.n} of Issue #${issue} is ready and not pushed. Push it: git -C ${tree} -c core.hooksPath=/dev/null push -u origin ${branch}` +
+        `Run ${run.n} of Issue #${issue} is ready and not pushed. Push it: git -C ${tree} push -u origin ${branch}` +
         (pr === null
           ? `, then run npm run handoff -- next ${issue} again.`
           : `; pull request #${pr.number} updates with it.`),
