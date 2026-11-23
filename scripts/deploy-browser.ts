@@ -20,7 +20,7 @@ export function browserReport(
   try {
     read = version(found);
   } catch (err) {
-    read = `version unreadable: ${err instanceof Error ? err.message : String(err)}`;
+    read = `version unreadable: ${(err instanceof Error ? err.message : String(err)).split("\n")[0]}`;
   }
   return [`deploy browser: ${found} (${read})`, second];
 }
