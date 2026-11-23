@@ -210,7 +210,7 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a cd after a heredoc and another line denied", "cat <<EOF\nx\nEOF\nls\ncd src", "<ROOT>", "deny"],
   [
     "a cd after a heredoc whose body opens a quote and a paren denied",
-    "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && gh pr view",
+    "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && git status",
     "<S>",
     "deny",
   ],
