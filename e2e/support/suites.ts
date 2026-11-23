@@ -63,6 +63,7 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "reading-room",
   "specimen",
   "writing-room",
+  "primer-gallery",
 ];
 
 export type E2eTier = "full" | "smoke" | "custom";
