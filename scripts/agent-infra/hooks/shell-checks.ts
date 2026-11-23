@@ -67,10 +67,10 @@ const ghApiWriteRefusal = (segment: string): string | null => {
 };
 
 const GH_API_COMMENT_PATH =
-  /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues\/(?:\d+\/(?:comments|timeline)|comments)|pulls\/(?:\d+\/(?:comments|reviews)|comments))(?=[\s/?]|$)/;
-const GH_VIEW_OR_LIST = /^gh (?:issue|pr) (view|list)\b/;
+  /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues\/(?:\d+\/(?:comments|timeline)|comments)|pulls\/(?:\d+\/(?:comments|reviews)|comments))(?=[\s/?)]|$)/;
+const GH_VIEW_OR_LIST = /^gh (?:issue|pr)(?: (?:-R|--repo)[=\s]?\S+)? (view|list)\b/;
 const GH_COMMENTS_FLAG = /(?:^|\s)(?:--comments\b|-c(?=\s|$))/;
-const GH_JSON_FIELDS = /(?:^|\s)--json(?:=|\s+)(\S+)/;
+const GH_JSON_FIELDS = /(?:^|\s)--json(?:=|\s+)(\S+)/g;
 const GH_TEXT_FIELD = /(?:^|,)(?:comments|reviews|latestReviews)(?=,|$)/;
 
 const COMMENT_READ_REASON =
@@ -89,9 +89,9 @@ const commentReadRefusal = (segment: string): string | null => {
   }
   const call = GH_VIEW_OR_LIST.exec(segment);
   if (call === null) return null;
-  const fields = GH_JSON_FIELDS.exec(segment)?.[1];
-  const asksForText = GH_COMMENTS_FLAG.test(segment) || (fields !== undefined && GH_TEXT_FIELD.test(fields));
-  return asksForText || (call[1] === "view" && fields === undefined) ? COMMENT_READ_REASON : null;
+  const fields = [...segment.matchAll(GH_JSON_FIELDS)].map((found) => found[1] ?? "");
+  const asksForText = GH_COMMENTS_FLAG.test(segment) || fields.some((list) => GH_TEXT_FIELD.test(list));
+  return asksForText || (call[1] === "view" && fields.length === 0) ? COMMENT_READ_REASON : null;
 };
 
 const PKILL_WARNING =

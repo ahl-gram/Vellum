@@ -26,6 +26,10 @@ const DENIED = [
   "gh pr view 1 --json latestReviews",
   "gh issue list --json number,comments",
   "gh issue view 1",
+  "n=$(gh api repos/o/r/issues/1/comments)",
+  "gh issue -R o/r view 1",
+  "gh issue --repo o/r list --json number,comments",
+  "gh pr view 1 --json number --json comments",
   "gh pr view 1",
 ];
 
@@ -39,6 +43,8 @@ const ALLOWED = [
   "gh api repos/o/r/pulls/1/files",
   "gh pr view 1 --json closingIssuesReferences",
   "gh pr view 1 --json state,headRefOid",
+  "gh pr view 1 --json number --json closingIssuesReferences",
+  "gh issue -R o/r view 1 --json closingIssuesReferences",
   "gh issue list --state open",
   "grep -n 'gh api repos/o/r/issues/1/comments' notes.md",
   "npm run --silent issue -- 1",
