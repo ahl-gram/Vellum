@@ -27,6 +27,7 @@ import {
 import { PLATE_CHART, howPlate } from "./how-plate.ts";
 import { $ } from "../../shared/by-id.ts";
 import { downloadBlob, nextObjectUrl } from "../../shared/object-url.ts";
+import { bootHandOnce } from "../../shared/primer-hand.ts";
 
 const status = $("pf-status");
 const warning = $("pf-warning");
@@ -280,7 +281,7 @@ const start = async (): Promise<void> => {
   await draft();
 };
 
-void start();
+void start().then(() => bootHandOnce({ route: "/explorer/portfolio/" }));
 
 declare global {
   interface Window {
