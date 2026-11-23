@@ -8,12 +8,13 @@ import {
   type ThinLines,
 } from "../../e2e/suites/stage/thin-lines.ts";
 
-// The fixtures are the probe's reads on the build of Issue #1076's plan, handbook/plans/1000/1076/1076-plan.md, Tests T1 to T3, and of its revision 1, handbook/plans/1000/1076/1076-r1-plan.md, Tests T14 to T18.
+// The fixtures are the probe's reads on the build of Issue #1076's plan, handbook/plans/1000/1076/1076-plan.md, Tests T1 to T3, and of its revision 1, handbook/plans/1000/1076/1076-r1-plan.md, Tests T14 to T18, and of Issue #1254's pull request 2 plan, handbook/plans/1200/1254/1254-pr2-plan.md, Tests T3.
 const line = (t: string, row: number, piece = "cluster"): ThinLine => ({ piece, t, row });
 const reads = (over: Partial<ThinLines>): ThinLines => ({
   innerH: 800,
   trail: null,
   also: null,
+  press: null,
   title: null,
   lines: [],
   ...over,
@@ -31,7 +32,7 @@ const EXPLORER: ThinLines = reads({
 });
 
 test("thinTopFaults keeps the Explorer's trail line and faults a row the head grows above or under it, or a missing atelier press", () => {
-  assert.deepEqual(thinTopFaults(EXPLORER, false), []);
+  assert.deepEqual(thinTopFaults(EXPLORER, false, false), []);
   const above = reads({
     trail: [59.40625, 75.40625],
     lines: [
@@ -41,11 +42,11 @@ test("thinTopFaults keeps the Explorer's trail line and faults a row the head gr
       line("the chart of the atelier", 67),
     ],
   });
-  assert.equal(thinTopFaults(above, false).length, 3);
+  assert.equal(thinTopFaults(above, false, false).length, 3);
   const under = reads({ ...EXPLORER, lines: [...EXPLORER.lines, line("a row the probe mounts u", 49)] });
-  assert.equal(thinTopFaults(under, false).length, 1);
+  assert.equal(thinTopFaults(under, false, false).length, 1);
   const bare = reads({ ...EXPLORER, lines: EXPLORER.lines.filter((l) => !l.t.startsWith("the chart of the atelier")) });
-  assert.equal(thinTopFaults(bare, false).length, 1);
+  assert.equal(thinTopFaults(bare, false, false).length, 1);
 });
 
 const PROSPECT: ThinLines = reads({
@@ -61,18 +62,52 @@ const PROSPECT: ThinLines = reads({
   ],
 });
 
+const EXPLORER_PRESSED = reads({
+  ...EXPLORER,
+  press: [31.203125, 46.203125],
+  lines: [...EXPLORER.lines, line("learn this room", 40)],
+});
+const PROSPECT_PRESSED = reads({
+  ...PROSPECT,
+  press: [53, 68],
+  lines: [...PROSPECT.lines, line("learn this room", 62)],
+});
+
+test("thinTopFaults keeps the Primer's press on its own line directly under the Explorer's trail, and under the Prospect's alias line (Issue #1254)", () => {
+  assert.deepEqual(thinTopFaults(EXPLORER_PRESSED, false, true), []);
+  assert.deepEqual(thinTopFaults(PROSPECT_PRESSED, true, true), []);
+});
+
+test("thinTopFaults faults the Primer's press missing, a line lower, its words off screen or wrapped, and a press where none is taught (Issue #1254)", () => {
+  assert.equal(thinTopFaults(EXPLORER, false, true).length, 1);
+  const lower = reads({
+    ...EXPLORER,
+    press: [55.203125, 70.203125],
+    lines: [...EXPLORER.lines, line("learn this room", 64)],
+  });
+  assert.equal(thinTopFaults(lower, false, true).length, 1);
+  assert.equal(thinTopFaults(reads({ ...EXPLORER, press: [31.203125, 46.203125] }), false, true).length, 1);
+  const wrapped = reads({
+    ...EXPLORER,
+    press: [31.203125, 61.203125],
+    lines: [...EXPLORER.lines, line("learn this", 40), line("room", 55)],
+  });
+  assert.equal(thinTopFaults(wrapped, false, true).length, 2);
+  assert.equal(thinTopFaults(EXPLORER_PRESSED, false, false).length, 1);
+});
+
 test("thinTopFaults keeps the Prospect's alias line under the trail", () => {
-  assert.deepEqual(thinTopFaults(PROSPECT, true), []);
+  assert.deepEqual(thinTopFaults(PROSPECT, true, false), []);
   const under = reads({ ...PROSPECT, lines: [...PROSPECT.lines, line("a row the probe mounts u", 71)] });
-  assert.equal(thinTopFaults(under, true).length, 1);
+  assert.equal(thinTopFaults(under, true, false).length, 1);
   const bare = reads({ ...PROSPECT, lines: PROSPECT.lines.filter((l) => l.row !== 38) });
-  assert.equal(thinTopFaults(bare, true).length, 1);
+  assert.equal(thinTopFaults(bare, true, false).length, 1);
   const over = reads({ ...PROSPECT, also: [10, 20], lines: PROSPECT.lines.map((l) => ({ ...l, row: 14 })) });
-  assert.equal(thinTopFaults(over, true).length, 1);
+  assert.equal(thinTopFaults(over, true, false).length, 1);
 });
 
 test("thinTopFaults faults a head with no trail at all", () => {
-  assert.equal(thinTopFaults(reads({ lines: EXPLORER.lines }), false).length, 1);
+  assert.equal(thinTopFaults(reads({ lines: EXPLORER.lines }), false, false).length, 1);
 });
 
 test("thinFootFaults keeps the title's foot within FOOT_WINDOW above the page's foot", () => {
@@ -94,9 +129,9 @@ const prospect = (also: Span | null, lines: readonly ThinLine[]): ThinLines =>
   reads({ trail: [6.40625, 22.40625], also, lines });
 
 test("thinTopFaults faults the Prospect's alias line gone, hidden, or standing 200 px under the trail", () => {
-  assert.equal(thinTopFaults(prospect(null, ON_TRAIL), true).length, 1);
-  assert.equal(thinTopFaults(prospect([0, 0], ON_TRAIL), true).length, 2);
-  assert.equal(thinTopFaults(prospect([222.40625, 235.40625], [...ON_TRAIL, ...aliasAt(229)]), true).length, 2);
+  assert.equal(thinTopFaults(prospect(null, ON_TRAIL), true, false).length, 1);
+  assert.equal(thinTopFaults(prospect([0, 0], ON_TRAIL), true, false).length, 2);
+  assert.equal(thinTopFaults(prospect([222.40625, 235.40625], [...ON_TRAIL, ...aliasAt(229)]), true, false).length, 2);
 });
 
 test("thinTopFaults faults a thin top line that wraps: the trail, the alias line, or the chart of the atelier press onto a row of its own", () => {
@@ -112,12 +147,12 @@ test("thinTopFaults faults a thin top line that wraps: the trail, the alias line
       ...aliasAt(67),
     ],
   });
-  assert.equal(thinTopFaults(trailWraps, true).length, 2);
+  assert.equal(thinTopFaults(trailWraps, true, false).length, 2);
   const aliasWraps = prospect(
     [31.203125, 57.203125],
     [...ON_TRAIL, line("also reached from", 38), line("The Reading Room", 51)],
   );
-  assert.equal(thinTopFaults(aliasWraps, true).length, 2);
+  assert.equal(thinTopFaults(aliasWraps, true, false).length, 2);
   const atelierRow = prospect(
     [44.203125, 57.203125],
     [
@@ -126,22 +161,22 @@ test("thinTopFaults faults a thin top line that wraps: the trail, the alias line
       ...aliasAt(51),
     ],
   );
-  assert.equal(thinTopFaults(atelierRow, true).length, 4);
+  assert.equal(thinTopFaults(atelierRow, true, false).length, 4);
   const explorerTrail = reads({
     trail: [6.40625, 35.40625],
     lines: [line("Vellum", 14), line("The Explorer", 29), line("the chart of the atelier", 14)],
   });
-  assert.equal(thinTopFaults(explorerTrail, false).length, 1);
+  assert.equal(thinTopFaults(explorerTrail, false, false).length, 1);
   const explorerAtelier = reads({
     trail: [6.40625, 22.40625],
     lines: [line("Vellum", 14), line("The Explorer", 14), line("the chart of the atelier", 29)],
   });
-  assert.equal(thinTopFaults(explorerAtelier, false).length, 2);
+  assert.equal(thinTopFaults(explorerAtelier, false, false).length, 2);
 });
 
 test("thinTopFaults reads an alias line only in the room that has one", () => {
-  assert.equal(thinTopFaults(PROSPECT, false).length, 2);
-  assert.equal(thinTopFaults(EXPLORER, true).length, 1);
+  assert.equal(thinTopFaults(PROSPECT, false, false).length, 2);
+  assert.equal(thinTopFaults(EXPLORER, true, false).length, 1);
 });
 
 test("thinFootFaults faults a chart folio title that wraps onto two or three rows, reading only the folio's lines on screen", () => {
@@ -160,7 +195,7 @@ test("thinFootFaults faults a chart folio title that wraps onto two or three row
 });
 
 test("thinTopFaults keeps the thin top line's foot within main's 48 px ceiling, faulting an alias line 4 px lower or the whole line 6 px lower", () => {
-  assert.equal(thinTopFaults(prospect([35.203125, 48.203125], [...ON_TRAIL, ...aliasAt(42)]), true).length, 1);
+  assert.equal(thinTopFaults(prospect([35.203125, 48.203125], [...ON_TRAIL, ...aliasAt(42)]), true, false).length, 1);
   const lower = reads({
     trail: [12.40625, 28.40625],
     also: [37.203125, 50.203125],
@@ -173,5 +208,5 @@ test("thinTopFaults keeps the thin top line's foot within main's 48 px ceiling, 
       ...aliasAt(44),
     ],
   });
-  assert.equal(thinTopFaults(lower, true).length, 1);
+  assert.equal(thinTopFaults(lower, true, false).length, 1);
 });

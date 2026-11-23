@@ -8,6 +8,7 @@ export type ThinLines = {
   readonly innerH: number;
   readonly trail: Span | null;
   readonly also: Span | null;
+  readonly press: Span | null;
   readonly title: Span | null;
   readonly lines: readonly ThinLine[];
 };
@@ -27,6 +28,7 @@ export const THIN_LINES: Payload<ThinLines> = `(() => {
     innerH: innerHeight,
     trail: span(document.querySelector("header.chrome .trail")),
     also: span(document.querySelector("header.chrome p.also")),
+    press: span(document.querySelector("header.chrome .primer-press")),
     title: span(document.getElementById("folio-title")),
     lines: (${GLYPH_LINES}).map((g) => ({ piece: g.piece, t: g.t, row: g.row })),
   };
@@ -42,7 +44,7 @@ export function thinTopFoot(t: ThinLines, alias: boolean): number {
   return alias && t.also !== null ? Math.max(t.trail[1], t.also[1]) : t.trail[1];
 }
 
-export function thinTopFaults(t: ThinLines, alias: boolean): string[] {
+export function thinTopFaults(t: ThinLines, alias: boolean, _press: boolean): string[] {
   const { trail, also, innerH } = t;
   if (trail === null) return ["no trail stands in the head cluster"];
   const faults: string[] = [];
