@@ -71,7 +71,7 @@ export async function zg1cDeskHidesTouch(k: GesturesKit): Promise<void> {
   );
 }
 
-async function zg5AtRest(k: GesturesKit): Promise<void> {
+export async function zg5AtRest(k: GesturesKit): Promise<void> {
   await k.reloadHome("touch-off-boot");
   const r = await k.evaluate(touchRead(BOX));
   const types = await touchListeners(k, BOX);
@@ -87,7 +87,7 @@ async function zg5AtRest(k: GesturesKit): Promise<void> {
   );
 }
 
-async function zg5bGlassPress(k: GesturesKit): Promise<void> {
+export async function zg5bGlassPress(k: GesturesKit): Promise<void> {
   const at = await k.evaluate<{ x: number; y: number; reached: boolean }>(
     `(() => { const b = document.getElementById("zoom-in"); const r = b.getBoundingClientRect(); const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); return { x, y, reached: document.elementFromPoint(x, y) === b }; })()`,
   );
@@ -102,7 +102,7 @@ async function zg5bGlassPress(k: GesturesKit): Promise<void> {
   await k.evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-async function zg7DoubleTapOff(k: GesturesKit): Promise<void> {
+export async function zg7DoubleTapOff(k: GesturesKit): Promise<void> {
   const p = await centre(k);
   await k.evaluate(
     `(window.__zg7 = 0, document.querySelector("${BOX}").addEventListener("dblclick", () => { window.__zg7++; }, true), true)`,
@@ -128,12 +128,6 @@ export async function zg6Pinches(k: GesturesKit): Promise<void> {
     synthesized === 1,
     JSON.stringify({ synthesized, scale }),
   );
-}
-
-export async function zgTouchOff(k: GesturesKit): Promise<void> {
-  await zg5AtRest(k);
-  await zg5bGlassPress(k);
-  await zg7DoubleTapOff(k);
 }
 
 export async function zg8TouchTaken(k: GesturesKit): Promise<void> {

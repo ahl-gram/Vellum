@@ -16,7 +16,9 @@ import {
   standHome,
   zg6Pinches,
   zg8cTakenBack,
-  zgTouchOff,
+  zg5AtRest,
+  zg5bGlassPress,
+  zg7DoubleTapOff,
 } from "./zoom-gestures/touch.ts";
 
 export type GesturesKit = ReturnType<typeof gesturesKit>;
@@ -36,7 +38,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("ZG1, ZG1b", () => zg1WheelZooms(k));
   await step("ZG1c", () => zg1cDeskHidesTouch(k));
   await setMobileViewport(1024, 768);
-  await step("ZG5, ZG5b, ZG7", () => zgTouchOff(k));
+  await step("ZG5", () => zg5AtRest(k));
+  await step("ZG5b", () => zg5bGlassPress(k));
+  await step("ZG7", () => zg7DoubleTapOff(k));
   await step("ZG6", () => zg6Pinches(k));
   await step("ZG10", async () => {
     await bounce(k.send, `http://127.0.0.1:${k.PORT}/writing-room/`);
