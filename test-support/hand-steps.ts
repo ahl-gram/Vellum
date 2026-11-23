@@ -10,4 +10,10 @@ export function stepOf(id: string): HandStep {
   return s;
 }
 
-export const HAND_ROOMS: readonly string[] = ["/explorer/", "/writing-room/", "/reading-room/", "/print-room/"];
+export const HAND_ROOMS: readonly string[] = [
+  "/explorer/",
+  "/writing-room/",
+  "/reading-room/",
+  "/print-room/",
+  "/prospect/",
+];

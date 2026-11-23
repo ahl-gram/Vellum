@@ -1,13 +1,11 @@
-import { countLine, LAY_ON_PAGE, layPressFace } from "../../explorer/chart-drawer.ts";
+import { LAY_ON_PAGE } from "../../explorer/chart-drawer.ts";
 import { eraLine } from "../../prospect/note-lines.ts";
 import { PROSPECT_ON_CARD } from "../living-chart/place-overlay-card.ts";
-import { parseTableValue } from "../table-address.ts";
 import { card } from "./explorer-sheet.ts";
 import { click, labelled, road, roomOf, set, text, type Ladder } from "./shape.ts";
 
 const AT = "/prospect/#seed=42&i=0";
 const EARLIER = 300;
-const LAID = parseTableValue("k-p.seed-42.style-antique.i-0.year-1059");
 
 export const PROSPECT: Ladder = {
   route: "/prospect/",
@@ -54,10 +52,6 @@ export const PROSPECT: Ladder = {
           at: AT,
           words: [text("#pp-lay", LAY_ON_PAGE)],
           do: [click("#pp-lay")],
-          then: [
-            text("#pp-lay", layPressFace({ holds: true, full: false }, LAY_ON_PAGE).label),
-            text("#pp-lay-count", countLine(LAID)),
-          ],
         },
         {
           id: "prospect-road",

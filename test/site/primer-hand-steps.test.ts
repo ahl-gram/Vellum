@@ -176,6 +176,13 @@ test("PK21 the Print Room's presses are used as ruling E1 has it: the thumbnail 
   assert.deepEqual(useWatches(stepOf("print-room-road")), [{ event: "click", css: '[data-poster="ribbon"]' }]);
 });
 
+test("PK23 the Prospect's steps are used as rulings E1 and P1 A have them: the lay step at its press whatever the table holds; the year step on its outcome; the engraver's note and the road on arrival (Issue #1253 pull request 5)", () => {
+  assert.equal(sealWhen(stepOf("prospect-lay"), DESK), "use", "prospect-lay");
+  assert.equal(sealWhen(stepOf("prospect-year"), DESK), "outcome", "prospect-year");
+  for (const id of ["prospect-note", "prospect-road"]) assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+  assert.deepEqual(useWatches(stepOf("prospect-lay")), [{ event: "click", css: "#pp-lay" }]);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");
