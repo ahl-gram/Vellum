@@ -60,3 +60,7 @@ export const readSlotBranch = (slot: string, issue: number): string | null => {
     return null;
   }
 };
+
+export type Collected = { readonly branch: string | null; readonly problems: readonly string[] };
+
+export const collect = (_root: string, _issue: number): Collected => ({ branch: null, problems: [] });
