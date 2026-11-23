@@ -79,7 +79,7 @@ figcaption span { font-variant-caps: small-caps; font-size: 0.8rem; letter-spaci
   font-style: italic; color: var(--ink-faded); }
 .legend { left: 50%; }
 @media screen {
-  body:has(.trail) main { padding-top: calc(var(--band-h) + 1.2rem + var(--trail-line) + var(--trail-gap) + var(--primer-slip-h)); }
+  body:has(.trail) main { padding-top: calc(var(--band-h) + 1.2rem + var(--trail-line) + var(--trail-gap) + var(--primer-slip-h) + var(--primer-press-h)); }
 }
 @media print {
   main { padding: 0; max-width: none; }
