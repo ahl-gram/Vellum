@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, readdirSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import { git } from "../agent-sandbox.ts";
-import { FILES, isIssueBranch } from "./state.ts";
+import { createPlan, git, runPlan } from "../agent-sandbox.ts";
+import { FILES, isIssueBranch, treeOf } from "./state.ts";
 
 export const ORIGIN_URL = "https://github.com/ahl-gram/Vellum.git";
 const MAX_HEAD_BYTES = 4096;
@@ -63,4 +63,31 @@ export const readSlotBranch = (slot: string, issue: number): string | null => {
 
 export type Collected = { readonly branch: string | null; readonly problems: readonly string[] };
 
-export const collect = (_root: string, _issue: number): Collected => ({ branch: null, problems: [] });
+const firstLine = (error: unknown): string => {
+  const stderr = (error as { stderr?: unknown }).stderr;
+  const text = typeof stderr === "string" || Buffer.isBuffer(stderr) ? stderr.toString() : "";
+  const message = error instanceof Error ? error.message : String(error);
+  return (text.trim() || message).split("\n")[0] ?? message;
+};
+
+export const collect = (root: string, issue: number): Collected => {
+  const slot = slotOf(root);
+  const branch = readSlotBranch(slot, issue);
+  if (branch === null) {
+    return { branch, problems: [`the build's clone is on no branch named for Issue #${issue}`] };
+  }
+  const tree = treeOf(root, issue);
+  const ref = handoffRefOf(issue);
+  try {
+    git(["fetch", "-q", "--no-tags", slot, `+refs/heads/${branch}:${ref}`], root);
+    if (existsSync(tree)) {
+      git(["merge", "-q", "--ff-only", ref], tree);
+    } else {
+      runPlan(createPlan(tree, ref, true), root, tree);
+      git(["switch", "-q", "-c", branch], tree);
+    }
+  } catch (error) {
+    return { branch, problems: [firstLine(error)] };
+  }
+  return { branch, problems: [] };
+};
