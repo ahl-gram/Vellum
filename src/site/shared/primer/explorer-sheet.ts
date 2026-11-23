@@ -146,6 +146,7 @@ export const SHEET_LESSONS: readonly Lesson[] = [
         at: AT,
         first: [card],
         words: [text("#place-card .pc-lay", LAY_ON_CARD)],
+        do: [click("#place-card .pc-lay")],
       },
     ],
   },
