@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
 import { ROLES } from "../agent-infra/roles.ts";
@@ -107,12 +107,10 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
     return refuse(`Issue #${issue} already has a build record in ${folder}; run npm run handoff -- next ${issue}`);
   }
   if (existsSync(tree)) return refuse(`${tree} already exists; retire it before building Issue #${issue} again`);
-  const holder = slotHolder(root, issue);
-  if (holder !== null) return refuse(holderReason(root, holder, issue));
   const { model, effort } = resolveModel(loadModelPolicy(HERE_ROOT, ROLES), "codex-local", "vellum-implementer");
   const texts = readIssue(issue, gh);
-  const slot = makeSlot(root);
-  writeIssueFiles(folder, texts);
+  const holder = slotHolder(root, issue);
+  if (holder !== null) return refuse(holderReason(root, holder, issue));
   const first: RunRecord = {
     n: 1,
     kind: "build",
@@ -123,6 +121,14 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   };
   const state: HandoffState = { issue, plan, tree, session, model, effort, thread: null, runs: [first] };
   writeState(folder, state);
+  let slot: string;
+  try {
+    slot = makeSlot(root);
+  } catch (error) {
+    rmSync(folder, { recursive: true, force: true });
+    throw error;
+  }
+  writeIssueFiles(folder, texts);
   const files = runFiles(folder, 1);
   console.log(`follow it: tail -f ${files.stream}`);
   const exit = await runCodex(

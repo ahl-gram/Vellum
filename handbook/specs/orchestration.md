@@ -175,9 +175,10 @@ home's line wins for the lane and this file's for the orchestrator.
   hooks, which a build's ordinary commands no longer reach; it carries no hooks flag, since that
   flag never closed a push (above) and auto mode refuses it (Alex, 2026-11-22, Issue #1418, comment
   7090052847, Q3; this supersedes ruling 1 of Issue #1409 comment 7047054816 and makes standing the
-  plain push he ruled for Issue #1237). Tests build scratch repositories, plant every hook and
-  command key in the clone, and run the collect and the printed push
-  (`test/repo/handoff-collect.test.ts`).
+  plain push he ruled for Issue #1237). Tests build scratch repositories, plant every hook name
+  in the clone and five command-naming keys (`core.hooksPath`, `core.fsmonitor` through
+  `include.path`, `credential.helper`, `uploadpack.packObjectsHook` and an `ext::` remote URL), and
+  run the collect and the printed push (`test/repo/handoff-collect.test.ts`).
 - **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
   report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
   session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief

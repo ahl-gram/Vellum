@@ -240,6 +240,23 @@ test("a resume is refused while another issue's record holds the clone (Issue #1
   assert.equal(readState(folder)?.runs.length, 2);
 });
 
+test("a build whose clone cannot be made leaves no record that would hold the clone (Issue #1418)", async () => {
+  const bare = join(dir, "no-origin");
+  mkdirSync(bare, { recursive: true });
+  git(["init", "-q", "-b", "main", "."], bare);
+  const messages: string[] = [];
+  const saved = console.error;
+  console.error = (line: string): void => void messages.push(line);
+  try {
+    assert.equal(await main(["build", "12", "--plan", plan, "--session", "https://s"], bare, env, gh), 1);
+  } finally {
+    console.error = saved;
+  }
+  assert.equal(readState(folderOf(bare, 12)), null);
+  assert.equal(existsSync(folderOf(bare, 12)), false);
+  assert.ok(messages.length > 0);
+});
+
 test("a build refuses a plan path that next would later refuse, and builds nothing (Issue #1409)", async () => {
   const odd = join(dir, "a plan with spaces.md");
   writeFileSync(odd, "a plan\n");

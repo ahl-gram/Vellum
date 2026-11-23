@@ -189,6 +189,21 @@ test("a clone on no branch named for the issue collects nothing and says so (Iss
   writeFileSync(join(slot, ".git", "HEAD"), "ref: refs/heads/feat/9-x\n");
 });
 
+test("a collect whose branch already exists in the main repository says so and leaves no review tree (Issue #1418)", () => {
+  const head = git(["rev-parse", "HEAD"], slot);
+  mkdirSync(join(slot, ".git", "refs", "heads", "feat"), { recursive: true });
+  writeFileSync(join(slot, ".git", "refs", "heads", "feat", "11-z"), `${head}\n`);
+  writeFileSync(join(slot, ".git", "HEAD"), "ref: refs/heads/feat/11-z\n");
+  git(["branch", "feat/11-z", head], main);
+  const got = collect(main, 11);
+  assert.equal(got.branch, "feat/11-z");
+  assert.equal(got.problems.length, 1);
+  assert.ok(got.problems[0]?.includes("already exists"), got.problems.join("\n"));
+  assert.equal(existsSync(treeOf(main, 11)), false);
+  assert.equal(git(["worktree", "list"], main).includes("codex-11"), false);
+  writeFileSync(join(slot, ".git", "HEAD"), "ref: refs/heads/feat/9-x\n");
+});
+
 test("git run inside the build's clone runs what it planted, so the marks are witnesses (Issue #1418)", () => {
   git(["status"], slot);
   assert.throws(() => git(["ls-remote", "origin"], slot));

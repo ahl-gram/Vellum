@@ -70,6 +70,16 @@ const firstLine = (error: unknown): string => {
   return (text.trim() || message).split("\n")[0] ?? message;
 };
 
+const discard = (root: string, tree: string): void => {
+  rmSync(join(tree, "node_modules"), { force: true });
+  try {
+    git(["worktree", "remove", "--force", tree], root);
+  } catch {
+    rmSync(tree, { recursive: true, force: true });
+    git(["worktree", "prune"], root);
+  }
+};
+
 export const collect = (root: string, issue: number): Collected => {
   const slot = slotOf(root);
   const branch = readSlotBranch(slot, issue);
@@ -83,8 +93,13 @@ export const collect = (root: string, issue: number): Collected => {
     if (existsSync(tree)) {
       git(["merge", "-q", "--ff-only", ref], tree);
     } else {
-      runPlan(createPlan(tree, ref, true), root, tree);
-      git(["switch", "-q", "-c", branch], tree);
+      try {
+        runPlan(createPlan(tree, ref, true), root, tree);
+        git(["switch", "-q", "-c", branch], tree);
+      } catch (error) {
+        discard(root, tree);
+        throw error;
+      }
     }
   } catch (error) {
     return { branch, problems: [firstLine(error)] };
