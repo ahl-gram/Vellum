@@ -19,6 +19,8 @@ const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [
 ];
 // The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
 const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
+// 2026-11-23: under the Primer's press the Print Room floors at 1280x720 on 134 of 152 worlds (87 of 92 days), the worst 4.708 px of width under the floor, where without it none floors (the worst +20.497), on the Mac harness browser (the Issue #1254 pull request 2 planner's sweeps); ruled, Alex, 2026-11-23, Issue #1254 comment 7111239318, Q2.
+const FLOORS_AT_1280X720: readonly string[] = ["/print-room/", COLLIDED_2026_10_06];
 
 async function deskReads(ctx: SuiteContext): Promise<{ reads: Read[] }> {
   await ctx.setTouch(false);
@@ -50,7 +52,9 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const pick = (page: string, at: string): Stage | undefined => reads.find((r) => r.page === page && r.size === at)?.s;
   const faults = reads.flatMap(stageFaults);
-  const control = reads.filter((r) => r.size === "1280x800" || r.size === "1280x720");
+  const control = reads.filter(
+    (r) => r.size === "1280x800" || (r.size === "1280x720" && !FLOORS_AT_1280X720.includes(r.page)),
+  );
   const controlFaults = control
     .filter((r) => r.s.under || r.s.risen)
     .map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
@@ -64,7 +68,7 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
     `print-room 1024x600 ${JSON.stringify(pick("/print-room/", "1024x600")?.sheet)} under ${pick("/print-room/", "1024x600")?.under}; explorer 1024x600 ${JSON.stringify(pick("/explorer/", "1024x600")?.sheet)} under ${pick("/explorer/", "1024x600")?.under} risen ${pick("/explorer/", "1024x600")?.risen}`,
   );
   ctx.check(
-    "EA3 the control: at 1280x800 and 1280x720 no chart room floors its sheet or raises its Press, so a healthy window keeps the layout main ships (Issue #762)",
+    "EA3 the control: at 1280x800 every chart room, and at 1280x720 every chart room but the Print Room, which floors there under the Primer's press (Issue #1254), keeps the layout main ships: no sheet floored and no Press risen (Issue #762)",
     missing.length === 0 && control.length >= 2 * CHART_ROOM_FLOOR.length && controlFaults.length === 0,
     `${control.length} control reads over ${rooms.length} rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; ${controlFaults.join("; ") || "none floored or risen"}`,
   );
