@@ -217,7 +217,7 @@ test("the Portfolio's where-line ships promising the sheets gathered at the Expl
   assert.deepEqual(cd55Faults(documentOf(page("/explorer/portfolio/"))), []);
 });
 
-test("home's stations are real buttons outside the marks' aria shroud, one per station and the how pip from one template, each with its anchor at full precision and its sea flag's dress, each with its slip, while the marks are every manifest place the stations leave unclaimed (from e2e L13)", () => {
+test("home's stations are real buttons outside the marks' aria shroud, one per station and the how pip from one template, each with its anchor at full precision, its sea flag's dress, its label's side and its town name's gap, each with its slip, while the marks are every manifest place the stations leave unclaimed (from e2e L13)", () => {
   assert.deepEqual(l13Faults(documentOf(page("/"))), []);
 });
 
@@ -229,7 +229,7 @@ test("home's shelf is plain flow after the landfall section: its heading and exa
   assert.deepEqual(l15Faults(documentOf(page("/")), served), []);
 });
 
-test("home's Notice to Mariners is the mockup's stamp on the deep, decorative and the only copy of its words; the how panel is a card slip shipped hidden above a keyboard-reachable region that carries the prose, with no door; the noscript carries the four doors and its own sheet (from e2e L16, less the sheet's not being fetched, a resource timing)", () => {
+test("home's Notice to Mariners is the mockup's stamp on the deep, decorative and the only copy of its words; the how panel is a card slip shipped hidden above a keyboard-reachable region that carries the prose, with no door; the noscript carries a door to every station, in the roster's order, and its own sheet (from e2e L16, less the sheet's not being fetched, a resource timing)", () => {
   assert.deepEqual(l16Faults(documentOf(page("/")), page("/")), []);
 });
 

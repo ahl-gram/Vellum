@@ -105,11 +105,18 @@ export async function l19Legend(k: LandfallKit): Promise<void> {
   );
 }
 
-type Pips = { pulses: string[][]; sea: [string, string]; land: number; slips: number[]; transition: [string, string] };
+type Pips = {
+  n: number;
+  pulses: string[][];
+  sea: [string, string];
+  land: number;
+  slips: number[];
+  transition: [string, string];
+};
 
 const PIPS: Payload<Pips> = `(() => {
   const cs = (s) => getComputedStyle(document.querySelector(s)), land = new DOMMatrixReadOnly(cs(".lf-station:not(.at-sea) .lf-station-glyph").transform), btn = cs(".lf-station");
-  return { pulses: [...document.querySelectorAll(".lf-pulse")].map((p) => [getComputedStyle(p).animationName, ...p.getAnimations().map((a) => a.animationName + ":" + a.playState)]),
+  return { n: document.querySelectorAll(".lf-station").length, pulses: [...document.querySelectorAll(".lf-pulse")].map((p) => [getComputedStyle(p).animationName, ...p.getAnimations().map((a) => a.animationName + ":" + a.playState)]),
     sea: [cs(".lf-station.at-sea .lf-station-glyph").borderRadius, cs(".lf-station.at-sea .lf-station-glyph").transform], land: Math.round(Math.atan2(land.b, land.a) * 180 / Math.PI),
     slips: [...document.querySelectorAll(".lf-station-slip")].map((s) => getComputedStyle(s).display === "none" ? 0 : s.getBoundingClientRect().width),
     transition: [btn.transitionProperty, btn.transitionDuration] };
@@ -174,14 +181,15 @@ export async function l20Stations(k: LandfallKit): Promise<void> {
   const press = await heldPip(k);
   k.check(
     "L20 the stations wear the mockup's dress: every pulse ring breathes, stilled under reduced motion; the at-sea glyph is the round, the land glyph the diamond turned 45 degrees; every name slip shows at the wide sheet and at a 640 window; and the house's button motion never reaches a station, no transition on its anchor transform and no shift on the sheet under a held press (#458)",
-    pips.pulses.length === 5 &&
+    pips.n >= 1 &&
+      pips.pulses.length === pips.n &&
       pips.pulses.every((p) => p[0] === "lf-station-pulse" && p.includes("lf-station-pulse:running")) &&
-      reduced.length === 5 &&
+      reduced.length === pips.n &&
       reduced.every((n) => n === "none") &&
       pips.sea[0] === "50%" &&
       pips.sea[1] === "none" &&
       pips.land === 45 &&
-      [pips.slips, narrow].every((s) => s.length === 5 && s.every((w) => w > 0)) &&
+      [pips.slips, narrow].every((s) => s.length === pips.n && s.every((w) => w > 0)) &&
       !slides(pips.transition) &&
       press.shift < 2,
     JSON.stringify({ pips, reduced, narrow, press }),

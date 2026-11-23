@@ -54,7 +54,9 @@ symbol and path so the reader goes and looks.
   seated under it that are not strictly rooms.** A route's seat is its first appearance in the tree
   and any later appearance is an alias. The atlas stays out of both, because it is one world's
   generated output rather than a room, with the home card and the chart of the atelier's isle as its ways in. **The home cards are modes
-  of encounter**, one to a mode, and a page deliberately without a card is not an oversight.
+  of encounter**, one to a mode: making, watching, reading and browsing a world, and learning the
+  rooms in the Primer (Alex, 2026-11-05, Issue #1155 comment 6664735683, M1). A page deliberately
+  without a card is not an oversight, and How It Works is a pip and no mode.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
   if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
   `ROUTE_NAMES`, its place on the chart of the atelier (`PLACES` in `src/layouts/atelier-chart.ts`, which `test/site/atelier-chart.test.ts` reds without), and its own sheet. A working page that mounts a bundle owes

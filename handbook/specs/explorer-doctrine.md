@@ -418,6 +418,14 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   magnification. Z24 (`z24CardSeats` in `e2e/suites/zoom/dress.ts`) reads every variant's seat at
   rest and at depth, and Z25 (`z25ClampFlush` in `e2e/suites/zoom/camera.ts`) the nudge flush into
   the box, so a nudge moved ahead of the division reds on the seat it moves.
+- **A home station moored at a town steps clear of the town's baked name.** Its diamond keeps its
+  designed size at every depth while the name, baked into the chart image, scales with the sheet, so
+  the station steps west of the town's point by however much the diamond's reach and 2 px of paper
+  exceed the name's distance at the live scale, and stands on the point where the name has that room.
+  The distance is each station's `nameGap` in `src/site/home/stations.ts`, which
+  `test/site/landfall-prose.test.ts` holds to the committed antique chart, and the step is the
+  counter-scaled `transform` of `.lf-station` in `src/styles/index.css`, inside the division as the
+  bullet above requires.
 - **A card is measured AFTER the counter-scale is published, never before**, or a fresh card is
   measured by the depth factor too large.
 

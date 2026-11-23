@@ -614,7 +614,7 @@ body:has(#map-viewport.zoomed) .corner.bl :is(.folio-sub, .folio-coords) {
   color: var(--parchment);
 }
 
-/* The legend row's footing is home's .lf-legend panel (src/styles/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`). */
+/* The legend row's footing is drawn as home's .lf-legend panel (src/styles/index.css: chart ink 0.85 to 0.72 top to bottom) at insets of 0.5rem 1.1rem 0.6rem, as a ::before so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`). */
 body:has(#map-viewport.zoomed) .legend::before,
 body.stage-under .legend::before,
 body.chart-room:not(:has(.stage)) .legend::before {

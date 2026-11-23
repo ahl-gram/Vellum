@@ -10,12 +10,14 @@ export type Station = {
   readonly prose: string;
   readonly arms: boolean;
   readonly sea: boolean;
+  readonly slipAbove: boolean;
+  readonly nameGap: number | null;
   readonly nx: number;
   readonly ny: number;
 };
 
-const GALLERY_NX = 0.79;
-const GALLERY_NY = 0.73;
+const GALLERY_NX = 0.76;
+const GALLERY_NY = 0.53;
 
 const PROSE: Readonly<Record<string, string>> = {
   explorer:
@@ -26,6 +28,8 @@ const PROSE: Readonly<Record<string, string>> = {
     "A bound volume: the world chart in three styles, two regional close-up surveys of the same terrain, and a gazetteer of every settlement with travelers' notes.",
   gallery:
     "Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.",
+  primer:
+    "New to the atelier? Learn its rooms one small step at a time: each step opens its room already set, and a hand points at what to press.",
 };
 
 function mooring(name: string): StageDot {
@@ -41,7 +45,7 @@ function station(
   where: string,
   href: string,
   at: { readonly nx: number; readonly ny: number },
-  extra: Partial<Pick<Station, "legendName" | "arms" | "sea">> = {},
+  extra: Partial<Pick<Station, "legendName" | "arms" | "sea" | "slipAbove" | "nameGap">> = {},
 ): Station {
   return {
     id,
@@ -53,6 +57,8 @@ function station(
     prose: PROSE[id]!,
     arms: false,
     sea: false,
+    slipAbove: false,
+    nameGap: null,
     nx: at.nx,
     ny: at.ny,
     ...extra,
@@ -63,8 +69,11 @@ export function homeStations(): ReadonlyArray<Station> {
   const capital = homeStage().capital;
   const lamahai = mooring("Lamahai");
   const weki = mooring("Weki");
+  const poalo = mooring("Poalo");
   return [
-    station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital),
+    station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital, {
+      nameGap: 11,
+    }),
     station(
       "reading-room",
       "The Reading Room",
@@ -72,10 +81,12 @@ export function homeStations(): ReadonlyArray<Station> {
       `off ${lamahai.name}, on the southern shore`,
       "reading-room/",
       lamahai,
+      { slipAbove: true, nameGap: 7 },
     ),
     station("atlas", "The Atlas of Rahai", "Read one", `at ${weki.name}, a seat of the west`, "atlas/", weki, {
       legendName: "The Atlas",
       arms: true,
+      nameGap: 8,
     }),
     station(
       "gallery",
@@ -86,10 +97,13 @@ export function homeStations(): ReadonlyArray<Station> {
       { nx: GALLERY_NX, ny: GALLERY_NY },
       { sea: true },
     ),
+    station("primer", "The Primer", "Start here", `at ${poalo.name}, a harbour of the Ratoa Atolls`, "primer/", poalo, {
+      nameGap: 7,
+    }),
   ];
 }
 
-export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "nx" | "ny">;
+export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "slipAbove" | "nameGap" | "nx" | "ny">;
 
 export function howStation(): Pip {
   return {
@@ -98,6 +112,8 @@ export function howStation(): Pip {
     verb: "See how",
     where: "at the title cartouche",
     sea: true,
+    slipAbove: false,
+    nameGap: null,
     nx: 0.7847,
     ny: 0.1779,
   };
