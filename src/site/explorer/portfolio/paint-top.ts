@@ -13,9 +13,9 @@ export interface TopLines {
 }
 
 export function paintTop(roomEls: TopEls, lines: TopLines, layout: () => void): void {
-  layout();
   roomEls.sheet.innerHTML = lines.svg;
   roomEls.title.textContent = lines.title;
   roomEls.sub.textContent = lines.sub;
   roomEls.coords.textContent = lines.coords;
+  layout();
 }
