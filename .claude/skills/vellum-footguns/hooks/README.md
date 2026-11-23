@@ -278,16 +278,15 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   takes a value (`npm --prefix` and `-w`, `pnpm --filter` and `-C`, `node -r` and `--import`), a git
   alias already set in a config file the build did not write, the GitHub API reached by another
   client (`curl`), a build started without the wrapper and so without the variable, and a build that
-  edits the hook's own files in its tree, since the hook it runs is that tree's copy. Under full
-  access a headless build can also leave code that later runs as Alex, with his login: in the shared
-  git config (a linked worktree shares the main checkout's `.git`, so a command set there runs on
-  `git ls-remote` and `git status` in the session and in the main checkout), in a git hook in the
-  shared `.git/hooks` (only the session's own push of a Codex build runs with hooks off,
-  `-c core.hooksPath=/dev/null`; the guard prover's sandbox, the next `handoff build` and Alex's own
-  commit, pull or checkout run a planted hook), in his shell startup files, and in test code the
-  guard prover runs; and it can reach his login in the macOS keychain or in gh's config folder by a
-  program the hook cannot read. The exits (a separate macOS user, a build with no network, its own
-  clone) are weighed in Issue #1418, before a Codex build is trusted with anything that matters.
+  edits the hook's own files in its tree, since the hook it runs is that tree's copy. A headless
+  build works in its own clone (Alex, 2026-11-22, Issue #1418), so its ordinary git commands land
+  there and not in the main repository's `.git`, and the session only fetches from that clone.
+  Under full access a build set on it can still write anywhere in Alex's home folder (the main
+  repository's `.git`, his shell startup files, test code the guard prover runs) and reach his login
+  in the macOS keychain or gh's config folder by a program the hook cannot read; and a push starts
+  any workflow file the branch carries. Alex accepted both (comment 7089981355);
+  `handbook/specs/orchestration.md` (Lanes that cross harnesses) holds the measurements, among them
+  that a command set in the shared git config ran on a push with every git hook off.
   **Its errors the other way are refusals**, each visible and one edit away: every `gh` call, reads
   included; any word that names a shell or `gh` (`which gh`, `ls ~/.config/gh`); `echo git push`;
   any `git -c`; a bare `git` or `git --version`; `git config user.name` without `--get`; a command
