@@ -226,6 +226,20 @@ test("a build of another issue is refused while this issue's record holds the cl
   assert.equal(readState(folderOf(mainRepo, 10)), null);
 });
 
+test("a resume is refused while another issue's record holds the clone (Issue #1418)", async () => {
+  const before = readFileSync(facts, "utf8");
+  const other = folderOf(mainRepo, 10);
+  mkdirSync(other, { recursive: true });
+  writeFileSync(join(other, "state.json"), "{}\n");
+  try {
+    assert.equal(await main(["resume", "9", "--brief", brief], mainRepo, env, gh), 2);
+  } finally {
+    rmSync(other, { recursive: true, force: true });
+  }
+  assert.equal(readFileSync(facts, "utf8"), before);
+  assert.equal(readState(folder)?.runs.length, 2);
+});
+
 test("a build refuses a plan path that next would later refuse, and builds nothing (Issue #1409)", async () => {
   const odd = join(dir, "a plan with spaces.md");
   writeFileSync(odd, "a plan\n");

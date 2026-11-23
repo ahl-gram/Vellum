@@ -122,6 +122,8 @@ test("the build's prompt names its plan, its own clone, session, record files, h
     ".codex/agents/vellum-implementer.toml",
   ])
     assert.ok(build.includes(part), part);
+  const hookLine = build.split("\n").find((line) => line.includes(HOOK_CHECK));
+  assert.ok(hookLine?.includes(OUTCOME_HOOK) && !hookLine.includes(OUTCOME_HANDBACK), hookLine);
   const resume = resumePrompt({ issue: 7, brief: "/b.md", folder: "/o/7-handoff" });
   for (const part of [
     "/b.md",

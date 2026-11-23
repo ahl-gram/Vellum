@@ -92,6 +92,13 @@ test("the build's branch is read from a regular HEAD file in a .git folder only,
   writeFileSync(join(gitfile, ".git"), `gitdir: ${join(dir, "gitfile-target")}\n`);
   assert.equal(readSlotBranch(gitfile, 9), null);
 
+  const linkedGit = join(dir, "linked-git");
+  mkdirSync(join(dir, "linked-git-target"), { recursive: true });
+  writeFileSync(join(dir, "linked-git-target", "HEAD"), TEXT);
+  mkdirSync(linkedGit, { recursive: true });
+  symlinkSync(join(dir, "linked-git-target"), join(linkedGit, ".git"));
+  assert.equal(readSlotBranch(linkedGit, 9), null);
+
   const fitting = clone("fitting");
   head(fitting, PREFIX + "x".repeat(4096 - PREFIX.length));
   assert.equal(readSlotBranch(fitting, 9), "chore/9-" + "x".repeat(4096 - PREFIX.length));
