@@ -15,8 +15,8 @@ export type Station = {
   readonly ny: number;
 };
 
-const GALLERY_NX = 0.79;
-const GALLERY_NY = 0.73;
+const GALLERY_NX = 0.76;
+const GALLERY_NY = 0.53;
 
 const PROSE: Readonly<Record<string, string>> = {
   explorer:
@@ -27,6 +27,8 @@ const PROSE: Readonly<Record<string, string>> = {
     "A bound volume: the world chart in three styles, two regional close-up surveys of the same terrain, and a gazetteer of every settlement with travelers' notes.",
   gallery:
     "Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.",
+  primer:
+    "New to the atelier? Learn its rooms one small step at a time: each step opens its room already set, and a hand points at what to press.",
 };
 
 function mooring(name: string): StageDot {
@@ -65,6 +67,7 @@ export function homeStations(): ReadonlyArray<Station> {
   const capital = homeStage().capital;
   const lamahai = mooring("Lamahai");
   const weki = mooring("Weki");
+  const poalo = mooring("Poalo");
   return [
     station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital),
     station(
@@ -74,6 +77,7 @@ export function homeStations(): ReadonlyArray<Station> {
       `off ${lamahai.name}, on the southern shore`,
       "reading-room/",
       lamahai,
+      { slipAbove: true },
     ),
     station("atlas", "The Atlas of Rahai", "Read one", `at ${weki.name}, a seat of the west`, "atlas/", weki, {
       legendName: "The Atlas",
@@ -88,6 +92,7 @@ export function homeStations(): ReadonlyArray<Station> {
       { nx: GALLERY_NX, ny: GALLERY_NY },
       { sea: true },
     ),
+    station("primer", "The Primer", "Start here", `at ${poalo.name}, a harbour of the Ratoa Atolls`, "primer/", poalo),
   ];
 }
 

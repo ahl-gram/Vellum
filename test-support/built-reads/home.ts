@@ -18,6 +18,7 @@ export function l13Faults(doc: Document): string[] {
       p.getAttribute("data-nx") === String(w.nx) || "nx",
       p.getAttribute("data-ny") === String(w.ny) || "ny",
       p.classList.contains("at-sea") === w.sea || "at-sea",
+      p.classList.contains("slip-above") === w.slipAbove || "slip-above",
     ].filter((f) => f !== true);
     return wrong.length ? [`pip ${w.id}: ${wrong.join(", ")}`] : [];
   });
@@ -147,7 +148,6 @@ const MARKERS = [
   "README",
 ];
 const HOW_KIDS = ["lf-card-close", "lf-card-verb", "lf-card-title", "lf-card-where", "lf-card-scroll"];
-const DOORS = ["explorer/", "reading-room/", "atlas/", "gallery/"];
 
 export function l16Faults(doc: Document, html: string): string[] {
   const stamp = doc.querySelector("aside.notice-stamp");
@@ -177,8 +177,10 @@ export function l16Faults(doc: Document, html: string): string[] {
     !how?.querySelector(".lf-card-enter") || "the how panel carries a door",
     ![...doc.querySelectorAll("h2")].some((h) => h.textContent.trim() === "How It Works") ||
       "the old How It Works head is back",
-    same(ns && [...ns.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")), DOORS) ||
-      "the noscript's four doors",
+    same(
+      ns && [...ns.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")),
+      homeStations().map((s) => s.href),
+    ) || "the noscript's doors, one to every station in the roster's order",
     (ns?.querySelector("link[rel='stylesheet']")?.getAttribute("href") ?? null) === "home-noscript.css" ||
       "the noscript's own sheet",
   ]);
