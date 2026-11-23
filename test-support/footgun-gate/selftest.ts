@@ -8,6 +8,7 @@ import { gateText, statePath } from "../../scripts/agent-infra/hooks/gate-state.
 import { requiredHeadings } from "../../scripts/agent-infra/hooks/pr-body.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { codexChecks } from "./codex-rows.ts";
+import { COMMENT_READ_ROWS } from "./comment-read.fixtures.ts";
 import { ESCAPE_ROWS } from "./escape.fixtures.ts";
 import { GH_API_ROWS } from "./gh-api.fixtures.ts";
 import { HEADLESS_ROWS } from "./headless-build.fixtures.ts";
@@ -199,6 +200,7 @@ const FIXTURES: Fixture[] = [
   ...CODE_FIXTURES,
   ...CD_FIXTURES,
   ...GH_API_ROWS,
+  ...COMMENT_READ_ROWS,
   ...HEADLESS_ROWS,
   ...PR_BODY_ROWS,
   ...ESCAPE_ROWS,
