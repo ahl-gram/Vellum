@@ -103,3 +103,43 @@ export function openFaults(doc: Document): string[] {
       "a room's lessons are hidden in the index before any script runs",
   ]);
 }
+
+export function pressFaults(pages: ReadonlyMap<string, Document>, taught: readonly string[], words: string): string[] {
+  const out: (true | string)[] = [pages.has("/primer/") || "the build wrote no Primer"];
+  const missing = taught.filter((r) => !pages.has(r));
+  out.push(missing.length === 0 || `the build wrote no page for ${missing.join(", ")}`);
+  const untaught = [...pages].filter(([route]) => !taught.includes(route));
+  out.push(
+    untaught.some(([, doc]) => doc.querySelector("header.chrome .where") !== null) ||
+      "no untaught page has a trail, so the absence is read nowhere",
+  );
+  for (const [route, doc] of untaught)
+    out.push(doc.querySelector(".primer-press") === null || `${route} carries a Primer press`);
+  const primer = pages.get("/primer/");
+  for (const route of taught) {
+    const doc = pages.get(route);
+    if (doc === undefined) continue;
+    const presses = [...doc.querySelectorAll(".primer-press")];
+    out.push(presses.length === 1 || `${route} carries ${presses.length} Primer presses`);
+    const press = presses[0];
+    if (press === undefined) continue;
+    out.push(
+      press.parentElement?.matches("header.chrome") === true || `${route}'s press stands outside the head cluster`,
+    );
+    out.push(
+      press.previousElementSibling?.matches(".where") === true ||
+        `${route}'s press does not stand straight after the trail`,
+    );
+    const links = [...press.querySelectorAll("a[href]")];
+    out.push(links.length === 1 || `${route}'s press holds ${links.length} links`);
+    const id = primer?.querySelector(`section.room[data-route="${route}"] h2[id]`)?.id;
+    out.push(id !== undefined || `the Primer has no room for ${route}`);
+    const link = links[0];
+    if (link === undefined || id === undefined) continue;
+    const href = link.getAttribute("href");
+    out.push(href === `/primer/#${id}` || `${route}'s press opens ${href}, not its room on the Primer`);
+    const got = text(link);
+    out.push(got === words || `${route}'s press reads ${JSON.stringify(got)}`);
+  }
+  return faults(out);
+}

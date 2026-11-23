@@ -41,6 +41,8 @@
   --chrome-y: 1.4rem;
   --trail-gap: 0.6rem;
   --trail-line: 1rem;
+  /* 2026-11-23: the Primer's press adds 23.8 px to the head cluster at 1024 and 1280 (the Issue #1254 pull request 2 planner's probe); 1.5rem keeps the Gallery's first row 39.19 px under it, and 39.42 px under the press and a done note. */
+  --primer-press-h: 0px;
 }
 /* A palette inversion, not a dark mode: form controls stay light. */
 :root {
@@ -172,8 +174,33 @@ footer a:focus-visible {
   text-decoration-color: rgb(from var(--parchment) r g b / 0.55);
   text-underline-offset: 0.25em;
 }
+.primer-press {
+  display: flex;
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+}
+.primer-press a {
+  color: var(--parchment);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.primer-press a:hover,
+.primer-press a:focus-visible {
+  color: var(--parchment-bright);
+}
+.primer-press a::before {
+  content: "☞ " / "";
+  font-family: var(--font-serif-fallback);
+  letter-spacing: 0;
+  opacity: 0.8;
+}
 :root:has(.band):has(.trail) {
   --band-h: 10.6rem;
+}
+:root:has(.primer-press) {
+  --primer-press-h: 1.5rem;
 }
 @media screen {
   body.room:has(.band):has(.trail) {

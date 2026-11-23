@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { RouteTree } from "../../src/site/shared/primer/ladders.ts";
+import { LADDERS, LEANED_ON, LEFT_UNTAUGHT, type RouteTree } from "../../src/site/shared/primer/ladders.ts";
 import { option, road, text, type Ladder, type Step } from "../../src/site/shared/primer/shape.ts";
-import { AFTERWARD, primerPage, tryItHref } from "../../src/site/primer/page.ts";
+import { AFTERWARD, primerPage, roomIdOf, trailPressHref, tryItHref } from "../../src/site/primer/page.ts";
 import { segmentsOf } from "../../src/site/shared/primer/segments.ts";
 import { datelineOf } from "../../src/site/primer/words.ts";
 
@@ -134,4 +134,18 @@ test("PP3 the page counts and links what the data holds", () => {
   const alone = primerPage([ladder("/b/", [lesson("one", [step("b1", "/b/")])])], tree).dateline;
   assert.equal(alone, datelineOf(1, 1));
   assert.match(alone, / in 1 room$/);
+});
+
+test("PP4 a room the Primer teaches carries a press to its own room on the Primer, and a room it does not teach carries none (Issue #1155 ruling 2 and N4; Issue #1254)", () => {
+  const ladders = [
+    ladder("/a/", [lesson("one", [step("a1", "/a/")])]),
+    ladder("/a/sub/", [lesson("one", [step("s1", "/a/sub/")])]),
+  ];
+  assert.equal(trailPressHref("/a/", ladders), "/primer/#a");
+  assert.equal(trailPressHref("/a/sub/", ladders), "/primer/#a-sub");
+  assert.equal(trailPressHref("/b/", ladders), null);
+  assert.equal(trailPressHref("/", ladders), null);
+  assert.ok(LADDERS.length > 0, "the house teaches rooms");
+  for (const l of LADDERS) assert.equal(trailPressHref(l.route), `/primer/#${roomIdOf(l.route)}`, l.route);
+  for (const r of ["/", ...LEANED_ON, ...Object.keys(LEFT_UNTAUGHT)]) assert.equal(trailPressHref(r), null, r);
 });

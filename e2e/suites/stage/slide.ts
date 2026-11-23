@@ -25,7 +25,7 @@ import {
 } from "./slide-kit.ts";
 import { FOOT_WINDOW, THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
 
-// 2026-11-12: the fill against the first press's 1.4, the Mac's layout 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over); the runner's 1280x800 1.5334 (0.1334 over) and 1024x768 2.1950 (0.7950 over), CI run 43180780683.
+// 2026-11-23: the fill against the first press's 1.4, the Mac's layout 1280x800 1.6327 (0.2327 over) and 1024x768 2.1389 (0.7389 over); the runner's 1280x800 1.6227 (0.2227 over) and 1024x768 2.1444 (0.7444 over), CI run 45252922447.
 const FIRST_PRESS = 1.4;
 
 async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults: string[]; detail: string }> {
@@ -59,7 +59,7 @@ async function es1At(ctx: SuiteContext, w: number, h: number): Promise<{ faults:
       `the painted chart ${JSON.stringify(at.chart)} does not cover [0, ${at.slip.left}] x [0, ${at.innerH}] at the fill`,
     );
   if (!(at.head.nav[1] <= 0)) say(`the nav stands on screen at the fill: bottom ${at.head.nav[1]}`);
-  for (const m of [...thinTopFaults(thin, false), ...thinFootFaults(thin)]) say(m);
+  for (const m of [...thinTopFaults(thin, false, true), ...thinFootFaults(thin)]) say(m);
   if (at.folio.rest.some((t) => t < at.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(at.folio.rest)}`);
   return {
@@ -72,7 +72,7 @@ export async function es1Follow(ctx: SuiteContext): Promise<void> {
   const rows = await motionOn(ctx, async () => [await es1At(ctx, 1280, 800), await es1At(ctx, 1024, 768)]);
   const faults = rows.flatMap((r) => r.faults);
   ctx.check(
-    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through every press before the press that fills and then follow the zoom by the log of depth, half way at the geometric mean of that press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7; Issue #1034)",
+    "ES1 on the Explorer at 1280x800 and 1024x768, seed 42, the head cluster and the chart folio stay home through every press before the press that fills and then follow the zoom by the log of depth, half way at the geometric mean of that press's depth and the fill depth, short of their travel just under it, and at their thin lines exactly at the depth where the chart, magnified about its centre, covers the screen beside the Broadside, read off the chart's own painted box, the Primer's press kept on its own line under the trail (Alex, 2026-10-22, Issue #989 rulings 1 to 4; Alex, 2026-10-23, Issue #996 step 6 rulings 1 and 7; Issue #1034)",
     faults.length === 0,
     rows.map((r) => r.detail).join("; ") +
       (faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""),
@@ -130,7 +130,7 @@ export async function es7Reduced(ctx: SuiteContext): Promise<void> {
   );
 }
 
-// 2026-11-12: the Explorer at 1280x800 fills open at 1.5334 (press 2) on the Mac harness browser and on the CI runner (run 43180780683, lane B), and folded at 1.8209 on both, 0.1391 short of the press the fold is made at, 1.96, and 0.2875 past the open fill.
+// 2026-11-23: the Explorer at 1280x800 fills open at 1.6327 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 45252922447, lane B), and folded at 1.8923 and 1.8850, 0.0677 and 0.0750 short of the press the fold is made at, 1.96, and 0.2596 and 0.2623 past the open fill.
 export async function es9Fold(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const last = <T>(a: readonly T[]): T => a[a.length - 1]!;

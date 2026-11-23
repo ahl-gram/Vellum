@@ -156,7 +156,7 @@ the cluster alone, and why **it wears no vignettes**: a vignette is a fixed dark
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav and, on every
-  page with a seat in the route tree, the trail under it, the press that opens the chart of the atelier riding the trail's line, or taking its own under the nav where the page has no trail, directly on the deep. Fixed in a room,
+  page with a seat in the route tree, the trail under it, the press that opens the chart of the atelier riding the trail's line, or taking its own under the nav where the page has no trail, directly on the deep. On every page whose room the Primer teaches, the press that opens the Primer at that room stands on a line of its own under the trail, and under the alias line where the page has one, its words after a manicule (`trailPressHref` in `src/site/primer/page.ts`), and in the Gallery the first row of plates keeps its gap under it (`--primer-press-h` in `src/styles/shared/shell.css`). **Provisional until the post-use review (Issue #1258):** the press's seat, its words, its manicule and the Gallery's reserve under it. Fixed in a room,
   riding the page on home. The motto keeps its line and the wordmark its size at every width. **The
   cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
   by `src/site/shared/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width,
@@ -176,7 +176,7 @@ press before the press that fills lands they slide toward their nearest edge, th
 folio down, in step with the camera's depth, finishing exactly as the chart, magnified as the Glass
 magnifies it, covers the screen beside the room's slip, so nothing moves until the press that fills;
 they leave the trail with the chart of the atelier press as a thin top line, on the Prospect with
-its alias line under it, and the chart folio's title as a thin bottom line, on the Reading Room
+its alias line under it, the Primer's press on its own line under them, and the chart folio's title as a thin bottom line, on the Reading Room
 under its strip. The Seed of the Day, whose Glass magnifies about its whole stage, is judged where
 its chart really grows, against the left, the top and the foot. A fold of the side panel, or the
 Chart Table opened, part way through a zoom keeps the depth the slide started from until the reader
@@ -238,9 +238,9 @@ Exactly one element on the page carries the current-page mark (`aria-current`): 
 when the page is on its top line, the trail's last segment when it is not. The mark is brightened
 AND underlined, never colour alone; on a top-level room the trail's last segment wears the same
 dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
-so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
+so does a page deliberately outside the tree. The trail's links and the Primer's press under them are parchment like the nav's, never
 a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
-controls. **Ratified at the post-use review (Issue #736):** the trail's size step under the nav, its separator glyph, the margins that clear the targets' spacing, the Gallery's first row given back its gap, and the alias link's strengthened underline. They are checked by eye since Issue #1273 deleted the cluster suite's DR13 and DR16, which held the size step, the margins, the trail's line, the underline's strength and the Gallery's clearance; the Gallery's spacing is not pinned (`handbook/errata/site.md`). **Still provisional:** the alias line's wording and whether it earns its place. The trail and the nav sharing one ink stays as `handbook/errata/site.md` records it.
+controls. **Ratified at the post-use review (Issue #736):** the trail's size step under the nav, its separator glyph, the margins that clear the targets' spacing, the Gallery's first row given back its gap, and the alias link's strengthened underline. They are checked by eye since Issue #1273 deleted the cluster suite's DR13 and DR16, which held the size step, the margins, the trail's line, the underline's strength and the Gallery's clearance; the Gallery's spacing is not pinned (`handbook/errata/site.md`). The Primer's press under the trail is held to the thumb's 24px in every room it stands in by RH33 (`e2e/suites/runninghead/press.ts`; Alex, 2026-11-23, Issue #1254 comment 7111239318, Q1). **Still provisional:** the alias line's wording and whether it earns its place. The trail and the nav sharing one ink stays as `handbook/errata/site.md` records it.
 
 **The chart of the atelier is the listing, laid over the trail as a layer.** Its press opens a small
 chart of the site's own shape: every route in the tree is a place and the atlas an isle off home
@@ -260,7 +260,7 @@ the drawing (the coast, the places, their ranks and labels, the roads, the atlas
 words, its seat at the trail's end and its lit ground, the panel's size, opacity and seat, the key
 line, the outline, the cut on a short window, and the press's gap under the nav.
 
-**The Primer's pointing hand** (Issue #1155 rulings 1, N2, N3, M4; Issue #1248 item 5; Issue #1253): a reader who arrives from a Try it finds the control the step names ringed in gold over a walnut line with a breathing halo, the house's manicule left of the ring, and a slim note under the head cluster's trail with the step in hand, the road back to its step on the Primer and the press onward; a step the room sees done is sealed and the note says so with the seal, a step that cannot apply on this device carries its mark. The note is part of the head cluster, so the chart is fitted under it and it rides the cluster's slide; in the Gallery, which hangs its plates with no stage, the first row of plates keeps its gap under it (`--primer-slip-h` in `src/styles/shared/primer-hand.css`). Under reduced motion nothing breathes; on paper none of it prints. **Provisional until the post-use review (Issue #1258):** the ring, its halo and breath, the manicule's seat and outline, the note's dress, its width and seat, the Gallery's reserve under it, the dots, the done row and the ×.
+**The Primer's pointing hand** (Issue #1155 rulings 1, N2, N3, M4; Issue #1248 item 5; Issue #1253): a reader who arrives from a Try it finds the control the step names ringed in gold over a walnut line with a breathing halo, the house's manicule left of the ring, and a slim note under the head cluster's trail and the Primer's press with the step in hand, the road back to its step on the Primer and the press onward; a step the room sees done is sealed and the note says so with the seal, a step that cannot apply on this device carries its mark. The note is part of the head cluster, so the chart is fitted under it and it rides the cluster's slide; in the Gallery, which hangs its plates with no stage, the first row of plates keeps its gap under it (`--primer-slip-h` in `src/styles/shared/primer-hand.css`). Under reduced motion nothing breathes; on paper none of it prints. **Provisional until the post-use review (Issue #1258):** the ring, its halo and breath, the manicule's seat and outline, the note's dress, its width and seat, the Gallery's reserve under it, the dots, the done row and the ×.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in

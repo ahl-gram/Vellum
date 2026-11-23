@@ -116,8 +116,8 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
 });
 
 // A `:visited` link's colour is one no browser hands a script (Issue #779 part 2f).
-test("no rule that dresses the trail reaches for an ink under the floor on the deep, in any state (Issue #668)", () => {
-  const trail = rulesIn(layoutStyle()).filter((r) => /\.(trail|also|where)\b/.test(r.selector));
+test("no rule that dresses the trail or the Primer's press under it reaches for an ink under the floor on the deep, in any state (Issue #668; Issue #1254)", () => {
+  const trail = rulesIn(layoutStyle()).filter((r) => /\.(trail|also|where|primer-press)\b/.test(r.selector));
   assert.ok(trail.length >= 10, `the reader found the trail's rules (${trail.length}), so the sweep is not of nothing`);
   for (const r of trail)
     assert.doesNotMatch(

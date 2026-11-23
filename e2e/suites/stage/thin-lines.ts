@@ -1,4 +1,4 @@
-// The slide-away's thin lines read off the page (Issue #1076): the trail's own line, with the Prospect's alias line directly under it, as the thin top line, and the chart folio's title, on one row 2 px above the foot, as the thin bottom line.
+// The slide-away's thin lines read off the page (Issue #1076): the trail's own line, with the Prospect's alias line directly under it and the Primer's press under them (Issue #1254), as the thin top line, and the chart folio's title, on one row 2 px above the foot, as the thin bottom line.
 import type { Payload } from "../../types.ts";
 import { GLYPH_LINES } from "./glyphs.ts";
 
@@ -8,6 +8,7 @@ export type ThinLines = {
   readonly innerH: number;
   readonly trail: Span | null;
   readonly also: Span | null;
+  readonly press: Span | null;
   readonly title: Span | null;
   readonly lines: readonly ThinLine[];
 };
@@ -27,6 +28,7 @@ export const THIN_LINES: Payload<ThinLines> = `(() => {
     innerH: innerHeight,
     trail: span(document.querySelector("header.chrome .trail")),
     also: span(document.querySelector("header.chrome p.also")),
+    press: span(document.querySelector("header.chrome .primer-press")),
     title: span(document.getElementById("folio-title")),
     lines: (${GLYPH_LINES}).map((g) => ({ piece: g.piece, t: g.t, row: g.row })),
   };
@@ -42,7 +44,7 @@ export function thinTopFoot(t: ThinLines, alias: boolean): number {
   return alias && t.also !== null ? Math.max(t.trail[1], t.also[1]) : t.trail[1];
 }
 
-export function thinTopFaults(t: ThinLines, alias: boolean): string[] {
+export function thinTopFaults(t: ThinLines, alias: boolean, press: boolean): string[] {
   const { trail, also, innerH } = t;
   if (trail === null) return ["no trail stands in the head cluster"];
   const faults: string[] = [];
@@ -66,14 +68,27 @@ export function thinTopFaults(t: ThinLines, alias: boolean): string[] {
     if (!onAlias.some((l) => l.t.startsWith("also reached from")))
       faults.push("the alias line's text is not on screen");
   }
+  const above = alias && also !== null ? also : trail;
+  if (press && t.press === null) faults.push("no Primer press stands under the trail");
+  if (press && t.press !== null) {
+    const p = t.press;
+    const onPress = on.filter((l) => within(l.row, p));
+    if (!(p[0] >= above[1] && p[0] - above[1] < p[1] - p[0]))
+      faults.push(
+        `the Primer press does not stand directly under the line above it: its top ${p[0].toFixed(2)}, that line's foot ${above[1].toFixed(2)}, its own line ${(p[1] - p[0]).toFixed(2)}`,
+      );
+    if (spread(onPress) > ROW_SPREAD) faults.push(`the Primer press stands on more than one row: ${rowsOf(onPress)}`);
+    if (!onPress.some((l) => l.t.startsWith("learn this room")))
+      faults.push("the Primer press's words are not on screen");
+  }
   const foot = thinTopFoot(t, alias);
   if (!(foot <= TOP_CEILING))
     faults.push(`the thin top line's foot ${foot.toFixed(2)} stands past the ${TOP_CEILING} px ceiling`);
-  const under = alias ? also : null;
+  const kept = [...(alias && also !== null ? [also] : []), ...(press && t.press !== null ? [t.press] : [])];
   for (const l of on)
-    if (!within(l.row, trail) && !(under !== null && within(l.row, under)))
+    if (!within(l.row, trail) && !kept.some((s) => within(l.row, s)))
       faults.push(
-        `the head cluster line "${l.t}" stands at ${l.row}, outside the trail's line ${trail[0].toFixed(2)} to ${trail[1].toFixed(2)}${under === null ? "" : ` and the alias line's ${under[0].toFixed(2)} to ${under[1].toFixed(2)}`}`,
+        `the head cluster line "${l.t}" stands at ${l.row}, outside the trail's line ${trail[0].toFixed(2)} to ${trail[1].toFixed(2)}${kept.map((s) => ` and ${s[0].toFixed(2)} to ${s[1].toFixed(2)}`).join("")}`,
       );
   return faults;
 }

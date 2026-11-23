@@ -1,6 +1,8 @@
 ---
 import { NAV_ITEMS, trailFor } from "./nav.ts";
 import AtelierChart from "./AtelierChart.astro";
+import { trailPressHref } from "../site/primer/page.ts";
+import { TRAIL_PRESS } from "../site/primer/words.ts";
 
 // The one shared shell (the Sub 1 decision doc comment on #202; the atelier-map idiom at #461): head meta from the props, <title> computed from `room`, the fixed head cluster on the walnut deep, the canonical nav, the constant footer, and the rooms' landing ceremony.
 interface Props {
@@ -63,6 +65,7 @@ const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.";
 const cardDescription = ogDescription ?? description;
 const trail = trailFor(path);
+const press = trailPressHref(path);
 const Desk = room ? "div" : Fragment;
 const deskAttrs = room ? { class: Astro.slots.has("desk") ? "desk-layer on" : "desk-layer" } : {};
 ---
@@ -121,6 +124,7 @@ const deskAttrs = room ? { class: Astro.slots.has("desk") ? "desk-layer on" : "d
     ))}
   </nav>
   {trail && <div class="where"><nav class="trail" aria-label="Where you are">{trail.crumbs.map((c, i) => <Fragment>{i > 0 ? <Fragment><span class="way" aria-hidden="true">›</span><wbr /></Fragment> : ""}{i < trail.crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : trail.current ? <span aria-current="page">{c.name}</span> : <span class="here">{c.name}</span>}</Fragment>)}</nav><AtelierChart path={path} />{trail.also.length > 0 && <p class="also">also reached from {trail.also.map((c, i) => <Fragment>{i > 0 ? " and " : ""}<a href={c.href}>{c.name}</a></Fragment>)}</p>}</div>}
+  {trail && press !== null && <p class="primer-press"><a href={press}>{TRAIL_PRESS}</a></p>}
   {!trail && <AtelierChart path={path} />}
   <slot name="header-extra" />
 </header>

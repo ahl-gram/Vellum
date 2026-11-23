@@ -15,7 +15,7 @@ function thinLines(room: Room, a: Pieces, t: ThinLines): string[] {
   const faults: string[] = [];
   const say = (m: string): number => faults.push(`${room.id}: ${m}`);
   if (!(a.head.nav[1] <= 0)) say(`the nav stands on screen: bottom ${a.head.nav[1]}`);
-  for (const m of [...thinTopFaults(t, room.id === "Prospect"), ...thinFootFaults(t)]) say(m);
+  for (const m of [...thinTopFaults(t, room.id === "Prospect", true), ...thinFootFaults(t)]) say(m);
   if (a.folio.rest.some((r) => r < a.innerH - FOOT_WINDOW))
     say(`a folio line stays on screen: ${JSON.stringify(a.folio.rest)}`);
   return faults;
@@ -48,11 +48,11 @@ async function sw1Visit(ctx: SuiteContext, room: Room): Promise<{ faults: string
   };
 }
 
-// 2026-11-12: the Prospect at 1280x800 fills at 1.6227 (press 2) on the Mac harness browser and 1.6227 on the CI runner (run 43180780683, lane C), 0.2227 past the first press's 1.4 and 0.3373 short of the second's 1.96.
+// 2026-11-23: the Prospect at 1280x800 fills at 1.7474 (press 2) on the Mac harness browser and 1.7365 on the CI runner (run 45252922447, lane C), 0.3474 and 0.3365 past the first press's 1.4 and 0.2126 and 0.2235 short of the second's 1.96.
 export async function sw1Rooms(ctx: SuiteContext): Promise<void> {
   const r = await sw1Visit(ctx, roomNamed("Prospect"));
   ctx.check(
-    "SW1 on the Prospect at 1280x800, whose zoom room takes the slide-away from the binder `scripts/lint/shared-bindings.ts` holds every zoom room to (`bindZoomRoom`), the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, the Prospect's second line kept under the trail, the folio's title 2 px above the foot and its other lines below it (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996; one room since Issue #1273)",
+    "SW1 on the Prospect at 1280x800, whose zoom room takes the slide-away from the binder `scripts/lint/shared-bindings.ts` holds every zoom room to (`bindZoomRoom`), the head cluster and the chart folio stay home until the Glass's press that fills the screen beside the slip and stand at their thin lines at it: the nav off screen, the chart of the atelier press on the top line, the Prospect's second line kept under the trail and the Primer's press under it, the folio's title 2 px above the foot and its other lines below it (Alex, 2026-10-23, Issue #997 rulings 1 to 3 and 5; Issue #996; one room since Issue #1273)",
     r.faults.length === 0,
     r.detail + (r.faults.length ? `; ${r.faults.length} faults: ${r.faults.slice(0, 6).join("; ")}` : ""),
   );
@@ -109,7 +109,7 @@ const reaches = (p: Pieces): boolean => {
   return f[0] <= 1 && f[1] <= 1 && f[3] >= p.innerH - 1;
 };
 
-// 2026-11-12: the Seed of the Day at 1024x768 fills at 2.4028 (press 3) by the plain rule and 3.0552 (press 4) by its own on the Mac harness browser, and at 2.4028 and 3.0552 on the CI runner (run 43180780683, lane C); the plain fill sits 0.3412 short of the third press's 2.744 and the room's 0.3112 past it.
+// 2026-11-23: the Seed of the Day at 1024x768 fills at 2.4997 (press 3) by the plain rule and 3.0552 (press 4) by its own on the Mac harness browser, and at 2.4910 and 3.0552 on the CI runner (run 45252922447, lane C); the plain fill sits 0.2443 and 0.2530 short of the third press's 2.744 and the room's 0.3112 past it.
 export async function sw3Today(ctx: SuiteContext): Promise<void> {
   const room = roomNamed("Seed of the Day");
   const faults: string[] = [];
