@@ -27,6 +27,7 @@ import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture 
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
 import { foundAddress, pageFounder, writtenParams } from "../shared/written-world.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 
 declare global {
   interface Window {
@@ -190,6 +191,7 @@ function draw(year: number | null, writeAddress: boolean): void {
       };
       // AFTER `last`, never before it: the press files what `last` names, and painted a beat early it reads the previous plate or none at all.
       paintLay();
+      void bootHandOnce({ route: "/prospect/" });
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
