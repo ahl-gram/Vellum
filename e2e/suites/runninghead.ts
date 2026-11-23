@@ -1,8 +1,10 @@
-// Running Head e2e (Issue #295; reshaped for the Issue #461 head cluster; cut to its sweep at Issue #1273): every shelled page and the Portfolio visited once with their scripts on, the kit's lifted shapes judged across them (RH32), the nav links' rise under a real pointer (RH31), and the sweep's console and 4xx gate (RH8); restores the Explorer base.
+// Running Head e2e (Issue #295; reshaped for the Issue #461 head cluster; cut to its sweep at Issue #1273): every shelled page and the Portfolio visited once with their scripts on, the kit's lifted shapes judged across them (RH32), the Primer's press a thumb's reach clear of the cluster's other links in every room it teaches (RH33), the nav links' rise under a real pointer (RH31), and the sweep's console and 4xx gate (RH8); restores the Explorer base.
 import { dropExpectedCancellations } from "../support/console.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import { runningHeadKit } from "./runninghead/kit.ts";
+import { pressRead, rh33Press, type PressRead } from "./runninghead/press.ts";
 import { SHELLED } from "./runninghead/reads.ts";
 import { PORTFOLIO, rh31Raise } from "./runninghead/gestures.ts";
 import { kitRead, rh32Kit } from "./runninghead/room.ts";
@@ -15,8 +17,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const k = runningHeadKit(ctx);
   const kits: Record<string, KitSample | undefined> = {};
-  for (const route of [...SHELLED, PORTFOLIO]) kits[route] = (await k.visit(route)) ? await kitRead(k) : undefined;
+  const taught = new Set(LADDERS.map((l) => l.route));
+  const presses: Record<string, PressRead | undefined> = {};
+  for (const route of [...SHELLED, PORTFOLIO]) {
+    kits[route] = (await k.visit(route)) ? await kitRead(k) : undefined;
+    if (kits[route] !== undefined && taught.has(route)) presses[route] = await pressRead(k);
+  }
   await step("RH32", () => Promise.resolve(ctx.check).then((check) => rh32Kit(check, kits)));
+  await step("RH33", () => Promise.resolve(ctx.check).then((check) => rh33Press(check, presses)));
   await step("RH31", () => rh31Raise(k));
   await rh8Clean(ctx, errBase, httpBase);
 }
