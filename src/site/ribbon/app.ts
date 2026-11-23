@@ -14,6 +14,7 @@ import type { WorldRecipe } from "../../world/types.ts";
 import { $ } from "../shared/by-id.ts";
 import { nextObjectUrl } from "../shared/object-url.ts";
 import { foundAddress, pageFounder, writtenParams } from "../shared/written-world.ts";
+import { bootHandOnce } from "../shared/primer-hand.ts";
 
 declare global {
   interface Window {
@@ -143,6 +144,7 @@ function draw(from: number | null, to: number | null, ceremony: boolean): void {
         rows: res.events.length,
         svgLength: res.svg.length,
       };
+      void bootHandOnce({ route: "/ribbon/" });
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
