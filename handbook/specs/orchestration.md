@@ -67,7 +67,7 @@ home's line wins for the lane and this file's for the orchestrator.
   step 8), `<plan file name>` naming that file with nothing added after it. Where two archives name
   one file, the sha256 on their opening lines says which is which. A plan too long for one comment
   is cut at line boundaries into parts of at most 60,000 bytes, posted in
-  order, one `gh issue comment --body-file` per call. Read the comments back with `gh api` and
+  order, one `gh issue comment --body-file` per call. Read the comments back with the reader, `npm run --silent issue -- <N> --json | jq -r '.comments[] | select(.body != null and (.body | startswith("Plan archive, not a ruling:"))) | .body'`, which prints each part as posted, and
   confirm the parts, joined, equal the file apart from a final newline. A lost plan is restored
   from `out/plans/`, or from the comments by joining the parts, dropping each opening line and
   checking the sha256. `.claude/agents/vellum-implementer.md` quotes the opening line's fixed text

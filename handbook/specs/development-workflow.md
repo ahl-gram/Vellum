@@ -58,12 +58,10 @@ How a Codex session that builds an issue hands off to each is `handbook/specs/or
 
 ## The sequence
 
-**1. Read the issue: the body AND its comments**, through the two `gh api` calls `CLAUDE.md` gives
-under "Read the issue before you build". The comments usually win, and the body will typically not
-tell you a superseding comment exists.
-`gh issue view` silently returns empty for some issues here, so it is never evidence that an issue
-or a thread is empty. An empty result from the `api` form is a claim like any other: count it
-(`| jq length`) rather than reading silence as absence.
+**1. Read the issue: the body AND its comments**, through the reader `CLAUDE.md` gives
+under "Read the issue before you build" (`npm run --silent issue -- N`). The comments usually win, and the body will typically not
+tell you a superseding comment exists. The reader's header counts the comments it shows and those it
+withholds as written outside the house, so an empty thread reads as a count of 0, never as silence.
 
 **2. Run `vellum-spec-recon` at the start of any sub or epic**, as `CLAUDE.md` requires. It returns a
 CURRENT / STALE / UNVERIFIABLE ledger and the open decisions awaiting Alex, and it exists because

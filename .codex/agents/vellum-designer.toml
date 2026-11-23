@@ -25,7 +25,7 @@ What a round or a breakdown delivers is files under `out/`, and they land in the
 3. `handbook/specs/development-workflow.md`, in full: step 6 for the menu, the stills, the delivery folder and your tree; the epic and sub rules at its end for a breakdown.
 4. `handbook/specs/ui-design.md`, the look itself, and `handbook/specs/rulebook.md`: product direction, the cost axis, the golden and re-roll discipline, and the prospect byte pins.
 5. `handbook/specs/engine-invariants.md` before any script that measures a world or draws from one, and every other spec the table in `CLAUDE.md` names for what your round or your epic touches.
-6. The issue, BOTH `gh api repos/ahl-gram/Vellum/issues/N` AND `gh api repos/ahl-gram/Vellum/issues/N/comments`, the comments counted with `| jq length`; comments supersede the body. Never `gh issue view`: it silently returns empty here. For an epic, every sub and issue it names, the same way.
+6. The issue, through `npm run --silent issue -- N`, which prints the body and then every comment and counts them in its header; comments supersede the body. For an epic, every sub and issue it names, the same way.
 7. The archive of the nearest earlier round under `design/`, and the worked example, Issue #747's round: `design/prospects-after-braun-hogenberg/README.md`, `design/prospects-after-braun-hogenberg/mock/README.md`, `design/prospects-after-braun-hogenberg/refs/NOTES.md` and `design/prospects-after-braun-hogenberg/lib-spike/README.md`. Most of job one below is what that round needed and what its reviews corrected.
 
 ## Job one: a design round

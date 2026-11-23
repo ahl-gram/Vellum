@@ -53,11 +53,12 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
     `PATCH` alone. Any data field switches the call to POST, and a POST to that endpoint UPDATES the
     item rather than commenting on it: the fields sent overwrite what is there, nothing is created,
     and it exits 0 (Issue #193, PR #550).
-    `/comments` and every other sub-path are untouched, so the remedy the Never list names still
-    runs, and `-X PATCH` in any of its spellings is the way through when editing IS the intent. Read
+    `/comments` and every other sub-path are untouched by this refusal, so the remedy the Never list names still
+    runs (a READ of `/comments` meets the next one), and `-X PATCH` in any of its spellings is the way through when editing IS the intent. Read
     from the SEGMENT only, never the raw command, so that reading an issue and then commenting on it
     in one call is not refused. Pull requests are covered on Alex's ruling of 2026-09-14, which
     widened #607's filed scope;
+  - a raw read of an issue's or pull request's comments, reviews or opening text (Issue #1417): `gh api` on a comment, review or timeline path of an issue or pull request (`repos/O/R/issues/N/comments`, `issues/N/timeline`, `issues/comments` with or without an id, `pulls/N/comments`, `pulls/comments`, `pulls/N/reviews`, and every path under them, in the `https://host/` and `{owner}/{repo}` spellings too) whose method is GET, read as the bare-item refusal reads it: no method and no data field, or a last `-X` / `--method` of GET; `gh issue view`, `gh pr view`, `gh issue list` or `gh pr list` with `--comments` or `-c`, or a `--json` naming `comments`, `reviews` or `latestReviews`; and `gh issue view` or `gh pr view` with no `--json`, which print the opening text. A post, a `-X PATCH`, a `-X DELETE` and a single field (`gh api repos/O/R/issues/N --jq .labels`, `gh pr view N --json closingIssuesReferences`) run. The reason names `npm run --silent issue -- <N>`, which withholds what accounts outside the house wrote;
   - a Write, Edit or MultiEdit, or a Codex patch that adds, updates or moves a file, into `.mjs` or `.ts` under `scripts/`, `out/` or `e2e/` (which also
     reaches the unit tests under `test/e2e/`), or a shell redirect or heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
     `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`, parsing
@@ -298,6 +299,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
   thing bounding it is that the literal unquoted form is what this house types, which is a habit
   rather than a guarantee. It is not closed because the fix, scanning the raw command, false-refuses
   the ordinary read-then-comment pair the fixture table pins. Fixture rows record both halves.
+- **The comment-read refusal stops habit, not a determined read** (Issue #1417). Its misses are silence: a quoted or variable-built path, the segmenter's as for the bare-item refusal, which is also how zsh needs a path holding `?per_page=` typed; a quoted `--json` field list; `--json body`, `--json title` and `gh api ... --jq .body`, which print an opening text or a title; `gh api graphql`; `gh search issues` and `gh api search/issues`, which carry each match's opening text, and `gh issue list` titles; commit comments (`repos/O/R/comments`); `curl` and every other client; a program the session writes; and the GitHub tools a connector adds to a session, which never reach a shell hook. Its errors the other way are refusals, each one edit away: `--comments=false`, `gh issue view --web`, and `gh pr view` with a bare `--json` that asks for the field list.
 - A non-body data field on a bare issue path (`-f state=closed`, `-f title=...`) is refused too. That
   is the rule rather than an overreach, since the refusal is about the implicit POST and not about
   the body in particular, and `-X PATCH` or the purpose-built `gh issue` subcommand is the way
@@ -442,7 +444,7 @@ with the same expected decision, and `test/repo/codex-hook.test.ts` runs the exa
 `.codex/hooks.json` through `sh` with no `CLAUDE_PROJECT_DIR`, from a folder deep in a checkout, from a
 lane's worktree, from an older worktree with no Codex launcher and from a folder in no repository.
 `test/repo/codex-patch.test.ts` holds the patch reader to what Codex's own patch tool reads, row by
-row, and each rule above for a patch to a fixture of its own. The headless-build rows (`test-support/footgun-gate/headless-build.fixtures.ts`) run through the Codex adapter alone with the build marked, and two of them carry the variable into a Claude call and an unmarked Codex call, which it must not change.
+row, and each rule above for a patch to a fixture of its own. The headless-build rows (`test-support/footgun-gate/headless-build.fixtures.ts`) run through the Codex adapter alone with the build marked, and two of them carry the variable into a Claude call and an unmarked Codex call, which it must not change. The comment-read rows are `test-support/footgun-gate/comment-read.fixtures.ts`.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.txt`, one gate to a line; delete it to see a gate again. `npm run check`,
