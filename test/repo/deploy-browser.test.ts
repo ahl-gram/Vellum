@@ -72,7 +72,7 @@ test("DB1 the publish job prints the browser it finds, with VELLUM_BROWSER as CI
     ciJob("build", ".github/workflows/deploy.yml").includes(
       [
         "      - run: npm ci",
-        "      - name: Browser for the Primer's pictures (Issue #1255)",
+        '      - name: "Browser for the Primer\'s pictures (Issue #1255)"',
         "        continue-on-error: true",
         "        timeout-minutes: 2",
         "        run: node scripts/deploy-browser.ts",

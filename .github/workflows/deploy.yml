@@ -36,7 +36,7 @@ jobs:
           node-version: '26'
           cache: npm
       - run: npm ci
-      - name: Browser for the Primer's pictures (Issue #1255)
+      - name: "Browser for the Primer's pictures (Issue #1255)"
         continue-on-error: true
         timeout-minutes: 2
         run: node scripts/deploy-browser.ts
