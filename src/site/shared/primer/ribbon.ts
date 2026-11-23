@@ -30,7 +30,6 @@ export const RIBBON: Ladder = {
           at: AT,
           words: [aria("#rb-to", "bound for")],
           do: [choose("#rb-to", ANOTHER)],
-          then: [text("#folio-title", `Laukuwelua to ${ANOTHER}`, "starts")],
         },
         {
           id: "ribbon-turn-about",
@@ -51,6 +50,7 @@ export const RIBBON: Ladder = {
             text("#itinerary .row-gloss", "A row leans the Glass on that stretch of the road."),
             { css: "#rb-itinerary .lean", says: "Lean the Glass on this stretch", read: "title" },
           ],
+          do: [click("#rb-itinerary .lean")],
         },
         {
           id: "ribbon-pill",
