@@ -19,6 +19,7 @@ const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
   description="A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing."
   path="/gallery/"
   chartRoom
+  extraCss={["/shared/primer-marks.css", "/shared/primer-hand.css"]}
 >
 <Fog />
 <div class="grid" set:html={figures}></div>

@@ -1,4 +1,11 @@
 /* The Primer's pointing hand (Issue #1253): the ring and the manicule a room lays on the control a step names, and the slim note under the head cluster's trail. */
+:root {
+  --primer-slip-h: 0px;
+}
+/* 2026-11-22: a note with a one-line step adds 62.42 px to the head cluster waiting and 65.38 px done, at 1024 and 1280 (the Issue #1253 pull request 8 planner's probe); 4.1rem keeps the Gallery's first row 39.22 px under a done note. */
+:root:has(.primer-slip) {
+  --primer-slip-h: 4.1rem;
+}
 .primer-ring {
   position: fixed;
   z-index: 46;
