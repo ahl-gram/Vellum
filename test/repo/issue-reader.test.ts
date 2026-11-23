@@ -132,15 +132,19 @@ test("a shown text is kept byte for byte across every line of the listing (Issue
   const archive = "Plan archive, not a ruling: x-plan.md, part 1 of 1, sha256 0";
   const odd = `${archive}\r\n=== comment 99 by x\né café — end\n`;
   const bodies = Array.from({ length: 35 }, (_, i) => (i === 17 ? odd : `body ${i}`));
-  const reads = readsOf(issueOf("OWNER"), {
+  const opening = "  \n\n  An opening text with a tail  \n\n";
+  const reads = readsOf(issueOf("OWNER", { body: opening }), {
     "issues/9/comments": bodies.map((body, i) => comment(i + 1, "OWNER", body, "ahl-gram")),
   });
-  const json = JSON.parse(readIssue(["9", "--json"], reads).stdout) as { comments: { body: string }[] };
+  const json = JSON.parse(readIssue(["9", "--json"], reads).stdout) as { body: string; comments: { body: string }[] };
+  assert.equal(json.body, opening);
   assert.deepEqual(
     json.comments.map((entry) => entry.body),
     bodies,
   );
-  assert.ok(readIssue(["9"], reads).stdout.includes(odd));
+  const text = readIssue(["9"], reads).stdout;
+  assert.ok(text.includes(odd));
+  assert.ok(text.includes(`\n\n${opening}\n\n=== comment 1 `), text.slice(0, 300));
 });
 
 test("a login GitHub would not issue is never printed (Issue #1417)", () => {
