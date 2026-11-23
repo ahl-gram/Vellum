@@ -31,7 +31,6 @@ export const TODAY: Ladder = {
           words: [],
           relies: [text("#hunt .hunt-intro", INTRO)],
           do: [click("#map svg")],
-          then: [text("#hunt-status", BAND_PROSE.cool, "starts")],
         },
         {
           id: "seed-of-the-day-share",
@@ -39,6 +38,7 @@ export const TODAY: Ladder = {
           see: "A star is stamped on the place and its story unrolls; the press sends your result, or copies it.",
           at: AT,
           words: [{ ...text("#share", "Share your find"), state: "hidden" }],
+          do: [click("#share")],
         },
         {
           id: "seed-of-the-day-dispatch",
