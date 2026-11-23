@@ -12,7 +12,9 @@ export function browserReport(
   exists: (path: string) => boolean,
   version: (path: string) => string,
 ): readonly string[] {
-  const second = wanted ? `VELLUM_BROWSER: ${wanted} (${exists(wanted) ? "present" : "missing"})` : "VELLUM_BROWSER: unset";
+  const second = wanted
+    ? `VELLUM_BROWSER: ${wanted} (${exists(wanted) ? "present" : "missing"})`
+    : "VELLUM_BROWSER: unset";
   if (found === null) return ["deploy browser: none found", second];
   let read: string;
   try {
