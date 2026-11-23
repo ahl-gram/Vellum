@@ -3,7 +3,13 @@ import assert from "node:assert/strict";
 import { HOOK_CHECK } from "../../scripts/agent-infra/hooks/headless-build.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, threadOf } from "../../scripts/handoff/launch.ts";
 import { trustedComments } from "../../scripts/handoff/snapshot.ts";
-import { buildPrompt, OUTCOME_HANDBACK, OUTCOME_HOOK, OUTCOME_READY, resumePrompt } from "../../scripts/handoff/prompt.ts";
+import {
+  buildPrompt,
+  OUTCOME_HANDBACK,
+  OUTCOME_HOOK,
+  OUTCOME_READY,
+  resumePrompt,
+} from "../../scripts/handoff/prompt.ts";
 
 const D2 = ["-s", "danger-full-access", "-a", "on-request"];
 const EFFORT = 'model_reasoning_effort="high"';

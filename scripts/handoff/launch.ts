@@ -103,7 +103,7 @@ export const runCodex = (argv: readonly string[], io: Io): Promise<number> =>
     child.on("close", (code) => done(code ?? 1));
   });
 
-export type Outcome = "ready" | "handback";
+export type Outcome = "ready" | "handback" | "hook";
 
 export const outcomeOf = (lastMessage: string): Outcome | null => {
   const last = lastMessage
@@ -112,7 +112,8 @@ export const outcomeOf = (lastMessage: string): Outcome | null => {
     .filter((line) => line !== "")
     .at(-1);
   if (last === "OUTCOME: ready") return "ready";
-  return last === "OUTCOME: handback" ? "handback" : null;
+  if (last === "OUTCOME: handback") return "handback";
+  return last === "OUTCOME: hook" ? "hook" : null;
 };
 
 export const threadOf = (stream: string): string | null => {
