@@ -191,6 +191,15 @@ test("PK24 the Ribbon's steps are used as rulings E1 and P1 A have them: bound f
   assert.deepEqual(useWatches(stepOf("ribbon-lean")), [{ event: "click", css: "#rb-itinerary .lean" }]);
 });
 
+test("PK25 Today's steps are used as rulings E1 and P1 A, and pull request 7's Q1 and Q2, have them: the sounding at a click on the chart whatever it answers, and Share at its press; the survey notes, Draft dispatch and the road on arrival (Issue #1253 pull request 7)", () => {
+  for (const id of ["seed-of-the-day-sound", "seed-of-the-day-share"])
+    assert.equal(sealWhen(stepOf(id), DESK), "use", id);
+  for (const id of ["seed-of-the-day-notes", "seed-of-the-day-dispatch", "seed-of-the-day-to-explorer"])
+    assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+  assert.deepEqual(useWatches(stepOf("seed-of-the-day-sound")), [{ event: "click", css: "#map svg" }]);
+  assert.deepEqual(useWatches(stepOf("seed-of-the-day-share")), [{ event: "click", css: "#share" }]);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");
