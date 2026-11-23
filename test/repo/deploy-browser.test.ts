@@ -49,6 +49,17 @@ test("DB2 the publish job's browser line names the browser it finds and its vers
   );
   assert.equal(
     browserReport(
+      "/usr/bin/chromium",
+      undefined,
+      () => true,
+      () => {
+        throw new Error("Command failed: x --version\nstderr line");
+      },
+    )[0],
+    "deploy browser: /usr/bin/chromium (version unreadable: Command failed: x --version)",
+  );
+  assert.equal(
+    browserReport(
       "/usr/bin/x",
       undefined,
       () => true,
