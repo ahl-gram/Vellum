@@ -30,6 +30,9 @@ const DENIED = [
   "gh issue -R o/r view 1",
   "gh issue --repo o/r list --json number,comments",
   "gh pr view 1 --json number --json comments",
+  'gh issue view 1 --json "comments"',
+  "gh issue view 1 --json 'comments,title'",
+  'gh issue view 1 --json=\\"reviews\\"',
   "gh pr view 1",
 ];
 

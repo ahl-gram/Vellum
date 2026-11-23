@@ -90,7 +90,8 @@ const commentReadRefusal = (segment: string): string | null => {
   const call = GH_VIEW_OR_LIST.exec(segment);
   if (call === null) return null;
   const fields = [...segment.matchAll(GH_JSON_FIELDS)].map((found) => found[1] ?? "");
-  const asksForText = GH_COMMENTS_FLAG.test(segment) || fields.some((list) => GH_TEXT_FIELD.test(list));
+  const asksForText =
+    GH_COMMENTS_FLAG.test(segment) || fields.some((list) => GH_TEXT_FIELD.test(list) || /["']/.test(list));
   return asksForText || (call[1] === "view" && fields.length === 0) ? COMMENT_READ_REASON : null;
 };
 
