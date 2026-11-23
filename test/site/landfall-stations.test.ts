@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { SHEET, fitScale, centerFraction } from "../../src/site/home/camera.ts";
 import { homeStage } from "../../src/site/home/stage-data.ts";
-import { homeStations, stationSpots, unclaimedDots } from "../../src/site/home/stations.ts";
+import { homeStations, howStation, stationSpots, unclaimedDots } from "../../src/site/home/stations.ts";
 import {
   STATION_FLIGHT_SECONDS,
   STATION_SCALE_FACTOR,
@@ -27,11 +27,11 @@ const stage = homeStage();
 const stations = homeStations();
 const byId = new Map(stations.map((s) => [s.id, s]));
 
-test("the four modes of encounter stand as stations, each at its ratified anchorage (#458)", () => {
+test("the five modes of encounter stand as stations, each at its ratified anchorage (#458; the Gallery moored anew and the Primer at Poalo, Issue #1155 comments 6664735683 and 6754142680)", () => {
   assert.deepEqual(
     stations.map((s) => s.id),
-    ["explorer", "reading-room", "atlas", "gallery"],
-    "the mockup's four stations, in its order",
+    ["explorer", "reading-room", "atlas", "gallery", "primer"],
+    "the mockup's four stations, in its order, and the Primer fifth",
   );
 
   const explorer = byId.get("explorer");
@@ -62,11 +62,19 @@ test("the four modes of encounter stand as stations, each at its ratified anchor
 
   const gallery = byId.get("gallery");
   assert.ok(gallery);
-  assert.equal(gallery.nx, 0.79, "the Gallery rides in open water SE, the mockup's mooring");
-  assert.equal(gallery.ny, 0.73);
+  assert.equal(gallery.nx, 0.76, "the Gallery rides in open water up the east coast, the seats round's mooring");
+  assert.equal(gallery.ny, 0.53);
   assert.equal(gallery.href, "gallery/");
   assert.equal(gallery.verb, "Browse many");
   assert.ok(gallery.sea, "the Gallery is the one at-sea station, round not diamond");
+  const poalo = stage.dots.find((d) => d.name === "Poalo");
+  assert.ok(poalo, "seed 42 must place Poalo for the Primer's anchorage");
+  const primer = byId.get("primer");
+  assert.ok(primer);
+  assert.equal(primer.nx, poalo.nx, "The Primer moors at Poalo");
+  assert.equal(primer.ny, poalo.ny);
+  assert.equal(primer.href, "primer/");
+  assert.equal(primer.verb, "Start here");
   assert.ok(
     stations.every((s) => s.sea === (s.id === "gallery")),
     "no land station wears the at-sea glyph",
@@ -77,7 +85,7 @@ test("the four modes of encounter stand as stations, each at its ratified anchor
   );
 });
 
-test("the station slips speak the mockup's words (#458)", () => {
+test("the station slips speak the mockup's words (#458; the Primer's, Issue #1155 comment 6754142680 ruling 8)", () => {
   assert.equal(byId.get("explorer")?.name, "The Explorer");
   assert.equal(byId.get("reading-room")?.name, "The Reading Room");
   assert.equal(byId.get("atlas")?.name, "The Atlas of Rahai");
@@ -91,6 +99,8 @@ test("the station slips speak the mockup's words (#458)", () => {
   assert.equal(byId.get("reading-room")?.where, "off Lamahai, on the southern shore");
   assert.equal(byId.get("atlas")?.where, "at Weki, a seat of the west");
   assert.equal(byId.get("gallery")?.where, "in open water, beyond the survey");
+  assert.equal(byId.get("primer")?.name, "The Primer");
+  assert.equal(byId.get("primer")?.where, "at Poalo, a harbour of the Ratoa Atolls");
 });
 
 test("the slips are the sole home of the encounter copy, pinned verbatim (#459, was the Go Deeper diff)", () => {
@@ -103,6 +113,8 @@ test("the slips are the sole home of the encounter copy, pinned verbatim (#459, 
       "A bound volume: the world chart in three styles, two regional close-up surveys of the same terrain, and a gazetteer of every settlement with travelers' notes.",
     gallery:
       "Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.",
+    primer:
+      "New to the atelier? Learn its rooms one small step at a time: each step opens its room already set, and a hand points at what to press.",
   };
   assert.deepEqual(
     Object.keys(copy).sort(),
@@ -120,9 +132,13 @@ test("the slips are the sole home of the encounter copy, pinned verbatim (#459, 
 test("a station claims its dot: the overlay never doubles a mark the station replaces (#458)", () => {
   const spots = stationSpots(stations);
   assert.ok(spots.has(`${stage.capital.nx},${stage.capital.ny}`), "the capital's spot is claimed");
-  assert.equal(spots.size, 4, "every station claims its spot, open water included");
+  assert.equal(spots.size, 5, "every station claims its spot, open water included");
   const left = unclaimedDots(stage.dots, stations);
-  assert.equal(left.length, stage.dots.length - 3, "three real places host stations; the Gallery claims no dot");
+  assert.equal(left.length, stage.dots.length - 4, "four real places host stations; the Gallery claims no dot");
+  assert.ok(
+    left.every((d) => d.name !== "Poalo"),
+    "Poalo's dot is the Primer's",
+  );
   assert.ok(
     left.every((d) => !spots.has(`${d.nx},${d.ny}`)),
     "no surviving dot sits on a station spot",
@@ -130,6 +146,14 @@ test("a station claims its dot: the overlay never doubles a mark the station rep
   const input = [...stage.dots];
   unclaimedDots(input, stations);
   assert.deepEqual(input, [...stage.dots], "unclaimedDots filters immutably");
+});
+
+test("only the Reading Room's label stands above its mark, so none lies under the legend row (Issue #1155 comment 6754142680 ruling 2; Issue #1295)", () => {
+  assert.ok(
+    stations.every((s) => s.slipAbove === (s.id === "reading-room")),
+    "the Reading Room alone lifts its label",
+  );
+  assert.equal(howStation().slipAbove, false, "How It Works keeps its label under its mark");
 });
 
 test("the station flight frames the anchor beside the card, at the mockup's depth (#458)", () => {

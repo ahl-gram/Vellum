@@ -10,6 +10,7 @@ export type Station = {
   readonly prose: string;
   readonly arms: boolean;
   readonly sea: boolean;
+  readonly slipAbove: boolean;
   readonly nx: number;
   readonly ny: number;
 };
@@ -41,7 +42,7 @@ function station(
   where: string,
   href: string,
   at: { readonly nx: number; readonly ny: number },
-  extra: Partial<Pick<Station, "legendName" | "arms" | "sea">> = {},
+  extra: Partial<Pick<Station, "legendName" | "arms" | "sea" | "slipAbove">> = {},
 ): Station {
   return {
     id,
@@ -53,6 +54,7 @@ function station(
     prose: PROSE[id]!,
     arms: false,
     sea: false,
+    slipAbove: false,
     nx: at.nx,
     ny: at.ny,
     ...extra,
@@ -89,7 +91,7 @@ export function homeStations(): ReadonlyArray<Station> {
   ];
 }
 
-export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "nx" | "ny">;
+export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "slipAbove" | "nx" | "ny">;
 
 export function howStation(): Pip {
   return {
@@ -98,6 +100,7 @@ export function howStation(): Pip {
     verb: "See how",
     where: "at the title cartouche",
     sea: true,
+    slipAbove: false,
     nx: 0.7847,
     ny: 0.1779,
   };

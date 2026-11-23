@@ -37,6 +37,21 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   );
 });
 
+test("the Primer's where-line is seed 42's own: Poalo is a harbour of The Ratoa Atolls (Issue #1155 comment 6754142680 ruling 8)", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const poalo = world.settlements.find((s) => s.name === "Poalo");
+  assert.ok(poalo, "seed 42 places Poalo");
+  assert.equal(poalo.harbor, true, "Poalo is a harbour");
+  const id = world.realms.labels[Math.round(poalo.y) * world.elev.w + Math.round(poalo.x)] ?? -1;
+  const realm = id >= 0 ? world.names.realms[id] : undefined;
+  assert.equal(realm, "The Ratoa Atolls", "Poalo stands in The Ratoa Atolls");
+  assert.equal(
+    homeStations().find((s) => s.id === "primer")?.where,
+    "at Poalo, a harbour of the Ratoa Atolls",
+    "the card says what the world holds",
+  );
+});
+
 test("every pip's at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small; swept class-wide at skeptic round 2)", () => {
   const world = generateWorld(defaultRecipe(42));
   const proj = createProjection(world.recipe.gridW, world.recipe.gridH, SHEET.w, marginFor(SHEET.w));
