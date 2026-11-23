@@ -17,4 +17,5 @@ export const HAND_ROOMS: readonly string[] = [
   "/print-room/",
   "/prospect/",
   "/ribbon/",
+  "/seed-of-the-day/",
 ];
