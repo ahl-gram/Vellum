@@ -2,6 +2,7 @@ import { HOOK_CHECK } from "../agent-infra/hooks/headless-build.ts";
 
 export const OUTCOME_READY = "OUTCOME: ready";
 export const OUTCOME_HANDBACK = "OUTCOME: handback";
+export const OUTCOME_HOOK = "OUTCOME: hook";
 
 export const buildPrompt = (p: {
   issue: number;

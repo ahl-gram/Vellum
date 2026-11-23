@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { HOOK_CHECK } from "../../scripts/agent-infra/hooks/headless-build.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, threadOf } from "../../scripts/handoff/launch.ts";
 import { trustedComments } from "../../scripts/handoff/snapshot.ts";
-import { buildPrompt, OUTCOME_HANDBACK, OUTCOME_READY, resumePrompt } from "../../scripts/handoff/prompt.ts";
+import { buildPrompt, OUTCOME_HANDBACK, OUTCOME_HOOK, OUTCOME_READY, resumePrompt } from "../../scripts/handoff/prompt.ts";
 
 const D2 = ["-s", "danger-full-access", "-a", "on-request"];
 const EFFORT = 'model_reasoning_effort="high"';
@@ -84,22 +84,24 @@ test("a run's thread is the first thread.started event of its stream (Issue #140
 test("a run's outcome is its last message's last non-empty line, exactly (Issue #1409)", () => {
   assert.equal(outcomeOf("built\nOUTCOME: ready\n"), "ready");
   assert.equal(outcomeOf("OUTCOME: handback\n\n"), "handback");
+  assert.equal(outcomeOf("done\nOUTCOME: hook\n"), "hook");
   assert.equal(outcomeOf("OUTCOME: ready\nmore"), null);
   assert.equal(outcomeOf("outcome: ready"), null);
   assert.equal(outcomeOf(""), null);
 });
 
-test("the build's prompt names its plan, tree, session, record files, hook check and outcome lines (Issue #1409)", () => {
+test("the build's prompt names its plan, its own clone, session, record files, hook check and outcome lines (Issue #1418)", () => {
   const build = buildPrompt({
     issue: 7,
     plan: "/p/7-plan.md",
-    tree: "/t",
+    tree: "/c",
     folder: "/o/7-handoff",
     session: "https://s",
   });
   for (const part of [
     "/p/7-plan.md",
-    "/t",
+    "your own clone",
+    "/c",
     "https://s",
     "/o/7-handoff/record.md",
     "/o/7-handoff/pr-body.md",
@@ -110,6 +112,7 @@ test("the build's prompt names its plan, tree, session, record files, hook check
     HOOK_CHECK,
     OUTCOME_READY,
     OUTCOME_HANDBACK,
+    OUTCOME_HOOK,
     ".codex/agents/vellum-implementer.toml",
   ])
     assert.ok(build.includes(part), part);
@@ -121,6 +124,7 @@ test("the build's prompt names its plan, tree, session, record files, hook check
     HOOK_CHECK,
     OUTCOME_READY,
     OUTCOME_HANDBACK,
+    OUTCOME_HOOK,
   ])
     assert.ok(resume.includes(part), part);
 });
