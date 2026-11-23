@@ -249,6 +249,7 @@ test("BP-H1 every room the pointing hand is taught in links the Primer's marks a
   assert.ok(HAND_ROOMS.includes("/ribbon/"), "the rooms list names the Ribbon");
   assert.ok(HAND_ROOMS.includes("/seed-of-the-day/"), "the rooms list names the Seed of the Day");
   assert.ok(HAND_ROOMS.includes("/gallery/"), "the rooms list names the Gallery");
+  assert.ok(HAND_ROOMS.includes("/explorer/portfolio/"), "the rooms list names the Portfolio");
   const faults = HAND_ROOMS.flatMap((route) => {
     const links = [...documentOf(page(route)).querySelectorAll('head link[rel="stylesheet"]')].map(
       (l) => new URL(l.getAttribute("href") ?? "", `http://127.0.0.1${route}`).pathname,
