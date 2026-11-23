@@ -11,6 +11,7 @@ export type Station = {
   readonly arms: boolean;
   readonly sea: boolean;
   readonly slipAbove: boolean;
+  readonly nameGap: number | null;
   readonly nx: number;
   readonly ny: number;
 };
@@ -44,7 +45,7 @@ function station(
   where: string,
   href: string,
   at: { readonly nx: number; readonly ny: number },
-  extra: Partial<Pick<Station, "legendName" | "arms" | "sea" | "slipAbove">> = {},
+  extra: Partial<Pick<Station, "legendName" | "arms" | "sea" | "slipAbove" | "nameGap">> = {},
 ): Station {
   return {
     id,
@@ -57,6 +58,7 @@ function station(
     arms: false,
     sea: false,
     slipAbove: false,
+    nameGap: null,
     nx: at.nx,
     ny: at.ny,
     ...extra,
@@ -96,7 +98,7 @@ export function homeStations(): ReadonlyArray<Station> {
   ];
 }
 
-export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "slipAbove" | "nx" | "ny">;
+export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "slipAbove" | "nameGap" | "nx" | "ny">;
 
 export function howStation(): Pip {
   return {
@@ -106,6 +108,7 @@ export function howStation(): Pip {
     where: "at the title cartouche",
     sea: true,
     slipAbove: false,
+    nameGap: null,
     nx: 0.7847,
     ny: 0.1779,
   };

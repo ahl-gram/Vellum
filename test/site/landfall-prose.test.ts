@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
+import { homeStage } from "../../src/site/home/stage-data.ts";
 import { homeStations, howStation } from "../../src/site/home/stations.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
@@ -66,4 +67,36 @@ test("every pip's at-sea dress is earned from the terrain, not asserted by hand 
       `${s.id}: the sea flag is the terrain's own verdict (measured 2026-11-22: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}; the Gallery 0.3989 and How It Works -0.0048 are the two at sea, and the Primer at Poalo, 0.4411, is land by 0.0023); if this reds after a regen or re-anchor, the dress must be re-decided, not the assertion loosened`,
     );
   }
+});
+
+test("a station moored at a town knows where the chart letters the town's name, so its diamond can step clear of it (Issue #1254 comment 7106747167)", () => {
+  const svg = read("src/static/charts/chart-42-antique.svg");
+  const names = [...svg.matchAll(/<text x="([\d.]+)" y="[\d.]+" text-anchor="(\w+)"[^>]*>([^<]*)<\/text>/g)];
+  const dots = homeStage().dots;
+  const land = homeStations().filter((s) => !s.sea);
+  assert.ok(
+    land.some((s) => s.id === "primer"),
+    "the Primer, the station this guard was written for, stands on land",
+  );
+  for (const s of land) {
+    const town = dots.find((d) => d.nx === s.nx && d.ny === s.ny);
+    assert.ok(town, `${s.id}: moors at a town of the chart`);
+    const lettered = names.filter((m) => m[3]!.toLowerCase() === town.name.toLowerCase());
+    assert.equal(lettered.length, 1, `${s.id}: the chart letters ${town.name} once`);
+    const [, x, anchor] = lettered[0]!;
+    assert.equal(
+      anchor,
+      "start",
+      `${s.id}: ${town.name} is lettered east of its point; lettered anywhere else, the station's westward step is wrong and its dress is re-decided`,
+    );
+    const gap = Number(x) - s.nx * SHEET.w;
+    assert.ok(
+      s.nameGap !== null && Math.abs(gap - s.nameGap) < 1e-9,
+      `${s.id}: its name gap is ${town.name}'s distance east of the point, ${gap.toFixed(3)} chart px, not ${s.nameGap}`,
+    );
+  }
+  assert.ok(
+    [...homeStations().filter((s) => s.sea), howStation()].every((s) => s.nameGap === null),
+    "a pip at sea stands on no town's name and never steps",
+  );
 });
