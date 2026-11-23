@@ -183,6 +183,14 @@ test("PK23 the Prospect's steps are used as rulings E1 and P1 A have them: the l
   assert.deepEqual(useWatches(stepOf("prospect-lay")), [{ event: "click", css: "#pp-lay" }]);
 });
 
+test("PK24 the Ribbon's steps are used as rulings E1 and P1 A have them: bound for at a change of its list, whichever town, and the row step at a row's press; Turn about on its outcome; the pill and the road's end on arrival (Issue #1253 pull request 6)", () => {
+  for (const id of ["ribbon-bound-for", "ribbon-lean"]) assert.equal(sealWhen(stepOf(id), DESK), "use", id);
+  assert.equal(sealWhen(stepOf("ribbon-turn-about"), DESK), "outcome", "ribbon-turn-about");
+  for (const id of ["ribbon-pill", "ribbon-end"]) assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+  assert.deepEqual(useWatches(stepOf("ribbon-bound-for")), [{ event: "change", css: "#rb-to" }]);
+  assert.deepEqual(useWatches(stepOf("ribbon-lean")), [{ event: "click", css: "#rb-itinerary .lean" }]);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");
