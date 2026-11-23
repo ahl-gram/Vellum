@@ -49,6 +49,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
     home: ["home"],
     specimen: ["specimen"],
     "writing-room": ["writing-room"],
+    gallery: ["primer-gallery"],
   };
   for (const { twin } of BUNDLE_ENTRIES) {
     // The home twin sits at the public root (Issue #455), so its surface has no directory prefix.

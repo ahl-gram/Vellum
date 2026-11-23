@@ -266,6 +266,7 @@ const PAGES: readonly PageSpec[] = [
     ogTitle: "The Gallery · Vellum",
     description: "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
     tagline: "a dozen worlds, hung for viewing",
+    scriptSrc: "./app.bundle.js",
     chartRoom: true,
   },
   {
@@ -1306,6 +1307,7 @@ test("every internal link and embed on the rendered pages resolves in the built 
     "/ribbon/app.bundle.js",
     "/specimen/app.bundle.js",
     "/writing-room/app.bundle.js",
+    "/gallery/app.bundle.js",
     "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));

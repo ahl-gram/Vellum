@@ -19,6 +19,7 @@ export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/ribbon/app.ts", twin: "ribbon/app.bundle.js" },
   { entry: "src/site/specimen/app.ts", twin: "specimen/app.bundle.js" },
   { entry: "src/site/writing-room/app.ts", twin: "writing-room/app.bundle.js" },
+  { entry: "src/site/gallery/app.ts", twin: "gallery/app.bundle.js" },
   { entry: "src/site/home/app.ts", twin: "app.bundle.js" },
 ];
 

@@ -34,7 +34,7 @@ export function routesOf(dist: string): string[] {
 
 const routeOfTwin = (twin: string): string => (dirname(twin) === "." ? "/" : `/${dirname(twin)}/`);
 const APP_ROUTES: ReadonlySet<string> = new Set(BUNDLE_ENTRIES.map(({ twin }) => routeOfTwin(twin)));
-const KEPT_MODES: Readonly<Record<string, Mode>> = { "/": "full", "/specimen/": "view" };
+const KEPT_MODES: Readonly<Record<string, Mode>> = { "/": "full", "/gallery/": "full", "/specimen/": "view" };
 
 export const modeOf = (route: string): Mode => KEPT_MODES[route] ?? (APP_ROUTES.has(route) ? "head" : "full");
 

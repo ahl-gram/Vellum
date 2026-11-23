@@ -200,6 +200,10 @@ test("PK25 Today's steps are used as rulings E1 and P1 A, and pull request 7's Q
   assert.deepEqual(useWatches(stepOf("seed-of-the-day-share")), [{ event: "click", css: "#share" }]);
 });
 
+test("PK26 the Gallery's steps are sealed on arrival as ruling N2 has it: the open step a road to another room, the read step one with nothing to see (Issue #1253 pull request 8)", () => {
+  for (const id of ["gallery-look", "gallery-open"]) assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");

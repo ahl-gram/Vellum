@@ -30,7 +30,6 @@ export const GALLERY: Ladder = {
             text(".legend .legend-head", "every plate is a road into its own world"),
             { css: `${PLATE} a`, says: "/explorer/#seed=", read: "attr", attr: "href", match: "starts" },
           ],
-          kind: "play",
         },
       ],
     },
