@@ -1,11 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
 import { ROLES } from "../agent-infra/roles.ts";
-import { createPlan, resolveRoot, runPlan } from "../agent-sandbox.ts";
+import { resolveRoot } from "../agent-sandbox.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, runCodex, threadOf } from "./launch.ts";
 import { nextStep } from "./next.ts";
 import { buildPrompt, resumePrompt } from "./prompt.ts";
+import { collect, makeSlot, slotHolder, slotOf, type Collected } from "./slot.ts";
 import { isRunning, snapshotOf, LIVE_GH, type GhReads } from "./snapshot.ts";
 import {
   FILES,
@@ -73,6 +74,13 @@ const closing = (issue: number, n: number, exit: number, last: string): string =
   return `run ${n} ended, exit ${exit}, ${outcome === null ? "no outcome line" : `OUTCOME: ${outcome}`}; next: npm run handoff -- next ${issue}`;
 };
 
+const holderReason = (root: string, holder: number, issue: number): string =>
+  `Issue #${holder}'s build holds the build's clone at ${slotOf(root)}; retire it before building Issue #${issue}`;
+
+const report = (issue: number, got: Collected): void => {
+  for (const problem of got.problems) console.log(`could not collect Issue #${issue}'s build: ${problem}`);
+};
+
 type IssueTexts = { readonly issueText: string; readonly commentsText: string };
 const readIssue = (issue: number, gh: GhReads): IssueTexts => ({
   issueText: gh.issueJson(issue),
@@ -101,8 +109,8 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   if (existsSync(tree)) return refuse(`${tree} already exists; retire it before building Issue #${issue} again`);
   const { model, effort } = resolveModel(loadModelPolicy(HERE_ROOT, ROLES), "codex-local", "vellum-implementer");
   const texts = readIssue(issue, gh);
-  runPlan(createPlan(tree, "origin/main", false), root, tree);
-  writeIssueFiles(folder, texts);
+  const holder = slotHolder(root, issue);
+  if (holder !== null) return refuse(holderReason(root, holder, issue));
   const first: RunRecord = {
     n: 1,
     kind: "build",
@@ -113,13 +121,28 @@ const build = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<nu
   };
   const state: HandoffState = { issue, plan, tree, session, model, effort, thread: null, runs: [first] };
   writeState(folder, state);
+  let slot: string;
+  try {
+    slot = makeSlot(root);
+  } catch (error) {
+    rmSync(folder, { recursive: true, force: true });
+    throw error;
+  }
+  writeIssueFiles(folder, texts);
   const files = runFiles(folder, 1);
   console.log(`follow it: tail -f ${files.stream}`);
   const exit = await runCodex(
-    buildArgv({ tree, model, effort, last: files.last, prompt: buildPrompt({ issue, plan, tree, folder, session }) }),
-    { cwd: tree, env: buildEnv(env, issue, join(folder, FILES.ghEmpty)), stream: files.stream, stderr: files.stderr },
+    buildArgv({
+      tree: slot,
+      model,
+      effort,
+      last: files.last,
+      prompt: buildPrompt({ issue, plan, tree: slot, folder, session }),
+    }),
+    { cwd: slot, env: buildEnv(env, issue, join(folder, FILES.ghEmpty)), stream: files.stream, stderr: files.stderr },
   );
   writeState(folder, finish(state, 1, exit, files.stream));
+  report(issue, collect(root, issue));
   console.log(closing(issue, 1, exit, files.last));
   return exit;
 };
@@ -141,7 +164,12 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
   }
   if (isRunning(lastRun(state))) return refuse(`Issue #${issue}'s last run is still running`);
   if (state.thread === null) return refuse(`Issue #${issue}'s build never started a thread, so it cannot be resumed`);
-  if (!existsSync(state.tree)) return refuse(`${state.tree} is gone, so Issue #${issue}'s build cannot be resumed`);
+  const slot = slotOf(root);
+  if (!existsSync(slot)) {
+    return refuse(`the build's clone at ${slot} is gone, so Issue #${issue}'s build cannot be resumed`);
+  }
+  const holder = slotHolder(root, issue);
+  if (holder !== null) return refuse(holderReason(root, holder, issue));
   writeIssueFiles(folder, readIssue(issue, gh));
   const n = state.runs.length + 1;
   const run: RunRecord = {
@@ -164,14 +192,10 @@ const resume = async (p: Parsed, root: string, env: Env, gh: GhReads): Promise<n
       last: files.last,
       prompt: resumePrompt({ issue, brief, folder }),
     }),
-    {
-      cwd: state.tree,
-      env: buildEnv(env, issue, join(folder, FILES.ghEmpty)),
-      stream: files.stream,
-      stderr: files.stderr,
-    },
+    { cwd: slot, env: buildEnv(env, issue, join(folder, FILES.ghEmpty)), stream: files.stream, stderr: files.stderr },
   );
   writeState(folder, finish(next, n, exit, files.stream));
+  report(issue, collect(root, issue));
   console.log(closing(issue, n, exit, files.last));
   return exit;
 };

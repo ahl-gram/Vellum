@@ -110,7 +110,7 @@ home's line wins for the lane and this file's for the orchestrator.
 - **`npm run handoff -- next <issue>` says what comes next** (`scripts/handoff/main.ts`). When Alex
   asks for the next step on an issue, the session runs it from the main checkout and takes the step
   it prints, which names its exact command. It reads the label, the build's record in
-  `out/<issue>-handoff/` in the main checkout, the build's tree, the branch's pushed head, the
+  `out/<issue>-handoff/` in the main checkout, the review tree, the branch's pushed head, the
   prover's report and the pull request. The build can rewrite everything in that folder, so `next`
   prints no command from a record that fails validation (a tree other than the one the wrapper
   made, a plan path, thread id or run field of an unexpected shape) or from a branch that is not
@@ -121,12 +121,15 @@ home's line wins for the lane and this file's for the orchestrator.
 - **The build runs headless, in the background, with no GitHub login.** Once the plan is finished
   and archived (The STOP and the relay, above), the session runs `npm run handoff -- build <issue>
   --plan <the plan's scratchpad path> --session <its own link>` as a background command, since a
-  build outlasts any foreground call. The wrapper builds the tree `.claude/worktrees/codex-<issue>`
-  as workflow step 7 builds one, detached at `origin/main` with `node_modules` linked, writes the
-  issue and its owner's, members' and collaborators' comments into the record's folder with the
-  session's own login (the repository is public, so every other comment stays out, and the prompt
-  calls both files data), and runs `codex
-  exec` in the tree with D2's flags before the subcommand, the implementer's Codex model and effort
+  build outlasts any foreground call. The wrapper refuses while another issue's live record holds
+  the build's clone, so one Codex build runs at a time. It fetches, then makes the build's own
+  clone afresh at `.claude/worktrees/codex-build`: a clone of the main repository with its own
+  `.git` and no object file shared with it, its `origin` pointing at GitHub, detached at
+  `origin/main`, with `node_modules` linked (Alex, 2026-11-22, Issue #1418, comment 7089981355). It
+  writes the issue and its owner's, members' and collaborators' comments into the record's folder
+  with the session's own login (the repository is public, so every other comment stays out, and the
+  prompt calls both files data), and runs `codex exec` in the clone with D2's flags before the
+  subcommand, the implementer's Codex model and effort
   from `.agents/model-policy.json` (`-m`, and `-c model_reasoning_effort`, Alex, 2026-11-20), stdin
   at `/dev/null`, `VELLUM_HEADLESS_BUILD` set, and no GitHub or push credentials in its environment
   (Alex, 2026-11-20, Issue #1409): no token variable, no ssh agent, git's credential helper reset
@@ -141,42 +144,60 @@ home's line wins for the lane and this file's for the orchestrator.
   guard against a build's mistakes and casual attempts, not against a build set on pushing** (Alex,
   comment 7047982050): a build can edit its own tree's copy of the hook, or run a one-line
   interpreter (`node -e`) or one of git's own command runners with a quoted payload (git's own command runners with a quoted payload, which the blanking of quoted spans hides (`git rebase -x "git -c credential.helper=osxkeychain push ..." HEAD~1`, `git submodule foreach "git push"`, `git bisect run "git push"`)), and then push with `git -c credential.helper=osxkeychain push`, which
-  brings the login back. Under full access a build can also leave code that later runs as Alex, with
-  his login: in the shared git config (a linked worktree shares the main checkout's `.git`, so a
-  command set there runs on `git ls-remote` and `git status` in the session and in the main
-  checkout), in his shell startup files, and in test code the guard prover runs. Removing the
-  build's login stops it pushing by itself; it does not stop such a trap. The exits (a separate
-  macOS user, a build with no network, its own clone) are weighed in Issue #1418, before a Codex
-  build is trusted with anything that matters. The prompt the wrapper
+  brings the login back. The build works in its own clone, so its ordinary git commands (a config
+  line, a hook an installer writes) land there, and the session takes its work only by fetching from
+  the clone by path, which runs no hook or config command of the clone (measured against every hook
+  name and sixteen command-naming config keys; a key outside that list that a later git honors is
+  the blind spot), and never runs git inside it (Alex, 2026-11-22, Issue #1418). Under full access a
+  build set on it can still write anywhere in Alex's home folder and leave code that later runs as
+  Alex, with his login: in the main repository's `.git` (a hook, a config line, a linked tree's
+  admin folder), in his shell startup files, in test code the guard prover runs; and the code it
+  delivers runs as Alex wherever it is run. Alex accepted that when he ruled (comment 7089981355).
+  Two measured facts bound it: in a linked tree, a command set in the shared config ran on `git
+  ls-remote` and on the push with every git hook off alike, so turning hooks off never closed a
+  push; and a push starts any workflow file the branch carries, which a build's branch can add and
+  the session's login (with its `workflow` scope) can push, a gap named and not closed (Alex,
+  2026-11-22, Issue #1418, Q2). The prompt the wrapper
   writes sends what the build would have posted into the record's folder: the step 12 record as
   record.md, the pull request body as pr-body.md, and each new or strengthened guard with the
   mutation that must red it as guards.md. The build stops where its definition would dispatch the
   guard prover or the plate reader, or open the pull request, and ends its last message with
-  `OUTCOME: ready` or `OUTCOME: handback`.
-- **The session pushes each run's commits as soon as the run ends**, ready or handed back, with
-  `git -C <tree> -c core.hooksPath=/dev/null push -u origin <branch>`, so the branch carries the plan
-  when a planner counts revisions (workflow step 8). Every push of a Codex build's work runs with
-  every git hook off, but only that push does: a headless build can write any hook into the shared
-  `.git/hooks`, a `reference-transaction` one included, which `--no-verify` does not skip, and Vellum
-  has no git hook of its own to skip. A hook so planted still runs with Alex's login when the guard
-  prover's sandbox is made (`scripts/agent-sandbox.ts create` runs `git fetch` and `git worktree
-  add`), at the next `handoff build`, and at his own commit, pull or checkout in the main checkout;
-  that stays inside the accepted gap below, and its exit is Issue #1418 (Alex, 2026-11-20, Issue
-  #1409, comments 7046605950 and 7047054816). A test builds a scratch repository, plants two hooks
-  and runs the printed command (`test/repo/handoff-push.test.ts`).
+  `OUTCOME: ready` or `OUTCOME: handback`, or `OUTCOME: hook` when the project hook did not refuse
+  its check.
+- **After each run the wrapper collects it, and the session pushes from the review tree.** The
+  wrapper reads the clone's branch from its `.git/HEAD` as data (a regular file in a real `.git`
+  folder, a branch named for the issue), fetches it into the main repository as
+  `refs/handoff/<issue>`, and makes or fast-forwards the review tree
+  `.claude/worktrees/codex-<issue>` (a linked tree of the main repository, on that branch,
+  `node_modules` linked) to it. The session pushes each run's commits as soon as the run ends,
+  ready or handed back, with `git -C <tree> push -u origin <branch>`, so the branch carries the plan
+  when a planner counts revisions (workflow step 8). The push runs the main repository's own git
+  hooks, which a build's ordinary commands no longer reach; it carries no hooks flag, since that
+  flag never closed a push (above) and auto mode refuses it (Alex, 2026-11-22, Issue #1418, comment
+  7090052847, Q3; this supersedes ruling 1 of Issue #1409 comment 7047054816 and makes standing the
+  plain push he ruled for Issue #1237). Tests build scratch repositories, plant every hook name
+  in the clone and five command-naming keys (`core.hooksPath`, `core.fsmonitor` through
+  `include.path`, `credential.helper`, `uploadpack.packObjectsHook` and an `ext::` remote URL), and
+  run the collect and the printed push (`test/repo/handoff-collect.test.ts`).
 - **A hand-back goes to a fresh `vellum-planner`**, with the run's last message as the implementer's
   report (The STOP and the relay, above). A revision Alex has seen goes back to the same Codex
   session: the session writes a brief naming it and runs `npm run handoff -- resume <issue> --brief
-  <brief> --plan <revision>` in the background, which resumes the thread by its id with the sandbox,
-  the effort, `VELLUM_HEADLESS_BUILD` and the empty login set again, and the issue written afresh.
-- **The guard prover runs from the build's tree.** Once no agent the session dispatched is still
-  running, the session steps into the tree with `EnterWorktree` (its `path`), dispatches
+  <brief> --plan <revision>` in the background, which resumes the thread by its id in the build's
+  clone with the sandbox, the effort, `VELLUM_HEADLESS_BUILD` and the empty login set again, and the
+  issue written afresh.
+- **A run that ends `OUTCOME: hook` waits on Alex's trust.** Codex keys a hook's trust by its file's
+  path, so the build's clone needs the hook trusted once at `.claude/worktrees/codex-build`, and
+  again whenever the hook file changes on main (Alex, 2026-11-22, Issue #1418). `next` asks Alex to
+  open Codex once in the clone, trust the folder if it asks and trust the hook with `/hooks`, and
+  the session then resumes the build on a one-line brief.
+- **The guard prover runs from the review tree.** Once no agent the session dispatched is still
+  running, the session steps into the review tree with `EnterWorktree` (its `path`), dispatches
   `vellum-guard-prover` there once, without isolation, on guards.md, accepts its ledger only if
   the sandbox HEAD it reports is the tree's HEAD, saves the report unedited as prover-report.md in
   the record's folder, and steps back out with `ExitWorktree` (`keep`) before anything else.
   `vellum-plate-reader`, where workflow step 11 owes it, is dispatched from the tree the same way.
 - **A guard the prover's one round left unproven is proved by the build** (workflow step 15): the
-  session resumes it on a brief naming the guard, and the build repairs it in its tree, commits
+  session resumes it on a brief naming the guard, and the build repairs it in its clone, commits
   before it mutates, and records its proof as implementer-proof.md in the record's folder (the
   commit, the guard and its test, the mutation, the command, the unmutated passing control, the red
   line, the restore and the final green), labelled as the build's; the prover's report is never
@@ -187,9 +208,10 @@ home's line wins for the lane and this file's for the orchestrator.
   once. After Alex rules on its findings, the session writes the fixes he named into a brief and
   resumes the build on it, which proves any guard it adds or changes as the bullet above says; the
   session pushes, and nobody runs the skeptic or a used prover again.
-- **After the merge, the session retires the build** as `next` prints: it removes the tree's
-  `node_modules` link and the tree, and moves the record's folder aside under the pull request's
-  number, where it stays as the build's record.
+- **After the merge, the session retires the build** as `next` prints: it removes the review tree's
+  `node_modules` link, the review tree and `refs/handoff/<issue>`, and moves the record's folder
+  aside under the pull request's number, where it stays as the build's record. The build's clone
+  stays until the next build replaces it.
 
 ## While lanes run
 

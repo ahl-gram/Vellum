@@ -16,10 +16,12 @@ import { join } from "node:path";
 import { main } from "../../scripts/handoff/main.ts";
 import { nextStep } from "../../scripts/handoff/next.ts";
 import { snapshotOf, type GhReads } from "../../scripts/handoff/snapshot.ts";
-import { folderOf, readState, writeState, type HandoffState } from "../../scripts/handoff/state.ts";
+import { slotOf } from "../../scripts/handoff/slot.ts";
+import { folderOf, readState, treeOf, writeState, type HandoffState } from "../../scripts/handoff/state.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 const STUB = `#!/bin/sh
+IDENT="-c user.name=t -c user.email=t@t -c commit.gpgsign=false"
 last=""
 prev=""
 for a in "$@"; do
@@ -36,10 +38,10 @@ echo "helper=[$GIT_CONFIG_VALUE_0]" >> "$STUB_FACTS"
 echo "ghdir=$GH_CONFIG_DIR" >> "$STUB_FACTS"
 echo "argv=$*" >> "$STUB_FACTS"
 echo '{"type":"thread.started","thread_id":"stub-thread"}'
-if [ "$(pwd -P)" = "$STUB_TREE" ]; then
+if [ "$(pwd -P)" = "$STUB_SLOT" ]; then
   case " $* " in
-    *" resume "*) git commit -q --allow-empty -m stub-fix ;;
-    *) git switch -q -c feat/9-stub && git commit -q --allow-empty -m stub ;;
+    *" resume "*) git $IDENT commit -q --allow-empty -m stub-fix ;;
+    *) git switch -q -c feat/9-stub && git $IDENT commit -q --allow-empty -m stub ;;
   esac
 fi
 echo "built" > "$last"
@@ -48,7 +50,8 @@ echo "OUTCOME: ready" >> "$last"
 
 const dir = realpathSync(mkdtempSync(join(tmpdir(), "handoff-run-")));
 const mainRepo = join(dir, "main");
-const tree = join(mainRepo, ".claude", "worktrees", "codex-9");
+const slot = slotOf(mainRepo);
+const tree = treeOf(mainRepo, 9);
 const bin = join(dir, "bin");
 const plan = join(dir, "plan.md");
 const brief = join(dir, "brief.md");
@@ -58,7 +61,7 @@ const env = {
   ...process.env,
   PATH: `${bin}:${process.env.PATH ?? ""}`,
   STUB_FACTS: facts,
-  STUB_TREE: tree,
+  STUB_SLOT: slot,
   GH_TOKEN: "fake-token",
   SSH_AUTH_SOCK: "/tmp/fake-sock",
 };
@@ -75,7 +78,8 @@ const gh: GhReads = {
 
 before(() => {
   mkdirSync(bin, { recursive: true });
-  mkdirSync(mainRepo, { recursive: true });
+  mkdirSync(join(mainRepo, "node_modules"), { recursive: true });
+  writeFileSync(join(mainRepo, "node_modules", "marker"), "m\n");
   git(["init", "--bare", "-q", "-b", "main", join(dir, "origin.git")], dir);
   git(["init", "-q", "-b", "main", "."], mainRepo);
   git(["config", "user.email", "t@t"], mainRepo);
@@ -100,13 +104,15 @@ const factsOf = (): Map<string, string> => {
   return found;
 };
 
-test("a build makes its tree from origin/main, runs codex there headless, and records the thread and the exit (Issue #1409)", async () => {
+test("a build makes its clone from origin/main, runs codex there headless, collects its branch into the review tree, and records the thread and the exit (Issue #1418)", async () => {
   assert.equal(await main(["build", "9", "--plan", plan, "--session", "https://s"], mainRepo, env, gh), 0);
-  assert.equal(git(["rev-parse", "HEAD~1"], tree), git(["rev-parse", "origin/main"], mainRepo));
+  assert.equal(git(["rev-parse", "HEAD~1"], slot), git(["rev-parse", "origin/main"], mainRepo));
+  assert.equal(readlinkSync(join(slot, "node_modules")), "../../../node_modules");
   assert.equal(readlinkSync(join(tree, "node_modules")), "../../../node_modules");
+  assert.equal(git(["rev-parse", "HEAD"], tree), git(["rev-parse", "HEAD"], slot));
   const seen = factsOf();
   assert.equal(seen.get("marker"), "9");
-  assert.equal(seen.get("cwd"), tree);
+  assert.equal(seen.get("cwd"), slot);
   assert.equal(seen.get("stdin"), "null");
   assert.equal(seen.get("token"), "");
   assert.equal(seen.get("sock"), "");
@@ -118,7 +124,7 @@ test("a build makes its tree from origin/main, runs codex there headless, and re
   assert.equal(readFileSync(join(folder, "comments.jsonl"), "utf8"), '{"id":1}\n');
   assert.equal(issueReads, 1);
   assert.ok(
-    seen.get("argv")?.startsWith(`-s danger-full-access -a on-request exec --json -C ${tree} -m `),
+    seen.get("argv")?.startsWith(`-s danger-full-access -a on-request exec --json -C ${slot} -m `),
     seen.get("argv"),
   );
   const state = readState(folder);
@@ -149,6 +155,9 @@ test("a resume restates the sandbox, names the thread and records a second run (
     seen.get("argv"),
   );
   assert.ok(seen.get("argv")?.includes(" stub-thread "), seen.get("argv"));
+  assert.equal(seen.get("cwd"), slot);
+  assert.equal(git(["rev-parse", "HEAD"], tree), git(["rev-parse", "HEAD"], slot));
+  assert.equal(git(["rev-list", "--count", "origin/main..HEAD"], tree), "2");
   const state = readState(folder);
   assert.deepEqual(
     state?.runs.map(({ n, kind, exit }) => [n, kind, exit]),
@@ -208,6 +217,44 @@ test("a run whose recorded process is alive reads as running, and resume refuses
     writeState(folder, state);
   }
   assert.equal(snapshotOf(9, mainRepo, gh).running, false);
+});
+
+test("a build of another issue is refused while this issue's record holds the clone (Issue #1418)", async () => {
+  const before = readFileSync(facts, "utf8");
+  assert.equal(await main(["build", "10", "--plan", plan, "--session", "https://s"], mainRepo, env, gh), 2);
+  assert.equal(readFileSync(facts, "utf8"), before);
+  assert.equal(readState(folderOf(mainRepo, 10)), null);
+});
+
+test("a resume is refused while another issue's record holds the clone (Issue #1418)", async () => {
+  const before = readFileSync(facts, "utf8");
+  const other = folderOf(mainRepo, 10);
+  mkdirSync(other, { recursive: true });
+  writeFileSync(join(other, "state.json"), "{}\n");
+  try {
+    assert.equal(await main(["resume", "9", "--brief", brief], mainRepo, env, gh), 2);
+  } finally {
+    rmSync(other, { recursive: true, force: true });
+  }
+  assert.equal(readFileSync(facts, "utf8"), before);
+  assert.equal(readState(folder)?.runs.length, 2);
+});
+
+test("a build whose clone cannot be made leaves no record that would hold the clone (Issue #1418)", async () => {
+  const bare = join(dir, "no-origin");
+  mkdirSync(bare, { recursive: true });
+  git(["init", "-q", "-b", "main", "."], bare);
+  const messages: string[] = [];
+  const saved = console.error;
+  console.error = (line: string): void => void messages.push(line);
+  try {
+    assert.equal(await main(["build", "12", "--plan", plan, "--session", "https://s"], bare, env, gh), 1);
+  } finally {
+    console.error = saved;
+  }
+  assert.equal(readState(folderOf(bare, 12)), null);
+  assert.equal(existsSync(folderOf(bare, 12)), false);
+  assert.ok(messages.length > 0);
 });
 
 test("a build refuses a plan path that next would later refuse, and builds nothing (Issue #1409)", async () => {
