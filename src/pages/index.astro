@@ -61,7 +61,7 @@ const how = howStation();
           <button
             type="button"
             class={`lf-station${s.sea ? " at-sea" : ""}${s.slipAbove ? " slip-above" : ""}`}
-            style={`left:${(s.nx * 100).toFixed(2)}%;top:${(s.ny * 100).toFixed(2)}%`}
+            style={`left:${(s.nx * 100).toFixed(2)}%;top:${(s.ny * 100).toFixed(2)}%${s.nameGap === null ? "" : `;--name-gap:${s.nameGap}px`}`}
             data-station={s.id}
             data-nx={String(s.nx)}
             data-ny={String(s.ny)}

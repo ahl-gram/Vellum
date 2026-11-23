@@ -289,7 +289,9 @@ header.chrome::before {
   width: 34px;
   height: 34px;
   padding: 0;
-  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  /* 16px: the diamond's reach (a 15px square, 1.5px border and 1px outline reach 14.14px, 13.44px where the border rounds to 1px) and 2px of paper before its town's baked name, which scales with the sheet while the diamond does not. */
+  transform: translate(-50%, -50%) scale(var(--inv, 1))
+    translateX(min(0px, calc(var(--name-gap, 1000px) / var(--inv, 1) - 16px)));
   appearance: none;
   border: 0;
   background: none;
