@@ -19,6 +19,7 @@ import {
   entryCountFaults,
   indexCountFaults,
   openFaults,
+  pressFaults,
   stepFaults,
 } from "../../test-support/built-reads/primer.ts";
 import { pb12Faults, pb16Faults, rb11Faults } from "../../test-support/built-reads/prospect-ribbon.ts";
@@ -131,6 +132,12 @@ test("BP-P5 the index slip counts what each kind of room lists: the Primer's row
   );
   assert.deepEqual(indexCountFaults(documentOf(page("/primer/")), steps, AFTERWARD), []);
   for (const route of ["/faq/", "/glossary/"]) assert.deepEqual(entryCountFaults(documentOf(page(route))), [], route);
+});
+
+test("BP-T1 every page whose room the Primer teaches carries one press on its own line straight after the head cluster's trail, opening that room on the Primer, and no other page carries one (Issue #1155 ruling 2 and N4; Issue #1254)", () => {
+  const pages = new Map([...built].map(([route, html]) => [route, documentOf(html)] as const));
+  const taught = LADDERS.map((l) => l.route);
+  assert.deepEqual(pressFaults(pages, taught, "learn this room"), []);
 });
 
 test("the Glossary keeps its #353 shape in the built page: no section past 8 terms (Zoryan and Ordai to 10), the sections Issues #353 and #430 added 5 to 8 each, the chart section split in three, every term Vellum prints documented, no headword twice, terms alphabetical in each section, and a definition for every term (from e2e IX12)", () => {

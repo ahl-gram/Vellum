@@ -56,7 +56,7 @@ export const roomIdOf = (route: string): string =>
 export const tryItHref = (step: Step): string => `..${stepAddress(step.id, step.at)}`;
 
 export function trailPressHref(route: string, ladders: readonly Ladder[] = LADDERS): string | null {
-  return ladders.some((l) => l.route === route) ? "/primer/" : null;
+  return ladders.some((l) => l.route === route) ? `/primer/#${roomIdOf(route)}` : null;
 }
 
 const lowerThe = (name: string): string => (name.startsWith("The ") ? `the ${name.slice(4)}` : name);
