@@ -120,5 +120,5 @@ test("a build waits while another issue's live record holds the clone (Issue #14
   assert.equal(slotHolder(root, 9), null);
   record("7-handoff");
   assert.equal(slotHolder(root, 9), 7);
-  assert.equal(slotHolder(root, 7), null);
+  assert.equal(slotHolder(root, 7), 9);
 });
