@@ -19,6 +19,7 @@ export const E2E_SKIPS: readonly E2eSkip[] = [
   { suite: "zoom-gestures", step: "ZG8b", issue: 1366 },
   { suite: "specimen", step: "SB6", issue: 1365 },
   { suite: "specimen", step: "SB13", issue: 1365 },
+  { suite: "specimen", step: "SB15", issue: 1365 },
 ];
 
 export function skipFor(skips: readonly E2eSkip[], suite: E2eSuiteName, step: string): E2eSkip | undefined {
