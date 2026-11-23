@@ -105,7 +105,7 @@ export async function h13DeadBundle(ctx: SuiteContext, step: ReturnType<typeof m
 
 export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doors): Promise<void> {
   check(
-    "H13c a dead bundle reveals the four slips as plain static doors: each visible in flow with its room's own door, the dead close controls hidden, the how panel and the sideways scroll unmoved",
+    "H13c a dead bundle reveals the station slips as plain static doors, read on the four it names, every slip being one template (Issue #1254): each visible in flow with its room's own door, the dead close controls hidden, the how panel and the sideways scroll unmoved",
     doors !== null &&
       doors.shown.every(Boolean) &&
       JSON.stringify(doors.hrefs) === JSON.stringify(["explorer/", "reading-room/", "atlas/", "gallery/"]) &&
