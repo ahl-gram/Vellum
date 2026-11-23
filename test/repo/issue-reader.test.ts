@@ -9,11 +9,11 @@ type Raw = Record<string, unknown>;
 
 const link = (id: number): string => `https://github.com/ahl-gram/Vellum/issues/9#issuecomment-${id}`;
 
-const comment = (id: number, association: string | null, body: string, login = "someone"): Raw => ({
+const comment = (id: number, association: unknown, body: string, login = "someone"): Raw => ({
   id,
   html_url: link(id),
   user: { login },
-  ...(association === null ? {} : { author_association: association }),
+  ...(association === undefined ? {} : { author_association: association }),
   created_at: "2026-11-22T10:00:00Z",
   body,
 });
@@ -32,11 +32,7 @@ const issueOf = (opener: string, extra: Raw = {}): Raw => ({
 
 const lines = (items: readonly Raw[]): string => items.map((item) => JSON.stringify(item)).join("\n");
 
-const readsOf = (
-  issue: Raw,
-  listings: Record<string, readonly Raw[]> = {},
-  asked: string[] = [],
-): ReaderReads => ({
+const readsOf = (issue: Raw, listings: Record<string, readonly Raw[]> = {}, asked: string[] = []): ReaderReads => ({
   issue: () => JSON.stringify(issue),
   listing: (path) => {
     asked.push(path);
@@ -55,6 +51,10 @@ test("the reader passes the owner's, members' and collaborators' text and withho
     "FIRST_TIMER",
     "MANNEQUIN",
     "owner",
+    undefined,
+    7,
+    ["OWNER"],
+    { value: "OWNER" },
     null,
   ];
   const written = associations.map((association, i) => comment(i + 1, association, `body ${i + 1}`));
@@ -64,10 +64,10 @@ test("the reader passes the owner's, members' and collaborators' text and withho
     reviews: [],
     reviewComments: [],
   });
-  assert.equal(thread.comments.length, 11);
+  assert.equal(thread.comments.length, 15);
   assert.deepEqual(
     thread.comments.map((entry) => entry.body),
-    ["body 1", "body 2", "body 3", null, null, null, null, null, null, null, null],
+    ["body 1", "body 2", "body 3", ...Array<null>(12).fill(null)],
   );
 });
 

@@ -23,9 +23,7 @@ export const LIVE_READS: ReaderReads = {
 
 const reasonOf = (error: unknown): string => {
   const stderr = (error as { stderr?: unknown }).stderr;
-  const first = String(stderr ?? "")
-    .split("\n")
-    .find((line) => line.trim() !== "");
+  const first = (typeof stderr === "string" ? stderr : "").split("\n").find((line) => line.trim() !== "");
   return first ?? (error instanceof Error ? error.message : String(error));
 };
 
@@ -48,7 +46,10 @@ export const readIssue = (argv: readonly string[], reads: ReaderReads): ReaderRu
   } catch (error) {
     return refused(`issue ${n}`, error);
   }
-  const paths = [`issues/${n}/comments`, ...(isPullRequest(issue) ? [`pulls/${n}/reviews`, `pulls/${n}/comments`] : [])];
+  const paths = [
+    `issues/${n}/comments`,
+    ...(isPullRequest(issue) ? [`pulls/${n}/reviews`, `pulls/${n}/comments`] : []),
+  ];
   const lists: unknown[][] = [];
   for (const path of paths) {
     try {

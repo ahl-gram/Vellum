@@ -1,15 +1,14 @@
 export const TRUSTED_ASSOCIATIONS: ReadonlySet<string> = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 
-export const isTrusted = (association: unknown): boolean => {
-  void association;
-  return true;
-};
+export const isTrusted = (association: unknown): boolean =>
+  typeof association === "string" && TRUSTED_ASSOCIATIONS.has(association);
 
 const LOGIN = /^[A-Za-z0-9][A-Za-z0-9-]{0,38}(\[bot\])?$/;
 const ENUM = /^[A-Z_]{1,32}$/;
 const NO_NAME = "an account whose name is not shown";
 
-export const shownLogin = (login: unknown): string => String(login);
+export const shownLogin = (login: unknown): string =>
+  typeof login === "string" && LOGIN.test(login) ? login : NO_NAME;
 
 export type EntryKind = "comment" | "review" | "review comment";
 
@@ -107,7 +106,3 @@ export const threadOf = (raw: RawThread): Thread => {
     reviewComments: raw.reviewComments.map((value) => entryOf("review comment", value)),
   };
 };
-
-void LOGIN;
-void NO_NAME;
-void TRUSTED_ASSOCIATIONS;
