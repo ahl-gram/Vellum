@@ -359,7 +359,7 @@ are copied here.
 
 ## Never
 
-The hook (launched from `hooks/`, its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the issue-body overwrite (#193, PR #550), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
+The hook (launched from `hooks/`, its code in `scripts/agent-infra/hooks/`), wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md) and raw comment reads (Issue #1417), the issue-body overwrite (#193, PR #550), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
@@ -367,7 +367,7 @@ The hook (launched from `hooks/`, its code in `scripts/agent-infra/hooks/`), wir
 - A PR body with an em-dash outside inline backticks or a fenced code block, or with "not close #N" / "does not fix #N".
 - A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.
-- `gh issue view` as evidence an issue is empty. It silently returns nothing for some issues here; use `gh api`.
+- A raw read of an issue's or pull request's comments or reviews, or `gh issue view` and `gh pr view` without `--json`: the repository is public, so a thread can hold anyone's text, and `gh issue view` silently returns nothing for some calls here. Read it through `npm run --silent issue -- N` (Issue #1417).
 - `gh api repos/O/R/issues/N -f body=...` with `/comments` left off. Any `-f` switches the call to POST, the issue endpoint treats that as an update, so the BODY is replaced, no comment is created, and it exits 0. Use `gh issue comment N --body-file <file>`, or `.../issues/N/comments -f body=...`, and `-X PATCH` when a body edit IS the intent; the tell is a response `html_url` ending `/issues/N` instead of `#issuecomment-<id>` (#193, PR #550).
 - `pkill` on a run you intend to repeat; the harness leaves a browser profile behind for every kill.
 - A bare `cd` in a Claude Code main session to another directory inside the project, a worktree or `out/` included: the session moves, and every later relative path, `git` call and dispatched agent runs from there. Spell the path out in a subshell, `( cd <path> && ... )`, or use `git -C <path>` or an absolute path; a session that has already moved asks Alex to type `/cd <path>` (Issue #781).

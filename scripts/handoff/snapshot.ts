@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { git } from "../agent-sandbox.ts";
+import { isTrusted } from "../issue-reader/thread.ts";
 import { outcomeOf } from "./launch.ts";
 import type { PullRequest, Snapshot } from "./next.ts";
 import { FILES, folderOf, lastRun, readState, runFiles, treeOf, type RunRecord } from "./state.ts";
@@ -33,14 +34,12 @@ export const LIVE_GH: GhReads = {
     trustedComments(gh(["api", "--paginate", `repos/${REPO}/issues/${issue}/comments`, "--jq", ".[] | tojson"])),
 };
 
-const TRUSTED = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
-
 export const trustedComments = (jsonl: string): string =>
   jsonl
     .split("\n")
     .filter((line) => {
       try {
-        return TRUSTED.has(String((JSON.parse(line) as { author_association?: unknown }).author_association));
+        return isTrusted((JSON.parse(line) as { author_association?: unknown }).author_association);
       } catch {
         return false;
       }

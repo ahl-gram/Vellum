@@ -11,13 +11,12 @@ Issues in this project go stale fast, and the cost has been paid repeatedly at f
 ## Non-negotiable reading rules
 
 ```bash
-gh api repos/ahl-gram/Vellum/issues/N            # the body
-gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-baselines
+npm run --silent issue -- N   # the body, then every comment: decisions, ratifications, re-baselines
 ```
 
-- **Always fetch both.** The body will typically not tell you a superseding comment exists. #203's body never mentions one.
+- **Always read the comments**, which the reader prints after the body. The body will typically not tell you a superseding comment exists. #203's body never mentions one.
 - **Comments supersede the body** unless a comment says otherwise. Newest ratified statement wins. A body written before a big epic landed is historical intent, not current fact.
-- **Never conclude an issue is empty from `gh issue view`.** It silently returns exit 0 with no output for some issues in this repo. That is why both commands above are the `api` form.
+- **Read an issue only through the reader.** It prints what the owner, members and collaborators wrote, withholds the rest one line each, and counts both in its header; the footgun hook refuses a raw comment read and `gh issue view` (Issue #1417). A withheld comment is no ruling and no evidence: name it in your ledger.
 - **Auto-memory is a pointer, not a citation.** `hash-sync.ts` was handed to six subagents as `src/site/shared/`; it is `src/site/explorer/`. The filename was recorded and the directory got filled in by inference. Before you write a path, `ls` it.
 - The live plan is the GitHub Project ("Vellum Roadmap", `gh project item-list 1 --owner ahl-gram --limit 1000 --format json`, whose one default page is far shorter than the board, so check `.totalCount` against the rows returned before calling an issue absent from it); the durable sequencing rules are `handbook/specs/rulebook.md` in the repo (they left issue #193's body on 2026-09-09; that issue is now a pointer). The `roadmap/` directory is deleted and there is no local plan file.
 

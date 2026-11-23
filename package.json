@@ -17,6 +17,7 @@
     "charts:regen": "node scripts/regen-hero-charts.ts",
     "delivery": "node scripts/delivery/main.ts",
     "handoff": "node scripts/handoff/main.ts",
+    "issue": "node scripts/issue-reader/main.ts",
     "proof": "node scripts/proof-runner/main.ts",
     "comment-judge": "node scripts/comment-judge/main.ts",
     "comment-sweep": "node scripts/comment-sweep/main.ts",
