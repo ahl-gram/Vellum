@@ -12,8 +12,15 @@ export function browserReport(
   exists: (path: string) => boolean,
   version: (path: string) => string,
 ): readonly string[] {
-  void [found, wanted, exists, version];
-  return [];
+  const second = wanted ? `VELLUM_BROWSER: ${wanted} (${exists(wanted) ? "present" : "missing"})` : "VELLUM_BROWSER: unset";
+  if (found === null) return ["deploy browser: none found", second];
+  let read: string;
+  try {
+    read = version(found);
+  } catch (err) {
+    read = `version unreadable: ${err instanceof Error ? err.message : String(err)}`;
+  }
+  return [`deploy browser: ${found} (${read})`, second];
 }
 
 if (import.meta.main) {
