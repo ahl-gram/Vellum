@@ -25,8 +25,10 @@ import {
   sheetLine,
 } from "./folio-lines.ts";
 import { PLATE_CHART, howPlate } from "./how-plate.ts";
+import { paintTop, type TopEls } from "./paint-top.ts";
 import { $ } from "../../shared/by-id.ts";
 import { downloadBlob, nextObjectUrl } from "../../shared/object-url.ts";
+import { bootHandOnce } from "../../shared/primer-hand.ts";
 
 const status = $("pf-status");
 const warning = $("pf-warning");
@@ -88,17 +90,24 @@ const layPile = (): void => {
   );
 };
 
+const topEls: TopEls = { sheet: sheetBox, title: folioTitle, sub: folioSub, coords: folioCoords };
+
 const showTop = (): void => {
   const sheet = sheets[top];
   if (!sheet) return;
-  sheetBox.innerHTML = sheet.svg ?? "";
-  room.layout();
-  folioTitle.textContent = sheetLine(sheet.title, top + 1, sheets.length);
-  folioSub.textContent =
-    sheet.item.kind === "survey"
-      ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
-      : `${subOf(sheet.item)} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`;
-  folioCoords.textContent = beneathLine(sheets.length - 1 - top);
+  paintTop(
+    topEls,
+    {
+      svg: sheet.svg ?? "",
+      title: sheetLine(sheet.title, top + 1, sheets.length),
+      sub:
+        sheet.item.kind === "survey"
+          ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
+          : `${subOf(sheet.item)} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`,
+      coords: beneathLine(sheets.length - 1 - top),
+    },
+    () => room.layout(),
+  );
   download.disabled = sheet.svg === null;
   for (const row of contents.querySelectorAll(".row"))
     row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
@@ -280,7 +289,7 @@ const start = async (): Promise<void> => {
   await draft();
 };
 
-void start();
+void start().then(() => bootHandOnce({ route: "/explorer/portfolio/" }));
 
 declare global {
   interface Window {

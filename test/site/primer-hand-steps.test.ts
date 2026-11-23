@@ -10,6 +10,7 @@ import {
   withoutStep,
 } from "../../src/site/shared/primer/hand-steps.ts";
 import { headOf, onward } from "../../src/site/shared/primer/hand-words.ts";
+import { parseTable } from "../../src/site/shared/table-address.ts";
 import { STEPS, stepOf } from "../../test-support/hand-steps.ts";
 
 const DESK = { touch: false, motion: true };
@@ -202,6 +203,29 @@ test("PK25 Today's steps are used as rulings E1 and P1 A, and pull request 7's Q
 
 test("PK26 the Gallery's steps are sealed on arrival as ruling N2 has it: the open step a road to another room, the read step one with nothing to see (Issue #1253 pull request 8)", () => {
   for (const id of ["gallery-look", "gallery-open"]) assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+});
+
+test("PK27 the Portfolio's steps are used as rulings E1 and P1 A, and pull request 9's Q1 and Q2, have them: the turned-up corner, Bring up The Next Sheet and Download The Engraving at their press; the bare table, the road to the Portfolio and the address to copy on arrival (Issue #1253 pull request 9)", () => {
+  for (const id of ["explorer-portfolio-turn-down", "explorer-portfolio-next", "explorer-portfolio-download"])
+    assert.equal(sealWhen(stepOf(id), DESK), "use", id);
+  for (const id of ["explorer-portfolio-bare", "explorer-portfolio-take", "explorer-portfolio-keep"])
+    assert.equal(sealWhen(stepOf(id), DESK), "arrival", id);
+  assert.deepEqual(useWatches(stepOf("explorer-portfolio-turn-down")), [
+    { event: "click", css: "#map .region-inset .dog-ear" },
+  ]);
+  assert.deepEqual(useWatches(stepOf("explorer-portfolio-next")), [{ event: "click", css: "#pf-next" }]);
+  assert.deepEqual(useWatches(stepOf("explorer-portfolio-download")), [{ event: "click", css: "#pf-download" }]);
+});
+
+test("PK28 the Explorer's Lay the prospect on the table is used at its press, as ruling E1 has it (Issue #1253 pull request 9)", () => {
+  const lay = stepOf("explorer-lay-prospect");
+  assert.equal(sealWhen(lay, DESK), "use");
+  assert.deepEqual(useWatches(lay), [{ event: "click", css: "#place-card .pc-lay" }]);
+});
+
+test("PK29 the Portfolio's first step opens an empty table, so a device holding sheets still shows the plate (Issue #1253 pull request 9)", () => {
+  const at = stepOf("explorer-portfolio-bare").at;
+  assert.deepEqual(parseTable(at.slice(at.indexOf("#"))), []);
 });
 
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {

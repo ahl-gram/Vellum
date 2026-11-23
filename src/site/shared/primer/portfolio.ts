@@ -1,7 +1,7 @@
 import { PLATE_STEPS, PLATE_TAB, PLATE_VERB } from "../../explorer/portfolio/how-plate.ts";
 import { TABLE_CAP } from "../table-address.ts";
 import { DOG_EAR, LAID, ONE_SHEET, SURVEYED } from "./explorer-sheet.ts";
-import { aria, countWord, road, roomOf, text, wait, type Ladder } from "./shape.ts";
+import { aria, click, countWord, road, roomOf, text, wait, type Ladder } from "./shape.ts";
 
 const TO_PORTFOLIO = `${PLATE_VERB} ${roomOf("/explorer/portfolio/")}`;
 const TWO_SHEETS = `/explorer/portfolio/#table=${ONE_SHEET}_k-p.seed-42.i-0.style-antique`;
@@ -22,7 +22,7 @@ export const PORTFOLIO: Ladder = {
           id: "explorer-portfolio-bare",
           act: "Open the Portfolio with nothing gathered.",
           see: `A plate shows the way in ${countWord(PLATE_STEPS.length)} steps: ${PLATE_STEPS.map((s) => lowerFirst(s.head)).join(", ")}.`,
-          at: "/explorer/portfolio/",
+          at: "/explorer/portfolio/#table=",
           words: [],
           relies: [text("#pf-sheet .how-plate .p-head", `${FIRST_STEP.numeral} · ${FIRST_STEP.head}`)],
         },
@@ -37,6 +37,7 @@ export const PORTFOLIO: Ladder = {
             aria(DOG_EAR, "lay this survey on the table"),
             { ...text("#chart-drawer-full", "no room for more"), state: "hidden" },
           ],
+          do: [click(DOG_EAR)],
         },
         {
           id: "explorer-portfolio-take",
@@ -54,6 +55,7 @@ export const PORTFOLIO: Ladder = {
           see: "The next sheet comes to the top of the pile.",
           at: TWO_SHEETS,
           words: [road("#pf-next", "Bring up The Next Sheet")],
+          do: [click("#pf-next")],
         },
         {
           id: "explorer-portfolio-download",
@@ -61,6 +63,7 @@ export const PORTFOLIO: Ladder = {
           see: "The sheet on top is saved as the engraving, an SVG that is exact at any size.",
           at: TWO_SHEETS,
           words: [road("#pf-download", "Download The Engraving")],
+          do: [click("#pf-download")],
         },
         {
           id: "explorer-portfolio-keep",
@@ -69,7 +72,6 @@ export const PORTFOLIO: Ladder = {
           at: TWO_SHEETS,
           words: [],
           relies: [road("#pf-explorer", `Back to ${roomOf("/explorer/")}`)],
-          kind: "play",
         },
       ],
     },
