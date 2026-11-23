@@ -63,7 +63,7 @@ test("every pip's at-sea dress is earned from the terrain, not asserted by hand 
     assert.equal(
       elev < world.seaLevel,
       s.sea,
-      `${s.id}: the sea flag is the terrain's own verdict (measured 2026-11-22: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}; the Gallery 0.3989 and How It Works -0.0048 are the two at sea, and the Primer at Poalo, 0.4412, is land by 0.0023); if this reds after a regen or re-anchor, the dress must be re-decided, not the assertion loosened`,
+      `${s.id}: the sea flag is the terrain's own verdict (measured 2026-11-22: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}; the Gallery 0.3989 and How It Works -0.0048 are the two at sea, and the Primer at Poalo, 0.4411, is land by 0.0023); if this reds after a regen or re-anchor, the dress must be re-decided, not the assertion loosened`,
     );
   }
 });

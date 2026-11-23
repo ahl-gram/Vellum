@@ -178,9 +178,9 @@ export function l16Faults(doc: Document, html: string): string[] {
     ![...doc.querySelectorAll("h2")].some((h) => h.textContent.trim() === "How It Works") ||
       "the old How It Works head is back",
     same(
-      ns && [...ns.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")),
-      homeStations().map((s) => s.href),
-    ) || "the noscript's doors, one to every station in the roster's order",
+      ns && [...ns.querySelectorAll("a[href]")].map((a) => [a.getAttribute("href"), a.textContent.trim()]),
+      homeStations().map((s) => [s.href, s.name]),
+    ) || "the noscript's doors, one to every station in the roster's order, each named as its station",
     (ns?.querySelector("link[rel='stylesheet']")?.getAttribute("href") ?? null) === "home-noscript.css" ||
       "the noscript's own sheet",
   ]);

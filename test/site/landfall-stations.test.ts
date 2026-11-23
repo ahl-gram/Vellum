@@ -148,7 +148,7 @@ test("a station claims its dot: the overlay never doubles a mark the station rep
   assert.deepEqual(input, [...stage.dots], "unclaimedDots filters immutably");
 });
 
-test("only the Reading Room's label stands above its mark, so none lies under the legend row (Issue #1155 comment 6754142680 ruling 2; Issue #1295)", () => {
+test("only the Reading Room's label stands above its mark (Issue #1155 comment 6754142680 ruling 2; Issue #1295)", () => {
   assert.ok(
     stations.every((s) => s.slipAbove === (s.id === "reading-room")),
     "the Reading Room alone lifts its label",
