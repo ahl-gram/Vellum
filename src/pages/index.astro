@@ -60,7 +60,7 @@ const how = howStation();
         {[...stations, how].map((s) => (
           <button
             type="button"
-            class={`lf-station${s.sea ? " at-sea" : ""}`}
+            class={`lf-station${s.sea ? " at-sea" : ""}${s.slipAbove ? " slip-above" : ""}`}
             style={`left:${(s.nx * 100).toFixed(2)}%;top:${(s.ny * 100).toFixed(2)}%`}
             data-station={s.id}
             data-nx={String(s.nx)}
@@ -165,7 +165,8 @@ const how = howStation();
       <a href="explorer/">The Explorer</a> ·
       <a href="reading-room/">The Reading Room</a> ·
       <a href="atlas/">The Atlas of Rahai</a> ·
-      <a href="gallery/">A Gallery of Worlds</a></p>
+      <a href="gallery/">A Gallery of Worlds</a> ·
+      <a href="primer/">The Primer</a></p>
     </nav>
   </noscript>
 </section>

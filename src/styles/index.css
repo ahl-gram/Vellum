@@ -326,6 +326,10 @@ header.chrome::before {
   gap: 2px;
   pointer-events: none;
 }
+.lf-station.slip-above .lf-station-slip {
+  top: auto;
+  bottom: calc(50% + 13px);
+}
 .lf-station-name {
   font-family: var(--font-display, "Iowan Old Style", "Palatino", Georgia, serif);
   font-size: 13px;
@@ -400,7 +404,7 @@ header.chrome::before {
   transform: translateX(-50%);
   text-align: center;
   z-index: 2;
-  padding: 0.5rem 1.1rem 0.6rem;
+  padding: 0.5rem 0.8rem 0.6rem;
   background: linear-gradient(
     to bottom,
     rgb(from var(--chart-ink) r g b / 0.85),
@@ -420,7 +424,7 @@ header.chrome::before {
 }
 .lf-legend-row {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.45rem;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -430,7 +434,7 @@ header.chrome::before {
   pointer-events: auto;
   background: rgb(from var(--chart-ink) r g b / 0.5);
   border: 1px solid var(--line-tan);
-  padding: 0.4rem 0.9rem 0.35rem;
+  padding: 0.4rem 0.55rem 0.35rem;
   text-align: center;
   transition:
     background 0.2s ease,
