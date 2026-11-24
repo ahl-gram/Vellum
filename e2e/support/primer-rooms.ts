@@ -36,7 +36,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
     booted: `({ up: typeof window.__vellumUsesWorker === "function" && !!document.querySelector("#map svg") })`,
     rest: EXPLORER_REST,
     pickFirst: "#place-options > li .pl-name",
-    chart: null,
+    chart: "#map > svg[data-vellum-seed]",
     repeatCap: Math.ceil(Math.log(DEEPEST_K) / Math.log(ZOOM_STEP)),
   },
   "/prospect/": {
@@ -54,7 +54,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `!!window.__vellumReadingRoomState().title && !!document.querySelector(".rf-chart svg") && document.querySelector(".rf-status").textContent === "" && !window.__vellumReadingRoomAges().playing`,
     ),
     pickFirst: null,
-    chart: null,
+    chart: ".rf-chart svg[data-vellum-seed]",
     repeatCap: 0,
   },
   "/print-room/": {
@@ -63,7 +63,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `!!window.__vellumPrintRoomState().title && !!document.querySelector("#pr-preview svg") && document.getElementById("pr-status").textContent === ""`,
     ),
     pickFirst: null,
-    chart: null,
+    chart: "#pr-preview svg[data-vellum-seed]",
     repeatCap: 0,
   },
   "/ribbon/": {
@@ -86,7 +86,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
     booted: `({ up: typeof window.__vellumWritingRoom === "function" && window.__vellumWritingRoom().n > 0 })`,
     rest: WRITING_REST,
     pickFirst: null,
-    chart: null,
+    chart: "#wr-chart svg[data-vellum-seed]",
     repeatCap: 0,
   },
   "/seed-of-the-day/": {

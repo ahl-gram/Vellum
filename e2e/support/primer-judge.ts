@@ -19,7 +19,16 @@ export function onItsArm(step: Step, arm: Arm): boolean {
 }
 
 const readsOf = (s: Step): string =>
-  JSON.stringify([s.at, s.first ?? [], s.words, s.relies ?? [], s.do ?? [], s.then ?? [], s.only ?? null]);
+  JSON.stringify([
+    s.at,
+    s.first ?? [],
+    s.words,
+    s.relies ?? [],
+    s.do ?? [],
+    s.then ?? [],
+    s.only ?? null,
+    s.picture ?? null,
+  ]);
 
 export function heldBy(step: Step, ladders: readonly Ladder[]): string | null {
   const mine = readsOf(step);

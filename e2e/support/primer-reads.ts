@@ -2,6 +2,8 @@
 import type { Payload } from "../types.ts";
 import type { Words } from "../../src/site/shared/primer/shape.ts";
 import type { Box, Facts } from "../../src/site/shared/primer/judge.ts";
+import { PICTURE_MANIFEST } from "../../src/site/primer/pictures.ts";
+import type { PictureManifest, Signature } from "../../scripts/primer-pictures/signature.ts";
 
 const at = (css: string, nth = 0): string => `document.querySelectorAll(${JSON.stringify(css)})[${nth}]`;
 
@@ -78,3 +80,11 @@ export const ARM: Payload<boolean> = `(() => {
   return true;
 })()`;
 export const MOVING = `document.getAnimations().filter((a) => a.playState !== "finished" && !(a.effect && a.effect.getTiming().iterations === Infinity)).length`;
+
+export const SIGNATURE = (css: string): Payload<Signature | null> => `(() => {
+  const svg = document.querySelector(${JSON.stringify(css)});
+  if (svg === null) return null;
+  const stamp = Object.fromEntries([...svg.attributes].filter((a) => a.name.startsWith("data-vellum-")).map((a) => [a.name, a.value]).sort((a, b) => (a[0] < b[0] ? -1 : 1)));
+  return { stamp, label: svg.getAttribute("aria-label"), layers: [...svg.querySelectorAll('[id^="layer-"]')].map((e) => e.id) };
+})()`;
+export const PICTURES: Payload<PictureManifest | null> = `fetch(${JSON.stringify(`/primer/${PICTURE_MANIFEST}`)}).then((r) => (r.ok ? r.json() : null), () => null)`;
