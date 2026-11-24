@@ -131,13 +131,23 @@ test("PR40 judges each room on the read whose own layout found every face loaded
   assert.deepEqual(apart(r.said, withFonts(STAGED)), []);
 });
 
-type Rested = { restedAt: number | null; read: { vw: number } | null; error: { message: string } | null };
+type Rested = {
+  restedAt: number | null;
+  read: { vw: number } | null;
+  error: { message: string } | null;
+  unlaid: number;
+};
 
 const cornersRest = async (status: (nth: number) => string): Promise<Rested> => {
   const queued: (() => void)[] = [];
   let reads = 0;
+  let laid = 0;
+  let unlaid = 0;
   const box = {
-    getBoundingClientRect: () => ({ left: 0, top: 0, right: 10, bottom: 10, width: 1280, height: 10 }),
+    getBoundingClientRect: () => {
+      laid++;
+      return { left: 0, top: 0, right: 10, bottom: 10, width: 1280, height: 10 };
+    },
     querySelectorAll: () => [],
   };
   const page = vm.createContext({
@@ -160,12 +170,14 @@ const cornersRest = async (status: (nth: number) => string): Promise<Rested> => 
       createTreeWalker: () => ({ nextNode: () => null }),
       fonts: {
         get status() {
+          if (laid === 0) unlaid++;
+          laid = 0;
           return status(++reads);
         },
       },
     },
   });
-  const out: Rested = { restedAt: null, read: null, error: null };
+  const out: Rested = { restedAt: null, read: null, error: null, unlaid: 0 };
   let frame = 0;
   const rest = vm.runInContext(restAt(1280), page) as Promise<{ vw: number }>;
   rest.then(
@@ -182,6 +194,7 @@ const cornersRest = async (status: (nth: number) => string): Promise<Rested> => 
     queued.splice(0).forEach((f) => f());
     await new Promise((resolve) => setImmediate(resolve));
   }
+  out.unlaid = unlaid;
   return out;
 };
 
@@ -190,6 +203,7 @@ test("the corners rest only on frames whose own layout found the faces loaded (I
   assert.equal(got.restedAt, 5, "the corners rested on a frame read while a face was still loading");
   assert.equal(got.read!.vw, 1280);
   assert.equal("fonts" in got.read!, false);
+  assert.equal(got.unlaid, 0, "the corners read the fonts' status before the layout that asks for them");
 });
 
 test("the corners name the faces when they never load, and do not rest (Issue #1447)", async () => {
