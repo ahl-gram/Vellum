@@ -21,7 +21,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const presses: Record<string, PressRead | undefined> = {};
   for (const route of [...SHELLED, PORTFOLIO]) {
     kits[route] = (await k.visit(route)) ? await kitRead(k) : undefined;
-    if (kits[route] !== undefined && taught.has(route)) presses[route] = await pressRead(k);
+    if (kits[route] !== undefined && taught.has(route)) presses[route] = await pressRead(k, route);
   }
   await step("RH32", () => Promise.resolve(ctx.check).then((check) => rh32Kit(check, kits)));
   await step("RH33", () => Promise.resolve(ctx.check).then((check) => rh33Press(check, presses)));

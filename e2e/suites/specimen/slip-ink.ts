@@ -1,5 +1,6 @@
 // The slip's own lines read for contrast as EA4 reads the chrome's: each line's computed ink against the ground painted under it with the slip's and the footnotes' text hidden, for SB20 here (Issue #1160).
 import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba, type Rgb } from "../../support/pixel.ts";
+import { withFonts } from "../../support/fonts.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { contrast } from "../cluster/trail.ts";
@@ -23,11 +24,10 @@ type InkRead = InkLine & { ground: Rgb; ratio: number; panel: boolean };
 
 // A computed colour read exactly where Chromium serialises it as rgb() or rgba() and through the canvas for color(srgb ...), oklab() and the rest, alpha as the fourth channel.
 export const INK_RGBA = `((css) => { const m = /^rgba?\\(([\\d.]+), ([\\d.]+), ([\\d.]+)(?:, ([\\d.]+))?\\)$/.exec(css); return m ? [+m[1], +m[2], +m[3], Math.round(255 * +(m[4] ?? 1))] : ${PAGE_RGBA}(css); })`;
-export const FONTS_LOADED: Payload<string> = `document.fonts.status`;
 const HIDE_SLIP_TEXT = `.slip *, .fn-note * { color: transparent !important; text-decoration-color: transparent !important; }`;
 const COUNT = (selector: string): Payload<number> => `document.querySelectorAll(${JSON.stringify(selector)}).length`;
 // One element at a time, scrolled into its own scroller's view first: the Book's body note stands under the slip's foot until its body is scrolled (1280x800).
-const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]> => `(() => {
+export const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]> => `(() => {
   const rgba = ${INK_RGBA};
   const el = document.querySelectorAll(${JSON.stringify(selector)})[${i}], out = [];
   el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
@@ -66,7 +66,11 @@ export async function slipInk(ctx: SuiteContext, pieces: readonly InkPiece[], id
     const n = await ctx.evaluate(COUNT(selector));
     for (let i = 0; i < n; i++) {
       await settle(REST_OF(selector, i), (d) => d.op === 1 && d.running === 0, `${id}: ${piece} ${i} at rest`);
-      const lines = await ctx.evaluate(LINES_OF(piece, selector, i));
+      const { read: lines } = await settle(
+        withFonts(LINES_OF(piece, selector, i)),
+        (d) => d.fonts === "loaded",
+        `${id}: ${piece} ${i} lines`,
+      );
       const grounds = await withStyle(ctx, id, HIDE_SLIP_TEXT, async () => {
         const g: Rgb[] = [];
         for (const l of lines) {
@@ -108,7 +112,6 @@ const SB20_PIECES: readonly InkPiece[] = [
 
 export async function sb20SlipInk(k: SpecimenKit): Promise<void> {
   if ((await k.goto()) === null) throw new Error("SB20: the Book never came up at rest");
-  await k.settle(FONTS_LOADED, (d) => d === "loaded", "SB20 fonts");
   await mouseMove(k.send, 1, 1);
   const reads = await slipInk(k, SB20_PIECES, "sb20-hide");
   const faults = [

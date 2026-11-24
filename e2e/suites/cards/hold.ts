@@ -4,6 +4,7 @@ import { NARROW_SEED } from "./reads.ts";
 import { mouseDown, mouseMove, mouseUp, sendClick, sendKey, sendTouch } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
+import { withFonts } from "../../support/fonts.ts";
 
 type Settle = ReturnType<typeof makeSettle>;
 type HoldKit = SuiteContext & { settle: Settle };
@@ -22,7 +23,7 @@ type Card = {
 
 // Issue #750 measured at Alex's floor of 1024 (ruling of 2026-10-04): it is where the defects are worst, 5 of 26 centre presses on this seed opening a neighbour against 3 at 1280.
 const DESK = { width: 1024, height: 768 };
-const MARKS: Payload<Mark[]> =
+export const MARKS: Payload<Mark[]> =
   `[...document.querySelectorAll(".place-overlay .place-hit")].map((h) => { const b = h.getBoundingClientRect(); return { idx: Number(h.dataset.idx), name: (h.getAttribute("aria-label") || "").split(", ")[0], x: b.x + b.width / 2, y: b.y + b.height / 2 }; })`;
 const CARD: Payload<Card> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return { shown: false, name: null, pinned: false, rest: false, left: 0, top: 0, right: 0, bottom: 0, link: null }; const r = c.getBoundingClientRect(); const i = c.querySelector(".pc-inner"); const a = i.getAnimations(); const l = c.querySelector(".pc-prospect"); const lr = l ? l.getBoundingClientRect() : null;
   return { shown: true, name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), rest: a.length > 0 && a.every((x) => x.playState === "finished"), left: r.left, top: r.top, right: r.right, bottom: r.bottom, link: lr ? { x: lr.x + lr.width / 2, y: lr.y + lr.height / 2 } : null }; })()`;
@@ -58,8 +59,8 @@ export function holdKit(ctx: HoldKit) {
     await setTouch(touch);
     await bounce(send, `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique&legend=1&arms=0&beasts=0`);
     await explorerUp({ waitReady }, "the hold kit at 1024");
-    await settle<string>(`document.fonts ? document.fonts.status : "loaded"`, (s) => s !== "loading", "fonts at 1024");
-    return evaluate(MARKS);
+    const { read } = await settle(withFonts(MARKS), (d) => d.fonts === "loaded", "the hold kit's marks at 1024");
+    return read;
   };
   const travel = async (from: Point, to: Point, pxPerMs: number) => {
     const len = Math.hypot(to.x - from.x, to.y - from.y),

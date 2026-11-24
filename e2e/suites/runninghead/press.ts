@@ -1,6 +1,9 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { LADDERS } from "../../../src/site/shared/primer/ladders.ts";
 import type { RunningHeadKit } from "./kit.ts";
+import { makeSettle } from "../../support/settle.ts";
+import { withFonts } from "../../support/fonts.ts";
+import { errorText } from "../../support/suites.ts";
 
 export type Box = { readonly l: number; readonly t: number; readonly r: number; readonly b: number };
 export type Target = { readonly name: string; readonly box: Box };
@@ -9,8 +12,8 @@ export type PressRead = { readonly fonts: string; readonly press: Box | null; re
 // 2026-11-23: ruled, a thumb's 24px (handbook/specs/ui-design.md, the paragraph opening "The head cluster says where the reader is standing").
 export const THUMB = 24;
 
-// 2026-11-23: the fonts read loaded at the first poll in all 36 visits of the Issue #1254 pull request 2 planner's probe; 200 polls of 75 ms are the visit's own readiness budget (visit in e2e/suites/runninghead/kit.ts).
-const FONT_TRIES = 200;
+// 2026-11-24, Issue #1447: on GitHub's runner the read passed within 1579 ms in all 864 reads of proof run 45417445912 (a median 2 to 7 ms a room); 200 tries of 50 ms is over six times that slowest.
+export const PRESS_TRIES = 200;
 
 const centreOf = (b: Box): readonly [number, number] => [(b.l + b.r) / 2, (b.t + b.b) / 2];
 const undersized = (b: Box): boolean => b.r - b.l < THUMB || b.b - b.t < THUMB;
@@ -65,22 +68,21 @@ export const PRESS_READ: Payload<string> = `JSON.stringify((() => {
   const others = [...document.querySelectorAll("header.chrome a, header.chrome summary, header.chrome button, .corner.tr a, .corner.tr button, .corner.tr input, .corner.tr select")]
     .filter((e) => e !== press && shown(e) && !e.closest(".atelier"))
     .map((e) => ({ name: (e.textContent || e.getAttribute("aria-label") || e.id || e.tagName).replace(/[ \\n\\t]+/g, " ").trim().slice(0, 32), box: box(e) }));
-  return { fonts: document.fonts.status, press: press && shown(press) ? box(press) : null, others };
+  return { press: press && shown(press) ? box(press) : null, others };
 })())`;
 
-export async function pressRead(k: RunningHeadKit): Promise<PressRead> {
-  for (let i = 0; i < FONT_TRIES; i++) {
-    let status = "unread";
-    try {
-      status = await k.evaluate<string>("document.fonts.status");
-    } catch {}
-    if (status === "loaded") break;
-    await k.sleep(75);
-  }
+export async function pressRead(k: RunningHeadKit, route: string): Promise<PressRead> {
+  const settle = makeSettle({ evaluate: k.evaluate, sleep: k.sleep, tolerant: true });
   try {
-    return JSON.parse(await k.evaluate(PRESS_READ)) as PressRead;
-  } catch {
-    return { fonts: "unread", press: null, others: [] };
+    const { read, fonts } = await settle(
+      withFonts(PRESS_READ),
+      (d) => d.fonts === "loaded",
+      `rh33-press ${route}`,
+      PRESS_TRIES,
+    );
+    return { ...(JSON.parse(read) as Pick<PressRead, "press" | "others">), fonts };
+  } catch (err) {
+    return { fonts: `never loaded: ${errorText(err).slice(0, 400)}`, press: null, others: [] };
   }
 }
 
