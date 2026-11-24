@@ -548,8 +548,12 @@ section points there rather than restating it.
   `e2e/suites/broadside.ts` and `laidOut` in `e2e/suites/broadside/grow.ts` ask). A wait for a
   camera to land counts the camera's writes to its target and asks for a frame between its two reads
   (`landed` in `e2e/suites/broadside/grow.ts`, and `framed` and `landedWith` in
-  `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest` and `kLeft` take). The
-  readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
+  `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest`, `kLeft`, `cardAtDepth` and
+  `cameraAtRest` take); `framed` finds the target itself, the gesture box's `#map` or the Reading
+  Room's frame chart, and refuses a page with no gesture box and a box that holds neither. A wait for a camera that is meant never
+  to move asks for the same read and no write across two drawn frames, since a glide d3 starts writes
+  by its second (`kStill` in `e2e/suites/zoom-gestures/touch.ts`,
+  `handbook/plans/1400/1446/1446-plan.md`). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
 - **`document.fonts.status` lays nothing out, so read alone it can say `loaded` while text the
   page wrote since its last frame waits on a face nothing has asked for yet.** The browser fetches
   a face when a layout first needs it, and a read that measures a box is such a layout, so the

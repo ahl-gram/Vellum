@@ -13,7 +13,7 @@ const AT = (id: string): Payload<At> =>
 
 // The matrix's scale reads home, not the camera's zoomed flag: a glide that rests at 1 can leave a translation of -2.8e-14, which the controller's strict isHome refuses (measured 2026-10-13 and 2026-11-24 on the Specimen, Issue #871).
 export async function glided(k: SpecimenKit, from: string): Promise<Lens> {
-  const read = framed(LENS, "#map");
+  const read = framed(LENS);
   try {
     let last = await k.evaluate(read);
     for (let i = 0; i < 60; i++) {

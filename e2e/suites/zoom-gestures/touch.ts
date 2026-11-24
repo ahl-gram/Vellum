@@ -11,12 +11,13 @@ import {
 import type { TouchRead } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { GesturesKit } from "../zoom-gestures.ts";
-import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH, type Framed } from "../../support/camera-landed.ts";
 
 const BOX = "#map-viewport";
 const KEEP = (types: readonly string[]): boolean => types.includes("wheel") && types.includes("mousedown");
 const noTouch = (types: readonly string[]): boolean => !types.some((t) => t.startsWith("touch"));
 const ZOOM_K: Payload<number> = `window.__vellumZoomState().k`;
+const sameK = (a: number, b: number): boolean => a === b;
 const SCALE: Payload<number> = `visualViewport.scale`;
 
 async function centre(k: GesturesKit): Promise<Point> {
@@ -39,8 +40,8 @@ async function doubleTap(k: GesturesKit, p: Point): Promise<void> {
 export async function kLeft(k: GesturesKit, label: string): Promise<number> {
   try {
     const d = await makeSettle(k)(
-      framed(ZOOM_K, "#map"),
-      (d, last) => d.read !== 1 && !!last && landedWith((a: number, b: number) => a === b)(d, last),
+      framed(ZOOM_K),
+      (d, last) => d.read !== 1 && !!last && landedWith(sameK)(d, last),
       label,
     );
     return d.read;
@@ -49,19 +50,23 @@ export async function kLeft(k: GesturesKit, label: string): Promise<number> {
   }
 }
 
-// Six consecutive reads agree (five repeats at 50 ms: 250 ms, past the camera's 250 ms double-click glide).
-const STILL_REPEATS = 5;
-async function kStill(k: GesturesKit, label: string): Promise<number> {
-  let same = 0;
-  let prev: number | null = null;
-  for (let i = 0; i < 120; i++) {
-    const now = await k.evaluate(ZOOM_K);
-    same = now === prev ? same + 1 : 0;
-    prev = now;
-    if (same >= STILL_REPEATS) return now;
-    await k.sleep(50);
+// Two drawn frames with no camera write: a glide d3 starts writes on its timer's first frame unless that tick lands at the glide's start, so the second frame is the first that must write (Issue #1446).
+const STILL_FRAMES = 2;
+export async function kStill(k: GesturesKit, label: string): Promise<number> {
+  let from: Framed<number> | null = null;
+  try {
+    const d = await makeSettle(k)(
+      framed(ZOOM_K),
+      (d) => {
+        from = from !== null && d.read === from.read && d.writes === from.writes ? from : d;
+        return landedWith(sameK, STILL_FRAMES)(d, from);
+      },
+      label,
+    );
+    return d.read;
+  } finally {
+    await k.evaluate(STOP_CAMERA_WATCH);
   }
-  throw new Error(`settle timeout ${label}: ${prev}`);
 }
 
 async function dressRead(k: GesturesKit, box: string, label: string): Promise<TouchRead> {

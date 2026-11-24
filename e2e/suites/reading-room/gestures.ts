@@ -4,7 +4,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { clearMetrics, pressAt } from "../print-room/kit.ts";
 import { homeCamera, lensRest, ZOOM_IN } from "../print-room/print.ts";
-import { BAR, RR_LENS, RR_ON, scrubTo } from "./kit.ts";
+import { BAR, RR_LENS, scrubTo } from "./kit.ts";
 
 const park = (send: SuiteContext["send"]) => mouseMove(send, 1, 1);
 
@@ -20,12 +20,12 @@ export async function rr40Glass(ctx: SuiteContext): Promise<void> {
     const rest = await evaluate(RR_LENS);
     const press = await evaluate(ZOOM_IN);
     if (press) await pressAt({ send }, press.x, press.y);
-    const leaned = await lensRest(ctx, "leaned", "reading-room-leaned", RR_LENS, RR_ON);
+    const leaned = await lensRest(ctx, "leaned", "reading-room-leaned", RR_LENS);
     await send("Emulation.setEmulatedMedia", { media: "print" });
     const paper = await evaluate(PAPER);
     await send("Emulation.setEmulatedMedia", { media: "" });
     const screen = await evaluate(PAPER);
-    await homeCamera(ctx, RR_LENS, RR_ON);
+    await homeCamera(ctx, RR_LENS);
     check(
       "RR40 the Glass leans the chart to 1.4 at a real press, while paper prints the chart untransformed with the strip gone (the screen the control)",
       rest.k === 1 &&
@@ -40,7 +40,7 @@ export async function rr40Glass(ctx: SuiteContext): Promise<void> {
     );
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "" });
-    await homeCamera(ctx, RR_LENS, RR_ON);
+    await homeCamera(ctx, RR_LENS);
     await park(send);
   }
 }

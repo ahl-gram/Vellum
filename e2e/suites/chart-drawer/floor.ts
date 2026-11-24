@@ -1,11 +1,26 @@
 // The Chart Table's dog-ear under a finger on a 1024 tablet (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718), where touch is a tablet's.
 import { releaseChartTouch, takeChartTouch } from "../../support/chart-touch.ts";
-import type { Payload, Point } from "../../types.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { DragKit } from "./kit.ts";
 import { DEEP, DRAWN, DRESS, READ, atInset } from "./reads.ts";
 import type { Cam } from "./reads.ts";
 
 const ZOOM_STATE: Payload<Cam> = `window.__vellumZoomState()`;
+
+export async function cameraAtRest(k: Pick<SuiteContext, "evaluate" | "sleep">, label: string): Promise<Cam> {
+  try {
+    const d = await makeSettle(k)(
+      framed(ZOOM_STATE),
+      (d, last) => !!last && landedWith((a: Cam, b: Cam) => a.x === b.x && a.y === b.y && a.k === b.k)(d, last),
+      label,
+    );
+    return d.read;
+  } finally {
+    await k.evaluate(STOP_CAMERA_WATCH);
+  }
+}
 
 // CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read.
 export async function cd48TouchHandle(kd: DragKit): Promise<void> {
@@ -15,11 +30,7 @@ export async function cd48TouchHandle(kd: DragKit): Promise<void> {
   await settle(READ, atInset, "chart-drawer-tablet-inset", DRAWN);
   await takeChartTouch(kd, true);
   const ear = `(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`;
-  const camBefore = await settle<Cam>(
-    `window.__vellumZoomState()`,
-    (d, last) => !!last && d.x === last.x && d.y === last.y && d.k === last.k,
-    "chart-drawer-tablet-camera-rest",
-  );
+  const camBefore = await cameraAtRest(kd, "chart-drawer-tablet-camera-rest");
   const earNow = await evaluate<Point | null>(ear);
   let ghostSeen = false;
   if (earNow) {
