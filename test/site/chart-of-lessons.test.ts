@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PLACES, ROADS } from "../../src/layouts/atelier-chart.ts";
 import { RING_FLOOR, SLOT_ARC, chartOfLessons, ringOf, seat, type Box } from "../../src/layouts/chart-of-lessons.ts";
+import { boxesOverlap } from "../../src/render/geometry.ts";
 import { primerPage } from "../../src/site/primer/page.ts";
 
 const rooms = primerPage().rooms;
@@ -9,8 +10,7 @@ const stepsOf = (room: (typeof rooms)[number]): string[] => room.lessons.flatMap
 const taught = (): ReturnType<typeof chartOfLessons> => chartOfLessons(rooms);
 
 const PAD = 1.5;
-const meets = (a: Box, b: Box): boolean =>
-  a.x < b.x + b.w + PAD && b.x < a.x + a.w + PAD && a.y < b.y + b.h + PAD && b.y < a.y + a.h + PAD;
+const meets = (a: Box, b: Box): boolean => boxesOverlap(a, b, PAD);
 
 const lessonsOfSizes = (...sizes: number[]): { steps: { id: string }[] }[] =>
   sizes.map((n, k) => ({ steps: Array.from({ length: n }, (_, i) => ({ id: `l${k}s${i}` })) }));

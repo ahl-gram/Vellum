@@ -1,5 +1,9 @@
 import { PIP_R, PLACES, ROADS, TRACKS, roadPath, type PlaceRank } from "./atelier-chart.ts";
+import { r1 } from "../core/math.ts";
+import { boxesOverlap, type Box } from "../render/geometry.ts";
 import { ROUTE_NAMES } from "./nav.ts";
+
+export type { Box };
 
 export interface ChartStep {
   readonly id: string;
@@ -12,12 +16,6 @@ export interface ChartRoom {
   readonly id: string;
   readonly route: string;
   readonly lessons: readonly ChartLesson[];
-}
-export interface Box {
-  readonly x: number;
-  readonly y: number;
-  readonly w: number;
-  readonly h: number;
 }
 export interface Arc {
   readonly from: number;
@@ -83,19 +81,17 @@ export const RING_FLOOR = 9;
 const PAD = 1.5;
 const RANK: Readonly<Record<PlaceRank, number>> = { capital: 0, landing: 1, town: 2, isle: 3, village: 4 };
 
-const round1 = (v: number): number => Math.round(v * 10) / 10;
 const rad = (deg: number): number => (deg * Math.PI) / 180;
 const at = (x: number, y: number, r: number, deg: number): { x: number; y: number } => ({
-  x: round1(x + r * Math.cos(rad(deg))),
-  y: round1(y + r * Math.sin(rad(deg))),
+  x: r1(x + r * Math.cos(rad(deg))),
+  y: r1(y + r * Math.sin(rad(deg))),
 });
 const circleBox = (x: number, y: number, c: number): Box => ({ x: x - c, y: y - c, w: 2 * c, h: 2 * c });
-const meets = (a: Box, b: Box): boolean =>
-  a.x < b.x + b.w + PAD && b.x < a.x + a.w + PAD && a.y < b.y + b.h + PAD && b.y < a.y + a.h + PAD;
+const meets = (a: Box, b: Box): boolean => boxesOverlap(a, b, PAD);
 
 export function ringOf(lessons: readonly ChartLesson[]): Ring {
   const slots = lessons.reduce((n, l) => n + l.steps.length + 1, 0);
-  const r = round1(Math.max(RING_FLOOR, (slots * SLOT_ARC) / (2 * Math.PI)));
+  const r = r1(Math.max(RING_FLOOR, (slots * SLOT_ARC) / (2 * Math.PI)));
   const per = 360 / slots;
   let slot = 0;
   const arcs = lessons.flatMap((lesson, k) => {
@@ -184,7 +180,7 @@ export function seat(
     side: "above",
     anchor: "middle",
     x,
-    y: round1(aboveY),
+    y: r1(aboveY),
     box: { x: x - w / 2, y: aboveY - up, w, h },
   };
   const all: Label[] = [
@@ -193,19 +189,19 @@ export function seat(
       ...base,
       side: "right",
       anchor: "start",
-      x: round1(x + ext + gap),
-      y: round1(sideY),
+      x: r1(x + ext + gap),
+      y: r1(sideY),
       box: { x: x + ext + gap, y: sideY - up, w, h },
     },
     {
       ...base,
       side: "left",
       anchor: "end",
-      x: round1(x - ext - gap),
-      y: round1(sideY),
+      x: r1(x - ext - gap),
+      y: r1(sideY),
       box: { x: x - ext - gap - w, y: sideY - up, w, h },
     },
-    { ...base, side: "below", anchor: "middle", x, y: round1(belowY), box: { x: x - w / 2, y: belowY - up, w, h } },
+    { ...base, side: "below", anchor: "middle", x, y: r1(belowY), box: { x: x - w / 2, y: belowY - up, w, h } },
   ];
   const free = all.find((c) => !obstacles.some((o) => meets(c.box, o)) && !placed.some((p) => meets(c.box, p.box)));
   return free ?? { ...above, forced: true };
