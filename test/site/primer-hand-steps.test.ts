@@ -228,6 +228,12 @@ test("PK29 the Portfolio's first step opens an empty table, so a device holding 
   assert.deepEqual(parseTable(at.slice(at.indexOf("#"))), []);
 });
 
+test("PK30 the Explorer's turned-up corner is used at its press, whatever the Chart Table holds, as ruling E1 has it (Issue #1425)", () => {
+  const ear = stepOf("explorer-dog-ear");
+  assert.equal(sealWhen(ear, DESK), "use");
+  assert.deepEqual(useWatches(ear), [{ event: "click", css: "#map .region-inset .dog-ear" }]);
+});
+
 test("PK8 the note's words: the lesson and the place, and the press onward", () => {
   assert.equal(headOf("The Land", 2, 6), "The Land, step 2 of 6");
   assert.equal(onward("sizes"), "Next, sizes ›");

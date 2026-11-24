@@ -1,4 +1,4 @@
-import { countLine, LAY_ON_CARD, tabLine } from "../../explorer/chart-drawer.ts";
+import { countLine, LAY_ON_CARD } from "../../explorer/chart-drawer.ts";
 import { PLATE_TAB, PLATE_VERB } from "../../explorer/portfolio/how-plate.ts";
 import { PROSPECT_ON_CARD, ROAD_ON_CARD } from "../living-chart/place-overlay-card.ts";
 import { parseTableValue, TABLE_CAP } from "../table-address.ts";
@@ -193,7 +193,6 @@ export const SHEET_LESSONS: readonly Lesson[] = [
         words: [],
         relies: [aria(DOG_EAR, "lay this survey on the table")],
         do: [click(DOG_EAR)],
-        then: [text("#chart-drawer-tab", tabLine(LAID_ITEMS))],
       },
       {
         id: "explorer-drawer",
