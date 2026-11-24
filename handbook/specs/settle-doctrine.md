@@ -533,7 +533,8 @@ section points there rather than restating it.
   until the room's `resize` listener or its chrome's `ResizeObserver` runs (`bindRoom` in
   `src/site/shared/room.ts`): on the Mac by the next poll, on the runner after two polls or more. A
   camera's glide steps only when `requestAnimationFrame` runs, since d3's timer rides it, and the
-  runner has recorded one to three frames over a glide of a third of a second. So a wait that takes
+  runner has recorded one to three frames over a glide of a third of a second, and four to eight over
+  a chart room's 300 ms Glass glide, 100 to 250 ms apart (`handbook/plans/1300/1365/1365-plan.md`). So a wait that takes
   two equal reads for rest can hand over a page that has not moved yet: after a window change, when
   it departs on the window's size or on a box the stylesheet places; after a press, when it departs
   on the camera having left where it began. A wait for a room laid out at a new window departs on
@@ -541,7 +542,8 @@ section points there rather than restating it.
   window's floor (`onSlipFloor` in `e2e/suites/broadside/kit.ts`, as `narrowTaps` in
   `e2e/suites/broadside.ts` and `laidOut` in `e2e/suites/broadside/grow.ts` ask). A wait for a
   camera to land counts the camera's writes to its target and asks for a frame between its two reads
-  (`landed` in `e2e/suites/broadside/grow.ts`). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
+  (`landed` in `e2e/suites/broadside/grow.ts`, and `framed` and `landedWith` in
+  `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest` and `kLeft` take). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
