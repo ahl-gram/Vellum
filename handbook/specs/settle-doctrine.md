@@ -162,11 +162,13 @@ headless browser actually do, so a green run can be believed.
 12. **A check shown to flake once leaves the run, under an issue filed under Flakes (Alex,
     2026-11-24, Issue #1456).** A red on GitHub's machines, in a run of the CI workflow or in an
     unmutated control of the proof runner, is shown to be a flake when its one re-run, alone, passes
-    (`vellum-footguns` Gate 2 item 10), at the same sha or in the push that
-    `handbook/specs/orchestration.md` (While lanes run) makes that re-run. Whoever sees that re-run
-    pass files an issue for the step that runs the check, the unit of the skip list, puts it on the
-    roadmap board under the Flakes phase and skips the step as item 11 says, with no offer first and
-    no count of earlier reds. An explained red (item 15) and a red the Mac run reproduces are never
+    (`vellum-footguns` Gate 2 item 10), on the same sha or in the lane's next push where that push
+    changes nothing the check reads; a push that changes anything the check reads proves nothing,
+    and the red waits for a re-run on its own sha (Alex, 2026-11-24, Issue #1456). Whoever sees
+    that re-run pass files an issue for the step that runs the check, the unit of the skip list,
+    and skips the step as item 11 says, with no offer first and no count of earlier reds. A lane
+    never touches the roadmap board: it hands the issue's phase, with the skip, to its dispatcher,
+    who puts the issue on the board under the Flakes phase. An explained red (item 15) and a red the Mac run reproduces are never
     shown to flake: each takes the route item 15 and `handbook/specs/orchestration.md` give it. A
     flake leaves a trail and is never silently re-run away (Issue #546's CD7b): its issue, and a PR
     comment on the pull request it reddened, hold the payload verbatim, the run and job ids, the sha

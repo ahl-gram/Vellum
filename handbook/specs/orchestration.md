@@ -267,7 +267,9 @@ home's line wins for the lane and this file's for the orchestrator.
   still in progress for the same pull request (the `concurrency` group in
   `.github/workflows/ci.yml`). The re-run clears the red only if that check passes, and the lane
   goes on with its build; a red in another check on it is a new red, read the same way. A check
-  whose re-run passes is shown to flake (that spec's item 12): file its issue, put it on the board
+  whose re-run passes, on the same sha or in the lane's next push where that push changes nothing
+  the check reads, is shown to flake (that spec's item 12; a push that changes anything the check
+  reads proves nothing, and the red waits for a re-run on its own sha): file its issue, put it on the board
   under Flakes, and open a pull request of your own that adds its step's entry to `E2E_SKIPS` as
   item 11 there says, one more for Alex to merge (Alex, 2026-10-24; Alex, 2026-11-24,
   Issue #1456); a unit test or a launch failure gets its issue alone, with nothing to skip. Your
