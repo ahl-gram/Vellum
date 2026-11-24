@@ -97,6 +97,7 @@ test("SB20 reads each slip line in the read whose own layout found every face lo
   const reads = await slipInk(r.ctx, [["note", ".slip .note"]], "t1447");
   assert.equal(asksOf(r.said, measuring), 2, "SB20 read the slip's lines before the face they asked for had loaded");
   assert.deepEqual(reads, []);
+  assert.equal(asksOf(r.said, bare), 0, "SB20 read the slip's lines again after the wait passed");
   assert.deepEqual(apart(r.said, measuring), []);
 });
 

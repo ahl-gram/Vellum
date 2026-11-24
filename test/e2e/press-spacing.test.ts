@@ -72,6 +72,7 @@ test("pressRead takes the fonts from the read that measures, never from the stat
     [],
     "pressRead read the fonts apart from the read that measures",
   );
+  assert.equal(p.asked.filter((e) => e === PRESS_READ).length, 0, "pressRead measured again after the wait passed");
 });
 
 test("pressRead hands back a read marked never loaded, naming its room, when the faces never load, and does not throw (Issue #1447)", async () => {
