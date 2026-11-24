@@ -1,5 +1,5 @@
 import { findBrowser } from "../../src/cli/raster.ts";
-import { type BrowserPolicyEnv } from "../../e2e/support/browser-policy.ts";
+import { isSet, type BrowserPolicyEnv } from "../../e2e/support/browser-policy.ts";
 
 export const REQUIRE_BROWSER = "VELLUM_REQUIRE_BROWSER";
 export const NO_PICTURE_BROWSER =
@@ -7,6 +7,8 @@ export const NO_PICTURE_BROWSER =
 export const SKIP_PICTURES =
   "SKIP: no Chromium-family browser found, so the Primer's pictures were not pressed and its page shows empty frames (set VELLUM_BROWSER, or VELLUM_REQUIRE_BROWSER=1 to fail instead)";
 
-export function pictureBrowser(_env: BrowserPolicyEnv, _find: () => string | null = findBrowser): string | null {
-  return null;
+export function pictureBrowser(env: BrowserPolicyEnv, find: () => string | null = findBrowser): string | null {
+  const browser = find();
+  if (browser === null && isSet(env[REQUIRE_BROWSER])) throw new Error(NO_PICTURE_BROWSER);
+  return browser;
 }

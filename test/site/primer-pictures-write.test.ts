@@ -5,7 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Ladder, Step } from "../../src/site/shared/primer/shape.ts";
 import { SKIP_PICTURES } from "../../scripts/primer-pictures/browser.ts";
-import { writePictures, type Press, type PressOptions, type Pressing } from "../../scripts/primer-pictures/main.ts";
+import { writePictures, type Press } from "../../scripts/primer-pictures/main.ts";
+import type { PressOptions, Pressing } from "../../scripts/primer-pictures/press.ts";
 import { chartSignature } from "../../scripts/primer-pictures/signature.ts";
 import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
