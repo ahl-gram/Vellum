@@ -550,6 +550,20 @@ section points there rather than restating it.
   (`landed` in `e2e/suites/broadside/grow.ts`, and `framed` and `landedWith` in
   `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest` and `kLeft` take). The
   readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
+- **`document.fonts.status` lays nothing out, so read alone it can say `loaded` while text the
+  page wrote since its last frame waits on a face nothing has asked for yet.** The browser fetches
+  a face when a layout first needs it, and a read that measures a box is such a layout, so the
+  evaluate that measures reads the same status as `loading`; a read that shows text, as P19's
+  sweep shows each place card, asks for its faces inside itself. RH33 read the status in one
+  evaluate and measured in the next, and on GitHub's runner a room's status line, the first text
+  the room set in its italic, fell between the two (Issue #1447). A wait for the faces reads the
+  status in the evaluate that measures, after the measurement, and waits for that read to say
+  `loaded`: `withFonts` in `e2e/support/fonts.ts` builds that read, and the six waits Issue #1447
+  rewrote take it. A wait that takes two equal reads of a measuring read carrying the status, as
+  the broadside's waits and `still` in `e2e/suites/corners/floor.ts` do, stands as it is, since a
+  face the first read asks for shows in the second, as `loading` or as boxes that moved; a
+  readiness read that measures nothing has nothing to put the status after. The readings are in
+  `handbook/plans/1400/1447/1447-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
