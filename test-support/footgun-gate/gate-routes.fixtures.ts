@@ -24,12 +24,12 @@ const GATE6_ARMS: [string, string][] = [
   ["og.png", "src/static/og.png"],
   ["favicon.svg", "src/static/favicon.svg"],
   ["apple-touch-icon.png", "src/static/apple-touch-icon.png"],
-  ["hero-charts", "scripts/hero-charts.ts"],
-  ["regen-hero-charts", "scripts/regen-hero-charts.ts"],
-  ["build-og", "scripts/build-og.ts"],
-  ["build-icons", "scripts/build-icons.ts"],
-  ["glyph-outline", "scripts/glyph-outline.ts"],
-  ["kit-fonts", "scripts/kit-fonts.ts"],
+  ["hero-charts", "scripts/build/hero-charts.ts"],
+  ["regen-hero-charts", "scripts/build/regen-hero-charts.ts"],
+  ["build-og", "scripts/build/build-og.ts"],
+  ["build-icons", "scripts/build/build-icons.ts"],
+  ["glyph-outline", "scripts/build/glyph-outline.ts"],
+  ["kit-fonts", "scripts/build/kit-fonts.ts"],
   ["design/kit/fonts/", "design/kit/fonts/im-fell-english-sc-latin-400-normal.woff2"],
 ];
 
