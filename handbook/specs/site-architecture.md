@@ -355,7 +355,11 @@ precisely, because a token that falls outside it looks identical at the point of
   no page, as a snap-confined Chromium cannot with a profile under the temporary folder, fails the build at the
   press once it has been launched as the e2e harness launches one (`launchWithRetry` and `LAUNCH_TUNING` in
   `e2e/support/launch.ts`, three attempts on fresh profiles), naming itself and every attempt's own output:
-  point `VELLUM_BROWSER` at another. The unit suite's builds
+  point `VELLUM_BROWSER` at another. A browser that dies or stops answering once the press holds it fails the
+  build too, naming the call it left unanswered (`<call>: the browser's DevTools connection closed (code <n>)`,
+  or `<call>: no reply in <ms> ms` once `PICTURE_REPLY_MS` in `scripts/primer-pictures/main.ts` has passed), and
+  the step writes its manifest only once every picture is on disk, so a build never goes on to publish a page
+  whose pictures are missing. The unit suite's builds
   (`test/site/astro-scaffold.test.ts`, `test/site/built-pages.test.ts`) never run `astro:generate`, so they press none.
 - **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
   `design/kit/fonts/`, the one copy the site reads, into `generated/fonts/`, so a face is
