@@ -70,6 +70,12 @@ export interface LessonChart {
   readonly roads: readonly ChartRoad[];
   readonly tracks: readonly string[];
 }
+export interface Seatable {
+  readonly route: string;
+  readonly x: number;
+  readonly y: number;
+  readonly ext: number;
+}
 
 export const SLOT_ARC = 3.3;
 export const RING_FLOOR = 9;
@@ -157,7 +163,13 @@ interface Body {
   readonly ext: number;
 }
 
-function seat(body: Body, text: string, size: number, obstacles: readonly Box[], placed: readonly Label[]): Label {
+export function seat(
+  body: Seatable,
+  text: string,
+  size: number,
+  obstacles: readonly Box[],
+  placed: readonly Label[],
+): Label {
   const { x, y, ext } = body;
   const w = text.length * 0.58 * size;
   const up = 0.82 * size;
