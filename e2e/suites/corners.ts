@@ -1,6 +1,7 @@
 // The head cluster against the right-hand corner on the Print Room, the page whose corner comes nearest (Issue #638; Issue #762 pull request B; one room since Issue #1273 ruling 2): resized while loaded, at a stride and at every media edge from 1024 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
 import { ATLAS_ROUTE } from "../../scripts/generate-discovery.ts";
 import { PAGE_FLOOR as FLOOR_WIDTH } from "../../src/site/shared/page-box.ts";
+import { withFonts } from "../support/fonts.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { withReducedMotion } from "../support/reduced-motion.ts";
@@ -61,10 +62,10 @@ export const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve,
   const read = ${READ};
   let last = null, frames = 0;
   const tick = () => {
-    const r = read();
-    const key = JSON.stringify(r);
-    const ready = matchMedia("(width: ${w}px)").matches && r.vw === r.clientW;
-    if (ready && key === last) { resolve(r); return; }
+    const seen = ${withFonts("read()")};
+    const key = JSON.stringify(seen);
+    const ready = matchMedia("(width: ${w}px)").matches && seen.read.vw === seen.read.clientW && seen.fonts === "loaded";
+    if (ready && key === last) { resolve(seen.read); return; }
     last = ready ? key : null;
     if (++frames > ${MAX_FRAMES}) { reject(new Error("no rest at ${w}: " + key)); return; }
     requestAnimationFrame(tick);
@@ -83,7 +84,7 @@ async function load(ctx: SuiteContext, page: string, w: number): Promise<void> {
   let up = false;
   for (let i = 0; i < 300 && !up; i++) {
     up = await evaluate<boolean>(
-      `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome") && !!(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")) && (!document.getElementById("dateline") || document.getElementById("dateline").textContent !== "")`,
+      `document.readyState === "complete" && !!document.querySelector("header.chrome") && !!(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")) && (!document.getElementById("dateline") || document.getElementById("dateline").textContent !== "")`,
     ).catch(() => false);
     if (!up) await sleep(50);
   }

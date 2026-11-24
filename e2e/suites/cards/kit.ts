@@ -3,12 +3,13 @@ import type { SuiteContext } from "../../types.ts";
 import { CAP_WINDOW, NARROW_SEED, SWEEP } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
+import { withFonts } from "../../support/fonts.ts";
 
 type Settle = ReturnType<typeof makeSettle>;
 export type CardsKit = ReturnType<typeof cardsKit>;
 
 export function cardsKit(ctx: SuiteContext & { settle: Settle }) {
-  const { evaluate, send, sleep, waitReady, setNarrowViewport, PORT } = ctx;
+  const { send, waitReady, setNarrowViewport, settle, PORT } = ctx;
   const sweepAt = async () => {
     const { w: width, h } = CAP_WINDOW;
     await setNarrowViewport(width, h);
@@ -16,14 +17,12 @@ export function cardsKit(ctx: SuiteContext & { settle: Settle }) {
     await bounce(send, `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique`);
     await explorerUp({ waitReady }, `P19 at ${width}`);
     // The card's height is set by wrapped text, so a face still swapping in measures a different card.
-    let fonts = null;
-    for (let i = 0; i < 100; i++) {
-      fonts = await evaluate<string>(`document.fonts ? document.fonts.status : "no-fonts-api"`);
-      if (fonts !== "loading") break;
-      await sleep(50);
-    }
-    if (fonts === "loading") throw new Error(`P19 the faces never finished loading at ${width}`);
-    const d = await evaluate(SWEEP);
+    const { read: d } = await settle(
+      withFonts(SWEEP),
+      (s) => s.read.error !== undefined || s.fonts === "loaded",
+      `P19 the cards at ${width}`,
+      100,
+    );
     if (d.error) throw new Error(`P19 the sweep found no chart box at ${width}: ${JSON.stringify(d)}`);
     return d;
   };

@@ -1,4 +1,5 @@
 // PR40 (Issue #1047): the runner's layout as VELLUM_E2E_RUNNER_LAYOUT stages it reaches every chart room's own selects and title, and wins the cascade there.
+import { withFonts } from "../../support/fonts.ts";
 import { makeSettle } from "../../support/settle.ts";
 import {
   RUNNER_NUMERO_FAMILY,
@@ -21,7 +22,6 @@ const SENTINEL_SCRIPT = runnerLayoutScript(
 type Staged = {
   path: string;
   ready: string;
-  fonts: string;
   selects: { selector: string; heights: number[] }[];
   first: string | null;
   face: boolean;
@@ -29,7 +29,7 @@ type Staged = {
 
 export const STAGED: Payload<Staged> = `(() => {
   const title = document.getElementById("folio-title");
-  return { path: location.pathname, ready: document.readyState, fonts: document.fonts.status,
+  return { path: location.pathname, ready: document.readyState,
     selects: ${JSON.stringify(RUNNER_SELECTS.map((s) => s.selector))}.map((selector) => ({ selector, heights: [...document.querySelectorAll(selector)].map((e) => e.getBoundingClientRect().height) })),
     first: title && getComputedStyle(title).fontFamily.split(",")[0].trim().replaceAll('"', ""),
     face: [...document.fonts].some((f) => f.family.replaceAll('"', "") === ${JSON.stringify(RUNNER_NUMERO_FAMILY)} && f.unicodeRange.toUpperCase() === "U+2116") };
@@ -65,9 +65,9 @@ export async function pr40RunnerLayout(ctx: SuiteContext): Promise<void> {
   try {
     for (const room of ROOMS) {
       await bounce(ctx.send, `http://127.0.0.1:${ctx.PORT}${room.path}`);
-      const read = await settle(
-        STAGED,
-        (d) => d.path === room.path.split("#")[0] && d.ready === "complete" && d.fonts === "loaded",
+      const { read } = await settle(
+        withFonts(STAGED),
+        (d) => d.read.path === room.path.split("#")[0] && d.read.ready === "complete" && d.fonts === "loaded",
         `PR40 ${room.id} staged`,
       );
       reads.push(read);

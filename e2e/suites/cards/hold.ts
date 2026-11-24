@@ -4,6 +4,7 @@ import { NARROW_SEED } from "./reads.ts";
 import { mouseDown, mouseMove, mouseUp, sendClick, sendKey, sendTouch } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
+import { withFonts } from "../../support/fonts.ts";
 
 type Settle = ReturnType<typeof makeSettle>;
 type HoldKit = SuiteContext & { settle: Settle };
@@ -58,8 +59,8 @@ export function holdKit(ctx: HoldKit) {
     await setTouch(touch);
     await bounce(send, `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique&legend=1&arms=0&beasts=0`);
     await explorerUp({ waitReady }, "the hold kit at 1024");
-    await settle<string>(`document.fonts ? document.fonts.status : "loaded"`, (s) => s !== "loading", "fonts at 1024");
-    return evaluate(MARKS);
+    const { read } = await settle(withFonts(MARKS), (d) => d.fonts === "loaded", "the hold kit's marks at 1024");
+    return read;
   };
   const travel = async (from: Point, to: Point, pxPerMs: number) => {
     const len = Math.hypot(to.x - from.x, to.y - from.y),
