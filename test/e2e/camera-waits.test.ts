@@ -47,6 +47,9 @@ const scripted = <T>(reads: readonly Framed<T>[]) => {
   return { evaluate, stops: () => stops, seen };
 };
 
+const ctx = (s: { evaluate: (e: string) => Promise<unknown> }) =>
+  ({ evaluate: s.evaluate, sleep: () => Promise.resolve() }) as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
+
 test("glided hands the Glass's glide over only once a frame has drawn with no camera write between (Issue #1365)", async () => {
   const s = scripted([lens(1, 0, 0), lens(1.37144, 1, 1), lens(1.37144, 1, 1), lens(1.4, 2, 2), lens(1.4, 3, 2)]);
   const k = { evaluate: s.evaluate, sleep: () => Promise.resolve() } as unknown as SpecimenKit;
@@ -56,8 +59,6 @@ test("glided hands the Glass's glide over only once a frame has drawn with no ca
 
 test("lensRest takes a leaned or a still camera only once a frame has drawn with no camera write between (Issue #1365)", async () => {
   const leaning = scripted([lens(1, 0, 0), lens(1.37144, 1, 1), lens(1.37144, 1, 1), lens(1.4, 2, 2), lens(1.4, 3, 2)]);
-  const ctx = (s: { evaluate: (e: string) => Promise<unknown> }) =>
-    ({ evaluate: s.evaluate, sleep: () => Promise.resolve() }) as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
   assert.equal((await lensRest(ctx(leaning), "leaned", "leaned")).k, 1.4);
   assert.equal(leaning.stops(), 1);
   const homing = scripted([lens(1.4, 0, 0), lens(1.4, 0, 0), lens(1, 1, 1), lens(1, 2, 1)]);
@@ -66,8 +67,6 @@ test("lensRest takes a leaned or a still camera only once a frame has drawn with
 });
 
 test("lensRest hands a camera that never left home over as still, and watches the target it is given (Issue #1365)", async () => {
-  const ctx = (s: { evaluate: (e: string) => Promise<unknown> }) =>
-    ({ evaluate: s.evaluate, sleep: () => Promise.resolve() }) as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
   const home = scripted([lens(1, 0, 0), lens(1, 1, 0), lens(1.3, 2, 1)]);
   assert.equal((await lensRest(ctx(home), "still", "home")).k, 1);
   assert.ok(home.seen.some((e) => e.includes(`document.querySelector("#map")`)));
