@@ -20,7 +20,6 @@ export interface Pressed {
   readonly product: string;
   readonly bytes: number;
 }
-
 export interface Launched {
   readonly port: number;
   readonly url: string;
@@ -28,13 +27,9 @@ export interface Launched {
 }
 
 const PROFILE_PREFIX = "vellum-primer-pictures-";
-// 2026-11-23, Issue #1255: a launch took 298 to 393 ms and a chart's load about 40 ms on this Mac (the plan's out/1255-dry-run logs); each cap is far above any real run, so a hang costs seconds and not the job's cap.
-const LAUNCH_MS = 15_000;
+// 2026-11-24, Issue #1255: a chart loaded in about 40 ms and a browser was gone 12 to 15 ms after its kill on this Mac, and none of the 336 loads in fourteen GitHub proof builds at 0f1dfa8f (runs 45305657670 and 45306297095) reached LOAD_MS; each cap is a hang's cost, not a budget.
 const LOAD_MS = 10_000;
 const EXIT_MS = 5_000;
-const POLL_MS = 50;
-
-const sleep = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
 
 interface Target {
   readonly type?: string;
@@ -104,7 +99,7 @@ export async function launchPress(browser: string, tuning: LaunchTuning = LAUNCH
         probe: () => pageTarget(port),
         log: (line) => console.error(line),
       },
-      { ...tuning, attempts: 1 },
+      tuning,
     );
     return { port, url, close };
   } catch (err) {
@@ -114,22 +109,6 @@ export async function launchPress(browser: string, tuning: LaunchTuning = LAUNCH
       { cause: err },
     );
   }
-}
-
-async function pageSocket(browser: string, port: number, failure: () => string | null): Promise<string> {
-  const give = (what: string): string =>
-    `${what}; point VELLUM_BROWSER at a Chromium-family browser that runs headless`;
-  for (let waited = 0; waited < LAUNCH_MS; waited += POLL_MS) {
-    const failed = failure();
-    if (failed !== null) throw new Error(failed);
-    const list = await fetch(`http://127.0.0.1:${port}/json/list`)
-      .then((r) => r.json() as Promise<readonly Target[]>)
-      .catch(() => [] as readonly Target[]);
-    const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl !== undefined);
-    if (page?.webSocketDebuggerUrl !== undefined) return page.webSocketDebuggerUrl;
-    await sleep(POLL_MS);
-  }
-  throw new Error(give(`${browser} opened no page to press with in ${LAUNCH_MS} ms`));
 }
 
 interface Reply {
@@ -186,47 +165,13 @@ export async function pressPictures(
   pressings: readonly Pressing[],
   options: PressOptions,
 ): Promise<Pressed> {
-  const port = await freePort();
-  const profile = mkdtempSync(join(tmpdir(), "vellum-primer-pictures-"));
-  const child = spawn(
-    browser,
-    [
-      "--headless=new",
-      `--remote-debugging-port=${port}`,
-      `--user-data-dir=${profile}`,
-      "--no-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--force-device-scale-factor=1",
-      "about:blank",
-    ],
-    { stdio: "ignore" },
-  );
-  let spawnError: string | null = null;
-  let exited: number | null | undefined;
-  child.on("error", (err) => {
-    spawnError = err.message;
-  });
-  const gone = new Promise<void>((done) =>
-    child.once("exit", (code) => {
-      exited = code;
-      done();
-    }),
-  );
+  const launched = await launchPress(browser);
   let socket: WebSocket | null = null;
   try {
-    const url = await pageSocket(browser, port, () =>
-      spawnError !== null
-        ? `${browser} did not start: ${spawnError}`
-        : exited !== undefined
-          ? `${browser} exited (code ${exited}) before it opened a page to press with; point VELLUM_BROWSER at a Chromium-family browser that runs headless`
-          : null,
-    );
-    const product = await fetch(`http://127.0.0.1:${port}/json/version`)
+    const product = await fetch(`http://127.0.0.1:${launched.port}/json/version`)
       .then((r) => r.json() as Promise<{ readonly Browser?: string }>)
       .then((v) => v.Browser ?? "unnamed browser");
-    const cdp = await connect(url);
+    const cdp = await connect(launched.url);
     socket = cdp.socket;
     await cdp.send("Page.enable");
     let bytes = 0;
@@ -248,8 +193,6 @@ export async function pressPictures(
     return { product, bytes };
   } finally {
     socket?.close();
-    child.kill();
-    await Promise.race([gone, sleep(EXIT_MS)]);
-    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    await launched.close();
   }
 }
