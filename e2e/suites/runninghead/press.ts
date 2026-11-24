@@ -10,7 +10,7 @@ export type PressRead = { readonly fonts: string; readonly press: Box | null; re
 export const THUMB = 24;
 
 // 2026-11-23: the fonts read loaded at the first poll in all 36 visits of the Issue #1254 pull request 2 planner's probe; 200 polls of 75 ms are the visit's own readiness budget (visit in e2e/suites/runninghead/kit.ts).
-const FONT_TRIES = 200;
+export const PRESS_TRIES = 200;
 
 const centreOf = (b: Box): readonly [number, number] => [(b.l + b.r) / 2, (b.t + b.b) / 2];
 const undersized = (b: Box): boolean => b.r - b.l < THUMB || b.b - b.t < THUMB;
@@ -68,8 +68,8 @@ export const PRESS_READ: Payload<string> = `JSON.stringify((() => {
   return { fonts: document.fonts.status, press: press && shown(press) ? box(press) : null, others };
 })())`;
 
-export async function pressRead(k: RunningHeadKit): Promise<PressRead> {
-  for (let i = 0; i < FONT_TRIES; i++) {
+export async function pressRead(k: RunningHeadKit, route: string): Promise<PressRead> {
+  for (let i = 0; i < PRESS_TRIES; i++) {
     let status = "unread";
     try {
       status = await k.evaluate<string>("document.fonts.status");
@@ -80,7 +80,7 @@ export async function pressRead(k: RunningHeadKit): Promise<PressRead> {
   try {
     return JSON.parse(await k.evaluate(PRESS_READ)) as PressRead;
   } catch {
-    return { fonts: "unread", press: null, others: [] };
+    return { fonts: `unread at ${route}`, press: null, others: [] };
   }
 }
 
