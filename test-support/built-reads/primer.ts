@@ -1,3 +1,4 @@
+import { pictureFile, type Frame } from "../../src/site/primer/pictures.ts";
 import { faults, same, text } from "../built-dom.ts";
 
 export interface StepWant {
@@ -140,6 +141,51 @@ export function pressFaults(pages: ReadonlyMap<string, Document>, taught: readon
     out.push(href === `/primer/#${id}` || `${route}'s press opens ${href}, not its room on the Primer`);
     const got = text(link);
     out.push(got === words || `${route}'s press reads ${JSON.stringify(got)}`);
+  }
+  return faults(out);
+}
+
+export function pictureFaults(
+  doc: Document,
+  steps: readonly { readonly id: string; readonly picture?: string }[],
+  frame: Frame,
+): string[] {
+  const out: (true | string)[] = [steps.some((s) => s.picture !== undefined) || "the guide names no picture"];
+  for (const s of steps) {
+    const pic = doc.querySelector(`.primer li.step[id="${s.id}"]`)?.querySelector(".pic") ?? null;
+    if (pic === null) {
+      out.push(`${s.id} has no row`);
+      continue;
+    }
+    const img = pic.querySelector("img");
+    const none = pic.classList.contains("none");
+    if (s.picture === undefined) {
+      out.push((none && img === null) || `${s.id} has no picture and its frame is not the empty one`);
+      continue;
+    }
+    if (img === null || none) {
+      out.push(`${s.id} carries no picture beside it`);
+      continue;
+    }
+    const got = {
+      src: img.getAttribute("src"),
+      width: img.getAttribute("width"),
+      height: img.getAttribute("height"),
+      alt: img.getAttribute("alt"),
+      decoding: img.getAttribute("decoding"),
+      fetchpriority: img.getAttribute("fetchpriority"),
+      loading: img.getAttribute("loading"),
+    };
+    const want = {
+      src: pictureFile(s.id),
+      width: String(frame.width),
+      height: String(frame.height),
+      alt: "",
+      decoding: "async",
+      fetchpriority: "low",
+      loading: null,
+    };
+    out.push(same(got, want) || `${s.id}'s picture reads ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`);
   }
   return faults(out);
 }
