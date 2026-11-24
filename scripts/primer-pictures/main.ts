@@ -22,6 +22,8 @@ import { chartSignature, type PictureEntry } from "./signature.ts";
 // 2026-11-23, Issue #1255, N8 ("about 13 KB"): twice the 13.5rem frame at a 16 px root, so sharp on a 2x screen; the 24 pictures at q70 averaged 12,656 bytes (7,726 to 15,310) on this Mac.
 export const PICTURE_PIXEL_WIDTH = 432;
 export const PICTURE_QUALITY = 70;
+// 2026-11-24, Issue #1255: a whole press of the 24 took 5.1 to 9.3 s after its launch on the four CI lanes at d30cf9ce (run 45332565596) and about 3 s on this Mac, which bounds any one reply; a reply that never comes is a hang, so the cap is about three times the slowest whole press.
+export const PICTURE_REPLY_MS = 30_000;
 
 export type Press = (browser: string, pressings: readonly Pressing[], options: PressOptions) => Promise<Pressed>;
 export interface PictureDeps {
@@ -67,7 +69,11 @@ export async function writePictures(
       manifest[p.id] = { file: pictureFile(p.id), signature: chartSignature(svg) };
     }
     mkdirSync(join(root, "primer", PICTURE_FOLDER), { recursive: true });
-    const pressed = await deps.press(browser, pressings, { pixelWidth: PICTURE_PIXEL_WIDTH, quality: PICTURE_QUALITY });
+    const pressed = await deps.press(browser, pressings, {
+      pixelWidth: PICTURE_PIXEL_WIDTH,
+      quality: PICTURE_QUALITY,
+      replyMs: PICTURE_REPLY_MS,
+    });
     writeFileSync(join(root, "primer", PICTURE_MANIFEST), JSON.stringify(manifest));
     const n = pressings.length;
     deps.log(`pictures: ${n} pressed with ${browser} (${pressed.product}), ${pressed.bytes} bytes in all`);

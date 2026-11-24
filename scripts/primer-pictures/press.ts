@@ -4,7 +4,13 @@ import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { LAUNCH_TUNING, launchWithRetry, type LaunchAttempt, type LaunchTuning } from "../../e2e/support/launch.ts";
+import {
+  LAUNCH_TUNING,
+  launchWithRetry,
+  type LaunchAttempt,
+  type LaunchDeps,
+  type LaunchTuning,
+} from "../../e2e/support/launch.ts";
 import { svgDimensions } from "../../src/cli/raster.ts";
 import { freePort } from "../free-port.ts";
 
@@ -15,6 +21,7 @@ export interface Pressing {
 export interface PressOptions {
   readonly pixelWidth: number;
   readonly quality: number;
+  readonly replyMs: number;
 }
 export interface Pressed {
   readonly product: string;
@@ -25,6 +32,7 @@ export interface Launched {
   readonly url: string;
   close(): Promise<void>;
 }
+export type Launch = (deps: LaunchDeps<string>, tuning: LaunchTuning) => Promise<string>;
 
 const PROFILE_PREFIX = "vellum-primer-pictures-";
 // 2026-11-24, Issue #1255: a chart loaded in about 40 ms and a browser was gone 12 to 15 ms after its kill on this Mac, and none of the 336 loads in fourteen GitHub proof builds at 0f1dfa8f (runs 45305657670 and 45306297095) reached LOAD_MS; each cap is a hang's cost, not a budget.
@@ -58,7 +66,11 @@ async function stop(live: Live): Promise<void> {
 }
 
 // 2026-11-24, Issue #1255: the press starts a build's first browser, and on GitHub's runners a first start took 0.6 to 56.4 s over 240 CI lane jobs from 2026-11-17 to 2026-11-24 and passed 15 s in 2 of 16 proof builds at 0f1dfa8f (runs 45305657670 and 45306297095), so it waits and retries as the e2e harness does.
-export async function launchPress(browser: string, tuning: LaunchTuning = LAUNCH_TUNING): Promise<Launched> {
+export async function launchPress(
+  browser: string,
+  tuning: LaunchTuning = { ...LAUNCH_TUNING, polls: 120 },
+  launch: Launch = launchWithRetry,
+): Promise<Launched> {
   const port = await freePort();
   const lives: Live[] = [];
   const close = async (): Promise<void> => {
@@ -92,7 +104,7 @@ export async function launchPress(browser: string, tuning: LaunchTuning = LAUNCH
     });
   };
   try {
-    const url = await launchWithRetry(
+    const url = await launch(
       {
         preflight: () => Promise.resolve(),
         spawn: attempt,

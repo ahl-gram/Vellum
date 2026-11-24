@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -6,8 +7,10 @@ import { fileURLToPath } from "node:url";
 
 export const STAND_IN_BROWSER = fileURLToPath(import.meta.url);
 export const STAND_IN_SILENT_VAR = "VELLUM_STAND_IN_SILENT";
+export const STAND_IN_DIES_VAR = "VELLUM_STAND_IN_DIES";
 export const STAND_IN_COUNTER = "stand-in-launches";
 const LIFETIME_MS = 60_000;
+const WEBSOCKET_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 export const standInTarget = (port: number, launch: number): string =>
   `ws://127.0.0.1:${port}/devtools/page/stand-in-${launch}`;
@@ -31,7 +34,18 @@ function main(): void {
     const body =
       req.url === "/json" ? [worker, { type: "page", webSocketDebuggerUrl: standInTarget(port, launch) }] : {};
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(body));
-  }).listen(port, "127.0.0.1");
+  })
+    .on("upgrade", (req, socket) => {
+      const accept = createHash("sha1")
+        .update(`${String(req.headers["sec-websocket-key"])}${WEBSOCKET_GUID}`)
+        .digest("base64");
+      socket.on("error", () => {});
+      socket.write(
+        `HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${accept}\r\n\r\n`,
+      );
+      if (process.env[STAND_IN_DIES_VAR] === "1") socket.once("data", () => process.kill(process.pid, "SIGKILL"));
+    })
+    .listen(port, "127.0.0.1");
 }
 
 if (import.meta.main) main();
