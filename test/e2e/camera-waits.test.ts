@@ -35,14 +35,16 @@ const lens = (k: number, frames: number, writes: number): Framed<Lens> => ({
 const scripted = <T>(reads: readonly Framed<T>[]) => {
   let n = 0;
   let stops = 0;
+  const seen: string[] = [];
   const evaluate = (expression: string): Promise<unknown> => {
+    seen.push(expression);
     if (expression === STOP_CAMERA_WATCH) {
       stops += 1;
       return Promise.resolve(true);
     }
     return Promise.resolve(reads[Math.min(n++, reads.length - 1)]);
   };
-  return { evaluate, stops: () => stops };
+  return { evaluate, stops: () => stops, seen };
 };
 
 test("glided hands the Glass's glide over only once a frame has drawn with no camera write between (Issue #1365)", async () => {
@@ -61,6 +63,17 @@ test("lensRest takes a leaned or a still camera only once a frame has drawn with
   const homing = scripted([lens(1.4, 0, 0), lens(1.4, 0, 0), lens(1, 1, 1), lens(1, 2, 1)]);
   assert.equal((await lensRest(ctx(homing), "still", "home")).k, 1);
   assert.equal(homing.stops(), 1);
+});
+
+test("lensRest hands a camera that never left home over as still, and watches the target it is given (Issue #1365)", async () => {
+  const ctx = (s: { evaluate: (e: string) => Promise<unknown> }) =>
+    ({ evaluate: s.evaluate, sleep: () => Promise.resolve() }) as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
+  const home = scripted([lens(1, 0, 0), lens(1, 1, 0), lens(1.3, 2, 1)]);
+  assert.equal((await lensRest(ctx(home), "still", "home")).k, 1);
+  assert.ok(home.seen.some((e) => e.includes(`document.querySelector("#map")`)));
+  const chart = scripted([lens(1, 0, 0), lens(1, 1, 0)]);
+  await lensRest(ctx(chart), "still", "chart", undefined, "#map-viewport > .rf-chart");
+  assert.ok(chart.seen.some((e) => e.includes(`document.querySelector("#map-viewport > .rf-chart")`)));
 });
 
 test("kLeft takes the double tap's depth only once a frame has drawn with no camera write between (Issue #1365)", async () => {
