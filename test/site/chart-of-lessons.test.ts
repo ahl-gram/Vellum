@@ -1,12 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PLACES, ROADS } from "../../src/layouts/atelier-chart.ts";
-import { RING_FLOOR, SLOT_ARC, chartOfLessons, ringOf, type Box } from "../../src/layouts/chart-of-lessons.ts";
+import { RING_FLOOR, SLOT_ARC, chartOfLessons, ringOf, seat, type Box } from "../../src/layouts/chart-of-lessons.ts";
 import { primerPage } from "../../src/site/primer/page.ts";
 
 const rooms = primerPage().rooms;
 const stepsOf = (room: (typeof rooms)[number]): string[] => room.lessons.flatMap((l) => l.steps.map((s) => s.id));
 const taught = (): ReturnType<typeof chartOfLessons> => chartOfLessons(rooms);
+
+const PAD = 1.5;
+const meets = (a: Box, b: Box): boolean =>
+  a.x < b.x + b.w + PAD && b.x < a.x + a.w + PAD && a.y < b.y + b.h + PAD && b.y < a.y + a.h + PAD;
 
 const lessonsOfSizes = (...sizes: number[]): { steps: { id: string }[] }[] =>
   sizes.map((n, k) => ({ steps: Array.from({ length: n }, (_, i) => ({ id: `l${k}s${i}` })) }));
@@ -103,9 +107,6 @@ test("CL5 every place's name finds a seat on today's chart that meets no other n
     chart.places.some((p) => p.label.side !== "above"),
     "some name takes a seat other than above, so the search is exercised",
   );
-  const PAD = 1.5;
-  const meets = (a: Box, b: Box): boolean =>
-    a.x < b.x + b.w + PAD && b.x < a.x + a.w + PAD && a.y < b.y + b.h + PAD && b.y < a.y + a.h + PAD;
   const obstacle = (p: (typeof chart.places)[number]): Box => {
     const c = p.ring === null ? p.pip : p.ring + 2;
     return { x: p.x - c, y: p.y - c, w: 2 * c, h: 2 * c };
@@ -117,4 +118,22 @@ test("CL5 every place's name finds a seat on today's chart that meets no other n
     for (const q of chart.places.slice(i + 1))
       assert.equal(meets(p.label.box, q.label.box), false, `${p.route}'s name meets ${q.route}'s`);
   }
+});
+
+test("CL6 a name whose seat above meets a name already placed takes its next seat that meets none, so a room the chart takes on later never lays its name over another's (Issue #1257; Issue #1155 comment 7136681098, Q6)", () => {
+  const a = { route: "/a/", x: 100, y: 100, ext: 9 };
+  const b = { route: "/b/", x: 128, y: 100, ext: 9 };
+  const places: Box[] = [
+    { x: 91, y: 91, w: 18, h: 18 },
+    { x: 119, y: 91, w: 18, h: 18 },
+  ];
+  const first = seat(a, "Aaaa", 12, places, []);
+  assert.equal(first.side, "above");
+  const alone = seat(b, "Bbbb", 12, places, []);
+  assert.equal(alone.side, "above", "with no name placed, the second name sits above its place, free of every place");
+  assert.equal(meets(alone.box, first.box), true, "and there it meets the first name");
+  const moved = seat(b, "Bbbb", 12, places, [first]);
+  assert.equal(moved.side, "right");
+  assert.equal(moved.forced, false);
+  assert.equal(meets(moved.box, first.box), false);
 });
