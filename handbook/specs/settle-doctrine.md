@@ -159,17 +159,23 @@ headless browser actually do, so a green run can be believed.
     section says; no earlier deletion is undone. The list is the one roster of skipped checks. A step
     too slow for what it holds is pulled out by the same entry, under an issue of its own, as
     "When a check leaves the run" below says.
-12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
-    never silently re-run away (#546's CD7b). When a step's CI rows in
-    `.claude/skills/vellum-footguns/references/flake-record.md` (counted by the step that runs the
-    check, the unit of the skip list) reach three with no issue open for it, whoever adds the third row
-    files the issue and skips the step as item 11 says, with no offer first, so recurring flakes become
-    issues rather than piling up as rows. Only a row from a run on GitHub's machines counts, the CI
-    workflow's or the proof runner's, and a run counts once however many rows it produced, so three
-    CI rows are three runs. A row whose cause a later change settled (its disposition reads settled)
-    no longer counts: the count starts again from the fix. A local run's red still gets its row and its trail, and local rows never
-    file the issue. A launch hiccup is a lane, not a step: its CI rows count toward one launch issue, and at three with
-    none open that issue is filed about the harness, with nothing to skip.
+12. **A check shown to flake once leaves the run, under an issue filed under Flakes (Alex,
+    2026-11-24, Issue #1456).** A red on GitHub's machines, in a run of the CI workflow or in an
+    unmutated control of the proof runner, is shown to be a flake when its one re-run, alone, passes
+    (`vellum-footguns` Gate 2 item 10), at the same sha or in the push that
+    `handbook/specs/orchestration.md` (While lanes run) makes that re-run. Whoever sees that re-run
+    pass files an issue for the step that runs the check, the unit of the skip list, puts it on the
+    roadmap board under the Flakes phase and skips the step as item 11 says, with no offer first and
+    no count of earlier reds. An explained red (item 15) and a red the Mac run reproduces are never
+    shown to flake: each takes the route item 15 and `handbook/specs/orchestration.md` give it. A
+    flake leaves a trail and is never silently re-run away (Issue #546's CD7b): its issue, and a PR
+    comment on the pull request it reddened, hold the payload verbatim, the run and job ids, the sha
+    and branch, the re-run that passed, and what to capture next. A unit test, which no skip list
+    reaches, gets its issue the same way and stays in the run until the issue is fixed, a further
+    red of it adding its payload to the open issue as a comment. A launch hiccup is a lane, not a
+    step: shown once, it gets one launch issue about the harness under Flakes, with nothing to skip,
+    or a comment on that issue while one is open. A local run shows no flake: its red is re-run
+    alone there, leaves its trail in the report or the PR comment that names it, and files nothing.
 13. **A stillness assertion in a fixture that crosses the ambient idle delay needs a tolerance sized
     to the drift, not an epsilon.** The home stage starts drifting on its own once it has been idle
     (`IDLE_DELAY_MS` and the drift constants in `src/site/home/drift.ts`), so a long fixture reads
@@ -205,31 +211,30 @@ headless browser actually do, so a green run can be believed.
     "Where the Mac and the CI runner disagree" below names the difference and the numbers are the
     ones its home gives, a staged run that reds as CI did included; a wait or a budget that ran out,
     and a red with no failing check (a launch failure, a job's time cap, a hang), never are, since
-    the runner's speed differs from run to run. An explained red gets no flake row and is fixed
-    instead, as `handbook/specs/orchestration.md`, "While lanes run", says (Alex, 2026-10-24). A red
-    not explained, on a check already rewritten once for an explained one, by this pull request or
-    any earlier one, where the Mac run does not red too and the cause is not in the code, is pulled
-    out of the run under a new issue as item 11 says if it is an e2e check, with no flake row, the
-    issue holding both readings and what was tried; a unit test, which no skip list reaches, gets
-    its flake row and is planned again (Alex, 2026-10-25).
+    the runner's speed differs from run to run. An explained red is not a flake: it files no issue
+    under Flakes and is fixed instead, as `handbook/specs/orchestration.md`, "While lanes run", says
+    (Alex, 2026-10-24). A red not explained, on a check already rewritten once for an explained one,
+    by this pull request or any earlier one, where the Mac run does not red too and the cause is not
+    in the code, is never re-run: an e2e check is pulled out of the run as item 11 says, under a new
+    issue filed under Flakes holding both readings and what was tried, and a unit test, which no
+    skip list reaches, gets such an issue and is planned again (Alex, 2026-10-25).
 
 ## A flake, from red to restore
 
 The order a flaky check goes through. Each step is stated once, in the home it names; this section
 holds only the order.
 
-1. **A red is yours until proven a flake.** It gets its row in
-   `.claude/skills/vellum-footguns/references/flake-record.md` before the one re-run, which is alone;
-   a second red is a defect (`vellum-footguns` Gate 2 item 10).
+1. **A red is yours until proven a flake.** Its payload goes in a PR comment before the one
+   re-run, which is alone; a second red is a defect (`vellum-footguns` Gate 2 item 10).
    A red on CI that item 15 names is never re-run, and takes the route that item gives.
-2. **It leaves a trail.** A PR comment with the payload; it is never silently re-run away (item 12).
-3. **Recurrence becomes an issue and a skip.** At three CI rows for one step with no issue open, the
-   issue is filed and the step skipped, with no offer first (item 12).
-4. **A filed issue pulls the check out of the run**, by whoever files it, with no ruling asked (item 11).
-5. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
+2. **The first re-run that passes shows the flake.** Its issue is filed under the roadmap board's
+   Flakes phase and its step skipped at once, with no offer first and no count of earlier reds,
+   and the issue carries the trail (item 12).
+3. **A filed issue pulls the check out of the run**, by whoever files it, with no ruling asked (item 11).
+4. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
    until the check returns, or until each is moved or listed where the check is deleted instead
    (item 11).
-6. **Fixing the flake puts the check back** (item 11), unless the check is deleted
+5. **Fixing the flake puts the check back** (item 11), unless the check is deleted
    instead (When a check leaves the run).
 
 ## When a check leaves the run
@@ -243,8 +248,7 @@ restore (Alex, 2026-11-08, Issue #1273). The bullets say, for each kind, what co
 suite has no skip list, and this section sets no rule for deleting a unit test.
 
 - **Flaky is items 11 and 12, in the order the section above gives.** A flaky step is pulled out
-  when its flake issue is filed, at its third counted CI row at the latest, and its fix is tried
-  before that row or while it is out: a fix that settles a row's cause starts the count again.
+  the first time it is shown to flake, and its fix is tried while it is out.
 - **Too slow is what a step holds against what it costs, never its seconds alone (Alex,
   2026-10-25, Issue #1063 comment 6395758072).** A step is too slow when at most two of its claims
   are held nowhere else, those claims are read on at most two pages or rooms, and it costs 10

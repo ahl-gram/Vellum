@@ -5,7 +5,8 @@ were triaged for the gates in `.claude/skills/vellum-footguns/SKILL.md` and decl
 filter (a line joins a gate only when it carries its own incident number or a ruling of Alex's), each
 with the sentence naming the incident that would earn it its line. Its siblings prove the other two
 things a gate needs: `.claude/skills/vellum-footguns/references/scars.md` proves a gate bites, and
-`.claude/skills/vellum-footguns/references/flake-record.md` proves a red is noise. This one records
+`.claude/skills/vellum-footguns/references/flake-record.md` proved a red is noise until it closed on
+2026-11-24, and an issue under the roadmap board's Flakes phase proves it since. This one records
 what did not earn a line, and what would.
 
 **How a line leaves.** By a PR adding it to a gate with the incident cited at that line, or by a dated

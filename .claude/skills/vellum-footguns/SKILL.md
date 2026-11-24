@@ -165,12 +165,11 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    root font size, a cached stylesheet from a persistent profile, and a rect field name (`y` read as
    `top` makes `undefined >= n` quietly false) are the first suspects when a probe surprises you.
 10. **A red is yours until proven a flake.** Re-run ONCE, alone, never two PRs concurrently; a
-    second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
-    away. **Give it a row in `references/flake-record.md` BEFORE you re-run**, one row per failure
-    (a launch hiccup, a lane whose browser never starts so no check runs, included) with the run id,
-    the payload and the disposition. A red on CI that `handbook/specs/settle-doctrine.md` item 15
-    names is never re-run, and takes the route that item gives; a filed flake issue pulls the check
-    out: item 11 there.
+    second red is a defect. Put the payload and what to capture next in a PR comment BEFORE you
+    re-run; never re-run it away. A re-run that passes shows the flake, and its issue under Flakes
+    and its skip follow at once, with no count of earlier reds: `handbook/specs/settle-doctrine.md`
+    items 11 and 12. A red on CI that item 15 there names is never re-run, and takes the route that
+    item gives.
 11. **A run whose log has not moved in ten minutes is hung, not slow.** Before reporting "still
     running", check `ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l` and
     `ps aux | grep '[r]emote-debugging-port'`; a starved machine stalls a lane you did not touch.
