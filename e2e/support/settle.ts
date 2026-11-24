@@ -60,7 +60,7 @@ const finished = (anims: readonly string[] | null): boolean =>
 const witnessed = <T>(read: Payload<T>, carrier: string): Payload<Witnessed<NonNullable<T>>> =>
   `(() => { const read = (${read}); const e = document.querySelector(${JSON.stringify(carrier)}); return { read: read || null, anims: e ? e.getAnimations().map((a) => a.playState) : null }; })()`;
 
-const sameJson = (d: unknown, last: unknown): boolean => JSON.stringify(d) === JSON.stringify(last);
+export const sameJson = (d: unknown, last: unknown): boolean => JSON.stringify(d) === JSON.stringify(last);
 
 const PROMISED = /^\s*\(\s*async\b/;
 

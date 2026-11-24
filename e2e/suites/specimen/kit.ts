@@ -1,5 +1,5 @@
 import { luminance, sampleRow } from "../../support/pixel.ts";
-import { makeStable, type Settle } from "../../support/settle.ts";
+import { makeStable, sameJson, type Settle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { PAGE, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
@@ -7,7 +7,6 @@ import { bounce } from "../../support/nav.ts";
 import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 
 const moved = (a: Specimen["map"], b: Specimen["map"]): boolean => JSON.stringify(a) !== JSON.stringify(b);
-const sameJson = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const COUNTED: Payload<Specimen & { sheetAnims: number }> =
   `(() => ({ ...(${READ}), sheetAnims: document.getElementById("sheet").getAnimations().length }))()`;
 export type SpecimenKit = ReturnType<typeof specimenKit>;

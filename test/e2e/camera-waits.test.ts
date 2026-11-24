@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { landedWith, STOP_CAMERA_WATCH, type Framed } from "../../e2e/support/camera-landed.ts";
+import vm from "node:vm";
+import { framed, landedWith, STOP_CAMERA_WATCH, type Framed } from "../../e2e/support/camera-landed.ts";
 import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
@@ -18,11 +19,9 @@ test("landedWith takes two equal camera reads only across a drawn frame with no 
   assert.equal(landed(read(1.4, 5, 4), read(1.4, 4, 3)), false, "a write the matrix's rounding hides");
   assert.equal(landed(read(1.4, 5, 3), read(1.4, 4, 3)), true, "one frame on and no write");
   assert.equal(landed(read(1.5, 5, 3), read(1.4, 4, 3)), false, "reads that differ");
-  assert.equal(
-    landed({ read: null, frames: 5, writes: 3 } as unknown as Framed<number>, read(1.4, 4, 3)),
-    false,
-    "a null read",
-  );
+  const none = { read: null, frames: 5, writes: 3 } as unknown as Framed<number>;
+  assert.equal(landed(none, read(1.4, 4, 3)), false, "a null read");
+  assert.equal(landed(none, { ...none, frames: 4 }), false, "two null reads across a frame");
 });
 
 const matrix = (k: number): string => `matrix(${k}, 0, 0, ${k}, 0, 0)`;
@@ -76,15 +75,70 @@ test("lensRest hands a camera that never left home over as still, and watches th
 });
 
 test("kLeft takes the double tap's depth only once a frame has drawn with no camera write between (Issue #1365)", async () => {
-  const depth = (k: number, frames: number, writes: number): Framed<number> => ({ read: k, frames, writes });
   const s = scripted([
-    depth(1, 0, 0),
-    depth(1.5863681885612406, 1, 1),
-    depth(1.5863681885612406, 1, 1),
-    depth(2, 2, 2),
-    depth(2, 3, 2),
+    read(1, 0, 0),
+    read(1.5863681885612406, 1, 1),
+    read(1.5863681885612406, 1, 1),
+    read(2, 2, 2),
+    read(2, 3, 2),
   ]);
   const k = { evaluate: s.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
   assert.equal(await kLeft(k, "ZG8b"), 2);
   assert.equal(s.stops(), 1);
+});
+
+type Watched = { cb: (records: unknown[]) => void; seen: { el: unknown; options: unknown }[]; detached: boolean };
+
+const fakePage = () => {
+  const elements: Record<string, { name: string }> = { "#map": { name: "map" }, "#chart": { name: "chart" } };
+  const observers: Watched[] = [];
+  const queued: (() => void)[] = [];
+  class FakeObserver {
+    private readonly watched: Watched;
+    constructor(cb: Watched["cb"]) {
+      this.watched = { cb, seen: [], detached: false };
+      observers.push(this.watched);
+    }
+    observe(el: unknown, options: unknown): void {
+      this.watched.seen.push({ el, options });
+    }
+    disconnect(): void {
+      this.watched.detached = true;
+    }
+  }
+  const context = vm.createContext({
+    window: {},
+    document: { querySelector: (selector: string) => elements[selector] ?? null },
+    MutationObserver: FakeObserver,
+    requestAnimationFrame: (f: () => void) => void queued.push(f),
+  });
+  const run = <T>(expression: string): T => JSON.parse(JSON.stringify(vm.runInContext(expression, context))) as T;
+  const draw = (): void => queued.splice(0).forEach((f) => f());
+  return { run, draw, observers, elements };
+};
+
+test("framed counts the frames drawn and the style writes to the camera's target, watches another target afresh, and stops (Issue #1365)", () => {
+  const page = fakePage();
+  const at = framed("1.4", "#map");
+  assert.deepEqual(page.run(at), { read: 1.4, frames: 0, writes: 0 });
+  assert.deepEqual(page.run(at), { read: 1.4, frames: 0, writes: 0 }, "no frame has drawn between two reads");
+  page.draw();
+  assert.deepEqual(page.run(at), { read: 1.4, frames: 1, writes: 0 });
+  assert.equal(page.observers.length, 1, "the watch is installed once");
+  const map = page.observers[0]!;
+  assert.equal(map.seen.length, 1);
+  assert.equal(map.seen[0]!.el, page.elements["#map"]);
+  assert.equal(JSON.stringify(map.seen[0]!.options), '{"attributes":true,"attributeFilter":["style"]}');
+  map.cb([{}, {}]);
+  assert.equal(page.run<Framed<number>>(at).writes, 2);
+  page.draw();
+  page.draw();
+  assert.equal(page.run<Framed<number>>(at).frames, 3);
+  assert.equal(page.run(STOP_CAMERA_WATCH), true);
+  assert.equal(map.detached, true);
+  page.draw();
+  assert.equal(page.run<Framed<number>>(at).frames, 0, "a read after the stop starts a fresh watch");
+  page.run(framed("1.4", "#chart"));
+  assert.equal(page.observers[1]!.detached, true, "the watch on the old target is dropped");
+  assert.equal(page.observers[2]!.seen[0]!.el, page.elements["#chart"], "and the new target is the one observed");
 });
