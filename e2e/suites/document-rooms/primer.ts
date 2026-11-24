@@ -160,3 +160,71 @@ export async function ix10Folds(k: DocRoomsKit): Promise<void> {
     `arrived ${JSON.stringify(arrived)}; press ${JSON.stringify(press)}; folded ${JSON.stringify(folded)}; road ${JSON.stringify(road)}; turned ${JSON.stringify(turned)}`,
   );
 }
+
+type Pressed = {
+  bound: boolean;
+  hash: string;
+  open: string[];
+  errors: number;
+  head: number | null;
+  inner: number;
+};
+
+const ARM_ERRORS: Payload<boolean> = `(() => {
+  window.__ix11 = { errors: 0 };
+  window.addEventListener("error", () => { window.__ix11.errors++; });
+  return true;
+})()`;
+
+const PRESSED = (id: string): Payload<Pressed> => `(() => {
+  const head = document.getElementById(${JSON.stringify(id)});
+  return {
+    bound: !!document.querySelector(".primer[data-bound]"),
+    hash: location.hash,
+    open: [...document.querySelectorAll(".primer section.room")].filter((r) => r.querySelector(".room-body").getBoundingClientRect().height > 0).map((r) => r.querySelector("h2[id]").id),
+    errors: window.__ix11 ? window.__ix11.errors : -1,
+    head: head ? head.getBoundingClientRect().top : null,
+    inner: innerHeight,
+  };
+})()`;
+
+const CHART_AIM = (id: string): Payload<Aim> => `(() => {
+  const link = document.querySelector(${JSON.stringify(`.col-chart a[href="#${id}"]`)});
+  const name = link && link.querySelector("text.name");
+  if (!link || !name) return null;
+  name.scrollIntoView({ block: "center" });
+  const b = name.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+  return { x, y, hit: link.contains(document.elementFromPoint(x, y)) };
+})()`;
+
+export async function ix11ChartPress(k: DocRoomsKit): Promise<void> {
+  const { evaluate, send, check, settle, stable, goto } = k;
+  const rooms = primerPage().rooms;
+  const target = rooms.find((r) => r.route === "/print-room/");
+  if (target === undefined) throw new Error("IX11 presses the Print Room, which the Primer no longer teaches");
+  const id = target.id;
+  await goto(PRIMER);
+  await evaluate(put(PRIMER_STORE_KEY, null));
+  await goto(PRIMER);
+  const arrived = await settle(PRESSED(id), (d) => d.bound, "primer-bound");
+  await evaluate(ARM_ERRORS);
+  const aim = await evaluate(CHART_AIM(id));
+  let after: Pressed | null = null;
+  if (aim?.hit) {
+    await sendClick(send, aim.x, aim.y);
+    after = await stable(PRESSED(id), "primer-chart-pressed", { departed: (d) => d.hash === `#${id}` });
+  }
+  check(
+    "IX11 a real press on a room's name on the chart of lessons reaches that room's link, raises no error, opens that room alone and lands its head in the window (Issue #1155 comment 7136681098, Q1; Issue #1257)",
+    same(arrived.open, [rooms[0]?.id]) &&
+      !arrived.open.includes(id) &&
+      aim?.hit === true &&
+      after !== null &&
+      same(after.open, [id]) &&
+      after.errors === 0 &&
+      after.head !== null &&
+      after.head >= 0 &&
+      after.head < after.inner,
+    `arrived ${JSON.stringify(arrived)}; aim ${JSON.stringify(aim)}; after ${JSON.stringify(after)}`,
+  );
+}
