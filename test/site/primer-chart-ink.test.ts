@@ -83,8 +83,9 @@ test("CI2 the road from home to every room holding a seal turns red, and no othe
 
 test("CI3 the open room alone is lit, and the hand stands at its first step this device can take that is not yet sealed; a room with none left, or no room, takes the hand off (Issue #1155 comment 7136681098, Q4 and Q5)", () => {
   const page = rooms.find((r) => r.id === "explorer");
-  const fifth = page?.lessons[4];
-  const sixth = page?.lessons[5];
+  assert.ok(page, "the Explorer is a room");
+  const fifth = page.lessons[4];
+  const sixth = page.lessons[5];
   assert.ok(fifth && sixth, "the Explorer has six lessons");
   const touch = fifth.steps.find((s) => s.only === "touch");
   assert.ok(touch, "the Explorer's fifth lesson holds the touch step");
@@ -96,7 +97,7 @@ test("CI3 the open room alone is lit, and the hand stands at its first step this
   };
 
   const sealed = new Set(
-    (page?.lessons ?? [])
+    page.lessons
       .slice(0, 5)
       .flatMap((l) => l.steps.map((s) => s.id))
       .filter((id) => id !== touch.id),

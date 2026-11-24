@@ -1,5 +1,5 @@
 import { applies, type Device, type Only } from "../shared/primer/hand-steps.ts";
-import { type ArrivalRoom } from "./arrival.ts";
+import type { ArrivalRoom } from "./arrival.ts";
 
 const onlyOf = (value: string | null): Only | undefined =>
   value === "touch" || value === "motion" ? value : undefined;
