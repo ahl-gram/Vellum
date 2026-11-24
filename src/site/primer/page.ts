@@ -4,6 +4,7 @@ import { MARKS } from "../shared/primer/hand-words.ts";
 import { stepAddress } from "../shared/primer/hand-steps.ts";
 import { segmentsOf, type Segment } from "../shared/primer/segments.ts";
 import type { Ladder, Step } from "../shared/primer/shape.ts";
+import { pictureFile } from "./pictures.ts";
 import { CLOSING_HEAD, datelineOf, ENTERED, OF, OPENS } from "./words.ts";
 
 export interface PageStep {
@@ -16,6 +17,7 @@ export interface PageStep {
   readonly only?: "touch" | "motion";
   readonly marks: readonly { readonly text: string; readonly comm: boolean }[];
   readonly commission: boolean;
+  readonly picture: string | null;
 }
 
 export interface PageLesson {
@@ -102,6 +104,7 @@ export function primerPage(ladders: readonly Ladder[] = LADDERS, tree: RouteTree
           ...(step.only === undefined ? {} : { only: step.only }),
           marks: marksOf(step),
           commission: step.kind === "commission",
+          picture: step.picture === undefined ? null : pictureFile(step.id),
         })),
       })),
       ...(after === undefined ? {} : { next: { id: roomIdOf(after.s.ladder.route), name: after.s.name } }),

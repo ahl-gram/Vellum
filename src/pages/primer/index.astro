@@ -5,9 +5,11 @@ import Fog from "../../layouts/Fog.astro";
 import IndexSlip from "../../layouts/IndexSlip.astro";
 import { LEANED_ON } from "../../site/shared/primer/ladders.ts";
 import { AFTERWARD, primerPage } from "../../site/primer/page.ts";
+import { chartFrame } from "../../site/primer/pictures.ts";
 import { CLOSING_HEAD, CLOSING_VERB, CLOSING_WHERE, DESCRIPTION, LEDE, NEXT, ROOM, TAGLINE, TRY, UNFOLD, WHERE, WIPE } from "../../site/primer/words.ts";
 
 const page = primerPage();
+const FRAME = chartFrame();
 const first = page.rooms[0]?.id ?? AFTERWARD;
 const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 ---
@@ -46,7 +48,7 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
                   <p class="see">{s.see}</p>
                   <p class="try"><a href={s.href}>{TRY}</a><span class="in">{s.opens}</span>{s.marks.map((m) => <span class={m.comm ? "mark comm" : "mark"}>{m.text}</span>)}</p>
                 </div>
-                <span class="pic none"></span>
+                {s.picture !== null ? <span class="pic"><img src={s.picture} width={FRAME.width} height={FRAME.height} alt="" decoding="async" fetchpriority="low"></span> : <span class="pic none"></span>}
               </li>
             ))}
           </ol>
