@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { findBrowser, svgDimensions } from "../../src/cli/raster.ts";
@@ -74,6 +74,8 @@ export async function writePictures(
       quality: PICTURE_QUALITY,
       replyMs: PICTURE_REPLY_MS,
     });
+    const missing = pressings.filter((p) => !existsSync(p.out)).map((p) => p.out);
+    if (missing.length > 0) throw new Error(`the press resolved without writing ${missing.join(", ")}`);
     writeFileSync(join(root, "primer", PICTURE_MANIFEST), JSON.stringify(manifest));
     const n = pressings.length;
     deps.log(`pictures: ${n} pressed with ${browser} (${pressed.product}), ${pressed.bytes} bytes in all`);
@@ -84,13 +86,15 @@ export async function writePictures(
 }
 
 if (import.meta.main) {
-  writePictures(resolve(process.argv[2] ?? GENERATED), {
-    env: process.env,
-    find: findBrowser,
-    press: pressPictures,
-    log: (line) => console.log(line),
-  }).catch((err: unknown) => {
+  try {
+    await writePictures(resolve(process.argv[2] ?? GENERATED), {
+      env: process.env,
+      find: findBrowser,
+      press: pressPictures,
+      log: (line) => console.log(line),
+    });
+  } catch (err: unknown) {
     console.error(err instanceof Error ? err.message : err);
     process.exitCode = 1;
-  });
+  }
 }

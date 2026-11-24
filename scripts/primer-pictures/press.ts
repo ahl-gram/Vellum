@@ -68,7 +68,7 @@ async function stop(live: Live): Promise<void> {
 // 2026-11-24, Issue #1255: the press starts a build's first browser, and on GitHub's runners a first start took 0.6 to 56.4 s over 240 CI lane jobs from 2026-11-17 to 2026-11-24 and passed 15 s in 2 of 16 proof builds at 0f1dfa8f (runs 45305657670 and 45306297095), so it waits and retries as the e2e harness does.
 export async function launchPress(
   browser: string,
-  tuning: LaunchTuning = { ...LAUNCH_TUNING, polls: 120 },
+  tuning: LaunchTuning = LAUNCH_TUNING,
   launch: Launch = launchWithRetry,
 ): Promise<Launched> {
   const port = await freePort();
@@ -130,7 +130,10 @@ interface Reply {
   readonly error?: unknown;
 }
 
-function connect(url: string): Promise<{
+function connect(
+  url: string,
+  replyMs: number,
+): Promise<{
   readonly socket: WebSocket;
   readonly send: (method: string, params?: object) => Promise<Record<string, unknown>>;
   readonly loaded: () => Promise<boolean>;
@@ -138,12 +141,16 @@ function connect(url: string): Promise<{
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(url);
     let next = 0;
-    const replies = new Map<number, (reply: Reply) => void>();
+    const waiting = new Map<number, (reply: Reply | string) => void>();
     const loads: (() => void)[] = [];
     socket.addEventListener("error", () => reject(new Error(`could not open ${url}`)));
+    socket.addEventListener("close", (event) => {
+      for (const answer of [...waiting.values()])
+        answer(`the browser's DevTools connection closed (code ${event.code})`);
+    });
     socket.addEventListener("message", (event) => {
       const reply = JSON.parse(String(event.data)) as Reply;
-      if (reply.id !== undefined) replies.get(reply.id)?.(reply);
+      if (reply.id !== undefined) waiting.get(reply.id)?.(reply);
       else if (reply.method === "Page.loadEventFired") loads.splice(0).forEach((done) => done());
     });
     socket.addEventListener("open", () =>
@@ -152,11 +159,15 @@ function connect(url: string): Promise<{
         send: (method, params = {}) =>
           new Promise((done, fail) => {
             const id = ++next;
-            replies.set(id, (reply) => {
-              replies.delete(id);
-              if (reply.error !== undefined) fail(new Error(`${method}: ${JSON.stringify(reply.error)}`));
+            const timer = setTimeout(() => answer(`no reply in ${replyMs} ms`), replyMs);
+            function answer(reply: Reply | string): void {
+              clearTimeout(timer);
+              waiting.delete(id);
+              if (typeof reply === "string") fail(new Error(`${method}: ${reply}`));
+              else if (reply.error !== undefined) fail(new Error(`${method}: ${JSON.stringify(reply.error)}`));
               else done(reply.result ?? {});
-            });
+            }
+            waiting.set(id, answer);
             socket.send(JSON.stringify({ id, method, params }));
           }),
         loaded: () =>
@@ -183,7 +194,7 @@ export async function pressPictures(
     const product = await fetch(`http://127.0.0.1:${launched.port}/json/version`)
       .then((r) => r.json() as Promise<{ readonly Browser?: string }>)
       .then((v) => v.Browser ?? "unnamed browser");
-    const cdp = await connect(launched.url);
+    const cdp = await connect(launched.url, options.replyMs);
     socket = cdp.socket;
     await cdp.send("Page.enable");
     let bytes = 0;
