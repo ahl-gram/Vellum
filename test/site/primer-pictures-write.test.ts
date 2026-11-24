@@ -80,11 +80,13 @@ test("PIC10 with a browser, every pictured step's chart is drawn, handed to the 
     );
     assert.equal(n, 2);
     assert.equal(calls.length, 1);
-    assert.equal(calls[0]?.browser, "/fake/browser");
-    assert.deepEqual(calls[0]?.options, { pixelWidth: 432, quality: 70 });
+    const call = calls[0];
+    assert.ok(call, "the press ran once");
+    assert.equal(call.browser, "/fake/browser");
+    assert.deepEqual(call.options, { pixelWidth: 432, quality: 70 });
     const outs = [join(tmp, "primer", "pictures/pic-plain.webp"), join(tmp, "primer", "pictures/pic-written.webp")];
     assert.deepEqual(
-      calls[0]?.pressings.map((p) => p.out),
+      call.pressings.map((p) => p.out),
       outs,
     );
     const manifest = JSON.parse(readFileSync(join(tmp, "primer", "pictures.json"), "utf8")) as unknown;

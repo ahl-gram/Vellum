@@ -5,7 +5,7 @@ import { recipeOverrides } from "../../src/site/shared/founding.ts";
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import { writtenHash } from "../../src/site/shared/written-address.ts";
 import { chartFrame, picturedSteps } from "../../src/site/primer/pictures.ts";
-import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
+import { foundWorld } from "../../src/world/founding/found.ts";
 import { FOUNDING_VERSION } from "../../src/world/founding/lexicon.ts";
 import { committedFounder, drawJob, jobOf } from "../../scripts/primer-pictures/draw.ts";
 import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
@@ -31,8 +31,8 @@ test("PIC2 a picture's address that carries a founding sentence draws the founde
   const f = foundWorld(sentence, FOUNDING_VERSION);
   assert.equal(f.ok, true, "the sentence founds a world");
   const job = await jobOf(`/writing-room/${writtenHash(sentence, FOUNDING_VERSION)}&${PLAIN}`, committedFounder());
-  assert.equal(job.seed, (f as Founding).seed);
-  assert.deepEqual(job.overrides, recipeOverrides(f as Founding));
+  assert.equal(job.seed, f.seed);
+  assert.deepEqual(job.overrides, recipeOverrides(f));
 });
 
 test("PIC3 a picture's address that leaves its style, legend, arms or beasts to a default is refused by name", async () => {
