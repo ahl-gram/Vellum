@@ -204,6 +204,7 @@ test("PJ9 heldBy names the earlier step whose reads are the same in every field,
     { do: [{ kind: "click", css: "#c" }] },
     { then: [w("text", "x")] },
     { only: "touch" },
+    { picture: "/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0" },
   ];
   assert.deepEqual(
     differing.map((d) => {

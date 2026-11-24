@@ -1,6 +1,8 @@
 import { WRITE_ANEW } from "../../explorer/land-rows.ts";
 import { MAP_WORDS } from "../map-words.ts";
-import { aria, click, road, roomOf, set, text, type Act, type Ladder } from "./shape.ts";
+import { FOUNDING_VERSION } from "../../../world/founding/lexicon.ts";
+import { writtenHash } from "../written-address.ts";
+import { aria, click, PLAIN_DRESS, road, roomOf, set, text, type Act, type Ladder } from "./shape.ts";
 
 const AT = "/writing-room/";
 const SENTENCE = "a polar archipelago of twenty islands";
@@ -9,6 +11,7 @@ const SHAPE = "an island in the shape of Japan";
 const FOUND = "#wr-form button[type=submit]";
 const PLATE = "The Vegetation Plate";
 const founded = (sentence: string): readonly Act[] => [set("#wr-line", sentence), click(FOUND)];
+const foundedAt = (sentence: string): string => `${AT}${writtenHash(sentence, FOUNDING_VERSION)}`;
 
 export const WRITING_ROOM: Ladder = {
   route: "/writing-room/",
@@ -27,6 +30,7 @@ export const WRITING_ROOM: Ladder = {
           words: [aria("#wr-line", "the founding sentence"), text(FOUND, "Found")],
           do: founded(SENTENCE),
           then: [text("#wr-account .wr-steered .wr-word", "polar")],
+          picture: `${foundedAt(SENTENCE)}&${PLAIN_DRESS}`,
         },
         {
           id: "writing-room-your-word",
@@ -40,6 +44,7 @@ export const WRITING_ROOM: Ladder = {
             text("#wr-account .wr-residual", NAME.toLowerCase(), "contains"),
             text("#folio-coords", `${MAP_WORDS.archipelago}, polar`, "contains"),
           ],
+          picture: `${foundedAt(`${SENTENCE} ${NAME}`)}&${PLAIN_DRESS}`,
           kind: "play",
         },
         {
@@ -50,6 +55,7 @@ export const WRITING_ROOM: Ladder = {
           words: [text(FOUND, "Found")],
           do: founded(SHAPE),
           then: [text("#wr-account .wr-steered", "the shape of Japan", "contains")],
+          picture: `${foundedAt(SHAPE)}&${PLAIN_DRESS}`,
         },
         {
           id: "writing-room-plate",
@@ -60,6 +66,7 @@ export const WRITING_ROOM: Ladder = {
           words: [road("#wr-plate", `Lay on ${PLATE}`)],
           do: [click("#wr-plate")],
           then: [road("#wr-plate", `Lift ${PLATE}`)],
+          picture: `${foundedAt(SENTENCE)}&theme=vegetation&${PLAIN_DRESS}`,
         },
         {
           id: "writing-room-explore-it",

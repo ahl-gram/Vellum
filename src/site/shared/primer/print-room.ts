@@ -6,6 +6,7 @@ import {
   click,
   countWord,
   option,
+  PLAIN_DRESS,
   road,
   roomOf,
   set,
@@ -49,6 +50,7 @@ export const PRINT_ROOM: Ladder = {
           relies: [aria("#pr-seed", "seed")],
           do: [set("#pr-seed", "42"), click("#pr-draw")],
           then: [text("#folio-title", "The Isle of Rahai", "starts")],
+          picture: `${AT}&${PLAIN_DRESS}`,
         },
         {
           id: "print-room-style",
@@ -59,6 +61,7 @@ export const PRINT_ROOM: Ladder = {
           relies: [text("#pr-draw", "Pull a proof")],
           do: [choose("#pr-style", "ink"), click("#pr-draw")],
           then: [{ css: "#pr-preview svg", says: "ink", read: "attr", attr: "data-vellum-style" }],
+          picture: `${AT}&style=ink&legend=1&arms=0&beasts=0`,
         },
       ],
     },

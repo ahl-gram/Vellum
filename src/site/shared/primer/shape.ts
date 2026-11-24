@@ -25,7 +25,7 @@ export type Act =
   | { readonly kind: "repeat"; readonly css: string; readonly until: string }
   | { readonly kind: "wait"; readonly css: string };
 
-// words are the controls the sentence marks in braces and relies those it leans on unmarked; first is done before either is read, do is the step itself, then is what shows once it is done, and only marks a step for a tablet or for motion.
+// words are the controls the sentence marks in braces and relies those it leans on unmarked; first is done before either is read, do is the step itself, then is what shows once it is done, and only marks a step for a tablet or for motion; picture is the address, in the shared grammar and naming its style, legend, arms and beasts, of the chart once the step is done, which the build draws for its picture.
 export interface Step {
   readonly id: string;
   readonly act: string;
@@ -36,6 +36,7 @@ export interface Step {
   readonly first?: readonly Act[];
   readonly do?: readonly Act[];
   readonly then?: readonly Words[];
+  readonly picture?: string;
   readonly kind?: "play" | "commission";
   readonly only?: "touch" | "motion";
 }
@@ -78,3 +79,4 @@ export const click = (css: string): Act => ({ kind: "click", css });
 export const set = (css: string, value: string): Act => ({ kind: "set", css, value });
 export const choose = (css: string, option: string): Act => ({ kind: "choose", css, option });
 export const wait = (css: string): Act => ({ kind: "wait", css });
+export const PLAIN_DRESS = "style=antique&legend=1&arms=0&beasts=0";

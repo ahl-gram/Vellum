@@ -1,6 +1,18 @@
 import { HELD_NOTES, islandsWord, looseWord, raggedWord } from "../../explorer/land-rows.ts";
 import { AT, chart, SHEET_LESSONS } from "./explorer-sheet.ts";
-import { aria, choose, click, labelled, option, set, text, wait, type Ladder, type Words } from "./shape.ts";
+import {
+  aria,
+  choose,
+  click,
+  labelled,
+  option,
+  PLAIN_DRESS,
+  set,
+  text,
+  wait,
+  type Ladder,
+  type Words,
+} from "./shape.ts";
 
 const ICELAND = "ne-1159320917";
 const ISLANDS = 20;
@@ -38,6 +50,7 @@ export const EXPLORER: Ladder = {
           words: [text("#draw", "Draw")],
           do: [set("#seed", "42"), click("#draw")],
           then: [title("The Isle of Rahai")],
+          picture: `${AT}&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-enter",
@@ -50,6 +63,7 @@ export const EXPLORER: Ladder = {
             { kind: "key", css: "#seed", key: "Enter" },
           ],
           then: [chart("data-vellum-seed", "1155")],
+          picture: `/explorer/#seed=1155&${PLAIN_DRESS}`,
           kind: "play",
         },
       ],
@@ -68,6 +82,7 @@ export const EXPLORER: Ladder = {
           words: [label("type", "type"), option("#type", "archipelago")],
           do: [choose("#type", "archipelago")],
           then: [title("The Rahai Archipelago"), chart("data-vellum-map-type", "archipelago")],
+          picture: `${AT}&type=archipelago&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-islands",
@@ -77,6 +92,7 @@ export const EXPLORER: Ladder = {
           words: [label("islands", "islands"), end("islands", "min", "few"), end("islands", "max", "many")],
           do: [set("#islands", String(ISLANDS))],
           then: [text("#islands-readout", islandsWord(ISLANDS)), chart("data-vellum-islands", String(ISLANDS))],
+          picture: `${AT}&type=archipelago&islands=${ISLANDS}&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-sizes",
@@ -86,6 +102,7 @@ export const EXPLORER: Ladder = {
           words: [text("#sizes-label", "sizes"), labelled("#isle-varied", "of every size")],
           do: [click("#isle-varied")],
           then: [chart("data-vellum-isle-size", "varied")],
+          picture: `${AT}&type=archipelago&islands=${ISLANDS}&isleSize=varied&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-climate",
@@ -95,6 +112,7 @@ export const EXPLORER: Ladder = {
           words: [label("band", "climate"), option("#band", "polar")],
           do: [choose("#band", "polar")],
           then: [chart("data-vellum-band", "polar")],
+          picture: `${AT}&band=polar&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-shape",
@@ -105,6 +123,7 @@ export const EXPLORER: Ladder = {
           relies: [{ css: "#place", says: "seed's choice", read: "placeholder" }],
           do: [{ kind: "pick", css: "#place", text: "Iceland", name: "Iceland" }],
           then: [chart("data-vellum-outline", ICELAND)],
+          picture: `${AT}&outline=${ICELAND}&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-held",
@@ -117,6 +136,7 @@ export const EXPLORER: Ladder = {
             { ...label("islands", "islands"), state: "held" },
             { ...text("#land-held-note", HELD_NOTES.count), state: "held" },
           ],
+          picture: `${AT}&type=archipelago&outline=${ICELAND}&${PLAIN_DRESS}`,
         },
       ],
     },
@@ -134,6 +154,7 @@ export const EXPLORER: Ladder = {
           words: [label("land", "sea level"), end("land", "min", "more sea")],
           do: [set("#land", "300")],
           then: [text("#land-readout", "% land", "contains")],
+          picture: `${AT}&land=300&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-coast",
@@ -143,6 +164,7 @@ export const EXPLORER: Ladder = {
           words: [label("coast", "coast"), end("coast", "min", "calm"), end("coast", "max", "lobed")],
           do: [set("#coast", "95")],
           then: [text("#coast-readout", "warp 0.95")],
+          picture: `${AT}&coast=95&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-ragged",
@@ -156,6 +178,7 @@ export const EXPLORER: Ladder = {
             text("#ragged-readout", raggedWord(RAGGED / 100)),
             chart("data-vellum-raggedness", String(RAGGED / 100)),
           ],
+          picture: `${AT}&type=archipelago&islands=${ISLANDS}&raggedness=${RAGGED}&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-looseness",
@@ -165,6 +188,7 @@ export const EXPLORER: Ladder = {
           words: [label("looseness", "looseness"), end("looseness", "min", "exact"), end("looseness", "max", "loose")],
           do: [set("#looseness", String(LOOSENESS))],
           then: [text("#looseness-readout", looseWord(LOOSENESS / 100)), label("coast", "coast")],
+          picture: `${AT}&outline=${ICELAND}&looseness=${LOOSENESS}&${PLAIN_DRESS}`,
         },
       ],
     },
@@ -182,6 +206,7 @@ export const EXPLORER: Ladder = {
           words: [label("style", "style"), option("#style", "ink")],
           do: [choose("#style", "ink")],
           then: [chart("data-vellum-style", "ink")],
+          picture: `${AT}&style=ink&legend=1&arms=0&beasts=0`,
         },
         {
           id: "explorer-theme",
@@ -190,6 +215,7 @@ export const EXPLORER: Ladder = {
           at: AT,
           words: [label("theme", "theme"), option("#theme", "rainfall")],
           do: [choose("#theme", "rainfall")],
+          picture: `${AT}&theme=moisture&${PLAIN_DRESS}`,
         },
         {
           id: "explorer-arms",
@@ -198,6 +224,7 @@ export const EXPLORER: Ladder = {
           at: AT,
           words: [labelled("#arms", "arms")],
           do: [click("#arms")],
+          picture: `${AT}&style=antique&legend=1&arms=1&beasts=0`,
         },
         {
           id: "explorer-beasts",
@@ -207,6 +234,7 @@ export const EXPLORER: Ladder = {
           words: [labelled("#beasts", "beasts")],
           do: [click("#beasts")],
           then: [text("#map > svg[data-vellum-style]", "Rauhoahai", "contains")],
+          picture: `${AT}&style=antique&legend=1&arms=0&beasts=1`,
         },
         {
           id: "explorer-survey",
@@ -223,6 +251,7 @@ export const EXPLORER: Ladder = {
           at: AT,
           words: [labelled("#legend", "legend")],
           do: [click("#legend")],
+          picture: `${AT}&style=antique&legend=0&arms=0&beasts=0`,
         },
       ],
     },

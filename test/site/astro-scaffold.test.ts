@@ -9,6 +9,8 @@ import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
 import { PLACES } from "../../src/layouts/atelier-chart.ts";
 import { cleanGenerated, GENERATED } from "../../scripts/clean-generated.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
+import { pictureFile, picturedSteps } from "../../src/site/primer/pictures.ts";
+import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import { decode } from "../../test-support/built-reads/documents.ts";
 
 // The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
@@ -1294,7 +1296,7 @@ test("the Notice stamps the deep before the panel's prose; the count is ten (#28
 });
 
 test("every internal link and embed on the rendered pages resolves in the built tree", () => {
-  // Generated per deploy and gitignored (absent on a fresh checkout; CI runs npm test before npm run build), so these resolve only against this allowlist.
+  // Generated per deploy and gitignored (absent on a fresh checkout; CI runs npm test before npm run build), so these resolve only against this allowlist, and the Primer's pictures, which the scaffold's build never presses.
   const generated = [
     "/atlas/",
     "/gallery/index.css",
@@ -1310,6 +1312,7 @@ test("every internal link and embed on the rendered pages resolves in the built 
     "/gallery/app.bundle.js",
     "/app.bundle.js",
   ];
+  const pictured = new Set(picturedSteps(LADDERS).map((s) => `/primer/${pictureFile(s.id)}`));
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {
     const html = page(p.route);
@@ -1322,6 +1325,7 @@ test("every internal link and embed on the rendered pages resolves in the built 
       const path = new URL(url!, `https://v.test${p.dir}`).pathname;
       if (routes.has(path)) continue;
       if (generated.includes(path)) continue;
+      if (pictured.has(path)) continue;
       if (/^\/gallery\/chart-\d+\.svg$/.test(path)) continue;
       const target = path.endsWith("/") ? `${path}index.html` : path;
       assert.ok(existsSync(join(outDir, target)), `${p.route} links ${url}: ${target} should be in the built tree`);

@@ -36,14 +36,11 @@ jobs:
           node-version: '26'
           cache: npm
       - run: npm ci
-      - name: "Browser for the Primer's pictures (Issue #1255)"
-        continue-on-error: true
-        timeout-minutes: 2
-        run: node scripts/deploy-browser.ts
-        env:
-          VELLUM_BROWSER: /usr/bin/google-chrome
       - name: Build site into dist/
         run: npm run build
+        env:
+          VELLUM_BROWSER: /usr/bin/google-chrome
+          VELLUM_REQUIRE_BROWSER: '1'
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

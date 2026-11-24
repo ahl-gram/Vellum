@@ -424,7 +424,11 @@ section points there rather than restating it.
   attempt's own reason, its pid and its kill-to-gone time, and a rescued lane passes, so read the
   logs of passing runs before asserting a cause or moving the wait:
   `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`, grepped for
-  `browser up on attempt` and `exposed no devtools target`. The same read of the failing lanes'
+  `browser up on attempt` and `exposed no devtools target`. **A lane's first browser is its
+  build's.** The Primer's picture press (`launchPress` in `scripts/primer-pictures/press.ts`)
+  launches through the same `launchWithRetry` with `LAUNCH_TUNING` and prints the same two lines in
+  the build step, so a job's cold start is the first `browser up on attempt` line in its log, and
+  the lane's own launch, after it, starts warm. The same read of the failing lanes'
   logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
   it began; the probe that reproduces it against a real browser is in
   `handbook/plans/600/621/621-plan.md`.
@@ -534,7 +538,8 @@ section points there rather than restating it.
   `src/site/shared/room.ts`): on the Mac by the next poll, on the runner after two polls or more. A
   camera's glide steps only when `requestAnimationFrame` runs, since d3's timer rides it, and the
   runner has recorded one to three frames over a glide of a third of a second, and four to eight over
-  a chart room's 300 ms Glass glide, 100 to 250 ms apart (`handbook/plans/1300/1365/1365-plan.md`). So a wait that takes
+  a chart room's 300 ms Glass glide, 100 to 250 ms apart
+  (`handbook/plans/1300/1365/1365-plan.md`). So a wait that takes
   two equal reads for rest can hand over a page that has not moved yet: after a window change, when
   it departs on the window's size or on a box the stylesheet places; after a press, when it departs
   on the camera having left where it began. A wait for a room laid out at a new window departs on
@@ -543,7 +548,8 @@ section points there rather than restating it.
   `e2e/suites/broadside.ts` and `laidOut` in `e2e/suites/broadside/grow.ts` ask). A wait for a
   camera to land counts the camera's writes to its target and asks for a frame between its two reads
   (`landed` in `e2e/suites/broadside/grow.ts`, and `framed` and `landedWith` in
-  `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest` and `kLeft` take). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
+  `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest` and `kLeft` take). The
+  readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left

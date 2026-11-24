@@ -1,24 +1,15 @@
-import { mock, test } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chmodSync, existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { createServer as createHttpServer } from "node:http";
 import type { Server as HttpServer } from "node:http";
 import { createServer } from "node:net";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
-import type { LaunchTuning } from "../../e2e/support/launch.ts";
 import { cleanup, launchBrowser } from "../../e2e/harness.ts";
-import {
-  STAND_IN_BROWSER,
-  STAND_IN_COUNTER,
-  STAND_IN_SILENT_VAR,
-  standInTarget,
-} from "../../test-support/stand-in-browser.ts";
+import { STAND_IN_COUNTER, standInTarget } from "../../test-support/stand-in-browser.ts";
+import { STAND_IN_TUNING, standInBrowser, type StandInOptions } from "../../test-support/stand-in-launch.ts";
 import { settle } from "../../test-support/launch-settle.ts";
 import { goneWithin, isAlive } from "../../test-support/process-fakes.ts";
-
-// REAL gives a stand-in node child 3000ms to bind: on ten CI runs through 2026-10-03 (PR #735) the slowest second stand-in came up in about 420ms.
-const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
 
 function freePort(): Promise<number> {
   return new Promise((resolve) => {
@@ -29,41 +20,17 @@ function freePort(): Promise<number> {
   });
 }
 
-async function standIn(silent: number, body = `exec "${process.execPath}" "${STAND_IN_BROWSER}" "$@"`) {
-  const dir = mkdtempSync(join(tmpdir(), "launch-test-"));
-  const saved = { tmp: process.env["TMPDIR"], silent: process.env[STAND_IN_SILENT_VAR] };
-  process.env["TMPDIR"] = dir;
-  process.env[STAND_IN_SILENT_VAR] = String(silent);
-  const browser = join(dir, "browser");
-  writeFileSync(browser, `#!/bin/sh\n${body}\n`);
-  chmodSync(browser, 0o755);
-  const logged = mock.method(console, "error", () => {});
-  const restore = () => {
-    logged.mock.restore();
-    if (saved.tmp === undefined) delete process.env["TMPDIR"];
-    else process.env["TMPDIR"] = saved.tmp;
-    if (saved.silent === undefined) delete process.env[STAND_IN_SILENT_VAR];
-    else process.env[STAND_IN_SILENT_VAR] = saved.silent;
-    rmSync(dir, { recursive: true, force: true });
-  };
-  const lines = () => logged.mock.calls.map((c) => String(c.arguments[0]));
-  return {
-    dir,
-    browser,
-    port: await freePort(),
-    restore,
-    lines,
-    profiles: () => readdirSync(dir).filter((n) => n.startsWith("vellum-e2e-")),
-  };
+async function standIn(options: StandInOptions) {
+  return { ...standInBrowser("vellum-e2e-", options), port: await freePort() };
 }
 
 test(
   "the harness's own launch, with a stand-in browser silent on its first start, comes up on attempt 2 and cleanup removes the rest",
   { timeout: 60_000 },
   async () => {
-    const s = await standIn(1);
+    const s = await standIn({ silent: 1 });
     try {
-      const target = await launchBrowser(s.browser, s.port, REAL);
+      const target = await launchBrowser(s.browser, s.port, STAND_IN_TUNING);
       assert.equal(target.webSocketDebuggerUrl, standInTarget(s.port, 2));
       const retry = s
         .lines()
@@ -97,9 +64,9 @@ test(
   "the harness's own launch, every stand-in silent, fails with each attempt's own captured output",
   { timeout: 60_000 },
   async () => {
-    const s = await standIn(2);
+    const s = await standIn({ silent: 2 });
     try {
-      const got = await settle(launchBrowser(s.browser, s.port, { ...REAL, attempts: 2, polls: 100 }));
+      const got = await settle(launchBrowser(s.browser, s.port, { ...STAND_IN_TUNING, attempts: 2, polls: 100 }));
       assert.match(
         got.error?.message ?? "",
         new RegExp(
@@ -118,12 +85,12 @@ test(
   "the harness's own launch checks the debug port first: a port already held starts no browser",
   { timeout: 60_000 },
   async () => {
-    const s = await standIn(0);
+    const s = await standIn({});
     const holder: HttpServer = await new Promise((resolve) => {
       const h = createHttpServer((_req, res) => res.end("{}")).listen(s.port, "127.0.0.1", () => resolve(h));
     });
     try {
-      const got = await settle(launchBrowser(s.browser, s.port, REAL));
+      const got = await settle(launchBrowser(s.browser, s.port, STAND_IN_TUNING));
       assert.match(got.error?.message ?? "", new RegExp(`something is already listening on e2e debug port ${s.port}`));
       assert.equal(
         existsSync(join(s.dir, STAND_IN_COUNTER)),
@@ -142,7 +109,7 @@ test(
   "the harness's own launch with no tuning passed takes the ruled default: three attempts, a 2s pause before each retry",
   { timeout: 60_000 },
   async () => {
-    const s = await standIn(0, "exit 1");
+    const s = await standIn({ body: () => "exit 1" });
     try {
       const got = await settle(launchBrowser(s.browser, s.port));
       assert.match(
