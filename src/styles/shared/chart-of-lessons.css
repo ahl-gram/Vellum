@@ -101,6 +101,9 @@
 .col-paper .col-next:not(.on) {
   display: none;
 }
+.col-paper .col-next {
+  pointer-events: none;
+}
 .col-paper .col-next.west .east,
 .col-paper .col-next:not(.west) .west {
   display: none;
