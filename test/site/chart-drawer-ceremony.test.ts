@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
+import { tabLine } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
@@ -381,4 +382,11 @@ test("CT19 a survey laid a second time is refused in the drawer's own voice and 
   assert.equal(table.lay(surveyAt(0), SVG, "again"), false, "the second lay of the same survey is refused");
   assert.equal(said.at(-1), "this survey is already on the table", "in the drawer's own words for a duplicate");
   assert.equal(changes.length, written, "and the table it holds is not written");
+});
+
+test("CT20 a lay writes the Drawer's tab the count of the table it now holds (Issue #1425, from the Primer's walk of explorer-dog-ear)", () => {
+  const { table, els } = drawer();
+  table.restore(fill(1));
+  table.lay(surveyAt(5), SVG, "five");
+  assert.equal(els.tab.textContent, tabLine([surveyAt(0), surveyAt(5)]));
 });
