@@ -143,13 +143,9 @@ function connect(
     let next = 0;
     const waiting = new Map<number, (reply: Reply | string) => void>();
     const loads: (() => void)[] = [];
-    const opening = setTimeout(() => {
-      reject(new Error(`WebSocket open: no reply in ${replyMs} ms`));
-    }, replyMs);
-    socket.addEventListener("error", () => {
-      clearTimeout(opening);
-      reject(new Error(`could not open ${url}`));
-    });
+    // unref'd so a timer left after the open cannot hold a finished press up to replyMs; the open's own socket keeps the loop alive until it fires
+    setTimeout(() => reject(new Error(`WebSocket open: no reply in ${replyMs} ms`)), replyMs).unref();
+    socket.addEventListener("error", () => reject(new Error(`could not open ${url}`)));
     socket.addEventListener("close", (event) => {
       for (const answer of [...waiting.values()])
         answer(`the browser's DevTools connection closed (code ${event.code})`);
@@ -159,8 +155,7 @@ function connect(
       if (reply.id !== undefined) waiting.get(reply.id)?.(reply);
       else if (reply.method === "Page.loadEventFired") loads.splice(0).forEach((done) => done());
     });
-    socket.addEventListener("open", () => {
-      clearTimeout(opening);
+    socket.addEventListener("open", () =>
       resolve({
         socket,
         send: (method, params = {}) =>
@@ -185,8 +180,8 @@ function connect(
               done(true);
             });
           }),
-      });
-    });
+      }),
+    );
   });
 }
 
