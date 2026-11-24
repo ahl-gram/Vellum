@@ -121,7 +121,7 @@ items that unlock the most downstream value, then the re-roll tail.
 `src/static/charts/arms-42-*.svg`, `src/static/og.png`, and `src/static/favicon.svg` plus
 `src/static/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
 to the Fell SC woff2). Everything else the site serves is generated into `generated/`, which nothing tracks, and rebuilt per deploy:
-the atlas, the gallery, the bundle twins and their chunks, and the fonts copied
+the atlas, the gallery, the Primer's pictures, the bundle twins and their chunks, and the fonts copied
 from `design/kit/fonts/`.
 
 **The committed list above is the rule; there is no shorter procedure that derives it.** "Referenced

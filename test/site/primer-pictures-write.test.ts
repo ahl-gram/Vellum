@@ -8,7 +8,6 @@ import { SKIP_PICTURES } from "../../scripts/primer-pictures/browser.ts";
 import { writePictures, type Press } from "../../scripts/primer-pictures/main.ts";
 import type { PressOptions, Pressing } from "../../scripts/primer-pictures/press.ts";
 import { chartSignature } from "../../scripts/primer-pictures/signature.ts";
-import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
 const DRESS = "style=ink&legend=1&arms=0&beasts=0";
 const step = (id: string, picture?: string): Step => ({
@@ -57,7 +56,6 @@ test("PIC9 with no browser where none is required, the pictures are skipped with
 });
 
 test("PIC10 with a browser, every pictured step's chart is drawn, handed to the press at the pictures' width and quality, named in the manifest with its file and its chart's signature, and logged with the browser and the bytes", async () => {
-  useCommittedGazetteer();
   const ladders = ladderOf([
     step("pic-plain", `/explorer/#seed=42&${DRESS}`),
     step(

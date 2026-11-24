@@ -32,7 +32,7 @@ interface Target {
   readonly webSocketDebuggerUrl?: string;
 }
 
-async function pageSocket(port: number, failure: () => string | null): Promise<string> {
+async function pageSocket(browser: string, port: number, failure: () => string | null): Promise<string> {
   const give = (what: string): string =>
     `${what}; point VELLUM_BROWSER at a Chromium-family browser that runs headless`;
   for (let waited = 0; waited < LAUNCH_MS; waited += POLL_MS) {
@@ -45,7 +45,7 @@ async function pageSocket(port: number, failure: () => string | null): Promise<s
     if (page?.webSocketDebuggerUrl !== undefined) return page.webSocketDebuggerUrl;
     await sleep(POLL_MS);
   }
-  throw new Error(give(`the browser opened no page to press with in ${LAUNCH_MS} ms`));
+  throw new Error(give(`${browser} opened no page to press with in ${LAUNCH_MS} ms`));
 }
 
 interface Reply {
@@ -132,7 +132,7 @@ export async function pressPictures(
   );
   let socket: WebSocket | null = null;
   try {
-    const url = await pageSocket(port, () =>
+    const url = await pageSocket(browser, port, () =>
       spawnError !== null
         ? `${browser} did not start: ${spawnError}`
         : exited !== undefined
