@@ -82,7 +82,9 @@ test("pressRead hands back a read marked never loaded, naming its room, when the
   const faults = pressSpacingFaults("/prospect/", got);
   assert.equal(faults.length, 1);
   assert.ok(
-    faults[0]!.startsWith("/prospect/: read before the fonts loaded (never loaded: settle timeout rh33-press /prospect/"),
+    faults[0]!.startsWith(
+      "/prospect/: read before the fonts loaded (never loaded: settle timeout rh33-press /prospect/",
+    ),
     faults[0],
   );
 });
