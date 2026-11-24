@@ -1,6 +1,6 @@
 import { DEFAULT_PACE, PACES } from "../living-chart/pace.ts";
 import { ROAD_ASK, ROAD_TAKE } from "../living-chart/voyage-log-panel.ts";
-import { aria, click, countWord, set, text, type Ladder } from "./shape.ts";
+import { aria, click, countWord, PLAIN_DRESS, set, text, type Ladder } from "./shape.ts";
 
 const AT = "/reading-room/#seed=42";
 const HURRIED = PACES.filter((k) => k !== DEFAULT_PACE);
@@ -68,6 +68,7 @@ export const READING_ROOM: Ladder = {
             { kind: "key", css: ".rr-colophon input", key: "Enter" },
             click(".rr-read"),
           ],
+          picture: `/reading-room/#seed=1155&${PLAIN_DRESS}`,
           kind: "play",
         },
       ],

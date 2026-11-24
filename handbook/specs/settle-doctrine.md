@@ -424,7 +424,11 @@ section points there rather than restating it.
   attempt's own reason, its pid and its kill-to-gone time, and a rescued lane passes, so read the
   logs of passing runs before asserting a cause or moving the wait:
   `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`, grepped for
-  `browser up on attempt` and `exposed no devtools target`. The same read of the failing lanes'
+  `browser up on attempt` and `exposed no devtools target`. **A lane's first browser is its
+  build's.** The Primer's picture press (`launchPress` in `scripts/primer-pictures/press.ts`)
+  launches through the same `launchWithRetry` with `LAUNCH_TUNING` and prints the same two lines in
+  the build step, so a job's cold start is the first `browser up on attempt` line in its log, and
+  the lane's own launch, after it, starts warm. The same read of the failing lanes'
   logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
   it began; the probe that reproduces it against a real browser is in
   `handbook/plans/600/621/621-plan.md`.

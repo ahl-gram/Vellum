@@ -6,6 +6,7 @@ import { routeOf } from "../../src/site/shared/primer/judge.ts";
 import { PRIMER_ROOMS } from "../../e2e/support/primer-rooms.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
+import { picturedSteps } from "../../src/site/primer/pictures.ts";
 
 const routes = LADDERS.map((l) => l.route);
 
@@ -38,4 +39,13 @@ test("PS2 every step's address opens a room the check can open, the room its Try
     steps.some(({ s, route }) => routeOf(s.at) !== route),
     "no step opens a room other than its ladder's, so nothing here tells the two keys apart",
   );
+});
+
+test("PS3 every pictured step opens a room whose chart the check can read (Issue #1255)", () => {
+  const pictured = picturedSteps(LADDERS);
+  assert.ok(pictured.length > 0, "the ladders name no picture");
+  for (const p of pictured) {
+    const chart = PRIMER_ROOMS[routeOf(p.at)]?.chart;
+    assert.ok(typeof chart === "string" && chart !== "", `${p.id} opens a room with no chart to read`);
+  }
 });

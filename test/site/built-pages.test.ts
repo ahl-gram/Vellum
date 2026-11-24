@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { AFTERWARD, roomIdOf } from "../../src/site/primer/page.ts";
+import { chartFrame } from "../../src/site/primer/pictures.ts";
 import { datelineOf } from "../../src/site/primer/words.ts";
 import { LADDERS, seated } from "../../src/site/shared/primer/ladders.ts";
 import { CULTURES } from "../../src/society/names.ts";
@@ -19,6 +20,7 @@ import {
   entryCountFaults,
   indexCountFaults,
   openFaults,
+  pictureFaults,
   pressFaults,
   stepFaults,
 } from "../../test-support/built-reads/primer.ts";
@@ -132,6 +134,10 @@ test("BP-P5 the index slip counts what each kind of room lists: the Primer's row
   );
   assert.deepEqual(indexCountFaults(documentOf(page("/primer/")), steps, AFTERWARD), []);
   for (const route of ["/faq/", "/glossary/"]) assert.deepEqual(entryCountFaults(documentOf(page(route))), [], route);
+});
+
+test("BP-P6 every step whose data names a picture carries it beside the step, sized to the chart's frame, decorative and eager at low priority, and every other step an empty frame (Issue #1155 ruling 8, N8)", () => {
+  assert.deepEqual(pictureFaults(documentOf(page("/primer/")), primerSteps, chartFrame()), []);
 });
 
 test("BP-T1 every page whose room the Primer teaches carries one press on its own line straight after the head cluster's trail, opening that room on the Primer, and no other page carries one (Issue #1155 ruling 2 and N4; Issue #1254)", () => {

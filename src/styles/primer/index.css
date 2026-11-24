@@ -183,6 +183,14 @@
 .primer .pic {
   width: 13.5rem;
 }
+.primer .pic img {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  border: 1px solid var(--line-tan);
+  box-shadow: var(--sheet-shadow);
+}
 .primer li.commission {
   background: linear-gradient(90deg, rgb(from var(--control-gold) r g b / 0.55), transparent 80%);
 }

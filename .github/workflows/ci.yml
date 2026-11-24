@@ -74,6 +74,9 @@ jobs:
       - name: Build site into dist/
         if: steps.scope.outputs.docs_only != 'true'
         run: npm run build
+        env:
+          VELLUM_BROWSER: /usr/bin/google-chrome
+          VELLUM_REQUIRE_BROWSER: '1'
       - name: Runner shape and dist/ hash
         if: steps.scope.outputs.docs_only != 'true'
         run: |

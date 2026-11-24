@@ -1,4 +1,4 @@
-// The Primer check walks a ladder (Issue #1250): each step opened at its own address on a bare device, its first acts done, every control it names read where it stands, its address read for every key, and, where it writes a then, the step done and the outcome read.
+// The Primer check walks a ladder (Issue #1250): each step opened at its own address on a bare device, its first acts done, every control it names read where it stands, its address read for every key, and, where it writes a then, the step done and the outcome read, and where it carries a picture, the room's own chart held against it.
 import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import type { Ladder, Step, Words } from "../../src/site/shared/primer/shape.ts";
 import type { SuiteContext } from "../types.ts";
@@ -16,12 +16,14 @@ import {
   type Facts,
   type Reach,
 } from "../../src/site/shared/primer/judge.ts";
-import { ARM, BARE, FACTS, HASH, HIT } from "./primer-reads.ts";
+import { ARM, BARE, FACTS, HASH, HIT, PICTURES, SIGNATURE } from "./primer-reads.ts";
 import { PRIMER_ROOMS, type PrimerRoom, type Rest } from "./primer-rooms.ts";
 import { withReducedMotion } from "./reduced-motion.ts";
 import { scopedHealth } from "./room.ts";
 import { makeSettle, makeStable } from "./settle.ts";
 import { makeStep } from "./step.ts";
+import { PICTURE_MANIFEST } from "../../src/site/primer/pictures.ts";
+import { signatureFaults, type PictureManifest } from "../../scripts/primer-pictures/signature.ts";
 
 // 2026-11-09, Issue #1250: 300 polls of 50 ms, 15 s, the budget `REDRAFT_TRIES` in `e2e/suites/zoom/kit.ts` gives the slowest redraft a suite waits on, since a step's rest and its waits can stand behind one; the boot takes the same, as `waitReady` in `e2e/harness.ts` gives 200 of 75 ms.
 const TRIES = 300;
@@ -30,6 +32,7 @@ const TABLET = { width: 1024, height: 768 } as const;
 const NAMES = "names every control as it stands, worded as quoted and reachable, held or hidden as the step says";
 const KEPT = "keeps every key of its address";
 const SHOWS = "shows what it says once the step is done";
+const PICTURED = "leaves the chart its picture shows";
 
 export type Read = {
   readonly css: string;
@@ -113,7 +116,9 @@ const told = (reads: readonly Read[]): string => {
     .join("; ");
 };
 
-export async function walkStep(k: PrimerKit, step: Step, arm: Arm): Promise<void> {
+export type Pictures = () => Promise<PictureManifest | null>;
+
+export async function walkStep(k: PrimerKit, step: Step, arm: Arm, pictures: Pictures): Promise<void> {
   const name = `${step.id}${ARM_NAME[arm]}`;
   await k.bare(name);
   const threw = await k.arrive(step.at, name);
@@ -130,7 +135,7 @@ export async function walkStep(k: PrimerKit, step: Step, arm: Arm): Promise<void
   );
   const lost = keysLost(step.at, await k.evaluate(HASH));
   k.check(`${name} ${KEPT}`, lost.length === 0, lost.length === 0 ? step.at : `lost ${lost.join(", ")} of ${step.at}`);
-  if (step.then === undefined) return;
+  if (step.then === undefined && step.picture === undefined) return;
   if (!named.every((r) => r.ok) || lost.length > 0 || !onItsArm(step, arm)) {
     console.log(
       `  ${name}: not done, ${onItsArm(step, arm) ? "since what it names is not as it says" : "since it is not this arm's step"}`,
@@ -138,17 +143,31 @@ export async function walkStep(k: PrimerKit, step: Step, arm: Arm): Promise<void
     return;
   }
   for (const a of step.do ?? []) await perform(k, a, `${name} do`);
-  const shown = await k.readAll(step.then, (w) => expectFor(w, step, arm, true));
-  k.check(
-    `${name} ${SHOWS}`,
-    shown.every((r) => r.ok),
-    told(shown),
-  );
+  if (step.then !== undefined) {
+    const shown = await k.readAll(step.then, (w) => expectFor(w, step, arm, true));
+    k.check(
+      `${name} ${SHOWS}`,
+      shown.every((r) => r.ok),
+      told(shown),
+    );
+  }
+  if (step.picture !== undefined) {
+    const css = k.room().chart;
+    const got = css === null ? null : await k.evaluate(SIGNATURE(css));
+    const want = (await pictures())?.[step.id];
+    const faults =
+      want === undefined
+        ? [`the build's ${PICTURE_MANIFEST} names no picture for ${step.id}`]
+        : signatureFaults(want.signature, got);
+    k.check(`${name} ${PICTURED}`, faults.length === 0, faults.length === 0 ? String(css) : faults.join("; "));
+  }
 }
 
 export async function walkLadder(ctx: SuiteContext, ladder: Ladder, health: string): Promise<void> {
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
+  let manifest: Promise<PictureManifest | null> | null = null;
+  const pictures: Pictures = () => (manifest ??= ctx.evaluate(PICTURES, true));
   const kitOf = (s: Step): PrimerKit => primerKit(ctx, routeOf(s.at));
   const steps = ladder.lessons
     .flatMap((l) => l.steps)
@@ -157,7 +176,8 @@ export async function walkLadder(ctx: SuiteContext, ladder: Ladder, health: stri
       if (holder !== null) console.log(`  ${s.id}: reads exactly what ${holder} reads, so it is walked there`);
       return holder === null;
     });
-  const walk = (s: Step, arm: Arm): Promise<void> => step(`${s.id}${ARM_NAME[arm]}`, () => walkStep(kitOf(s), s, arm));
+  const walk = (s: Step, arm: Arm): Promise<void> =>
+    step(`${s.id}${ARM_NAME[arm]}`, () => walkStep(kitOf(s), s, arm, pictures));
   await ctx.send("Emulation.setDeviceMetricsOverride", DESK);
   await withReducedMotion(ctx, async () => {
     for (const s of steps) await walk(s, "desk");
