@@ -1,8 +1,9 @@
 import { TOUCH_PRIMARY } from "../shared/chart-touch.ts";
 import { prefersReduce } from "../shared/reduced-motion.ts";
 import { clearSeals, readSeals } from "../shared/primer/seals.ts";
-import type { Only } from "../shared/primer/hand-steps.ts";
+import type { Device, Only } from "../shared/primer/hand-steps.ts";
 import { roomOnArrival, type ArrivalRoom } from "./arrival.ts";
+import { inkChart, lightChart } from "./chart-ink.ts";
 import { SEALED } from "./words.ts";
 
 const ONLY: ReadonlySet<string> = new Set(["touch", "motion"]);
@@ -20,6 +21,9 @@ export function bindPrimer(doc: Document = document): void {
       return only !== undefined && ONLY.has(only) ? { id: li.id, only: only as Only } : { id: li.id };
     }),
   }));
+  const here: Device = { touch: matchMedia(TOUCH_PRIMARY).matches, motion: !prefersReduce() };
+  const chart = primer.querySelector(".col-chart");
+  let sealed: ReadonlySet<string> = new Set();
   const lessons = [...doc.querySelectorAll<HTMLElement>("#index .index > li[data-sec]")].flatMap((row) => {
     const list = row.querySelector<HTMLElement>(".entries");
     return list === null ? [] : [{ id: row.dataset["sec"] ?? "", list }];
@@ -37,14 +41,21 @@ export function bindPrimer(doc: Document = document): void {
         press.setAttribute("aria-expanded", String(on));
       }
     }
+    if (chart !== null)
+      lightChart(
+        chart,
+        arrival.find((r) => r.id === id),
+        sealed,
+        here,
+      );
   };
   const roomOf = (id: string): string | null => {
     if (id === "") return null;
     const room = doc.getElementById(id)?.closest("section.room");
     return room ? idOf(room) : null;
   };
-  const drawSeals = (): ReadonlySet<string> => {
-    const sealed = readSeals(device);
+  const drawSeals = (): void => {
+    sealed = readSeals(device);
     for (const li of primer.querySelectorAll<HTMLElement>("li.step")) {
       const on = sealed.has(li.id);
       li.classList.toggle("sealed", on);
@@ -58,17 +69,14 @@ export function bindPrimer(doc: Document = document): void {
         for (const name of ["title", "role", "aria-label"]) num.removeAttribute(name);
       }
     }
-    return sealed;
+    if (chart !== null) inkChart(chart, arrival, sealed, here);
   };
   const show = (id: string): void => doc.getElementById(id)?.scrollIntoView({ block: "start", inline: "nearest" });
 
   const hash = location.hash.slice(1);
   const target = roomOf(hash);
-  const sealed = drawSeals();
-  const first = roomOnArrival(arrival, target, sealed, {
-    touch: matchMedia(TOUCH_PRIMARY).matches,
-    motion: !prefersReduce(),
-  });
+  drawSeals();
+  const first = roomOnArrival(arrival, target, sealed, here);
   if (first !== null) {
     open(first);
     if (target !== null) show(hash);
@@ -86,8 +94,8 @@ export function bindPrimer(doc: Document = document): void {
       }
       return;
     }
-    const link = el?.closest<HTMLAnchorElement>('a[href^="#"]');
-    const room = link ? roomOf(link.hash.slice(1)) : null;
+    const link = el?.closest('a[href^="#"]');
+    const room = link ? roomOf((link.getAttribute("href") ?? "").slice(1)) : null;
     if (room !== null) open(room);
   });
   window.addEventListener("hashchange", () => {

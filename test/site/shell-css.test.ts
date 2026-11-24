@@ -67,6 +67,13 @@ test("src/styles/shared/shell.css declares each palette token once at its ratifi
   assert.equal(declared.get("--the-deep")?.length, 1, "the walnut deep is declared once, so ground and band share it");
 });
 
+test("SC1 the chart of lessons' three washes are declared once each in src/styles/shared/shell.css, as their house colour at its ruled strength (Issue #1257)", () => {
+  const declared = shellDeclarations();
+  assert.deepEqual(declared.get("--lessons-land"), ["rgb(from var(--parchment-deep) r g b / 0.6)"]);
+  assert.deepEqual(declared.get("--lessons-sea"), ["rgb(from var(--line-tan) r g b / 0.4)"]);
+  assert.deepEqual(declared.get("--lessons-road"), ["rgb(from var(--ink-faded) r g b / 0.75)"]);
+});
+
 test("the composers dress from the same palette (#269 review follow-up)", async () => {
   // The generated atlas and gallery cannot render through BaseLayout (the single-file download links nothing external), so each declares the tokens in its own :root.
   const { GALLERY_PAGE_CSS, cardFigureHtml } = await import("../../src/cli/gallery.ts");

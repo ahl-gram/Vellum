@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
 import Fog from "../../layouts/Fog.astro";
 import IndexSlip from "../../layouts/IndexSlip.astro";
+import ChartOfLessons from "../../layouts/ChartOfLessons.astro";
 import { LEANED_ON } from "../../site/shared/primer/ladders.ts";
 import { AFTERWARD, primerPage } from "../../site/primer/page.ts";
 import { chartFrame } from "../../site/primer/pictures.ts";
@@ -14,7 +15,7 @@ const first = page.rooms[0]?.id ?? AFTERWARD;
 const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 ---
 
-<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/primer-marks.css", "/shared/document-room.css"]} desk="open">
+<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/primer-marks.css", "/shared/chart-of-lessons.css", "/shared/document-room.css"]} desk="open">
 <Fog />
 <RoomFolio slot="desk" region room={ROOM} tagline={TAGLINE}>
   <p class="dateline">{page.dateline}</p>
@@ -22,6 +23,7 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 <IndexSlip slot="desk" sections={page.index} kind="lessons" where={WHERE} />
 <div class="sheet">
 <div class="primer">
+<ChartOfLessons rooms={page.rooms} />
 <div class="opening">
 <p class="lede">{LEDE}</p>
 <p>Press <a class="inline-try" href={`#${first}`}>{TRY}</a> beside a step and its room opens already set for that step, so you may begin anywhere and skip whatever you know. Nothing you do there can spoil a world: every world comes back from its number.</p>
