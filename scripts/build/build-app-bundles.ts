@@ -7,7 +7,7 @@ import { GENERATED } from "./clean-generated.ts";
 
 /** Issue #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under generated/; the worker is emitted ONCE at explorer/worker.bundle.js, its own chunks apart under explorer/chunks/worker/, and every surface that runs a job through `initWorker` in `src/site/explorer/worker-client.ts` shares it, shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill), save that a page's import() goes through the bundler's preload helper, which fires vite:preloadError on window when a load fails. */
 
-const REPO = fileURLToPath(new URL("..", import.meta.url));
+const REPO = fileURLToPath(new URL("../..", import.meta.url));
 
 export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },

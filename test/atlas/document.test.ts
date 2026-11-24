@@ -11,7 +11,7 @@ import {
   svgToDataUri,
   type AtlasDocumentData,
 } from "../../src/atlas/document.ts";
-import { REPO, SERVED_SOURCES, sourceFor } from "../../scripts/served-sources.ts";
+import { REPO, SERVED_SOURCES, sourceFor } from "../../scripts/build/served-sources.ts";
 import { prospectPlates } from "../../src/atlas/compose.ts";
 import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";

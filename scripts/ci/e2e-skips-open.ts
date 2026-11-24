@@ -1,4 +1,4 @@
-import { E2E_SKIPS, closedSkips } from "../e2e/support/skips.ts";
+import { E2E_SKIPS, closedSkips } from "../../e2e/support/skips.ts";
 
 const seen = new Map<number, string>();
 

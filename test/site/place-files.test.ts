@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { PLACE_NAMES, PLACE_TABLE, writePlaceFiles, writePlaceNames } from "../../scripts/place-files.ts";
+import { PLACE_NAMES, PLACE_TABLE, writePlaceFiles, writePlaceNames } from "../../scripts/build/place-files.ts";
 import { NAMES_FILE, placeFile } from "../../src/site/explorer/place-fetch.ts";
 import { PLACE_ID_LIST } from "../../src/world/outline-place-ids.ts";
 import { placeId } from "../../src/world/outline-ids.ts";

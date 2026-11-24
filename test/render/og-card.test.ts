@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { KIT_FONTS } from "../../scripts/kit-fonts.ts";
+import { KIT_FONTS } from "../../scripts/build/kit-fonts.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";

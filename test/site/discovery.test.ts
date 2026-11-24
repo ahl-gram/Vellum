@@ -17,7 +17,7 @@ import {
   llmsTxt,
   robotsTxt,
   sitemapXml,
-} from "../../scripts/generate-discovery.ts";
+} from "../../scripts/build/generate-discovery.ts";
 
 // sitemap.xml, robots.txt and llms.txt are GENERATED from NAV_ITEMS, so every route assertion iterates NAV_ITEMS; the origin is a parameter, exercised with a non-Vellum domain so a hardcoded www.vellumworlds.com in a generator fails here.
 
@@ -146,7 +146,7 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
 test("astro:generate ends by generating the discovery files into generated/", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.ok(
-    pkg.scripts["astro:generate"]!.includes("node scripts/generate-discovery.ts"),
+    pkg.scripts["astro:generate"]!.includes("node scripts/build/generate-discovery.ts"),
     "astro:generate must run the discovery step or dist/ has no sitemap",
   );
   assert.ok(

@@ -118,7 +118,7 @@ test("every comment in the TypeScript tree writes Issue #N or PR #N, each number
 
 const ROOT_WITNESSES: Readonly<Record<string, string>> = {
   e2e: "e2e/harness.ts",
-  scripts: "scripts/build-app-bundles.ts",
+  scripts: "scripts/build/build-app-bundles.ts",
   src: "src/cli/main.ts",
   test: "test/repo/lint-wiring.test.ts",
   "test-support": "test-support/element-shim.ts",

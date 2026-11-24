@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { kitClassesFrom, OWNED_SHEETS } from "../../scripts/lint/sheet-owners.ts";
 import { sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
-import { STYLES } from "../../scripts/served-sources.ts";
+import { STYLES } from "../../scripts/build/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import { type Plant, reportedLines, resolvedRule } from "../../test-support/source-shape-reports.ts";

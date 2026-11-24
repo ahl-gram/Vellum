@@ -4,14 +4,14 @@ import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// npm test runs only the .test.ts files under test/ (`SUITE` in `scripts/unit-suite.ts`), while a bare node --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules), so all three defects below hide in a green run: a suite under test/ under another name, or outside test/, never runs under npm test, a module so placed or named is a phantom pass under a bare run, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
+// npm test runs only the .test.ts files under test/ (`SUITE` in `scripts/ci/unit-suite.ts`), while a bare node --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules), so all three defects below hide in a green run: a suite under test/ under another name, or outside test/, never runs under npm test, a module so placed or named is a phantom pass under a bare run, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
 const pruned = (name: string) => name === "node_modules" || name.startsWith(".");
 const prunedAtRoot = (name: string) => pruned(name) || name === "out";
 
-// A sibling suite removes generated/ during the same npm test run (`cleanGenerated` in `scripts/clean-generated.ts`), racing this walk, so tolerating ENOENT errs toward MISSING a collectible name in a tree that vanished mid-walk; it is the one place this file errs toward a miss rather than a false positive.
+// A sibling suite removes generated/ during the same npm test run (`cleanGenerated` in `scripts/build/clean-generated.ts`), racing this walk, so tolerating ENOENT errs toward MISSING a collectible name in a tree that vanished mid-walk; it is the one place this file errs toward a miss rather than a false positive.
 const entriesOf = (dir: string) => {
   try {
     return readdirSync(dir, { withFileTypes: true });

@@ -9,7 +9,7 @@ import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
 import { huntProjection } from "../../src/site/seed-of-the-day/app-hunt.ts";
 import { rv4TiltAndFacing } from "../../e2e/suites/room-voyage-route.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
-import { stringConfig } from "../../scripts/build-app-bundles.ts";
+import { stringConfig } from "../../scripts/build/build-app-bundles.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
 import { LOD_BANDS } from "../../src/world/lod.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";

@@ -4,9 +4,9 @@ import { spawnSync } from "node:child_process";
 import { lstatSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { UNIT_SECONDS } from "../../scripts/unit-shards.ts";
+import { UNIT_SECONDS } from "../../scripts/ci/unit-shards.ts";
 
-const LAUNCHER = resolve(import.meta.dirname, "..", "..", "scripts", "unit-suite.ts");
+const LAUNCHER = resolve(import.meta.dirname, "..", "..", "scripts", "ci", "unit-suite.ts");
 const TAP = "--test-reporter=tap";
 // A cap on a hang, never a budget (2026-11-01: each seeded run took about 0.2 s on a Mac).
 const CHILD_LIMIT_MS = 60_000;

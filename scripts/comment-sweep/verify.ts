@@ -1,5 +1,5 @@
 import type { Changed, ModeChange, Tree } from "../comment-judge/tree.ts";
-import { isDoc } from "../docs-only.ts";
+import { isDoc } from "../ci/docs-only.ts";
 import { pageTokens } from "./page-tokens.ts";
 import { lineFinder, scriptTokens, sheetTokens, type Token } from "./tokens.ts";
 

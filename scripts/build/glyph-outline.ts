@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import * as fontkit from "fontkit";
-import type { GlyphOutline } from "../src/render/favicon.ts";
+import type { GlyphOutline } from "../../src/render/favicon.ts";
 import { KIT_FONTS } from "./kit-fonts.ts";
 
 export const FELL_SC_WOFF2 = join(KIT_FONTS, "im-fell-english-sc-latin-400-normal.woff2");

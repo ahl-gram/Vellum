@@ -47,7 +47,7 @@ const BLIND_SPOTS =
 test("no module reads process.argv[1], the path it was started by as typed, to tell whether it is the entry: a symlinked launch makes that check skip, and import.meta.main is the way round it (Issue #1180)", async () => {
   const messages = await plantMessages(
     PLANT.map(([line]) => line),
-    "scripts/regen-hero-charts.ts",
+    "scripts/build/regen-hero-charts.ts",
   );
   assert.ok(
     REFUSED.length > 0 && REFUSED.length < PLANT.length,

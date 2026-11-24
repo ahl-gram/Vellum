@@ -6,7 +6,7 @@ import { join, relative, resolve } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import * as prettier from "prettier";
 import formatConfig from "../../prettier.config.ts";
-import { PLATE_FACES, faceModulePath } from "../../scripts/plate-face.ts";
+import { PLATE_FACES, faceModulePath } from "../../scripts/build/plate-face.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";

@@ -30,7 +30,7 @@ test("the hand-coded shells retired with the re-shell (#254): routes and the bui
 });
 
 test("the press bundles from the src/site TypeScript entries (#260)", async () => {
-  const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
+  const { BUNDLE_ENTRIES } = await import("../../scripts/build/build-app-bundles.ts");
   assert.deepEqual(
     BUNDLE_ENTRIES.map(({ entry, twin }) => ({ entry, twin })),
     [
@@ -78,7 +78,7 @@ test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts && node scripts/primer-steps.ts && node scripts/primer-pictures/main.ts",
+    "node scripts/build/clean-generated.ts && node scripts/build/kit-fonts.ts && node scripts/build/place-files.ts && node scripts/build/build-app-bundles.ts && node scripts/build/generate-showcases.ts && node scripts/build/generate-discovery.ts && node scripts/build/primer-steps.ts && node scripts/primer-pictures/main.ts",
     "no tsc step: Vite compiles the engine graph from src/ directly",
   );
 });
@@ -115,7 +115,7 @@ async function withFixture<T>(run: (dir: string) => T | Promise<T>): Promise<T> 
 }
 
 const bundleToString = async (absEntry: string): Promise<string> =>
-  (await import("../../scripts/build-app-bundles.ts")).bundleToString(absEntry);
+  (await import("../../scripts/build/build-app-bundles.ts")).bundleToString(absEntry);
 
 test("the press inlines relative imports into a self-contained bundle (#208)", async () => {
   const out = await withFixture((dir) => bundleToString(resolve(dir, "entry.js")));
@@ -210,7 +210,7 @@ const readEdges = (root: string, file: string, text: string): Edges => {
 
 const press = (): Promise<Pressed> =>
   (pressed ??= (async () => {
-    const { bundleAppSurfaces, BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
+    const { bundleAppSurfaces, BUNDLE_ENTRIES } = await import("../../scripts/build/build-app-bundles.ts");
     const root = mkdtempSync(join(tmpdir(), "vellum-press-801-"));
     await bundleAppSurfaces(root);
     const texts = new Map<string, string>();

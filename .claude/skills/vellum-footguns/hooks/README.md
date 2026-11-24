@@ -335,7 +335,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
 
 The block lives in `.claude/settings.json` (shared, committed); read it there rather than from a copy
 here. It runs `node` on the launcher `footgun-gate.ts` beside this file (Node's native TypeScript, the
-same way `scripts/*.ts` run) only if it exists at `${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/`,
+same way `scripts/**/*.ts` run) only if it exists at `${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/`,
 and exits 0 otherwise, so a checkout without it is not blocked. The launcher holds no policy: it hands
 the call to `runClaudeHook` in `scripts/agent-infra/hooks/claude-adapter.ts`, the one place that reads
 `CLAUDE_PROJECT_DIR`, which turns the payload into the request typed in `scripts/agent-infra/hooks/request.ts`

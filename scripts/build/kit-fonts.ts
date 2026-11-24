@@ -5,7 +5,7 @@ import { GENERATED } from "./clean-generated.ts";
 
 /** Issue #706 ruling C: the design kit is the source of truth for the house faces, so `npm run astro:generate` copies `design/kit/fonts/` into the generated `generated/fonts/` and every other reader takes `KIT_FONTS`. */
 
-export const KIT_FONTS = fileURLToPath(new URL("../design/kit/fonts", import.meta.url));
+export const KIT_FONTS = fileURLToPath(new URL("../../design/kit/fonts", import.meta.url));
 
 export async function copyKitFonts(root: string, from: string = KIT_FONTS): Promise<void> {
   await cp(from, join(root, "fonts"), { recursive: true });

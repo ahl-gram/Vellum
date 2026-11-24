@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
-import { STYLES } from "../../scripts/served-sources.ts";
+import { STYLES } from "../../scripts/build/served-sources.ts";
 import { SITE_SHEETS, SRC_CSS_FILES } from "../../test-support/site-sheets.ts";
 
 // What tips and what pins its bullet is the stylesheet lint's (vellum/css-tip-goes-somewhere and vellum/css-inline-block-bullet, Issue #779 part 2d); this file holds the roster of CSS-bearing sources under src/ that the lint reaches by running them (test/repo/css-beyond-sheets.test.ts), and the sheets the lint's walk of src/styles/ reads.

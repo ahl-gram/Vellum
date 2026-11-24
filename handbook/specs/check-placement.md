@@ -72,12 +72,12 @@ belongs in.
 ## The unit suite
 
 - **`npm test` runs the `.test.ts` files under `test/` and nothing else** (`SUITE` in
-  `scripts/unit-suite.ts`), so nothing under `out/` or any other folder is ever collected. A path
+  `scripts/ci/unit-suite.ts`), so nothing under `out/` or any other folder is ever collected. A path
   after `npm test --` runs that path alone, and a flag after it reaches `node --test`, written as
   `--flag=value`, since a value written as its own word reads as a path and the run falls back to
   `node --test`'s own collection of the whole checkout. The one flag that does not reach it is
   `--test-shard=<k>/<n>` with no path beside it: the launcher runs the `k`th of `n` parts that
-  `shardOf` in `scripts/unit-shards.ts` deals by measured seconds
+  `shardOf` in `scripts/ci/unit-shards.ts` deals by measured seconds
   (`handbook/specs/site-architecture.md`, the bullet opening "`UNIT_SECONDS` is read from CI's own
   unit logs"). A suite outside `test/`, or under it under
   another name, never runs, and `test/repo/test-collection.test.ts` reds one whose name is in

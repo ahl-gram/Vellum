@@ -1,10 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { renderMap } from "../src/render/map-renderer.ts";
-import { buildOgCard, fontFaceCss, OG_FONT_FACES } from "../src/render/og-card.ts";
-import { cardStamp, stampPng } from "../src/render/og-stamp.ts";
-import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
+import { buildOgCard, fontFaceCss, OG_FONT_FACES } from "../../src/render/og-card.ts";
+import { cardStamp, stampPng } from "../../src/render/og-stamp.ts";
+import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../../src/cli/raster.ts";
 import { KIT_FONTS } from "./kit-fonts.ts";
 
 /** npm run og: regenerates the committed src/static/og.png from the hero world; committed because the Pages deploy CI has no browser to rasterize. Needs a Chromium-family browser locally. */

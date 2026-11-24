@@ -384,8 +384,10 @@ runner.
 **Place a file by what runs it.** Code the site or the CLI runs goes in `src/`, a module a page
 runs while the build presses it included. A command run to produce, check, prove or deliver
 something goes in `scripts/`. A command whose logic the product also needs keeps that logic in
-`src/` and wraps it: `scripts/place-files.ts` writes each place under the name `placeFile` in
+`src/` and wraps it: `scripts/build/place-files.ts` writes each place under the name `placeFile` in
 `src/site/explorer/place-fetch.ts` gives it, the name the site fetches.
+
+**Inside `scripts/`, a file sits in the folder of who runs it, never loose at the top.** What the site build runs, and a command that rewrites a committed file the product carries, goes in `scripts/build/`; the unit suite's launcher and the steps CI runs go in `scripts/ci/`; a small module that scripts of several kinds import goes in `scripts/shared/`; what the agents, and the sessions that dispatch them, run goes in `scripts/agent-infra/`. The house's lint rules are `scripts/lint/` and the design rounds' tools `scripts/design/`, and a command of several files keeps them in a folder of its own. `test/site/folder-layout.test.ts` holds the top of `scripts/` to this, apart from the files its `NOT_YET_PLACED` names.
 
 **The dependency points one way.** `src/` imports nothing from `scripts/`, `test/`, `test-support/`
 or `e2e/`, a type included, so a type both sides use lives in `src/` and the script or the test

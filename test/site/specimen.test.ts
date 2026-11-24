@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
-import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
-import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { DISCOVERY_ROUTES } from "../../scripts/build/generate-discovery.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build/build-app-bundles.ts";
 
 // The Specimen Book (Issue #487 item 4, cut at Issue #465 ruling 6): the kit's oracle and the live sitting's bench.
 

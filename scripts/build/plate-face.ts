@@ -2,11 +2,11 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as fontkit from "fontkit";
-import { GRID, UNITS_PER_EM, type FaceName } from "../src/prospect/letter/face.ts";
+import { GRID, UNITS_PER_EM, type FaceName } from "../../src/prospect/letter/face.ts";
 import { simplify } from "./simplify.ts";
 
-export const PLATE_FONTS = fileURLToPath(new URL("../design/kit/plate-fonts", import.meta.url));
-export const FACE_DIR = fileURLToPath(new URL("../src/prospect/letter", import.meta.url));
+export const PLATE_FONTS = fileURLToPath(new URL("../../design/kit/plate-fonts", import.meta.url));
+export const FACE_DIR = fileURLToPath(new URL("../../src/prospect/letter", import.meta.url));
 
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const DIGITS = "0123456789";

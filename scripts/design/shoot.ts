@@ -6,8 +6,8 @@ import { cleanup, start } from "../../e2e/harness.ts";
 import { dropExpectedCancellations } from "../../e2e/support/console.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { HarnessContext } from "../../e2e/types.ts";
-import { isRecord } from "../is-record.ts";
-import { freePorts } from "../free-port.ts";
+import { isRecord } from "../shared/is-record.ts";
+import { freePorts } from "../shared/free-port.ts";
 
 /** The shared camera for design work: one browser per call, every shot at a TRUE layout viewport set through device metrics, captured once. */
 

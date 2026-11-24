@@ -279,7 +279,7 @@ is run and PROVEN in a particular way.
   difference's line on each side), is added, deleted or renamed, changes type, changes mode (the
   executable bit, content unchanged), or is of a kind it does not read, and exits 1 on any of
   them; it passes the house prose `isDoc` in
-  `scripts/docs-only.ts` names. A run that exits 1 is fixed on the branch, never argued. These
+  `scripts/ci/docs-only.ts` names. A run that exits 1 is fixed on the branch, never argued. These
   things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
   `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block
   otherwise reads as a code change. Strip Astro's two comment forms, `<!-- -->` in the markup

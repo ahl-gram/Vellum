@@ -1,5 +1,5 @@
 // The head cluster against the right-hand corner on the Print Room, the page whose corner comes nearest (Issue #638; Issue #762 pull request B; one room since Issue #1273 ruling 2): resized while loaded, at a stride and at every media edge from 1024 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
-import { ATLAS_ROUTE } from "../../scripts/generate-discovery.ts";
+import { ATLAS_ROUTE } from "../../scripts/build/generate-discovery.ts";
 import { PAGE_FLOOR as FLOOR_WIDTH } from "../../src/site/shared/page-box.ts";
 import { withFonts } from "../support/fonts.ts";
 import { makeSettle } from "../support/settle.ts";
