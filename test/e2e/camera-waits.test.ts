@@ -140,6 +140,19 @@ test("cardAtDepth takes the card at depth for rest only once a frame has drawn w
   assert.equal(at.k, 1.3947436663504054);
   assert.equal(at.h, 272);
   assert.equal(s.stops(), 1);
+  const growing = scripted([
+    card(1.2, 300, 1, 1),
+    card(1.2, 300, 1, 1),
+    card(1.2, 320, 2, 1),
+    card(1.3947436663504054, 272, 3, 2),
+    card(1.3947436663504054, 272, 4, 2),
+  ]);
+  assert.equal(
+    (await cardAtDepth(ctx(growing), "P23")).h,
+    272,
+    "a card still growing under a camera that has not written is not at rest",
+  );
+  assert.equal(growing.stops(), 1);
 });
 
 const cam = (k: number, x: number, y: number, frames: number, writes: number): Framed<Cam> => ({
