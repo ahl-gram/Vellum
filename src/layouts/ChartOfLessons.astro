@@ -1,0 +1,14 @@
+---
+import { chartOfLessons, type ChartRoom } from "./chart-of-lessons.ts";
+import { chartOfLessonsSvg } from "./chart-of-lessons-svg.ts";
+import { CHART_KEY, CHART_LABEL, CHART_TITLE } from "../site/primer/words.ts";
+interface Props {
+  rooms: readonly ChartRoom[];
+}
+const svg = chartOfLessonsSvg(chartOfLessons(Astro.props.rooms), CHART_TITLE);
+---
+
+<nav class="col-head col-paper" aria-label={CHART_LABEL}>
+  <div class="col-frame" set:html={svg}></div>
+  <p class="col-caption">{CHART_KEY}</p>
+</nav>

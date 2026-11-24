@@ -1,0 +1,151 @@
+/* The chart of lessons across the head of the Primer's sheet (Issue #1257), dressed as the ruled stills of Issue #1256's round. */
+.col-head {
+  margin: 0 0 1.5rem;
+}
+.col-head .col-frame {
+  position: relative;
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-tan);
+  outline-offset: 4px;
+  background: var(--chart-paper);
+}
+.col-head .col-caption {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-flourish);
+  font-style: italic;
+  color: var(--ink-brown);
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+.col-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.col-paper .col-sea {
+  fill: none;
+  stroke: var(--lessons-sea);
+  stroke-width: 9;
+}
+.col-paper .col-land {
+  fill: var(--lessons-land);
+  stroke: var(--ink-brown);
+  stroke-width: 1.1;
+}
+.col-paper .col-road {
+  fill: none;
+  stroke: var(--lessons-road);
+  stroke-width: 0.9;
+}
+.col-paper .col-road.track {
+  stroke-dasharray: 3 4;
+}
+.col-paper .col-road.inked {
+  stroke: var(--iron-red);
+  stroke-width: 2.3;
+}
+.col-paper .col-open {
+  fill: var(--control-gold);
+  stroke: var(--ink-dark);
+  stroke-width: 0.8;
+}
+.col-paper .col-open:not(.lit) {
+  display: none;
+}
+.col-paper .col-place .pip {
+  fill: var(--parchment-bright);
+  stroke: var(--ink-dark);
+  stroke-width: 1.1;
+}
+.col-paper .col-place.landing .pip {
+  fill: none;
+  stroke-width: 1.4;
+}
+.col-paper .col-place text.name {
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+  fill: var(--ink-dark);
+  paint-order: stroke;
+  stroke: var(--chart-paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.col-paper .col-place.landing text.name {
+  font-style: italic;
+}
+.col-paper .col-place.untaught .pip {
+  fill: none;
+  stroke: var(--ink-brown);
+  stroke-width: 0.9;
+}
+.col-paper .col-place.untaught text.name {
+  fill: var(--ink-brown);
+}
+.col-paper .col-place a:hover text.name {
+  text-decoration: underline;
+}
+.col-paper .col-tick {
+  fill: none;
+  stroke-width: 3.2;
+  stroke: var(--ink-faded);
+}
+.col-paper .col-tick.sealed {
+  stroke: var(--iron-red);
+}
+.col-paper .col-tick.elsewhere {
+  stroke: var(--ink-brown);
+  stroke-width: 1;
+  stroke-dasharray: 0.9 0.9;
+}
+.col-paper .col-next:not(.on) {
+  display: none;
+}
+.col-paper .col-next.west .east,
+.col-paper .col-next:not(.west) .west {
+  display: none;
+}
+.col-paper .col-next .ring-a {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 3.6;
+}
+.col-paper .col-next .ring-b {
+  fill: none;
+  stroke: var(--control-gold);
+  stroke-width: 1.9;
+}
+.col-paper .col-next text {
+  font-family: var(--font-serif-fallback);
+  font-size: 19px;
+  fill: var(--parchment-bright);
+  stroke: var(--chart-ink);
+  stroke-width: 2.4px;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+.col-paper .col-rose circle {
+  fill: none;
+  stroke: var(--ink-brown);
+  stroke-width: 0.8;
+}
+.col-paper .col-rose path {
+  fill: var(--ink-brown);
+}
+.col-paper .col-rose text {
+  font-family: var(--font-display);
+  font-size: 9px;
+  text-anchor: middle;
+  fill: var(--ink-brown);
+}
+.col-paper .col-title {
+  font-family: var(--font-display);
+  font-size: 13.44px;
+  letter-spacing: 0.11em;
+  fill: var(--ink-dark);
+}
+@media print {
+  .col-paper :is(.col-open, .col-next) {
+    display: none;
+  }
+}
