@@ -5,6 +5,7 @@ import type { CardsKit } from "./kit.ts";
 import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
 import { mouseMove, sendClick, sendKey } from "../../support/input.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 import { bounce } from "../../support/nav.ts";
 import { explorerUp } from "../../support/explorer.ts";
 
@@ -190,6 +191,26 @@ export async function p26TailScrolls(
   await p27PageDown({ evaluate, send, check, sleep });
 }
 
+export type CardAtDepth = { k: number; w: number; h: number; boxH: number; over: number };
+const CARD_AT_DEPTH: Payload<CardAtDepth | null> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
+        return { k: window.__vellumZoomState().k, w: +r.width.toFixed(2), h: +r.height.toFixed(2), boxH: +v.height.toFixed(2), over: +(r.height - v.height).toFixed(2) }; })()`;
+
+export async function cardAtDepth(k: Pick<SuiteContext, "evaluate" | "sleep">, label: string): Promise<CardAtDepth> {
+  try {
+    const d = await makeSettle(k)(
+      framed(CARD_AT_DEPTH),
+      (d, last) =>
+        !!last &&
+        landedWith((a: CardAtDepth, b: CardAtDepth) => a.k === b.k && a.h === b.h)(d, last) &&
+        d.read.k > 1.05,
+      label,
+    );
+    return d.read;
+  } finally {
+    await k.evaluate(STOP_CAMERA_WATCH);
+  }
+}
+
 export async function p23CapHolds(
   { evaluate, send, check, sleep, wheel, settle }: CardsKit,
   open: Pinned,
@@ -200,12 +221,7 @@ export async function p23CapHolds(
   await mouseMove(send, bare.x, bare.y);
   await sleep(120, "pace: the hover lands before the wheel");
   await wheel(bare.x, bare.y, -240);
-  const deep = await settle<{ k: number; w: number; h: number; boxH: number; over: number } | null>(
-    `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
-        return { k: window.__vellumZoomState().k, w: +r.width.toFixed(2), h: +r.height.toFixed(2), boxH: +v.height.toFixed(2), over: +(r.height - v.height).toFixed(2) }; })()`,
-    (d, last) => d.k > 1.05 && !!last && d.k === last.k && d.h === last.h,
-    "P23 the camera coming to rest above k=1",
-  );
+  const deep = await cardAtDepth({ evaluate, sleep }, "P23 the camera coming to rest above k=1");
   // The card is a fixed 16rem, so its rendered width is the control that says which way the scales compose: unchanged means the counter-scale cancels the mount and the cap must be raw.
   check(
     "P23 the cap still holds once the reader zooms, and the card's own width proves the scales cancel (#633)",

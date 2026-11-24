@@ -7,6 +7,9 @@ import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { cardAtDepth, type CardAtDepth } from "../../e2e/suites/cards/cap.ts";
+import { cameraAtRest } from "../../e2e/suites/chart-drawer/floor.ts";
+import type { Cam } from "../../e2e/suites/chart-drawer/reads.ts";
 import { kLeft, kStill } from "../../e2e/suites/zoom-gestures/touch.ts";
 import type { GesturesKit } from "../../e2e/suites/zoom-gestures.ts";
 
@@ -102,10 +105,56 @@ test("kStill takes a camera that never moved for still only across two drawn fra
   const k = { evaluate: held.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
   assert.equal(await kStill(k, "ZG7"), 2, "six equal reads with no frame drawn are not a camera at rest");
   assert.equal(held.stops(), 1);
-  const startTick = scripted([read(1, 0, 0), read(1, 1, 0), read(1.2, 2, 1), read(2, 3, 2), read(2, 4, 2), read(2, 5, 2)]);
+  const startTick = scripted([
+    read(1, 0, 0),
+    read(1, 1, 0),
+    read(1.2, 2, 1),
+    read(2, 3, 2),
+    read(2, 4, 2),
+    read(2, 5, 2),
+  ]);
   const j = { evaluate: startTick.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
   assert.equal(await kStill(j, "ZG7"), 2, "one quiet frame is the glide's start tick, which writes no change");
   assert.equal(startTick.stops(), 1);
+});
+
+const card = (k: number, h: number, frames: number, writes: number): Framed<CardAtDepth> => ({
+  read: { k, w: 256, h, boxH: 272, over: h - 272 },
+  frames,
+  writes,
+});
+
+test("cardAtDepth takes the card at depth for rest only once a frame has drawn with no camera write between (Issue #1446)", async () => {
+  const s = scripted([
+    card(1, 272, 0, 0),
+    card(1.2, 300, 1, 1),
+    card(1.2, 300, 1, 1),
+    card(1.3947436663504054, 272, 2, 2),
+    card(1.3947436663504054, 272, 3, 2),
+  ]);
+  const at = await cardAtDepth(ctx(s), "P23");
+  assert.equal(at.k, 1.3947436663504054);
+  assert.equal(at.h, 272);
+  assert.equal(s.stops(), 1);
+});
+
+const cam = (k: number, x: number, y: number, frames: number, writes: number): Framed<Cam> => ({
+  read: { x, y, k },
+  frames,
+  writes,
+});
+
+test("cameraAtRest takes the camera for rest only once a frame has drawn with no camera write between (Issue #1446)", async () => {
+  const s = scripted([
+    cam(8, -1892, -1095, 0, 0),
+    cam(8, -1892, -1095, 0, 0),
+    cam(6.9, -1600, -930, 1, 1),
+    cam(5.714285714285714, -1283.857142857143, -730, 2, 2),
+    cam(5.714285714285714, -1283.857142857143, -730, 3, 2),
+  ]);
+  const at = await cameraAtRest(ctx(s), "CD48");
+  assert.equal(at.k, 5.714285714285714);
+  assert.equal(s.stops(), 1);
 });
 
 type Watched = { cb: (records: unknown[]) => void; seen: { el: unknown; options: unknown }[]; detached: boolean };
@@ -172,7 +221,7 @@ test("framed watches the camera's own sheet: a room's #map, the Reading Room's f
   assert.ok(reading.observers[0]!.seen[0]!.el !== reading.doc.querySelector("#map"), "never the g#map");
   const fresh = reading.doc.createElement("div");
   fresh.setAttribute("class", "rf-chart living-chart");
-  chart!.replaceWith(fresh);
+  chart.replaceWith(fresh);
   reading.run(at);
   assert.equal(reading.observers[0]!.detached, true, "the watch on the old sheet is dropped");
   assert.ok(reading.observers[1]!.seen[0]!.el === fresh, "and the sheet mounted again is the one observed");
@@ -182,6 +231,8 @@ test("framed reads an empty gesture box as a camera at rest and refuses a box th
   const empty = fakePage(`<!doctype html><html><body><div id="map-viewport"></div></body></html>`);
   assert.deepEqual(empty.run(framed("1.4")), { read: 1.4, frames: 0, writes: 0 });
   assert.equal(empty.observers[0]!.seen.length, 0, "nothing is observed");
-  const stray = fakePage(`<!doctype html><html><body><div id="map-viewport"><div class="stray"></div></div></body></html>`);
+  const stray = fakePage(
+    `<!doctype html><html><body><div id="map-viewport"><div class="stray"></div></div></body></html>`,
+  );
   assert.throws(() => stray.run(framed("1.4")), /no camera target/);
 });
