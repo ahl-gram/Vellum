@@ -1,4 +1,4 @@
-// Each room the Primer teaches, as its check opens and rests it (Issue #1250): the token its boot sets, and the read that says nothing is in flight; a step whose address opens a route with no entry here fails by name.
+// Each room the Primer teaches, as its check opens and rests it (Issue #1250): the token its boot sets, and the read that says nothing is in flight; a step whose address opens a route with no entry here fails by name, and the chart a pictured step's check reads.
 import { DEEPEST_K } from "../../src/world/lod.ts";
 import { ZOOM_STEP } from "../../src/site/shared/zoom-keys.ts";
 import type { Payload } from "../types.ts";
@@ -10,6 +10,7 @@ export type PrimerRoom = {
   readonly booted: Payload<{ up: boolean }>;
   readonly rest: Payload<Rest>;
   readonly pickFirst: string | null;
+  readonly chart: string | null;
   readonly repeatCap: number;
 };
 
@@ -35,6 +36,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
     booted: `({ up: typeof window.__vellumUsesWorker === "function" && !!document.querySelector("#map svg") })`,
     rest: EXPLORER_REST,
     pickFirst: "#place-options > li .pl-name",
+    chart: null,
     repeatCap: Math.ceil(Math.log(DEEPEST_K) / Math.log(ZOOM_STEP)),
   },
   "/prospect/": {
@@ -43,6 +45,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `window.__vellumProspectState() !== null && document.getElementById("pp-status").textContent === ""`,
     ),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/reading-room/": {
@@ -51,6 +54,7 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `!!window.__vellumReadingRoomState().title && !!document.querySelector(".rf-chart svg") && document.querySelector(".rf-status").textContent === "" && !window.__vellumReadingRoomAges().playing`,
     ),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/print-room/": {
@@ -59,12 +63,14 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `!!window.__vellumPrintRoomState().title && !!document.querySelector("#pr-preview svg") && document.getElementById("pr-status").textContent === ""`,
     ),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/ribbon/": {
     booted: `({ up: typeof window.__vellumRibbonUsesWorker === "function" && typeof window.__vellumRibbonState === "function" && window.__vellumRibbonState() !== null })`,
     rest: restWhen(`window.__vellumRibbonState() !== null && document.getElementById("rb-status").textContent === ""`),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/explorer/portfolio/": {
@@ -73,12 +79,14 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `window.__vellumPortfolio().drawn === window.__vellumPortfolio().items && document.getElementById("pf-status").textContent === ""`,
     ),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/writing-room/": {
     booted: `({ up: typeof window.__vellumWritingRoom === "function" && window.__vellumWritingRoom().n > 0 })`,
     rest: WRITING_REST,
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/seed-of-the-day/": {
@@ -87,12 +95,14 @@ export const PRIMER_ROOMS: Readonly<Partial<Record<string, PrimerRoom>>> = {
       `!!document.querySelector("#map svg") && document.getElementById("clues").children.length > 0 && document.getElementById("status").textContent === ""`,
     ),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
   "/gallery/": {
     booted: `({ up: document.querySelectorAll(".grid figure").length > 0 })`,
     rest: restWhen(`document.querySelectorAll(".grid figure").length > 0`),
     pickFirst: null,
+    chart: null,
     repeatCap: 0,
   },
 };
