@@ -39,7 +39,7 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
     await setState(s);
     // An unfold slides the sheet from the frame after its press, pending at the folded box through its first commit, so rest also asks #sheet to list no animation (Issue #1261).
     try {
-      const d = await stable(framed(COUNTED, "#map"), label, {
+      const d = await stable(framed(COUNTED), label, {
         departed: (d) =>
           moved(d.read.map, from.map) && (!unfolds || moved(d.read.sheet, from.sheet)) && d.read.sheetAnims === 0,
         same: landedWith(sameJson),

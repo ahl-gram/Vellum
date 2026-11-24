@@ -5,7 +5,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { pressAt } from "../print-room/kit.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import { fillPressOf } from "../slide-away/kit.ts";
-import { RR_LENS, RR_ON } from "../reading-room/kit.ts";
+import { RR_LENS } from "../reading-room/kit.ts";
 import { GLYPH_LINES } from "./glyphs.ts";
 import { fillOf, PIECES_READ } from "./slide-kit.ts";
 import { THIN_LINES, thinFootFaults, thinTopFaults, thinTopFoot } from "./thin-lines.ts";
@@ -100,13 +100,12 @@ type RoomRead = Zoomed & { page: string; at: Stage | null; s: Stage | null; zoom
 
 export async function zoomIn(ctx: SuiteContext, page: string, presses: number): Promise<boolean> {
   const lens = page === "/reading-room/" ? RR_LENS : LENS;
-  const on = page === "/reading-room/" ? RR_ON : "#map";
   let zoomed = false;
   for (let n = 1; n <= presses; n++) {
     const at = await ctx.evaluate(ZOOM_IN);
     if (!at || at.hit !== "zoom-in") return false;
     await pressAt(ctx, at.x, at.y);
-    zoomed = (await lensRest(ctx, "leaned", `EZ ${page} press ${n}`, lens, on)).zoomed;
+    zoomed = (await lensRest(ctx, "leaned", `EZ ${page} press ${n}`, lens)).zoomed;
   }
   return zoomed;
 }
