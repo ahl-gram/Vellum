@@ -19,4 +19,4 @@ export const landedWith =
     last.read !== null &&
     same(d.read, last.read) &&
     d.writes === last.writes &&
-    d.frames > last.frames;
+    d.frames - last.frames >= frames;
