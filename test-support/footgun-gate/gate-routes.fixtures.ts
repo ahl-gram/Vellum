@@ -56,6 +56,7 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
     "## Gate 1",
   ],
   ["a non-e2e scripts .ts gets no gate 2", "Edit", "scripts/agent-sandbox.ts", "x", null, ""],
+  ["a non-render script in scripts/build/ gets no gate 6", "Edit", "scripts/build/place-files.ts", "x", null, ""],
   [
     "a render script's name in another scripts folder gets no gate 6 (ci)",
     "Edit",
