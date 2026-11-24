@@ -17,6 +17,7 @@ const BOX = "#map-viewport";
 const KEEP = (types: readonly string[]): boolean => types.includes("wheel") && types.includes("mousedown");
 const noTouch = (types: readonly string[]): boolean => !types.some((t) => t.startsWith("touch"));
 const ZOOM_K: Payload<number> = `window.__vellumZoomState().k`;
+const sameK = (a: number, b: number): boolean => a === b;
 const SCALE: Payload<number> = `visualViewport.scale`;
 
 async function centre(k: GesturesKit): Promise<Point> {
@@ -39,8 +40,8 @@ async function doubleTap(k: GesturesKit, p: Point): Promise<void> {
 export async function kLeft(k: GesturesKit, label: string): Promise<number> {
   try {
     const d = await makeSettle(k)(
-      framed(ZOOM_K, "#map"),
-      (d, last) => d.read !== 1 && !!last && landedWith((a: number, b: number) => a === b)(d, last),
+      framed(ZOOM_K),
+      (d, last) => d.read !== 1 && !!last && landedWith(sameK)(d, last),
       label,
     );
     return d.read;

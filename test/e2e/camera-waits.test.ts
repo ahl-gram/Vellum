@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
+import { documentOf } from "../../test-support/built-dom.ts";
 import { framed, landedWith, STOP_CAMERA_WATCH, type Framed } from "../../e2e/support/camera-landed.ts";
 import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
@@ -71,13 +72,10 @@ test("lensRest takes a leaned or a still camera only once a frame has drawn with
   assert.equal(homing.stops(), 1);
 });
 
-test("lensRest hands a camera that never left home over as still, and watches the target it is given (Issue #1365)", async () => {
+test("lensRest hands a camera that never left home over as still (Issue #1365)", async () => {
   const home = scripted([lens(1, 0, 0), lens(1, 1, 0), lens(1.3, 2, 1)]);
   assert.equal((await lensRest(ctx(home), "still", "home")).k, 1);
-  assert.ok(home.seen.some((e) => e.includes(`document.querySelector("#map")`)));
-  const chart = scripted([lens(1, 0, 0), lens(1, 1, 0)]);
-  await lensRest(ctx(chart), "still", "chart", undefined, "#map-viewport > .rf-chart");
-  assert.ok(chart.seen.some((e) => e.includes(`document.querySelector("#map-viewport > .rf-chart")`)));
+  assert.equal(home.stops(), 1);
 });
 
 test("kLeft takes the double tap's depth only once a frame has drawn with no camera write between (Issue #1365)", async () => {
@@ -95,8 +93,8 @@ test("kLeft takes the double tap's depth only once a frame has drawn with no cam
 
 type Watched = { cb: (records: unknown[]) => void; seen: { el: unknown; options: unknown }[]; detached: boolean };
 
-const fakePage = () => {
-  const elements: Record<string, { name: string }> = { "#map": { name: "map" }, "#chart": { name: "chart" } };
+const fakePage = (html: string) => {
+  const doc = documentOf(html);
   const observers: Watched[] = [];
   const queued: (() => void)[] = [];
   class FakeObserver {
@@ -114,37 +112,59 @@ const fakePage = () => {
   }
   const context = vm.createContext({
     window: {},
-    document: { querySelector: (selector: string) => elements[selector] ?? null },
+    document: doc,
     MutationObserver: FakeObserver,
     requestAnimationFrame: (f: () => void) => void queued.push(f),
   });
   const run = <T>(expression: string): T => JSON.parse(JSON.stringify(vm.runInContext(expression, context))) as T;
   const draw = (): void => queued.splice(0).forEach((f) => f());
-  return { run, draw, observers, elements };
+  return { doc, run, draw, observers };
 };
 
-test("framed counts the frames drawn and the style writes to the camera's target, watches another target afresh, and stops (Issue #1365)", () => {
-  const page = fakePage();
-  const at = framed("1.4", "#map");
-  assert.deepEqual(page.run(at), { read: 1.4, frames: 0, writes: 0 });
-  assert.deepEqual(page.run(at), { read: 1.4, frames: 0, writes: 0 }, "no frame has drawn between two reads");
-  page.draw();
-  assert.deepEqual(page.run(at), { read: 1.4, frames: 1, writes: 0 });
-  assert.equal(page.observers.length, 1, "the watch is installed once");
-  const map = page.observers[0]!;
+const ROOM = `<!doctype html><html><body><div id="map-viewport"><div id="map"><svg><g id="inner"></g></svg></div></div></body></html>`;
+const READING = `<!doctype html><html><body><div id="map-viewport"><div class="rf-chart living-chart"><svg><g id="map"></g></svg></div></div></body></html>`;
+
+test("framed watches the camera's own sheet: a room's #map, the Reading Room's frame chart and never the chart's own g#map, and a sheet mounted again afresh (Issue #1365, Issue #1448)", () => {
+  const room = fakePage(ROOM);
+  const at = framed("1.4");
+  assert.deepEqual(room.run(at), { read: 1.4, frames: 0, writes: 0 });
+  assert.deepEqual(room.run(at), { read: 1.4, frames: 0, writes: 0 }, "no frame has drawn between two reads");
+  room.draw();
+  assert.deepEqual(room.run(at), { read: 1.4, frames: 1, writes: 0 });
+  assert.equal(room.observers.length, 1, "the watch is installed once");
+  const map = room.observers[0]!;
   assert.equal(map.seen.length, 1);
-  assert.equal(map.seen[0]!.el, page.elements["#map"]);
+  assert.ok(map.seen[0]!.el === room.doc.getElementById("map"), "the room's #map is the one observed");
   assert.equal(JSON.stringify(map.seen[0]!.options), '{"attributes":true,"attributeFilter":["style"]}');
   map.cb([{}, {}]);
-  assert.equal(page.run<Framed<number>>(at).writes, 2);
-  page.draw();
-  page.draw();
-  assert.equal(page.run<Framed<number>>(at).frames, 3);
-  assert.equal(page.run(STOP_CAMERA_WATCH), true);
+  assert.equal(room.run<Framed<number>>(at).writes, 2);
+  room.draw();
+  room.draw();
+  assert.equal(room.run<Framed<number>>(at).frames, 3);
+  assert.equal(room.run(STOP_CAMERA_WATCH), true);
   assert.equal(map.detached, true);
-  page.draw();
-  assert.equal(page.run<Framed<number>>(at).frames, 0, "a read after the stop starts a fresh watch");
-  page.run(framed("1.4", "#chart"));
-  assert.equal(page.observers[1]!.detached, true, "the watch on the old target is dropped");
-  assert.equal(page.observers[2]!.seen[0]!.el, page.elements["#chart"], "and the new target is the one observed");
+  room.draw();
+  assert.equal(room.run<Framed<number>>(at).frames, 0, "a read after the stop starts a fresh watch");
+
+  const reading = fakePage(READING);
+  assert.match(reading.doc.querySelector("#map")!.tagName, /^g$/i, "the chart's own g#map stands as the decoy");
+  reading.run(at);
+  const chart = reading.doc.querySelector(".rf-chart");
+  assert.ok(chart !== null, "the frame chart stands");
+  assert.ok(reading.observers[0]!.seen[0]!.el === chart, "the frame chart is the one observed");
+  assert.ok(reading.observers[0]!.seen[0]!.el !== reading.doc.querySelector("#map"), "never the g#map");
+  const fresh = reading.doc.createElement("div");
+  fresh.setAttribute("class", "rf-chart living-chart");
+  chart!.replaceWith(fresh);
+  reading.run(at);
+  assert.equal(reading.observers[0]!.detached, true, "the watch on the old sheet is dropped");
+  assert.ok(reading.observers[1]!.seen[0]!.el === fresh, "and the sheet mounted again is the one observed");
+});
+
+test("framed reads an empty gesture box as a camera at rest and refuses a box that holds no camera sheet it knows (Issue #1448)", () => {
+  const empty = fakePage(`<!doctype html><html><body><div id="map-viewport"></div></body></html>`);
+  assert.deepEqual(empty.run(framed("1.4")), { read: 1.4, frames: 0, writes: 0 });
+  assert.equal(empty.observers[0]!.seen.length, 0, "nothing is observed");
+  const stray = fakePage(`<!doctype html><html><body><div id="map-viewport"><div class="stray"></div></div></body></html>`);
+  assert.throws(() => stray.run(framed("1.4")), /no camera target/);
 });
