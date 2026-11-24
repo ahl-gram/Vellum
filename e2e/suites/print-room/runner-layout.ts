@@ -27,7 +27,7 @@ type Staged = {
   face: boolean;
 };
 
-const STAGED: Payload<Staged> = `(() => {
+export const STAGED: Payload<Staged> = `(() => {
   const title = document.getElementById("folio-title");
   return { path: location.pathname, ready: document.readyState, fonts: document.fonts.status,
     selects: ${JSON.stringify(RUNNER_SELECTS.map((s) => s.selector))}.map((selector) => ({ selector, heights: [...document.querySelectorAll(selector)].map((e) => e.getBoundingClientRect().height) })),

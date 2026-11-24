@@ -57,7 +57,7 @@ const READ = `(() => {
 })`;
 
 // A read is taken only once the media queries see the width set, a 100vw sentinel matches the width vw resolves against (a vw length is not recomputed until the resizing pauses: measured 2026-10-03 on home's since-removed calc(100vw - 15rem) cap, which a one-frame read never applied from 396 down to 320), and two frame reads agree.
-const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject) => {
+export const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject) => {
   const read = ${READ};
   let last = null, frames = 0;
   const tick = () => {

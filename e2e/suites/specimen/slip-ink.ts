@@ -27,7 +27,7 @@ export const FONTS_LOADED: Payload<string> = `document.fonts.status`;
 const HIDE_SLIP_TEXT = `.slip *, .fn-note * { color: transparent !important; text-decoration-color: transparent !important; }`;
 const COUNT = (selector: string): Payload<number> => `document.querySelectorAll(${JSON.stringify(selector)}).length`;
 // One element at a time, scrolled into its own scroller's view first: the Book's body note stands under the slip's foot until its body is scrolled (1280x800).
-const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]> => `(() => {
+export const LINES_OF = (piece: string, selector: string, i: number): Payload<InkLine[]> => `(() => {
   const rgba = ${INK_RGBA};
   const el = document.querySelectorAll(${JSON.stringify(selector)})[${i}], out = [];
   el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
