@@ -13,7 +13,7 @@ export const framed = <T>(read: Payload<T>, on: string): Payload<Framed<NonNulla
 export const STOP_CAMERA_WATCH: Payload<boolean> = `(() => { if (window.__cameraWatch && window.__cameraWatch.on) window.__cameraWatch.stop(); return true; })()`;
 
 export const landedWith =
-  <T>(same: (d: T, last: T) => boolean) =>
+  <T>(same: (d: T, last: T) => boolean, frames = 1) =>
   (d: Framed<T>, last: Framed<T>): boolean =>
     d.read !== null &&
     last.read !== null &&

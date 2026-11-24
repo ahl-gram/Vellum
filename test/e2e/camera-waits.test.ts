@@ -24,6 +24,12 @@ test("landedWith takes two equal camera reads only across a drawn frame with no 
   assert.equal(landed(none, { ...none, frames: 4 }), false, "two null reads across a frame");
 });
 
+test("landedWith asks for as many drawn frames as it is given between two equal camera reads (Issue #1446)", () => {
+  assert.equal(landedWith(sameK, 2)(read(1.4, 5, 3), read(1.4, 4, 3)), false, "one frame where two are asked");
+  assert.equal(landedWith(sameK, 2)(read(1.4, 6, 3), read(1.4, 4, 3)), true, "two frames where two are asked");
+  assert.equal(landedWith(sameK)(read(1.4, 5, 3), read(1.4, 4, 3)), true, "the default stays one frame");
+});
+
 const matrix = (k: number): string => `matrix(${k}, 0, 0, ${k}, 0, 0)`;
 const lens = (k: number, frames: number, writes: number): Framed<Lens> => ({
   read: { k, t: matrix(k), zoomed: k > 1 },
