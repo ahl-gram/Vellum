@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { landedWith, STOP_CAMERA_WATCH, type Framed } from "../../e2e/support/camera-landed.ts";
-import type { Lens } from "../../e2e/suites/print-room/print.ts";
+import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
+import type { SuiteContext } from "../../e2e/types.ts";
 
 const read = (k: number, frames: number, writes: number): Framed<number> => ({ read: k, frames, writes });
 const sameK = (a: number, b: number): boolean => a === b;
@@ -47,4 +48,15 @@ test("glided hands the Glass's glide over only once a frame has drawn with no ca
   const k = { evaluate: s.evaluate, sleep: () => Promise.resolve() } as unknown as SpecimenKit;
   assert.equal((await glided(k, matrix(1))).k, 1.4);
   assert.equal(s.stops(), 1);
+});
+
+test("lensRest takes a leaned or a still camera only once a frame has drawn with no camera write between (Issue #1365)", async () => {
+  const leaning = scripted([lens(1, 0, 0), lens(1.37144, 1, 1), lens(1.37144, 1, 1), lens(1.4, 2, 2), lens(1.4, 3, 2)]);
+  const ctx = (s: { evaluate: (e: string) => Promise<unknown> }) =>
+    ({ evaluate: s.evaluate, sleep: () => Promise.resolve() }) as unknown as Pick<SuiteContext, "evaluate" | "sleep">;
+  assert.equal((await lensRest(ctx(leaning), "leaned", "leaned")).k, 1.4);
+  assert.equal(leaning.stops(), 1);
+  const homing = scripted([lens(1.4, 0, 0), lens(1.4, 0, 0), lens(1, 1, 1), lens(1, 2, 1)]);
+  assert.equal((await lensRest(ctx(homing), "still", "home")).k, 1);
+  assert.equal(homing.stops(), 1);
 });

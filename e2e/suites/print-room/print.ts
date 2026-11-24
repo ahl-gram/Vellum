@@ -2,6 +2,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import type { PrintRoomKit } from "./kit.ts";
 import { clearMetrics, pressAt } from "./kit.ts";
 import { mouseMove } from "../../support/input.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 
 export type Lens = { k: number; t: string; zoomed: boolean };
 export const LENS: Payload<Lens> = `(() => { const t = getComputedStyle(document.getElementById("map")).transform, m = /^matrix\\(([^,]+),/.exec(t);
@@ -13,17 +14,23 @@ export const lensRest = async (
   want: Rest,
   label: string,
   lens: Payload<Lens> = LENS,
+  on = "#map",
 ): Promise<Lens> => {
-  let last = await evaluate(lens);
-  let left = last.zoomed;
-  for (let i = 0; i < 60; i++) {
-    await sleep(150);
-    const d = await evaluate(lens);
-    left ||= d.zoomed;
-    if (d.t === last.t && (want === "still" || left || i >= 6)) return d;
-    last = d;
+  const read = framed(lens, on);
+  try {
+    let last = await evaluate(read);
+    let left = last.read.zoomed;
+    for (let i = 0; i < 60; i++) {
+      await sleep(150);
+      const d = await evaluate(read);
+      left ||= d.read.zoomed;
+      if (landedWith((a: Lens, b: Lens) => a.t === b.t)(d, last) && (want === "still" || left || i >= 6)) return d.read;
+      last = d;
+    }
+    throw new Error(`settle timeout ${label}: ${JSON.stringify(last.read)}`);
+  } finally {
+    await evaluate(STOP_CAMERA_WATCH);
   }
-  throw new Error(`settle timeout ${label}: ${JSON.stringify(last)}`);
 };
 export const ZOOM_IN: Payload<{ x: number; y: number; hit: string | null } | null> =
   `(() => { const b = document.getElementById("zoom-in"); if (!b) return null;
@@ -35,14 +42,15 @@ const VIEWPORT: Payload<{ x: number; y: number; hit: string | null; size: number
 export async function homeCamera(
   ctx: Pick<SuiteContext, "evaluate" | "sleep" | "wheel" | "send">,
   lens: Payload<Lens> = LENS,
+  on = "#map",
 ): Promise<Lens> {
   const { evaluate, send, wheel } = ctx;
   await evaluate(`(() => { const b = document.getElementById("zoom-reset"); if (b) b.click(); return true; })()`);
-  let at = await lensRest(ctx, "still", "camera-home", lens);
+  let at = await lensRest(ctx, "still", "camera-home", lens, on);
   if (at.k > 1.001) {
     const c = await evaluate(VIEWPORT);
     await wheel(c.x, c.y, 4000);
-    at = await lensRest(ctx, "still", "camera-wheeled-home", lens);
+    at = await lensRest(ctx, "still", "camera-wheeled-home", lens, on);
   }
   await mouseMove(send, 1, 1);
   return at;
