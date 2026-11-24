@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, aliasesOf, seatOf, trailFor } from "../../src/layouts/nav.ts";
-import { ATLAS_ROUTE, DISCOVERY_ROUTES, HOME_ROUTE, ROUTE_ENTRIES } from "../../scripts/generate-discovery.ts";
+import { ATLAS_ROUTE, DISCOVERY_ROUTES, HOME_ROUTE, ROUTE_ENTRIES } from "../../scripts/build/generate-discovery.ts";
 
 // The route tree the trail reads (Issue #668, the tree ruled on Issue #667). The trails, the children and the unseated routes are LITERAL, since a roster taken from the data it checks would be circular; only the top line is read from NAV_ITEMS, and TRAILS' literal keys red if the nav grows.
 

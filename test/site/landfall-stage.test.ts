@@ -135,7 +135,7 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
 });
 
 test("the press carries the home twin at the root (#455)", async () => {
-  const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
+  const { BUNDLE_ENTRIES } = await import("../../scripts/build/build-app-bundles.ts");
   assert.ok(
     BUNDLE_ENTRIES.some((e) => e.entry === "src/site/home/app.ts" && e.twin === "app.bundle.js"),
     "BUNDLE_ENTRIES carries the home entry with its root twin",

@@ -7,7 +7,7 @@ import vm from "node:vm";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
-import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build/build-app-bundles.ts";
 import { e2eSourcePaths, e2eSuiteFamily, readE2eSource } from "../../test-support/e2e-source.ts";
 import { CTX_THROWING_WAITS } from "../../scripts/lint/e2e-steps.ts";
 import { writeFiles } from "../../test-support/proof-runner-repo.ts";
@@ -268,7 +268,7 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["test"],
-    "node scripts/unit-suite.ts",
+    "node scripts/ci/unit-suite.ts",
     "npm test no longer runs the unit launcher, so the shard flag ci.yml appends can land after the suite's pattern, where node --test reads it as one more pattern and every leg runs every file",
   );
   assert.match(

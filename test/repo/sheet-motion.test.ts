@@ -10,7 +10,7 @@ import {
   TIPS_AWAITING_A_RULING,
 } from "../../scripts/lint/sheet-motion.ts";
 import { sheetsOnDisk, SRC_CSS_FILES } from "../../scripts/lint/sheet-tokens.ts";
-import { STYLES } from "../../scripts/served-sources.ts";
+import { STYLES } from "../../scripts/build/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import {

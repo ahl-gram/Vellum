@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { shardOf, UNIT_SECONDS, UNLISTED_SECONDS } from "../../scripts/unit-shards.ts";
+import { shardOf, UNIT_SECONDS, UNLISTED_SECONDS } from "../../scripts/ci/unit-shards.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");

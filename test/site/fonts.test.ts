@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
-import { copyKitFonts, KIT_FONTS } from "../../scripts/kit-fonts.ts";
+import { copyKitFonts, KIT_FONTS } from "../../scripts/build/kit-fonts.ts";
 import { atlasDocument, atlasPlateFilename, type AtlasDocumentData } from "../../src/atlas/document.ts";
 import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -92,7 +92,11 @@ test("npm run astro:generate's fonts step copies the real kit into the build-out
   rmSync(dir, { recursive: true, force: true });
   try {
     // 2026-10-02: the step runs in about 0.1 s here; a minute is a cap on a hang, not a budget.
-    const run = spawnSync("node", ["scripts/kit-fonts.ts", dir], { cwd: root(""), encoding: "utf8", timeout: 60_000 });
+    const run = spawnSync("node", ["scripts/build/kit-fonts.ts", dir], {
+      cwd: root(""),
+      encoding: "utf8",
+      timeout: 60_000,
+    });
     assert.equal(run.status, 0, `the step failed: ${run.stderr}`);
     assert.deepEqual(readdirSync(join(dir, "fonts")).sort(), ["OFL.txt", ...WOFF2].sort());
     for (const f of WOFF2)

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { handSteps } from "../src/site/shared/primer/hand-steps.ts";
-import { LADDERS } from "../src/site/shared/primer/ladders.ts";
+import { handSteps } from "../../src/site/shared/primer/hand-steps.ts";
+import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
 import { GENERATED } from "./clean-generated.ts";
 
 /** Issue #1253: the one data file a room fetches when its address carries a Primer step, written by astro:generate beside the discovery files so it cannot drift from the ladders. */

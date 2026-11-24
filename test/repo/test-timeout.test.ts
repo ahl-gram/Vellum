@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
-import { unitArgs } from "../../scripts/unit-suite.ts";
+import { unitArgs } from "../../scripts/ci/unit-suite.ts";
 
 // Type-only and erased at run time: it puts the fixture in the type-check and lint program without running its wedged test here.
 import type {} from "../../test-support/wedged-fixture.ts";

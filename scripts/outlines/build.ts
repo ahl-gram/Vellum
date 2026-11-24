@@ -1,6 +1,6 @@
 import { decodeRings, encodeRings } from "../../src/terrain/outline-codec.ts";
 import { ASPECT, CELL, boxOf, diagonal2, fitScale, gap2, ringArea, type Box } from "./plane.ts";
-import { simplifyRing, type P } from "../simplify.ts";
+import { simplifyRing, type P } from "../build/simplify.ts";
 
 export const EPSILON = 1;
 export const KEEP_CELLS = 1;

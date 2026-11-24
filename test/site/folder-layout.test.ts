@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build/build-app-bundles.ts";
 import { listWorkingTree } from "../../test-support/working-tree.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -42,4 +42,16 @@ test("the only sheets at the top of src/styles/ are home's two, and every folder
   const strays = [...loose, ...[...folders].filter((name) => name !== "shared" && !isRoute(name))].sort();
   assert.deepEqual(strays, []);
   assert.ok(folders.has("explorer") && HOME_SHEETS.every((sheet) => remainders.includes(sheet)), "git listed the tree");
+});
+
+const NOT_YET_PLACED: readonly string[] = ["agent-sandbox.ts"];
+
+test("no file sits directly under scripts/ but the ones NOT_YET_PLACED names, and each of those is still there (Issue #1454)", () => {
+  const remainders = listed("scripts");
+  const loose = remainders.filter((r) => !r.includes("/") && !NOT_YET_PLACED.includes(r));
+  assert.deepEqual(loose, []);
+  assert.ok(
+    foldersOf(remainders).has("lint") && NOT_YET_PLACED.every((file) => remainders.includes(file)),
+    "git listed the tree, and every file NOT_YET_PLACED names still stands at the top of scripts/",
+  );
 });

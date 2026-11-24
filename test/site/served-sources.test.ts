@@ -22,7 +22,7 @@ import {
   servedSources,
   sourceFor,
   type ServedSource,
-} from "../../scripts/served-sources.ts";
+} from "../../scripts/build/served-sources.ts";
 
 const SOURCES: readonly ServedSource[] = [
   { dir: "styles", types: { ".css": "text/css; charset=utf-8" } },

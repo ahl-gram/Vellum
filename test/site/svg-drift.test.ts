@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { diffSvg, DRIFT_TOL, type SvgDiff } from "../../scripts/svg-drift.ts";
+import { diffSvg, DRIFT_TOL, type SvgDiff } from "../../test-support/svg-drift.ts";
 
 // Unit tests for the drift-guard comparison: on one platform the hero-charts guard only ever sees the byte-identical case, so the CI and cross-machine behaviours are pinned here with synthetic inputs.
 

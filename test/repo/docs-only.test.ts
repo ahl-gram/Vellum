@@ -13,7 +13,7 @@ import {
   isDoc,
   isUnsafePath,
   verdict,
-} from "../../scripts/docs-only.ts";
+} from "../../scripts/ci/docs-only.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
@@ -65,7 +65,7 @@ test("a path is a doc only when DOC_FILES names it or it lies under a DOC_DIRS f
     ".agents/skills/vellum-footguns",
     ".agents/skills/comment-sweep",
     ".claude/skills/vellum-footguns/hooks/footgun-gate.ts",
-    "scripts/docs-only.ts",
+    "scripts/ci/docs-only.ts",
     "package.json",
     "test/repo/docs-only.test.ts",
     "handbookx/a.md",
@@ -134,7 +134,7 @@ test("the script writes docs_only=true to GITHUB_OUTPUT on a docs-only pull requ
     await withTempRepo({ "src/a.ts": "a\n" }, (dir) => {
       docsMerge(dir);
       const run = (event: string, out: string): void => {
-        execFileSync(process.execPath, [join(ROOT, "scripts", "docs-only.ts")], {
+        execFileSync(process.execPath, [join(ROOT, "scripts", "ci", "docs-only.ts")], {
           cwd: dir,
           env: { ...process.env, GITHUB_EVENT_NAME: event, GITHUB_OUTPUT: out },
           encoding: "utf8",
@@ -155,7 +155,7 @@ test("the script writes docs_only=true to GITHUB_OUTPUT on a docs-only pull requ
   }
 });
 
-const SCOPE_STEP = "      - name: Docs-only diff\n        id: scope\n        run: node scripts/docs-only.ts";
+const SCOPE_STEP = "      - name: Docs-only diff\n        id: scope\n        run: node scripts/ci/docs-only.ts";
 const SKIP_UNLESS_DOCS = `        if: steps.scope.outputs.${OUTPUT_KEY} != 'true'`;
 
 test("each e2e lane runs every step after the docs-only verdict unless the verdict is true, and only checkout and an uncached setup-node before it", () => {
@@ -285,7 +285,7 @@ test("a changed path holding a line break or another control character runs ever
           "a changed path holds a line break or another control character, so no path is printed and every lane runs",
       });
       const out = join(outDir, "output");
-      const stdout = execFileSync(process.execPath, [join(ROOT, "scripts", "docs-only.ts")], {
+      const stdout = execFileSync(process.execPath, [join(ROOT, "scripts", "ci", "docs-only.ts")], {
         cwd: dir,
         env: { ...process.env, GITHUB_EVENT_NAME: "pull_request", GITHUB_OUTPUT: out },
         encoding: "utf8",

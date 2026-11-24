@@ -4,7 +4,7 @@ import { encodeRings } from "../../src/terrain/outline-codec.ts";
 import { serialId } from "./ids.ts";
 import { CELL, boxOf, diagonal2, fitScale, ringArea } from "./plane.ts";
 import { projectPlace, type LonLat } from "./project.ts";
-import { simplifyRing } from "../simplify.ts";
+import { simplifyRing } from "../build/simplify.ts";
 import type { Kind } from "./build.ts";
 
 export const THIN = 1e-4;

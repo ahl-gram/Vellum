@@ -310,7 +310,7 @@ test("a single-escaped regex class or dot in a backtick string reports in every 
         'const tag = (s: TemplateStringsArray): string => s.raw.join("");',
         "export const tagged = tag`a\\sb`;",
       ],
-      "scripts/build-app-bundles.ts",
+      "scripts/build/build-app-bundles.ts",
     ),
     at(ESCAPE, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 18]),
   );
@@ -327,7 +327,7 @@ const REACH: ReadonlyArray<readonly [string, string, string]> = [
   [GLASS, "src/site/home/app.ts", "src/site/prospect/seats.ts"],
   [CONTENTS, "src/site/prospect/seats.ts", "src/cli/main.ts"],
   [TEST_IMPORTS, "e2e/harness.ts", "src/styles/shared/house.css"],
-  [TEST_IMPORTS, "scripts/build-app-bundles.ts", "src/styles/shared/house.css"],
+  [TEST_IMPORTS, "scripts/build/build-app-bundles.ts", "src/styles/shared/house.css"],
   [TEST_IMPORTS, "src/cli/main.ts", "src/styles/shared/house.css"],
   [TEST_IMPORTS, "test/repo/lint-config.test.ts", "src/styles/shared/house.css"],
   [TEST_IMPORTS, "test-support/lint-roots.ts", "src/styles/shared/house.css"],

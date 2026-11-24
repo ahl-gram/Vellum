@@ -12,7 +12,7 @@ import {
   type Arm,
   type RuleNode,
 } from "./sheet-tokens.ts";
-import { STYLES } from "../served-sources.ts";
+import { STYLES } from "../build/served-sources.ts";
 
 export const OWNED_SHEETS = {
   house: "shared/house.css",

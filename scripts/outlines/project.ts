@@ -1,5 +1,5 @@
 import { ringArea } from "./plane.ts";
-import type { P } from "../simplify.ts";
+import type { P } from "../build/simplify.ts";
 
 export type LonLat = readonly [number, number];
 type V3 = readonly [number, number, number];

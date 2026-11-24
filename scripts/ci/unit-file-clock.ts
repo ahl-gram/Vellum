@@ -1,5 +1,5 @@
 import { relative, resolve } from "node:path";
-import { formatSuiteTimings } from "../e2e/support/suites.ts";
+import { formatSuiteTimings } from "../../e2e/support/suites.ts";
 
 export type FileTiming = { readonly file: string; readonly ms: number };
 

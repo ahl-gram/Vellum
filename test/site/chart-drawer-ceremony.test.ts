@@ -4,7 +4,7 @@ import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
 import { tabLine } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
-import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
+import { PORTFOLIO_ROUTE } from "../../scripts/build/generate-discovery.ts";
 import { surveyAt } from "../../test-support/table-address-fixtures.ts";
 
 // The ceremony half of the Chart Table (Issue #523 Sub 5 of Issue #401): the settle on a laid cutting, the jolt at the cap, the ghost's url adopted on a drag-drop, the drawer revealed for a carry and put back, and a thumbnail patched into its cutting in place. The drawer BUILDS DOM, so the element shim stands in for the environment, never the module under test; every rect is the one the test states.

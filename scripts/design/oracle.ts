@@ -1,6 +1,6 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
-import { BUNDLE_ENTRIES } from "../build-app-bundles.ts";
+import { BUNDLE_ENTRIES } from "../build/build-app-bundles.ts";
 import { shootAll, type Shot, type ShotResult } from "./shoot.ts";
 
 /** The screenshot sweep (the Issue #465 closing review's oracle, ported by Issue #706): every built page at a desktop window and at 1024, the narrowest the site is laid out for, for comparing two builds through `scripts/design/compare.ts`; the method is `handbook/specs/settle-doctrine.md`'s. */
