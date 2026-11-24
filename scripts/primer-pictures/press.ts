@@ -143,7 +143,13 @@ function connect(
     let next = 0;
     const waiting = new Map<number, (reply: Reply | string) => void>();
     const loads: (() => void)[] = [];
-    socket.addEventListener("error", () => reject(new Error(`could not open ${url}`)));
+    const opening = setTimeout(() => {
+      reject(new Error(`WebSocket open: no reply in ${replyMs} ms`));
+    }, replyMs);
+    socket.addEventListener("error", () => {
+      clearTimeout(opening);
+      reject(new Error(`could not open ${url}`));
+    });
     socket.addEventListener("close", (event) => {
       for (const answer of [...waiting.values()])
         answer(`the browser's DevTools connection closed (code ${event.code})`);
@@ -153,7 +159,8 @@ function connect(
       if (reply.id !== undefined) waiting.get(reply.id)?.(reply);
       else if (reply.method === "Page.loadEventFired") loads.splice(0).forEach((done) => done());
     });
-    socket.addEventListener("open", () =>
+    socket.addEventListener("open", () => {
+      clearTimeout(opening);
       resolve({
         socket,
         send: (method, params = {}) =>
@@ -178,8 +185,8 @@ function connect(
               done(true);
             });
           }),
-      }),
-    );
+      });
+    });
   });
 }
 
@@ -191,9 +198,16 @@ export async function pressPictures(
   const launched = await launchPress(browser);
   let socket: WebSocket | null = null;
   try {
-    const product = await fetch(`http://127.0.0.1:${launched.port}/json/version`)
+    const product = await fetch(`http://127.0.0.1:${launched.port}/json/version`, {
+      signal: AbortSignal.timeout(options.replyMs),
+    })
       .then((r) => r.json() as Promise<{ readonly Browser?: string }>)
-      .then((v) => v.Browser ?? "unnamed browser");
+      .then((v) => v.Browser ?? "unnamed browser")
+      .catch((err: unknown) => {
+        throw err instanceof Error && err.name === "TimeoutError"
+          ? new Error(`/json/version: no reply in ${options.replyMs} ms`)
+          : err;
+      });
     const cdp = await connect(launched.url, options.replyMs);
     socket = cdp.socket;
     await cdp.send("Page.enable");
