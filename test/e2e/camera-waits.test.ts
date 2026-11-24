@@ -253,3 +253,9 @@ test("framed reads an empty gesture box as a camera at rest and refuses a box th
   );
   assert.throws(() => stray.run(framed("1.4")), /no camera target/);
 });
+
+test("framed refuses a page with no gesture box at all, even where a #map stands elsewhere (Issue #1448, PR #1453 review)", () => {
+  const bare = fakePage(`<!doctype html><html><body><div id="map"></div></body></html>`);
+  assert.throws(() => bare.run(framed("1.4")), /no #map-viewport/);
+  assert.equal(bare.observers.length, 0, "nothing is watched");
+});

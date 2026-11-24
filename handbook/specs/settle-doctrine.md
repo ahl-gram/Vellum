@@ -550,7 +550,7 @@ section points there rather than restating it.
   (`landed` in `e2e/suites/broadside/grow.ts`, and `framed` and `landedWith` in
   `e2e/support/camera-landed.ts`, which `toState`, `glided`, `lensRest`, `kLeft`, `cardAtDepth` and
   `cameraAtRest` take); `framed` finds the target itself, the gesture box's `#map` or the Reading
-  Room's frame chart, and refuses a box that holds neither. A wait for a camera that is meant never
+  Room's frame chart, and refuses a page with no gesture box and a box that holds neither. A wait for a camera that is meant never
   to move asks for the same read and no write across two drawn frames, since a glide d3 starts writes
   by its second (`kStill` in `e2e/suites/zoom-gestures/touch.ts`,
   `handbook/plans/1400/1446/1446-plan.md`). The readings are in `handbook/plans/1200/1260/1260-r5-plan.md`.
