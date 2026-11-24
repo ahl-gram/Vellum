@@ -5,7 +5,12 @@ import { join } from "node:path";
 import { LAUNCH_TUNING, type LaunchTuning } from "../../e2e/support/launch.ts";
 import { launchPress, pressPictures, type Launch, type Launched } from "../../scripts/primer-pictures/press.ts";
 import { STAND_IN_COUNTER, standInTarget } from "../../test-support/stand-in-browser.ts";
-import { EXEC_STAND_IN, STAND_IN_TUNING, standInBrowser } from "../../test-support/stand-in-launch.ts";
+import {
+  EXEC_STAND_IN,
+  STAND_IN_TUNING,
+  standInBrowser,
+  type StandInOptions,
+} from "../../test-support/stand-in-launch.ts";
 import { settle, settleWithin } from "../../test-support/launch-settle.ts";
 
 const PROFILE_PREFIX = "vellum-primer-pictures-";
@@ -80,26 +85,56 @@ test(
   },
 );
 
+async function pressStalled(stalls: StandInOptions["stalls"]): Promise<{ message?: string; folder: string[] }> {
+  const s = standInBrowser(PROFILE_PREFIX, { stalls });
+  const svg = join(s.dir, "chart.svg");
+  writeFileSync(svg, '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="8"></svg>');
+  try {
+    const got = await settleWithin(
+      20_000,
+      pressPictures(s.browser, [{ svg, out: join(s.dir, "chart.webp") }], {
+        pixelWidth: 4,
+        quality: 70,
+        replyMs: 1_000,
+      }),
+    );
+    return { message: got.error?.message, folder: readdirSync(s.dir).sort() };
+  } finally {
+    s.restore();
+  }
+}
+
+const STALLED_FOLDER = ["browser", "chart.svg", STAND_IN_COUNTER];
+
 test(
   "PIC15 a browser that stops answering fails the press at its reply cap, naming the call it never answered, and leaves no profile",
   { timeout: 60_000 },
   async () => {
-    const s = standInBrowser(PROFILE_PREFIX);
-    const svg = join(s.dir, "chart.svg");
-    writeFileSync(svg, '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="8"></svg>');
-    try {
-      const got = await settleWithin(
-        20_000,
-        pressPictures(s.browser, [{ svg, out: join(s.dir, "chart.webp") }], {
-          pixelWidth: 4,
-          quality: 70,
-          replyMs: 1_000,
-        }),
-      );
-      assert.equal(got.error?.message, "Page.enable: no reply in 1000 ms");
-      assert.deepEqual(readdirSync(s.dir).sort(), ["browser", "chart.svg", STAND_IN_COUNTER]);
-    } finally {
-      s.restore();
-    }
+    assert.deepEqual(await pressStalled(undefined), {
+      message: "Page.enable: no reply in 1000 ms",
+      folder: STALLED_FOLDER,
+    });
+  },
+);
+
+test(
+  "PIC17 a browser that stops answering its version read fails the press at the reply cap, naming the read, and leaves no profile",
+  { timeout: 60_000 },
+  async () => {
+    assert.deepEqual(await pressStalled("version"), {
+      message: "/json/version: no reply in 1000 ms",
+      folder: STALLED_FOLDER,
+    });
+  },
+);
+
+test(
+  "PIC18 a browser that never completes the DevTools upgrade fails the press at the reply cap, naming the open, and leaves no profile",
+  { timeout: 60_000 },
+  async () => {
+    assert.deepEqual(await pressStalled("upgrade"), {
+      message: "WebSocket open: no reply in 1000 ms",
+      folder: STALLED_FOLDER,
+    });
   },
 );

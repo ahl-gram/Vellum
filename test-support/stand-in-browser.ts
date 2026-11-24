@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 export const STAND_IN_BROWSER = fileURLToPath(import.meta.url);
 export const STAND_IN_SILENT_VAR = "VELLUM_STAND_IN_SILENT";
 export const STAND_IN_DIES_VAR = "VELLUM_STAND_IN_DIES";
+export const STAND_IN_STALLS_VAR = "VELLUM_STAND_IN_STALLS";
 export const STAND_IN_COUNTER = "stand-in-launches";
 const LIFETIME_MS = 60_000;
 const WEBSOCKET_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -26,7 +27,9 @@ function main(): void {
   process.stderr.write(`stand-in launch ${launch} on port ${port}\n`);
   setTimeout(() => process.exit(0), LIFETIME_MS);
   if (launch <= Number(process.env[STAND_IN_SILENT_VAR] ?? "0")) return;
+  const stalls = process.env[STAND_IN_STALLS_VAR];
   createServer((req, res) => {
+    if (stalls === "version" && req.url === "/json/version") return;
     const worker = {
       type: "service_worker",
       webSocketDebuggerUrl: `ws://127.0.0.1:${port}/devtools/worker/stand-in-${launch}`,
@@ -36,6 +39,7 @@ function main(): void {
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(body));
   })
     .on("upgrade", (req, socket) => {
+      if (stalls === "upgrade") return;
       const accept = createHash("sha1")
         .update(`${String(req.headers["sec-websocket-key"])}${WEBSOCKET_GUID}`)
         .digest("base64");
