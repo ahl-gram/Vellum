@@ -12,7 +12,7 @@ export const SERVED_SOURCES: readonly ServedSource[] = [
   { dir: STYLES, types: { ".css": "text/css; charset=utf-8" } },
   { dir: STATIC, types: { ".svg": "image/svg+xml", ".png": "image/png" } },
 ];
-export const REPO: string = fileURLToPath(new URL("..", import.meta.url));
+export const REPO: string = fileURLToPath(new URL("../..", import.meta.url));
 
 // A case-insensitive disk finds /House.css for house.css, which a case-sensitive deploy would 404, so the file's real name must end the address as typed.
 const isFile = (path: string, pathname: string): boolean => {

@@ -12,7 +12,7 @@ import {
   type LaunchTuning,
 } from "../../e2e/support/launch.ts";
 import { svgDimensions } from "../../src/cli/raster.ts";
-import { freePort } from "../free-port.ts";
+import { freePort } from "../shared/free-port.ts";
 
 export interface Pressing {
   readonly svg: string;

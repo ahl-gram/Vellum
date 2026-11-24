@@ -1,5 +1,5 @@
 import { parse } from "@astrojs/compiler-rs";
-import { isRecord } from "../is-record.ts";
+import { isRecord } from "../shared/is-record.ts";
 import { isInstruction } from "./instructions.ts";
 import { lineFinder, sheetTokens, type Token } from "./tokens.ts";
 

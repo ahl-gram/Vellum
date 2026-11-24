@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { isRecord } from "../is-record.ts";
+import { isRecord } from "../shared/is-record.ts";
 import { GenerationError, messageOf } from "./errors.ts";
 import { HARNESSES, POLICY_FILE, type HarnessId, type RoleDefinition } from "./roles.ts";
 

@@ -14,7 +14,7 @@ import {
   PUNCHCUTTER_TILE,
   type GlyphOutline,
 } from "../../src/render/favicon.ts";
-import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "../../scripts/glyph-outline.ts";
+import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "../../scripts/build/glyph-outline.ts";
 import { decodePng, hexOf } from "../../test-support/png-decode.ts";
 import { attr } from "../../test-support/dress-svg.ts";
 import { near } from "../../test-support/near.ts";

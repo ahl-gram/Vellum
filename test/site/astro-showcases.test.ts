@@ -4,8 +4,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { generateShowcases } from "../../scripts/generate-showcases.ts";
-import { HERO_CHART_DIRS, regenHeroCharts } from "../../scripts/regen-hero-charts.ts";
+import { generateShowcases } from "../../scripts/build/generate-showcases.ts";
+import { HERO_CHART_DIRS, regenHeroCharts } from "../../scripts/build/regen-hero-charts.ts";
 
 // Scriptorium Sub 4 (Issue #205): build-time generation replaces the homegrown site build. SPEC: the ratified 2026-07-21 comment on Issue #202, section 2 and decision D; the hero-charts decision ratified 2026-07-24 (option a, the goldens stay committed).
 
@@ -17,10 +17,14 @@ test("build-site.ts is retired; charts:regen and the showcase step replace it", 
   assert.equal(pkg.scripts["site"], undefined, "npm run site is retired");
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts && node scripts/primer-steps.ts && node scripts/primer-pictures/main.ts",
+    "node scripts/build/clean-generated.ts && node scripts/build/kit-fonts.ts && node scripts/build/place-files.ts && node scripts/build/build-app-bundles.ts && node scripts/build/generate-showcases.ts && node scripts/build/generate-discovery.ts && node scripts/build/primer-steps.ts && node scripts/primer-pictures/main.ts",
     "astro:generate must generate the showcases into generated/ (tsc emit retired at Sub 9, #260), then the discovery files (#286)",
   );
-  assert.equal(pkg.scripts["charts:regen"], "node scripts/regen-hero-charts.ts", "the thin golden-writer successor");
+  assert.equal(
+    pkg.scripts["charts:regen"],
+    "node scripts/build/regen-hero-charts.ts",
+    "the thin golden-writer successor",
+  );
   assert.equal(pkg.scripts["dev"], "npm run astro:dev", "local preview repoints to the Astro dev server");
   assert.equal(
     pkg.scripts["build"],
@@ -74,7 +78,7 @@ test(
     const scratch = root("out/test-showcases-cli");
     rmSync(scratch, { recursive: true, force: true });
     mkdirSync(scratch, { recursive: true });
-    execFileSync(process.execPath, [root("scripts/generate-showcases.ts")], { cwd: scratch });
+    execFileSync(process.execPath, [root("scripts/build/generate-showcases.ts")], { cwd: scratch });
     assert.ok(
       existsSync(join(scratch, "generated", "atlas", "index.html")),
       "the CLI should write <cwd>/generated/atlas",

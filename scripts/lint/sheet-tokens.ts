@@ -5,7 +5,7 @@ import type { Rule } from "eslint";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";
-import { STYLES } from "../served-sources.ts";
+import { STYLES } from "../build/served-sources.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 

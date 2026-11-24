@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { faceModulePath, faceModuleSource, PLATE_FACES, TOLERANCE } from "../../scripts/plate-face.ts";
-import { segmentDistance2, simplify } from "../../scripts/simplify.ts";
+import { faceModulePath, faceModuleSource, PLATE_FACES, TOLERANCE } from "../../scripts/build/plate-face.ts";
+import { segmentDistance2, simplify } from "../../scripts/build/simplify.ts";
 import { GRID, type FaceName } from "../../src/prospect/letter/face.ts";
 import { FACES } from "../../src/prospect/letter/letter.ts";
 

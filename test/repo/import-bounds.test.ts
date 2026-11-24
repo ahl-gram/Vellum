@@ -232,18 +232,18 @@ const TOOLING_BLIND_SPOTS =
 const toolingPlant = (file: string): string[] => {
   const up = "../".repeat(file.split("/").length - 1);
   return [
-    `import { placeFile } from "${up}scripts/place-files.ts";`,
+    `import { placeFile } from "${up}scripts/build/place-files.ts";`,
     `import type { WITNESSES } from "${up}test-support/lint-witnesses.ts";`,
     `export * from "${up}e2e/harness.ts";`,
     `export type { Plant } from "${up}test/repo/fixture.ts";`,
     `export const a = () => import("${up}scripts/delivery/main.ts");`,
     `export const b = new URL("${up}e2e/harness.ts", import.meta.url);`,
-    `export type C = typeof import("${up}scripts/place-files.ts");`,
+    `export type C = typeof import("${up}scripts/build/place-files.ts");`,
     `export type D = import("${up}test-support/lint-witnesses.ts").Witnesses;`,
-    `import "/scripts/kit-fonts.ts";`,
+    `import "/scripts/build/kit-fonts.ts";`,
     `const spec = "${up}test/repo/fixture.ts"; export const load = () => import(spec);`,
     "export const e = (name: string) => import(`" + up + "e2e/suites/${name}.ts`);",
-    `// imports ${up}scripts/place-files.ts, named in a comment`,
+    `// imports ${up}scripts/build/place-files.ts, named in a comment`,
     `export const f = "scripts/ holds the commands, named in prose";`,
     `export const g = "/scripts/";`,
     `import { createRng } from "${up}src/core/rng.ts";`,

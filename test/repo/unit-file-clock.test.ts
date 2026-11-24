@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { Readable } from "node:stream";
-import unitFileClock, { fileClockLines } from "../../scripts/unit-file-clock.ts";
+import unitFileClock, { fileClockLines } from "../../scripts/ci/unit-file-clock.ts";
 
 type Events = Parameters<typeof unitFileClock>[0];
 type Event = Events extends AsyncIterable<infer E> ? E : never;

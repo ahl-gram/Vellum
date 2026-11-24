@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { cleanGenerated, GENERATED } from "../../scripts/clean-generated.ts";
+import { cleanGenerated, GENERATED } from "../../scripts/build/clean-generated.ts";
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
@@ -16,7 +16,7 @@ test("astro:generate regenerates the runtime trees into generated/, and dev/buil
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/place-files.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts && node scripts/primer-steps.ts && node scripts/primer-pictures/main.ts",
+    "node scripts/build/clean-generated.ts && node scripts/build/kit-fonts.ts && node scripts/build/place-files.ts && node scripts/build/build-app-bundles.ts && node scripts/build/generate-showcases.ts && node scripts/build/generate-discovery.ts && node scripts/build/primer-steps.ts && node scripts/primer-pictures/main.ts",
     "astro:generate must clean, copy the kit fonts (Issue #706), bundle (Vite compiles the TS graph since Sub 9, #260), then generate the showcases and the discovery files",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
@@ -52,7 +52,7 @@ test("the no-arg CLI deletes ./generated relative to CWD (the exact astro:genera
   mkdirSync(join(scratch, "src"), { recursive: true });
   writeFileSync(join(scratch, "src", "app.ts"), "// committed source, must survive");
 
-  execFileSync(process.execPath, [root("scripts/clean-generated.ts")], { cwd: scratch });
+  execFileSync(process.execPath, [root("scripts/build/clean-generated.ts")], { cwd: scratch });
 
   assert.ok(!existsSync(join(scratch, GENERATED)), "the CLI should delete <cwd>/generated");
   assert.ok(existsSync(join(scratch, "src", "app.ts")), "committed files survive");

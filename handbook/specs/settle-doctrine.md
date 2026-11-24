@@ -352,7 +352,7 @@ suite has no skip list, and this section sets no rule for deleting a unit test.
   check's entry in `E2E_SKIPS` goes with it, and a step that keeps another check is renamed to what
   it keeps, entry and all; the issue an entry named is closed by that pull request's closing
   reference once no entry names it, since CI fails while an entry names an issue that is not open
-  (`scripts/e2e-skips-open.ts`). A suite left with no check leaves every roster it joined, found
+  (`scripts/ci/e2e-skips-open.ts`). A suite left with no check leaves every roster it joined, found
   the way `vellum-footguns` Gate 4 finds them.
 
 ## The environment

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build/build-app-bundles.ts";
 import { listWorkingTree } from "../../test-support/working-tree.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");

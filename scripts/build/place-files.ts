@@ -2,12 +2,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GENERATED } from "./clean-generated.ts";
-import { NAMES_FILE, PLACE_FOLDER, placeFile } from "../src/site/explorer/place-fetch.ts";
-import type { PlaceId } from "../src/world/outline-ids.ts";
+import { NAMES_FILE, PLACE_FOLDER, placeFile } from "../../src/site/explorer/place-fetch.ts";
+import type { PlaceId } from "../../src/world/outline-ids.ts";
 
-export const PLACE_TABLE = fileURLToPath(new URL("../src/terrain/outline-places.json", import.meta.url));
+export const PLACE_TABLE = fileURLToPath(new URL("../../src/terrain/outline-places.json", import.meta.url));
 
-export const PLACE_NAMES = fileURLToPath(new URL("../src/world/outline-place-names.json", import.meta.url));
+export const PLACE_NAMES = fileURLToPath(new URL("../../src/world/outline-place-names.json", import.meta.url));
 
 export async function writePlaceFiles(root: string, table: string = PLACE_TABLE): Promise<number> {
   const places = JSON.parse(await readFile(table, "utf8")) as Record<string, string>;

@@ -60,7 +60,7 @@ symbol and path so the reader goes and looks.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
   if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
   `ROUTE_NAMES`, its place on the chart of the atelier (`PLACES` in `src/layouts/atelier-chart.ts`, which `test/site/atelier-chart.test.ts` reds without), and its own sheet. A working page that mounts a bundle owes
-  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), whose
+  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build/build-app-bundles.ts`), whose
   twin the press writes into the build-output folder, and its own
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
   budget. **Budgeting a working page as a two-file change is the mistake this rule exists to stop.**
@@ -85,9 +85,9 @@ symbol and path so the reader goes and looks.
   does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
-  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS`, `STAGES`, `LEGENDS` and `NOTICES` beside it for a page carrying a road out, the kit's stage, a legend row or a stage's notices, and RH32's browser copies of `ROADS` and `STAGES` in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
+  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS`, `STAGES`, `LEGENDS` and `NOTICES` beside it for a page carrying a road out, the kit's stage, a legend row or a stage's notices, and RH32's browser copies of `ROADS` and `STAGES` in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build/build-app-bundles.ts`;
   `ROUTE_ENTRIES` and
-  `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
+  `DISCOVERY_ROUTES` in `scripts/build/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
   check holds to `E2E_SUITE_ORDER`), `E2E_LANES` (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds
   kept by hand as "`MEASURED_SECONDS` is read from CI's own lane logs" says), and `NEEDS_PREDECESSOR` or `OPENS_ON_HOME`
@@ -133,7 +133,7 @@ symbol and path so the reader goes and looks.
   committed charts, icons and card), at the path it is served from.** The build copies the kinds each
   folder keeps into the built site at the same paths, and nothing else in either, and the dev server
   serves them from there, so an edit shows on the next reload; both are `servedSources` in
-  `scripts/served-sources.ts`, whose `SERVED_SOURCES` names the folders and their kinds. Everything
+  `scripts/build/served-sources.ts`, whose `SERVED_SOURCES` names the folders and their kinds. Everything
   else the site serves is written by `npm run astro:generate` into `generated/`, Astro's public
   folder, which nothing tracks.
 - **Sheet order is a contract.** The layout links the sheets every page wears, save the shell's, then the sheets a page
@@ -257,7 +257,7 @@ other way, which is what earns them a section of their own.
 ## Discovery and indexes
 
 - **The discovery files are DERIVED, and that is the anti-drift mechanism.**
-  `scripts/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
+  `scripts/build/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
   `generated/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
@@ -311,7 +311,7 @@ precisely, because a token that falls outside it looks identical at the point of
 
 ## Build, check and deploy
 
-- **One press, one pass.** `scripts/build-app-bundles.ts` is a single multi-entry Vite build over
+- **One press, one pass.** `scripts/build/build-app-bundles.ts` is a single multi-entry Vite build over
   `BUNDLE_ENTRIES`, compiling the TypeScript entries and the engine graph they import together, so
   there is no separate emit step and nothing orders against one. Twins are staged in a temporary
   directory and copied into the build-output folder, `generated/`; shared chunks take fixed names with no hashes; one worker
@@ -361,12 +361,12 @@ precisely, because a token that falls outside it looks identical at the point of
   the step writes its manifest only once every picture is on disk, so a build never goes on to publish a page
   whose pictures are missing. The unit suite's builds
   (`test/site/astro-scaffold.test.ts`, `test/site/built-pages.test.ts`) never run `astro:generate`, so they press none.
-- **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
+- **The site's fonts are generated, from the design kit.** `scripts/build/kit-fonts.ts` copies
   `design/kit/fonts/`, the one copy the site reads, into `generated/fonts/`, so a face is
   added or changed in the kit and never in the build-output folder. Nothing under test reads `generated/fonts/`:
   `test/site/astro-scaffold.test.ts` deletes the build-output folder while other files run, so a reader
-  there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
-- **A real place's outline is served one file to a place, never bundled.** `scripts/place-files.ts`
+  there races it; read `KIT_FONTS` from `scripts/build/kit-fonts.ts` instead.
+- **A real place's outline is served one file to a place, never bundled.** `scripts/build/place-files.ts`
   writes each place's rings from `src/terrain/outline-places.json` to `generated/outlines/`, one
   file each, and the one loader is `loadPlace` in `src/site/explorer/worker-client.ts`, which `runJob`
   and the Explorer's place picker share: before `runJob` sends
@@ -377,13 +377,13 @@ precisely, because a token that falls outside it looks identical at the point of
   function. A plain job sent while a place is still being fetched waits its turn (`createPlaceGate`
   in `src/site/explorer/place-gate.ts`), so the worker stays first in first out. The name index the
   place picker searches is served beside the places as one file (`writePlaceNames` in
-  `scripts/place-files.ts`, at `namesUrl` in `src/site/explorer/place-fetch.ts`), fetched the first
+  `scripts/build/place-files.ts`, at `namesUrl` in `src/site/explorer/place-fetch.ts`), fetched the first
   time the picker needs a name, or the first time a page founds a sentence asking for a real
   place's shape, never bundled and never sent to the worker.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
   fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole
-  (`cleanGenerated` in `scripts/clean-generated.ts`, which refuses a folder of any other name), so no
+  (`cleanGenerated` in `scripts/build/clean-generated.ts`, which refuses a folder of any other name), so no
   list of generated trees is kept; nothing in the folder is tracked, and `.gitignore` names it in one
   line, which `test/site/app-bundles.test.ts` holds.
 - **The dev server needs its dev-only middleware.** `astro.config.ts` registers a middleware that
@@ -402,7 +402,7 @@ precisely, because a token that falls outside it looks identical at the point of
   two lanes is visible instead of silent.
 - **A pull request runs every check `main` runs, except that one whose every changed file is a doc
   passes each browser lane without building or running it** (Alex, 2026-11-10, Issue #1306). A doc
-  is a path `isDoc` in `scripts/docs-only.ts` names, house prose that neither `npm run build` nor any
+  is a path `isDoc` in `scripts/ci/docs-only.ts` names, house prose that neither `npm run build` nor any
   browser check reads. Each lane job still starts and reports its check, since main's required
   checks wait on every one: its scope step reads the changed files off the merge commit's first
   parent, and every step after it runs unless the reading is docs only, so a reading that fails runs
@@ -422,7 +422,7 @@ precisely, because a token that falls outside it looks identical at the point of
   again. A run started by hand is a second full run of one commit, useful for re-timing, and it does
   not replace the pull request's own run in the commit's check list, which is what merging reads.
 - **`MEASURED_SECONDS` is read from CI's own lane logs.** No pull request re-times a suite, whatever it changes: the table is kept by hand, and whoever notices a lane grown lopsided edits it (Alex, 2026-10-25, Issue #785). It feeds only the lane-balance check in `test/e2e/lane-timings.test.ts`, so a stale value makes CI slower and its lanes lopsided and breaks nothing else. Read a suite's seconds as the median, over three runs of one commit, of its line under `per-suite wall clock` in each lane job's log (`gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`), take the job's total from that line, and take the seconds a set of suites takes in a job as that total less the suites outside the set. A pull request that edits a value names the jobs it read in its own body, never at the constant.
-- **`UNIT_SECONDS` is read from CI's own unit logs.** `shardOf` in `scripts/unit-shards.ts` deals the files under `test/` heaviest first onto the lightest of the `check & test` jobs, weighing each by `UNIT_SECONDS` and every file the table does not name by `UNLISTED_SECONDS`, so each job carries an even share of the suite's seconds and a test file added or removed moves little; `npm test -- --test-shard=<k>/<n>` runs the `k`th of `n` parts and prints its files' seconds under `per-file wall clock` (`scripts/unit-file-clock.ts`). The table is kept and read as the `MEASURED_SECONDS` bullet above says, from each file's line under `per-file wall clock` in its `check & test` job's log, and names every file whose median is at or over 5 seconds, at its whole seconds, and no other. A stale value makes CI slower and breaks nothing, and a key naming a file `npm test` no longer runs reds `test/repo/unit-shards.test.ts`.
+- **`UNIT_SECONDS` is read from CI's own unit logs.** `shardOf` in `scripts/ci/unit-shards.ts` deals the files under `test/` heaviest first onto the lightest of the `check & test` jobs, weighing each by `UNIT_SECONDS` and every file the table does not name by `UNLISTED_SECONDS`, so each job carries an even share of the suite's seconds and a test file added or removed moves little; `npm test -- --test-shard=<k>/<n>` runs the `k`th of `n` parts and prints its files' seconds under `per-file wall clock` (`scripts/ci/unit-file-clock.ts`). The table is kept and read as the `MEASURED_SECONDS` bullet above says, from each file's line under `per-file wall clock` in its `check & test` job's log, and names every file whose median is at or over 5 seconds, at its whole seconds, and no other. A stale value makes CI slower and breaks nothing, and a key naming a file `npm test` no longer runs reds `test/repo/unit-shards.test.ts`.
 - **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
   in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
   again until branch protection is updated to match; ADDING a job that ought to be required is the

@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { heroChartSvgs } from "../../scripts/hero-charts.ts";
-import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
+import { heroChartSvgs } from "../../scripts/build/hero-charts.ts";
+import { diffSvg, DRIFT_TOL } from "../../test-support/svg-drift.ts";
 
 // Drift guard (Issue #40): nothing else re-renders the committed src/static/charts heroes, so this re-renders via heroChartSvgs() and compares via diffSvg, tolerant of cross-platform float noise; on a real drift run npm run charts:regen and land the regen ALONE.
 

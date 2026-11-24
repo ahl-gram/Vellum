@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { GENERATED } from "./clean-generated.ts";
-import { NAV_ITEMS } from "../src/layouts/nav.ts";
+import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 
 /** Issue #286: the three discovery files (sitemap.xml, robots.txt, llms.txt), GENERATED from NAV_ITEMS in the astro:generate step so they cannot drift from the nav; robots.txt is generated rather than committed because its Sitemap: line carries the origin, which the 2026-07-24 domain move would have stranded. */
 
@@ -181,7 +181,7 @@ export async function generateDiscovery(root: string, site: string): Promise<voi
 }
 
 export async function configuredSite(): Promise<string> {
-  const config = (await import("../astro.config.ts")).default;
+  const config = (await import("../../astro.config.ts")).default;
   if (!config.site) throw new Error("astro.config.ts must set `site`: the discovery files need absolute URLs");
   return config.site;
 }

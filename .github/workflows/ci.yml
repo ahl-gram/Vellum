@@ -37,7 +37,7 @@ jobs:
       - name: Test
         run: npm test -- --test-shard=${{ matrix.shard }}/${{ strategy.job-total }}
       - name: Each e2e skip names an open issue
-        run: node scripts/e2e-skips-open.ts
+        run: node scripts/ci/e2e-skips-open.ts
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -59,7 +59,7 @@ jobs:
           node-version: '26'
       - name: Docs-only diff
         id: scope
-        run: node scripts/docs-only.ts
+        run: node scripts/ci/docs-only.ts
       - uses: actions/setup-node@v4
         if: steps.scope.outputs.docs_only != 'true'
         with:

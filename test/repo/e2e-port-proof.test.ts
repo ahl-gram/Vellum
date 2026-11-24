@@ -193,7 +193,7 @@ const LAYOUT: [string, string][] = [
   ["test/e2e/lanes.test.ts", "test/e2e/lanes.test.ts"],
 ];
 const OUTSIDE = [
-  "scripts/build-og.ts",
+  "scripts/build/build-og.ts",
   "scripts/lint/css-comment-form.ts",
   "src/cli/main.ts",
   "src/cli/raster.ts",
@@ -212,7 +212,7 @@ test("the tree the proof reads is every e2e file in either layout, and a file in
   for (const [from] of LAYOUT) assert.ok(inTree(from), from);
   for (const path of ["scripts/e2e/other.ts", "scripts/e2e/x/left.mjs"]) assert.ok(inTree(path), path);
   for (const path of [
-    "scripts/build-og.ts",
+    "scripts/build/build-og.ts",
     "scripts/lint/css-comment-form.ts",
     "src/cli/main.ts",
     "test/cli/main.test.ts",

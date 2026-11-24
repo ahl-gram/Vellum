@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { eslint } from "../../test-support/source-shape-reports.ts";
-import { STYLES } from "../../scripts/served-sources.ts";
+import { STYLES } from "../../scripts/build/served-sources.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const ONE_LINE = "vellum/css-comment-one-line";

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PLACES, ROADS, TRACKS, roadPath } from "../../src/layouts/atelier-chart.ts";
 import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, aliasesOf } from "../../src/layouts/nav.ts";
-import { ATLAS_ROUTE } from "../../scripts/generate-discovery.ts";
+import { ATLAS_ROUTE } from "../../scripts/build/generate-discovery.ts";
 
 test("AC1 every route in the tree, and home, is a place on the chart of the atelier, and the one place off the tree is the atlas, drawn as an isle off home (Issue #671; Alex, 2026-10-16, D3)", () => {
   const want = [

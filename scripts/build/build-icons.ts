@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { buildFavicon, buildTouchIcon, TOUCH_ICON_SIZE } from "../src/render/favicon.ts";
-import { findBrowser, rasterizeSvg, NO_BROWSER } from "../src/cli/raster.ts";
+import { buildFavicon, buildTouchIcon, TOUCH_ICON_SIZE } from "../../src/render/favicon.ts";
+import { findBrowser, rasterizeSvg, NO_BROWSER } from "../../src/cli/raster.ts";
 import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "./glyph-outline.ts";
 
 /** npm run icons: cuts the Punchcutter's Mark (Issue #489) from the shipped Fell SC woff2 into src/static/favicon.svg and src/static/apple-touch-icon.png, both committed because the Pages deploy CI has no browser to rasterize; any change to that font file re-runs this. */

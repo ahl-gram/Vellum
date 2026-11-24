@@ -21,7 +21,7 @@ import {
   runBox,
   type RunSpec,
 } from "../../src/prospect/letter/letter.ts";
-import { PLATE_FACES, PLATE_FONTS } from "../../scripts/plate-face.ts";
+import { PLATE_FACES, PLATE_FONTS } from "../../scripts/build/plate-face.ts";
 
 const fonts = new Map<FaceName, fontkit.Font>();
 function font(face: FaceName): fontkit.Font {
