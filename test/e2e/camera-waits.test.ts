@@ -5,6 +5,8 @@ import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
+import { kLeft } from "../../e2e/suites/zoom-gestures/touch.ts";
+import type { GesturesKit } from "../../e2e/suites/zoom-gestures.ts";
 
 const read = (k: number, frames: number, writes: number): Framed<number> => ({ read: k, frames, writes });
 const sameK = (a: number, b: number): boolean => a === b;
@@ -59,4 +61,18 @@ test("lensRest takes a leaned or a still camera only once a frame has drawn with
   const homing = scripted([lens(1.4, 0, 0), lens(1.4, 0, 0), lens(1, 1, 1), lens(1, 2, 1)]);
   assert.equal((await lensRest(ctx(homing), "still", "home")).k, 1);
   assert.equal(homing.stops(), 1);
+});
+
+test("kLeft takes the double tap's depth only once a frame has drawn with no camera write between (Issue #1365)", async () => {
+  const depth = (k: number, frames: number, writes: number): Framed<number> => ({ read: k, frames, writes });
+  const s = scripted([
+    depth(1, 0, 0),
+    depth(1.5863681885612406, 1, 1),
+    depth(1.5863681885612406, 1, 1),
+    depth(2, 2, 2),
+    depth(2, 3, 2),
+  ]);
+  const k = { evaluate: s.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
+  assert.equal(await kLeft(k, "ZG8b"), 2);
+  assert.equal(s.stops(), 1);
 });

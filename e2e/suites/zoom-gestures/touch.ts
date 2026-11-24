@@ -11,6 +11,7 @@ import {
 import type { TouchRead } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { GesturesKit } from "../zoom-gestures.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 
 const BOX = "#map-viewport";
 const KEEP = (types: readonly string[]): boolean => types.includes("wheel") && types.includes("mousedown");
@@ -35,8 +36,17 @@ async function doubleTap(k: GesturesKit, p: Point): Promise<void> {
   await tapAt(k, p);
 }
 
-async function kLeft(k: GesturesKit, label: string): Promise<number> {
-  return makeSettle(k)(ZOOM_K, (d, last) => d !== 1 && last === d, label);
+export async function kLeft(k: GesturesKit, label: string): Promise<number> {
+  try {
+    const d = await makeSettle(k)(
+      framed(ZOOM_K, "#map"),
+      (d, last) => d.read !== 1 && !!last && landedWith((a: number, b: number) => a === b)(d, last),
+      label,
+    );
+    return d.read;
+  } finally {
+    await k.evaluate(STOP_CAMERA_WATCH);
+  }
 }
 
 // Six consecutive reads agree (five repeats at 50 ms: 250 ms, past the camera's 250 ms double-click glide).
