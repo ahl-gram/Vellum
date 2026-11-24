@@ -15,4 +15,8 @@ export const STOP_CAMERA_WATCH: Payload<boolean> = `(() => { if (window.__camera
 export const landedWith =
   <T>(same: (d: T, last: T) => boolean) =>
   (d: Framed<T>, last: Framed<T>): boolean =>
-    d.read !== null && last.read !== null && same(d.read, last.read);
+    d.read !== null &&
+    last.read !== null &&
+    same(d.read, last.read) &&
+    d.writes === last.writes &&
+    d.frames > last.frames;

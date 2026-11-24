@@ -12,5 +12,9 @@ test("landedWith takes two equal camera reads only across a drawn frame with no 
   assert.equal(landed(read(1.4, 5, 4), read(1.4, 4, 3)), false, "a write the matrix's rounding hides");
   assert.equal(landed(read(1.4, 5, 3), read(1.4, 4, 3)), true, "one frame on and no write");
   assert.equal(landed(read(1.5, 5, 3), read(1.4, 4, 3)), false, "reads that differ");
-  assert.equal(landed({ read: null, frames: 5, writes: 3 } as unknown as Framed<number>, read(1.4, 4, 3)), false, "a null read");
+  assert.equal(
+    landed({ read: null, frames: 5, writes: 3 } as unknown as Framed<number>, read(1.4, 4, 3)),
+    false,
+    "a null read",
+  );
 });
