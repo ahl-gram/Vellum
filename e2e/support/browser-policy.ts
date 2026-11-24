@@ -4,7 +4,7 @@ export interface BrowserPolicyEnv {
   readonly [key: string]: string | undefined;
 }
 
-function isSet(value: string | undefined): boolean {
+export function isSet(value: string | undefined): boolean {
   return value !== undefined && value !== "";
 }
 

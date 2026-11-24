@@ -1,5 +1,4 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findBrowser, NO_BROWSER } from "../../src/cli/raster.ts";
@@ -8,6 +7,7 @@ import { dropExpectedCancellations } from "../../e2e/support/console.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { HarnessContext } from "../../e2e/types.ts";
 import { isRecord } from "../is-record.ts";
+import { freePorts } from "../free-port.ts";
 
 /** The shared camera for design work: one browser per call, every shot at a TRUE layout viewport set through device metrics, captured once. */
 
@@ -120,24 +120,6 @@ export function readProbe(value: unknown, out: string): string {
   if (value === undefined)
     throw new Error(`the probe for ${out} handed back nothing, so this row would be measured as undefined`);
   return typeof value === "string" ? value : JSON.stringify(value);
-}
-
-const freePort = (): Promise<number> =>
-  new Promise((res, rej) => {
-    const server = createServer();
-    server.once("error", rej);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      const port = typeof address === "object" && address !== null ? address.port : 0;
-      server.close(() => res(port));
-    });
-  });
-
-async function freePorts(): Promise<[number, number]> {
-  const a = await freePort();
-  let b = await freePort();
-  while (b === a) b = await freePort();
-  return [a, b];
 }
 
 export const servedUrl = (url: string, port: number): string =>
