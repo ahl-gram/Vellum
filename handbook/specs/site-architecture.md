@@ -351,9 +351,11 @@ precisely, because a token that falls outside it looks identical at the point of
   pictured step's chart with the engine and presses it with the browser `findBrowser` (`src/cli/raster.ts`) finds.
   Where `VELLUM_REQUIRE_BROWSER` is set, as on the deploy's build, every e2e lane's build and the proof runner's,
   a build that finds none fails and the site stays as it was (Issue #1155 comment 6664735683, M3);
-  elsewhere it skips with a warning and the page shows its frames empty. A browser that is found but cannot run
-  headless with a profile under the temporary folder, as a snap-confined Chromium cannot, fails the build at the
-  press, naming itself: point `VELLUM_BROWSER` at another. The unit suite's builds
+  elsewhere it skips with a warning and the page shows its frames empty. A browser that is found but opens
+  no page, as a snap-confined Chromium cannot with a profile under the temporary folder, fails the build at the
+  press once it has been launched as the e2e harness launches one (`launchWithRetry` and `LAUNCH_TUNING` in
+  `e2e/support/launch.ts`, three attempts on fresh profiles), naming itself and every attempt's own output:
+  point `VELLUM_BROWSER` at another. The unit suite's builds
   (`test/site/astro-scaffold.test.ts`, `test/site/built-pages.test.ts`) never run `astro:generate`, so they press none.
 - **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
   `design/kit/fonts/`, the one copy the site reads, into `generated/fonts/`, so a face is
