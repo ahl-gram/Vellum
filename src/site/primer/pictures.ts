@@ -1,3 +1,5 @@
+import { createProjection, marginFor } from "../../render/transform.ts";
+import { LOD_BANDS } from "../../world/lod.ts";
 import type { Ladder } from "../shared/primer/shape.ts";
 
 export const PICTURE_DRAW_WIDTH = 1500;
@@ -15,7 +17,10 @@ export interface Pictured {
 export const pictureFile = (id: string): string => `${PICTURE_FOLDER}/${id}.webp`;
 
 export function chartFrame(): Frame {
-  return { width: 0, height: 0 };
+  const band = LOD_BANDS[0];
+  if (band === undefined) throw new Error("no world band");
+  const p = createProjection(band.gridW, band.gridH, PICTURE_DRAW_WIDTH, marginFor(PICTURE_DRAW_WIDTH));
+  return { width: Math.round(p.widthPx), height: Math.round(p.heightPx) };
 }
 
 export function picturedSteps(ladders: readonly Ladder[]): readonly Pictured[] {
