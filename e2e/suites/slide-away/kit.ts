@@ -5,7 +5,7 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { LENS, lensRest, ZOOM_IN } from "../print-room/print.ts";
 import type { Lens } from "../print-room/print.ts";
 import { pressAt } from "../print-room/kit.ts";
-import { RR_LENS } from "../reading-room/kit.ts";
+import { RR_LENS, RR_ON } from "../reading-room/kit.ts";
 import { open, size } from "../stage/stage.ts";
 
 export type Room = {
@@ -109,7 +109,7 @@ export async function pressGlass(ctx: SuiteContext, lens: Payload<Lens>, label: 
   const at = await ctx.evaluate(ZOOM_IN);
   if (!at || at.hit !== "zoom-in") throw new Error(`${label}: the Glass's press is covered: ${JSON.stringify(at)}`);
   await pressAt(ctx, at.x, at.y);
-  await lensRest(ctx, "leaned", label, lens);
+  await lensRest(ctx, "leaned", label, lens, lens === RR_LENS ? RR_ON : "#map");
 }
 
 // Waits for rest alone, never for a value, so a piece stuck home or stuck away reaches the assertion; 8 reads at 50 ms outlast the 340 ms ease, so a move that starts after the camera rests is seen.

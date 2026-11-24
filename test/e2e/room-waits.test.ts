@@ -6,6 +6,7 @@ import { rs10Drag, rs12Pause } from "../../e2e/suites/room-instrument/sweep.ts";
 import { foldLanded, type Pieces } from "../../e2e/suites/slide-away/kit.ts";
 import { READ, type Specimen } from "../../e2e/suites/specimen/reads.ts";
 import { specimenKit } from "../../e2e/suites/specimen/kit.ts";
+import { STOP_CAMERA_WATCH } from "../../e2e/support/camera-landed.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 import { answering, checkInto } from "../../test-support/ctx-fakes.ts";
@@ -173,7 +174,9 @@ const moving = (from: Specimen, frames: Specimen[]) => {
   return specimen((e) => {
     if (e.includes("sb-state")) return void (set = true);
     if (!e.includes(READ)) return null;
-    return set ? (frames[Math.min(n++, frames.length - 1)] ?? from) : from;
+    if (!e.includes("__cameraWatch")) return from;
+    const read = set ? (frames[Math.min(n, frames.length - 1)] ?? from) : from;
+    return { read, frames: n++, writes: 0 };
   });
 };
 
@@ -214,6 +217,33 @@ test("toState times out naming its label", async () => {
     moving(from, [book({ map: MAPS[0], sheetAnims: 0 })]).toState("rest", "SB6 at rest again"),
     (err: Error) => err.message.startsWith("settle timeout SB6 at rest again: "),
   );
+});
+
+test("toState waits out a glide the runner stalls mid-way: two equal reads with no frame between are not a rest (Issue #1365)", async () => {
+  const from = book({ map: MAPS[0] });
+  const mid = book({ map: MAPS[1], sheetAnims: 0 });
+  const later = book({ map: MAPS[2], sheetAnims: 0 });
+  const landed = book({ map: MAPS[3], sheetAnims: 0 });
+  const reads = [
+    { read: mid, frames: 4, writes: 3 },
+    { read: mid, frames: 4, writes: 3 },
+    { read: mid, frames: 4, writes: 3 },
+    { read: later, frames: 5, writes: 4 },
+    { read: landed, frames: 6, writes: 5 },
+    { read: landed, frames: 7, writes: 5 },
+  ];
+  let set = false;
+  let n = 0;
+  let stops = 0;
+  const kit = specimen((e) => {
+    if (e.includes("sb-state")) return void (set = true);
+    if (e === STOP_CAMERA_WATCH) return void (stops += 1);
+    if (!e.includes(READ)) return null;
+    if (!e.includes("__cameraWatch")) return from;
+    return set ? reads[Math.min(n++, reads.length - 1)] : { read: from, frames: 0, writes: 0 };
+  });
+  assert.deepEqual(await kit.toState("rest", "SB6 at rest again"), landed);
+  assert.equal(stops, 1);
 });
 
 const slid = (left: number, right: number, sheetAnims: number) =>

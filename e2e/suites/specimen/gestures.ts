@@ -3,6 +3,7 @@ import { pressAt } from "../print-room/kit.ts";
 import { LENS, homeCamera, type Lens } from "../print-room/print.ts";
 import type { Payload } from "../../types.ts";
 import type { SpecimenKit } from "./kit.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 
 type At = { x: number; y: number; hit: string | null } | null;
 const AT = (id: string): Payload<At> =>
@@ -10,16 +11,21 @@ const AT = (id: string): Payload<At> =>
   const r = b.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, e = document.elementFromPoint(x, y);
   return { x, y, hit: e ? e.id || e.tagName : null }; })()`;
 
-// A glide has rested when two reads 100ms apart agree on a matrix that has left `from`; a press that goes nowhere is taken as it stands after about a second, so it reads as a fault and not a stop. The camera's own `zoomed` flag is no reader of the way home: a glide that rests at 1 can leave a translation of -2.8e-14, which the controller's strict isHome refuses (measured 2026-10-13 on the Specimen), so the matrix's scale is what reads home.
-async function glided(k: SpecimenKit, from: string): Promise<Lens> {
-  let last = await k.evaluate(LENS);
-  for (let i = 0; i < 60; i++) {
-    await k.sleep(100);
-    const d = await k.evaluate(LENS);
-    if (d.t === last.t && (d.t !== from || i >= 12)) return d;
-    last = d;
+// The matrix's scale reads home, not the camera's zoomed flag: a glide that rests at 1 can leave a translation of -2.8e-14, which the controller's strict isHome refuses (measured 2026-10-13 and 2026-11-24 on the Specimen, Issue #871).
+export async function glided(k: SpecimenKit, from: string): Promise<Lens> {
+  const read = framed(LENS, "#map");
+  try {
+    let last = await k.evaluate(read);
+    for (let i = 0; i < 60; i++) {
+      await k.sleep(100);
+      const d = await k.evaluate(read);
+      if (landedWith((a: Lens, b: Lens) => a.t === b.t)(d, last) && (d.read.t !== from || i >= 12)) return d.read;
+      last = d;
+    }
+    throw new Error(`settle timeout specimen-glass-glide: ${JSON.stringify(last.read)}`);
+  } finally {
+    await k.evaluate(STOP_CAMERA_WATCH);
   }
-  throw new Error(`settle timeout specimen-glass-glide: ${JSON.stringify(last)}`);
 }
 
 export async function sb15OutPress(k: SpecimenKit): Promise<void> {
