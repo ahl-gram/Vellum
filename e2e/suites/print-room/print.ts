@@ -14,9 +14,8 @@ export const lensRest = async (
   want: Rest,
   label: string,
   lens: Payload<Lens> = LENS,
-  on = "#map",
 ): Promise<Lens> => {
-  const read = framed(lens, on);
+  const read = framed(lens);
   try {
     let last = await evaluate(read);
     let left = last.read.zoomed;
@@ -42,15 +41,14 @@ const VIEWPORT: Payload<{ x: number; y: number; hit: string | null; size: number
 export async function homeCamera(
   ctx: Pick<SuiteContext, "evaluate" | "sleep" | "wheel" | "send">,
   lens: Payload<Lens> = LENS,
-  on = "#map",
 ): Promise<Lens> {
   const { evaluate, send, wheel } = ctx;
   await evaluate(`(() => { const b = document.getElementById("zoom-reset"); if (b) b.click(); return true; })()`);
-  let at = await lensRest(ctx, "still", "camera-home", lens, on);
+  let at = await lensRest(ctx, "still", "camera-home", lens);
   if (at.k > 1.001) {
     const c = await evaluate(VIEWPORT);
     await wheel(c.x, c.y, 4000);
-    at = await lensRest(ctx, "still", "camera-wheeled-home", lens, on);
+    at = await lensRest(ctx, "still", "camera-wheeled-home", lens);
   }
   await mouseMove(send, 1, 1);
   return at;
