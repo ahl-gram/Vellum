@@ -7,7 +7,7 @@ import { lensRest, type Lens } from "../../e2e/suites/print-room/print.ts";
 import { glided } from "../../e2e/suites/specimen/gestures.ts";
 import type { SpecimenKit } from "../../e2e/suites/specimen/kit.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
-import { kLeft } from "../../e2e/suites/zoom-gestures/touch.ts";
+import { kLeft, kStill } from "../../e2e/suites/zoom-gestures/touch.ts";
 import type { GesturesKit } from "../../e2e/suites/zoom-gestures.ts";
 
 const read = (k: number, frames: number, writes: number): Framed<number> => ({ read: k, frames, writes });
@@ -89,6 +89,23 @@ test("kLeft takes the double tap's depth only once a frame has drawn with no cam
   const k = { evaluate: s.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
   assert.equal(await kLeft(k, "ZG8b"), 2);
   assert.equal(s.stops(), 1);
+});
+
+test("kStill takes a camera that never moved for still only across two drawn frames with no camera write (Issue #1446)", async () => {
+  const held = scripted([
+    ...Array.from({ length: 6 }, () => read(1, 0, 0)),
+    read(1.3, 1, 1),
+    read(2, 2, 2),
+    read(2, 3, 2),
+    read(2, 4, 2),
+  ]);
+  const k = { evaluate: held.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
+  assert.equal(await kStill(k, "ZG7"), 2, "six equal reads with no frame drawn are not a camera at rest");
+  assert.equal(held.stops(), 1);
+  const startTick = scripted([read(1, 0, 0), read(1, 1, 0), read(1.2, 2, 1), read(2, 3, 2), read(2, 4, 2), read(2, 5, 2)]);
+  const j = { evaluate: startTick.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
+  assert.equal(await kStill(j, "ZG7"), 2, "one quiet frame is the glide's start tick, which writes no change");
+  assert.equal(startTick.stops(), 1);
 });
 
 type Watched = { cb: (records: unknown[]) => void; seen: { el: unknown; options: unknown }[]; detached: boolean };
