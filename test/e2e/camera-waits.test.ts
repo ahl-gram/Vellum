@@ -116,6 +116,10 @@ test("kStill takes a camera that never moved for still only across two drawn fra
   const j = { evaluate: startTick.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
   assert.equal(await kStill(j, "ZG7"), 2, "one quiet frame is the glide's start tick, which writes no change");
   assert.equal(startTick.stops(), 1);
+  const written = scripted([read(1, 0, 0), read(1, 1, 1), read(1, 2, 1), read(1, 3, 1)]);
+  const w = { evaluate: written.evaluate, sleep: () => Promise.resolve() } as unknown as GesturesKit;
+  assert.equal(await kStill(w, "ZG7"), 1, "a write the matrix's rounding hides starts the quiet run again");
+  assert.equal(written.stops(), 1);
 });
 
 const card = (k: number, h: number, frames: number, writes: number): Framed<CardAtDepth> => ({
