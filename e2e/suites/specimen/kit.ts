@@ -4,8 +4,10 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { PAGE, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
+import { framed, landedWith, STOP_CAMERA_WATCH } from "../../support/camera-landed.ts";
 
 const moved = (a: Specimen["map"], b: Specimen["map"]): boolean => JSON.stringify(a) !== JSON.stringify(b);
+const sameJson = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const COUNTED: Payload<Specimen & { sheetAnims: number }> =
   `(() => ({ ...(${READ}), sheetAnims: document.getElementById("sheet").getAnimations().length }))()`;
 export type SpecimenKit = ReturnType<typeof specimenKit>;
@@ -37,9 +39,16 @@ export function specimenKit(ctx: SuiteContext & { settle: Settle }) {
     const unfolds = !!from.st && from.st.folded;
     await setState(s);
     // An unfold slides the sheet from the frame after its press, pending at the folded box through its first commit, so rest also asks #sheet to list no animation (Issue #1261).
-    return stable(COUNTED, label, {
-      departed: (d) => moved(d.map, from.map) && (!unfolds || moved(d.sheet, from.sheet)) && d.sheetAnims === 0,
-    });
+    try {
+      const d = await stable(framed(COUNTED, "#map"), label, {
+        departed: (d) =>
+          moved(d.read.map, from.map) && (!unfolds || moved(d.read.sheet, from.sheet)) && d.read.sheetAnims === 0,
+        same: landedWith(sameJson),
+      });
+      return d.read;
+    } finally {
+      await evaluate(STOP_CAMERA_WATCH);
+    }
   };
   const brightest = async (x: number, y: number) =>
     Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
