@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { carriesEverySubject, cropClip, RESTAGES, withStyle, witnessFails } from "../../scripts/still-judge/restage.ts";
+import {
+  carriesEverySubject,
+  cropClip,
+  RESTAGES,
+  withStyle,
+  witnessFails,
+} from "../../scripts/review/still-judge/restage.ts";
 import { RAIN, SHEET } from "../../test-support/still-judge-fixtures.ts";
 
 const CASING = '<rect class="range-casing" transform="rotate(32.0 586.4 686.1)"/>';

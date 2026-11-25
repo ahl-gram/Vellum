@@ -216,15 +216,15 @@ belongs in.
   libraries the pages ship, the `dependencies` in `package.json`, since the tools that build the site
   are `devDependencies`.
 - **No check holds a judgment that rests on a probability.** These commands ask TypeSafe's Jev:
-  - `npm run comment-judge` (`scripts/comment-judge/main.ts`), whether each comment a diff adds
+  - `npm run comment-judge` (`scripts/review/comment-judge/main.ts`), whether each comment a diff adds
     only restates its code or is already pinned by a test (Issue #1304);
   - `npm run recon-triage` (`scripts/recon-triage/main.ts`), whether the code an issue cites does
     what the issue's claim says, which orders `vellum-spec-recon`'s reading (Issue #1310);
-  - `npm run keeper-scan` (`scripts/keeper-scan/main.ts`), whether each comment a diff deletes
+  - `npm run keeper-scan` (`scripts/review/keeper-scan/main.ts`), whether each comment a diff deletes
     carries a keeper fact its file no longer says, which a comment sweep's ledger carries
     (Issue #1320);
-  - `npm run still-judge` (`scripts/still-judge/main.ts`), how two versions of one chart compare on the four
-    questions in `scripts/still-judge/questions.ts` (each realm name readable, the rainfall lines leading, every name
+  - `npm run still-judge` (`scripts/review/still-judge/main.ts`), how two versions of one chart compare on the four
+    questions in `scripts/review/still-judge/questions.ts` (each realm name readable, the rainfall lines leading, every name
     in a piece readable, the title read first), a difference under 0.12 counting as none and no one picture's number
     read as a pass or a fail, its trial scored against three defects the house fixed and one invented, put back on
     today's chart (Issue #1309), which `vellum-plate-reader` runs beside its measurements wherever a change reaches
@@ -232,12 +232,12 @@ belongs in.
     its `trial` scores the 30 charts of seeds 1 to 35 whose sheets carried every subject the restages needed, and a
     question reworded after its score is scored again on charts from seed 36 up, which `--seeds <from>-<to>` picks
     (at most a hundred seeds, those whose sheets lack a subject left out);
-  - `npm run copy-hunt` (`scripts/copy-hunt/main.ts`), whether a function a diff adds or changes
+  - `npm run copy-hunt` (`scripts/review/copy-hunt/main.ts`), whether a function a diff adds or changes
     implements the same logic as another under the lint's roots, which `vellum-pr-skeptic` runs on
     every pull request (Issue #1319); the exact copies it lists are found by code, with no call,
     and the lint refuses one: `vellum/no-word-for-word-copy` in `scripts/lint/word-for-word.ts`
     reads every function under the lint's roots with the hunt's reader and refuses one whose text
-    another shares, unless `scripts/copy-hunt/accepted-copies.ts` lists the pair (Issue #1332).
+    another shares, unless `scripts/review/copy-hunt/accepted-copies.ts` lists the pair (Issue #1332).
 
   Their answers are probabilities from a service whose model changes from version to version, so a
   red resting on one is a guard no prover can show bites. No call of theirs is made, and no
@@ -258,7 +258,7 @@ belongs in.
   runs, its one exception the docs-only lanes, read from the changed files alone
   (`handbook/specs/site-architecture.md`, the bullet opening "A pull request runs every check"),
   and `main` has no sweep to verify, so `npm run comment-sweep -- verify`
-  (`scripts/comment-sweep/main.ts`) is run by the sweep's sitting and by the cold review, as
+  (`scripts/review/comment-sweep/main.ts`) is run by the sweep's sitting and by the cold review, as
   `handbook/specs/conventions.md` (The comment sweep) says. It is deterministic, and its own unit
   tests hold what it reads.
 

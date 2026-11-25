@@ -6,8 +6,8 @@ import {
   PINS_QUESTION,
   RESTATES,
   requestsFor,
-} from "../../scripts/comment-judge/questions.ts";
-import type { Candidate, CommentRun } from "../../scripts/comment-judge/types.ts";
+} from "../../scripts/review/comment-judge/questions.ts";
+import type { Candidate, CommentRun } from "../../scripts/review/comment-judge/types.ts";
 import { MODEL } from "../../scripts/jev/system-one.ts";
 
 const run: CommentRun = {

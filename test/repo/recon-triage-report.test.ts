@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
 import { liveSender, type Answered } from "../../scripts/jev/system-one.ts";
 import type { ClaimRow, Kind } from "../../scripts/recon-triage/claims.ts";
 import type { Excerpt } from "../../scripts/recon-triage/excerpt.ts";

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ACCEPTED_COPIES, type AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
-import { acceptedFaults } from "../../scripts/copy-hunt/accepted-faults.ts";
-import { acceptedFor, staleCopies } from "../../scripts/copy-hunt/accepted.ts";
+import { ACCEPTED_COPIES, type AcceptedCopy } from "../../scripts/review/copy-hunt/accepted-copies.ts";
+import { acceptedFaults } from "../../scripts/review/copy-hunt/accepted-faults.ts";
+import { acceptedFor, staleCopies } from "../../scripts/review/copy-hunt/accepted.ts";
 import { fnOf } from "../../test-support/copy-hunt-fixtures.ts";
 
 const A = fnOf("src/a.ts", 3, "alpha", [], { hash: "a070d6cdc7bcc32e" });

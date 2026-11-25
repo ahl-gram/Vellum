@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
+import { firstDifference, readerOf } from "../../scripts/review/comment-sweep/verify.ts";
 
 const SCRIPTS_BITING = [
   { name: "a changed identifier", path: "src/a.ts", before: "const a = 1;\n", after: "const b = 1;\n" },

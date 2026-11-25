@@ -273,7 +273,7 @@ is run and PROVEN in a particular way.
   sentinel's decode.
 - **The proof that a sweep changed no code is `npm run comment-sweep -- verify origin/main HEAD`,
   run on the sweep's branch: an AST token-stream comparison against the base, per file**
-  (`scripts/comment-sweep/main.ts`). It reads the branch's commits from their merge base with
+  (`scripts/review/comment-sweep/main.ts`). It reads the branch's commits from their merge base with
   `origin/main`, compares each script, sheet and page the branch changes with every comment
   removed but one that instructs a tool, names every file that differs (with the first
   difference's line on each side), is added, deleted or renamed, changes type, changes mode (the
@@ -290,7 +290,7 @@ is run and PROVEN in a particular way.
   read a `return` whose value sits on the next line as one that returns it. Read a comment that
   instructs a tool as code, since no type check, lint or format check reports the removal of
   every one: a comment an entry of `INSTRUCTION_COMMENTS` in
-  `scripts/comment-sweep/instructions.ts` reads, each entry reading its form the way the tool
+  `scripts/review/comment-sweep/instructions.ts` reads, each entry reading its form the way the tool
   that obeys it does, stays in the token stream where it stands, so removing or editing one, or
   moving it past code, is a change. Its unit tests are its proof: a changed identifier, string,
   regular-expression body or template literal, a dropped default argument or type annotation, a
@@ -310,7 +310,7 @@ is run and PROVEN in a particular way.
   coordinate convention or a sentinel's decode) and check whether the fact survives anywhere in its
   file. For TypeScript, run `npm run keeper-scan -- diff origin/main HEAD` on the sweep's branch
   before its pull request opens, and paste its report into the sweep's ledger whole
-  (`scripts/keeper-scan/main.ts`). It asks TypeSafe's Jev whether each comment the branch deletes or
+  (`scripts/review/keeper-scan/main.ts`). It asks TypeSafe's Jev whether each comment the branch deletes or
   trims carries each signal, and asks each signal Jev is confident the comment carried (an answer
   above 0.7) whether the file at head still says it. It lists only those confident facts: as lost
   where the file no longer says one (an answer under 0.3), and as unsettled where it may not (from
@@ -319,7 +319,7 @@ is run and PROVEN in a particular way.
   or skipped, and every file it names as not read (a sheet, a page, a TypeScript file outside the
   lint's roots, a file the branch deletes): put each keeper fact back at its line or into the test
   that pins it, or name in the ledger why it is not one, since the scan only lists and a person
-  decides what is a keeper. Its questions are frozen in `scripts/keeper-scan/questions.ts` by its
+  decides what is a keeper. Its questions are frozen in `scripts/review/keeper-scan/questions.ts` by its
   unit tests. **CSS is the weakest ground for the whole doctrine**, because no unit test
   pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
   dangerous single loss: without the line the next reader "fixes" the value back. A line holding

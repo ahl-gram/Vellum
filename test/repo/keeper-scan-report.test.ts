@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { replyLines, requestLines } from "../../scripts/comment-judge/report.ts";
+import { replyLines, requestLines } from "../../scripts/review/comment-judge/report.ts";
 import { liveSender } from "../../scripts/jev/system-one.ts";
-import { BY_HAND } from "../../scripts/keeper-scan/collect.ts";
-import { keeperRequest } from "../../scripts/keeper-scan/questions.ts";
-import { reportLines } from "../../scripts/keeper-scan/report.ts";
-import { RUN_INPUT_TOKEN_CAP, scanAll, type Scanned } from "../../scripts/keeper-scan/scan.ts";
+import { BY_HAND } from "../../scripts/review/keeper-scan/collect.ts";
+import { keeperRequest } from "../../scripts/review/keeper-scan/questions.ts";
+import { reportLines } from "../../scripts/review/keeper-scan/report.ts";
+import { RUN_INPUT_TOKEN_CAP, scanAll, type Scanned } from "../../scripts/review/keeper-scan/scan.ts";
 import { answered, keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 import { RUN } from "../../test-support/keeper-scan-fixtures.ts";
 

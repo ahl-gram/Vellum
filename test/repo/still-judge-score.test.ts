@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Reply } from "../../scripts/jev/system-one.ts";
-import { COMPARISON_RULE } from "../../scripts/still-judge/compare.ts";
-import { scoreLines, winRate } from "../../scripts/still-judge/score.ts";
-import { reaskedOf, stillsOf, type TrialStill } from "../../scripts/still-judge/trial-set.ts";
+import { COMPARISON_RULE } from "../../scripts/review/still-judge/compare.ts";
+import { scoreLines, winRate } from "../../scripts/review/still-judge/score.ts";
+import { reaskedOf, stillsOf, type TrialStill } from "../../scripts/review/still-judge/trial-set.ts";
 import { answered } from "../../test-support/jev-fakes.ts";
 import { RAIN, SHEET } from "../../test-support/still-judge-fixtures.ts";
 

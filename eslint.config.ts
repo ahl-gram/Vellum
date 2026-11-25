@@ -24,7 +24,7 @@ import sharedBindings, { SHARED_BINDINGS } from "./scripts/lint/shared-bindings.
 import packageImports from "./scripts/lint/package-imports.ts";
 import wordForWord from "./scripts/lint/word-for-word.ts";
 import entryGuard from "./scripts/lint/entry-guard.ts";
-import { ACCEPTED_COPIES } from "./scripts/copy-hunt/accepted-copies.ts";
+import { ACCEPTED_COPIES } from "./scripts/review/copy-hunt/accepted-copies.ts";
 import skippableChecks, { SKIPPABLE_TESTS } from "./scripts/lint/skippable-checks.ts";
 import sheetMotion, {
   CHART_INSTRUMENTS,

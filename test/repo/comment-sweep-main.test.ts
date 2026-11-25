@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { chmodSync, rmSync, symlinkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
-import { main, verify } from "../../scripts/comment-sweep/main.ts";
-import { exitOf, reportLines } from "../../scripts/comment-sweep/report.ts";
-import type { Finding } from "../../scripts/comment-sweep/verify.ts";
+import { main, verify } from "../../scripts/review/comment-sweep/main.ts";
+import { exitOf, reportLines } from "../../scripts/review/comment-sweep/report.ts";
+import type { Finding } from "../../scripts/review/comment-sweep/verify.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 

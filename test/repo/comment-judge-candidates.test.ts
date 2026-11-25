@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { candidateFinder } from "../../scripts/comment-judge/candidates.ts";
-import { commentRuns } from "../../scripts/comment-judge/collect.ts";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
+import { candidateFinder } from "../../scripts/review/comment-judge/candidates.ts";
+import { commentRuns } from "../../scripts/review/comment-judge/collect.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
 
 const HEAD = 'import assert from "node:assert/strict";\nimport { test } from "node:test";\n';
 const FILES: Record<string, string> = {

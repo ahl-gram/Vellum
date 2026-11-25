@@ -465,7 +465,7 @@ number), and once the ledger is posted, run the recon against the LEDGER and put
 surfaces to Alex in the same sitting. A completeness claim in a ledger's preamble is exactly the
 confidence with no command behind it that this file exists to refuse.
 
-**The weekly sitting that runs the comment sweep runs the copy hunt over the same merges** (Alex, 2026-11-11, Issue #1319): `npm run copy-hunt -- diff <the last comment-sweep tag> origin/main --out out/copy-sweep-<date>`, the tag found as `handbook/specs/conventions.md` (The comment sweep) finds it, before the sitting tags the commit it read. Step 14 hunts each pull request on its own, and this catches what those hunts let through: a skipped call, a copy kept with no ruling. Each family of copies it reports that `scripts/copy-hunt/accepted-copies.ts` does not list is filed as one issue, searched for first as step 15 says.
+**The weekly sitting that runs the comment sweep runs the copy hunt over the same merges** (Alex, 2026-11-11, Issue #1319): `npm run copy-hunt -- diff <the last comment-sweep tag> origin/main --out out/copy-sweep-<date>`, the tag found as `handbook/specs/conventions.md` (The comment sweep) finds it, before the sitting tags the commit it read. Step 14 hunts each pull request on its own, and this catches what those hunts let through: a skipped call, a copy kept with no ruling. Each family of copies it reports that `scripts/review/copy-hunt/accepted-copies.ts` does not list is filed as one issue, searched for first as step 15 says.
 
 **An epic filed from 2026-10-04 on nests its subs as native sub-issues** (Alex, 2026-10-04), so the
 roadmap board shows each sub under its epic. File a sub with `gh issue create --parent <epic>`, or

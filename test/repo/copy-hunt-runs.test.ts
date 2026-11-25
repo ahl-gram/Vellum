@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { revParse } from "../../scripts/comment-judge/tree.ts";
-import { RUN_INPUT_TOKEN_CAP, type Found, type HuntOptions } from "../../scripts/copy-hunt/hunt.ts";
-import { diffRun, fullRun } from "../../scripts/copy-hunt/runs.ts";
+import { revParse } from "../../scripts/review/comment-judge/tree.ts";
+import { RUN_INPUT_TOKEN_CAP, type Found, type HuntOptions } from "../../scripts/review/copy-hunt/hunt.ts";
+import { diffRun, fullRun } from "../../scripts/review/copy-hunt/runs.ts";
 import type { Send } from "../../scripts/jev/system-one.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 import { ALPHA, ALPHA_COPY, ALPHA_NEAR, LONG, OTHER, sameAnswer, TINY } from "../../test-support/copy-hunt-fixtures.ts";

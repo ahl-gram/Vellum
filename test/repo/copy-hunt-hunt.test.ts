@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
-import { hunt, RUN_INPUT_TOKEN_CAP, type HuntOptions } from "../../scripts/copy-hunt/hunt.ts";
-import { requestFor } from "../../scripts/copy-hunt/questions.ts";
+import type { AcceptedCopy } from "../../scripts/review/copy-hunt/accepted-copies.ts";
+import { hunt, RUN_INPUT_TOKEN_CAP, type HuntOptions } from "../../scripts/review/copy-hunt/hunt.ts";
+import { requestFor } from "../../scripts/review/copy-hunt/questions.ts";
 import type { Send } from "../../scripts/jev/system-one.ts";
 import { alphaFns, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
 import { recordingSender } from "../../test-support/jev-fakes.ts";

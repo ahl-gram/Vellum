@@ -1,10 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { AcceptedCopy } from "../../scripts/copy-hunt/accepted-copies.ts";
-import type { Fn } from "../../scripts/copy-hunt/functions.ts";
-import { hunt, RUN_INPUT_TOKEN_CAP, type Found, type Run } from "../../scripts/copy-hunt/hunt.ts";
-import { requestFor } from "../../scripts/copy-hunt/questions.ts";
-import { BLIND_SPOTS, pairLines, replyLines, reportLines, requestLines } from "../../scripts/copy-hunt/report.ts";
+import type { AcceptedCopy } from "../../scripts/review/copy-hunt/accepted-copies.ts";
+import type { Fn } from "../../scripts/review/copy-hunt/functions.ts";
+import { hunt, RUN_INPUT_TOKEN_CAP, type Found, type Run } from "../../scripts/review/copy-hunt/hunt.ts";
+import { requestFor } from "../../scripts/review/copy-hunt/questions.ts";
+import {
+  BLIND_SPOTS,
+  pairLines,
+  replyLines,
+  reportLines,
+  requestLines,
+} from "../../scripts/review/copy-hunt/report.ts";
 import { liveSender } from "../../scripts/jev/system-one.ts";
 import { alphaFns, asked, fnOf, pair, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
 import { keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";

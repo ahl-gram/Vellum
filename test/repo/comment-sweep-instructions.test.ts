@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { INSTRUCTION_COMMENTS, isInstruction } from "../../scripts/comment-sweep/instructions.ts";
-import { firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
+import { INSTRUCTION_COMMENTS, isInstruction } from "../../scripts/review/comment-sweep/instructions.ts";
+import { firstDifference, readerOf } from "../../scripts/review/comment-sweep/verify.ts";
 
 const EACH_INSTRUCTION: Readonly<Record<string, { readonly before: string; readonly after: string }>> = {
   "@ts-": {

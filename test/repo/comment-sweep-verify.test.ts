@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
-import { scriptTokens } from "../../scripts/comment-sweep/tokens.ts";
-import { findingsOf, firstDifference, readerOf } from "../../scripts/comment-sweep/verify.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
+import { scriptTokens } from "../../scripts/review/comment-sweep/tokens.ts";
+import { findingsOf, firstDifference, readerOf } from "../../scripts/review/comment-sweep/verify.ts";
 
 const READ = [
   "src/a.ts",

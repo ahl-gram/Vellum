@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { decide } from "../../scripts/comment-judge/decide.ts";
-import type { Candidate } from "../../scripts/comment-judge/types.ts";
+import { decide } from "../../scripts/review/comment-judge/decide.ts";
+import type { Candidate } from "../../scripts/review/comment-judge/types.ts";
 
 const A: Candidate = { file: "test/a.test.ts", name: "a", body: "" };
 const B: Candidate = { file: "test/b.test.ts", name: "b", body: "" };

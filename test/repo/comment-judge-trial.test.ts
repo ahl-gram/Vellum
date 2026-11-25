@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { PR548_SHA, type TrialRow } from "../../scripts/comment-judge/trial-set.ts";
-import { locateRun, scoreLines, type Scored } from "../../scripts/comment-judge/trial.ts";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
-import type { Candidate, CommentRun, Outcome } from "../../scripts/comment-judge/types.ts";
+import { PR548_SHA, type TrialRow } from "../../scripts/review/comment-judge/trial-set.ts";
+import { locateRun, scoreLines, type Scored } from "../../scripts/review/comment-judge/trial.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
+import type { Candidate, CommentRun, Outcome } from "../../scripts/review/comment-judge/types.ts";
 import type { Reply, SystemOneRequest } from "../../scripts/jev/system-one.ts";
 
 test("a trial row finds the run covering its line, the first line or a later one", () => {

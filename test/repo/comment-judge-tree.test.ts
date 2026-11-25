@@ -3,7 +3,7 @@ import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { deletedFiles } from "../../scripts/comment-judge/tree.ts";
+import { deletedFiles } from "../../scripts/review/comment-judge/tree.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 test("a deleted file is one the branch removes, and a renamed file is never also one, whatever the repository's diff.renames says", () => {

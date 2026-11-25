@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { changedFunctions } from "../../scripts/copy-hunt/changed.ts";
-import { functionsIn, type Fn } from "../../scripts/copy-hunt/functions.ts";
+import { changedFunctions } from "../../scripts/review/copy-hunt/changed.ts";
+import { functionsIn, type Fn } from "../../scripts/review/copy-hunt/functions.ts";
 import { ALPHA, ALPHA_NEAR, OTHER } from "../../test-support/copy-hunt-fixtures.ts";
 
 const before =

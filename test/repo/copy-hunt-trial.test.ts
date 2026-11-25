@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { functionsIn } from "../../scripts/copy-hunt/functions.ts";
-import { YES } from "../../scripts/copy-hunt/questions.ts";
-import { CONTROL, SCAN, TRIAL_ROWS, type TrialRow } from "../../scripts/copy-hunt/trial-set.ts";
-import { locate, scoreLines } from "../../scripts/copy-hunt/trial.ts";
+import { functionsIn } from "../../scripts/review/copy-hunt/functions.ts";
+import { YES } from "../../scripts/review/copy-hunt/questions.ts";
+import { CONTROL, SCAN, TRIAL_ROWS, type TrialRow } from "../../scripts/review/copy-hunt/trial-set.ts";
+import { locate, scoreLines } from "../../scripts/review/copy-hunt/trial.ts";
 import { asked, fnOf, KINDS, pair, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
 
 test("a trial side is found by its file, line and name, and one that is not there is refused", () => {

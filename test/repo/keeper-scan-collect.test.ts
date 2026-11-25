@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BY_HAND, DELETED_FILE, deletedRuns, filesToRead, OUTSIDE_ROOTS } from "../../scripts/keeper-scan/collect.ts";
+import {
+  BY_HAND,
+  DELETED_FILE,
+  deletedRuns,
+  filesToRead,
+  OUTSIDE_ROOTS,
+} from "../../scripts/review/keeper-scan/collect.ts";
 
 test("a deleted run is one whose text the file no longer carries, read at the base with its line and the code beside it there, so a trimmed comment is deleted and a moved one is not", () => {
   const before =

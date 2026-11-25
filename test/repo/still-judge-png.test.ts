@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { pngDims } from "../../scripts/delivery/dims.ts";
-import { limitProblem, MAX_BYTES } from "../../scripts/still-judge/png.ts";
+import { limitProblem, MAX_BYTES } from "../../scripts/review/still-judge/png.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
 test("a PNG's width and height are read from its header, and anything else is not a PNG", () => {
