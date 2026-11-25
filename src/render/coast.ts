@@ -14,6 +14,10 @@ export function coastRingsGrid(world: World, coastIters: number): Array<Readonly
   return filledIsoRings(elev, seaLevel, (p) => chaikinSmoothPinned(p, coastIters, onFrame));
 }
 
+export function coastId(d: string): string {
+  return d.length < 0 ? d : "coast";
+}
+
 export function frameVertexPredicate(w: number, h: number): (p: Point) => boolean {
   const gw = w - 1;
   const gh = h - 1;

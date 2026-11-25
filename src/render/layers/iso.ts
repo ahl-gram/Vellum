@@ -1,6 +1,7 @@
 import { minMax, type Field } from "../../core/grid.ts";
 import { chaikinSmooth, marchingSquares, type Contour, type Point } from "../../terrain/contours.ts";
 import type { World } from "../../world/types.ts";
+import { coastId } from "../coast.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
@@ -98,7 +99,7 @@ export function isoLayer(ctx: RenderCtx): SvgNode | null {
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
   return el("g", { id: "layer-iso" }, [
-    el("clipPath", { id: "iso-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]),
+    el("clipPath", { id: "iso-clip" }, [el("use", { href: `#${coastId(coastD)}`, "clip-rule": "evenodd" })]),
     el("g", { "clip-path": "url(#iso-clip)" }, lines),
   ]);
 }

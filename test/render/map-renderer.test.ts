@@ -27,6 +27,12 @@ const coastSheets = (): ReadonlyArray<{ readonly name: string; readonly svg: str
   { name: "close-up rainfall plate", svg: renderMap(closeUp, { style: "antique", theme: "moisture" }), lines: 8 },
 ];
 
+function coastCopy(svg: string): { readonly id: string; readonly d: string } {
+  const copy = /<defs><path id="([^"]+)" d="([^"]*)"\/>/.exec(svg);
+  assert.ok(copy !== null, "the sheet's defs open on its coast copy");
+  return { id: copy[1]!, d: copy[2]! };
+}
+
 test("renderMap emits a complete SVG document with all core layers", () => {
   const svg = renderMap(world, { style: "antique" });
   assert.ok(svg.startsWith("<svg"));
@@ -118,4 +124,29 @@ test("the coast is written twice on a world sheet, a rainfall plate and a close-
     assert.ok(land !== undefined && land.length > 0, `${name}: the land layer opens on the coast`);
     assert.equal(count(svg, `d="${land}"`), 2, name);
   }
+});
+
+test("every coast line on a sheet draws from that sheet's own copy, and a close-up names its copy apart from its world sheet's, since the Explorer lays the close-up inline beside the world sheet (Issue #1475)", () => {
+  const sheets = coastSheets();
+  const copies = sheets.map(({ svg }) => coastCopy(svg));
+  for (const [i, { name, svg, lines }] of sheets.entries()) {
+    assert.equal(
+      svg.includes('id="layer-iso"') && svg.includes('id="layer-wind-streams"'),
+      lines > 3,
+      `${name}: a plate draws its isohyets and streaks, the plain sheet neither, or the line count reads another case`,
+    );
+    assert.equal(
+      count(svg, `href="#${copies[i]!.id}"`),
+      lines,
+      `${name}: every coast line draws from the sheet's own copy`,
+    );
+    assert.equal(count(svg, `id="${copies[i]!.id}"`), 1, `${name}: the copy is named once`);
+  }
+  assert.equal(copies[0]!.id, copies[1]!.id, "a plate draws its world's coast, so it names the same copy");
+  assert.notEqual(
+    copies[0]!.d,
+    copies[2]!.d,
+    "the close-up draws another coast, or its copy may rightly share the name",
+  );
+  assert.notEqual(copies[0]!.id, copies[2]!.id);
 });

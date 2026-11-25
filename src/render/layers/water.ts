@@ -1,6 +1,7 @@
 import { minMax } from "../../core/grid.ts";
 import { chaikinSmooth, filledIsoRings } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
+import { coastId } from "../coast.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Projection } from "../transform.ts";
 
@@ -78,7 +79,7 @@ export function oceanLayer(ctx: RenderCtx): SvgNode {
 
 export function waterlinesLayer(ctx: RenderCtx): SvgNode {
   const { style, coastRings } = ctx;
-  const d = coastRings.map((r) => pathFrom(r, true)).join("");
+  const href = `#${coastId(coastRings.map((r) => pathFrom(r, true)).join(""))}`;
   const rings = [
     { width: 9, opacity: 0.16 },
     { width: 5.5, opacity: 0.26 },
@@ -88,8 +89,8 @@ export function waterlinesLayer(ctx: RenderCtx): SvgNode {
     "g",
     { id: "layer-waterlines" },
     rings.map((r) =>
-      el("path", {
-        d,
+      el("use", {
+        href,
         fill: "none",
         stroke: style.waterline,
         "stroke-width": r.width,

@@ -1,7 +1,7 @@
 import { createRng } from "../core/rng.ts";
 import { minMax } from "../core/grid.ts";
 import { coastSmoothingIterations } from "../terrain/contours.ts";
-import { coastRingsGrid } from "./coast.ts";
+import { coastId, coastRingsGrid } from "./coast.ts";
 import type { World } from "../world/types.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type PxRing, type RenderCtx } from "./context.ts";
@@ -215,7 +215,10 @@ function furnitureFor(ctx: RenderCtx, plans: ChartPlans): Array<SvgNode | null> 
 function chartDefs(ctx: RenderCtx): SvgNode {
   const { world, style, proj, coastRings } = ctx;
   const margin = proj.margin;
+  const coastD = coastRings.map((r) => pathFrom(r, true)).join("");
+  const id = coastId(coastD);
   return el("defs", {}, [
+    el("path", { id, d: coastD }),
     el("clipPath", { id: "map-clip" }, [
       el("rect", {
         x: margin,
@@ -225,14 +228,7 @@ function chartDefs(ctx: RenderCtx): SvgNode {
       }),
     ]),
     ...(world.region
-      ? [
-          el("clipPath", { id: "region-land-clip" }, [
-            el("path", {
-              d: coastRings.map((r) => pathFrom(r, true)).join(""),
-              "clip-rule": "evenodd",
-            }),
-          ]),
-        ]
+      ? [el("clipPath", { id: "region-land-clip" }, [el("use", { href: `#${id}`, "clip-rule": "evenodd" })])]
       : []),
     ...(style.glyphs ? glyphSymbolDefs(style) : []),
     ...textureDefs(ctx),
