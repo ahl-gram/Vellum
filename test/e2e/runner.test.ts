@@ -116,7 +116,7 @@ test("the runner runs exactly the suites the environment selects, and no others"
   const wanted = resolveSuiteSelection(env).names;
   assert.ok(wanted.length > 0 && wanted.length < E2E_SUITE_ORDER.length, "the fixture selects the full order or none");
   const { io, ran } = rig(env);
-  assert.equal(await runE2e(io), 0);
+  assert.equal(await runE2e({ ...io, skips: [] }), 0);
   assert.deepEqual(ran, wanted);
 });
 
