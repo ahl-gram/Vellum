@@ -1,36 +1,44 @@
 # The flake record
 
-**One row per FAILURE, not per check.** A check that has flaked three times gets three rows, because
-the thing worth knowing is never "this is flaky", it is how often, on what shas, with what payload,
-and whether anyone did anything about it.
+**A closed record (Alex, 2026-11-24, Issue #1456): it takes no new row.** It holds the reds
+believed to be flakes until it closed, one row per failure, with the run id, the payload and what
+was done about it. A check shown to flake since is an issue under the roadmap board's Flakes phase,
+which holds what a row held (`handbook/specs/settle-doctrine.md` item 12). A row already here still
+takes its disposition when its check is settled or deleted (`handbook/specs/settle-doctrine.md`,
+When a check leaves the run), and a spec line or a code comment that cites a row cites it as
+history.
 
-This file exists because #578 found CD7b had failed on `main` twice in forty runs with nobody
-recording either, and that reconstructing even that much cost a forty-run archaeology dig through CI
-history plus three closed issues. A third occurrence, older than both and the only one actually
-re-run away, was sitting in a comment on #546 that nothing pointed at. `vellum-footguns` Gate 2
-item 10 says a red is yours until proven a flake and must never be silently re-run away; this is
-where the proof goes.
+The record was opened because Issue #578 found CD7b had failed on `main` twice in forty runs with
+nobody recording either, and that reconstructing even that much cost a forty-run archaeology dig
+through CI history plus three closed issues. A third occurrence, older than both and the only one
+actually re-run away, was sitting in a comment on Issue #546 that nothing pointed at.
 
-## How to use it
+## Reading a row
 
-- **A red you believe is a flake gets a row before you re-run anything.** The payload verbatim, inside
-  backticks, where an em-dash it carries stands; the run id, the sha and branch. A row costs a minute; the dig costs a session.
 - **A row's disposition is one of four**: *settled* (the wait or the bound was fixed, and the check
-  asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue number,
-  per `handbook/specs/settle-doctrine.md` item 11), *deleted* (the check is gone, with the PR that
-  deleted it, per that spec's "When a check leaves the run"), or *open* (seen, recorded, nobody has
-  acted).
-- **A rewritten unit test's red that the list does not explain gets a row with no re-run**
-  (`handbook/specs/settle-doctrine.md` item 15): its disposition keeps the words
-  `a rewritten unit test re-planned` through every change, since `handbook/specs/orchestration.md`
-  reports the count of such rows to Alex.
-- **Only a row from GitHub's machines counts toward the issue** (`handbook/specs/settle-doctrine.md`
-  item 12): the CI workflow's or the proof runner's, one per run. A local run's red gets its row and
-  its disposition as usual, and local rows never file the issue.
-- **A cell that cannot be read back is written "not retained"**, never inferred. GitHub ages out run
-  logs, and a guess here is worse than a gap.
-- **This is a record, not a rule.** It is not required reading before a kind of work; it is what you
-  consult the moment a check goes red and you are tempted to press re-run.
+  asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue
+  number, per `handbook/specs/settle-doctrine.md` item 11), *deleted* (the check is gone, with the PR
+  that deleted it, per that spec's "When a check leaves the run"), or *open* (seen, recorded, nobody
+  had acted when the record closed).
+- **A cell written "not retained"** could not be read back when its row was written, since GitHub
+  ages out run logs, and was never inferred.
+- **The payload is verbatim, inside backticks**, where an em-dash it carries stands.
+
+## What the CD7b rows turned out to be
+
+Worth keeping because it is the shape a "flaky" hit test takes, and because the first two guesses
+were both wrong. The drawer is `position: fixed; bottom: 0` with `animation: chart-drawer-up 0.32s
+... both` from `translateY(100%)`. The press adds the `open` class, and until the runner commits
+that style change the six remove buttons sit below the viewport, where `elementFromPoint` returns
+null rather than the element. So the drawer reports open and all six controls report unreachable, in
+the same read. Measured 2026-09-13: the window is 59ms at 1x CPU throttle and 1094 to 1514ms at 60x,
+because its length is main-thread bound and not animation bound. The check's fixed 700ms sleep was a
+bet on the runner.
+
+Neither of the readings the record carried before that was right. #546's comment reasoned it was
+"the Broadside not yet settled above the drawer band" and asked that the next occurrence capture the
+Broadside's rect; nothing was painted over the buttons, they were off screen. #578's body offered
+"or with something painted over all of them" as an alternative to the timing; it was the timing.
 
 ## The record
 
@@ -152,22 +160,6 @@ where the proof goes.
 | 2026-10-13 | SB15 | 38345842332 (CI, lane C job 115126941467) | `c0265f12`, `779-part2h-plan` (Issue #779 part 2h, PR #867) | `FAIL  SB15 the Glass's out press answers a real press in a room the kit's key binder binds  — {"before":{"state":"rest","folded":false,"zoomed":false,"pill":"the status pill, as a room reports a draw"},"inAt":{"x":856.015625,"y":676.859375,"hit":"zoom-in"},"leaned":{"state":"rest","folded":false,"zoomed":true,"pill":"the status pill, as a room reports a draw"},"outAt":{"x":856.015625,"y":718.4375,"hit":"zoom-out"},"back":{"state":"rest","folded":false,"zoomed":true,"pill":"the status pill, as a room reports a draw"}}` (every other conjunct true; only the flag after the out press false) | settled by the Issue #779 part 2h lane 2 at `c21f89c5`, the cause of the two proof-runner rows above: the in glide had rested before the out press, and the controller's strict `isHome` refused a translation of -2.84217e-14; the third failure of the check, and the first in a lane in order |
 | 2026-10-13 | `test/e2e/launch.test.ts:152`, "the late line did not land during attempt 2" | local `npm test` in the cold skeptic's sandbox `skeptic-867-1`, not CI | `35d0fbd7`, `779-part2h-plan` (Issue #779 part 2h, PR #867) | `the late line did not land during attempt 2` (the assertion's message as the skeptic relayed it; 2712 of 2713 passed that run, and the full output was not retained) | open, no issue: relayed by the skeptic, not reproduced here. The file and `e2e/harness.ts` are unchanged by this pull request (`git diff --stat 2b148100..35d0fbd7` over both is empty), the test passed alone three runs of three (17 of 17 each), and the sandbox was running beside other work, so a loaded machine is the reading; I ran the whole suite at `d6ff15dc` the same day and it read 2713 of 2713 |
 | 2026-10-13 | CD61 | local three-suite run (`VELLUM_E2E_SUITES=reading-room,room-instrument,chart-drawer`), not CI | `0a62c8b2`, `fix/873-e2e-skip-list` (Issue #873) | `FAIL  CD61 never reached its assertion  — {"code":-32000,"message":"Inspected target navigated or closed"}` (stack in `harness.ts` `onCdpMessage`; CD61 passed in the same selection at `51a00072`, and commit `0a62c8b2` touches neither chart-drawer nor anything it loads) | *deleted* by PR #1279 (Issue #1273), and before that: pulled out, Issue #944 (Alex, 2026-10-26, overriding for this check his 2026-10-21 ruling that local rows never pull one). As first recorded: open, no issue: seen once; the one re-run of the same selection at `24edae5a` passed CD61 (132 of 132), so nothing more is known |
-
-## What the CD7b rows turned out to be
-
-Worth keeping because it is the shape a "flaky" hit test takes, and because the first two guesses
-were both wrong. The drawer is `position: fixed; bottom: 0` with `animation: chart-drawer-up 0.32s
-... both` from `translateY(100%)`. The press adds the `open` class, and until the runner commits
-that style change the six remove buttons sit below the viewport, where `elementFromPoint` returns
-null rather than the element. So the drawer reports open and all six controls report unreachable, in
-the same read. Measured 2026-09-13: the window is 59ms at 1x CPU throttle and 1094 to 1514ms at 60x,
-because its length is main-thread bound and not animation bound. The check's fixed 700ms sleep was a
-bet on the runner.
-
-Neither of the readings the record carried before that was right. #546's comment reasoned it was
-"the Broadside not yet settled above the drawer band" and asked that the next occurrence capture the
-Broadside's rect; nothing was painted over the buttons, they were off screen. #578's body offered
-"or with something painted over all of them" as an alternative to the timing; it was the timing.
 | 2026-10-13 | RR42 | 38393177956 (CI, lane B job 115281737720) | `299a80ad`, `chore/876-flake-sequence` (Issue #876, PR #877; a prose-only diff) | `{"unfurl":{"name":"prospectUnfurl","fill":"backwards","origin":"150.406px 0px","half":151.20504760742188,"open":[0,-58.00000991946718],"end":-0.0011401688234259828}` and hovered, keyed and away reads that decode to pass; the one false conjunct is `Math.abs(parseFloat(unfurl.origin) - unfurl.half) < 0.01` | *deleted* by PR #1278 (Issue #1273), and before that: settled (PR #1021, which restored the check that PR #878's skip list had pulled out), Issue #869: the check's base read lands inside the plate's own arrival unfurl; re-run once, by the push that adds this row |
 | 2026-10-13 | FL1 | 38501801109 (CI, lane C job 115650241767) | `94c040bb`, `feat/778-chart-touch-press` (Issue #778, PR #893; the same lane C job passed at `7fb4d570`, and the push between changed no site code, only e2e comments and cleanup, docs and one test file) | `5 faults: /print-room/ 640x800: .legend at [25.6,563.8,541,147.9] against [25.6,565.8,541,145.9] at 1024; /print-room/ 640x800: #sheet at [22,144.7,524.6,405.1] against [20.7,144.7,527.2,407.1] at 1024;` and the same two at 900x800 and the legend at 640x400 | *deleted* by PR #1280 (Issue #1273), and before that: open: the same payload, byte for byte, as the 38325126279 row above, the Print Room's fit depending on how many layout passes it has had (the PR #777 row in `handbook/errata/site.md`); re-run once by the push that carries this row, and FL1 now has rows past the three that settle-doctrine item 12 counts with no issue open, which this lane hands to the dispatcher since it never edits `e2e/support/skips.ts` |
 | 2026-10-16 | CD47 | local single-suite run, `VELLUM_E2E_SUITES=chart-drawer node e2e/run.ts`, not CI | `c1e82173`, `feat/670-portfolio-first-visit-plate` (Issue #670, PR #900; the commit changes one check's name and one errata row, nothing CD47 loads; the run before it, at `54d2fe77`, read CD47 green) | `{"before":{"cuttings":6,"open":true,"folded":true,"cam":{"x":-2812,"y":-1629,"k":8}},"mid":{"ghost":true,"receiving":true},"after":{"cuttings":6,"status":"the table is full: six sheets lie on it","saw":false,"jolt":false,"ghost":null,"drag":false,"open":true,"cam":{"x":-2812,"y":-1629,"k":8}}}` | *deleted* by PR #1279 (Issue #1273), and before that: open: the same `saw:false` shape as the 2026-10-04 row above; 56 of 57 in this run with CD62 and CD20 green; recorded by the Issue #670 lane before its one re-run, per Gate 2 item 10, and not investigated |

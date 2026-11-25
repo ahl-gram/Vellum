@@ -17,8 +17,9 @@ Five other places carry what this one deliberately does not:
   no em-dashes, measure before you assert, and what each subagent is for.
 - **`handbook/specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
   pull request, and which subagent runs at which point in it.
-- **`.claude/skills/vellum-footguns/references/flake-record.md`** holds every CI red believed to be a
-  flake, one row per failure, with the run id, the payload and what was done about it.
+- **`.claude/skills/vellum-footguns/references/flake-record.md`** holds the reds believed to be
+  flakes until it closed on 2026-11-24, one row per failure; a flake shown since is an issue under
+  the roadmap board's Flakes phase (`handbook/specs/settle-doctrine.md` item 12).
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
 Its siblings under `handbook/specs/` hold what this file is not about: `conventions.md` how a design decision
@@ -501,5 +502,5 @@ overlays), to
 several lanes at once), to `handbook/specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), to `handbook/specs/check-placement.md` (which
 check holds which kind of rule), and to the flake record at
-`.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
+`.claude/skills/vellum-footguns/references/flake-record.md` (the closed record of the reds believed to be flakes).
 Rules change rarely; when one does, edit the spec that owns it, this file for the rules here.*
