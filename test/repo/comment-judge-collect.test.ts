@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { addedRuns, commentRuns } from "../../scripts/comment-judge/collect.ts";
+import { addedRuns, commentRuns } from "../../scripts/review/comment-judge/collect.ts";
 
 const shape = (text: string) =>
   commentRuns("src/a.ts", text).map((r) => ({

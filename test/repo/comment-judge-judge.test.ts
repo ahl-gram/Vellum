@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { commentRuns } from "../../scripts/comment-judge/collect.ts";
-import { judgeAll, judgeRun, type Judged } from "../../scripts/comment-judge/judge.ts";
-import { replyLines, reportLines, requestLines } from "../../scripts/comment-judge/report.ts";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
-import type { Candidate, CommentRun, Outcome } from "../../scripts/comment-judge/types.ts";
+import { commentRuns } from "../../scripts/review/comment-judge/collect.ts";
+import { judgeAll, judgeRun, type Judged } from "../../scripts/review/comment-judge/judge.ts";
+import { replyLines, reportLines, requestLines } from "../../scripts/review/comment-judge/report.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
+import type { Candidate, CommentRun, Outcome } from "../../scripts/review/comment-judge/types.ts";
 import type { Reply, Send } from "../../scripts/jev/system-one.ts";
 import { answered } from "../../test-support/jev-fakes.ts";
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { requestFor, verdictOf } from "../../scripts/copy-hunt/questions.ts";
+import { requestFor, verdictOf } from "../../scripts/review/copy-hunt/questions.ts";
 import { fnOf } from "../../test-support/copy-hunt-fixtures.ts";
 
 test("a request asks the scan's frozen question about both functions, each sent as its file, name and body", () => {

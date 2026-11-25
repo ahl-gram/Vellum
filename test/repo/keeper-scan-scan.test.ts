@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readOf, scanAll, scanRun } from "../../scripts/keeper-scan/scan.ts";
+import { readOf, scanAll, scanRun } from "../../scripts/review/keeper-scan/scan.ts";
 import { answered, recordingSender } from "../../test-support/jev-fakes.ts";
 import { RUN } from "../../test-support/keeper-scan-fixtures.ts";
 

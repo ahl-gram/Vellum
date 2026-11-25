@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { RESTAGES, withStyle, witnessProbe } from "../../scripts/still-judge/restage.ts";
-import { reaskedOf, seedRange, shotsOf, stillsOf, takeSeeds } from "../../scripts/still-judge/trial-set.ts";
+import { RESTAGES, withStyle, witnessProbe } from "../../scripts/review/still-judge/restage.ts";
+import { reaskedOf, seedRange, shotsOf, stillsOf, takeSeeds } from "../../scripts/review/still-judge/trial-set.ts";
 import { RAIN, SHEET } from "../../test-support/still-judge-fixtures.ts";
 
 const CLIP = { x: 286, y: 486, width: 600, height: 400 };

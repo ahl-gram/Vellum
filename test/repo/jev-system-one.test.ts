@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { RESTATES } from "../../scripts/comment-judge/questions.ts";
+import { RESTATES } from "../../scripts/review/comment-judge/questions.ts";
 import {
   ask,
   liveSender,

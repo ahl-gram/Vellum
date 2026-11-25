@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { memoryTree } from "../../scripts/comment-judge/tree.ts";
-import { functionsAt, functionsIn } from "../../scripts/copy-hunt/functions.ts";
+import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
+import { functionsAt, functionsIn } from "../../scripts/review/copy-hunt/functions.ts";
 import { ALPHA, ALPHA_COPY, KINDS, OTHER, TINY } from "../../test-support/copy-hunt-fixtures.ts";
 
 const OTHER_FORMS = [

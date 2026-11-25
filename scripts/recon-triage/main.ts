@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ensureCommit, gitTree, type Tree } from "../comment-judge/tree.ts";
+import { ensureCommit, gitTree, type Tree } from "../review/comment-judge/tree.ts";
 import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../jev/cli.ts";
 import { parseClaims } from "./claims.ts";
 import { excerptOf } from "./excerpt.ts";

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
 import { MODEL } from "../../scripts/jev/system-one.ts";
-import { keeperRequest, SIGNALS, survivalRequest } from "../../scripts/keeper-scan/questions.ts";
+import { keeperRequest, SIGNALS, survivalRequest } from "../../scripts/review/keeper-scan/questions.ts";
 import { RUN } from "../../test-support/keeper-scan-fixtures.ts";
 
 test("the keeper request asks the trial's seven frozen keeper questions about the comment, its file and the code beside it", () => {

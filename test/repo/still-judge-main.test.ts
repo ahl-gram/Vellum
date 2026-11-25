@@ -4,11 +4,11 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
-import { COMPARISON_RULE } from "../../scripts/still-judge/compare.ts";
+import { COMPARISON_RULE } from "../../scripts/review/still-judge/compare.ts";
 import { NO_KEY, runKeyless, type Run } from "../../test-support/keyless-spawn.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
-const MAIN = resolve(import.meta.dirname, "..", "..", "scripts", "still-judge", "main.ts");
+const MAIN = resolve(import.meta.dirname, "..", "..", "scripts", "review", "still-judge", "main.ts");
 // 2026-11-11, Issue #1309: ten runs over header-only PNGs took under 0.2 s each on the Mac (the three tests in 1.0 s together); a minute holds three hundred times the slowest.
 const RUN_MS = 60_000;
 

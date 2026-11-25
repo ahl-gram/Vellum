@@ -2,10 +2,10 @@ import type { Rule } from "eslint";
 import { readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { listWorkingTree } from "../../test-support/working-tree.ts";
-import type { Tree } from "../comment-judge/tree.ts";
-import type { AcceptedCopy } from "../copy-hunt/accepted-copies.ts";
-import { acceptedFor } from "../copy-hunt/accepted.ts";
-import { functionsAt, functionsIn, MIN_TOKENS, type Fn } from "../copy-hunt/functions.ts";
+import type { Tree } from "../review/comment-judge/tree.ts";
+import type { AcceptedCopy } from "../review/copy-hunt/accepted-copies.ts";
+import { acceptedFor } from "../review/copy-hunt/accepted.ts";
+import { functionsAt, functionsIn, MIN_TOKENS, type Fn } from "../review/copy-hunt/functions.ts";
 
 type Options = { readonly root: string; readonly roots: readonly string[]; readonly accepted: readonly AcceptedCopy[] };
 type Index = {
@@ -65,7 +65,7 @@ const wordForWord: Rule.RuleModule = {
       },
     ],
     messages: {
-      copy: "{{name}} is word for word {{copies}}: fold them into one function, or list each pair in scripts/copy-hunt/accepted-copies.ts with the ruling that keeps it (Issue #1332)",
+      copy: "{{name}} is word for word {{copies}}: fold them into one function, or list each pair in scripts/review/copy-hunt/accepted-copies.ts with the ruling that keeps it (Issue #1332)",
     },
   },
   create(context) {

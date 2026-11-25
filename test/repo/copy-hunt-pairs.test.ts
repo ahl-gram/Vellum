@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { functionsIn } from "../../scripts/copy-hunt/functions.ts";
-import { CUT, exactPairs, jaccard, similarPairs } from "../../scripts/copy-hunt/pairs.ts";
+import { functionsIn } from "../../scripts/review/copy-hunt/functions.ts";
+import { CUT, exactPairs, jaccard, similarPairs } from "../../scripts/review/copy-hunt/pairs.ts";
 import {
   ALPHA,
   ALPHA_COPY,

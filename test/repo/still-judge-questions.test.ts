@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
 import { MODEL } from "../../scripts/jev/system-one.ts";
-import { ABOUT, isKind, KINDS, referenceOf, requestFor, SLOT, type Kind } from "../../scripts/still-judge/questions.ts";
+import {
+  ABOUT,
+  isKind,
+  KINDS,
+  referenceOf,
+  requestFor,
+  SLOT,
+  type Kind,
+} from "../../scripts/review/still-judge/questions.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
 const png = pngHeader(1500, 1158);

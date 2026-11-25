@@ -1,4 +1,4 @@
-import type { CommentRun } from "../scripts/comment-judge/types.ts";
+import type { CommentRun } from "../scripts/review/comment-judge/types.ts";
 
 export const RUN: CommentRun = {
   file: "src/keeper.ts",

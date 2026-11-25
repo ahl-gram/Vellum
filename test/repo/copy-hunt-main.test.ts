@@ -5,7 +5,7 @@ import { ALPHA, ALPHA_NEAR, OTHER } from "../../test-support/copy-hunt-fixtures.
 import { NO_KEY, runKeyless, type Run } from "../../test-support/keyless-spawn.ts";
 import { commitAll, withTempRepo, writeFiles } from "../../test-support/proof-runner-repo.ts";
 
-const MAIN = resolve(import.meta.dirname, "..", "..", "scripts", "copy-hunt", "main.ts");
+const MAIN = resolve(import.meta.dirname, "..", "..", "scripts", "review", "copy-hunt", "main.ts");
 // 2026-11-11, Issue #1319: seven runs over a one- or two-file repository took under 0.6 s each on the Mac; a minute holds a hundred times the slowest.
 const RUN_MS = 60_000;
 
