@@ -191,7 +191,7 @@ function draw(year: number | null, writeAddress: boolean): void {
       };
       // AFTER `last`, never before it: the press files what `last` names, and painted a beat early it reads the previous plate or none at all.
       paintLay();
-      void bootHandOnce({ route: "/prospect/" });
+      void bootHandOnce();
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;

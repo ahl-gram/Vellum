@@ -177,7 +177,7 @@ function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: P
   refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
   enableBind();
   askRoad(posterBasis);
-  void bootHandOnce({ route: "/print-room/" });
+  void bootHandOnce();
 }
 
 function draw(): void {

@@ -290,7 +290,7 @@ function scheduleArm(
       // AFTER the arm, since the survey half's plates are keyed by the travel order the arm decides; every plate either half can reach is pulled in one step, so no reveal can stall the sweep.
       stage.prefetch(plateSpecsFor(plates!.beats, rowsForSurvey()));
       frame.host.statusEl.textContent = "";
-      void bootHandOnce({ route: "/reading-room/" });
+      void bootHandOnce();
     },
   });
 }

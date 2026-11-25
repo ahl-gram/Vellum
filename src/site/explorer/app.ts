@@ -371,7 +371,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       if (myGen !== drawGen) return;
       keepDraw(res, seed, t0);
       landDraw(res, seed, overrides, style, theme, legend, arms, beasts, quiet, isTurn, hadChart, myGen);
-      void bootHandOnce({ route: "/explorer/" });
+      void bootHandOnce();
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
