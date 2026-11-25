@@ -1,4 +1,4 @@
-import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../jev/system-one.ts";
+import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import type { Fn } from "./functions.ts";
 
 export const SAME_ID = "same";

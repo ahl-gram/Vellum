@@ -218,7 +218,7 @@ belongs in.
 - **No check holds a judgment that rests on a probability.** These commands ask TypeSafe's Jev:
   - `npm run comment-judge` (`scripts/review/comment-judge/main.ts`), whether each comment a diff adds
     only restates its code or is already pinned by a test (Issue #1304);
-  - `npm run recon-triage` (`scripts/recon-triage/main.ts`), whether the code an issue cites does
+  - `npm run recon-triage` (`scripts/agent-infra/recon-triage/main.ts`), whether the code an issue cites does
     what the issue's claim says, which orders `vellum-spec-recon`'s reading (Issue #1310);
   - `npm run keeper-scan` (`scripts/review/keeper-scan/main.ts`), whether each comment a diff deletes
     carries a keeper fact its file no longer says, which a comment sweep's ledger carries
@@ -245,14 +245,14 @@ belongs in.
   that can fail or a refusal of the footgun hook; what each reports is a
   reader's hypothesis that a command still confirms; and a call that fails is reported as skipped,
   never as nothing found. Each reads the key from `TYPESAFE_API_KEY`, then from
-  `~/.config/typesafe/key`, and never prints it (`readKey` in `scripts/jev/system-one.ts`); where
+  `~/.config/typesafe/key`, and never prints it (`readKey` in `scripts/shared/jev/system-one.ts`); where
   neither holds one, every call is skipped before it is
-  sent. Every one of them runs through `runCommand` in `scripts/jev/cli.ts`, which appends one line
+  sent. Every one of them runs through `runCommand` in `scripts/shared/jev/cli.ts`, which appends one line
   of the run's totals (its input tokens, its requests, the model, the command, and whether any
   count was not TypeSafe's own) to `~/.config/typesafe/usage.jsonl` when the run ends, an interrupt
   included, and none for a run that sent nothing; the line carries counts only, and a write that
   fails is reported on stderr and never changes the run's exit (Issue #1343). A pull request that
-  moves `MODEL` in `scripts/jev/system-one.ts` runs the `trial` of each command that has one and
+  moves `MODEL` in `scripts/shared/jev/system-one.ts` runs the `trial` of each command that has one and
   posts every score on itself.
 - **No check holds that a comment sweep changed no code.** A pull request runs the checks `main`
   runs, its one exception the docs-only lanes, read from the changed files alone

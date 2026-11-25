@@ -1,5 +1,6 @@
 import { closeSync, existsSync, lstatSync, openSync, readdirSync, readFileSync, readlinkSync, readSync } from "node:fs";
 import { extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export type Kind = "picture" | "page" | "site" | "table" | "json" | "text" | "log" | "code" | "link" | "other";
 
@@ -29,6 +30,7 @@ export interface Delivery {
 
 export const NOTES = "notes.md";
 export const PAGE = "index.html";
+export const HOME_OUT = fileURLToPath(new URL("../../../out", import.meta.url));
 export const MARK = `<meta name="generator" content="vellum delivery page">`;
 
 const BY_EXTENSION: Readonly<Record<string, Kind>> = {

@@ -3,7 +3,7 @@ import type { Comment, Program } from "estree";
 import { join, resolve } from "node:path";
 import tseslint from "typescript-eslint";
 
-const ROOT = resolve(import.meta.dirname, "..", "..", "..");
+export const ROOT = resolve(import.meta.dirname, "..", "..", "..");
 
 export type TsParse = { readonly text: string; readonly program: Program; readonly comments: readonly Comment[] };
 

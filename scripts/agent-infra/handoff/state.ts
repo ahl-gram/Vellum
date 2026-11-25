@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EFFORTS, type Effort } from "../agent-infra/model-policy.ts";
+import { EFFORTS, type Effort } from "../model-policy.ts";
 
 export type RunKind = "build" | "resume";
 export type RunRecord = {

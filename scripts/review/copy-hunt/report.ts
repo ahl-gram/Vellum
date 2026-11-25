@@ -1,5 +1,5 @@
 import { two } from "../comment-judge/report.ts";
-import { MODEL } from "../../jev/system-one.ts";
+import { MODEL } from "../../shared/jev/system-one.ts";
 import type { Fn } from "./functions.ts";
 import type { Asked, Found, Run } from "./hunt.ts";
 import type { Verdict } from "./questions.ts";

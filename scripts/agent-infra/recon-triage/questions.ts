@@ -1,4 +1,4 @@
-import { MODEL, type NoulQuestion, type SystemOneRequest } from "../jev/system-one.ts";
+import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 
 export const HOLDS_ID = "holds";
 export const CONTRADICTS_ID = "contradicts";

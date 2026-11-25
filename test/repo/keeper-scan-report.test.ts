@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { replyLines, requestLines } from "../../scripts/review/comment-judge/report.ts";
-import { liveSender } from "../../scripts/jev/system-one.ts";
+import { liveSender } from "../../scripts/shared/jev/system-one.ts";
 import { BY_HAND } from "../../scripts/review/keeper-scan/collect.ts";
 import { keeperRequest } from "../../scripts/review/keeper-scan/questions.ts";
 import { reportLines } from "../../scripts/review/keeper-scan/report.ts";

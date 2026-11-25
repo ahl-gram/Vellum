@@ -5,7 +5,7 @@ import { judgeAll, judgeRun, type Judged } from "../../scripts/review/comment-ju
 import { replyLines, reportLines, requestLines } from "../../scripts/review/comment-judge/report.ts";
 import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
 import type { Candidate, CommentRun, Outcome } from "../../scripts/review/comment-judge/types.ts";
-import type { Reply, Send } from "../../scripts/jev/system-one.ts";
+import type { Reply, Send } from "../../scripts/shared/jev/system-one.ts";
 import { answered } from "../../test-support/jev-fakes.ts";
 
 const run = (file: string, line: number): CommentRun => ({

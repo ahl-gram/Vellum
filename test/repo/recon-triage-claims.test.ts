@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseClaims } from "../../scripts/recon-triage/claims.ts";
+import { parseClaims } from "../../scripts/agent-infra/recon-triage/claims.ts";
 
 const FIRST =
   '{"claim":"a is one","source":"body","paths":["src/a.ts"],"symbols":["a"],"kind":"behavior","verdict":"stale"}';

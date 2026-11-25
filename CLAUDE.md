@@ -285,7 +285,7 @@ Every project agent's model and effort under each harness is in `.agents/model-p
 ## Worktrees
 
 Worktrees live in `.claude/worktrees/`, which `.gitignore` ignores as a directory. Anywhere else is
-NOT ignored, and `scripts/agent-sandbox.ts` assumes that location: it links `node_modules` three
+NOT ignored, and `scripts/agent-infra/agent-sandbox.ts` assumes that location: it links `node_modules` three
 levels up, which resolves only for a sandbox at `<root>/.claude/worktrees/<name>`. That script owns
 the sandbox for both review agents that build one, so the depth lives in one place (#575).
 
@@ -295,7 +295,7 @@ makes one as `handbook/specs/development-workflow.md` step 7 says.
 
 - **`vellum-guard-prover` builds its own tree.** It must mutate the code under review, which
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
-  `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
+  `node scripts/agent-infra/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
   `vellum-pr-skeptic` builds one for EVERY run (Alex, 2026-09-12): `npm test` deletes the generated
   assets under `generated/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script

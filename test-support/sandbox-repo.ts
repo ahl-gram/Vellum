@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 export const BOUND_MS = 30_000;
-export const SCRIPT = resolve(import.meta.dirname, "..", "scripts", "agent-sandbox.ts");
+export const SCRIPT = resolve(import.meta.dirname, "..", "scripts", "agent-infra", "agent-sandbox.ts");
 
 export const git = (args: string[], cwd: string): string =>
   execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();

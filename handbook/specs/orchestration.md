@@ -107,7 +107,7 @@ home's line wins for the lane and this file's for the orchestrator.
   `handbook/specs/development-workflow.md` (The agents) assigns to Claude Code keep running there,
   from the Claude Code session that orchestrates the issue, which also puts every menu to Alex. The
   label is read only before a build starts; once one has, its record decides.
-- **`npm run handoff -- next <issue>` says what comes next** (`scripts/handoff/main.ts`). When Alex
+- **`npm run handoff -- next <issue>` says what comes next** (`scripts/agent-infra/handoff/main.ts`). When Alex
   asks for the next step on an issue, the session runs it from the main checkout and takes the step
   it prints, which names its exact command. It reads the label, the build's record in
   `out/<issue>-handoff/` in the main checkout, the review tree, the branch's pushed head, the
@@ -325,7 +325,7 @@ home's line wins for the lane and this file's for the orchestrator.
   already has, and never `git worktree prune`, which clears every other unlocked missing
   registration too, other sessions' included. A leftover directory that holds files but no `.git`
   file blocks both commands: move it to the Trash first. Then link `node_modules` by path as
-  `scripts/agent-sandbox.ts` does, bring a lane that had no commits current with
+  `scripts/agent-infra/agent-sandbox.ts` does, bring a lane that had no commits current with
   `git -C <path> merge --ff-only origin/main`, and message the lane to resume from its scratchpad
   plan. A planner whose tree is lost is never resumed without one: dispatch a fresh planner on the
   scratchpad plan, after copying any stills its tree still held.
@@ -345,7 +345,7 @@ home's line wins for the lane and this file's for the orchestrator.
   merged state is not the state CI ran.
 - **For a refactor, a moved proof or a new guard, run a check of your own before the merge.** Build a
   detached tree at the pull request's head (`git -C <main checkout> worktree add --detach <path>
-  <sha>`, `node_modules` linked by path as `scripts/agent-sandbox.ts` does), run the lane's proof and
+  <sha>`, `node_modules` linked by path as `scripts/agent-infra/agent-sandbox.ts` does), run the lane's proof and
   guard tests there, plant one change in the moved code or against the new guard and confirm the
   proof reports it, then remove the tree. The plant may instead go to the CI proof runner, on the
   terms `handbook/specs/development-workflow.md` step 11 sets, when the queue ahead of it is short. Place the planted change where coverage shows the code

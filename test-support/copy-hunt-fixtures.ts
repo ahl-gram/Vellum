@@ -1,7 +1,7 @@
 import { functionsIn, type Fn } from "../scripts/review/copy-hunt/functions.ts";
 import type { Found, Outcome } from "../scripts/review/copy-hunt/hunt.ts";
 import { requestFor, verdictOf } from "../scripts/review/copy-hunt/questions.ts";
-import type { Answered, Reply } from "../scripts/jev/system-one.ts";
+import type { Answered, Reply } from "../scripts/shared/jev/system-one.ts";
 import { answered } from "./jev-fakes.ts";
 
 export const ALPHA = [

@@ -1,6 +1,6 @@
 import { closeSync, fstatSync, mkdirSync, openSync, readSync, writeSync } from "node:fs";
 import { join } from "node:path";
-import { errorText } from "../../src/site/shared/error-text.ts";
+import { errorText } from "../../../src/site/shared/error-text.ts";
 import { typesafeDirOf, type Reply, type SystemOneRequest } from "./system-one.ts";
 
 export const USAGE_FILE_SHOWN = "~/.config/typesafe/usage.jsonl";

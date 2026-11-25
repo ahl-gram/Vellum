@@ -1,4 +1,4 @@
-import type { Reply, Send, SystemOneRequest } from "../../jev/system-one.ts";
+import type { Reply, Send, SystemOneRequest } from "../../shared/jev/system-one.ts";
 import { candidateFinder } from "./candidates.ts";
 import { decide } from "./decide.ts";
 import { RESTATES_ID, pinsId, requestsFor } from "./questions.ts";

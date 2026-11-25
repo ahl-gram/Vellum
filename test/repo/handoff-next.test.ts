@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { nextStep, type Snapshot, type StepId } from "../../scripts/handoff/next.ts";
+import { nextStep, type Snapshot, type StepId } from "../../scripts/agent-infra/handoff/next.ts";
 
 const RUN = {
   n: 1,

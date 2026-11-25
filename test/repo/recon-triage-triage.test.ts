@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
-import type { Reply } from "../../scripts/jev/system-one.ts";
-import type { ClaimRow } from "../../scripts/recon-triage/claims.ts";
-import { excerptOf } from "../../scripts/recon-triage/excerpt.ts";
-import { requestFor } from "../../scripts/recon-triage/questions.ts";
-import { RUN_INPUT_TOKEN_CAP, triage } from "../../scripts/recon-triage/triage.ts";
+import type { Reply } from "../../scripts/shared/jev/system-one.ts";
+import type { ClaimRow } from "../../scripts/agent-infra/recon-triage/claims.ts";
+import { excerptOf } from "../../scripts/agent-infra/recon-triage/excerpt.ts";
+import { requestFor } from "../../scripts/agent-infra/recon-triage/questions.ts";
+import { RUN_INPUT_TOKEN_CAP, triage } from "../../scripts/agent-infra/recon-triage/triage.ts";
 import { answered, recordingSender } from "../../test-support/jev-fakes.ts";
 
 const tree = memoryTree("t", { "src/a.ts": "export const a = 1;\n", "src/b.ts": "export const b = 2;\n" });

@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { isRecord } from "../shared/is-record.ts";
+import { isRecord } from "../is-record.ts";
 
 export const ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 export const MODEL = "jev-1.14.0";

@@ -1,4 +1,4 @@
-import { processDeps, runCommand } from "../scripts/jev/cli.ts";
+import { processDeps, runCommand } from "../scripts/shared/jev/cli.ts";
 import { answeringFetch, ONE_QUESTION } from "./jev-fakes.ts";
 
 // 2026-11-11: a cap on a hang, never a budget; it stays under jev-cli.test.ts's WAIT_MS so a handler that fails to exit ends the child by itself with code 0 and reds on the code assertion.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
-import { MODEL } from "../../scripts/jev/system-one.ts";
+import { MODEL } from "../../scripts/shared/jev/system-one.ts";
 import {
   ABOUT,
   isKind,

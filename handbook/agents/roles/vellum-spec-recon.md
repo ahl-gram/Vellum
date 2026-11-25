@@ -25,7 +25,7 @@ npm run --silent issue -- N   # the body, then every comment: decisions, ratific
 Before you verify anything, write every claim the issue and its comments make to `out/<N>-recon/claims.jsonl` in the tree you stand in, `<N>` the issue's number, {{harness:recon-claims-write}}: one JSON object a line, in the issue's order. {{harness:recon-claims-rewrite}}
 
 ```json
-{"claim": "senderFor refuses a key holding a character a request header cannot carry.", "source": "body", "paths": ["scripts/jev/system-one.ts"], "symbols": ["senderFor"], "kind": "behavior"}
+{"claim": "senderFor refuses a key holding a character a request header cannot carry.", "source": "body", "paths": ["scripts/shared/jev/system-one.ts"], "symbols": ["senderFor"], "kind": "behavior"}
 ```
 
 - `claim` is one fact, readable on its own: a sentence holding two ("the ribbon is deterministic to the byte, and RB7 pins it") is two rows, and each names its subject rather than "it".

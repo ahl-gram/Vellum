@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
-import { MODEL } from "../../scripts/jev/system-one.ts";
+import { MODEL } from "../../scripts/shared/jev/system-one.ts";
 import { keeperRequest, SIGNALS, survivalRequest } from "../../scripts/review/keeper-scan/questions.ts";
 import { RUN } from "../../test-support/keeper-scan-fixtures.ts";
 

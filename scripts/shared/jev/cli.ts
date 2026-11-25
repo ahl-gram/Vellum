@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { errorText } from "../../src/site/shared/error-text.ts";
+import { errorText } from "../../../src/site/shared/error-text.ts";
 import { dryRunSender, liveSender, type Env, type Fetch, type Meter, type ReadText, type Send } from "./system-one.ts";
 import { appendUsage, NO_TALLY, notLogged, usageLine, withReply, withSent } from "./usage.ts";
 

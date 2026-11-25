@@ -1,5 +1,5 @@
-import type { Tree } from "../review/comment-judge/tree.ts";
-import { capReason, type Reply, type Send, type SystemOneRequest } from "../jev/system-one.ts";
+import type { Tree } from "../../review/comment-judge/tree.ts";
+import { capReason, type Reply, type Send, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import type { ClaimRow } from "./claims.ts";
 import { excerptOf, type Excerpt } from "./excerpt.ts";
 import { CONTRADICTS_ID, HOLDS_ID, requestFor, scoreOf } from "./questions.ts";

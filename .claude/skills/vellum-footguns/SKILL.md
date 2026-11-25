@@ -59,7 +59,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    precedent in `test-support/` is no evidence against the convention.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover`, one round (step 15), for the guard set (10 minutes, unit tests only,
-   untried mutations named). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
+   untried mutations named). It mutates in its OWN detached worktree, built by `scripts/agent-infra/agent-sandbox.ts` at the
    DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves, and it stops
    rather than carry any across: commit first. Zero red is a
    hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:

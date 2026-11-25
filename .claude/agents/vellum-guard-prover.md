@@ -20,12 +20,12 @@ Rules already exist for this (the guard lines of `vellum-footguns` Gate 1, and C
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatcher standing in a harness-isolated worktree puts you inside its fence, and the Worktrees section of `.claude/rules/claude-code.md` lists what that fence refuses. So `$WT` and `git rev-parse` inside the sandbox are both out, the two reads below are calls of their own, and the `cd` stays in the call that runs the test, which names no git. The fence refuses the Edit tool on a sandbox file as well, and its refusal names the dispatch tree's copy of that file as the one to edit instead, which is the one tree you must never edit (measured 2026-09-27, Issue #707): that is why you hold no Edit tool, and change a sandbox file only through the commands under "Changing a sandbox file" below.
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-infra/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatcher standing in a harness-isolated worktree puts you inside its fence, and the Worktrees section of `.claude/rules/claude-code.md` lists what that fence refuses. So `$WT` and `git rev-parse` inside the sandbox are both out, the two reads below are calls of their own, and the `cd` stays in the call that runs the test, which names no git. The fence refuses the Edit tool on a sandbox file as well, and its refusal names the dispatch tree's copy of that file as the one to edit instead, which is the one tree you must never edit (measured 2026-09-27, Issue #707): that is why you hold no Edit tool, and change a sandbox file only through the commands under "Changing a sandbox file" below.
 
 ```bash
-node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
+node scripts/agent-infra/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
 git status --porcelain > /tmp/guard-<topic>-status-before.txt
-node scripts/agent-sandbox.ts create guard-<topic>-<round>
+node scripts/agent-infra/agent-sandbox.ts create guard-<topic>-<round>
 ```
 
 `create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing (a reused name, a bad sha, a directory already at that path), STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly.
@@ -45,9 +45,9 @@ Step 15 of `handbook/specs/development-workflow.md` gives you one round per pull
 **Changing a sandbox file, and putting it back.** The same script does it, run from the dispatch tree like `create`, one call per line:
 
 ```bash
-node scripts/agent-sandbox.ts mutate guard-<topic>-<round> <path> <line> '<from>' '<to>'
-node scripts/agent-sandbox.ts status guard-<topic>-<round>
-node scripts/agent-sandbox.ts restore guard-<topic>-<round> <path> [<path>...]
+node scripts/agent-infra/agent-sandbox.ts mutate guard-<topic>-<round> <path> <line> '<from>' '<to>'
+node scripts/agent-infra/agent-sandbox.ts status guard-<topic>-<round>
+node scripts/agent-infra/agent-sandbox.ts restore guard-<topic>-<round> <path> [<path>...]
 ```
 
 `mutate` replaces the single occurrence of `<from>` on line `<line>` of the repo-relative `<path>` with `<to>`, both taken literally, and prints the line before and after; `''` as `<to>` deletes the anchor. It refuses, writing nothing, when `<from>` is not on that line exactly once, when the change is a no-op, when the file is not valid UTF-8, or when the path is not a regular file tracked at the sandbox's commit and inside the sandbox. `restore` writes back each named file's bytes at the sandbox's commit. `status` lists every tracked file whose bytes differ from that commit, however it came to differ, exits 1 when it lists any, and exits 1 with a message on stderr when it fails; so only an empty listing WITH exit 0 is the byte compare that proves a restore. All three refuse anything but a `guard-*` sandbox. If `mutate` prints a usage line that does not name `mutate`, the dispatch tree's script predates these commands: STOP, and tell the caller to merge main. A usage line that does name it means your call had the wrong number of arguments, most often an unquoted anchor or a missing `''`. Change a sandbox file by no other route: under a fenced dispatch a `cd` into the sandbox before `git`, `git -C` aimed at it, and many inline `node -e` edits are refused, and a refused compound command runs none of its parts, so a restore chained behind a refused step silently never happens.
@@ -55,10 +55,10 @@ node scripts/agent-sandbox.ts restore guard-<topic>-<round> <path> [<path>...]
 Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 
 ```bash
-node scripts/agent-sandbox.ts teardown guard-<topic>-<round>
+node scripts/agent-infra/agent-sandbox.ts teardown guard-<topic>-<round>
 ```
 
-If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
+If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-infra/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. You are the only review agent that changes source files, through `mutate` and `restore`, so the rule matters most here; it already binds you through `handbook/specs/development-workflow.md` step 14 and the footguns Never list, and is repeated because an agent reads its own file.
 
@@ -136,11 +136,11 @@ Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red),
 State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the proof that you left the dispatch tree as you found it, taken AFTER teardown so your own sandbox is not reported as your own residue:
 
 ```bash
-node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
+node scripts/agent-infra/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
 diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
 git status --porcelain | diff /tmp/guard-<topic>-status-before.txt -
 git worktree list
-node scripts/agent-sandbox.ts list
+node scripts/agent-infra/agent-sandbox.ts list
 ```
 
 Paste all four. The two `diff`s are the residue check and empty is the pass for both: the first catches anything created or deleted, ignored paths included; the second catches a tracked file edited in place, which the first cannot see because the name did not change. Both are diffs against a baseline taken before you started, because the dispatch tree may already be dirty when you arrive with files unrelated to the guards under proof, so a bare "status is empty" pass would be unreachable through no act of yours. The last two are the sandbox check, and they see different orphans: `git worktree list` sees a REGISTRATION whose directory is gone (marked `prunable`, the state an `rm -rf` in place of `teardown` leaves, and the state a later bare prune by anyone silently erases); `list` sees a DIRECTORY whose registration is gone (the state a bare prune leaves). Your own name must be absent from both. `list` also prints other sessions' worktrees, since it lists the whole sandbox root; those are not findings. The listings go to `/tmp` and not `out/` because `out/` is inside the tree being listed, and a file written there would make the diff non-empty by construction.

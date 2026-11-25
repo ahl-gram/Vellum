@@ -1,6 +1,6 @@
 import { stateOf } from "../comment-judge/questions.ts";
 import type { CommentRun } from "../comment-judge/types.ts";
-import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../jev/system-one.ts";
+import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 
 export const SIGNALS = ["measured", "platform", "deviation", "golden", "units", "convention", "sentinel"] as const;
 export type Signal = (typeof SIGNALS)[number];

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
-import { walkDelivery } from "../../scripts/delivery/walk.ts";
+import { HOME_OUT, walkDelivery } from "../../scripts/agent-infra/delivery/walk.ts";
 
 test("a folder or a file whose name begins with a dot stays off the delivery, which is how the comparison's extracted base source stays off the page (Issue #1309)", () => {
   const dir = mkdtempSync(join(tmpdir(), "delivery-walk-"));
@@ -29,4 +29,8 @@ test("a folder or a file whose name begins with a dot stays off the delivery, wh
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("the folder npm run delivery lists with no argument is the repository's out/, which no run's exit code shows (Issue #1454)", () => {
+  assert.equal(HOME_OUT, join(resolve(import.meta.dirname, "..", ".."), "out"));
 });

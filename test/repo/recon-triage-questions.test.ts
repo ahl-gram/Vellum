@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { bandOf, requestFor, scoreOf } from "../../scripts/recon-triage/questions.ts";
+import { bandOf, requestFor, scoreOf } from "../../scripts/agent-infra/recon-triage/questions.ts";
 
 test("a request asks the trial's two frozen questions about the claim and its code, holds first", () => {
   assert.equal(

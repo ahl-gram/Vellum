@@ -1,5 +1,5 @@
-import { two } from "../review/comment-judge/report.ts";
-import type { Reply } from "../jev/system-one.ts";
+import { two } from "../../review/comment-judge/report.ts";
+import type { Reply } from "../../shared/jev/system-one.ts";
 import { isList } from "./claims.ts";
 import { bandOf, CONTRADICTS_ID, HOLDS_ID, scoreOf, type Band } from "./questions.ts";
 

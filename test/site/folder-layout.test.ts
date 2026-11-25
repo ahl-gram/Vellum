@@ -44,16 +44,11 @@ test("the only sheets at the top of src/styles/ are home's two, and every folder
   assert.ok(folders.has("explorer") && HOME_SHEETS.every((sheet) => remainders.includes(sheet)), "git listed the tree");
 });
 
-const NOT_YET_PLACED: readonly string[] = ["agent-sandbox.ts"];
-
-test("no file sits directly under scripts/ but the ones NOT_YET_PLACED names, and each of those is still there (Issue #1454)", () => {
+test("no file sits directly under scripts/ (Issue #1454)", () => {
   const remainders = listed("scripts");
-  const loose = remainders.filter((r) => !r.includes("/") && !NOT_YET_PLACED.includes(r));
+  const loose = remainders.filter((r) => !r.includes("/"));
   assert.deepEqual(loose, []);
-  assert.ok(
-    foldersOf(remainders).has("lint") && NOT_YET_PLACED.every((file) => remainders.includes(file)),
-    "git listed the tree, and every file NOT_YET_PLACED names still stands at the top of scripts/",
-  );
+  assert.ok(foldersOf(remainders).has("lint"), "git listed the tree");
 });
 
 const SCRIPT_FOLDERS: readonly string[] = [
@@ -66,16 +61,13 @@ const SCRIPT_FOLDERS: readonly string[] = [
   "review",
   "shared",
 ];
-const FOLDERS_NOT_YET_PLACED: readonly string[] = ["delivery", "handoff", "issue-reader", "jev", "recon-triage"];
 
-test("every folder directly under scripts/ is one SCRIPT_FOLDERS or FOLDERS_NOT_YET_PLACED names, and each of those is still there (Issue #1454)", () => {
+test("every folder directly under scripts/ is one SCRIPT_FOLDERS names, and each of those is still there (Issue #1454)", () => {
   const folders = foldersOf(listed("scripts"));
-  const strays = [...folders]
-    .filter((name) => !SCRIPT_FOLDERS.includes(name) && !FOLDERS_NOT_YET_PLACED.includes(name))
-    .sort();
+  const strays = [...folders].filter((name) => !SCRIPT_FOLDERS.includes(name)).sort();
   assert.deepEqual(strays, []);
   assert.ok(
-    [...SCRIPT_FOLDERS, ...FOLDERS_NOT_YET_PLACED].every((name) => folders.has(name)),
-    "git listed the tree, and every folder the two lists name still stands at the top of scripts/",
+    SCRIPT_FOLDERS.every((name) => folders.has(name)),
+    "git listed the tree, and every folder SCRIPT_FOLDERS names still stands at the top of scripts/",
   );
 });

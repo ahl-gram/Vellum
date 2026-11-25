@@ -36,7 +36,7 @@ export const stamp = (ms: number): string => {
   return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`;
 };
 
-// The mark stays above the style block: `pageState` in `scripts/delivery/walk.ts` looks for it in a page's first kilobyte only.
+// The mark stays above the style block: `pageState` in `scripts/agent-infra/delivery/walk.ts` looks for it in a page's first kilobyte only.
 export const head = (title: string): string => `<!doctype html>
 <html lang="en">
 <head>

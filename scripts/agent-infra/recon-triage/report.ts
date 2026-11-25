@@ -1,5 +1,5 @@
-import { two } from "../review/comment-judge/report.ts";
-import { MODEL, type Answered } from "../jev/system-one.ts";
+import { two } from "../../review/comment-judge/report.ts";
+import { MODEL, type Answered } from "../../shared/jev/system-one.ts";
 import { bandOf } from "./questions.ts";
 import type { Triaged } from "./triage.ts";
 

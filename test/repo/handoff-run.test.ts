@@ -13,11 +13,11 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { main } from "../../scripts/handoff/main.ts";
-import { nextStep } from "../../scripts/handoff/next.ts";
-import { snapshotOf, type GhReads } from "../../scripts/handoff/snapshot.ts";
-import { slotOf } from "../../scripts/handoff/slot.ts";
-import { folderOf, readState, treeOf, writeState, type HandoffState } from "../../scripts/handoff/state.ts";
+import { main } from "../../scripts/agent-infra/handoff/main.ts";
+import { nextStep } from "../../scripts/agent-infra/handoff/next.ts";
+import { snapshotOf, type GhReads } from "../../scripts/agent-infra/handoff/snapshot.ts";
+import { slotOf } from "../../scripts/agent-infra/handoff/slot.ts";
+import { folderOf, readState, treeOf, writeState, type HandoffState } from "../../scripts/agent-infra/handoff/state.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 const STUB = `#!/bin/sh

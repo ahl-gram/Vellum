@@ -11,7 +11,7 @@ import {
   reportLines,
   requestLines,
 } from "../../scripts/review/copy-hunt/report.ts";
-import { liveSender } from "../../scripts/jev/system-one.ts";
+import { liveSender } from "../../scripts/shared/jev/system-one.ts";
 import { alphaFns, asked, fnOf, pair, sameAnswer } from "../../test-support/copy-hunt-fixtures.ts";
 import { keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 

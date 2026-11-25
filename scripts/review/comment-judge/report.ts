@@ -1,4 +1,4 @@
-import type { Reply, SystemOneRequest } from "../../jev/system-one.ts";
+import type { Reply, SystemOneRequest } from "../../shared/jev/system-one.ts";
 import type { Judged } from "./judge.ts";
 import type { CommentRun } from "./types.ts";
 
