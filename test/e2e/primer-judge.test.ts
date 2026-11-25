@@ -258,7 +258,14 @@ test("PJ10 inView holds a text outcome in view only where every line of one rend
       inView(q([], { x: -200, y: -150, w: 1680, h: 1100 }), false),
       inView(q([], { x: 25.59, y: 816.61, w: 384, h: 36 }), false),
       inView(q([], { x: 600, y: 400, w: 0, h: 18 }), false),
+      inView(q([[{ x: 1200, y: 100, w: 384, h: 18 }]]), true),
+      inView(q([[{ x: -10, y: 100, w: 50, h: 18 }]]), true),
+      inView(q([[{ x: 100, y: -5, w: 50, h: 18 }]]), true),
+      inView(q([], { x: 600, y: 400, w: 18, h: 0 }), false),
+      inView(q([], { x: 1300, y: 400, w: 50, h: 50 }), false),
+      inView(q([], { x: -60, y: 400, w: 50, h: 50 }), false),
+      inView(q([], { x: 600, y: -60, w: 50, h: 50 }), false),
     ],
-    [false, true, false, true, false, true, false, false],
+    [false, true, false, true, false, true, false, false, false, false, false, false, false, false, false],
   );
 });
