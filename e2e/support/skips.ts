@@ -14,8 +14,6 @@ export const E2E_SKIPS: readonly E2eSkip[] = [
   { suite: "stage", step: "EA8", issue: 897 },
   { suite: "zoom", step: "Z21, Z21b", issue: 1085 },
   { suite: "ribbon", step: "RB21, RB22", issue: 1269 },
-  { suite: "prospect", step: "PB18", issue: 1424 },
-  { suite: "chart-drawer", step: "CD38", issue: 1424 },
   { suite: "ribbon", step: "RB15", issue: 1483 },
 ];
 

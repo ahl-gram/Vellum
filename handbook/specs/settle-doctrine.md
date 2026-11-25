@@ -688,6 +688,14 @@ section points there rather than restating it.
   reads `Network.loadingFailed`, so a `file://` page's failed loads reach it as nothing. A second
   websocket on the same page target is a passive tap that receives what the first one drops, and
   changes nothing on the page.
+- **A page is kept out of the back/forward cache by evicting it with a channel message, never by an
+  `unload` listener.** The browser may refuse an `unload` listener under its permissions policy, log
+  the refusal as a console error and cache the page anyway, so a Back meant to rebuild the document
+  restores it. The page that must come back rebuilt opens a `BroadcastChannel` with a listener
+  before it is left, and the page it went to posts one message on that channel before the Back
+  (`armColdBack` and `evictColdBack` in `e2e/support/cold-back.ts`); a check that rides it asserts
+  its premise, that the document was re-created, as PB18 and CD38 do. What else was tried, and why
+  each fails, is in `handbook/plans/1400/1424/1424-plan.md`.
 - **Do not count on `loading="lazy"` deferring a frame loaded from disk.** In headless Brave all
   seven frames of a generated page were in the frame tree five seconds after load, the deepest about
   592000 px down the page (measured 2026-10-08, cause unverified, and another browser may differ),
