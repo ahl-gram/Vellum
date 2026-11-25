@@ -113,3 +113,12 @@ One drawing differs between the two folders, as `combined/notes.md` records unde
 ## What the round found that bears on the subs
 
 `notes.md` lists the defects the round found and did not cause, under "Defects found, not caused here", and `combined/notes.md` the costs of the rulings drawn together. The subs, Issue #1251, Issue #1253 and Issue #1254, were written to carry what they needed, and this README does not restate them.
+
+## Reading notes from the review
+
+Read at full scale and at their own pixels by the plate reader before the pull request opened (Issue #1427); no still is edited, and each note is what the still shows as it ran:
+
+- `shots/1-home/f-b-and-reading-room-above-1024.png`: "A Gallery of Worlds" runs to the right edge at 1024, and "Browse many" is cut off under the zoom buttons.
+- `shots/1-home/b-and-d-together-1024.png`: the Reading Room's label is partly under the bottom row of presses, the defect ruling 2 lifted it to remove.
+- `shots/5-atelier/b-an-isle-of-its-own-in-q-and-a-2x.png`: the dark panel is translucent and the page's text ghosts through it, and the labels of The Portfolio and The Writing Room nearly touch.
+- `shots/4-hand/b2-a-slim-line-under-the-trail-1024-done.png`: the pointing hand sits at the left edge, over the panel's frame, beside the islands row.
