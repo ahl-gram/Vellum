@@ -4,7 +4,6 @@ import type { DrawerKit } from "./kit.ts";
 import { CARD, DRAWN, DRESS, PP, type Card, type Pp } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
 
-// The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
 export const pressStill = (d: Card, last: Card | null): boolean =>
   !!d.press &&
   !!last?.press &&
@@ -13,6 +12,7 @@ export const pressStill = (d: Card, last: Card | null): boolean =>
   last.press.box.w === d.press.box.w &&
   last.press.box.h === d.press.box.h;
 
+// The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
 export const pressAtRest = (d: Card, last: Card | null): boolean =>
   !!d.press && d.press.hit === "self" && pressStill(d, last);
 

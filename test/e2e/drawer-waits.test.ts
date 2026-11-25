@@ -252,6 +252,19 @@ test("restSeeing starts its quiet run again at a camera write, so a camera still
   assert.equal(r.left(), 1, "restSeeing handed over inside two frames of a camera write");
 });
 
+test("restSeeing starts its quiet run again at a read that changed with no camera write, so it hands over the read that held, never one still moving (Issue #843)", async () => {
+  const r = resting([
+    carried(0, 0),
+    carried(1, 0, { cuttings: 2 }),
+    carried(2, 0, { cuttings: 2 }),
+    carried(3, 0, { cuttings: 2 }),
+    carried(9, 0, { cuttings: 2 }),
+  ]);
+  const got = await r.kd.restSeeing("chart-drawer-carried", "landingRuns");
+  assert.equal(got.cuttings, 2);
+  assert.equal(r.left(), 1, "restSeeing counted frames from a read that was not the one it handed over");
+});
+
 test("restSeeing remembers a landing it saw running on its way to rest, and reads none where none ran (Issue #843)", async () => {
   const ran = resting([
     carried(0, 0, { landing: true, landingRuns: 1 }),
