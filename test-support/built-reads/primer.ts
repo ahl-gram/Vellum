@@ -1,5 +1,5 @@
 import { pictureFile, type Frame } from "../../src/site/primer/pictures.ts";
-import { faults, same, text } from "../built-dom.ts";
+import { before, faults, same, text } from "../built-dom.ts";
 
 export interface StepWant {
   readonly id: string;
@@ -187,5 +187,43 @@ export function pictureFaults(
     };
     out.push(same(got, want) || `${s.id}'s picture reads ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`);
   }
+  return faults(out);
+}
+
+export function chartFaults(
+  doc: Document,
+  rooms: readonly { readonly id: string; readonly steps: readonly string[] }[],
+): string[] {
+  const head = doc.querySelector(".primer > .col-head");
+  const chart = head?.querySelector(".col-chart") ?? null;
+  const out: (true | string)[] = [
+    head !== null || "the Primer has no chart of lessons as the first child of its sheet",
+    before(head, doc.querySelector(".primer > .opening")) || "the chart of lessons does not stand before the opening",
+    chart !== null || "the chart of lessons holds no drawing",
+  ];
+  if (chart === null) return faults(out);
+  const marked = [...chart.querySelectorAll("[data-step]")].map((m) => m.getAttribute("data-step") ?? "");
+  out.push(
+    same([...marked].sort(), rooms.flatMap((r) => r.steps).sort()) ||
+      "the chart's marks are not the guide's steps, once each",
+  );
+  for (const room of rooms) {
+    const link = chart.querySelector(`a[href="#${room.id}"]`);
+    if (link === null) {
+      out.push(`${room.id} has no link on the chart`);
+      continue;
+    }
+    const inside = [...link.querySelectorAll("[data-step]")].map((m) => m.getAttribute("data-step") ?? "");
+    out.push(
+      same(inside, room.steps) || `${room.id}'s link holds the marks ${inside.join(", ")}, not its steps in order`,
+    );
+    const lights = chart.querySelectorAll(`[data-halo="${room.id}"]`).length;
+    out.push(lights === 1 || `${room.id} has ${lights} lights on the chart`);
+  }
+  const links = chart.querySelectorAll("a[href]").length;
+  out.push(links === rooms.length || `the chart carries ${links} links for ${rooms.length} rooms`);
+  out.push(chart.querySelector(".col-next") !== null || "the chart carries no hand to move");
+  const inked = chart.querySelectorAll(".sealed, .elsewhere, .inked, .lit, .on").length;
+  out.push(inked === 0 || `${inked} elements of the chart are inked before any script runs`);
   return faults(out);
 }

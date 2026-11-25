@@ -1,4 +1,4 @@
-// The Primer's pointing hand in the Explorer (Issue #1253): a Try it opened with its step key, the ring and the note it lays, the seal a step earns, and the key that leaves the address with its hash kept.
+// The Primer's pointing hand in the Explorer (Issue #1253): a Try it opened with its step key, the ring and the note it lays, the seal a step earns, the key that leaves the address with its hash kept, and the done note keeping its row inside it at 1024 (Issue #1385).
 import { handStepFor, handSteps, stepAddress, type HandStep } from "../../../src/site/shared/primer/hand-steps.ts";
 import { LADDERS } from "../../../src/site/shared/primer/ladders.ts";
 import type { Box } from "../../../src/site/shared/primer/judge.ts";
@@ -14,6 +14,11 @@ import { makeStep } from "../../support/step.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 const DESK = { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false } as const;
+const NARROW = { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false } as const;
+// 2026-11-24, Issue #1385: over all 81 notes at 1024 and 1280 a press that fits ends 0.00 to 0.02 px inside the note's content box (the planner's probe); half a pixel at scale 1 is the edge.
+const EDGE = 0.5;
+// 2026-11-24, Issue #1385: PH9's sentence reads 1.16 of its line heights on one line and 2.16 on two, its chips standing proud of the line (the planner's probe).
+const ONE_LINE = 1.5;
 
 type Ring = {
   readonly present: boolean;
@@ -47,6 +52,28 @@ const NOTE: Payload<Note> = `(() => {
   const t = (e) => (e ? e.textContent.replace(/\\s+/g, " ").trim() : null);
   const at = (css) => (s ? t(s.querySelector(css)) : null);
   return { up: !!s, title: at(".primer-slip-title"), act: at(".primer-slip-act"), done: at(".primer-slip-done"), next: at(".primer-slip-next"), mark: at(".mark"), row: at(".primer-slip-row") };
+})()`;
+
+type Fit = {
+  readonly done: boolean;
+  readonly fonts: string;
+  readonly past: number;
+  readonly act: number;
+  readonly lines: number;
+  readonly room: number;
+};
+const FIT: Payload<Fit> = `(() => {
+  const n = document.querySelector(".primer-slip");
+  const row = n && n.querySelector(".primer-slip-row");
+  const act = n && n.querySelector(".primer-slip-act");
+  if (!n || !row || !act) return { done: false, fonts: document.fonts.status, past: 0, act: 0, lines: 0, room: 0 };
+  const s = getComputedStyle(n);
+  const b = n.getBoundingClientRect();
+  const left = b.left + parseFloat(s.borderLeftWidth) + parseFloat(s.paddingLeft);
+  const right = b.right - parseFloat(s.borderRightWidth) - parseFloat(s.paddingRight);
+  const past = Math.max(...[row, ...row.children].map((e) => { const r = e.getBoundingClientRect(); return Math.max(r.right - right, left - r.left); }));
+  const a = act.getBoundingClientRect();
+  return { done: row.querySelector(".primer-slip-done") !== null, fonts: document.fonts.status, past, act: a.width, lines: a.height / parseFloat(getComputedStyle(act).lineHeight), room: right - left };
 })()`;
 
 type Where = { readonly sealed: boolean; readonly search: string; readonly hash: string };
@@ -214,6 +241,28 @@ export async function handChecks(ctx: SuiteContext): Promise<void> {
           lost.length === 0,
           `lost ${lost.join(", ") || "none"}`,
         );
+      },
+    );
+    await step(
+      "PH9 at 1024 the done note keeps its row and its sentence: every press of the row stands inside the note, and the sentence reads on one line or across the note",
+      async () => {
+        await ctx.send("Emulation.setDeviceMetricsOverride", NARROW);
+        // explorer-to-print is the Explorer step whose done row runs furthest past its note at 1024 on the sheet before Issue #1385 (59.34 px), the case PH9 needs.
+        const toPrint = handStep("explorer-to-print");
+        await open(k, toPrint, "PH9");
+        const fit = await k.settle(
+          FIT,
+          (d, last) => d.done && d.fonts === "loaded" && last !== null && sameJson(d, last),
+          "PH9: the done note comes to rest",
+          k.waitTries,
+        );
+        k.check("PH9 (a) every press of the done row stands inside the note", fit.past <= EDGE, JSON.stringify(fit));
+        k.check(
+          "PH9 (b) the step's sentence reads on one line or across the note's width",
+          fit.lines < ONE_LINE || fit.act >= fit.room - EDGE,
+          JSON.stringify(fit),
+        );
+        await ctx.send("Emulation.setDeviceMetricsOverride", DESK);
       },
     );
   });

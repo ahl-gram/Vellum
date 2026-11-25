@@ -160,3 +160,109 @@ export async function ix10Folds(k: DocRoomsKit): Promise<void> {
     `arrived ${JSON.stringify(arrived)}; press ${JSON.stringify(press)}; folded ${JSON.stringify(folded)}; road ${JSON.stringify(road)}; turned ${JSON.stringify(turned)}`,
   );
 }
+
+type Pressed = {
+  bound: boolean;
+  hash: string;
+  open: string[];
+  errors: number;
+  head: number | null;
+  inner: number;
+};
+
+const ARM_ERRORS: Payload<boolean> = `(() => {
+  window.__ix11 = { errors: 0 };
+  window.addEventListener("error", () => { window.__ix11.errors++; });
+  return true;
+})()`;
+
+const PRESSED = (id: string): Payload<Pressed> => `(() => {
+  const head = document.getElementById(${JSON.stringify(id)});
+  return {
+    bound: !!document.querySelector(".primer[data-bound]"),
+    hash: location.hash,
+    open: [...document.querySelectorAll(".primer section.room")].filter((r) => r.querySelector(".room-body").getBoundingClientRect().height > 0).map((r) => r.querySelector("h2[id]").id),
+    errors: window.__ix11 ? window.__ix11.errors : -1,
+    head: head ? head.getBoundingClientRect().top : null,
+    inner: innerHeight,
+  };
+})()`;
+
+const CHART_AIM = (id: string): Payload<Aim> => `(() => {
+  const link = document.querySelector(${JSON.stringify(`.col-chart a[href="#${id}"]`)});
+  const name = link && link.querySelector("text.name");
+  if (!link || !name) return null;
+  name.scrollIntoView({ block: "center" });
+  const b = name.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+  return { x, y, hit: link.contains(document.elementFromPoint(x, y)) };
+})()`;
+
+type UnderHand = { on: boolean; area: number; x: number; y: number; hit: boolean } | null;
+
+const HAND_AIM = (id: string): Payload<UnderHand> => `(() => {
+  const link = document.querySelector(${JSON.stringify(`.col-chart a[href="#${id}"]`)});
+  const name = link && link.querySelector("text.name");
+  const hand = document.querySelector(".col-chart .col-next");
+  if (!link || !name || !hand) return null;
+  name.scrollIntoView({ block: "center" });
+  const glyph = [...hand.querySelectorAll("text")].find((t) => t.getBoundingClientRect().width > 0);
+  if (!glyph) return { on: hand.classList.contains("on"), area: 0, x: 0, y: 0, hit: false };
+  const n = name.getBoundingClientRect(), g = glyph.getBoundingClientRect();
+  const left = Math.max(n.left, g.left), top = Math.max(n.top, g.top);
+  const w = Math.min(n.right, g.right) - left, h = Math.min(n.bottom, g.bottom) - top;
+  const x = left + w / 2, y = top + h / 2;
+  const area = w > 0 && h > 0 ? w * h : 0;
+  return { on: hand.classList.contains("on"), area, x, y, hit: area > 0 && link.contains(document.elementFromPoint(x, y)) };
+})()`;
+
+const lands = (d: Pressed): boolean => d.head !== null && d.head >= 0 && d.head < d.inner;
+
+export async function ix11ChartPress(k: DocRoomsKit): Promise<void> {
+  const { evaluate, send, check, settle, stable, goto } = k;
+  const rooms = primerPage().rooms;
+  const lit = rooms[0];
+  const target = rooms.find((r) => r.route === "/print-room/");
+  if (lit === undefined) throw new Error("IX11 presses the room the Primer opens on, and the Primer teaches none");
+  if (target === undefined) throw new Error("IX11 presses the Print Room, which the Primer no longer teaches");
+  const id = target.id;
+  await goto(PRIMER);
+  await evaluate(put(PRIMER_STORE_KEY, null));
+  await goto(PRIMER);
+  const arrived = await settle(PRESSED(id), (d) => d.bound, "primer-bound");
+  await evaluate(ARM_ERRORS);
+  const under = await evaluate(HAND_AIM(lit.id));
+  const before = await evaluate(PRESSED(lit.id));
+  let landed: Pressed | null = null;
+  if (under?.hit) {
+    await sendClick(send, under.x, under.y);
+    landed = await stable(PRESSED(lit.id), "primer-chart-pressed-under-hand", {
+      departed: (d) => d.hash === `#${lit.id}`,
+    });
+  }
+  const aim = await evaluate(CHART_AIM(id));
+  let after: Pressed | null = null;
+  if (aim?.hit) {
+    await sendClick(send, aim.x, aim.y);
+    after = await stable(PRESSED(id), "primer-chart-pressed", { departed: (d) => d.hash === `#${id}` });
+  }
+  check(
+    "IX11 on a first visit, a real press on a room's name on the chart of lessons reaches that room's link, on the open room's name where the hand lies across it as on a room's past it, raises no error, opens that room alone and lands its head in the window (Issue #1155 comment 7136681098, Q1; Issue #1257 comment 7144617260, F2)",
+    same(arrived.open, [lit.id]) &&
+      !arrived.open.includes(id) &&
+      under?.on === true &&
+      under.area > 0 &&
+      under.hit &&
+      before.head !== null &&
+      before.head >= before.inner &&
+      landed !== null &&
+      same(landed.open, [lit.id]) &&
+      landed.errors === 0 &&
+      lands(landed) &&
+      aim?.hit === true &&
+      after !== null &&
+      same(after.open, [id]) &&
+      after.errors === 0 &&
+      lands(after),
+    `arrived ${JSON.stringify(arrived)}; under ${JSON.stringify(under)}; before ${JSON.stringify(before)}; landed ${JSON.stringify(landed)}; aim ${JSON.stringify(aim)}; after ${JSON.stringify(after)}`,
+  );
+}

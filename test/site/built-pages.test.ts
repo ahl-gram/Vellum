@@ -16,6 +16,7 @@ import { l13Faults, l14Faults, l15Faults, l16Faults, l17Faults } from "../../tes
 import { pr36Faults } from "../../test-support/built-reads/print-room.ts";
 import {
   anchorFaults,
+  chartFaults,
   datelineFaults,
   entryCountFaults,
   indexCountFaults,
@@ -138,6 +139,14 @@ test("BP-P5 the index slip counts what each kind of room lists: the Primer's row
 
 test("BP-P6 every step whose data names a picture carries it beside the step, sized to the chart's frame, decorative and eager at low priority, and every other step an empty frame (Issue #1155 ruling 8, N8)", () => {
   assert.deepEqual(pictureFaults(documentOf(page("/primer/")), primerSteps, chartFrame()), []);
+});
+
+test("BP-P7 the chart of lessons stands at the head of the Primer's sheet, before its opening: one mark for every step of the guide, each inside its own room's link to that room's head, a light for every room, and with scripts off no mark sealed or dotted, no road inked, no room lit and no hand shown (Issue #1257; Issue #1155 comment 7136681098, Q1 and Q2)", () => {
+  const taught = primerRooms.map((s) => ({
+    id: roomIdOf(s.ladder.route),
+    steps: s.ladder.lessons.flatMap((l) => l.steps.map((st) => st.id)),
+  }));
+  assert.deepEqual(chartFaults(documentOf(page("/primer/")), taught), []);
 });
 
 test("BP-T1 every page whose room the Primer teaches carries one press on its own line straight after the head cluster's trail, opening that room on the Primer, and no other page carries one (Issue #1155 ruling 2 and N4; Issue #1254)", () => {

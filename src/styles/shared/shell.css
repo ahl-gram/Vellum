@@ -12,6 +12,9 @@
   /* The ONE depth a chart rests at; anything laid OVER a chart inside the mount opts out (src/styles/shared/living-chart.css). */
   --sheet-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.4);
   --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+  --lessons-land: rgb(from var(--parchment-deep) r g b / 0.6);
+  --lessons-sea: rgb(from var(--line-tan) r g b / 0.4);
+  --lessons-road: rgb(from var(--ink-faded) r g b / 0.75);
   --ink-annals: #3f3122; /* the chronicler's iron-gall: journal entries */
   --ink-surveyor: #7a5f38; /* the surveyor's walnut italic: journal prologue */
   --ink-surveyor-faded: #99855f; /* the surveyor's unbolded gutter days */
