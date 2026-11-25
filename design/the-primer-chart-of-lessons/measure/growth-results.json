@@ -1,0 +1,710 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/prime.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-8-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-8-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-9-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-9-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-10-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-10-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.4,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-11-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-11-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-12-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-12-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-13-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":24.9,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-13-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":31.9,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-14-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":21.6,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-14-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":27.7,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-16-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":13.4,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-16-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":17.1,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-1-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-1-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-2-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":13.6,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-2-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":17.4,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-3-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":10.2,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-3-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":13,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-4-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":12.3,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-4-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":15.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-5-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":10.2,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-5-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":13,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-6-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":8.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-6-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":11.4,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-3-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-3-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-4-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-4-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-5-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-5-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-6-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127685546875,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-6-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-8-lessons-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":915,\"shownStepTop\":915,\"shownStepBottom\":1075,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":354.859375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563732839595376,\"numeralPx\":8.51252257947977,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.7,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0256051300578035,\"wayPx\":13.127716064453125,\"wayGapPx\":1.8,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-print-room-8-lessons-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":961,\"shownStepTop\":961,\"shownStepBottom\":1072,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":454.3125},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524331647398844,\"numeralPx\":10.898247832369943,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.3,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.3130419075144508,\"wayPx\":16.806884765625,\"wayGapPx\":2.3,\"placeClearPx\":35.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-37-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.5,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-37-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":28.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-50-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.5,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-50-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":28.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-65-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.5,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-65-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":28.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-80-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.5,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-80-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":28.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-100-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":18.2,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-explorer-100-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":23.3,\"placeClearPair\":\"The Explorer / The Reading Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-6-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.5,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-6-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":28.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-12-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":22.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-12-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":29.2,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-18-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":21.8,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-18-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":27.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-24-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":18.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-24-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":23.9,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-30-steps-1024.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"scrollWidth\":1024,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":920,\"shownStepTop\":920,\"shownStepBottom\":1080,\"chart\":{\"x\":78.140625,\"y\":216.40625,\"w\":573.328125,\"h\":359.984375},\"fold\":null,\"slip\":{\"x\":736,\"y\":110.125,\"w\":256,\"h\":635.875},\"press\":null,\"labelPx\":10.563644052706552,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",42.8,15],[\"The Explorer\",80,15],[\"The Prospect\",78.1,15],[\"The Wayfarer's Ribbon\",132.8,15],[\"The Portfolio\",84.5,15],[\"The Reading Room\",110.3,15],[\"The Print Room\",95.8,15],[\"The Writing Room\",111.1,15],[\"The Seed of the Day\",118.3,15],[\"The Gallery\",73.2,15],[\"Questions & Answers\",106.3,14],[\"The Glossary\",67,14],[\"The Atlas\",50.4,14],[\"The Primer\",57.1,14]],\"scale\":1.0255965099715099,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":15.4,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/growth/HYPOTHETICAL-portfolio-30-steps-1280.png",
+  "url": "http://127.0.0.1:50194/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"scrollWidth\":1280,\"scrollY\":0,\"sealed\":36,\"openRoom\":\"explorer\",\"firstStepTop\":968,\"shownStepTop\":968,\"shownStepBottom\":1079,\"chart\":{\"x\":125.796875,\"y\":216.40625,\"w\":734,\"h\":460.875},\"fold\":null,\"slip\":{\"x\":992,\"y\":110.125,\"w\":256,\"h\":667.875},\"press\":null,\"labelPx\":13.524252136752137,\"numeralPx\":null,\"labelWidths\":[[\"Vellum\",54.8,20],[\"The Explorer\",102.4,20],[\"The Prospect\",100,20],[\"The Wayfarer's Ribbon\",170,20],[\"The Portfolio\",108.1,20],[\"The Reading Room\",141.3,20],[\"The Print Room\",122.6,20],[\"The Writing Room\",142.2,20],[\"The Seed of the Day\",151.5,20],[\"The Gallery\",93.7,20],[\"Questions & Answers\",136.1,17],[\"The Glossary\",85.7,17],[\"The Atlas\",64.5,17],[\"The Primer\",73.2,17]],\"scale\":1.313034188034188,\"wayPx\":null,\"wayGapPx\":null,\"placeClearPx\":19.7,\"placeClearPair\":\"The Portfolio / The Writing Room\",\"overlaps\":[]}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

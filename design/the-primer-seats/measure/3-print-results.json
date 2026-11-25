@@ -1,0 +1,602 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-eight-items-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":358,\"cornerH\":109,\"cornerBottom\":132,\"gap\":26,\"navW\":589,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":87,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":29,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":97,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-eight-items-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/control-eight-items-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":358,\"cornerH\":109,\"cornerBottom\":132,\"gap\":26,\"navW\":589,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":87,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":29,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":97,\"need\":112,\"cut\":true,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-eight-items-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":240,\"navW\":589,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-eight-items-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/control-eight-items-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":240,\"navW\":589,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-ninth-item-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":109,\"cornerBottom\":132,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":63,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":19,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":75,\"need\":84,\"cut\":true,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-ninth-item-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/control-ninth-item-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":109,\"cornerBottom\":132,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":63,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":19,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":75,\"need\":112,\"cut\":true,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-ninth-item-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/control-ninth-item-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/control-ninth-item-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a-controls-on-two-lines-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":147,\"cornerBottom\":169,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":451,\"h\":348}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a-controls-on-two-lines-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/a-controls-on-two-lines-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":147,\"cornerBottom\":169,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":451,\"h\":348}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a-controls-on-two-lines-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":147,\"cornerBottom\":169,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":554,\"h\":428}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a-controls-on-two-lines-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/a-controls-on-two-lines-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":147,\"cornerBottom\":169,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":554,\"h\":428}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a2-wrap-only-where-it-must-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":147,\"cornerBottom\":169,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":116,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":133,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":451,\"h\":348}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a2-wrap-only-where-it-must-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/a2-wrap-only-where-it-must-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":147,\"cornerBottom\":169,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":116,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":133,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":451,\"h\":348}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a2-wrap-only-where-it-must-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":99,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":116,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/a2-wrap-only-where-it-must-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/a2-wrap-only-where-it-must-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":183,\"navW\":645,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":99,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":116,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/b-nav-tightened-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":363,\"cornerH\":109,\"cornerBottom\":132,\"gap\":26,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":89,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":30,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":99,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/b-nav-tightened-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/b-nav-tightened-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":363,\"cornerH\":109,\"cornerBottom\":132,\"gap\":26,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":89,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":30,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":99,\"need\":112,\"cut\":true,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/b-nav-tightened-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":245,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/b-nav-tightened-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/b-nav-tightened-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":400,\"cornerH\":109,\"cornerBottom\":132,\"gap\":245,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":105,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":36,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":113,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/c-dice-in-the-seed-box-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":109,\"cornerBottom\":132,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":88,\"need\":57,\"cut\":true,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":27,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":79,\"need\":84,\"cut\":true,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/c-dice-in-the-seed-box-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/c-dice-in-the-seed-box-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":109,\"cornerBottom\":132,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":88,\"need\":119,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":27,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":79,\"need\":112,\"cut\":true,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":499,\"h\":385}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/c-dice-in-the-seed-box-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":388,\"cornerH\":109,\"cornerBottom\":132,\"gap\":195,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":132,\"need\":57,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":27,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/c-dice-in-the-seed-box-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/c-dice-in-the-seed-box-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":388,\"cornerH\":109,\"cornerBottom\":132,\"gap\":195,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":132,\"need\":119,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":27,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":602,\"h\":465}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/d-style-under-1024.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":287,\"cornerH\":151,\"cornerBottom\":173,\"gap\":40,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":445,\"h\":344}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/d-style-under-1024-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/d-style-under-1024-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":287,\"cornerH\":151,\"cornerBottom\":173,\"gap\":40,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":445,\"h\":344}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/d-style-under-1280.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":287,\"cornerH\":151,\"cornerBottom\":173,\"gap\":296,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":84,\"cut\":false,\"shows\":\"antique\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":549,\"h\":424}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/3-print/d-style-under-1280-2x.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/d-style-under-1280-widest.png",
+  "url": "http://127.0.0.1:53425/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"corner\":287,\"cornerH\":151,\"cornerBottom\":173,\"gap\":296,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"pr-seed\",\"w\":111,\"need\":98,\"cut\":true,\"shows\":\"4294967295\"},{\"id\":\"pr-random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"pr-style\",\"w\":118,\"need\":112,\"cut\":false,\"shows\":\"topographic\"},{\"id\":\"pr-draw\",\"w\":122,\"need\":122,\"cut\":false,\"shows\":\"Pull a proof\"}],\"chart\":{\"w\":549,\"h\":424}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/ribbon-control-ninth-item-1024.png",
+  "url": "http://127.0.0.1:53425/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":167,\"cornerBottom\":189,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"rb-swap\",\"w\":114,\"need\":114,\"cut\":false,\"shows\":\"Turn about\"}],\"chart\":{\"w\":554,\"h\":387}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/ribbon-control-ninth-item-1024-widest.png",
+  "url": "http://127.0.0.1:53425/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":304,\"cornerH\":167,\"cornerBottom\":189,\"gap\":23,\"navW\":645,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"rb-swap\",\"w\":114,\"need\":114,\"cut\":false,\"shows\":\"Turn about\"}],\"chart\":{\"w\":554,\"h\":387}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/ribbon-b-nav-tightened-1024.png",
+  "url": "http://127.0.0.1:53425/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":363,\"cornerH\":167,\"cornerBottom\":189,\"gap\":26,\"navW\":584,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"rb-swap\",\"w\":114,\"need\":114,\"cut\":false,\"shows\":\"Turn about\"}],\"chart\":{\"w\":554,\"h\":387}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/ribbon-b-nav-tightened-1024-widest.png",
+  "url": "http://127.0.0.1:53425/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":363,\"cornerH\":167,\"cornerBottom\":189,\"gap\":26,\"navW\":584,\"navLines\":1,\"rows\":2,\"ctrls\":[{\"id\":\"rb-swap\",\"w\":114,\"need\":114,\"cut\":false,\"shows\":\"Turn about\"}],\"chart\":{\"w\":554,\"h\":387}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/prospect-b-nav-tightened-1024.png",
+  "url": "http://127.0.0.1:53425/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":296,\"cornerH\":108,\"cornerBottom\":131,\"gap\":93,\"navW\":584,\"navLines\":1,\"rows\":3,\"ctrls\":[{\"id\":\"year-label\",\"w\":86,\"need\":88,\"cut\":false,\"shows\":\"viewed in the year\"},{\"id\":\"pp-year\",\"w\":104,\"need\":52,\"cut\":false,\"shows\":\"1059\"},{\"id\":\"pp-engrave\",\"w\":90,\"need\":90,\"cut\":false,\"shows\":\"Engrave\"}],\"chart\":{\"w\":569,\"h\":420}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/prospect-b-nav-tightened-1024-widest.png",
+  "url": "http://127.0.0.1:53425/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":296,\"cornerH\":108,\"cornerBottom\":131,\"gap\":93,\"navW\":584,\"navLines\":1,\"rows\":3,\"ctrls\":[{\"id\":\"year-label\",\"w\":86,\"need\":88,\"cut\":false,\"shows\":\"viewed in the year\"},{\"id\":\"pp-year\",\"w\":104,\"need\":52,\"cut\":false,\"shows\":\"1059\"},{\"id\":\"pp-engrave\",\"w\":90,\"need\":90,\"cut\":false,\"shows\":\"Engrave\"}],\"chart\":{\"w\":569,\"h\":420}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/explorer-b-nav-tightened-1024.png",
+  "url": "http://127.0.0.1:53425/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":263,\"cornerH\":108,\"cornerBottom\":131,\"gap\":126,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"seed\",\"w\":140,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"draw\",\"w\":69,\"need\":69,\"cut\":false,\"shows\":\"Draw\"}],\"chart\":{\"w\":473,\"h\":365}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/3-print/explorer-b-nav-tightened-1024-widest.png",
+  "url": "http://127.0.0.1:53425/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"corner\":263,\"cornerH\":108,\"cornerBottom\":131,\"gap\":126,\"navW\":584,\"navLines\":1,\"rows\":1,\"ctrls\":[{\"id\":\"seed\",\"w\":140,\"need\":37,\"cut\":false,\"shows\":\"42\"},{\"id\":\"random\",\"w\":38,\"need\":12,\"cut\":false,\"shows\":\"⚄\"},{\"id\":\"draw\",\"w\":69,\"need\":69,\"cut\":false,\"shows\":\"Draw\"}],\"chart\":{\"w\":473,\"h\":365}}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

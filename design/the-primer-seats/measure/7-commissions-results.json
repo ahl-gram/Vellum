@@ -1,0 +1,38 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/7-commissions/explorer-a.png",
+  "url": "http://127.0.0.1:54933/explorer/#seed=42&style=nautical&type=archipelago&band=polar&arms=1&islands=40&isleSize=varied",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "[{\"row\":\"type\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"band\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"islands\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[\"few\",\"many\"]},{\"row\":\"sizes\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"land\",\"shown\":true,\"held\":true,\"within\":[\"held\",\"ledger\",\"panel\"],\"ends\":[\"more sea\",\"more land\"]},{\"style\":\"nautical\",\"beasts\":false,\"arms\":true}]",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/7-commissions/explorer-b.png",
+  "url": "http://127.0.0.1:54933/explorer/#seed=42&style=topographic&type=island&band=tropical&beasts=1",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "[{\"row\":\"type\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"band\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"coast\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[\"calm\",\"lobed\"]},{\"style\":\"topographic\",\"beasts\":true,\"arms\":false}]",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/7-commissions/explorer-c.png",
+  "url": "http://127.0.0.1:54933/explorer/#seed=42&style=ink&type=continent&band=temperate&arms=1",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "[{\"row\":\"type\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"band\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[]},{\"row\":\"land\",\"shown\":true,\"held\":false,\"within\":[\"ledger\",\"panel\",\"broadside\"],\"ends\":[\"more sea\",\"more land\"]},{\"style\":\"ink\",\"beasts\":false,\"arms\":true}]",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
