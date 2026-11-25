@@ -11,7 +11,7 @@ import {
   seatProjected,
   seatReach,
 } from "../../src/world/seat-settlements.ts";
-import { laidRiverCount } from "../../scripts/region-detail/feature-match.ts";
+import { laidRiverCount } from "../../scripts/measure/region-detail/feature-match.ts";
 import { onOrBeside } from "../../test-support/on-or-beside.ts";
 import { quarterWindow } from "../../test-support/uv-window.ts";
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chartSignature, signatureFaults, type Signature } from "../../scripts/primer-pictures/signature.ts";
+import { chartSignature, signatureFaults, type Signature } from "../../scripts/build/primer-pictures/signature.ts";
 
 const SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="8" aria-label="Chart of A &amp; B" data-vellum-seed="42" data-vellum-founding-text="a &quot;sea&quot;"><g id="layer-ocean"/><g id="other"/><g id="layer-legend"><g id="layer-inner"/></g></svg>';

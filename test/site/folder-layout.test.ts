@@ -55,3 +55,29 @@ test("no file sits directly under scripts/ but the ones NOT_YET_PLACED names, an
     "git listed the tree, and every file NOT_YET_PLACED names still stands at the top of scripts/",
   );
 });
+
+const SCRIPT_FOLDERS: readonly string[] = ["agent-infra", "build", "ci", "design", "lint", "measure", "shared"];
+const FOLDERS_NOT_YET_PLACED: readonly string[] = [
+  "comment-judge",
+  "comment-sweep",
+  "copy-hunt",
+  "delivery",
+  "handoff",
+  "issue-reader",
+  "jev",
+  "keeper-scan",
+  "recon-triage",
+  "still-judge",
+];
+
+test("every folder directly under scripts/ is one SCRIPT_FOLDERS or FOLDERS_NOT_YET_PLACED names, and each of those is still there (Issue #1454)", () => {
+  const folders = foldersOf(listed("scripts"));
+  const strays = [...folders]
+    .filter((name) => !SCRIPT_FOLDERS.includes(name) && !FOLDERS_NOT_YET_PLACED.includes(name))
+    .sort();
+  assert.deepEqual(strays, []);
+  assert.ok(
+    [...SCRIPT_FOLDERS, ...FOLDERS_NOT_YET_PLACED].every((name) => folders.has(name)),
+    "git listed the tree, and every folder the two lists name still stands at the top of scripts/",
+  );
+});

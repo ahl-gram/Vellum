@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { CheckResult, JobResult } from "../../scripts/proof-runner/job.ts";
-import { codeSpan, judge, ledgerMarkdown, passed, type Row } from "../../scripts/proof-runner/ledger.ts";
-import { planJobs, type Entry } from "../../scripts/proof-runner/list.ts";
+import type { CheckResult, JobResult } from "../../scripts/ci/proof-runner/job.ts";
+import { codeSpan, judge, ledgerMarkdown, passed, type Row } from "../../scripts/ci/proof-runner/ledger.ts";
+import { planJobs, type Entry } from "../../scripts/ci/proof-runner/list.ts";
 
 const SHA = "b".repeat(40);
 const DASH = String.fromCharCode(0x2014);

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildRoster } from "../../scripts/outlines/build.ts";
+import { buildRoster } from "../../scripts/build/outlines/build.ts";
 import {
   KIT_README,
   PLACE_IDS,
@@ -10,7 +10,7 @@ import {
   readKit,
   readKitFiles,
   readmeText,
-} from "../../scripts/outlines/kit.ts";
+} from "../../scripts/build/outlines/kit.ts";
 import { decodeRings } from "../../src/terrain/outline-codec.ts";
 
 const ID = /^ne-[1-9][0-9]*$/;

@@ -1,4 +1,4 @@
-import { unescapeXml } from "../../src/render/svg.ts";
+import { unescapeXml } from "../../../src/render/svg.ts";
 
 export interface Signature {
   readonly stamp: Readonly<Record<string, string>>;

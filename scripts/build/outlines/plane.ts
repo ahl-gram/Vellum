@@ -1,4 +1,4 @@
-import type { P } from "../build/simplify.ts";
+import type { P } from "../simplify.ts";
 
 export const ASPECT = 319 / 239;
 export const INSET = 0.06;

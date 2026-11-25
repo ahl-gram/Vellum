@@ -1,12 +1,12 @@
-import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts";
-import { overridesOfLand, readDressKeys, readWorldKeys } from "../../src/site/shared/address-grammar.ts";
-import { createFounder, type Founder } from "../../src/site/shared/founding.ts";
-import { readWritten } from "../../src/site/shared/written-address.ts";
-import { foundAddress } from "../../src/site/shared/written-world.ts";
-import { PICTURE_DRAW_WIDTH } from "../../src/site/primer/pictures.ts";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import type { WorldRecipe } from "../../src/world/types.ts";
-import { committedGazetteer } from "../../test-support/founding-gazetteer.ts";
+import { renderMap, type RenderOptions } from "../../../src/render/map-renderer.ts";
+import { overridesOfLand, readDressKeys, readWorldKeys } from "../../../src/site/shared/address-grammar.ts";
+import { createFounder, type Founder } from "../../../src/site/shared/founding.ts";
+import { readWritten } from "../../../src/site/shared/written-address.ts";
+import { foundAddress } from "../../../src/site/shared/written-world.ts";
+import { PICTURE_DRAW_WIDTH } from "../../../src/site/primer/pictures.ts";
+import { defaultRecipe, generateWorld } from "../../../src/world/generate.ts";
+import type { WorldRecipe } from "../../../src/world/types.ts";
+import { committedGazetteer } from "../../../test-support/founding-gazetteer.ts";
 
 export interface PictureJob {
   readonly seed: number;

@@ -1,5 +1,5 @@
-import { findBrowser } from "../../src/cli/raster.ts";
-import { isSet, type BrowserPolicyEnv } from "../../e2e/support/browser-policy.ts";
+import { findBrowser } from "../../../src/cli/raster.ts";
+import { isSet, type BrowserPolicyEnv } from "../../../e2e/support/browser-policy.ts";
 
 export const REQUIRE_BROWSER = "VELLUM_REQUIRE_BROWSER";
 export const NO_PICTURE_BROWSER =

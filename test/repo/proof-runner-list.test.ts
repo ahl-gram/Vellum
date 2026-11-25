@@ -10,7 +10,7 @@ import {
   planFromCheckout,
   planJobs,
   selectionKey,
-} from "../../scripts/proof-runner/list.ts";
+} from "../../scripts/ci/proof-runner/list.ts";
 import { commitAll, withTempRepo } from "../../test-support/proof-runner-repo.ts";
 
 const SHA = "a".repeat(40);
