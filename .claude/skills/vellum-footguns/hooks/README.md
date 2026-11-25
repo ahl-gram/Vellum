@@ -9,7 +9,7 @@ judges shell calls and file patches (Under Codex, below). The skill works withou
 ## What it does
 
 - **Injects a gate once per session**, reading the text from `.claude/skills/vellum-footguns/SKILL.md` so the skill stays the single
-  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites, their helpers and the two proof tools; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
+  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites and their helpers; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file, or a Codex patch that adds or moves one, under `src/pages/`, `src/site/`,
   `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or a sheet anywhere under `src/styles/` (a page can gain a sheet without a new page file), never a `*.test.ts` or a file in a `test-support/` folder, since a test or its helper joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
