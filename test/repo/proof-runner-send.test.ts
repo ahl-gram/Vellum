@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { E2E_SUITE_ORDER, NEEDS_PREDECESSOR, OPENS_ON_HOME } from "../../e2e/support/suites.ts";
-import type { List } from "../../scripts/proof-runner/list.ts";
+import type { List } from "../../scripts/ci/proof-runner/list.ts";
 import {
   appliesAt,
   applyEdits,
@@ -14,7 +14,7 @@ import {
   sendList,
   type Gh,
   type Mutation,
-} from "../../scripts/proof-runner/send.ts";
+} from "../../scripts/ci/proof-runner/send.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 import { withTempRepo } from "../../test-support/proof-runner-repo.ts";
 

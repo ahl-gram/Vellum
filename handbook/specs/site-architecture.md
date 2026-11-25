@@ -171,7 +171,7 @@ worker boundary is serializable, and one function is the single glue both transp
 new kind follows. **PNG is outside the determinism covenant and is never byte-compared**: a canvas
 raster bakes the viewer's own installed fonts, as `src/site/shared/rasterize.ts` states at its head.
 The Primer's pictures are the same kind of raster, pressed by a browser at each build
-(`scripts/primer-pictures/main.ts`), so they letter the chart in that machine's own serif and are never
+(`scripts/build/primer-pictures/main.ts`), so they letter the chart in that machine's own serif and are never
 byte-compared either.
 SVG remains the byte-faithful artifact.
 
@@ -347,7 +347,7 @@ precisely, because a token that falls outside it looks identical at the point of
 - **`astro:generate` is clean, fonts, places, bundle, showcases, discovery, the Primer's steps and the Primer's
   pictures, in that order**, and several suites pin its exact command string. A reordered or added step reds
   all of them at once: that is the pin working, not a break, but budget the edits.
-- **The Primer's pictures need a browser where the site is built.** `scripts/primer-pictures/main.ts` draws each
+- **The Primer's pictures need a browser where the site is built.** `scripts/build/primer-pictures/main.ts` draws each
   pictured step's chart with the engine and presses it with the browser `findBrowser` (`src/cli/raster.ts`) finds.
   Where `VELLUM_REQUIRE_BROWSER` is set, as on the deploy's build, every e2e lane's build and the proof runner's,
   a build that finds none fails and the site stays as it was (Issue #1155 comment 6664735683, M3);
@@ -357,7 +357,7 @@ precisely, because a token that falls outside it looks identical at the point of
   `e2e/support/launch.ts`, three attempts on fresh profiles), naming itself and every attempt's own output:
   point `VELLUM_BROWSER` at another. A browser that dies or stops answering once the press holds it fails the
   build too, naming the call it left unanswered (`<call>: the browser's DevTools connection closed (code <n>)`,
-  or `<call>: no reply in <ms> ms` once `PICTURE_REPLY_MS` in `scripts/primer-pictures/main.ts` has passed), and
+  or `<call>: no reply in <ms> ms` once `PICTURE_REPLY_MS` in `scripts/build/primer-pictures/main.ts` has passed), and
   the step writes its manifest only once every picture is on disk, so a build never goes on to publish a page
   whose pictures are missing. The unit suite's builds
   (`test/site/astro-scaffold.test.ts`, `test/site/built-pages.test.ts`) never run `astro:generate`, so they press none.

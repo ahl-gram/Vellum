@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPlace } from "../../scripts/outlines/build.ts";
-import { refuseRepeats, serialId } from "../../scripts/outlines/ids.ts";
-import { appended, readmeText, type KitFile } from "../../scripts/outlines/kit.ts";
-import { boxOf, gap2 } from "../../scripts/outlines/plane.ts";
-import { projectPlace } from "../../scripts/outlines/project.ts";
+import { buildPlace } from "../../scripts/build/outlines/build.ts";
+import { refuseRepeats, serialId } from "../../scripts/build/outlines/ids.ts";
+import { appended, readmeText, type KitFile } from "../../scripts/build/outlines/kit.ts";
+import { boxOf, gap2 } from "../../scripts/build/outlines/plane.ts";
+import { projectPlace } from "../../scripts/build/outlines/project.ts";
 
 function aspectOf(rings: Parameters<typeof boxOf>[0]): number {
   const b = boxOf(rings);

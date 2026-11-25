@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { runBudgeted, runJob, type Runner } from "../../scripts/proof-runner/job.ts";
-import type { Job } from "../../scripts/proof-runner/list.ts";
+import { runBudgeted, runJob, type Runner } from "../../scripts/ci/proof-runner/job.ts";
+import type { Job } from "../../scripts/ci/proof-runner/list.ts";
 import { withTempRepo } from "../../test-support/proof-runner-repo.ts";
 import { goneWithin } from "../../test-support/process-fakes.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
-const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "proof-runner", "reporter.ts");
+const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "ci", "proof-runner", "reporter.ts");
 const patchOf = (from: string, to: string) =>
   `diff --git a/src/x.ts b/src/x.ts\n--- a/src/x.ts\n+++ b/src/x.ts\n@@ -1 +1 @@\n-${from}\n+${to}\n`;
 const FILES = {

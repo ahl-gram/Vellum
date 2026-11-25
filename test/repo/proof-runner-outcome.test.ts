@@ -8,9 +8,9 @@ import { format } from "node:util";
 import { ESLint } from "eslint";
 import { runnerHooks } from "../../e2e/support/runner.ts";
 import { makeStep } from "../../e2e/support/step.ts";
-import { e2eOutcome, lintOutcome, unitOutcome } from "../../scripts/proof-runner/outcome.ts";
+import { e2eOutcome, lintOutcome, unitOutcome } from "../../scripts/ci/proof-runner/outcome.ts";
 
-const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "proof-runner", "reporter.ts");
+const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "ci", "proof-runner", "reporter.ts");
 // The line `check` in e2e/harness.ts prints; only this framing is restated here, and every check NAME below comes from the real code that makes it.
 const harnessLine = (name: string, ok: boolean, detail = "") =>
   `${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  ${String.fromCharCode(0x2014)} ${detail}` : ""}`;

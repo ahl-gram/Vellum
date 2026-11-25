@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
-import { BUDGET_SECONDS } from "../../scripts/proof-runner/list.ts";
+import { BUDGET_SECONDS } from "../../scripts/ci/proof-runner/list.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 
 const WORKFLOW = ".github/workflows/proof-runner.yml";

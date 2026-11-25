@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { LOD_BANDS, type LodBand } from "../../src/world/lod.ts";
+import { defaultRecipe, generateWorld } from "../../../src/world/generate.ts";
+import { LOD_BANDS, type LodBand } from "../../../src/world/lod.ts";
 import { measure, type RiverFailure, type WindowResult } from "./sweep-measure.ts";
 import { bandWindows } from "./sweep-windows.ts";
 

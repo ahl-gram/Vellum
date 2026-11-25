@@ -4,7 +4,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 import { corridorRadius, fineRelief, routeRun } from "../../src/world/river-route.ts";
 import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
-import { distanceToPolyline, inWindowCourse } from "../../scripts/region-detail/feature-match.ts";
+import { distanceToPolyline, inWindowCourse } from "../../scripts/measure/region-detail/feature-match.ts";
 import { closeUp, groundOf, GRID_H, GRID_W } from "../../test-support/region-rivers-fixtures.ts";
 
 const HERO = generateWorld(defaultRecipe(42));

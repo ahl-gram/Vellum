@@ -9,7 +9,7 @@ import { extractRivers, type River } from "../../src/hydrology/rivers.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 import type { FlowResult } from "../../src/hydrology/flow.ts";
-import { worldRiversDrawn } from "../../scripts/region-detail/feature-match.ts";
+import { worldRiversDrawn } from "../../scripts/measure/region-detail/feature-match.ts";
 import { worldRiverRuns } from "../../src/world/river-runs.ts";
 import { closeUp, relay, townWindows } from "../../test-support/region-rivers-fixtures.ts";
 

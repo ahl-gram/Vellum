@@ -6,7 +6,11 @@ import { corridorRadius } from "../../src/world/river-route.ts";
 import { riverReachCells } from "../../src/world/seat-settlements.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
-import { distanceToPolyline, inWindowCourse, worldRoadsDrawn } from "../../scripts/region-detail/feature-match.ts";
+import {
+  distanceToPolyline,
+  inWindowCourse,
+  worldRoadsDrawn,
+} from "../../scripts/measure/region-detail/feature-match.ts";
 import { closeUp, GRID_H, GRID_W, townWindows } from "../../test-support/region-rivers-fixtures.ts";
 
 const HERO = generateWorld(defaultRecipe(42));

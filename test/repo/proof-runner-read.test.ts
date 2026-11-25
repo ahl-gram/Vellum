@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { read, readPlan, WORKFLOW_NAME, type RunView, type Shell } from "../../scripts/proof-runner/main.ts";
+import { read, readPlan, WORKFLOW_NAME, type RunView, type Shell } from "../../scripts/ci/proof-runner/main.ts";
 
 const run = (more: Partial<RunView> = {}): RunView => ({
   status: "completed",

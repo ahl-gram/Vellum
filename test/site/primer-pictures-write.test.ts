@@ -4,10 +4,10 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Ladder, Step } from "../../src/site/shared/primer/shape.ts";
-import { SKIP_PICTURES } from "../../scripts/primer-pictures/browser.ts";
-import { writePictures, type Press } from "../../scripts/primer-pictures/main.ts";
-import { pressPictures, type PressOptions, type Pressing } from "../../scripts/primer-pictures/press.ts";
-import { chartSignature } from "../../scripts/primer-pictures/signature.ts";
+import { SKIP_PICTURES } from "../../scripts/build/primer-pictures/browser.ts";
+import { writePictures, type Press } from "../../scripts/build/primer-pictures/main.ts";
+import { pressPictures, type PressOptions, type Pressing } from "../../scripts/build/primer-pictures/press.ts";
+import { chartSignature } from "../../scripts/build/primer-pictures/signature.ts";
 import { STAND_IN_COUNTER } from "../../test-support/stand-in-browser.ts";
 import { standInBrowser } from "../../test-support/stand-in-launch.ts";
 import { settleWithin } from "../../test-support/launch-settle.ts";

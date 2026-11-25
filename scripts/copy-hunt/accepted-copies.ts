@@ -61,7 +61,7 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
   },
   {
     a: { file: "src/world/region-parent.ts", name: ".toRegion", hash: "02e996b42f735427" },
-    b: { file: "scripts/region-detail/feature-match.ts", name: ".toRegion", hash: "02e996b42f735427" },
+    b: { file: "scripts/measure/region-detail/feature-match.ts", name: ".toRegion", hash: "02e996b42f735427" },
     reason:
       "The region census's own mapping into a close-up's grid, kept apart so a guard built on it does not share the close-up's code (its file's opening line), word for word windowFrame's since PR #1337 (Issue #1331) folded the close-up's two, with a line above the copy naming the original",
     ruling: KEPT_BY_1332,
@@ -77,7 +77,7 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
     a: { file: "src/site/shared/error-text.ts", name: "errorText", hash: "4619f717ef9ee94a" },
     b: { file: "e2e/support/suites.ts", name: "errorText", hash: "4619f717ef9ee94a" },
     reason:
-      "The e2e suite rules' own errorText: the proof runner (rulesAt in scripts/proof-runner/main.ts) loads suites.ts at a sha by copying only it and skips.ts, so suites.ts may import nothing else, with a line above the copy naming the original",
+      "The e2e suite rules' own errorText: the proof runner (rulesAt in scripts/ci/proof-runner/main.ts) loads suites.ts at a sha by copying only it and skips.ts, so suites.ts may import nothing else, with a line above the copy naming the original",
     ruling: KEPT_ERROR_TEXT,
   },
   {

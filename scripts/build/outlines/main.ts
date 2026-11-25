@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { OUTLINE_RINGS } from "../../src/terrain/outlines.ts";
+import { OUTLINE_RINGS } from "../../../src/terrain/outlines.ts";
 import { buildRoster, type Kind, type KitPlace } from "./build.ts";
 import { candidates, extractText, SOURCES, type Feature } from "./extract.ts";
 import { refuseRepeats } from "./ids.ts";

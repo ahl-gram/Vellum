@@ -16,7 +16,7 @@ test("astro:generate regenerates the runtime trees into generated/, and dev/buil
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/build/clean-generated.ts && node scripts/build/kit-fonts.ts && node scripts/build/place-files.ts && node scripts/build/build-app-bundles.ts && node scripts/build/generate-showcases.ts && node scripts/build/generate-discovery.ts && node scripts/build/primer-steps.ts && node scripts/primer-pictures/main.ts",
+    "node scripts/build/clean-generated.ts && node scripts/build/kit-fonts.ts && node scripts/build/place-files.ts && node scripts/build/build-app-bundles.ts && node scripts/build/generate-showcases.ts && node scripts/build/generate-discovery.ts && node scripts/build/primer-steps.ts && node scripts/build/primer-pictures/main.ts",
     "astro:generate must clean, copy the kit fonts (Issue #706), bundle (Vite compiles the TS graph since Sub 9, #260), then generate the showcases and the discovery files",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");

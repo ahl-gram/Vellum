@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { git } from "../../test-support/sandbox-repo.ts";
-import { rulesAt } from "../../scripts/proof-runner/main.ts";
+import { rulesAt } from "../../scripts/ci/proof-runner/main.ts";
 
 test("the suite rules load at a real sha with every file suites.ts imports at run time", async () => {
   const sha = git(["rev-parse", "HEAD"], process.cwd());

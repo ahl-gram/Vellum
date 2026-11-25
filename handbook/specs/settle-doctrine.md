@@ -431,7 +431,7 @@ section points there rather than restating it.
   logs of passing runs before asserting a cause or moving the wait:
   `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`, grepped for
   `browser up on attempt` and `exposed no devtools target`. **A lane's first browser is its
-  build's.** The Primer's picture press (`launchPress` in `scripts/primer-pictures/press.ts`)
+  build's.** The Primer's picture press (`launchPress` in `scripts/build/primer-pictures/press.ts`)
   launches through the same `launchWithRetry` with `LAUNCH_TUNING` and prints the same two lines in
   the build step, so a job's cold start is the first `browser up on attempt` line in its log, and
   the lane's own launch, after it, starts warm. The same read of the failing lanes'

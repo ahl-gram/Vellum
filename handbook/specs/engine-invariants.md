@@ -77,7 +77,7 @@ a string. `test/world/terrain-inputs.test.ts` holds each arm of the close-up to 
 values its fixture row gives each key, against a close-up of the same world without that key (the
 type checker refuses a key with no row and a row with no value). A row may carry another key it
 needs, as a looseness needs an outline and a size or a raggedness a count. It cannot see a field that never joined the list, nor a new call site of `buildHeightfield`
-or `buildChainedField` that skips `terrainInputsOf`; `scripts/region-detail/probes.ts`,
+or `buildChainedField` that skips `terrainInputsOf`; `scripts/measure/region-detail/probes.ts`,
 `partition.ts` and `cost.ts` build terrain by hand today, harmlessly, because each builds from
 `defaultRecipe(seed)`.
 

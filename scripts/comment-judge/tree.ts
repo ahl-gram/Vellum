@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readAt } from "../proof-runner/send.ts";
+import { readAt } from "../ci/proof-runner/send.ts";
 
 const GIT_MS = 30_000;
 const FETCH_MS = 120_000;

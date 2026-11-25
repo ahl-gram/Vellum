@@ -1,6 +1,6 @@
-import type { UvWindow } from "../../src/terrain/heightfield.ts";
-import { densifyCourse, worldRiverRuns } from "../../src/world/river-runs.ts";
-import type { World } from "../../src/world/types.ts";
+import type { UvWindow } from "../../../src/terrain/heightfield.ts";
+import { densifyCourse, worldRiverRuns } from "../../../src/world/river-runs.ts";
+import type { World } from "../../../src/world/types.ts";
 
 /** The census's and the guards' one instrument for rivers and roads, the Issue #395 breakdown's per-feature rule: a world feature crossing a close-up counts as drawn when at least half of its in-window course lies within max(3 cells, one world cell) of a drawn one. It clips with its own copy of the clip, not an import of `worldRiverRuns`, so a guard built on it does not share that function's code. */
 
