@@ -85,16 +85,26 @@ export async function writePictures(
   }
 }
 
-if (import.meta.main) {
+export interface RunDeps extends PictureDeps {
+  readonly error: (reason: unknown) => void;
+}
+
+export async function runPictures(root: string, deps: RunDeps): Promise<0 | 1> {
   try {
-    await writePictures(resolve(process.argv[2] ?? GENERATED), {
-      env: process.env,
-      find: findBrowser,
-      press: pressPictures,
-      log: (line) => console.log(line),
-    });
+    await writePictures(root, deps);
+    return 0;
   } catch (err: unknown) {
-    console.error(err instanceof Error ? err.message : err);
-    process.exitCode = 1;
+    deps.error(err instanceof Error ? err.message : err);
+    return 1;
   }
+}
+
+if (import.meta.main) {
+  process.exitCode = await runPictures(resolve(process.argv[2] ?? GENERATED), {
+    env: process.env,
+    find: findBrowser,
+    press: pressPictures,
+    log: (line) => console.log(line),
+    error: (reason) => console.error(reason),
+  });
 }
