@@ -5,22 +5,22 @@ import { CARD, DRAWN, DRESS, PP, type Card, type Pp } from "./reads.ts";
 import { bounce } from "../../support/nav.ts";
 
 // The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
-export const pressAtRest = (d: Card, last: Card | null): boolean =>
+export const pressStill = (d: Card, last: Card | null): boolean =>
   !!d.press &&
-  d.press.hit === "self" &&
   !!last?.press &&
   last.press.box.x === d.press.box.x &&
   last.press.box.y === d.press.box.y &&
   last.press.box.w === d.press.box.w &&
   last.press.box.h === d.press.box.h;
 
-export const pressStill = (d: Card, last: Card | null): boolean => pressAtRest(d, last);
+export const pressAtRest = (d: Card, last: Card | null): boolean =>
+  !!d.press && d.press.hit === "self" && pressStill(d, last);
 
 export async function cd25CardPress({ check, settle, go, pinCard }: DrawerKit): Promise<void> {
   await go(DRESS);
   const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
   await pinCard(1);
-  const armed = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-press");
+  const armed = await settle(CARD, (d, last) => d.shown && pressStill(d, last), "chart-drawer-card-press");
   check(
     "CD25 the place card's three actions stand in ONE row and EACH answers a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7; Issue #428)",
     at.hits > 1 &&

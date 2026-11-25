@@ -14,6 +14,9 @@ export const framed = <T>(read: Payload<T>): Payload<Framed<NonNullable<T>>> =>
 
 export const STOP_CAMERA_WATCH: Payload<boolean> = `(() => { if (window.__cameraWatch && window.__cameraWatch.on) window.__cameraWatch.stop(); return true; })()`;
 
+// Two drawn frames with no camera write: a glide d3 starts writes on its timer's first frame unless that tick lands at the glide's start, so the second frame is the first that must write (Issue #1446).
+export const STILL_FRAMES = 2;
+
 export const landedWith =
   <T>(same: (d: T, last: T) => boolean, frames = 1) =>
   (d: Framed<T>, last: Framed<T>): boolean =>

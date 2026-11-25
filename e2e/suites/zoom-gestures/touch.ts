@@ -11,7 +11,7 @@ import {
 import type { TouchRead } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { GesturesKit } from "../zoom-gestures.ts";
-import { framed, landedWith, STOP_CAMERA_WATCH, type Framed } from "../../support/camera-landed.ts";
+import { framed, landedWith, STILL_FRAMES, STOP_CAMERA_WATCH, type Framed } from "../../support/camera-landed.ts";
 
 const BOX = "#map-viewport";
 const KEEP = (types: readonly string[]): boolean => types.includes("wheel") && types.includes("mousedown");
@@ -50,8 +50,6 @@ export async function kLeft(k: GesturesKit, label: string): Promise<number> {
   }
 }
 
-// Two drawn frames with no camera write: a glide d3 starts writes on its timer's first frame unless that tick lands at the glide's start, so the second frame is the first that must write (Issue #1446).
-const STILL_FRAMES = 2;
 export async function kStill(k: GesturesKit, label: string): Promise<number> {
   let from: Framed<number> | null = null;
   try {
