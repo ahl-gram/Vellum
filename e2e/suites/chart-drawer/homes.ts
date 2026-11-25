@@ -1,6 +1,7 @@
 import type { Payload } from "../../types.ts";
 import type { TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE, READ } from "./reads.ts";
+import { armColdBack, evictColdBack } from "../../support/cold-back.ts";
 
 const LAY: Payload<{ w: number; box: number[] } | null> =
   `(() => { const e = document.getElementById("pp-lay"); if (!e) return null; const b = e.getBoundingClientRect(); return { w: b.width, box: [b.x, b.y, b.width, b.height].map((n) => +n.toFixed(2)) }; })()`;
@@ -119,11 +120,9 @@ export async function cd38BackRebuilt({
   pressById,
 }: TableKit): Promise<void> {
   await go(`${DRESS}&table=${ONE}`);
-  // The same road with the cache REFUSED, which is the other half and needs a deliberately artificial instrument
-  // (Gate 2 item 14): desktop Chrome will not cache a page carrying an unload listener. The check asserts its own
-  // premise, that the document really was re-created, so a browser that caches it anyway reds here instead of
-  // quietly measuring CD37 a second time.
-  await evaluate(`(() => { window.__cd634 = "cold"; window.addEventListener("unload", () => {}); })()`);
+  // The cache is refused by evicting the Explorer with a channel message the Prospect page posts (`armColdBack` and `evictColdBack` in `e2e/support/cold-back.ts`), a deliberately artificial instrument (Gate 2 item 14), and the check asserts its own premise, that the document really was re-created, so a browser that restores it anyway reds here instead of quietly measuring CD37 a second time.
+  await evaluate(`window.__cd634 = "cold"`);
+  await armColdBack(evaluate);
   await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
   for (let i = 0; i < 300; i++) {
     await sleep(100);
@@ -136,6 +135,7 @@ export async function cd38BackRebuilt({
     (d) => typeof d.table === "string" && d.table.split("_").length === 2,
     "prospect-filed-for-cold-back",
   );
+  await evictColdBack(evaluate);
   await evaluate(`history.back()`);
   await atExplorer();
   const home = await restedAtExplorer();

@@ -6,6 +6,7 @@ import type { Payload } from "../../types.ts";
 import { STORE, type ProspectKit } from "./kit.ts";
 import { FETCHED_PLACES, PLACE_PATH } from "../render/place.ts";
 import { bounce } from "../../support/nav.ts";
+import { armColdBack, evictColdBack } from "../../support/cold-back.ts";
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
@@ -88,10 +89,11 @@ const HOME: Payload<Home> = `(() => { const p = document.getElementById("pp-lay"
   return { path: location.pathname, marker: window.__pb18 ?? null, nav: performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type,
     table: new URLSearchParams(location.hash.slice(1)).get("table"), count: (document.getElementById("pp-lay-count") || {}).textContent ?? null, dim: !!p && p.classList.contains("dim"), drawn: !!st }; })()`;
 
-export async function backHome(k: ProspectKit, marker: string, unload: boolean): Promise<Home> {
+export async function backHome(k: ProspectKit, marker: string, cold: boolean): Promise<Home> {
   const { evaluate, sleep } = k;
+  if (cold) await armColdBack(evaluate);
   await evaluate(
-    `(() => { window.__pb18 = "${marker}"; ${unload ? `window.addEventListener("unload", () => {});` : ""} setTimeout(() => { location.href = "/faq/"; }, 0); return true; })()`,
+    `(() => { window.__pb18 = "${marker}"; setTimeout(() => { location.href = "/faq/"; }, 0); return true; })()`,
   );
   type Away = { path: string; ready: string };
   const away = makeSettle({ evaluate, sleep, tolerant: true });
@@ -101,6 +103,7 @@ export async function backHome(k: ProspectKit, marker: string, unload: boolean):
     (d) => d.path === "/faq/" && d.ready === "complete",
     "prospect-to-faq",
   );
+  if (cold) await evictColdBack(evaluate);
   await evaluate(`(() => { setTimeout(() => history.back(), 0); return true; })()`);
   return home(
     HOME,
