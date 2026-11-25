@@ -77,7 +77,7 @@ export const SHEET_LESSONS: readonly Lesson[] = [
         id: "explorer-hold",
         act: "Press {Hold the sheet}, the anchor.",
         see: "The Glass drafts no finer survey and takes nothing away while it is lit, so the sheet you have stays put; the caption ends held.",
-        at: SURVEYED,
+        at: "/explorer/#seed=42&cx=0.5000&cy=0.5000&k=1.6000",
         words: [aria("#zoom-hold", "Hold the sheet")],
         do: [wait("#map .region-inset"), click("#zoom-hold")],
         then: [pressed("#zoom-hold"), text("#caption", "held", "contains")],
@@ -187,7 +187,7 @@ export const SHEET_LESSONS: readonly Lesson[] = [
       {
         id: "explorer-dog-ear",
         act: "Draw nearer until the chart is drafted anew, then press the survey's turned-up corner.",
-        see: "The survey is laid on the Chart Table, and the Drawer's tab counts it.",
+        see: "The survey is laid on the Chart Table, which slides out and counts it.",
         at: SURVEYED,
         first: [wait(DOG_EAR)],
         words: [],
