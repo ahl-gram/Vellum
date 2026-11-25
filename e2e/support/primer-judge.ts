@@ -5,6 +5,12 @@ import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/sha
 export type Arm = "desk" | "tablet" | "motion";
 export const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
 export type Point = { readonly x: number; readonly y: number };
+export type Quoted = {
+  readonly width: number;
+  readonly height: number;
+  readonly element: Box;
+  readonly each: readonly (readonly Box[])[];
+} | null;
 
 export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Expect {
   if (step.only === "touch" && arm !== "tablet") return "hidden";
@@ -16,6 +22,10 @@ export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Exp
 export function onItsArm(step: Step, arm: Arm): boolean {
   if (step.only === undefined) return arm === "desk";
   return arm === (step.only === "touch" ? "tablet" : "motion");
+}
+
+export function inView(q: Quoted, text: boolean): boolean {
+  return q !== null || text;
 }
 
 const readsOf = (s: Step): string =>

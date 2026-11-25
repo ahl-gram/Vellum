@@ -1,7 +1,7 @@
 // The Primer's judgement of a control against the words a step quotes (Issue #1250), shared by the drift check and the pointing hand (Issue #1253).
 import type { Words } from "./shape.ts";
 
-export type Expect = "reachable" | "held" | "hidden" | "any";
+export type Expect = "reachable" | "held" | "hidden" | "seen" | "any";
 export type Reach =
   "absent" | "hidden" | "no box" | "held" | "disabled" | "off screen" | "reachable" | `covered by ${string}`;
 export type Box = { readonly x: number; readonly y: number; readonly w: number; readonly h: number };

@@ -1,7 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ARM_NAME, expectFor, heldBy, keyOf, keysLost, onItsArm, pressPoint } from "../../e2e/support/primer-judge.ts";
-import { fits, routeOf, stateOf, wordsHold, wordsOf, type Facts } from "../../src/site/shared/primer/judge.ts";
+import {
+  ARM_NAME,
+  expectFor,
+  heldBy,
+  inView,
+  keyOf,
+  keysLost,
+  onItsArm,
+  pressPoint,
+  type Quoted,
+} from "../../e2e/support/primer-judge.ts";
+import {
+  fits,
+  routeOf,
+  stateOf,
+  wordsHold,
+  wordsOf,
+  type Box,
+  type Facts,
+} from "../../src/site/shared/primer/judge.ts";
 import type { Ladder, Step, Words } from "../../src/site/shared/primer/shape.ts";
 
 const FACTS: Facts = {
@@ -76,7 +94,7 @@ test("PJ2 wordsHold matches whole words, or by their start or by what they conta
   );
 });
 
-test("PJ3 expectFor holds a tablet step hidden but on the tablet and a motion step hidden but with motion on, takes the data's own state, and asks nothing of an outcome's reach; onItsArm does each device step only on its own arm", () => {
+test("PJ3 expectFor holds a tablet step hidden but on the tablet and a motion step hidden but with motion on, takes the data's own state, and asks an outcome to stand in view (Issue #1302); onItsArm does each device step only on its own arm", () => {
   const touch = step({ only: "touch" });
   const motion = step({ only: "motion" });
   assert.deepEqual(
@@ -92,7 +110,7 @@ test("PJ3 expectFor holds a tablet step hidden but on the tablet and a motion st
       expectFor(w("text", "x", { state: "hidden" }), step(), "desk", false),
       expectFor(w("text", "x"), step(), "desk", true),
     ],
-    ["reachable", "hidden", "reachable", "hidden", "hidden", "hidden", "reachable", "held", "hidden", "any"],
+    ["reachable", "hidden", "reachable", "hidden", "hidden", "hidden", "reachable", "held", "hidden", "seen"],
   );
   assert.deepEqual(
     (["desk", "tablet", "motion"] as const).flatMap((arm) => [step(), touch, motion].map((s) => onItsArm(s, arm))),
@@ -140,8 +158,15 @@ test("PJ4 stateOf names each way a control can fail to be reached, and fits take
       fits("covered by stage", "reachable"),
       fits("covered by stage", "any"),
       fits("absent", "any"),
+      fits("covered by stage", "seen"),
+      fits("reachable", "seen"),
+      fits("held", "seen"),
+      fits("off screen", "seen"),
+      fits("hidden", "seen"),
+      fits("no box", "seen"),
+      fits("absent", "seen"),
     ],
-    [true, true, false, true, false, true, false],
+    [true, true, false, true, false, true, false, true, true, true, false, false, false, false],
   );
 });
 
@@ -212,5 +237,28 @@ test("PJ9 heldBy names the earlier step whose reads are the same in every field,
       return heldBy(other, [lad("/explorer/", [a]), lad("/prospect/", [other])]);
     }),
     differing.map(() => null),
+  );
+});
+
+test("PJ10 inView holds a text outcome in view only where every line of one rendered occurrence of its quoted words stands inside the window, and any other outcome where its box meets the window (Issue #1302)", () => {
+  const q = (each: Box[][], element: Box = { x: 0, y: 0, w: 10, h: 10 }): Quoted => ({
+    width: 1280,
+    height: 800,
+    element,
+    each,
+  });
+  const line = (y: number): Box => ({ x: 25.59, y, w: 384, h: 18 });
+  assert.deepEqual(
+    [
+      inView(null, true),
+      inView(q([[line(741.61), line(759.61)]]), true),
+      inView(q([[line(771.61), line(789.61)]]), true),
+      inView(q([[], [line(400)]]), true),
+      inView(q([[]]), true),
+      inView(q([], { x: -200, y: -150, w: 1680, h: 1100 }), false),
+      inView(q([], { x: 25.59, y: 816.61, w: 384, h: 36 }), false),
+      inView(q([], { x: 600, y: 400, w: 0, h: 18 }), false),
+    ],
+    [false, true, false, true, false, true, false, false],
   );
 });
