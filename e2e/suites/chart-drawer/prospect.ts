@@ -14,6 +14,8 @@ export const pressAtRest = (d: Card, last: Card | null): boolean =>
   last.press.box.w === d.press.box.w &&
   last.press.box.h === d.press.box.h;
 
+export const pressStill = (d: Card, last: Card | null): boolean => pressAtRest(d, last);
+
 export async function cd25CardPress({ check, settle, go, pinCard }: DrawerKit): Promise<void> {
   await go(DRESS);
   const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");

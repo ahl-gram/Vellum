@@ -2,7 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cd46ReducedCarry } from "../../e2e/suites/chart-drawer/drag.ts";
 import { dragKit, drawerKit, tableKit } from "../../e2e/suites/chart-drawer/kit.ts";
-import { CARRY, FOLDREST, type Card } from "../../e2e/suites/chart-drawer/reads.ts";
+import { pressAtRest, pressStill } from "../../e2e/suites/chart-drawer/prospect.ts";
+import { CARRY, FOLDREST, type Card, type Carry } from "../../e2e/suites/chart-drawer/reads.ts";
+import { framed, STOP_CAMERA_WATCH, type Framed } from "../../e2e/support/camera-landed.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 import { fakePage, type FakeFrame, type FakePage } from "../../test-support/fake-page.ts";
@@ -203,6 +205,99 @@ test("CD46 clears reduced motion when its carry fails, so the checks after it ru
     err.message.startsWith("settle timeout the carry held over its target: "),
   );
   assert.deepEqual(sent.at(-1), ["Emulation.setEmulatedMedia", { features: [] }]);
+});
+
+const carried = (frames: number, writes: number, over: Partial<Carry> = {}): Framed<Carry> => ({
+  read: {
+    ghost: null,
+    drag: false,
+    open: true,
+    receiving: false,
+    folded: true,
+    cuttings: 1,
+    landing: false,
+    landingRuns: 0,
+    jolt: false,
+    joltRuns: 0,
+    sel: 0,
+    cursor: null,
+    cam: { x: -2704, y: -1566, k: 8 },
+    hashTable: null,
+    status: "",
+    innerH: 800,
+    ...over,
+  },
+  frames,
+  writes,
+});
+const resting = (reads: Framed<Carry>[]) => {
+  let stops = 0;
+  const { kd } = kitOn(EAR, (expression) =>
+    expression === framed(CARRY) ? reads.shift() : expression === STOP_CAMERA_WATCH ? (stops++, true) : undefined,
+  );
+  return { kd, stops: () => stops, left: () => reads.length };
+};
+
+test("restSeeing hands a carry over only across two drawn frames with no camera write, never on equal reads with no frame drawn between them (Issue #843)", async () => {
+  const r = resting([carried(0, 0), carried(0, 0), carried(0, 0), carried(1, 0), carried(2, 0), carried(9, 0)]);
+  const got = await r.kd.restSeeing("chart-drawer-carried", "landingRuns");
+  assert.equal(r.left(), 1, "restSeeing handed the carry over before two frames were drawn");
+  assert.deepEqual(got.cam, { x: -2704, y: -1566, k: 8 });
+  assert.equal(r.stops(), 1, "restSeeing left the camera watch running");
+});
+
+test("restSeeing starts its quiet run again at a camera write, so a camera still being written is never handed over (Issue #843)", async () => {
+  const r = resting([carried(0, 0), carried(1, 1), carried(2, 1), carried(3, 1), carried(9, 9)]);
+  await r.kd.restSeeing("chart-drawer-carried", "landingRuns");
+  assert.equal(r.left(), 1, "restSeeing handed over inside two frames of a camera write");
+});
+
+test("restSeeing remembers a landing it saw running on its way to rest, and reads none where none ran (Issue #843)", async () => {
+  const ran = resting([
+    carried(0, 0, { landing: true, landingRuns: 1 }),
+    carried(1, 0, { landing: true, landingRuns: 1 }),
+    carried(2, 0),
+    carried(3, 0),
+    carried(4, 0),
+  ]);
+  assert.equal((await ran.kd.restSeeing("chart-drawer-carried", "landingRuns")).saw, true);
+  const none = resting([carried(0, 0), carried(1, 0), carried(2, 0)]);
+  assert.equal((await none.kd.restSeeing("chart-drawer-carried", "landingRuns")).saw, false);
+});
+
+test("restSeeing times out naming its label while the camera keeps being written, and stops the camera watch (Issue #843)", async () => {
+  let n = 0;
+  let stops = 0;
+  const { kd } = kitOn(EAR, (expression) =>
+    expression === framed(CARRY) ? carried(n, n++) : expression === STOP_CAMERA_WATCH ? (stops++, true) : undefined,
+  );
+  await assert.rejects(kd.restSeeing("chart-drawer-carried", "landingRuns"), (err: Error) =>
+    err.message.startsWith("settle timeout chart-drawer-carried: "),
+  );
+  assert.equal(stops, 1, "restSeeing left the camera watch running after its timeout");
+});
+
+test("pressStill takes a press whose box held across two reads whatever answers the pointer, which CD25 asserts after it, and pressAtRest still asks the press to answer it (Issue #716)", () => {
+  const at = (hit: string, y = 424): Card =>
+    ({
+      press: {
+        text: "Lay the prospect on the table",
+        dim: false,
+        idx: "1",
+        box: { x: 434, y, w: 198.58, h: 24.09 },
+        hit,
+        disabled: false,
+      },
+    }) as unknown as Card;
+  assert.equal(
+    pressStill(at("map"), at("map")),
+    true,
+    "CD25's wait asks the press to answer the pointer, which is CD25's own claim",
+  );
+  assert.equal(pressStill(at("self", 425), at("self", 424)), false);
+  assert.equal(pressStill(at("self"), null), false);
+  assert.equal(pressAtRest(at("map"), at("map")), false);
+  assert.equal(pressAtRest(at("self"), at("self")), true);
 });
 
 type Shut = "unfolds" | "stays folded" | "stays open";

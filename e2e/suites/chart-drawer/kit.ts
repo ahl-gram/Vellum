@@ -5,7 +5,8 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 // Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";
-import type { Back, Card } from "./reads.ts";
+import type { Back, Card, Carry } from "./reads.ts";
+import { framed } from "../../support/camera-landed.ts";
 import { mouseMove } from "../../support/input.ts";
 import { bounce } from "../../support/nav.ts";
 
@@ -96,18 +97,17 @@ export function dragKit(k: DrawerKit & Mouse) {
     );
     return { from, to, mid };
   };
-  /** Polls to rest while remembering whether the class was ever seen with its animation running: the settle is 340ms and the poll is 50ms, so a settle that plays is seen and a settle that never plays is not. */
-  const restSeeing = async (label: string, flag: "landingRuns" | "joltRuns") => {
+  const restSeeing = async (label: string, flag: "landingRuns" | "joltRuns"): Promise<Carry & { saw: boolean }> => {
     let saw = false;
     const d = await settle(
-      CARRY,
+      framed(CARRY),
       (x, last) => {
-        if (x[flag] > 0) saw = true;
-        return atRest(x, last);
+        if (x.read[flag] > 0) saw = true;
+        return atRest(x.read, last?.read ?? null);
       },
       label,
     );
-    return { ...d, saw };
+    return { ...d.read, saw };
   };
   const shutAndFold = async (label: string) => {
     const before = await evaluate(SLIP);
