@@ -18,7 +18,7 @@ import {
   cd8Home,
   cd52LayWrites,
 } from "./chart-drawer/desk.ts";
-import { cd45SnapBack, cd46ReducedCarry } from "./chart-drawer/drag.ts";
+import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry } from "./chart-drawer/drag.ts";
 import { cd56WorkerBlocked } from "./chart-drawer/room.ts";
 import { cd58TurnFiles, cd59AbortedTurn } from "./chart-drawer/gestures.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
@@ -66,6 +66,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const kd = dragKit({ ...k, press, moveTo, release });
   await step("CD45", () => cd45SnapBack(kd));
   await step("CD46", () => cd46ReducedCarry(kd));
+  await step("CD44", () => cd44CarryFiles(kd));
   await step("CD4", () => cd4Reload(kd, laid));
   await step("CD5", () => cd5CuttingOff(kd));
   const SIX = [
