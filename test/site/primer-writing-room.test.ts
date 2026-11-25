@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { WRITING_ROOM } from "../../src/site/shared/primer/writing-room.ts";
 import type { Act } from "../../src/site/shared/primer/shape.ts";
+import { readWritten } from "../../src/site/shared/written-address.ts";
 
 const LESSON = "/writing-room/#found=a+polar+archipelago+of+twenty+islands&v=1";
 const steps = WRITING_ROOM.lessons.flatMap((lesson) => lesson.steps);
@@ -20,4 +21,15 @@ test("PN1 a Writing Room step that founds the lesson's sentence first opens the 
     assert.deepEqual(typed(s.first), sentence, `${s.id} first founds the lesson's sentence`);
     assert.equal(s.at, LESSON, `${s.id} opens on the lesson's world`);
   }
+});
+
+test("PN2 every Writing Room step's picture and hashed Try it carry version 1, so a founding-version bump never moves the lesson's world (Issue #1472)", () => {
+  const versionOf = (address: string): number | null =>
+    readWritten(address.slice(address.indexOf("#")))?.version ?? null;
+  const pictures = steps.filter((s) => s.picture !== undefined);
+  assert.ok(pictures.length > 0, "the ladder has pictures to hold");
+  for (const s of pictures) assert.equal(versionOf(s.picture ?? ""), 1, `${s.id} picture is pinned to version 1`);
+  const hashed = steps.filter((s) => s.at.includes("#"));
+  assert.ok(hashed.length > 0, "some step opens on a founded world");
+  for (const s of hashed) assert.equal(versionOf(s.at), 1, `${s.id} at is pinned to version 1`);
 });

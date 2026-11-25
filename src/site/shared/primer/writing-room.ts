@@ -1,6 +1,5 @@
 import { WRITE_ANEW } from "../../explorer/land-rows.ts";
 import { MAP_WORDS } from "../map-words.ts";
-import { FOUNDING_VERSION } from "../../../world/founding/lexicon.ts";
 import { writtenHash } from "../written-address.ts";
 import { aria, click, PLAIN_DRESS, road, roomOf, set, text, type Act, type Ladder } from "./shape.ts";
 
@@ -10,9 +9,10 @@ const NAME = "Zebediah";
 const SHAPE = "an island in the shape of Japan";
 const FOUND = "#wr-form button[type=submit]";
 const PLATE = "The Vegetation Plate";
-const AT_FOUNDED = AT + writtenHash(SENTENCE, 1);
+const LESSON_VERSION = 1;
+const AT_FOUNDED = AT + writtenHash(SENTENCE, LESSON_VERSION);
 const founded = (sentence: string): readonly Act[] => [set("#wr-line", sentence), click(FOUND)];
-const foundedAt = (sentence: string): string => `${AT}${writtenHash(sentence, FOUNDING_VERSION)}`;
+const foundedAt = (sentence: string): string => `${AT}${writtenHash(sentence, LESSON_VERSION)}`;
 
 export const WRITING_ROOM: Ladder = {
   route: "/writing-room/",
