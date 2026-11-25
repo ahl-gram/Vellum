@@ -1,16 +1,14 @@
 import { existsSync, mkdirSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { indexPage } from "./index-page.ts";
 import { deliveryPage } from "./page.ts";
-import { NOTES, PAGE, pageState, walkDelivery } from "./walk.ts";
+import { HOME_OUT, NOTES, PAGE, pageState, walkDelivery } from "./walk.ts";
 
 interface Outcome {
   readonly out: string | null;
   readonly refused: string | null;
 }
 
-const HOME_OUT = fileURLToPath(new URL("../../../out", import.meta.url));
 const TYPED_FROM = process.env["INIT_CWD"] ?? process.cwd();
 
 const isCheckoutOut = (dir: string): boolean =>
