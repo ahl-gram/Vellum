@@ -100,7 +100,7 @@ setTimeout(() => {
     // Fitted only now: the folio's lines are chrome the fit measures, and an empty folio reserves nothing.
     room.layout();
     setupHunt(world, seed);
-    void bootHandOnce({ route: "/seed-of-the-day/" });
+    void bootHandOnce();
   } catch (err) {
     $("status").textContent = "The cartographer spilled the ink: " + errorText(err);
   }

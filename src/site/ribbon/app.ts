@@ -144,7 +144,7 @@ function draw(from: number | null, to: number | null, ceremony: boolean): void {
         rows: res.events.length,
         svgLength: res.svg.length,
       };
-      void bootHandOnce({ route: "/ribbon/" });
+      void bootHandOnce();
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;

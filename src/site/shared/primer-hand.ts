@@ -16,10 +16,6 @@ import { readSeals, writeSeal } from "./primer/seals.ts";
 import { pageBox, pageX, pageY } from "./page-box.ts";
 import { prefersReduce } from "./reduced-motion.ts";
 
-export interface HandRoom {
-  readonly route: string;
-}
-
 export interface HandEnv {
   readonly doc: Document;
   readonly location: { readonly pathname: string; readonly search: string; readonly hash: string };
@@ -51,10 +47,10 @@ function boxesOf(el: Element, s: Scroll): Box[] {
   return parts.map((e) => boxOf(e.getBoundingClientRect(), s));
 }
 
-export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
+export async function bootHand(env: HandEnv): Promise<void> {
   const id = stepIdOf(env.location.search);
   if (id === null) return;
-  const step = handStepFor(await env.fetchSteps(), id, room.route);
+  const step = handStepFor(await env.fetchSteps(), id, "/explorer/");
   if (step === null) return;
   const { doc } = env;
   const chrome = doc.querySelector("header.chrome");
@@ -147,10 +143,10 @@ export async function bootHand(room: HandRoom, env: HandEnv): Promise<void> {
 
 let booted = false;
 
-export function bootHandOnce(room: HandRoom): Promise<void> {
+export function bootHandOnce(): Promise<void> {
   if (booted) return Promise.resolve();
   booted = true;
-  return bootHand(room, {
+  return bootHand({
     doc: document,
     location: window.location,
     replace: (url) => history.replaceState(history.state, "", url),

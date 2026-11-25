@@ -289,7 +289,7 @@ const start = async (): Promise<void> => {
   await draft();
 };
 
-void start().then(() => bootHandOnce({ route: "/explorer/portfolio/" }));
+void start().then(() => bootHandOnce());
 
 declare global {
   interface Window {

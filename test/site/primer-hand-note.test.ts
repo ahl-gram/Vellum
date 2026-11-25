@@ -8,7 +8,7 @@ import type { HandStep } from "../../src/site/shared/primer/hand-steps.ts";
 import { PRIMER_STORE_KEY } from "../../src/site/shared/primer/seals.ts";
 import { bootHand, type HandEnv } from "../../src/site/shared/primer-hand.ts";
 import { FakeStore } from "../../test-support/fake-store.ts";
-import { STEPS, stepOf } from "../../test-support/hand-steps.ts";
+import { HAND_ROOMS, STEPS, stepOf } from "../../test-support/hand-steps.ts";
 
 const noteOf = (
   id: string,
@@ -148,7 +148,7 @@ function booted(
     store,
     replaced,
     fetched: () => fetched,
-    run: (route = "/explorer/") => bootHand({ route }, env),
+    run: () => bootHand(env),
   };
 }
 
@@ -173,8 +173,8 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
   const other = booted("/explorer/?step=prospect-year#seed=42");
   await other.run();
   assert.deepEqual([none.fetched(), unknown.fetched(), other.fetched()], [0, 1, 1]);
-  const elsewhere = booted("/explorer/?step=explorer-dice#seed=42");
-  await elsewhere.run("/prospect/");
+  const elsewhere = booted("/prospect/?step=explorer-dice#seed=42");
+  await elsewhere.run();
   assert.equal(
     elsewhere.document.querySelector(".primer-slip") === null,
     true,
@@ -184,6 +184,28 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
     assert.deepEqual(b.store.held, {});
     assert.deepEqual(b.replaced, []);
     assert.equal(b.document.querySelector(".primer-slip") === null, true);
+  }
+});
+
+test("PK31 bootHand takes its room from the page's own address: in each room that takes the hand, one of its steps opens the note at that room's address and none at the next room's (Issue #1389)", async () => {
+  for (const [i, room] of HAND_ROOMS.entries()) {
+    const step = STEPS.find((s) => s.route === room);
+    assert.ok(step !== undefined, `no step is addressed to ${room}, so this room reads nothing here`);
+    const next = HAND_ROOMS[(i + 1) % HAND_ROOMS.length]!;
+    const own = booted(`${room}?step=${step.id}`);
+    await own.run();
+    assert.equal(
+      own.document.querySelector(".primer-slip") !== null,
+      true,
+      `${step.id} opens no note at ${room}, its own room`,
+    );
+    const elsewhere = booted(`${next}?step=${step.id}`);
+    await elsewhere.run();
+    assert.equal(
+      elsewhere.document.querySelector(".primer-slip") === null,
+      true,
+      `${step.id}, a step of ${room}, opens a note at ${next}`,
+    );
   }
 });
 
@@ -276,7 +298,7 @@ test("PK22 a named control that is greyed does not stand, so the ring holds the 
     at("#pr-bind", rect(900, 360, 120, 35));
     at("#pr-print", rect(900, 650, 60, 35));
     at("#pr-download", rect(970, 650, 80, 35));
-    await b.run("/print-room/");
+    await b.run();
     frames.shift()?.();
     assert.equal(
       b.document.querySelector(".primer-ring")?.getAttribute("style"),

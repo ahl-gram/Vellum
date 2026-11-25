@@ -77,7 +77,7 @@ async function draw(f: Founding, plate: boolean, onDrawn: () => void = () => {})
     onDrawn();
     held = { founding: f, plate };
     settled++;
-    void bootHandOnce({ route: "/writing-room/" });
+    void bootHandOnce();
     return true;
   } catch (err) {
     if (mine === turn) $("status").textContent = "The ink would not take: " + errorText(err);
