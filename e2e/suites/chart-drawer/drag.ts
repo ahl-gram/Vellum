@@ -1,6 +1,79 @@
+import { GRIP_INSET_PX } from "../../../src/site/explorer/table-drag.ts";
 import type { DragKit } from "./kit.ts";
 import { CARRY, DURATION, atRest, sameCam } from "./reads.ts";
 import type { Carry } from "./reads.ts";
+
+export async function cd44CarryFiles({
+  evaluate,
+  check,
+  release,
+  bandPoint,
+  carry,
+  restSeeing,
+  shutAndFold,
+}: DragKit): Promise<void> {
+  // Wiring: whatever sheet the steps before left on the table comes off, so this carry files a survey the table does not hold.
+  await evaluate<boolean>(
+    `(() => { const off = document.querySelector("#cuttings .off"); if (off) off.click(); return !!off; })()`,
+  );
+  await shutAndFold("chart-drawer-carry-folded");
+  const before = await restSeeing("chart-drawer-carry-rest", "landingRuns");
+  const { mid, to } = await carry(await bandPoint());
+  await release(to.x, to.y);
+  const landed = await restSeeing("chart-drawer-carried", "landingRuns");
+  const duration = await evaluate(DURATION);
+  check(
+    "CD44 a REAL mouse carry from the dog-ear into the drawer's band files the survey: mid-carry the ghost is the thumbnail as a fixed blob img at pointer-events none, seated on body and never inside #map, hanging from the corner the reader took it by (its inline translate puts the pointer GRIP_INSET_PX inside its top-right corner, read from the seat and not from the rect, which is a rotated box's bounding box), the body carries the drag state with the cursor grabbing and nothing selected, and the drawer, SHUT at the press, opened with the drop cue as the sheet entered the band (D4); on release the cutting lands with its settle seen running and then retired, the address carries the table, the line is said, the ghost and the drag state are gone, and the camera is at rest where it was, which is the pan the ear's stopped mousedown keeps from d3 (Issue #523, ruled 2026-09-21)",
+    before.cuttings === 0 &&
+      before.folded &&
+      !before.open &&
+      !!mid.ghost &&
+      mid.ghost.tag === "IMG" &&
+      mid.ghost.src === "blob:" &&
+      mid.ghost.pos === "fixed" &&
+      mid.ghost.pe === "none" &&
+      !mid.ghost.inMap &&
+      Math.abs(parseFloat(mid.ghost.translate) + mid.ghost.w - GRIP_INSET_PX - to.x) <= 1 &&
+      Math.abs(parseFloat(mid.ghost.translate.split(" ")[1]!) + GRIP_INSET_PX - to.y) <= 1 &&
+      mid.ghost.rotate === "-6deg" &&
+      mid.ghost.z === "30" &&
+      mid.drag &&
+      mid.cursor === "grabbing" &&
+      mid.sel === 0 &&
+      mid.open &&
+      mid.receiving &&
+      landed.cuttings === 1 &&
+      landed.saw &&
+      !landed.landing &&
+      !landed.ghost &&
+      !landed.drag &&
+      !landed.receiving &&
+      typeof landed.hashTable === "string" &&
+      landed.hashTable.startsWith("k-s.seed-42") &&
+      /lies on the table/.test(landed.status) &&
+      sameCam(before.cam, landed.cam) &&
+      landed.folded &&
+      parseFloat(duration!) === 0.34,
+    JSON.stringify({
+      before: { cuttings: before.cuttings, folded: before.folded, open: before.open, cam: before.cam },
+      mid,
+      to,
+      landed: {
+        cuttings: landed.cuttings,
+        saw: landed.saw,
+        landing: landed.landing,
+        ghost: landed.ghost,
+        drag: landed.drag,
+        receiving: landed.receiving,
+        hashTable: landed.hashTable,
+        status: landed.status,
+        cam: landed.cam,
+        folded: landed.folded,
+      },
+      duration,
+    }),
+  );
+}
 
 function cd45FilesNothing(
   check: DragKit["check"],
