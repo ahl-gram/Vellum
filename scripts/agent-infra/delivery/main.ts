@@ -10,7 +10,7 @@ interface Outcome {
   readonly refused: string | null;
 }
 
-const HOME_OUT = fileURLToPath(new URL("../../out", import.meta.url));
+const HOME_OUT = fileURLToPath(new URL("../../../out", import.meta.url));
 const TYPED_FROM = process.env["INIT_CWD"] ?? process.cwd();
 
 const isCheckoutOut = (dir: string): boolean =>

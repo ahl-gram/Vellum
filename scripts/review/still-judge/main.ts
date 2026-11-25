@@ -1,8 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { shootAll } from "../../design/shoot.ts";
-import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../jev/cli.ts";
-import { askAll } from "../../recon-triage/triage.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../shared/jev/cli.ts";
+import { askAll } from "../../agent-infra/recon-triage/triage.ts";
 import { askStills } from "./compare.ts";
 import { isKind, requestFor, type Kind } from "./questions.ts";
 import { compareLines, loggedRequest, trialLine } from "./report.ts";

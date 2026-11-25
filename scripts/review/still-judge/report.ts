@@ -1,6 +1,6 @@
 import { two } from "../comment-judge/report.ts";
-import { pngDims } from "../../delivery/dims.ts";
-import { MODEL, type SystemOneRequest } from "../../jev/system-one.ts";
+import { pngDims } from "../../agent-infra/delivery/dims.ts";
+import { MODEL, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import { COMPARISON_RULE, differenceOf, readingOf, type Asked } from "./compare.ts";
 import { ASKED, sha256Of, type Kind } from "./questions.ts";
 import type { TrialStill } from "./trial-set.ts";

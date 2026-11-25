@@ -1,4 +1,4 @@
-import { capReason, type Reply, type Send, type SystemOneRequest } from "../../jev/system-one.ts";
+import { capReason, type Reply, type Send, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import type { AcceptedCopy } from "./accepted-copies.ts";
 import { acceptedFor } from "./accepted.ts";
 import type { Fn, Unread } from "./functions.ts";

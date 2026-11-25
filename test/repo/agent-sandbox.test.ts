@@ -25,7 +25,7 @@ import {
   teardown,
   teardownPlan,
   validateName,
-} from "../../scripts/agent-sandbox.ts";
+} from "../../scripts/agent-infra/agent-sandbox.ts";
 import { cli, git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 test("resolveRoot returns the main checkout from inside a linked worktree", () => {
@@ -324,7 +324,7 @@ const withRemote = (body: (clone: string, sha: string) => void): void => {
   }
 };
 
-// Kept on purpose (Issue #1318): a copy of `haveCommit` in `scripts/agent-sandbox.ts` that only checks the fixture's premise, that the clone lacks the commit `create` is asked to fetch.
+// Kept on purpose (Issue #1318): a copy of `haveCommit` in `scripts/agent-infra/agent-sandbox.ts` that only checks the fixture's premise, that the clone lacks the commit `create` is asked to fetch.
 const hasCommit = (cwd: string, sha: string): boolean => {
   try {
     git(["cat-file", "-e", `${sha}^{commit}`], cwd);

@@ -11,7 +11,7 @@ import {
   type Meter,
   type ReadText,
   type SystemOneRequest,
-} from "../../scripts/jev/system-one.ts";
+} from "../../scripts/shared/jev/system-one.ts";
 import { unmetered } from "../../test-support/jev-fakes.ts";
 
 const R: SystemOneRequest = {

@@ -183,8 +183,8 @@ tree was made, and the gitignored `out/` never prints there. So an agent that wo
 harness tree but whose only deliverable is files under `out/`, such as `vellum-designer` running a
 design round, or a measurement, is dispatched WITHOUT isolation, by a session standing in the main
 checkout:
-- The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` into it by path, with no `cd`, as `scripts/agent-sandbox.ts` does.
-- The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/delivery/main.ts` from its own tree with the folder's absolute path.
+- The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` into it by path, with no `cd`, as `scripts/agent-infra/agent-sandbox.ts` does.
+- The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/agent-infra/delivery/main.ts` from its own tree with the folder's absolute path.
 - The dispatcher removes the tree once the stills have been ruled, or the report it was built for is in.
 
 A dispatcher fenced inside a worktree, a planner, an implementer or an EnterWorktree session, hands such an
@@ -306,7 +306,7 @@ stopped part way is not evidence until its reds and greens are re-run.
 
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
-tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
+tree's HEAD (built by `scripts/agent-infra/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
 the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
 deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
 measured a spike and this run measures what was built. Wherever the diff in step 1 of that agent's
@@ -385,7 +385,7 @@ in the directory you launched it from, which is your worktree, and on 2026-09-11
 head out in two live ones (#573). No dispatched review agent may move or restore the tree it was
 dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites included, because a
 suite run there deletes the generated assets under `generated/` (Alex, 2026-09-12); both it and
-`vellum-guard-prover` build their sandbox with `scripts/agent-sandbox.ts` rather than a recipe of
+`vellum-guard-prover` build their sandbox with `scripts/agent-infra/agent-sandbox.ts` rather than a recipe of
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
 `out/` samples included, because its own boundary writes only into `out/` and the other two hold no
 write tool at all. That is where Alex looks when the dispatch tree is the main checkout; when it is a

@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { closeSync, openSync, writeSync } from "node:fs";
-import { HEADLESS_BUILD_VAR } from "../agent-infra/hooks/headless-build.ts";
+import { HEADLESS_BUILD_VAR } from "../hooks/headless-build.ts";
 
 export const D2_FLAGS: readonly string[] = ["-s", "danger-full-access", "-a", "on-request"];
 export const effortConfig = (effort: string): string => `model_reasoning_effort="${effort}"`;

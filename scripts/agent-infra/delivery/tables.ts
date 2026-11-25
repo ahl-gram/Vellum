@@ -1,4 +1,4 @@
-import { isRecord } from "../shared/is-record.ts";
+import { isRecord } from "../../shared/is-record.ts";
 import { escapeHtml } from "./markdown.ts";
 
 export const ROW_CAP = 500;

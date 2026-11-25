@@ -1,5 +1,5 @@
-import type { Reply, Send, SystemOneRequest } from "../../jev/system-one.ts";
-import { askAll } from "../../recon-triage/triage.ts";
+import type { Reply, Send, SystemOneRequest } from "../../shared/jev/system-one.ts";
+import { askAll } from "../../agent-infra/recon-triage/triage.ts";
 import { limitProblem } from "./png.ts";
 import { requestFor, type Kind } from "./questions.ts";
 

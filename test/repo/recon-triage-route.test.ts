@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { ClaimRow, Kind } from "../../scripts/recon-triage/claims.ts";
-import { routeOf } from "../../scripts/recon-triage/route.ts";
+import type { ClaimRow, Kind } from "../../scripts/agent-infra/recon-triage/claims.ts";
+import { routeOf } from "../../scripts/agent-infra/recon-triage/route.ts";
 
 const row = (kind: Kind, paths: string[]): ClaimRow => ({ claim: "c", source: "body", paths, symbols: [], kind });
 

@@ -3,9 +3,9 @@ import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
-import { commandOf, runCommand, type Main, type RunDeps, type Signal } from "../../scripts/jev/cli.ts";
-import { MODEL, type Env, type Fetch } from "../../scripts/jev/system-one.ts";
-import { usageFileOf } from "../../scripts/jev/usage.ts";
+import { commandOf, runCommand, type Main, type RunDeps, type Signal } from "../../scripts/shared/jev/cli.ts";
+import { MODEL, type Env, type Fetch } from "../../scripts/shared/jev/system-one.ts";
+import { usageFileOf } from "../../scripts/shared/jev/usage.ts";
 import { answeringFetch, ONE_QUESTION, usageLinesIn, withHome } from "../../test-support/jev-fakes.ts";
 import { noExit } from "../../test-support/process-fakes.ts";
 

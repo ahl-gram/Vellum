@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { create, listing, sandboxes, snapshot, teardown } from "../../scripts/agent-sandbox.ts";
+import { create, listing, sandboxes, snapshot, teardown } from "../../scripts/agent-infra/agent-sandbox.ts";
 import { git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 test("listing skips the directories the residue proof must not walk, and sees the rest", () => {

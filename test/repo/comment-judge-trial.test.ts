@@ -4,7 +4,7 @@ import { PR548_SHA, type TrialRow } from "../../scripts/review/comment-judge/tri
 import { locateRun, scoreLines, type Scored } from "../../scripts/review/comment-judge/trial.ts";
 import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
 import type { Candidate, CommentRun, Outcome } from "../../scripts/review/comment-judge/types.ts";
-import type { Reply, SystemOneRequest } from "../../scripts/jev/system-one.ts";
+import type { Reply, SystemOneRequest } from "../../scripts/shared/jev/system-one.ts";
 
 test("a trial row finds the run covering its line, the first line or a later one", () => {
   const tree = memoryTree("t", { "src/m.ts": "const a = 1;\n// one\n// two\n// three\nconst b = 2;\n" });

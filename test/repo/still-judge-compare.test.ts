@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { Reply } from "../../scripts/jev/system-one.ts";
+import type { Reply } from "../../scripts/shared/jev/system-one.ts";
 import {
   askStills,
   COMPARISON_RULE,

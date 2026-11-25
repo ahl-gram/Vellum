@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readIssue, USAGE, type ReaderReads } from "../../scripts/issue-reader/main.ts";
-import { parseLines, threadOf } from "../../scripts/issue-reader/thread.ts";
+import { readIssue, USAGE, type ReaderReads } from "../../scripts/agent-infra/issue-reader/main.ts";
+import { parseLines, threadOf } from "../../scripts/agent-infra/issue-reader/thread.ts";
 
 const NO_NAME = "an account whose name is not shown";
 

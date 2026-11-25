@@ -263,7 +263,7 @@ const PASSED = [
   "npm test",
   "npm run check",
   "npm test -- test/repo/proof-runner-send.test.ts",
-  "node scripts/agent-sandbox.ts list",
+  "node scripts/agent-infra/agent-sandbox.ts list",
 ];
 
 const session = (row: string): string => `selftest-${process.pid}-${row}`;

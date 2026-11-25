@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ensureCommit, gitTree, type Tree } from "../comment-judge/tree.ts";
-import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../shared/jev/cli.ts";
 import { ACCEPTED_COPIES } from "./accepted-copies.ts";
 import { functionsIn, type Fn } from "./functions.ts";
 import { askPair, RUN_INPUT_TOKEN_CAP, type Found, type HuntOptions, type Run } from "./hunt.ts";

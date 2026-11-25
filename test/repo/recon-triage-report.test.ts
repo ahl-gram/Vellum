@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
-import { liveSender, type Answered } from "../../scripts/jev/system-one.ts";
-import type { ClaimRow, Kind } from "../../scripts/recon-triage/claims.ts";
-import type { Excerpt } from "../../scripts/recon-triage/excerpt.ts";
-import { requestFor } from "../../scripts/recon-triage/questions.ts";
-import { replyLines, reportLines, requestLines } from "../../scripts/recon-triage/report.ts";
-import { RUN_INPUT_TOKEN_CAP, triage, type Triaged } from "../../scripts/recon-triage/triage.ts";
+import { liveSender, type Answered } from "../../scripts/shared/jev/system-one.ts";
+import type { ClaimRow, Kind } from "../../scripts/agent-infra/recon-triage/claims.ts";
+import type { Excerpt } from "../../scripts/agent-infra/recon-triage/excerpt.ts";
+import { requestFor } from "../../scripts/agent-infra/recon-triage/questions.ts";
+import { replyLines, reportLines, requestLines } from "../../scripts/agent-infra/recon-triage/report.ts";
+import { RUN_INPUT_TOKEN_CAP, triage, type Triaged } from "../../scripts/agent-infra/recon-triage/triage.ts";
 import { keyEchoingFetch, unmetered } from "../../test-support/jev-fakes.ts";
 
 const row = (claim: string, source: string, kind: Kind, paths: string[]): ClaimRow => ({

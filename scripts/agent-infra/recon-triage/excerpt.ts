@@ -1,4 +1,4 @@
-import type { Tree } from "../review/comment-judge/tree.ts";
+import type { Tree } from "../../review/comment-judge/tree.ts";
 
 export const AROUND = 20;
 export const MAX_HITS = 4;

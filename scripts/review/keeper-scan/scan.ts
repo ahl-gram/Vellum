@@ -1,7 +1,7 @@
 import { tokensOf } from "../comment-judge/judge.ts";
 import { NO, YES } from "../comment-judge/questions.ts";
 import type { CommentRun } from "../comment-judge/types.ts";
-import { capReason, type Reply, type Send, type SystemOneRequest } from "../../jev/system-one.ts";
+import { capReason, type Reply, type Send, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import { keeperRequest, SIGNALS, survivalRequest, type Signal } from "./questions.ts";
 
 // 2026-11-10: about twice the 3,940,154 input tokens the PR #377 sweep's diff took at jev-1.14.0 in the Issue #1320 planner's run, the largest single run measured; the first weekly sweep's whole range is about 2.6 million.

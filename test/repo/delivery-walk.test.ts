@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
-import { walkDelivery } from "../../scripts/delivery/walk.ts";
+import { walkDelivery } from "../../scripts/agent-infra/delivery/walk.ts";
 
 test("a folder or a file whose name begins with a dot stays off the delivery, which is how the comparison's extracted base source stays off the page (Issue #1309)", () => {
   const dir = mkdtempSync(join(tmpdir(), "delivery-walk-"));

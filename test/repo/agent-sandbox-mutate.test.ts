@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { create, mutate, restore, status, teardown } from "../../scripts/agent-sandbox.ts";
+import { create, mutate, restore, status, teardown } from "../../scripts/agent-infra/agent-sandbox.ts";
 import { cli, git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 const NAME = "guard-mutate";

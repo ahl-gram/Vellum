@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { memoryTree } from "../../scripts/review/comment-judge/tree.ts";
-import { excerptOf } from "../../scripts/recon-triage/excerpt.ts";
+import { excerptOf } from "../../scripts/agent-infra/recon-triage/excerpt.ts";
 
 const numbered = (n: number, at: Readonly<Record<number, string>> = {}): string =>
   Array.from({ length: n }, (_, i) => at[i + 1] ?? `line ${i + 1}`).join("\n");

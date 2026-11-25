@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { pngDims } from "../../scripts/delivery/dims.ts";
+import { pngDims } from "../../scripts/agent-infra/delivery/dims.ts";
 import { limitProblem, MAX_BYTES } from "../../scripts/review/still-judge/png.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 

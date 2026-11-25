@@ -1,6 +1,6 @@
 import { replyLines, requestLines } from "../comment-judge/report.ts";
 import { changedFiles, deletedFiles, gitTree, mergeBase, revParse } from "../comment-judge/tree.ts";
-import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../shared/jev/cli.ts";
 import { deletedRuns, filesToRead } from "./collect.ts";
 import { reportLines } from "./report.ts";
 import { RUN_INPUT_TOKEN_CAP, scanAll } from "./scan.ts";

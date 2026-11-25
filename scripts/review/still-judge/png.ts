@@ -1,4 +1,4 @@
-import { pngDims } from "../../delivery/dims.ts";
+import { pngDims } from "../../agent-infra/delivery/dims.ts";
 
 // 2026-11-11, Issue #1309: TypeSafe's image limits (https://docs.typesafe.ai/go/images.md, Limits): each side 280 to 1568 pixels, which also holds the total inside its 78,400 to 2,458,624, and 16 MiB a file; an image outside them is refused, never resized.
 export const MIN_SIDE = 280;

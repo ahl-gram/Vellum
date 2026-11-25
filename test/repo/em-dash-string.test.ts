@@ -12,7 +12,10 @@ const refusals = async (code: string, file: string): Promise<number> =>
 test("a string or template literal holding the character is refused in shipped code (Issue #981)", async () => {
   assert.equal(await refusals(`export const a = "x ${D} y";`, "src/atlas/document.ts"), 1);
   assert.equal(await refusals(`export const a = \`x ${D} y\`;`, "src/atlas/document.ts"), 1);
-  assert.equal(await refusals(`export const a = (n: number) => \`\${n} ${D} y\`;`, "scripts/agent-sandbox.ts"), 1);
+  assert.equal(
+    await refusals(`export const a = (n: number) => \`\${n} ${D} y\`;`, "scripts/agent-infra/agent-sandbox.ts"),
+    1,
+  );
   assert.equal(await refusals(`export const a = "x";\nexport const b = "${D}";`, "e2e/lanes.ts"), 1);
 });
 

@@ -8,7 +8,7 @@ import {
   requestsFor,
 } from "../../scripts/review/comment-judge/questions.ts";
 import type { Candidate, CommentRun } from "../../scripts/review/comment-judge/types.ts";
-import { MODEL } from "../../scripts/jev/system-one.ts";
+import { MODEL } from "../../scripts/shared/jev/system-one.ts";
 
 const run: CommentRun = {
   file: "src/m.ts",

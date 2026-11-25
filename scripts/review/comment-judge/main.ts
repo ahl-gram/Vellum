@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../jev/cli.ts";
+import { parseArgs, processDeps, runCommand, writeAll, type Args, type SendFor } from "../../shared/jev/cli.ts";
 import { isTsUnderLintRoots } from "../../../test-support/lint-roots.ts";
 import { addedRuns } from "./collect.ts";
 import { judgeAll, RUN_INPUT_TOKEN_CAP, type Judged } from "./judge.ts";

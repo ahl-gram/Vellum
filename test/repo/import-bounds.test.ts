@@ -236,7 +236,7 @@ const toolingPlant = (file: string): string[] => {
     `import type { WITNESSES } from "${up}test-support/lint-witnesses.ts";`,
     `export * from "${up}e2e/harness.ts";`,
     `export type { Plant } from "${up}test/repo/fixture.ts";`,
-    `export const a = () => import("${up}scripts/delivery/main.ts");`,
+    `export const a = () => import("${up}scripts/agent-infra/delivery/main.ts");`,
     `export const b = new URL("${up}e2e/harness.ts", import.meta.url);`,
     `export type C = typeof import("${up}scripts/build/place-files.ts");`,
     `export type D = import("${up}test-support/lint-witnesses.ts").Witnesses;`,

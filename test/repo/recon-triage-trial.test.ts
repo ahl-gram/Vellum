@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { Answered, Reply } from "../../scripts/jev/system-one.ts";
+import type { Answered, Reply } from "../../scripts/shared/jev/system-one.ts";
 import {
   aucOf,
   parseTrialSet,
@@ -9,7 +9,7 @@ import {
   staleAmongFirst,
   type ScoredRow,
   type TrialRow,
-} from "../../scripts/recon-triage/trial.ts";
+} from "../../scripts/agent-infra/recon-triage/trial.ts";
 
 const T = (issue: number, verdict: "stale" | "current", claim: string): TrialRow => ({
   issue,

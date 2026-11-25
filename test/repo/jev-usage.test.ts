@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { MODEL } from "../../scripts/jev/system-one.ts";
+import { MODEL } from "../../scripts/shared/jev/system-one.ts";
 import {
   appendUsage,
   NO_TALLY,
@@ -12,7 +12,7 @@ import {
   withSent,
   type Tally,
   type UsageLine,
-} from "../../scripts/jev/usage.ts";
+} from "../../scripts/shared/jev/usage.ts";
 import { answered, ONE_QUESTION, usageTextIn, withHome } from "../../test-support/jev-fakes.ts";
 
 const AT = new Date("2026-11-11T20:00:00.000Z");

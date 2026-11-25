@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
-import { loadModelPolicy, resolveModel } from "../agent-infra/model-policy.ts";
-import { ROLES } from "../agent-infra/roles.ts";
+import { loadModelPolicy, resolveModel } from "../model-policy.ts";
+import { ROLES } from "../roles.ts";
 import { resolveRoot } from "../agent-sandbox.ts";
 import { buildArgv, buildEnv, outcomeOf, resumeArgv, runCodex, threadOf } from "./launch.ts";
 import { nextStep } from "./next.ts";
@@ -25,7 +25,7 @@ import {
 export const USAGE =
   "usage: npm run handoff -- next <issue> | build <issue> --plan <path> --session <link> | resume <issue> --brief <path> [--plan <path>]";
 
-const HERE_ROOT = resolve(import.meta.dirname, "..", "..");
+const HERE_ROOT = resolve(import.meta.dirname, "..", "..", "..");
 
 type Env = Readonly<Record<string, string | undefined>>;
 type Parsed = { readonly command: string; readonly issue: number; readonly flags: ReadonlyMap<string, string> };

@@ -1,4 +1,4 @@
-import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../jev/system-one.ts";
+import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 import type { Candidate, CommentRun } from "./types.ts";
 
 export const YES = 0.7;

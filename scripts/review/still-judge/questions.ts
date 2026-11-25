@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../jev/system-one.ts";
+import { MODEL, type NoulQuestion, type SystemOneRequest } from "../../shared/jev/system-one.ts";
 
 export type Kind = "sheet" | "rainfall" | "crop";
 export const KINDS: readonly Kind[] = ["sheet", "rainfall", "crop"];

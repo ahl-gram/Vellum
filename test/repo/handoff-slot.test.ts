@@ -14,7 +14,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { makeSlot, ORIGIN_URL, readSlotBranch, slotHolder, slotOf } from "../../scripts/handoff/slot.ts";
+import { makeSlot, ORIGIN_URL, readSlotBranch, slotHolder, slotOf } from "../../scripts/agent-infra/handoff/slot.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
 
 const dir = realpathSync(mkdtempSync(join(tmpdir(), "handoff-slot-")));

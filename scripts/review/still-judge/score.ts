@@ -1,5 +1,5 @@
 import { two } from "../comment-judge/report.ts";
-import type { Reply } from "../../jev/system-one.ts";
+import type { Reply } from "../../shared/jev/system-one.ts";
 import { COMPARISON_RULE } from "./compare.ts";
 import { ASKED, NO, YES } from "./questions.ts";
 import { RESTAGES, type Restage } from "./restage.ts";

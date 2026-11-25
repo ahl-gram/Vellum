@@ -9,8 +9,8 @@ import {
   type Reply,
   type Send,
   type SystemOneRequest,
-} from "../scripts/jev/system-one.ts";
-import { usageFileOf } from "../scripts/jev/usage.ts";
+} from "../scripts/shared/jev/system-one.ts";
+import { usageFileOf } from "../scripts/shared/jev/usage.ts";
 
 export const recordingSender = (replies: readonly Reply[]): { send: Send; seen: SystemOneRequest[] } => {
   const seen: SystemOneRequest[] = [];

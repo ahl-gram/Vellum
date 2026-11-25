@@ -13,9 +13,9 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { nextStep, type Snapshot } from "../../scripts/handoff/next.ts";
-import { collect, handoffRefOf, makeSlot } from "../../scripts/handoff/slot.ts";
-import { folderOf, treeOf } from "../../scripts/handoff/state.ts";
+import { nextStep, type Snapshot } from "../../scripts/agent-infra/handoff/next.ts";
+import { collect, handoffRefOf, makeSlot } from "../../scripts/agent-infra/handoff/slot.ts";
+import { folderOf, treeOf } from "../../scripts/agent-infra/handoff/state.ts";
 import { BOUND_MS, git } from "../../test-support/sandbox-repo.ts";
 
 const HOOKS = [

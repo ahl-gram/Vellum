@@ -1,4 +1,4 @@
-import { HOOK_CHECK } from "../agent-infra/hooks/headless-build.ts";
+import { HOOK_CHECK } from "../hooks/headless-build.ts";
 
 export const OUTCOME_READY = "OUTCOME: ready";
 export const OUTCOME_HANDBACK = "OUTCOME: handback";

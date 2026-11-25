@@ -81,7 +81,7 @@ export const ACCEPTED_COPIES: readonly AcceptedCopy[] = [
     ruling: KEPT_ERROR_TEXT,
   },
   {
-    a: { file: "scripts/agent-sandbox.ts", name: "haveCommit", hash: "3dc95b12918f2154" },
+    a: { file: "scripts/agent-infra/agent-sandbox.ts", name: "haveCommit", hash: "3dc95b12918f2154" },
     b: { file: "test/repo/agent-sandbox.test.ts", name: "hasCommit", hash: "e0956ef6254d9f92" },
     reason: `${KEPT}: the test's copy only checks the fixture's premise, that the clone lacks the commit create is asked to fetch.`,
     ruling: LISTED_RULING,

@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { pictureDims } from "../../scripts/delivery/dims.ts";
+import { pictureDims } from "../../scripts/agent-infra/delivery/dims.ts";
 import { pngHeader } from "../../test-support/still-judge-fixtures.ts";
 
 test("a delivered PNG is measured only when it carries the whole signature and an IHDR chunk, the two cases the delivery's own reader once let through", () => {

@@ -20,7 +20,7 @@ Do not put a question to Alex yourself, even where Codex offers you a tool that 
 
 <!-- slot: prover-isolation -->
 
-Build your tree only through `scripts/agent-sandbox.ts`, below, and never another way: one made from `origin/main` would leave you to mutate and test the wrong code.
+Build your tree only through `scripts/agent-infra/agent-sandbox.ts`, below, and never another way: one made from `origin/main` would leave you to mutate and test the wrong code.
 
 <!-- slot: prover-edit-fence -->
 
