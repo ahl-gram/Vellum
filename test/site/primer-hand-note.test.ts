@@ -187,11 +187,10 @@ test("PK14 bootHand drops the key with the hash kept once the step is done, writ
   }
 });
 
-test("PK31 bootHand takes its room from the page's own address: in each room that takes the hand, one of its steps opens the note at that room's address and none at the next room's (Issue #1389)", async () => {
-  for (const [i, room] of HAND_ROOMS.entries()) {
+test("PK31 bootHand takes its room from the page's own address: in each room that takes the hand, one of its steps opens the note at that room's address and at no other room's (Issue #1389)", async () => {
+  for (const room of HAND_ROOMS) {
     const step = STEPS.find((s) => s.route === room);
     assert.ok(step !== undefined, `no step is addressed to ${room}, so this room reads nothing here`);
-    const next = HAND_ROOMS[(i + 1) % HAND_ROOMS.length]!;
     const own = booted(`${room}?step=${step.id}`);
     await own.run();
     assert.equal(
@@ -199,13 +198,15 @@ test("PK31 bootHand takes its room from the page's own address: in each room tha
       true,
       `${step.id} opens no note at ${room}, its own room`,
     );
-    const elsewhere = booted(`${next}?step=${step.id}`);
-    await elsewhere.run();
-    assert.equal(
-      elsewhere.document.querySelector(".primer-slip") === null,
-      true,
-      `${step.id}, a step of ${room}, opens a note at ${next}`,
-    );
+    for (const other of HAND_ROOMS.filter((r) => r !== room)) {
+      const elsewhere = booted(`${other}?step=${step.id}`);
+      await elsewhere.run();
+      assert.equal(
+        elsewhere.document.querySelector(".primer-slip") === null,
+        true,
+        `${step.id}, a step of ${room}, opens a note at ${other}`,
+      );
+    }
   }
 });
 
