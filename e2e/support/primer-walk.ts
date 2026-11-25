@@ -23,7 +23,7 @@ import { scopedHealth } from "./room.ts";
 import { makeSettle, makeStable } from "./settle.ts";
 import { makeStep } from "./step.ts";
 import { PICTURE_MANIFEST } from "../../src/site/primer/pictures.ts";
-import { signatureFaults, type PictureManifest } from "../../scripts/primer-pictures/signature.ts";
+import { signatureFaults, type PictureManifest } from "../../scripts/build/primer-pictures/signature.ts";
 
 // 2026-11-09, Issue #1250: 300 polls of 50 ms, 15 s, the budget `REDRAFT_TRIES` in `e2e/suites/zoom/kit.ts` gives the slowest redraft a suite waits on, since a step's rest and its waits can stand behind one; the boot takes the same, as `waitReady` in `e2e/harness.ts` gives 200 of 75 ms.
 const TRIES = 300;

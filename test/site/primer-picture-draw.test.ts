@@ -7,7 +7,7 @@ import { writtenHash } from "../../src/site/shared/written-address.ts";
 import { chartFrame, picturedSteps } from "../../src/site/primer/pictures.ts";
 import { foundWorld } from "../../src/world/founding/found.ts";
 import { FOUNDING_VERSION } from "../../src/world/founding/lexicon.ts";
-import { committedFounder, drawJob, jobOf } from "../../scripts/primer-pictures/draw.ts";
+import { committedFounder, drawJob, jobOf } from "../../scripts/build/primer-pictures/draw.ts";
 import { useCommittedGazetteer } from "../../test-support/founding-gazetteer.ts";
 
 const DRESS = "style=ink&legend=0&arms=1&beasts=1";

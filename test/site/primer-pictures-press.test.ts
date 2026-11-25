@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { LAUNCH_TUNING, type LaunchTuning } from "../../e2e/support/launch.ts";
-import { launchPress, pressPictures, type Launch, type Launched } from "../../scripts/primer-pictures/press.ts";
+import { launchPress, pressPictures, type Launch, type Launched } from "../../scripts/build/primer-pictures/press.ts";
 import { STAND_IN_COUNTER, standInTarget } from "../../test-support/stand-in-browser.ts";
 import {
   EXEC_STAND_IN,

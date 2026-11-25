@@ -4,7 +4,7 @@ import type { Words } from "../../src/site/shared/primer/shape.ts";
 import type { Quoted } from "./primer-judge.ts";
 import type { Box, Facts } from "../../src/site/shared/primer/judge.ts";
 import { PICTURE_MANIFEST } from "../../src/site/primer/pictures.ts";
-import type { PictureManifest, Signature } from "../../scripts/primer-pictures/signature.ts";
+import type { PictureManifest, Signature } from "../../scripts/build/primer-pictures/signature.ts";
 
 const at = (css: string, nth = 0): string => `document.querySelectorAll(${JSON.stringify(css)})[${nth}]`;
 

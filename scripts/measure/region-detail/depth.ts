@@ -1,13 +1,13 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { isMajorRiver, type River } from "../../src/hydrology/rivers.ts";
-import type { UvWindow } from "../../src/terrain/heightfield.ts";
-import { createChainCache, type ChainCache } from "../../src/world/detail-chain.ts";
-import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
-import { generateRegionWorld } from "../../src/world/region.ts";
-import { landSnapRadius } from "../../src/world/snap-to-land.ts";
-import type { World } from "../../src/world/types.ts";
+import { isMajorRiver, type River } from "../../../src/hydrology/rivers.ts";
+import type { UvWindow } from "../../../src/terrain/heightfield.ts";
+import { createChainCache, type ChainCache } from "../../../src/world/detail-chain.ts";
+import { defaultRecipe, generateWorld } from "../../../src/world/generate.ts";
+import { lodWindowFor, quantizeCenter } from "../../../src/world/lod.ts";
+import { generateRegionWorld } from "../../../src/world/region.ts";
+import { landSnapRadius } from "../../../src/world/snap-to-land.ts";
+import type { World } from "../../../src/world/types.ts";
 import {
   inWindowCourse,
   laidRiverCount,

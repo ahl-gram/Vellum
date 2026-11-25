@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: '26'
       - id: plan
-        run: node scripts/proof-runner/list.ts
+        run: node scripts/ci/proof-runner/list.ts
         env:
           REF_NAME: ${{ github.ref_name }}
           PLAN: ${{ runner.temp }}/plan.json
@@ -68,7 +68,7 @@ jobs:
           node-version: '26'
       - run: npm ci
         working-directory: tree
-      - run: node ../runner/scripts/proof-runner/job.ts
+      - run: node ../runner/scripts/ci/proof-runner/job.ts
         working-directory: tree
         env:
           PLAN: ${{ runner.temp }}/plan/plan.json
@@ -108,7 +108,7 @@ jobs:
         with:
           node-version: '26'
       - if: always()
-        run: node scripts/proof-runner/ledger.ts
+        run: node scripts/ci/proof-runner/ledger.ts
         env:
           PLAN: ${{ runner.temp }}/plan/plan.json
           RESULTS: ${{ runner.temp }}/results

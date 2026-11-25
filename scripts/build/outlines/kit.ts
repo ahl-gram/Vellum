@@ -4,11 +4,11 @@ import { fileURLToPath } from "node:url";
 import type { Kind, KitPlace } from "./build.ts";
 import { SOURCES } from "./extract.ts";
 
-export const KIT = fileURLToPath(new URL("../../design/kit/outlines", import.meta.url));
+export const KIT = fileURLToPath(new URL("../../../design/kit/outlines", import.meta.url));
 export const KIT_README = join(KIT, "README.md");
-export const PLACE_TABLE = fileURLToPath(new URL("../../src/terrain/outline-places.json", import.meta.url));
-export const PLACE_IDS = fileURLToPath(new URL("../../src/world/outline-place-ids.ts", import.meta.url));
-export const PLACE_NAMES = fileURLToPath(new URL("../../src/world/outline-place-names.json", import.meta.url));
+export const PLACE_TABLE = fileURLToPath(new URL("../../../src/terrain/outline-places.json", import.meta.url));
+export const PLACE_IDS = fileURLToPath(new URL("../../../src/world/outline-place-ids.ts", import.meta.url));
+export const PLACE_NAMES = fileURLToPath(new URL("../../../src/world/outline-place-names.json", import.meta.url));
 export const PAGE = "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/";
 export const LAKES_PAGE = "https://www.naturalearthdata.com/downloads/10m-physical-vectors/";
 export const TERMS = "https://www.naturalearthdata.com/about/terms-of-use/";

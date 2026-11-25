@@ -1,19 +1,19 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { findBrowser, svgDimensions } from "../../src/cli/raster.ts";
+import { findBrowser, svgDimensions } from "../../../src/cli/raster.ts";
 import {
   chartFrame,
   pictureFile,
   PICTURE_FOLDER,
   PICTURE_MANIFEST,
   picturedSteps,
-} from "../../src/site/primer/pictures.ts";
-import { LADDERS } from "../../src/site/shared/primer/ladders.ts";
-import type { Ladder } from "../../src/site/shared/primer/shape.ts";
-import type { BrowserPolicyEnv } from "../../e2e/support/browser-policy.ts";
-import { useCommittedPlaces } from "../../test-support/outline-places.ts";
-import { GENERATED } from "../build/clean-generated.ts";
+} from "../../../src/site/primer/pictures.ts";
+import { LADDERS } from "../../../src/site/shared/primer/ladders.ts";
+import type { Ladder } from "../../../src/site/shared/primer/shape.ts";
+import type { BrowserPolicyEnv } from "../../../e2e/support/browser-policy.ts";
+import { useCommittedPlaces } from "../../../test-support/outline-places.ts";
+import { GENERATED } from "../clean-generated.ts";
 import { pictureBrowser, SKIP_PICTURES } from "./browser.ts";
 import { committedFounder, drawJob, jobOf } from "./draw.ts";
 import { pressPictures, type Pressed, type Pressing, type PressOptions } from "./press.ts";
