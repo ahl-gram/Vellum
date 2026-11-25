@@ -85,6 +85,15 @@ export async function writePictures(
   }
 }
 
+export interface RunDeps extends PictureDeps {
+  readonly error: (reason: unknown) => void;
+}
+
+export function runPictures(root: string, deps: RunDeps): Promise<0 | 1> {
+  void [root, deps];
+  return Promise.resolve(0);
+}
+
 if (import.meta.main) {
   try {
     await writePictures(resolve(process.argv[2] ?? GENERATED), {
