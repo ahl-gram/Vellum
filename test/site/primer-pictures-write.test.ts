@@ -4,8 +4,8 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Ladder, Step } from "../../src/site/shared/primer/shape.ts";
-import { SKIP_PICTURES } from "../../scripts/build/primer-pictures/browser.ts";
-import { writePictures, type Press } from "../../scripts/build/primer-pictures/main.ts";
+import { NO_PICTURE_BROWSER, SKIP_PICTURES } from "../../scripts/build/primer-pictures/browser.ts";
+import { runPictures, writePictures, type Press } from "../../scripts/build/primer-pictures/main.ts";
 import { pressPictures, type PressOptions, type Pressing } from "../../scripts/build/primer-pictures/press.ts";
 import { chartSignature } from "../../scripts/build/primer-pictures/signature.ts";
 import { STAND_IN_COUNTER } from "../../test-support/stand-in-browser.ts";
@@ -56,6 +56,38 @@ test("PIC9 with no browser where none is required, the pictures are skipped with
       assert.equal(existsSync(join(tmp, "primer", "pictures.json")), false);
     });
   }
+});
+
+// No unit test reaches the import.meta.main block's assignment of this code to process.exitCode: a spawned main.ts costs about 13 s and cannot reach the no-browser branch on a machine that has a browser (Issue #1440 plan).
+test("PIC19 runPictures gives the build the code 1, saying why, when the pictures stop the build, and 0 when they are skipped (Issue #1440)", async () => {
+  await withTemp(async (tmp) => {
+    const errors: unknown[] = [];
+    const lines: string[] = [];
+    const code = await runPictures(tmp, {
+      env: { VELLUM_REQUIRE_BROWSER: "1" },
+      find: () => null,
+      press: unused,
+      log: (l) => lines.push(l),
+      error: (e) => errors.push(e),
+    });
+    assert.equal(code, 1);
+    assert.deepEqual(errors, [NO_PICTURE_BROWSER]);
+    assert.deepEqual(lines, []);
+  });
+  await withTemp(async (tmp) => {
+    const errors: unknown[] = [];
+    const lines: string[] = [];
+    const code = await runPictures(tmp, {
+      env: {},
+      find: () => null,
+      press: unused,
+      log: (l) => lines.push(l),
+      error: (e) => errors.push(e),
+    });
+    assert.equal(code, 0);
+    assert.deepEqual(errors, []);
+    assert.deepEqual(lines, [SKIP_PICTURES]);
+  });
 });
 
 test("PIC10 with a browser, every pictured step's chart is drawn, handed to the press at the pictures' width and quality, named in the manifest with its file and its chart's signature, and logged with the browser and the bytes", async () => {
