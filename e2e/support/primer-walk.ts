@@ -5,7 +5,7 @@ import type { SuiteContext } from "../types.ts";
 import { dropExpectedCancellations } from "./console.ts";
 import { bounce } from "./nav.ts";
 import { perform } from "./primer-acts.ts";
-import { ARM_NAME, expectFor, heldBy, keysLost, onItsArm, pressPoint, type Arm } from "./primer-judge.ts";
+import { ARM_NAME, expectFor, heldBy, inView, keysLost, onItsArm, pressPoint, type Arm } from "./primer-judge.ts";
 import {
   fits,
   routeOf,
@@ -16,7 +16,7 @@ import {
   type Facts,
   type Reach,
 } from "../../src/site/shared/primer/judge.ts";
-import { ARM, BARE, FACTS, HASH, HIT, PICTURES, SIGNATURE } from "./primer-reads.ts";
+import { ARM, BARE, FACTS, HASH, HIT, PICTURES, QUOTED, SIGNATURE } from "./primer-reads.ts";
 import { PRIMER_ROOMS, type PrimerRoom, type Rest } from "./primer-rooms.ts";
 import { withReducedMotion } from "./reduced-motion.ts";
 import { scopedHealth } from "./room.ts";
@@ -96,7 +96,9 @@ export function primerKit(ctx: SuiteContext, route: string) {
       const { facts, state } = await read(w);
       const got = wordsOf(facts, w);
       const e = expect(w);
-      reads.push({ css: w.css, says: w.says, got, state, expect: e, ok: wordsHold(got, w) && fits(state, e) });
+      const away = e === "seen" && fits(state, e) && !inView(await ctx.evaluate(QUOTED(w)), w.read === "text");
+      const shown: Reach = away ? "off screen" : state;
+      reads.push({ css: w.css, says: w.says, got, state: shown, expect: e, ok: wordsHold(got, w) && fits(shown, e) });
     }
     return reads;
   };

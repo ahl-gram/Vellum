@@ -69,5 +69,7 @@ export function stateOf(f: Facts, hit: string): Reach {
 export function fits(state: Reach, expect: Expect): boolean {
   if (expect === "any") return state !== "absent";
   if (expect === "hidden") return state === "hidden" || state === "no box";
+  if (expect === "seen")
+    return state !== "absent" && state !== "hidden" && state !== "no box" && state !== "off screen";
   return state === expect;
 }
