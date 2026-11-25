@@ -10,6 +10,7 @@ const NAME = "Zebediah";
 const SHAPE = "an island in the shape of Japan";
 const FOUND = "#wr-form button[type=submit]";
 const PLATE = "The Vegetation Plate";
+const AT_FOUNDED = AT + writtenHash(SENTENCE, 1);
 const founded = (sentence: string): readonly Act[] => [set("#wr-line", sentence), click(FOUND)];
 const foundedAt = (sentence: string): string => `${AT}${writtenHash(sentence, FOUNDING_VERSION)}`;
 
@@ -36,7 +37,7 @@ export const WRITING_ROOM: Ladder = {
           id: "writing-room-your-word",
           act: "Add your own name to the end of the sentence, and press {Found} again.",
           see: "Your name is not on the list, so it changes only the chart number: another polar archipelago of about twenty islands.",
-          at: AT,
+          at: AT_FOUNDED,
           first: founded(SENTENCE),
           words: [text(FOUND, "Found")],
           do: founded(`${SENTENCE} ${NAME}`),
@@ -61,7 +62,7 @@ export const WRITING_ROOM: Ladder = {
           id: "writing-room-plate",
           act: `Press {Lay on ${PLATE}}.`,
           see: "The plants are laid over the land; the press now reads Lift, to take them off.",
-          at: AT,
+          at: AT_FOUNDED,
           first: founded(SENTENCE),
           words: [road("#wr-plate", `Lay on ${PLATE}`)],
           do: [click("#wr-plate")],
@@ -72,7 +73,7 @@ export const WRITING_ROOM: Ladder = {
           id: "writing-room-explore-it",
           act: `Press {Explore it in ${roomOf("/explorer/")}}.`,
           see: `Your world opens in the Explorer, its Land and Strand held by your sentence: to change them, ${WRITE_ANEW}.`,
-          at: AT,
+          at: AT_FOUNDED,
           first: founded(SENTENCE),
           words: [road("#wr-explorer", `Explore it in ${roomOf("/explorer/")}`)],
         },
