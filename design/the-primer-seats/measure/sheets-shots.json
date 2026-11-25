@@ -1,0 +1,72 @@
+[
+ {
+  "url": "/out/1248/sheets/sheet-1-home.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-1-home.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-2-trail.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-2-trail.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-3-print.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-3-print.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-4-hand.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-4-hand.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-5-atelier.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-5-atelier.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-6-seal.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-6-seal.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ },
+ {
+  "url": "/out/1248/sheets/sheet-7-words.html",
+  "width": 2260,
+  "height": 1000,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/sheets/sheet-7-words.png",
+  "waitMs": 1500,
+  "full": true,
+  "probe": "document.documentElement.scrollWidth"
+ }
+]

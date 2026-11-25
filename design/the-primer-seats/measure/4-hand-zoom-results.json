@@ -1,0 +1,146 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-at-rest-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":209,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"none\",\"region\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-at-rest-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":190,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"none\",\"region\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-one-press-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":209,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"none\",\"region\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-one-press-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":190,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"none\",\"region\":false}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-two-presses-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":209,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"none\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-two-presses-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":85,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-drafted-anew-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":22,\"top\":138,\"bottom\":209,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"none\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-drafted-anew-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":85,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-four-presses-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":104,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-four-presses-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":85,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-six-presses-1024.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":104,\"inWindow\":true,\"visible\":71.484375,\"height\":71,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/zoom-b2-six-presses-1280.png",
+  "url": "http://127.0.0.1:54523/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"headTop\":-83,\"top\":33,\"bottom\":85,\"inWindow\":true,\"visible\":52.046875,\"height\":52,\"headTranslate\":\"0px -105px\",\"region\":true}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
