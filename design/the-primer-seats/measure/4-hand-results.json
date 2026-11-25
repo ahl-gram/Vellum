@@ -1,0 +1,470 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/control-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":null,\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":930,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":false,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/control-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":null,\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":926,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":false,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/control-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":null,\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1642,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":false,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/control-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":null,\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1648,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":false,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/a-beside-the-broadside-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":167,\"t\":277,\"r\":519,\"b\":487},\"overChartBox\":37.2,\"overVisibleChart\":37.2,\"landSeen\":930,\"landUnder\":615,\"landUnderShare\":66.1,\"marks\":26,\"marksUnder\":22,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/a-beside-the-broadside-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":167,\"t\":277,\"r\":519,\"b\":487},\"overChartBox\":37.2,\"overVisibleChart\":37.2,\"landSeen\":926,\"landUnder\":585,\"landUnderShare\":63.2,\"marks\":26,\"marksUnder\":16,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/a-beside-the-broadside-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":423,\"t\":303,\"r\":775,\"b\":513},\"overChartBox\":17.6,\"overVisibleChart\":17.6,\"landSeen\":1642,\"landUnder\":471,\"landUnderShare\":28.7,\"marks\":26,\"marksUnder\":7,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/a-beside-the-broadside-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":423,\"t\":302,\"r\":775,\"b\":511},\"overChartBox\":17.6,\"overVisibleChart\":17.6,\"landSeen\":1648,\"landUnder\":395,\"landUnderShare\":24,\"marks\":26,\"marksUnder\":8,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b-in-the-head-cluster-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":412,\"h\":318},\"visibleChart\":130839,\"slip\":{\"l\":26,\"t\":138,\"r\":521,\"b\":258},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":706,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b-in-the-head-cluster-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":412,\"h\":318},\"visibleChart\":130839,\"slip\":{\"l\":26,\"t\":138,\"r\":521,\"b\":258},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":703,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b-in-the-head-cluster-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":463,\"h\":357},\"visibleChart\":165373,\"slip\":{\"l\":26,\"t\":138,\"r\":570,\"b\":258},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":884,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b-in-the-head-cluster-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":463,\"h\":357},\"visibleChart\":165373,\"slip\":{\"l\":26,\"t\":138,\"r\":570,\"b\":258},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":895,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":26,\"t\":138,\"r\":521,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":930,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":26,\"t\":138,\"r\":521,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":926,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":526,\"h\":406},\"visibleChart\":213201,\"slip\":{\"l\":26,\"t\":138,\"r\":646,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1151,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":526,\"h\":406},\"visibleChart\":213201,\"slip\":{\"l\":26,\"t\":138,\"r\":646,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1143,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c-in-the-broadside-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":572,\"t\":241,\"r\":933,\"b\":382},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":930,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":true,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c-in-the-broadside-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":572,\"t\":241,\"r\":933,\"b\":382},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":926,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":true,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c-in-the-broadside-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":828,\"t\":241,\"r\":1189,\"b\":382},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1642,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":true,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c-in-the-broadside-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":828,\"t\":241,\"r\":1189,\"b\":382},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1648,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":true,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c2-in-the-broadsides-masthead-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":572,\"t\":156,\"r\":933,\"b\":296},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":930,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c2-in-the-broadsides-masthead-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":572,\"t\":156,\"r\":933,\"b\":296},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":926,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":true,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c2-in-the-broadsides-masthead-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":828,\"t\":157,\"r\":1189,\"b\":298},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1642,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/c2-in-the-broadsides-masthead-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":828,\"t\":156,\"r\":1189,\"b\":296},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1648,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":50654.6923828125,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d-folded-to-a-tab-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":315,\"t\":363,\"r\":508,\"b\":401},\"overChartBox\":3.4,\"overVisibleChart\":3.4,\"landSeen\":930,\"landUnder\":3,\"landUnderShare\":0.3,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d-folded-to-a-tab-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":315,\"t\":363,\"r\":508,\"b\":401},\"overChartBox\":3.4,\"overVisibleChart\":3.4,\"landSeen\":926,\"landUnder\":25,\"landUnderShare\":2.7,\"marks\":26,\"marksUnder\":2,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d-folded-to-a-tab-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":571,\"t\":389,\"r\":764,\"b\":427},\"overChartBox\":1.3,\"overVisibleChart\":1.3,\"landSeen\":1642,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d-folded-to-a-tab-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":571,\"t\":388,\"r\":764,\"b\":425},\"overChartBox\":1.3,\"overVisibleChart\":1.3,\"landSeen\":1648,\"landUnder\":3,\"landUnderShare\":0.2,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d2-one-line-beside-the-ring-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":124,\"t\":358,\"r\":508,\"b\":406},\"overChartBox\":9.6,\"overVisibleChart\":9.6,\"landSeen\":930,\"landUnder\":130,\"landUnderShare\":14,\"marks\":26,\"marksUnder\":5,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d2-one-line-beside-the-ring-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":124,\"t\":358,\"r\":508,\"b\":406},\"overChartBox\":9.6,\"overVisibleChart\":9.6,\"landSeen\":926,\"landUnder\":154,\"landUnderShare\":16.6,\"marks\":26,\"marksUnder\":6,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d2-one-line-beside-the-ring-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":380,\"t\":384,\"r\":764,\"b\":432},\"overChartBox\":4.7,\"overVisibleChart\":4.7,\"landSeen\":1642,\"landUnder\":35,\"landUnderShare\":2.1,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/d2-one-line-beside-the-ring-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":380,\"t\":383,\"r\":764,\"b\":430},\"overChartBox\":4.7,\"overVisibleChart\":4.7,\"landSeen\":1648,\"landUnder\":100,\"landUnderShare\":6.1,\"marks\":26,\"marksUnder\":3,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/e-at-the-foot-1024.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":26,\"t\":449,\"r\":473,\"b\":589},\"overChartBox\":26,\"overVisibleChart\":26,\"landSeen\":930,\"landUnder\":124,\"landUnderShare\":13.3,\"marks\":26,\"marksUnder\":4,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/e-at-the-foot-1024-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"chartBox\":{\"w\":473,\"h\":365},\"visibleChart\":172847,\"slip\":{\"l\":26,\"t\":449,\"r\":473,\"b\":589},\"overChartBox\":26,\"overVisibleChart\":26,\"landSeen\":926,\"landUnder\":200,\"landUnderShare\":21.6,\"marks\":26,\"marksUnder\":6,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/e-at-the-foot-1280.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":26,\"t\":509,\"r\":586,\"b\":629},\"overChartBox\":21.1,\"overVisibleChart\":21.1,\"landSeen\":1642,\"landUnder\":135,\"landUnderShare\":8.2,\"marks\":26,\"marksUnder\":4,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"1\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/e-at-the-foot-1280-done.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":627,\"h\":484},\"visibleChart\":303751,\"slip\":{\"l\":26,\"t\":509,\"r\":586,\"b\":629},\"overChartBox\":21.1,\"overVisibleChart\":21.1,\"landSeen\":1648,\"landUnder\":264,\"landUnderShare\":16,\"marks\":26,\"marksUnder\":5,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-ink.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago&style=ink",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":526,\"h\":406},\"visibleChart\":213201,\"slip\":{\"l\":26,\"t\":138,\"r\":646,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1143,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-topographic.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago&style=topographic",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":526,\"h\":406},\"visibleChart\":213201,\"slip\":{\"l\":26,\"t\":138,\"r\":646,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1143,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-nautical.png",
+  "url": "http://127.0.0.1:53985/explorer/#seed=42&type=archipelago&style=nautical",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"chartBox\":{\"w\":526,\"h\":406},\"visibleChart\":213201,\"slip\":{\"l\":26,\"t\":138,\"r\":646,\"b\":209},\"overChartBox\":0,\"overVisibleChart\":0,\"landSeen\":1143,\"landUnder\":0,\"landUnderShare\":0,\"marks\":26,\"marksUnder\":0,\"overRing\":0,\"overBroadside\":0,\"overGlass\":0,\"overLegend\":0,\"overFolio\":0,\"inWindow\":true,\"broadsideScrolls\":false,\"islands\":\"20\"}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

@@ -1,5 +1,6 @@
 import { BIOMES } from "../../climate/biomes.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
+import { coastId } from "../coast.ts";
 import type { RenderCtx } from "../context.ts";
 import type { World } from "../../world/types.ts";
 import type { MapStyle, StyleName } from "../style.ts";
@@ -194,14 +195,15 @@ export function fieldLayer(ctx: RenderCtx): SvgNode | null {
   const rects = fieldRects(ctx, theme);
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
-  const clipPath = el("clipPath", { id: "field-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]);
+  const href = `#${coastId(coastD)}`;
+  const clipPath = el("clipPath", { id: "field-clip" }, [el("use", { href, "clip-rule": "evenodd" })]);
 
   return el("g", { id: "layer-field" }, [
     clipPath,
     el("g", { "clip-path": "url(#field-clip)" }, rects),
     // The cells cover the inner half of the coast stroke; redraw it on top so the coastline stays crisp.
-    el("path", {
-      d: coastD,
+    el("use", {
+      href,
       fill: "none",
       stroke: style.coastStroke,
       "stroke-width": 1.3,

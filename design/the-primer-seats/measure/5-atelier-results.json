@@ -1,0 +1,170 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/control-in-q-and-a.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":null,\"nearPip\":null,\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/control-in-q-and-a-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/a-at-the-landing-in-q-and-a.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"Vellum\",\"d\":6.1},\"nearPip\":{\"n\":\"The Ribbon\",\"d\":37.2},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/a-at-the-landing-in-q-and-a-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/b-an-isle-of-its-own-in-q-and-a.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"A Chart of the Atelier\",\"d\":28.7},\"nearPip\":{\"n\":\"Vellum\",\"d\":90.6},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/b-an-isle-of-its-own-in-q-and-a-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/c-on-the-south-shore-in-q-and-a.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"Q & A\",\"d\":15.9},\"nearPip\":{\"n\":\"Q & A\",\"d\":57.7},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/c-on-the-south-shore-in-q-and-a-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/a-at-the-landing-on-the-primer.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"Vellum\",\"d\":6.1},\"nearPip\":{\"n\":\"The Ribbon\",\"d\":37.2},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/a-at-the-landing-on-the-primer-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/b-an-isle-of-its-own-on-the-primer.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"A Chart of the Atelier\",\"d\":28.7},\"nearPip\":{\"n\":\"Vellum\",\"d\":90.6},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/b-an-isle-of-its-own-on-the-primer-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/c-on-the-south-shore-on-the-primer.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hits\":[],\"nearLabel\":{\"n\":\"Q & A\",\"d\":15.9},\"nearPip\":{\"n\":\"Q & A\",\"d\":57.7},\"panel\":{\"w\":544,\"h\":400,\"inWindow\":true}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/5-atelier/c-on-the-south-shore-on-the-primer-2x.png",
+  "url": "http://127.0.0.1:51959/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

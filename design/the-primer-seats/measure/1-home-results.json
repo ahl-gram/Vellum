@@ -1,0 +1,770 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":184,\"t\":665,\"r\":840,\"b\":754},\"rowW\":656,\"rowLines\":1,\"rowToGlass\":123,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0}},\"rowOverCoords\":234,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":null,\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":312,\"t\":697,\"r\":968,\"b\":786},\"rowW\":656,\"rowLines\":1,\"rowToGlass\":251,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":null,\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/a-as-first-drawn-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/a-as-first-drawn-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/a-as-first-drawn-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/a-as-first-drawn-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-narrow-presses-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-narrow-presses-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-narrow-presses-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-narrow-presses-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/c-gallery-slip-above-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":114,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":114,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":631,\"r\":1032,\"b\":669},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/c-gallery-slip-above-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/c-gallery-slip-above-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":3,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":3,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":659,\"r\":1179,\"b\":697},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/c-gallery-slip-above-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/d-gallery-moored-anew-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":354.2,\"gallerySlip\":{\"l\":826,\"t\":452,\"r\":985,\"b\":490},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/d-gallery-moored-anew-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/d-gallery-moored-anew-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":370.1,\"gallerySlip\":{\"l\":970,\"t\":470,\"r\":1130,\"b\":508},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/d-gallery-moored-anew-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-and-d-together-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":354.2,\"gallerySlip\":{\"l\":826,\"t\":452,\"r\":985,\"b\":490},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-and-d-together-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-and-d-together-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":370.1,\"gallerySlip\":{\"l\":970,\"t\":470,\"r\":1130,\"b\":508},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/b-and-d-together-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/e-row-left-of-centre-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":81,\"t\":665,\"r\":861,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":102,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":2095,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/e-row-left-of-centre-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/e-row-left-of-centre-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":227,\"t\":697,\"r\":1007,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":212,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/e-row-left-of-centre-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/f-b-and-reading-room-above-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/f-b-and-reading-room-above-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/f-b-and-reading-room-above-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/f-b-and-reading-room-above-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/g-b-primer-card-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":920,\"coords\":{\"l\":26,\"t\":728,\"r\":210,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":770,\"galleryOverRow\":0,\"galleryNearest\":546.1,\"gallerySlip\":{\"l\":1634,\"t\":1040,\"r\":1794,\"b\":1078},\"pip\":{\"inWindow\":true,\"nearest\":390.7,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":{\"id\":\"lf-card-primer\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":0,\"box\":{\"l\":608,\"t\":244,\"r\":960,\"b\":524}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/g-b-primer-card-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/g-b-primer-card-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":210,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":677,\"galleryOverRow\":0,\"galleryNearest\":569.8,\"gallerySlip\":{\"l\":1798,\"t\":1083,\"r\":1957,\"b\":1121},\"pip\":{\"inWindow\":true,\"nearest\":408.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":{\"id\":\"lf-card-primer\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":0,\"box\":{\"l\":864,\"t\":260,\"r\":1216,\"b\":540}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/g-b-primer-card-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/h-b-how-card-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":1195,\"coords\":{\"l\":26,\"t\":728,\"r\":226,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":474,\"galleryOverRow\":0,\"galleryNearest\":546.1,\"gallerySlip\":{\"l\":610,\"t\":1204,\"r\":770,\"b\":1242},\"pip\":{\"inWindow\":false,\"nearest\":390.7,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":{\"id\":\"lf-card-how\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":36813,\"box\":{\"l\":608,\"t\":24,\"r\":960,\"b\":744}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/h-b-how-card-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/h-b-how-card-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":226,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":491,\"galleryOverRow\":0,\"galleryNearest\":569.8,\"gallerySlip\":{\"l\":639,\"t\":1253,\"r\":799,\"b\":1291},\"pip\":{\"inWindow\":false,\"nearest\":408.3,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":{\"id\":\"lf-card-how\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":36813,\"box\":{\"l\":864,\"t\":24,\"r\":1216,\"b\":776}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/h-b-how-card-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-how-card-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":184,\"t\":665,\"r\":840,\"b\":754},\"rowW\":656,\"rowLines\":1,\"rowToGlass\":123,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0}},\"rowOverCoords\":751,\"coords\":{\"l\":26,\"t\":728,\"r\":226,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":474,\"galleryOverRow\":0,\"galleryNearest\":546.1,\"gallerySlip\":{\"l\":610,\"t\":1204,\"r\":770,\"b\":1242},\"pip\":null,\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":{\"id\":\"lf-card-how\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":36813,\"box\":{\"l\":608,\"t\":24,\"r\":960,\"b\":744}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-how-card-1024-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-how-card-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":312,\"t\":697,\"r\":968,\"b\":786},\"rowW\":656,\"rowLines\":1,\"rowToGlass\":251,\"rowOver\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":226,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":491,\"galleryOverRow\":0,\"galleryNearest\":569.8,\"gallerySlip\":{\"l\":639,\"t\":1253,\"r\":799,\"b\":1291},\"pip\":null,\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":{\"id\":\"lf-card-how\",\"inWindow\":true,\"overGlass\":0,\"overSeed\":36813,\"box\":{\"l\":864,\"t\":24,\"r\":1216,\"b\":776}}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/1-home/control-how-card-1280-2x.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-one-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-one-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-one-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-one-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-how-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-how-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-how-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-how-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-start-here-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-start-here-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-start-here-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-start-here-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-the-rooms-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-the-rooms-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-the-rooms-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-the-rooms-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-to-make-one-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":122,\"t\":665,\"r\":902,\"b\":754},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":61,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":1108,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":413,\"primer\":0,\"how\":0}},\"rowOverCoords\":1354,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":1108,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-a-learn-to-make-one-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":250,\"t\":697,\"r\":1030,\"b\":786},\"rowW\":781,\"rowLines\":1,\"rowToGlass\":189,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":410,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":410,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-to-make-one-1024.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"w\":1024,\"row\":{\"l\":159,\"t\":665,\"r\":865,\"b\":754},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":99,\"rowOver\":{\"explorer\":0,\"reading-room\":3481,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":677,\"coords\":{\"l\":26,\"t\":728,\"r\":197,\"b\":746},\"rowOverNotice\":0,\"gallerySlipOverGlass\":1337,\"galleryOffWindow\":8,\"galleryOverRow\":0,\"galleryNearest\":353.8,\"gallerySlip\":{\"l\":873,\"t\":695,\"r\":1032,\"b\":733},\"pip\":{\"inWindow\":true,\"nearest\":247.9,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":963,\"t\":627,\"r\":998,\"b\":746},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/1-home-verbs/verb-b-learn-to-make-one-1280.png",
+  "url": "http://127.0.0.1:52324/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"w\":1280,\"row\":{\"l\":287,\"t\":697,\"r\":993,\"b\":786},\"rowW\":705,\"rowLines\":1,\"rowToGlass\":227,\"rowOver\":{\"explorer\":0,\"reading-room\":2695,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"pressOver\":{\"explorer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"reading-room\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"atlas\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"gallery\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0},\"primer\":{\"explorer\":0,\"reading-room\":0,\"atlas\":0,\"gallery\":0,\"primer\":0,\"how\":0}},\"rowOverCoords\":0,\"coords\":{\"l\":26,\"t\":760,\"r\":197,\"b\":778},\"rowOverNotice\":0,\"gallerySlipOverGlass\":0,\"galleryOffWindow\":0,\"galleryOverRow\":0,\"galleryNearest\":369.5,\"gallerySlip\":{\"l\":1019,\"t\":723,\"r\":1179,\"b\":761},\"pip\":{\"inWindow\":true,\"nearest\":259.6,\"slipOverOthers\":0,\"overGlass\":0,\"overSeed\":0,\"overNotice\":0,\"overChrome\":0,\"overRow\":0},\"glass\":{\"l\":1219,\"t\":659,\"r\":1254,\"b\":778},\"card\":null}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

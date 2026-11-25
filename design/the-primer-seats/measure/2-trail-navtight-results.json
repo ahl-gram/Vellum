@@ -1,0 +1,866 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":37.5,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":298,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":37.5,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":554,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":27.8,\"centreTo\":\"Gallery\",\"fullMargin\":3.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":27.8,\"centreTo\":\"Gallery\",\"fullMargin\":3.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":28.1,\"centreTo\":\"Gallery\",\"fullMargin\":4.1,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":273,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":28.1,\"centreTo\":\"Gallery\",\"fullMargin\":4.1,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":529,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":36.1,\"centreTo\":\"Gallery\",\"fullMargin\":5.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":183,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":36.1,\"centreTo\":\"Gallery\",\"fullMargin\":5.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":402,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":180,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":436,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":26.1,\"centreTo\":\"Q & A\",\"fullMargin\":2.1,\"fullTo\":\"Q & A\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":64,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":189,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":26.1,\"centreTo\":\"Q & A\",\"fullMargin\":2.1,\"fullTo\":\"Q & A\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":203,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":169,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.9,\"centreTo\":\"Primer\",\"fullMargin\":0.9,\"fullTo\":\"Primer\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.9,\"centreTo\":\"Primer\",\"fullMargin\":0.9,\"fullTo\":\"Primer\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.3,\"centreTo\":\"Gallery\",\"fullMargin\":1.3,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.3,\"centreTo\":\"Gallery\",\"fullMargin\":1.3,\"fullTo\":\"Gallery\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1024-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":33.3,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1280-learn-this-room.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":33.3,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":100.8},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":39.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":292,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":39.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":548,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":26.6,\"centreTo\":\"Gallery\",\"fullMargin\":2.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":26.6,\"centreTo\":\"Gallery\",\"fullMargin\":2.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":26.8,\"centreTo\":\"Gallery\",\"fullMargin\":2.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":267,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":26.8,\"centreTo\":\"Gallery\",\"fullMargin\":2.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":523,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":33.9,\"centreTo\":\"Gallery\",\"fullMargin\":5.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":177,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":33.9,\"centreTo\":\"Gallery\",\"fullMargin\":5.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":396,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":25.4,\"centreTo\":\"Primer\",\"fullMargin\":1.4,\"fullTo\":\"Primer\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":174,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":25.4,\"centreTo\":\"Primer\",\"fullMargin\":1.4,\"fullTo\":\"Primer\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":430,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":25.2,\"centreTo\":\"Q & A\",\"fullMargin\":1.2,\"fullTo\":\"Q & A\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":58,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":189,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":25.2,\"centreTo\":\"Q & A\",\"fullMargin\":1.2,\"fullTo\":\"Q & A\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":197,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":169,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.6,\"centreTo\":\"Primer\",\"fullMargin\":0.6,\"fullTo\":\"Primer\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.6,\"centreTo\":\"Primer\",\"fullMargin\":0.6,\"fullTo\":\"Primer\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.8,\"centreTo\":\"Gallery\",\"fullMargin\":0.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.8,\"centreTo\":\"Gallery\",\"fullMargin\":0.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1024-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":35.4,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1280-this-room-s-steps.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":35.4,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":106.9},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":32.7,\"centreTo\":\"Gallery\",\"fullMargin\":5.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":260,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":32.7,\"centreTo\":\"Gallery\",\"fullMargin\":5.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":516,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.2,\"centreTo\":\"Gallery\",\"fullMargin\":1.2,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.2,\"centreTo\":\"Gallery\",\"fullMargin\":1.2,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.1,\"centreTo\":\"Gallery\",\"fullMargin\":1.1,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":236,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.1,\"centreTo\":\"Gallery\",\"fullMargin\":1.1,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":492,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":25.8,\"centreTo\":\"Gallery\",\"fullMargin\":1.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":146,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":25.8,\"centreTo\":\"Gallery\",\"fullMargin\":1.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":365,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":142,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":398,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":26.6,\"centreTo\":\"Q & A\",\"fullMargin\":2.6,\"fullTo\":\"Q & A\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":27,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":189,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":26.6,\"centreTo\":\"Q & A\",\"fullMargin\":2.6,\"fullTo\":\"Q & A\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":166,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":169,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":28.8,\"centreTo\":\"Primer\",\"fullMargin\":4.8,\"fullTo\":\"Primer\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":28.8,\"centreTo\":\"Primer\",\"fullMargin\":4.8,\"fullTo\":\"Primer\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":27.8,\"centreTo\":\"Gallery\",\"fullMargin\":3.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":27.8,\"centreTo\":\"Gallery\",\"fullMargin\":3.8,\"fullTo\":\"Gallery\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1024-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":47.8,\"centreTo\":\"Print Room\",\"fullMargin\":6.1,\"fullTo\":\"Print Room\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1280-a-primer-for-this-room.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":47.8,\"centreTo\":\"Print Room\",\"fullMargin\":6.1,\"fullTo\":\"Print Room\",\"h\":13,\"w\":138.1},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":36.6,\"centreTo\":\"Gallery\",\"fullMargin\":5.9,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":271,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-explorer-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/explorer/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":36.6,\"centreTo\":\"Gallery\",\"fullMargin\":5.9,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":38,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":527,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.6,\"centreTo\":\"Gallery\",\"fullMargin\":0.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-writing-room-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/writing-room/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.6,\"centreTo\":\"Gallery\",\"fullMargin\":0.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":24.7,\"centreTo\":\"Reading Room\",\"fullMargin\":0.7,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":89,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.6,\"centreTo\":\"Gallery\",\"fullMargin\":0.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":247,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-reading-room-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/reading-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":24.6,\"centreTo\":\"Gallery\",\"fullMargin\":0.6,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":93.1,\"centreTo\":\"Print Room\",\"fullMargin\":11.4,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":503,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":28,\"centreTo\":\"Gallery\",\"fullMargin\":4,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":157,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-print-room-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/print-room/#seed=42",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":28,\"centreTo\":\"Gallery\",\"fullMargin\":4,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":28.9,\"centreTo\":\"Reading Room\",\"fullMargin\":4.9,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":376,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":132,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.9,\"centreTo\":\"Primer\",\"fullMargin\":0.9,\"fullTo\":\"Primer\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":153,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-prospect-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":24.9,\"centreTo\":\"Primer\",\"fullMargin\":0.9,\"fullTo\":\"Primer\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":40.2,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":409,\"overCorner\":false,\"chromeBottom\":149,\"cornerBottom\":131,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":25,\"centreTo\":\"Q & A\",\"fullMargin\":1,\"fullTo\":\"Q & A\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":38,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":189,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-ribbon-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/ribbon/#seed=42&a=0",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Primer\",\"centre\":25,\"centreTo\":\"Q & A\",\"fullMargin\":1,\"fullTo\":\"Q & A\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":29.8,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":177,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":169,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-portfolio-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/explorer/portfolio/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Gallery\",\"centre\":26.3,\"centreTo\":\"Primer\",\"fullMargin\":2.3,\"fullTo\":\"Primer\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Reading Room\",\"centre\":35.9,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":104,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.7,\"centreTo\":\"Gallery\",\"fullMargin\":1.7,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-seed-of-the-day-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/seed-of-the-day/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":25.7,\"centreTo\":\"Gallery\",\"fullMargin\":1.7,\"fullTo\":\"Gallery\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":25.2,\"centreTo\":\"Reading Room\",\"fullMargin\":1.2,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1024-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":43.1,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/measure/2-trail/navtight-a2-gallery-1280-how-this-room-works.png",
+  "url": "http://127.0.0.1:53895/gallery/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"press\":{\"edge\":11.1,\"edgeTo\":\"Print Room\",\"centre\":43.1,\"centreTo\":\"Print Room\",\"fullMargin\":5.6,\"fullTo\":\"Print Room\",\"h\":13,\"w\":127},\"atelier\":{\"edge\":11.1,\"edgeTo\":\"Writing Room\",\"centre\":42.7,\"centreTo\":\"Reading Room\",\"fullMargin\":5.6,\"fullTo\":\"Reading Room\",\"h\":13,\"w\":150},\"toCorner\":null,\"overCorner\":false,\"chromeBottom\":127,\"cornerBottom\":94,\"navLines\":1}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
