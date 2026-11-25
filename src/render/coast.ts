@@ -1,3 +1,4 @@
+import { hashString } from "../core/rng.ts";
 import type { Point } from "../terrain/contours.ts";
 import { chaikinSmooth, chaikinSmoothPinned, filledIsoRings } from "../terrain/contours.ts";
 import type { World } from "../world/types.ts";
@@ -12,6 +13,10 @@ export function coastRingsGrid(world: World, coastIters: number): Array<Readonly
   }
   const onFrame = frameVertexPredicate(elev.w, elev.h);
   return filledIsoRings(elev, seaLevel, (p) => chaikinSmoothPinned(p, coastIters, onFrame));
+}
+
+export function coastId(d: string): string {
+  return `coast-${hashString(d).toString(16).padStart(8, "0")}`;
 }
 
 export function frameVertexPredicate(w: number, h: number): (p: Point) => boolean {

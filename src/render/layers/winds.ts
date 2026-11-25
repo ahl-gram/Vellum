@@ -1,5 +1,6 @@
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import { prunePoints, boxesOverlap, type Box } from "../geometry.ts";
+import { coastId } from "../coast.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
 import type { Rng } from "../../core/rng.ts";
@@ -128,7 +129,7 @@ export function windStreamsLayer(ctx: RenderCtx): SvgNode | null {
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
   return el("g", { id: "layer-wind-streams" }, [
-    el("clipPath", { id: "wind-streams-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]),
+    el("clipPath", { id: "wind-streams-clip" }, [el("use", { href: `#${coastId(coastD)}`, "clip-rule": "evenodd" })]),
     el("g", { "clip-path": "url(#wind-streams-clip)" }, streaks),
   ]);
 }

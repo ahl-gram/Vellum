@@ -234,8 +234,10 @@ test("the drawn close-up opens its land fill and its land clip with the frame (I
     firstPathIn(svg, '<g id="layer-land">').startsWith(FRAME_D),
     "the land fill must open on the frame, so the lake is cut out of the land",
   );
+  const clip = /<clipPath id="region-land-clip"><use href="#([^"]+)" clip-rule="evenodd"\/><\/clipPath>/.exec(svg)?.[1];
+  assert.ok(clip !== undefined, "the land clip draws from the sheet's coast copy");
   assert.ok(
-    firstPathIn(svg, '<clipPath id="region-land-clip">').startsWith(FRAME_D),
+    svg.includes(`<path id="${clip}" d="${FRAME_D}`),
     "the land clip must open on the frame, so the rivers and tints stand on the land",
   );
 });
