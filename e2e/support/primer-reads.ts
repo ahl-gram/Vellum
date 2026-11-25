@@ -1,6 +1,7 @@
 // What the Primer check reads in the page (Issue #1250): a control's facts, what lies under a point, and the counters a room's rest is read against.
 import type { Payload } from "../types.ts";
 import type { Words } from "../../src/site/shared/primer/shape.ts";
+import type { Quoted } from "./primer-judge.ts";
 import type { Box, Facts } from "../../src/site/shared/primer/judge.ts";
 import { PICTURE_MANIFEST } from "../../src/site/primer/pictures.ts";
 import type { PictureManifest, Signature } from "../../scripts/build/primer-pictures/signature.ts";
@@ -35,6 +36,33 @@ export const HIT = (css: string, x: number, y: number): Payload<string> => `(() 
   if (top === e || (top && e.contains(top))) return "self";
   if (e.labels && [...e.labels].some((l) => l === top || l.contains(top))) return "label";
   return top ? (top.id ? "#" + top.id : top.getAttribute("class") || top.tagName) : "nothing";
+})()`;
+
+export const QUOTED = (w: Words): Payload<Quoted> => `(() => {
+  const e = ${at(w.css)};
+  if (!e) return null;
+  e.scrollIntoView({ block: "center", inline: "center" });
+  const box = (b) => ({ x: +b.left.toFixed(2), y: +b.top.toFixed(2), w: +b.width.toFixed(2), h: +b.height.toFixed(2) });
+  const rectsOf = (r) => [...r.getClientRects()].map(box).filter((b) => b.w > 0 && b.h > 0);
+  const each = [];
+  if (${w.read === "text" && w.match !== undefined && w.says !== ""}) {
+    const t = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    for (let n = t.nextNode(); n; n = t.nextNode()) {
+      const i = n.data.indexOf(${JSON.stringify(w.says)});
+      if (i < 0) continue;
+      const r = document.createRange();
+      r.setStart(n, i);
+      r.setEnd(n, i + ${w.says.length});
+      const rects = rectsOf(r);
+      if (rects.length > 0) each.push(rects);
+    }
+  }
+  if (each.length === 0) {
+    const r = document.createRange();
+    r.selectNodeContents(e);
+    each.push(rectsOf(r));
+  }
+  return { width: innerWidth, height: innerHeight, element: box(e.getBoundingClientRect()), each };
 })()`;
 
 export type Aim = { readonly box: Box; readonly clip: string } | null;

@@ -5,17 +5,31 @@ import type { Ladder, Spot, Step, Words } from "../../src/site/shared/primer/sha
 export type Arm = "desk" | "tablet" | "motion";
 export const ARM_NAME: Readonly<Record<Arm, string>> = { desk: "", tablet: " on a tablet", motion: " with motion on" };
 export type Point = { readonly x: number; readonly y: number };
+export type Quoted = {
+  readonly width: number;
+  readonly height: number;
+  readonly element: Box;
+  readonly each: readonly (readonly Box[])[];
+} | null;
 
 export function expectFor(w: Words, step: Step, arm: Arm, outcome: boolean): Expect {
   if (step.only === "touch" && arm !== "tablet") return "hidden";
   if (step.only === "motion" && arm !== "motion") return "hidden";
   if (w.state !== undefined) return w.state;
-  return outcome ? "any" : "reachable";
+  return outcome ? "seen" : "reachable";
 }
 
 export function onItsArm(step: Step, arm: Arm): boolean {
   if (step.only === undefined) return arm === "desk";
   return arm === (step.only === "touch" ? "tablet" : "motion");
+}
+
+export function inView(q: Quoted, text: boolean): boolean {
+  if (q === null) return false;
+  const within = (b: Box): boolean => b.x >= 0 && b.y >= 0 && b.x + b.w <= q.width && b.y + b.h <= q.height;
+  const meets = (b: Box): boolean =>
+    b.w > 0 && b.h > 0 && b.x < q.width && b.y < q.height && b.x + b.w > 0 && b.y + b.h > 0;
+  return text ? q.each.some((lines) => lines.length > 0 && lines.every(within)) : meets(q.element);
 }
 
 const readsOf = (s: Step): string =>
