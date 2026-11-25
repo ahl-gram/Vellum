@@ -50,7 +50,7 @@ function boxesOf(el: Element, s: Scroll): Box[] {
 export async function bootHand(env: HandEnv): Promise<void> {
   const id = stepIdOf(env.location.search);
   if (id === null) return;
-  const step = handStepFor(await env.fetchSteps(), id, "/explorer/");
+  const step = handStepFor(await env.fetchSteps(), id, env.location.pathname);
   if (step === null) return;
   const { doc } = env;
   const chrome = doc.querySelector("header.chrome");
