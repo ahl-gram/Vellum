@@ -1,11 +1,31 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
 // Structural tests, not red-green: aesthetics are not unit-assertable, so these pin the contract instead.
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
+
+const count = (svg: string, needle: string): number => svg.split(needle).length - 1;
+
+const closeUp = generateRegionWorld(world, {
+  window: windowAround(
+    world,
+    world.settlements.find((s) => s.kind === "capital")!,
+    0.38,
+  ),
+  gridW: world.recipe.gridW,
+  gridH: world.recipe.gridH,
+  title: "Test Region",
+});
+
+const coastSheets = (): ReadonlyArray<{ readonly name: string; readonly svg: string; readonly lines: number }> => [
+  { name: "world antique", svg: renderMap(world, { style: "antique" }), lines: 3 },
+  { name: "world rainfall plate", svg: renderMap(world, { style: "antique", theme: "moisture" }), lines: 7 },
+  { name: "close-up rainfall plate", svg: renderMap(closeUp, { style: "antique", theme: "moisture" }), lines: 8 },
+];
 
 test("renderMap emits a complete SVG document with all core layers", () => {
   const svg = renderMap(world, { style: "antique" });
@@ -90,4 +110,12 @@ test("the SVG carries an accessible name and description", () => {
   assert.ok(/<title>.+<\/title>/.test(svg), "needs a <title>");
   assert.ok(/<desc>.+<\/desc>/.test(svg), "needs a <desc>");
   assert.ok(svg.includes(world.title.title), "name derived from the world");
+});
+
+test("the coast is written twice on a world sheet, a rainfall plate and a close-up: once as the copy every other coast line draws from, and once as the land (Issue #1475)", () => {
+  for (const { name, svg } of coastSheets()) {
+    const land = /<g id="layer-land"><path d="([^"]*)"/.exec(svg)?.[1];
+    assert.ok(land !== undefined && land.length > 0, `${name}: the land layer opens on the coast`);
+    assert.equal(count(svg, `d="${land}"`), 2, name);
+  }
 });
