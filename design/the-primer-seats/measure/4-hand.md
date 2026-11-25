@@ -1,0 +1,45 @@
+# Item 4: the pointing hand's slip in the Explorer, measured
+
+The islands step (the Land, step 2 of 6, "A new row has come: drag islands from few toward many, then let go.") at its own address, /explorer/#seed=42&type=archipelago, on the real built Explorer at b6a77459, reduced motion (`node out/1248/mock/seats-hand.ts` from the design tree), as the reader arrives and once the step is done (islands set to 20, the state the step asks the reader to watch). "Over the chart" is the share of the drawn chart's box the slip covers. "Land under it" samples the chart every 6 px across the part a reader can see (in the window and under no corner, the Broadside, the head cluster or the press row), keeps the samples inside the fill of the land layer's paths, and counts those the slip covers: the isles the step asks the reader to watch. "Marks" counts the place marks in that same visible part. The other columns are square CSS px the slip shares with the ring round the islands row, the Broadside, the Glass, the press row and the chart folio. "Broadside scrolls" reads the Broadside's own body. Every result came back with no 4xx and no console error.
+
+| seat | width | state | dress | chart drawn | over the chart | land under it | marks under it | over the ring | over the Broadside | over the Glass | over the press row | over the chart folio | in the window | Broadside scrolls | still |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| control | 1024 | arriving | antique | 473 by 365 | 0% | 0% (0 of 930) | 0 of 26 | 0 | 0 | 0 | 0 | 0 |  | no | `shots/4-hand/control-1024.png` |
+| control | 1024 | done (islands 20) | antique | 473 by 365 | 0% | 0% (0 of 926) | 0 of 26 | 0 | 0 | 0 | 0 | 0 |  | no | `shots/4-hand/control-1024-done.png` |
+| control | 1280 | arriving | antique | 627 by 484 | 0% | 0% (0 of 1642) | 0 of 26 | 0 | 0 | 0 | 0 | 0 |  | no | `shots/4-hand/control-1280.png` |
+| control | 1280 | done (islands 20) | antique | 627 by 484 | 0% | 0% (0 of 1648) | 0 of 26 | 0 | 0 | 0 | 0 | 0 |  | no | `shots/4-hand/control-1280-done.png` |
+| a-beside-the-broadside | 1024 | arriving | antique | 473 by 365 | 37.2% | 66.1% (615 of 930) | 22 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/a-beside-the-broadside-1024.png` |
+| a-beside-the-broadside | 1024 | done (islands 20) | antique | 473 by 365 | 37.2% | 63.2% (585 of 926) | 16 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/a-beside-the-broadside-1024-done.png` |
+| a-beside-the-broadside | 1280 | arriving | antique | 627 by 484 | 17.6% | 28.7% (471 of 1642) | 7 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/a-beside-the-broadside-1280.png` |
+| a-beside-the-broadside | 1280 | done (islands 20) | antique | 627 by 484 | 17.6% | 24% (395 of 1648) | 8 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/a-beside-the-broadside-1280-done.png` |
+| b-in-the-head-cluster | 1024 | arriving | antique | 412 by 318 (today 473 by 365) | 0% | 0% (0 of 706) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b-in-the-head-cluster-1024.png` |
+| b-in-the-head-cluster | 1024 | done (islands 20) | antique | 412 by 318 (today 473 by 365) | 0% | 0% (0 of 703) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b-in-the-head-cluster-1024-done.png` |
+| b-in-the-head-cluster | 1280 | arriving | antique | 463 by 357 (today 627 by 484) | 0% | 0% (0 of 884) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b-in-the-head-cluster-1280.png` |
+| b-in-the-head-cluster | 1280 | done (islands 20) | antique | 463 by 357 (today 627 by 484) | 0% | 0% (0 of 895) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b-in-the-head-cluster-1280-done.png` |
+| b2-a-slim-line-under-the-trail | 1024 | arriving | antique | 473 by 365 | 0% | 0% (0 of 930) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1024.png` |
+| b2-a-slim-line-under-the-trail | 1024 | done (islands 20) | antique | 473 by 365 | 0% | 0% (0 of 926) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1024-done.png` |
+| b2-a-slim-line-under-the-trail | 1280 | arriving | antique | 526 by 406 (today 627 by 484) | 0% | 0% (0 of 1151) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1280.png` |
+| b2-a-slim-line-under-the-trail | 1280 | done (islands 20) | antique | 526 by 406 (today 627 by 484) | 0% | 0% (0 of 1143) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1280-done.png` |
+| c-in-the-broadside | 1024 | arriving | antique | 473 by 365 | 0% | 0% (0 of 930) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | SCROLLS | `shots/4-hand/c-in-the-broadside-1024.png` |
+| c-in-the-broadside | 1024 | done (islands 20) | antique | 473 by 365 | 0% | 0% (0 of 926) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | SCROLLS | `shots/4-hand/c-in-the-broadside-1024-done.png` |
+| c-in-the-broadside | 1280 | arriving | antique | 627 by 484 | 0% | 0% (0 of 1642) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | SCROLLS | `shots/4-hand/c-in-the-broadside-1280.png` |
+| c-in-the-broadside | 1280 | done (islands 20) | antique | 627 by 484 | 0% | 0% (0 of 1648) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | SCROLLS | `shots/4-hand/c-in-the-broadside-1280-done.png` |
+| c2-in-the-broadsides-masthead | 1024 | arriving | antique | 473 by 365 | 0% | 0% (0 of 930) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | no | `shots/4-hand/c2-in-the-broadsides-masthead-1024.png` |
+| c2-in-the-broadsides-masthead | 1024 | done (islands 20) | antique | 473 by 365 | 0% | 0% (0 of 926) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | SCROLLS | `shots/4-hand/c2-in-the-broadsides-masthead-1024-done.png` |
+| c2-in-the-broadsides-masthead | 1280 | arriving | antique | 627 by 484 | 0% | 0% (0 of 1642) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | no | `shots/4-hand/c2-in-the-broadsides-masthead-1280.png` |
+| c2-in-the-broadsides-masthead | 1280 | done (islands 20) | antique | 627 by 484 | 0% | 0% (0 of 1648) | 0 of 26 | 0 | 50654.6923828125 | 0 | 0 | 0 | yes | no | `shots/4-hand/c2-in-the-broadsides-masthead-1280-done.png` |
+| d-folded-to-a-tab | 1024 | arriving | antique | 473 by 365 | 3.4% | 0.3% (3 of 930) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d-folded-to-a-tab-1024.png` |
+| d-folded-to-a-tab | 1024 | done (islands 20) | antique | 473 by 365 | 3.4% | 2.7% (25 of 926) | 2 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d-folded-to-a-tab-1024-done.png` |
+| d-folded-to-a-tab | 1280 | arriving | antique | 627 by 484 | 1.3% | 0% (0 of 1642) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d-folded-to-a-tab-1280.png` |
+| d-folded-to-a-tab | 1280 | done (islands 20) | antique | 627 by 484 | 1.3% | 0.2% (3 of 1648) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d-folded-to-a-tab-1280-done.png` |
+| d2-one-line-beside-the-ring | 1024 | arriving | antique | 473 by 365 | 9.6% | 14% (130 of 930) | 5 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d2-one-line-beside-the-ring-1024.png` |
+| d2-one-line-beside-the-ring | 1024 | done (islands 20) | antique | 473 by 365 | 9.6% | 16.6% (154 of 926) | 6 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d2-one-line-beside-the-ring-1024-done.png` |
+| d2-one-line-beside-the-ring | 1280 | arriving | antique | 627 by 484 | 4.7% | 2.1% (35 of 1642) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d2-one-line-beside-the-ring-1280.png` |
+| d2-one-line-beside-the-ring | 1280 | done (islands 20) | antique | 627 by 484 | 4.7% | 6.1% (100 of 1648) | 3 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/d2-one-line-beside-the-ring-1280-done.png` |
+| e-at-the-foot | 1024 | arriving | antique | 473 by 365 | 26% | 13.3% (124 of 930) | 4 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/e-at-the-foot-1024.png` |
+| e-at-the-foot | 1024 | done (islands 20) | antique | 473 by 365 | 26% | 21.6% (200 of 926) | 6 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/e-at-the-foot-1024-done.png` |
+| e-at-the-foot | 1280 | arriving | antique | 627 by 484 | 21.1% | 8.2% (135 of 1642) | 4 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/e-at-the-foot-1280.png` |
+| e-at-the-foot | 1280 | done (islands 20) | antique | 627 by 484 | 21.1% | 16% (264 of 1648) | 5 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/e-at-the-foot-1280-done.png` |
+| b2-a-slim-line-under-the-trail | 1280 | done (islands 20) | ink | 526 by 406 (today 627 by 484) | 0% | 0% (0 of 1143) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-ink.png` |
+| b2-a-slim-line-under-the-trail | 1280 | done (islands 20) | topographic | 526 by 406 (today 627 by 484) | 0% | 0% (0 of 1143) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-topographic.png` |
+| b2-a-slim-line-under-the-trail | 1280 | done (islands 20) | nautical | 526 by 406 (today 627 by 484) | 0% | 0% (0 of 1143) | 0 of 26 | 0 | 0 | 0 | 0 | 0 | yes | no | `shots/4-hand/b2-a-slim-line-under-the-trail-1280-done-nautical.png` |

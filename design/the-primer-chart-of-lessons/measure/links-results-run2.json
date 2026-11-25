@@ -1,0 +1,54 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/links/prime.png",
+  "url": "http://127.0.0.1:50476/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/links/svg-room-link-prospect.png",
+  "url": "http://127.0.0.1:50476/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hash\":\"#prospect\",\"open\":\"prospect\",\"scrollY\":759}",
+  "http4xx": [],
+  "consoleErrors": [
+   "EXCEPTION: TypeError: Cannot read properties of undefined (reading 'slice')\n    at HTMLDocument.<anonymous> (http://127.0.0.1:50476/primer/:957:2305)\n    at <anonymous>:31:125\n    at <anonymous>:31:236"
+  ]
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/links/svg-lesson-link-print-room.png",
+  "url": "http://127.0.0.1:50476/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hash\":\"#print-room-atlas\",\"open\":\"print-room\",\"scrollY\":2111}",
+  "http4xx": [],
+  "consoleErrors": [
+   "EXCEPTION: TypeError: Cannot read properties of undefined (reading 'slice')\n    at HTMLDocument.<anonymous> (http://127.0.0.1:50476/primer/:957:2305)\n    at <anonymous>:31:130\n    at <anonymous>:31:241"
+  ]
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1256/measure/links/html-index-link-prospect.png",
+  "url": "http://127.0.0.1:50476/primer/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"hash\":\"#prospect\",\"open\":\"prospect\",\"scrollY\":284}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

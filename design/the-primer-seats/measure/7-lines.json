@@ -1,0 +1,176 @@
+[
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "A world from a number",
+  "lessonId": "number",
+  "gloss": "the seed box, the dice and Draw, at the top right",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Land",
+  "lessonId": "land",
+  "gloss": "these shape the world itself",
+  "aside": "Every list starts at seed's choice: choose it again to hand the row back to the seed.",
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Strand",
+  "lessonId": "strand",
+  "gloss": "these set the water's edge",
+  "aside": "A row that cannot act on the world on screen waits in a held box, and the note under it says what holds it.",
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Hand",
+  "lessonId": "hand",
+  "gloss": "these dress the same world",
+  "aside": "Nothing in the Hand changes the land: the same world, dressed another way.",
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Surveyor's Glass",
+  "lessonId": "glass",
+  "gloss": "the presses at the chart's bottom right corner",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "Places on the chart",
+  "lessonId": "places",
+  "gloss": "every town opens a card",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Press",
+  "lessonId": "press",
+  "gloss": "what the sheet can do next, under the chart",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Explorer",
+  "route": "/explorer/",
+  "lesson": "The Chart Table",
+  "lessonId": "table",
+  "gloss": "the sheets you gather, in the Drawer at the right edge",
+  "aside": null,
+  "commissions": [
+   {
+    "id": "commission",
+    "act": "Your commission: a polar archipelago of about forty islands, of every size, in the nautical style with its arms. Lay one survey of it on the table.",
+    "see": "Then copy the address from the bar. Whoever opens it sees your world, drawn the same, line for line."
+   }
+  ]
+ },
+ {
+  "room": "The Prospect",
+  "route": "/prospect/",
+  "lesson": "A town, engraved",
+  "lessonId": "plate",
+  "gloss": "the plate, and The Engraver's Note at the right",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Wayfarer's Ribbon",
+  "route": "/ribbon/",
+  "lesson": "A road, unrolled",
+  "lessonId": "road",
+  "gloss": "the journey at the top right, and The Itinerary below it",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Portfolio",
+  "route": "/explorer/portfolio/",
+  "lesson": "Gather, then take home",
+  "lessonId": "gather",
+  "gloss": "the Explorer's Drawer, then this room",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Writing Room",
+  "route": "/writing-room/",
+  "lesson": "A world from a sentence",
+  "lessonId": "found",
+  "gloss": "the box on The Founding, at the right",
+  "aside": null,
+  "commissions": [
+   {
+    "id": "commission",
+    "act": "Your commission: write a sentence for a world you would like to visit, and send its link to a friend.",
+    "see": "The same sentence founds the same world, forever."
+   }
+  ]
+ },
+ {
+  "room": "The Reading Room",
+  "route": "/reading-room/",
+  "lesson": "Watch a world live",
+  "lessonId": "watch",
+  "gloss": "the instrument under the chart, and the Journal at the right",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Print Room",
+  "route": "/print-room/",
+  "lesson": "A proof on the desk",
+  "lessonId": "proof",
+  "gloss": "the seed, the style and Pull a proof, at the top right",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Print Room",
+  "route": "/print-room/",
+  "lesson": "The Bound Atlas",
+  "lessonId": "atlas",
+  "gloss": "the whole atlas, on the sheet at the right",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Print Room",
+  "route": "/print-room/",
+  "lesson": "Posters",
+  "lessonId": "posters",
+  "gloss": "the presses under the chart",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Seed of the Day",
+  "route": "/seed-of-the-day/",
+  "lesson": "The Daily Hunt",
+  "lessonId": "hunt",
+  "gloss": "the notes at the right, and the chart",
+  "aside": null,
+  "commissions": []
+ },
+ {
+  "room": "The Gallery",
+  "route": "/gallery/",
+  "lesson": "Worlds hung for viewing",
+  "lessonId": "browse",
+  "gloss": "every plate is a road into its own world",
+  "aside": null,
+  "commissions": []
+ }
+]

@@ -1,0 +1,1010 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":27,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":27,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":27,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":27,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":127,\"h\":27,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":154,\"h\":27,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":136,\"h\":27,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":160,\"h\":27,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-a.png",
+  "url": "http://127.0.0.1:54971/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":10,\"y\":6,\"width\":680,\"height\":159,\"extra\":{\"w\":101,\"h\":13,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-b.png",
+  "url": "http://127.0.0.1:54971/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":10,\"y\":6,\"width\":687,\"height\":159,\"extra\":{\"w\":107,\"h\":13,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-c.png",
+  "url": "http://127.0.0.1:54971/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":10,\"y\":6,\"width\":718,\"height\":159,\"extra\":{\"w\":138,\"h\":13,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-d.png",
+  "url": "http://127.0.0.1:54971/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":10,\"y\":6,\"width\":707,\"height\":159,\"extra\":{\"w\":127,\"h\":13,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-a.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":18,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-b.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":18,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-c.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":18,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-a.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":21,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-b.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":21,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-c.png",
+  "url": "http://127.0.0.1:54971/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":6,\"y\":184,\"width\":420,\"height\":242,\"extra\":{\"w\":320,\"h\":21,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7673,\"width\":900,\"height\":91,\"extra\":{\"w\":135,\"h\":59,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7673,\"width\":900,\"height\":91,\"extra\":{\"w\":135,\"h\":59,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7673,\"width\":900,\"height\":91,\"extra\":{\"w\":135,\"h\":59,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7673,\"width\":900,\"height\":91,\"extra\":{\"w\":135,\"h\":59,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":5743,\"width\":900,\"height\":191,\"extra\":{\"w\":77,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":5743,\"width\":900,\"height\":191,\"extra\":{\"w\":63,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":5743,\"width\":900,\"height\":191,\"extra\":{\"w\":74,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":8093,\"width\":900,\"height\":165,\"extra\":{\"w\":102,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":8093,\"width\":900,\"height\":165,\"extra\":{\"w\":88,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":8093,\"width\":900,\"height\":165,\"extra\":{\"w\":116,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":142,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":80,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":469,\"width\":900,\"height\":227,\"extra\":{\"w\":156,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":86,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":82,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":67,\"h\":22,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":683,\"h\":38,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":683,\"h\":38,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":356,\"width\":900,\"height\":376,\"extra\":{\"w\":683,\"h\":38,\"lines\":1}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-a.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":143,\"y\":402,\"width\":737,\"height\":121,\"extra\":{\"w\":104,\"h\":47,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-b.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":143,\"y\":402,\"width\":737,\"height\":121,\"extra\":{\"w\":104,\"h\":47,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-c.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":143,\"y\":402,\"width\":737,\"height\":121,\"extra\":{\"w\":104,\"h\":47,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-d.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":143,\"y\":402,\"width\":737,\"height\":121,\"extra\":{\"w\":104,\"h\":47,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-e.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": "{\"x\":143,\"y\":402,\"width\":737,\"height\":121,\"extra\":{\"w\":104,\"h\":47,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-a.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":848,\"y\":244,\"width\":384,\"height\":313,\"extra\":{\"w\":352,\"h\":281,\"lines\":12}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-b.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":848,\"y\":244,\"width\":384,\"height\":313,\"extra\":{\"w\":352,\"h\":281,\"lines\":12}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-c.png",
+  "url": "http://127.0.0.1:54971/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":848,\"y\":244,\"width\":384,\"height\":313,\"extra\":{\"w\":352,\"h\":281,\"lines\":12}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":436,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":436,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":436,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":436,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":4574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":4574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":4574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":4574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":6574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":6574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":6574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":6574,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":11251,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":11251,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":11251,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":11251,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9642,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9642,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9642,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":4}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-d.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9642,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":1078,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":2438,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":2438,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":2438,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":3311,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":3311,\"width\":900,\"height\":91,\"extra\":{\"w\":736,\"h\":59,\"lines\":5}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":3311,\"width\":900,\"height\":59,\"extra\":{\"w\":736,\"h\":27,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":78,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":78,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":7459,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":78,\"lines\":3}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-a.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9198,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":52,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-b.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9198,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":52,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-c.png",
+  "url": "http://127.0.0.1:54971/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": "{\"x\":43,\"y\":9198,\"width\":900,\"height\":227,\"extra\":{\"w\":451,\"h\":52,\"lines\":2}}",
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]

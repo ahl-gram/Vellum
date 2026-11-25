@@ -1,0 +1,386 @@
+[
+ {
+  "name": "explorer-8-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-9-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-10-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-11-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-12-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-13-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Portfolio: right",
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-14-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Portfolio: right",
+   "The Reading Room: right",
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-16-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Portfolio: right",
+   "The Reading Room: right",
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-1-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-2-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-3-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-4-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-5-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-6-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "print-room-3-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "print-room-4-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "print-room-5-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "print-room-6-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "print-room-8-lessons",
+  "frame": {
+   "x": 7,
+   "y": 64,
+   "w": 559,
+   "h": 346
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-37-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-50-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-65-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-80-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "explorer-100-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Portfolio: right",
+   "The Reading Room: right",
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-6-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-12-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-18-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-24-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ },
+ {
+  "name": "portfolio-30-steps",
+  "frame": {
+   "x": 7,
+   "y": 59,
+   "w": 559,
+   "h": 351
+  },
+  "moved": [
+   "The Writing Room: right"
+  ],
+  "forced": []
+ }
+]

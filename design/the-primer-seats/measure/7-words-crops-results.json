@@ -1,0 +1,1010 @@
+[
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w1-try-it-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w2-begin-again-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-a-2x.png",
+  "url": "http://127.0.0.1:55068/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-b-2x.png",
+  "url": "http://127.0.0.1:55068/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-c-2x.png",
+  "url": "http://127.0.0.1:55068/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w3-trail-press-d-2x.png",
+  "url": "http://127.0.0.1:55068/prospect/#seed=42&i=0",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-a-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-b-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w4-slip-verb-c-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-a-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-b-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w5-road-back-c-2x.png",
+  "url": "http://127.0.0.1:55068/explorer/#seed=42&type=archipelago",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w6-next-road-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-tablet-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-motion-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-play-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w7-mark-commission-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w8-closing-head-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-a-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-b-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-c-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-d-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w9-station-verb-e-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1024,
+   "innerHeight": 768,
+   "clientWidth": 1024
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-a-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-b-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w10-station-card-c-2x.png",
+  "url": "http://127.0.0.1:55068/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-number-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-land-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-glass-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-explorer-press-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-print-room-proof-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w11-lesson-line-reading-room-watch-d-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-land-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-strand-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w12-comfort-explorer-hand-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-explorer-commission-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-a-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-b-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ },
+ {
+  "out": "/Users/ahl/CodeProjects/Vellum/out/1248/shots/7-words/w13-writing-room-commission-c-2x.png",
+  "url": "http://127.0.0.1:55068/faq/",
+  "viewport": {
+   "innerWidth": 1280,
+   "innerHeight": 800,
+   "clientWidth": 1280
+  },
+  "probe": null,
+  "http4xx": [],
+  "consoleErrors": []
+ }
+]
