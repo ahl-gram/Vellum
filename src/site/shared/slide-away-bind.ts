@@ -37,7 +37,8 @@ interface Piece {
   point(spot: Spot, away: boolean, hold: (on: boolean) => void): void;
 }
 
-function pieceOf(el: HTMLElement, deps: SlideAwayDeps): Piece {
+function pieceOf(el: HTMLElement | null, deps: SlideAwayDeps): Piece {
+  if (el === null) return { held: new Set(), place() {}, point() {} };
   const held = new Set<Hold>();
   let written = "";
   let ease = 0;
@@ -95,7 +96,6 @@ function holdOnHead(deps: SlideAwayDeps, hold: (why: Hold, on: boolean) => void)
 }
 
 export function bindSlideAway(deps: SlideAwayDeps): SlideAway {
-  if (deps.folio === null) return { follow: () => {}, measured: () => {}, arm: () => {}, point: () => {} };
   let k = 1;
   let m: Measured = { fill: Infinity, from: Infinity, up: 0, down: 0 };
   let armed = false;
