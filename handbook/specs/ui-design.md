@@ -81,14 +81,14 @@ the flourish brown of taglines, captions and asides. `--ink-faded` is the faded 
 and small labels. Three journal inks stand apart, chosen by eye from a rendered contact sheet: the
 chronicler's iron-gall for annals entries, the surveyor's walnut italic for the prologue, and its
 faded companion for the gutter days. `--ink-tale` is the note ink of place-card tales and atlas
-notes. `--iron-red` is the ink red of the hunt star and statuses.
+notes. `--iron-red` is the ink red of the hunt star and statuses, and of a step the Primer sees done: its seal is that red under a cream shine written as alpha over `--parchment-bright`, never a lighter red of its own (`.primer-seal` in `src/styles/shared/primer-marks.css`; Alex, 2026-11-09, Issue #1155 comment 6754142680, ruling 7), and the chart of lessons inks each sealed step's mark, and the road from home to each room holding a seal, in it (Issue #1155 comment 7136681098, Q2 and Q3). **Provisional until the post-use review (Issue #1258):** the seal's red and its shine, and the chart's red marks and roads.
 
 **Papers.** `--parchment` is the sheet ground; `--parchment-panel` the raised panels, cards and
 pinned slips; `--parchment-bright` the lit cream of hovers and reveals; `--parchment-deep` the
 pressed tan of code chips.
 
 **Hairlines.** `--line-tan` for outer frames, `--line-faint` for interior rules. That split is
-ratified and it is the fastest way to tell whether a border is framing something or dividing it.
+ratified and it is the fastest way to tell whether a border is framing something or dividing it. **A double outline drawn outside a frame takes the ink its piece's round drew it in**, so the pieces differ on purpose, as two of them show: the document sheet's is tan, like its border (`.sheet` in `src/styles/shared/document-room.css`; Issue #461 comment 5418660767, ruling 3), and the slip's is faint outside a tan border, as the station card it grew from wears it (`.slip` in `src/styles/shared/atelier.css`; Issue #462 comment 5459457562, chart-room ruling 3). The Primer's note under the trail wears a tan one its round left a stand-in, provisional with the note's dress (`.primer-slip` in `src/styles/shared/primer-hand.css`).
 
 **Quotations from the chart.** `--chart-paper` and `--chart-ink` are borrowed from the renderer's own
 constants and pinned equal to them by test. **Every depth shadow on the site is cast in chart ink**,
@@ -279,6 +279,10 @@ the stop short of it, and the Primer listing the open room's lessons alone. Fold
 way. **The band buys the ground for what the cluster carries**: its height is keyed to the
 cluster's contents, never to a page's name, and raised only on a room that renders a band.
 
+**The document sheet is a raised parchment panel** (Issue #461 comment 5418660767, ruling 3, ratified after live use at Issue #454 comment 5531575169, ruling 21): `--parchment-panel` under a faint lit wash, a tan border with the double outline the hairlines give it (The palette, by role), a 26px corner bracket in the same tan at its top left and at its bottom right, and the stage's chart-ink shadow (`--stage-shadow`), all of it `.sheet` in `src/styles/shared/document-room.css`.
+
+**Q & A and the Glossary set their prose as a ruled broadside** (Issue #461 comment 5418660767, ruling 4, its column width superseded by Issue #462 comment 5459586757, document-room ruling 3, and comment 5462811529; ratified after live use at Issue #454 comment 5530746858, ruling 15, and comment 5531575169, ruling 22): the prose flows in columns at least 22rem wide, two at 1280 with the index open or folded, with a `--line-faint` hairline between them, and every section head spans them all (`.columns` and `h2` in `src/styles/shared/document-room.css`). The Primer's sheet is no broadside: its lessons are read in order down one column, as its round drew it (`.primer` in `src/styles/primer/index.css`). No check reads the sheet's dress, and the only one on the columns is the width `IX1` holds in `e2e/suites/document-rooms.ts`; the rest of both is checked by eye.
+
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.
 
@@ -420,6 +424,8 @@ face is `--ink-faded` or `--line-tan`, and at small sizes on the deep or on a pa
 between 2.8:1 and 4.0:1, so **the shipped face goes up a step, to parchment on the deep or ink-brown
 on a panel.** Assume a small label taken from a mockup needs this until you have measured it.
 
+**Make a word quieter by setting it smaller, never in a fainter ink** (ruled with the nav round's stills, Alex, 2026-09-22, Issue #513 comment 5781877210): a link or a label that must recede beside its neighbours steps down a size and keeps an ink that clears the floor, as the trail's links do under the nav (The room and its furniture). What ink a separator between links takes is not ruled here; it is Issue #1190's open question.
+
 **A press whose only face is a glyph is held to the same 4.5:1**, the slip's fold mark among them
 (Alex, 2026-11-02, Issue #1160 comment 6569036260): the house keeps one floor for every glyph a
 reader reads, and no lower one for a mark that is part of a control (`SB20` in
@@ -445,6 +451,10 @@ it, since a walk up the ancestors' computed backgrounds cannot see a pseudo-elem
 text. A number measured beside the text is a number
 about a different place, and the error runs both ways: a ratio taken from the bright outer edge of a
 radial ground overstates the margin, and one taken from a dark neighbour understates it.
+
+**Measure a see-through panel against what shows through it**, never against its own ground alone: lay it over the page's busiest content, a heading and a paragraph, and read its words against what ghosts beneath them, at full scale and at a 2x crop (`.atelier` in `src/styles/shared/chart-of-the-atelier.css`, whose opacity the nav round's plate read raised for exactly that, `design/nav-wayfinding/README.md`; Alex, 2026-11-25, Issue #1491 comment 7181750605).
+
+**Judge lettering inside a drawing the page scales at the pixels it renders**, never in the drawing's own units: once a label renders below about 5px the right ink no longer makes it read, so set a drawing's text sizes and strokes for every size the page gives it, and check every pair of its labels for overlap at that size (`design/nav-wayfinding/README.md`, the same plate read; Alex, 2026-11-25, Issue #1491 comment 7181750605; `CL5` and `CL6` in `test/site/chart-of-lessons.test.ts` hold the chart of lessons' names apart).
 
 **Removing or changing a ground owes the whole surface a sweep.** When a fix changes what a surface's
 background *is*, re-measure everything standing on it, not just the element the issue named. A dark
@@ -534,6 +544,8 @@ the note re-shows. The working shape is `src/site/explorer/footnotes.ts`.
 
 Motion is design material here and it is ruled like the rest.
 
+**Time a motion by its role, through that role's token in `src/styles/shared/motion.css`** (Alex, 2026-07-04, Issue #125, the Paper & Ink doctrine). A gesture of paper, a lift, a press, a tip or a fold, runs 160 to 340ms on an ease-out (`--paper-quick`, `--paper` and `--paper-settle` on `--ease-paper`, and the slip's fold `--fold` on `--ease-fold`), and the camera's glide takes `--glide`. A ceremony of ink, a coast drawn or a wash dried, runs 500 to 1500ms (`--ink-draw`, `--ink-dry`), and a redraft, which plays at every settle, runs its own shorter grade (the `--redraft-` tokens). The unfurl is the one ruled exception, 500 to 700ms on a stiff start that flexes past flat (`--unfurl` on `--ease-unfurl`), and a hover's preview of it runs about 60% of that (`--unfurl-quick`). A sheet turned over takes `--turn` on `--ease-turn`, and the verso's flip `--verso-turn`. Paper settles and never bounces: one ease-out, with at most a hint of overshoot. A stagger steps 40 to 80ms and has no token. **A new motion in one of these roles takes its role's token**, never a duration or a curve written out (Alex, 2026-11-25, Issue #1491 comment 7181750605); where a sheet still writes one out, `handbook/errata/site.md` records it.
+
 **A ceremony is an arrival, and how often it plays is a ruling.** The homepage's veil plays once per
 sitting and any click or key skips it (#457, ratified at #454 ruling 20); a room's landing ceremony
 plays on every arrival (#461, ratified at #454 ruling 21); and the Wayfarer's Ribbon's ink-in, its
@@ -548,7 +560,7 @@ pointer while it inks, and its interruption policy. **Provisional until Alex has
 each strip's soft edge (`--rb-ink-feather` there).
 
 **The sheet settles onto the desk, then the chrome inks in.** That is the order, and it is quicker and
-subtler in a room than on the homepage.
+subtler in a room than on the homepage. In a room the sheet, or the stage, settles in 0.55s on `--ease-fold`'s curve, and the chrome inks in over 0.5s from 0.18s after the settle begins (`sheet-land` and `ink-in` in `src/styles/shared/shell.css`; Issue #461 comment 5418660767, ruling 6, played on every arrival by comment 5459457663, and ratified after live use at Issue #454 comment 5531575169, ruling 21). No check reads either timing's value. Neither timing has a token yet, and each sheet that plays the landing writes both out again, which `handbook/errata/site.md` records.
 
 **Reduced motion is the control, not just a courtesy.** The shared motion sheet zeroes every animation
 and transition delay and cuts every duration to 0.01ms under `prefers-reduced-motion` with
