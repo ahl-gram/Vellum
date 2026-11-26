@@ -69,6 +69,7 @@ export async function ix9Seals(k: DocRoomsKit): Promise<void> {
 type Fold = {
   bound: boolean;
   rendered: string[];
+  inked: (string | undefined)[];
   hash: string;
   y: number;
   felt: number;
@@ -91,6 +92,7 @@ const FOLD: Payload<Fold> = `(() => {
   return {
     bound: !!document.querySelector(".primer[data-bound]"),
     rendered: [...document.querySelectorAll(".primer li.step")].filter((li) => li.getBoundingClientRect().height > 0).map((li) => li.id),
+    inked: [...document.querySelectorAll("#index .index > li.inked")].map((li) => li.dataset.sec),
     hash: location.hash,
     y: scrollY, felt: w.felt, marks: w.marks, frames: w.frames,
   };
@@ -109,7 +111,7 @@ const still = (d: Fold, last: Fold): boolean =>
   d.marks === last.marks &&
   d.frames > last.frames &&
   d.y === last.y &&
-  JSON.stringify(d.rendered) === JSON.stringify(last.rendered);
+  JSON.stringify([d.rendered, d.inked]) === JSON.stringify([last.rendered, last.inked]);
 
 const same = (a: readonly unknown[], b: readonly unknown[]): boolean => JSON.stringify(a) === JSON.stringify(b);
 
@@ -144,23 +146,28 @@ export async function ix10Walks(k: DocRoomsKit): Promise<void> {
   const skipped = await pressed(".primer .walk .walk-skip", 1);
   const backed = skipped === null ? null : await pressed(".primer .walk .walk-back", 2);
   await goto(`${PRIMER}#${last.id}`);
+  // goto has waited for the document's load and the sheet's landing, past the last instant the browser's own jump to an address was seen (102 ms, the document complete, Brave 158; Issue #1392).
   const atEnd = await settle(FOLD, (d) => d.bound, "primer-bound-at-last-step");
   await evaluate(ARMED);
   const toEnd = await pressed(".primer .walk .walk-skip", 1);
   const turned = toEnd === null ? null : await pressed(".primer section.room:not(.folded) .room-body > .next a", 2);
   check(
-    "IX10 the Primer walks one step at a time: a first visit renders the first room's first step alone; a real press on Skip renders the next step alone and one on Back the first again; on the Prospect's last step a real press on Skip shows the room's road, and one on the road renders the next room's first step alone (Issue #1392 D1)",
+    "IX10 the Primer walks one step at a time: a first visit renders the first room's first step alone; a real press on Skip renders the next step alone and one on Back the first again; an address followed from another page to the Prospect's last step renders that step alone with the page at its top and the Prospect inked in the index; a real press there on Skip shows the room's road, and one on the road renders the next room's first step alone with the page at its top and that room inked (Issue #1392 D1, C14, C24, C25)",
     same(arrived.rendered, [first.id]) &&
       skipped !== null &&
       same(skipped.rendered, [second.id]) &&
       backed !== null &&
       same(backed.rendered, [first.id]) &&
       same(atEnd.rendered, [last.id]) &&
+      atEnd.y === 0 &&
+      same(atEnd.inked, [prospect.id]) &&
       toEnd !== null &&
       same(toEnd.rendered, []) &&
       turned !== null &&
       same(turned.rendered, [turnedTo.id]) &&
-      turned.hash === `#${onward.id}`,
+      turned.hash === `#${onward.id}` &&
+      turned.y === 0 &&
+      same(turned.inked, [onward.id]),
     `arrived ${JSON.stringify(arrived)}; skipped ${JSON.stringify(skipped)}; backed ${JSON.stringify(backed)}; atEnd ${JSON.stringify(atEnd)}; toEnd ${JSON.stringify(toEnd)}; turned ${JSON.stringify(turned)}`,
   );
 }

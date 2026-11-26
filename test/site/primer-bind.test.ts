@@ -8,8 +8,7 @@ import { chartOfLessons, type ChartRoom } from "../../src/layouts/chart-of-lesso
 import { chartOfLessonsSvg } from "../../src/layouts/chart-of-lessons-svg.ts";
 import { FakeStore } from "../../test-support/fake-store.ts";
 
-const lesson = (id: string, steps: string): string =>
-  `<section class="lesson" id="${id}"><ol>${steps}</ol></section>`;
+const lesson = (id: string, steps: string): string => `<section class="lesson" id="${id}"><ol>${steps}</ol></section>`;
 const room = (id: string, steps: string, more = ""): string =>
   `<section class="room"><div class="room-head"><h2 id="${id}">${id}</h2></div>` +
   `<div class="room-body" id="${id}-steps">${lesson(`${id}-one`, steps)}${more}</div></section>`;
@@ -17,7 +16,7 @@ const step = (id: string, only = ""): string =>
   `<li class="step" id="${id}"${only === "" ? "" : ` data-only="${only}"`}><span class="num">1</span><p class="act">Press ${id}</p></li>`;
 const pageOf = (chart: string): string =>
   `<div class="primer">${chart}<div class="opening"><p class="lede">l</p><p>was</p></div>${room("a", step("a1") + step("a2", "touch"), '<p class="next"><a href="#b">b</a></p>')}` +
-  `${room("b", step("b1"), lesson("b-two", step("b2")))}` +
+  room("b", step("b1"), lesson("b-two", step("b2"))) +
   `<section class="closing"><h2 id="afterward">x</h2><button class="wipe"></button></section></div>`;
 
 const row = (sec: string, lessons: string): string =>
@@ -38,15 +37,19 @@ function load(chart: string, hash: string, sealed: string) {
   const timers: Array<() => void> = [];
   const listeners = new Map<string, Listener[]>();
   const focused: Array<{ el: Element; opts: unknown }> = [];
-  let active: Element | null = null;
   Element.prototype.scrollIntoView = function (this: Element) {
     scrolled.push(this.id);
   };
-  Element.prototype.focus = function (this: Element, opts?: unknown) {
+  (Element.prototype as unknown as { focus: (opts?: unknown) => void }).focus = function (
+    this: Element,
+    opts?: unknown,
+  ) {
     focused.push({ el: this, opts });
-    active = this;
   };
-  Object.defineProperty(document, "activeElement", { configurable: true, get: () => active });
+  Object.defineProperty(document, "activeElement", {
+    configurable: true,
+    get: () => focused[focused.length - 1]?.el ?? null,
+  });
   const store = new FakeStore(sealed === "" ? {} : { [PRIMER_STORE_KEY]: sealed });
   const g = globalThis as unknown as Record<string, unknown>;
   const where = { hash, pathname: "/primer/", search: "" };
