@@ -19,7 +19,7 @@ export type Sample = {
 export type BirdseyeWindow = {
   readonly cols: number;
   readonly rows: number;
-  readonly samples: ReadonlyArray<Sample>; // row-major, j * cols + i, row 0 nearest the viewer
+  readonly samples: ReadonlyArray<Sample>;
   readonly site: PlanPoint;
   readonly view: { readonly dx: number; readonly dy: number };
   readonly right: { readonly dx: number; readonly dy: number };
@@ -72,7 +72,7 @@ export type BirdseyeTown = {
   readonly bridges: ReadonlyArray<readonly [Pt, Pt]>;
   readonly items: ReadonlyArray<TownItem>;
   readonly wall: {
-    readonly ring: ReadonlyArray<Pt>; // closed: the first point repeated last
+    readonly ring: ReadonlyArray<Pt>;
     readonly towers: ReadonlyArray<Pt>;
     readonly gates: ReadonlyArray<Pt>;
     readonly grid: ReadonlyArray<PlanPoint>;
@@ -111,7 +111,7 @@ export type BirdseyeGeometry = {
   readonly rivers: ReadonlyArray<ReadonlyArray<Pt>>;
   readonly roads: ReadonlyArray<Way>;
   readonly scatter: ReadonlyArray<Scatter>;
-  readonly town: BirdseyeTown | null; // null before the founding
+  readonly town: BirdseyeTown | null;
   readonly harbour: BirdseyeHarbour;
   readonly neighbours: ReadonlyArray<Neighbour>;
   readonly seaName: { readonly text: string; readonly bands: ReadonlyArray<SeaBand> } | null;

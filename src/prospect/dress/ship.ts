@@ -41,7 +41,6 @@ function shipMasts(e: Engraver, x: number, y: number, s: number, great: boolean)
   return out;
 }
 
-/** A ship whose three wake strokes take their offsets from `wake`, each a draw already taken. */
 export function shipWith(
   e: Engraver,
   x: number,

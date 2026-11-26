@@ -22,9 +22,8 @@ import {
   tagSpec,
   titleCartouche,
   wreathedArms,
-  type Inked,
 } from "./furniture.ts";
-import { bandText, cardinalsFor, furnitureGroup, plateSheet } from "./plate-sheet.ts";
+import { bandText, boxesOf, cardinalsFor, furnitureGroup, plateSheet } from "./plate-sheet.ts";
 
 export type PlateParts = {
   readonly input: ProspectInput;
@@ -113,16 +112,15 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
     picture: pic.nodes,
     furniture,
   });
-  const boxes = (parts: ReadonlyArray<Inked>): Box[] => parts.flatMap((i) => i.boxes);
   return {
     node,
     picture: pic,
     furniture: {
       towns: towns.boxes,
-      cartouche: boxes(cartouche),
-      medals: boxes(medals),
-      key: boxes(key),
-      margin: boxes(margin),
+      cartouche: boxesOf(cartouche),
+      medals: boxesOf(medals),
+      key: boxesOf(key),
+      margin: boxesOf(margin),
     },
   };
 }

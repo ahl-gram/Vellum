@@ -10,7 +10,6 @@ import type { BirdseyeKind, BirdseyeTown, BirdseyeWindow, TownItem } from "./typ
 import { leanHouses } from "./houses.ts";
 import { SX, SY, projector } from "./window.ts";
 
-/** The town's own ground, the land inside its wall, so a creek or a basin of the sea inside the walls stays water. */
 export function townGround(world: World, centre: PlanPoint, wall: ReadonlyArray<PlanPoint>): PlanPoint[][] {
   const reach = Math.max(...wall.map((p) => Math.max(Math.abs(p.x - centre.x), Math.abs(p.y - centre.y))));
   const L = lattice(centre.x, centre.y, 1.2 + reach);
@@ -56,7 +55,6 @@ function wallOf(plan: TownPlan, to: (g: PlanPoint) => Pt): NonNullable<BirdseyeT
   };
 }
 
-/** The town as the plan stands it, in plate units, with every lean house standing: its bridges and wall only where the era keeps them, a ruin three houses in ten and none of its landmarks. */
 export function townLayer(
   world: World,
   w: BirdseyeWindow,

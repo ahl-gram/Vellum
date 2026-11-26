@@ -7,7 +7,6 @@ import { sampleAt } from "./window.ts";
 const TREE_BIOMES = new Set(["temperateForest", "rainforest", "taiga", "tropicalForest", "jungle"]);
 const FIELD_BIOMES = new Set(["grassland", "steppe", "shrubland", "savanna"]);
 
-/** Trees, fields and marsh tufts on every second sample of land outside the town; the draws are taken whether or not the keep-out ring then hides the item. */
 export function scatterIn(w: BirdseyeWindow, rng: Rng, radius: number, keepOut: ReadonlyArray<Pt>): Scatter[] {
   const out: Scatter[] = [];
   const reach = (radius + 0.6) * (radius + 0.6);

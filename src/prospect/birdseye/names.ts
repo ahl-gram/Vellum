@@ -12,7 +12,6 @@ export type KeyDraft = { readonly label: string; readonly at: PlanPoint | null; 
 
 export const KEY_ENTRIES = 8;
 
-/** Plate units the key's number stands above the thing it names. */
 export const TAG_LIFT: Readonly<Record<KeyOf, number>> = {
   keep: 24,
   church: 26,
@@ -23,7 +22,6 @@ export const TAG_LIFT: Readonly<Record<KeyOf, number>> = {
   world: 0,
 };
 
-/** The first settlement a traveller meets leaving by the gate's road, by a breadth-first walk over the cells the world's roads join, never back through the town's own road cells; null where none is reached. */
 export function gateTown(world: World, plan: TownPlan, gate: PlanGate): number | null {
   const wall = plan.wall;
   if (wall === null) return null;
@@ -80,7 +78,6 @@ const CHURCH: Readonly<Record<BirdseyeKind, string>> = {
   village: "The Chapel",
 };
 
-/** What the plate's key may truthfully name: a landmark only where the plan stands one, a gate only where its road reaches a town, then the sea and the river. */
 export function planKey(
   world: World,
   plan: TownPlan,
@@ -112,7 +109,6 @@ export function planKey(
 
 const COUNT = { capital: 7, town: 5 } as const;
 
-/** Every other settlement inside the window less a margin, founded by the year and not yet ruined, as a little cluster of houses. */
 export function neighboursIn(world: World, w: BirdseyeWindow, index: number, year: number, rng: Rng): Neighbour[] {
   const out: Neighbour[] = [];
   world.settlements.forEach((n, i) => {
@@ -133,7 +129,6 @@ export function neighboursIn(world: World, w: BirdseyeWindow, index: number, yea
 
 const SEA_BAND = 3;
 
-/** The runs of open water three sample rows deep that a name could stand on, scored by length and nearness to the middle of the sea, best first. */
 export function seaBands(w: BirdseyeWindow): SeaBand[] {
   const open = (i: number, j: number): boolean => {
     for (let k = 0; k < SEA_BAND; k++) if (sampleAt(w, i, j + k).land) return false;

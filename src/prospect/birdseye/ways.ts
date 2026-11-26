@@ -24,7 +24,6 @@ function runsInside(w: BirdseyeWindow, to: (g: PlanPoint) => Pt, points: Readonl
   return runs.filter((r) => r.run.length >= 2);
 }
 
-/** Each river and road cut into its runs inside the window; a road run keeps the grid points it was drawn from. */
 export function waysIn(world: World, w: BirdseyeWindow): { rivers: Pt[][]; roads: Way[] } {
   const to = projector(world, w);
   const rivers = world.rivers.flatMap((r) => runsInside(w, to, r.points).map((x) => x.run));

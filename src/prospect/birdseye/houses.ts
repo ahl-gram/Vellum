@@ -31,7 +31,6 @@ function inwardSign(block: ReadonlyArray<PlanPoint>): number {
   return insideRing(probe, block) ? 1 : -1;
 }
 
-/** The houses a block stands along its edges, one stream per block so the bird's-eye and the plan view stand the same houses. */
 export function leanHouses(plan: TownPlan, kind: BirdseyeKind): LeanHouse[] {
   const out: LeanHouse[] = [];
   const front = FRONT[kind] * LEAN.front;

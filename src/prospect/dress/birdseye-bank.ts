@@ -21,7 +21,6 @@ const HEIGHT = 34;
 const GAP = 6;
 const EDGE = 22;
 
-/** The near bank the viewer stands on, widened to hold the cast the rise view's rule picks, with a tree and the people on it. */
 export function bankOf(e: Engraver, p: BankParts, rng: Rng): { readonly nodes: SvgNode[]; readonly box: Box } {
   const cast = castFor(p.kind, p.harbor, p.roads, p.era);
   const widths = cast.map((k) => (FIGURE_WIDTH[k] * HEIGHT) / 30);

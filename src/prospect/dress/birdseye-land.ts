@@ -5,7 +5,6 @@ import type { BirdseyeGeometry, Scatter } from "../birdseye/types.ts";
 import { VIEW_BOTTOM, VIEW_TOP } from "../birdseye/window.ts";
 import { hatchNode, poly, r1, stroke, treeClump, washOr, waterLines, type Engraver } from "./burin.ts";
 
-/** The water wash over the view where the dress is coloured, then the sea's line-work. */
 export function seaNodes(e: Engraver, rng: Rng): SvgNode[] {
   const wash =
     e.wash === null
@@ -25,7 +24,6 @@ export function seaNodes(e: Engraver, rng: Rng): SvgNode[] {
 const strokes = (list: BirdseyeGeometry["hatch"]): string =>
   list.map((s) => `M${r1(s.from.x)} ${r1(s.from.y)}l${r1(s.by.x)} ${r1(s.by.y)}`).join("");
 
-/** The land strips, the coast, the hill hatching and its shade, the rivers and the roads. */
 export function landNodes(e: Engraver, g: BirdseyeGeometry): SvgNode[] {
   const ground = washOr(e, "ground");
   const out: SvgNode[] = g.strips.map((strip) =>
@@ -83,7 +81,6 @@ export function landNodes(e: Engraver, g: BirdseyeGeometry): SvgNode[] {
   return out;
 }
 
-/** Trees, fields and marsh tufts, a tree's lobes drawn from `rng`. */
 export function scatterNodes(e: Engraver, scatter: ReadonlyArray<Scatter>, rng: Rng): SvgNode[] {
   return scatter.flatMap((item): SvgNode[] => {
     if (item.kind === "tree") return treeClump(e, item.x, item.y, item.s, rng, item.species);

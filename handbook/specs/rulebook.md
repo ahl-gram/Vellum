@@ -352,10 +352,10 @@ comment. This is a convenience index, not their home.
   elsewhere are libm-free too: the finished-plate pins in `test/prospect/finished.test.ts` are
   armless because the arms reach `Math.cos` in `src/render/layers/heraldry/charges.ts`. Its companion
   rule is that world-sourced geometry is quantized to three decimals before hashing, far above the
-  cross-platform drift and far below any real composition change. The bird's-eye takes
-  that rule into the plate itself: `composeBirdseye` in `src/prospect/birdseye/compose.ts` rounds its
-  whole geometry to three decimals before the dress reads it, which is what lets
-  `test/prospect/birdseye.test.ts` pin its plates' bytes on real worlds, armless.
+  cross-platform drift and far below any real composition change. The bird's-eye takes that rule into the
+  plate itself: `composeBirdseye` in `src/prospect/birdseye/compose.ts` rounds its whole geometry to
+  three decimals before the dress reads it, which is what lets `test/prospect/birdseye.test.ts` pin
+  its plates' bytes on real worlds, armless.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
 - **The comment citation convention** is `handbook/specs/conventions.md`'s, under how code is cited.
 - **A parameter property is refused by the type check, not by Node.** Node's type stripping accepts

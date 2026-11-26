@@ -9,7 +9,6 @@ import { HALF_U, V_FAR, V_NEAR, projector, toUV } from "./window.ts";
 
 const TRIES = 16;
 
-/** A standing town's quay and ships, stood only round the plan's own harbour landmark: a harbour place with none stands no ship. */
 export function harbourOf(
   world: World,
   w: BirdseyeWindow,

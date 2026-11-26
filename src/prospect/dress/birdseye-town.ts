@@ -14,7 +14,6 @@ export type OneHouse = {
   readonly window: boolean;
 };
 
-/** A house in the oblique: a front, a hatched side and a roof, with its one window where it keeps one. */
 export function obliqueHouse(e: Engraver, house: OneHouse): SvgNode[] {
   const { x, y, w, h, depth } = house;
   const roofFill = e.wash === null ? e.paper : house.church ? e.wash.roofChurch : e.wash.roof;
@@ -205,7 +204,6 @@ function wallNodes(e: Engraver, wall: NonNullable<BirdseyeTown["wall"]>): SvgNod
   return out;
 }
 
-/** The town's ground, its blocks and streets, its bridges, its buildings in order from far to near, then its wall. */
 export function townNodes(e: Engraver, town: BirdseyeTown): SvgNode[] {
   const out: SvgNode[] = town.ground.map((ring) =>
     el("path", { d: poly(ring), fill: washOr(e, "ground"), stroke: "none" }),

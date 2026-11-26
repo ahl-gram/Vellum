@@ -386,7 +386,7 @@ that cell, so a surface that draws a plan on a close-up places it from the world
 it against the dot rather than assuming they agree.
 
 **A harbour place need not have a quay.** `planTown` stands a `harbour` landmark only on a run of the
-wall or outline on the shore, so a harbour village can have none (Issue #793's cold review, comment
+wall or outline on the shore, so a harbour place can have none (Issue #793's cold review, comment
 7200399716 on Issue #755); the bird's-eye stands ships only round that landmark (`harbourOf` in
 `src/prospect/birdseye/harbour.ts`), and a surface that draws a harbour reads the landmark, never the
 world's `harbor` flag.

@@ -4,7 +4,6 @@ import { rel, sampleAt } from "./window.ts";
 
 const at = (p: Sample): Pt => ({ x: p.x, y: p.y });
 
-/** Land as one polygon per run of land samples along a row, far rows first so nearer ground covers farther. */
 export function landStrips(w: BirdseyeWindow): Pt[][] {
   const out: Pt[][] = [];
   for (let j = w.rows - 1; j >= 1; j--) {
@@ -30,7 +29,6 @@ export function landStrips(w: BirdseyeWindow): Pt[][] {
   return out;
 }
 
-/** The coast by marching squares over the sample grid, interpolated to the sea level and projected. */
 export function coastSegments(w: BirdseyeWindow): Array<readonly [Pt, Pt]> {
   const out: Array<readonly [Pt, Pt]> = [];
   const lerp = (a: Sample, b: Sample): Pt => {
@@ -56,7 +54,6 @@ export function coastSegments(w: BirdseyeWindow): Array<readonly [Pt, Pt]> {
   return out;
 }
 
-/** A stroke down the fall line wherever the ground stands above the site, longer where steeper, and a darker one on faces turned from the light. */
 export function hillStrokes(w: BirdseyeWindow, siteRel: number): { hatch: Stroke[]; shade: Stroke[] } {
   const hatch: Stroke[] = [];
   const shade: Stroke[] = [];

@@ -5,6 +5,7 @@ import { viewRight, type ProspectView } from "../transect.ts";
 import type { Lettering } from "../letter/letter.ts";
 import type { Engraver } from "./burin.ts";
 import type { Cardinals, Inked } from "./furniture.ts";
+import type { Box } from "./rise.ts";
 
 /** Grid space: x east, y south; the view points from the viewer into the picture (the round's cardinal words). */
 export function cardinalsFor(view: ProspectView): Cardinals {
@@ -66,6 +67,8 @@ export const furnitureGroup = (cls: string, parts: ReadonlyArray<Inked>): SvgNod
     { class: cls },
     parts.flatMap((p) => p.nodes),
   );
+
+export const boxesOf = (parts: ReadonlyArray<Inked>): ReadonlyArray<Box> => parts.flatMap((p) => p.boxes);
 
 export function bandText(caption: PlateCaption, era: PlateEra, founded: number): string {
   if (caption.yearLine === null) return caption.epithet;

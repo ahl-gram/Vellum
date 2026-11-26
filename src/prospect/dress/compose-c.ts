@@ -23,9 +23,8 @@ import {
   keyTags,
   titleCartouche,
   wreathedArms,
-  type Inked,
 } from "./furniture.ts";
-import { bandText, cardinalsFor, furnitureGroup, plateSheet } from "./plate-sheet.ts";
+import { bandText, boxesOf, cardinalsFor, furnitureGroup, plateSheet } from "./plate-sheet.ts";
 
 export type PlateCParts = {
   readonly input: ProspectInput;
@@ -75,7 +74,6 @@ function neighbourNames(e: Engraver, letters: Lettering, g: BirdseyeGeometry) {
   return { nodes, boxes };
 }
 
-/** The sea's name, stood on the best band of open water where it lies wholly over the run and clear of everything else drawn; where none holds it, no name. */
 function seaNameAt(e: Engraver, letters: Lettering, g: BirdseyeGeometry, avoid: ReadonlyArray<Box>) {
   if (g.seaName === null) return null;
   const { text, bands } = g.seaName;
@@ -111,8 +109,6 @@ function seaNameAt(e: Engraver, letters: Lettering, g: BirdseyeGeometry, avoid: 
   }
   return null;
 }
-
-const boxesOf = (parts: ReadonlyArray<Inked>): Box[] => parts.flatMap((p) => p.boxes);
 
 export function engraveC(style: MapStyle, p: PlateCParts): EngravedC {
   const g = p.geometry;

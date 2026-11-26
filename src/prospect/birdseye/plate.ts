@@ -30,7 +30,6 @@ export function utf8Bytes(s: string): number {
   return n;
 }
 
-/** Which of `n` things stand at `share`, kept evenly: thing i stands where the running count of the share steps over a whole number. */
 export function evenShare(n: number, share: number): boolean[] {
   return Array.from({ length: n }, (_, i) => Math.floor((i + 1) * share) > Math.floor(i * share));
 }
