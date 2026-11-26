@@ -56,9 +56,15 @@ Ruling 3's limits, taken again after the fold swept them wider (Issue #793 comme
 
 It was ruled from stills this archive does not hold, the delivery out/793-budget/ in the main checkout: seed 181's capital from directly above and in the lean bird's-eye, as the round's planner draws it at 2,192 points and trimmed to 1,948, and seed 29's capital as drawn, which the trim leaves alone.
 
+The nine measurement logs, left out of this archive (Issue #793 comment 7193906561):
+
+> Put to Alex, he ruled to leave them out rather than force-add them or open `.gitignore`: `design/town-plans/` archives 275 files and its README, and the README and the plan's count say the logs are not kept (each script that wrote one is archived and can be run again). The rest of D3 stands.
+
 ## Found after the sitting
 
 - **The budget's numbers do not hold over every world.** The fold's re-sweep (Issue #793's build plan, archived with the build under handbook/plans/700/793/) drew every place of seeds 1 to 40 and 42 as ruled: the lean bird's-eye of seed 29's capital in the ink dress weighs 476.6 KB and seed 16's profile 241.2 KB, against 460 KB and 240 KB; the plates `measure/bytes.ts` measured (its log is not archived) covered seeds 42, 7 and 19 only, and the notes' 439 KB worst case is the antique dress alone (its ink twin, in that log, is 491 KB for the grid and 437 KB with the land). Past seed 42 the capitals of seeds 43 to 300 reach 2,192 points, 552.7 KB and 245.1 KB. How the budget is held is the re-take above.
 - **The profile from the plan stands the full houses**, not the lean tier: `planGeometry` in `mock/profile.ts` calls `housesOf` with its default detail. The 240 KB the notes propose rests on that.
 - **The planner's type imports do not all resolve**: `planner/plan.ts` and `planner/network.ts`, among others, import the type `P` from `planner/types.ts`, which does not export it. Node strips the types and the code runs; a type check would refuse it. The build imports `P` from its geometry module.
 - **The drawers' streams carry the street system in their names** (`mock-houses:<index>:<direction>:<block>` in `mock/houses.ts`, `mock-birdseye:<index>:<direction>` in `mock/birdseye.ts`), so a drawer built to these stills reproduces their gaps and heights only on a stream named with `land`.
+- **Eight of the twelve pages under `sheets/` scroll sideways at a 1280 wide window.** `capital-grurgthohold`, `capital-laukuwelua`, `profile-width`, `seat-mectlan`, `town-tau`, `village-haireno`, `village-lokai` and `village-voorea` set their picture cells at a fixed 480px, so their width is 1492px (measured by the plate reader on this pull request); the round shot them at 1540 wide, where they fit, and shot `detail`, `shore` and `small` at the widths their stills show (1040, 1040 and 1140).
+- **`sheets/plate.html` is a viewer, not a page.** A script sets its picture from the query string (`plate.html?f=sheet-detail.png&w=1040` loads `stills/sheet-detail.png` at 1040 wide); opened bare it asks for `stills/null` and draws a missing picture.
