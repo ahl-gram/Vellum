@@ -55,6 +55,7 @@ export type Limner = {
   readonly wood: string;
   readonly water: string;
   readonly hill: string;
+  readonly ground: string;
   readonly vermilion: string;
   readonly cartouche: string;
   readonly skin: string;
@@ -101,6 +102,7 @@ const ANTIQUE: MapStyle = {
     wood: "#6f9460",
     water: "#c6d6d0",
     hill: "#d6c79a",
+    ground: "#e3d7b3",
     vermilion: "#c23b22",
     cartouche: "#b7cbd3",
     skin: "#e8cfae",
