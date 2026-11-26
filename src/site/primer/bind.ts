@@ -150,7 +150,7 @@ export function bindPrimer(doc: Document = document): void {
     const press = el?.closest(".walk button");
     if (press) {
       const room = arrival.find((r) => r.id === openId);
-      if (press.hasAttribute("disabled") || room === undefined || shown === null) return;
+      if (room === undefined || shown === null) return;
       clearDone();
       show(press.classList.contains("walk-skip") ? stepAfter(room, shown) : stepBefore(room, shown));
       return;

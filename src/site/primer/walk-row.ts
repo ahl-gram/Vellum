@@ -17,8 +17,6 @@ export function buildRow(
   first: boolean,
 ): HTMLElement {
   const row = make(doc, "p", "walk");
-  const back = press(doc, "walk-back", BACK_A_STEP);
-  if (first) back.setAttribute("disabled", "");
   const dots = make(doc, "span", "dots");
   for (const on of dotsOf(siblings, at, sealed, false)) {
     const dot = make(doc, "i", on);
@@ -26,7 +24,7 @@ export function buildRow(
     dots.append(dot);
   }
   row.append(
-    back,
+    ...(first ? [] : [press(doc, "walk-back", BACK_A_STEP)]),
     make(doc, "span", "walk-of", headOf(lesson, siblings.indexOf(at) + 1, siblings.length)),
     dots,
     press(doc, "walk-skip", SKIP_THIS_STEP),
