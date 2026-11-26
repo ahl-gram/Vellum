@@ -109,6 +109,13 @@ export function bindPrimer(doc: Document = document): void {
         step,
       );
   };
+  const refocus = (same: string): void => {
+    const next =
+      primer.querySelector<HTMLElement>(`.walk ${same}`) ??
+      primer.querySelector<HTMLElement>(".walk .walk-skip") ??
+      primer.querySelector<HTMLElement>("section.room:not(.folded) .room-body > .next a");
+    next?.focus({ preventScroll: true });
+  };
   const land = (aim: Aim, top: boolean): void => {
     const l = landing(arrival, aim, sealed, here);
     if (l === null) return;
@@ -151,8 +158,11 @@ export function bindPrimer(doc: Document = document): void {
     if (press) {
       const room = arrival.find((r) => r.id === openId);
       if (room === undefined || shown === null) return;
+      const kept = press === doc.activeElement;
+      const skip = press.classList.contains("walk-skip");
       clearDone();
-      show(press.classList.contains("walk-skip") ? stepAfter(room, shown) : stepBefore(room, shown));
+      show(skip ? stepAfter(room, shown) : stepBefore(room, shown));
+      if (kept) refocus(skip ? ".walk-skip" : ".walk-back");
       return;
     }
     const href = el?.closest('a[href^="#"]')?.getAttribute("href") ?? "";

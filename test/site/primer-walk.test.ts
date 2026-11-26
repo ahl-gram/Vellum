@@ -4,6 +4,7 @@ import { parseHTML } from "linkedom";
 import type { ArrivalRoom } from "../../src/site/primer/arrival.ts";
 import { landing, stepAfter, stepBefore } from "../../src/site/primer/walk.ts";
 import { buildDone, buildRow } from "../../src/site/primer/walk-row.ts";
+import { holdAddress } from "../../src/site/primer/hold-address.ts";
 
 const A: ArrivalRoom = { id: "A", steps: [{ id: "a1" }, { id: "a2", only: "touch" }, { id: "a3" }] };
 const B: ArrivalRoom = { id: "B", steps: [{ id: "b1" }, { id: "b2" }] };
@@ -81,4 +82,46 @@ test("PW7 the Done line carries the step's seal and its act (Issue #1392 D5)", (
   const line = buildDone(document, "5", "A new row has come.");
   assert.equal(line.querySelector(".primer-seal")?.textContent, "5");
   assert.equal(line.textContent, "5Done: A new row has come.");
+});
+
+function held(hash: string) {
+  const replaced: string[] = [];
+  const timers: Array<() => void> = [];
+  const loaded: Array<() => void> = [];
+  const where = { pathname: "/primer/", search: "", hash };
+  const win = {
+    location: where,
+    history: {
+      state: null,
+      replaceState: (_data: unknown, _unused: string, url: string) => {
+        replaced.push(url);
+        where.hash = url.includes("#") ? url.slice(url.indexOf("#")) : "";
+      },
+    },
+    setTimeout: (run: () => void) => timers.push(run),
+  };
+  const doc = { addEventListener: (_type: "DOMContentLoaded", run: () => void) => loaded.push(run) };
+  holdAddress(win, doc);
+  return { replaced, timers, loaded, where };
+}
+
+test("PW8 an address is held out of the window's location from the landing until a task after DOMContentLoaded, past the browser's own read of it for its jump, and put back only where nothing has replaced it since (Issue #1392 C24)", () => {
+  const one = held("#prospect");
+  assert.deepEqual(one.replaced, ["/primer/"], "the address is taken out at the landing");
+  assert.equal(one.loaded.length, 1);
+  one.loaded[0]?.();
+  assert.deepEqual(one.replaced, ["/primer/"], "still out when DOMContentLoaded's listener has run");
+  assert.equal(one.timers.length, 1);
+  one.timers[0]?.();
+  assert.deepEqual(one.replaced, ["/primer/", "/primer/#prospect"], "put back a task after it");
+
+  const bare = held("");
+  assert.deepEqual(bare.replaced, []);
+  assert.equal(bare.loaded.length, 0);
+
+  const moved = held("#prospect");
+  moved.loaded[0]?.();
+  moved.where.hash = "#ribbon";
+  moved.timers[0]?.();
+  assert.deepEqual(moved.replaced, ["/primer/"], "an address put there since is left alone");
 });

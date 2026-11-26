@@ -271,3 +271,38 @@ test("PB11 Back stands beside Skip on every step of a room but its first, a late
   assert.deepEqual(ids(), ["b-two", "b2"]);
   assert.notEqual(document.querySelector(".walk .walk-back"), null);
 });
+
+test("PB10 Skip and Back keep the keyboard on the walk: the press used takes the focus in the new row, Skip where Back has gone at the room's first step, the room's road at its end, and a press that held no focus hands none (Issue #1392, review of PR #1496)", () => {
+  const { document, Event, focused } = load("", "", "");
+  const click = (el: Element | null): void => {
+    el?.dispatchEvent(new Event("click", { bubbles: true }));
+  };
+  const hold = (selector: string): Element | null => {
+    const el = document.querySelector(selector);
+    (el as HTMLElement | null)?.focus();
+    return el;
+  };
+  const last = (): { el: Element; opts: unknown } | undefined => focused[focused.length - 1];
+
+  const skip = hold(".walk-skip");
+  click(skip);
+  assert.equal(last()?.el.matches(".walk .walk-skip"), true, "Skip hands the focus to the new row's Skip");
+  assert.equal(last()?.el !== skip, true, "the new row's Skip, not the one pressed");
+  assert.deepEqual(last()?.opts, { preventScroll: true });
+
+  click(hold(".walk-back"));
+  assert.equal(last()?.el.matches(".walk .walk-skip"), true, "Back at the room's first step hands the focus to Skip");
+
+  click(hold(".walk-skip"));
+  click(hold(".walk-skip"));
+  assert.equal(document.querySelector(".walk") === null, true, "the room's last step leaves no row");
+  assert.equal(
+    last()?.el.matches("section.room:not(.folded) .room-body > .next a"),
+    true,
+    "the room's road takes the focus",
+  );
+
+  const fresh = load("", "", "");
+  fresh.document.querySelector(".walk-skip")?.dispatchEvent(new fresh.Event("click", { bubbles: true }));
+  assert.deepEqual(fresh.focused, [], "a press that held no focus hands none");
+});
