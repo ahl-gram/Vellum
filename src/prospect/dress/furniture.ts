@@ -144,6 +144,7 @@ export function keyPanel(
   letters: Lettering,
   entries: ReadonlyArray<PlateKeyEntry>,
   riseBottom: number,
+  right: number = INNER.x1,
 ): Inked {
   if (entries.length === 0) return { nodes: [], boxes: [] };
   const cols = entries.length > 4 ? 2 : 1;
@@ -168,7 +169,7 @@ export function keyPanel(
   const w = colW.reduce((a, b) => a + b, 0) + 10,
     h = rows * ROW_H + 10;
   const curl = Math.min(9, h * 0.45);
-  const x = INNER.x1 - 1.5 - curl * CURL_REACH - 0.5 - w;
+  const x = right - 1.5 - curl * CURL_REACH - 0.5 - w;
   const y = riseBottom - 14 - h;
   const panel = strapwork(e, x + w / 2, y + h / 2, w, h, false);
   const runs = lettered(
