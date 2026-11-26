@@ -5,7 +5,7 @@ import { STYLES } from "../../src/render/style.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { plateSurroundings } from "../../src/prospect/surroundings.ts";
 import { composeBirdseye } from "../../src/prospect/birdseye/compose.ts";
-import { birdseyePlate, engraveBirdseye } from "../../src/prospect/birdseye/plate.ts";
+import { birdseyePlate, engraveBirdseye, evenShare } from "../../src/prospect/birdseye/plate.ts";
 import { fnv1a, tokenColors } from "../../test-support/dress-svg.ts";
 import { worldFor } from "../../test-support/seed-worlds.ts";
 
@@ -91,5 +91,23 @@ test("pinned armless plate checksums freeze the dress", () => {
     const input = { ...buildProspectInput(w, index), arms: null };
     const svg = engraveBirdseye(w, input, STYLES[dress], at).svg;
     assert.equal(fnv1a(svg), sum, `plate checksum for seed ${seed} index ${index} ${dress} at ${at}`);
+  }
+});
+
+test("an even share keeps houses spread through the town, as many as the share says", () => {
+  const stands = (n: number, share: number): number[] => evenShare(n, share).flatMap((on, i) => (on ? [i] : []));
+  assert.deepEqual(stands(10, 0.5), [1, 3, 5, 7, 9]);
+  assert.deepEqual(stands(10, 0.3), [3, 6, 9]);
+  assert.deepEqual(stands(7, 1), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(stands(7, 0), []);
+  for (const [n, share] of [
+    [323, 0.85],
+    [323, 0.7],
+    [41, 0.35],
+  ] as const) {
+    const kept = stands(n, share);
+    assert.equal(kept.length, Math.floor(n * share), `${n} at ${share} keeps floor(n * share)`);
+    const gaps = kept.slice(1).map((at, i) => at - kept[i]!);
+    assert.ok(Math.max(...gaps) <= Math.ceil(1 / share), `${n} at ${share} leaves no long run of cut houses`);
   }
 });
