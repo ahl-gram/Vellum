@@ -33,14 +33,14 @@ export function lightChart(
   room: ArrivalRoom | undefined,
   sealed: ReadonlySet<string>,
   device: Device,
-  _step?: string | null,
+  shown?: string | null,
 ): void {
   for (const light of chart.querySelectorAll("[data-halo]")) {
     light.classList.toggle("lit", room !== undefined && light.getAttribute("data-halo") === room.id);
   }
   const hand = chart.querySelector(".col-next");
   if (hand === null) return;
-  const step = room === undefined ? null : nextStepIn(room, sealed, device);
+  const step = shown !== undefined ? shown : room === undefined ? null : nextStepIn(room, sealed, device);
   const mark = step === null ? null : chart.querySelector(`[data-step="${step}"]`);
   hand.classList.toggle("on", mark !== null);
   if (mark === null) return;
