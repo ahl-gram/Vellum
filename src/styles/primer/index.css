@@ -275,6 +275,9 @@
   .primer.walking.room-end .room-body > .next {
     display: block;
   }
+  .primer.walking nav.col-head {
+    margin-top: 2rem;
+  }
   .primer li.step.now {
     border-top: 0;
     padding-top: 0.4rem;
