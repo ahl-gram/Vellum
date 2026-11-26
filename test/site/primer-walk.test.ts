@@ -61,15 +61,19 @@ const row = (first: boolean): HTMLElement => {
   return buildRow(document, "The Land", ["x1", "x2", "x3"], "x2", set("x1"), first);
 };
 
-test("PW6 the row counts the step in the hand's own words, dots its lesson as the slip does, and stands Back disabled at the room's first step (Issue #1392 C5)", () => {
+test("PW6 the row counts the step in the hand's own words, dots its lesson as the slip does, and carries Back on every step but a room's first, where Skip stands alone (Issue #1392 C5, comment 7199849912)", () => {
   const mid = row(false);
   assert.equal(mid.querySelector(".walk-of")?.textContent, "The Land, step 2 of 3");
   assert.deepEqual(
     [...mid.querySelectorAll(".dots i")].map((i) => i.getAttribute("class") ?? ""),
     ["on", "now", ""],
   );
+  assert.notEqual(mid.querySelector(".walk-back"), null);
   assert.equal(mid.querySelector(".walk-back")?.hasAttribute("disabled"), false);
-  assert.equal(row(true).querySelector(".walk-back")?.hasAttribute("disabled"), true);
+  const first = row(true);
+  assert.equal(first.querySelector(".walk-back") === null, true, "no Back at the room's first step");
+  assert.equal(first.firstElementChild?.className, "walk-of");
+  assert.notEqual(first.querySelector(".walk-skip"), null);
 });
 
 test("PW7 the Done line carries the step's seal and its act (Issue #1392 D5)", () => {

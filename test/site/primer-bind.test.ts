@@ -8,13 +8,16 @@ import { chartOfLessons, type ChartRoom } from "../../src/layouts/chart-of-lesso
 import { chartOfLessonsSvg } from "../../src/layouts/chart-of-lessons-svg.ts";
 import { FakeStore } from "../../test-support/fake-store.ts";
 
-const room = (id: string, steps: string): string =>
+const lesson = (id: string, steps: string): string =>
+  `<section class="lesson" id="${id}"><ol>${steps}</ol></section>`;
+const room = (id: string, steps: string, more = ""): string =>
   `<section class="room"><div class="room-head"><h2 id="${id}">${id}</h2></div>` +
-  `<div class="room-body" id="${id}-steps"><section class="lesson" id="${id}-one"><ol>${steps}</ol></section></div></section>`;
+  `<div class="room-body" id="${id}-steps">${lesson(`${id}-one`, steps)}${more}</div></section>`;
 const step = (id: string, only = ""): string =>
   `<li class="step" id="${id}"${only === "" ? "" : ` data-only="${only}"`}><span class="num">1</span><p class="act">Press ${id}</p></li>`;
 const pageOf = (chart: string): string =>
-  `<div class="primer">${chart}<div class="opening"><p class="lede">l</p><p>was</p></div>${room("a", step("a1") + step("a2", "touch"))}${room("b", step("b1"))}` +
+  `<div class="primer">${chart}<div class="opening"><p class="lede">l</p><p>was</p></div>${room("a", step("a1") + step("a2", "touch"), '<p class="next"><a href="#b">b</a></p>')}` +
+  `${room("b", step("b1"), lesson("b-two", step("b2")))}` +
   `<section class="closing"><h2 id="afterward">x</h2><button class="wipe"></button></section></div>`;
 
 const row = (sec: string, lessons: string): string =>
@@ -24,30 +27,53 @@ const INDEX =
   `${row("a", `<li data-for="a-one"><a href="#a-one">one</a></li>`)}${row("b", `<li data-for="b-one"><a href="#b-one">one</a></li>`)}${row("afterward", "")}` +
   `</ol></div></aside>`;
 
+type Listener = (e: { persisted?: boolean }) => void;
+
 function load(chart: string, hash: string, sealed: string) {
   const { document, Element, Event } = parseHTML(`<!doctype html><html><body>${INDEX}${pageOf(chart)}</body></html>`);
   const scrolled: string[] = [];
   const tops: unknown[][] = [];
   const pushed: string[] = [];
+  const replaced: string[] = [];
+  const timers: Array<() => void> = [];
+  const listeners = new Map<string, Listener[]>();
+  const focused: Array<{ el: Element; opts: unknown }> = [];
+  let active: Element | null = null;
   Element.prototype.scrollIntoView = function (this: Element) {
     scrolled.push(this.id);
   };
+  Element.prototype.focus = function (this: Element, opts?: unknown) {
+    focused.push({ el: this, opts });
+    active = this;
+  };
+  Object.defineProperty(document, "activeElement", { configurable: true, get: () => active });
   const store = new FakeStore(sealed === "" ? {} : { [PRIMER_STORE_KEY]: sealed });
   const g = globalThis as unknown as Record<string, unknown>;
+  const where = { hash, pathname: "/primer/", search: "" };
   const win = {
     matchMedia: () => ({ matches: false }),
-    addEventListener: () => {},
+    addEventListener: (type: string, run: Listener) => listeners.set(type, [...(listeners.get(type) ?? []), run]),
     scrollTo: (...at: unknown[]) => tops.push(at),
-    history: { pushState: (_state: unknown, _title: string, url: string) => pushed.push(url) },
+    location: where,
+    setTimeout: (run: () => void) => timers.push(run),
+    history: {
+      state: null,
+      scrollRestoration: "auto",
+      pushState: (_state: unknown, _title: string, url: string) => pushed.push(url),
+      replaceState: (_state: unknown, _title: string, url: string) => {
+        replaced.push(url);
+        where.hash = url.includes("#") ? url.slice(url.indexOf("#")) : "";
+      },
+    },
   };
-  Object.assign(g, { location: { hash }, window: win, matchMedia: win.matchMedia, localStorage: store, Element });
+  Object.assign(g, { location: where, window: win, matchMedia: win.matchMedia, localStorage: store, Element });
   let error: unknown = null;
   try {
     bindPrimer(document);
   } catch (e) {
     error = e;
   }
-  return { document, Event, scrolled, tops, pushed, error };
+  return { document, Event, scrolled, tops, pushed, replaced, timers, listeners, focused, store, win, error };
 }
 
 const foldedOf = (document: Document) =>
@@ -80,7 +106,7 @@ function bound(hash: string, sealed: string, press?: string) {
 
 const CHART_ROOMS: ChartRoom[] = [
   { id: "a", route: "/explorer/", lessons: [{ steps: [{ id: "a1" }, { id: "a2", only: "touch" }] }] },
-  { id: "b", route: "/prospect/", lessons: [{ steps: [{ id: "b1" }] }] },
+  { id: "b", route: "/prospect/", lessons: [{ steps: [{ id: "b1" }] }, { steps: [{ id: "b2" }] }] },
 ];
 const CHART = chartOfLessonsSvg(chartOfLessons(CHART_ROOMS), "t");
 
@@ -205,7 +231,7 @@ test("PB7 a press on a room's link on the chart opens that room as a link in the
   assert.equal(got.hand, got.handAt("b1"));
 });
 
-test("PB8 the page walks: its first step alone and its lesson marked, the chart moved under the rooms, the opening in the walk's words; Skip shows the next step, a tablet step included, Back the one before, and Skip at the room's last step its end (Issue #1392 D1, D2, D6)", () => {
+test("PB8 the page walks: its first step alone and its lesson marked, the chart moved under the rooms, the opening in the walk's words; Skip shows the next step, a tablet step included, Back the one before, Back absent at the room's first step, and Skip at the room's last step its end (Issue #1392 D1, D2, D6, comment 7199849912)", () => {
   const { document, Event, error } = load(`<nav class="col-head">${CHART}</nav>`, "", "");
   assert.equal(error, null);
   const primer = document.querySelector(".primer")!;
@@ -215,9 +241,11 @@ test("PB8 the page walks: its first step alone and its lesson marked, the chart 
   };
   assert.equal(primer.classList.contains("walking"), true);
   assert.deepEqual(nowIds(), ["a-one", "a1"]);
+  assert.equal(document.querySelector(".walk .walk-back") === null, true, "no Back at the room's first step");
   assert.equal(document.querySelector(".closing")?.previousElementSibling?.matches("nav.col-head"), true);
   assert.equal(document.querySelector(".opening p:not(.lede)")?.textContent, WALK_OPENING);
   press(".walk-skip");
+  assert.notEqual(document.querySelector(".walk .walk-back"), null);
   assert.deepEqual(nowIds(), ["a-one", "a2"]);
   press(".walk-back");
   assert.deepEqual(nowIds(), ["a-one", "a1"]);
@@ -232,4 +260,14 @@ test("PB9 a hash naming a sealed step lands past it with a Done line holding its
   assert.equal(got.document.querySelector(".walk-done")?.textContent, "1Done: Press a1");
   assert.equal(got.document.querySelector(".primer")?.classList.contains("room-end"), true);
   assert.deepEqual(got.tops, [[0, 0]]);
+});
+
+test("PB11 Back stands beside Skip on every step of a room but its first, a later lesson's first step included (Issue #1392 comment 7199849912)", () => {
+  const { document, Event } = load("", "#b", "");
+  const ids = (): string[] => [...document.querySelectorAll(".now[id]")].map((e) => e.id);
+  assert.deepEqual(ids(), ["b-one", "b1"]);
+  assert.equal(document.querySelector(".walk .walk-back") === null, true);
+  document.querySelector(".walk-skip")?.dispatchEvent(new Event("click", { bubbles: true }));
+  assert.deepEqual(ids(), ["b-two", "b2"]);
+  assert.notEqual(document.querySelector(".walk .walk-back"), null);
 });
