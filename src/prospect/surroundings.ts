@@ -73,7 +73,7 @@ function townsReachedFirst(world: World, index: number): Set<number> {
   return found;
 }
 
-const ruinedBy = (world: World, i: number, year: number): boolean =>
+export const ruinedBy = (world: World, i: number, year: number): boolean =>
   world.history.events.some((e) => e.kind === "ruin" && e.settlement === i && e.year <= year);
 
 function roadTowns(world: World, index: number, view: ProspectView, year: number): RoadTown[] {
