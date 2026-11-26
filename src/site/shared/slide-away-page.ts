@@ -96,7 +96,7 @@ function measure(
   };
 }
 
-export function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: number): Spot {
+function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: number): Spot {
   const home = rectOf(el);
   if (home === null) return OFF;
   const reach = reachOf(getComputedStyle(el, "::before"));
@@ -104,6 +104,27 @@ export function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: 
     on: within(x, y, grown(pageEdges(el.getBoundingClientRect()), reach)),
     near: within(x, y, holdZone(pageEdges(home), reach, toward, pageBox().h)),
   };
+}
+
+export function watchPointer(
+  doc: Document,
+  slide: SlideAway,
+  head: HTMLElement,
+  folioSpot: (x: number, y: number) => Spot,
+): void {
+  doc.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!steers(e.pointerType) || e.buttons !== 0) return;
+      const x = pageX(e.clientX, window.scrollX);
+      const y = pageY(e.clientY, window.scrollY);
+      slide.point(spotOf(head, "top", x, y), folioSpot(x, y));
+    },
+    { passive: true },
+  );
+  doc.documentElement.addEventListener("pointerleave", (e) => {
+    if (steers(e.pointerType)) slide.point(OFF, OFF);
+  });
 }
 
 function watchLayout(parts: RoomSlideParts, head: HTMLElement, folio: HTMLElement, remeasure: () => void): void {
@@ -154,19 +175,7 @@ function watchInput(
     },
     true,
   );
-  document.addEventListener(
-    "pointermove",
-    (e) => {
-      if (!steers(e.pointerType) || e.buttons !== 0) return;
-      const x = pageX(e.clientX, window.scrollX);
-      const y = pageY(e.clientY, window.scrollY);
-      slide.point(spotOf(head, "top", x, y), covered() ? OFF : spotOf(folio, "bottom", x, y));
-    },
-    { passive: true },
-  );
-  document.documentElement.addEventListener("pointerleave", (e) => {
-    if (steers(e.pointerType)) slide.point(OFF, OFF);
-  });
+  watchPointer(document, slide, head, (x, y) => (covered() ? OFF : spotOf(folio, "bottom", x, y)));
 }
 
 export const bindOnPage = (head: HTMLElement, folio: HTMLElement | null): SlideAway =>

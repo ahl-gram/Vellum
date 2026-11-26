@@ -224,9 +224,6 @@ footer a:focus-visible {
   background-color: var(--chart-ink);
   clip-path: inset(0 0 calc(100% - var(--band-paint, var(--band-h))) 0);
 }
-:root.head-away .band::before {
-  transition: clip-path var(--paper-settle) var(--ease-paper);
-}
 .band::after {
   content: "";
   position: absolute;
@@ -235,9 +232,6 @@ footer a:focus-visible {
   top: var(--band-paint, var(--band-h));
   height: 14px;
   background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent);
-}
-:root.head-away .band::after {
-  transition: top var(--paper-settle) var(--ease-paper);
 }
 .room-name {
   font-size: 1.65rem;

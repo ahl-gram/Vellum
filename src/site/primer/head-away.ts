@@ -1,9 +1,8 @@
 // The Primer's head in its slid-away state (Issue #1392 D3): the wordmark, the motto and the nav stand above the window at rest, leaving the trail and its line as a thin top line on a band shrunk to fit it, and the shared holds bring the head and the band's ground back.
 import { OFF, type Measured, type SlideAway } from "../shared/slide-away-bind.ts";
-import { bindOnPage, spotOf } from "../shared/slide-away-page.ts";
-import { headTravel, steers } from "../shared/slide-away.ts";
+import { bindOnPage, watchPointer } from "../shared/slide-away-page.ts";
+import { headTravel } from "../shared/slide-away.ts";
 import { translateOf } from "../shared/room-seats.ts";
-import { pageX, pageY } from "../shared/page-box.ts";
 
 export const HEAD_AWAY = "head-away";
 export const BAND_PAINT = "--band-paint";
@@ -42,16 +41,6 @@ export function bindHeadAway(doc: Document = document): SlideAway | null {
   void doc.fonts.ready.then(again);
   window.addEventListener("resize", again);
   new ResizeObserver(again).observe(head);
-  doc.addEventListener(
-    "pointermove",
-    (e) => {
-      if (!steers(e.pointerType) || e.buttons !== 0) return;
-      slide.point(spotOf(head, "top", pageX(e.clientX, window.scrollX), pageY(e.clientY, window.scrollY)), OFF);
-    },
-    { passive: true },
-  );
-  root.addEventListener("pointerleave", (e) => {
-    if (steers(e.pointerType)) slide.point(OFF, OFF);
-  });
+  watchPointer(doc, slide, head, () => OFF);
   return slide;
 }
