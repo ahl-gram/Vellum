@@ -4,7 +4,7 @@ import { makeSettle, makeStable, type Settle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { ix8Landmark } from "./document-rooms/landmark.ts";
-import { ix10Folds, ix11ChartPress, ix12HeadAway, ix9Seals } from "./document-rooms/primer.ts";
+import { ix10Walks, ix11ChartPress, ix12HeadAway, ix9Seals } from "./document-rooms/primer.ts";
 import { bounce } from "../support/nav.ts";
 
 const FAQ = "/faq/";
@@ -100,7 +100,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("IX3", () => ix3Folds(k, faq!));
   await step("IX8", () => ix8Landmark(k));
   await step("IX9", () => ix9Seals(k));
-  await step("IX10", () => ix10Folds(k));
+  await step("IX10", () => ix10Walks(k));
   await step("IX11", () => ix11ChartPress(k));
   await step("IX12", () => ix12HeadAway(k));
   gate.check("IX7 the document-room suite drove the Q & A and the Primer with no console error and no 4xx");
