@@ -17,7 +17,7 @@ export interface Spot {
 export const OFF: Spot = { on: false, near: false };
 export interface SlideAwayDeps {
   readonly head: HTMLElement;
-  readonly folio: HTMLElement;
+  readonly folio: HTMLElement | null;
   readonly atelier: HTMLDetailsElement | null;
   readonly reduce: () => boolean;
   readonly focusVisible: (target: EventTarget | null) => boolean;
@@ -95,6 +95,7 @@ function holdOnHead(deps: SlideAwayDeps, hold: (why: Hold, on: boolean) => void)
 }
 
 export function bindSlideAway(deps: SlideAwayDeps): SlideAway {
+  if (deps.folio === null) return { follow: () => {}, measured: () => {}, arm: () => {}, point: () => {} };
   let k = 1;
   let m: Measured = { fill: Infinity, from: Infinity, up: 0, down: 0 };
   let armed = false;

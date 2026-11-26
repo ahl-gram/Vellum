@@ -32,7 +32,7 @@ interface Timer {
   live: boolean;
 }
 
-function build(flags: { reduce?: boolean; focusVisible?: boolean } = {}) {
+function build(flags: { reduce?: boolean; focusVisible?: boolean; folio?: boolean } = {}) {
   const head = new Piece("header");
   const folio = new El("div");
   const atelier = new Fold("details");
@@ -42,7 +42,7 @@ function build(flags: { reduce?: boolean; focusVisible?: boolean } = {}) {
   const state = { reduce: flags.reduce ?? false, focusVisible: flags.focusVisible ?? true };
   const slide: SlideAway = bindSlideAway({
     head: head as unknown as HTMLElement,
-    folio: folio as unknown as HTMLElement,
+    folio: flags.folio === false ? null : (folio as unknown as HTMLElement),
     atelier: atelier as unknown as HTMLDetailsElement,
     reduce: () => state.reduce,
     focusVisible: () => state.focusVisible,
@@ -217,4 +217,13 @@ test("SB11 a follow that carries a measure writes it at its own depth with no ea
   u.armedAt(1.6);
   u.slide.measured({ ...MEASURED, from: 1.6 });
   assert.equal(u.easing(u.head), true, "the same measure handed over alone eases");
+});
+
+test("SB12 a room with no chart folio slides its head and brings it home for a resting mouse as a room with one does (Issue #1392)", () => {
+  const t = build({ folio: false });
+  t.armedAt(2);
+  assert.equal(t.read(t.head), "0px -105.00px");
+  t.slide.point({ on: true, near: true }, OFF);
+  t.runLive(REST_MS);
+  assert.equal(t.read(t.head), "");
 });
