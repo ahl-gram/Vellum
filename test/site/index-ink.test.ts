@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { edgesOf, entryAt, indexInk, inViewBy, markEdges, readingAt } from "../../src/site/shared/index-ink.ts";
+import { parseHTML } from "linkedom";
+import {
+  edgesOf,
+  entryAt,
+  indexInk,
+  inkOnChange,
+  inViewBy,
+  markEdges,
+  readingAt,
+} from "../../src/site/shared/index-ink.ts";
 
 // Issue #462 document-room ruling 1: the section being read is the last head at or above the reading line.
 
@@ -278,4 +287,35 @@ test("IK8 the body itself carries the fades' marks, more-above and more-below, r
   fake.scrollTop = 500;
   markEdges(fake as unknown as HTMLElement);
   assert.deepEqual(on, { "more-above": true, "more-below": false });
+});
+
+test("IK9 the index inks again whenever the sheet changes what it shows, a class, a hidden or a node added or taken away, and for no other attribute and nothing outside the sheet (Issue #1392, review of PR #1496)", async () => {
+  const { document, MutationObserver } = parseHTML(
+    `<!doctype html><html><body><div class="sheet"><section class="room"><h2 id="a">a</h2></section></div><p class="out"></p></body></html>`,
+  );
+  (globalThis as unknown as Record<string, unknown>)["MutationObserver"] = MutationObserver;
+  const sheet = document.querySelector(".sheet")!;
+  let inks = 0;
+  inkOnChange(sheet, () => inks++);
+  const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
+  sheet.querySelector(".room")!.classList.add("folded");
+  await settle();
+  assert.equal(inks, 1, "a class");
+  sheet.querySelector(".room")!.setAttribute("hidden", "");
+  await settle();
+  assert.equal(inks, 2, "hidden");
+  const added = document.createElement("p");
+  sheet.append(added);
+  await settle();
+  assert.equal(inks, 3, "a node added");
+  added.remove();
+  await settle();
+  assert.equal(inks, 4, "a node taken away");
+  sheet.setAttribute("data-x", "1");
+  await settle();
+  assert.equal(inks, 4, "another attribute");
+  document.querySelector(".out")!.classList.add("on");
+  await settle();
+  assert.equal(inks, 4, "outside the sheet");
+  assert.doesNotThrow(() => inkOnChange(null, () => inks++));
 });

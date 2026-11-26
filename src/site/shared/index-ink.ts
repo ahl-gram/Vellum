@@ -1,4 +1,4 @@
-// The document rooms' index (Issue #462 ruling 1): the section being read is inked and the entry being read is marked as the page scrolls.
+// The document rooms' index (Issue #462 ruling 1): the section being read is inked and the entry being read is marked as the page scrolls and whenever the sheet changes what it shows.
 
 export interface Placed {
   readonly id: string;
@@ -90,4 +90,14 @@ export function indexInk(p: InkParts): () => void {
       box.scrollTop += inViewBy(row.getBoundingClientRect(), box.getBoundingClientRect(), p.inset());
   };
   return ink;
+}
+
+export function inkOnChange(sheet: Element | null, ink: () => void): void {
+  if (sheet === null) return;
+  new MutationObserver(() => ink()).observe(sheet, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["class", "hidden"],
+  });
 }
