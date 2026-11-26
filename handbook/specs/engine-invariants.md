@@ -379,6 +379,12 @@ strict walk, along each road's own points and stopping at the first settlement o
 `roadReachable` in `src/itinerary/route.ts` is the lenient one, which floods the road mask by any of
 eight neighbours, so roads that merely touch join, and walks on through every town.
 
+**A town's plan is the world sheet's.** `planTown` in `src/prospect/town-plan/plan.ts` reads a world
+sheet by its world index, on its own fork, and stands the plan on the town's world cell. A close-up
+re-lays the roads along its own ground and draws a port's dot on its own shore or river, away from
+that cell, so a surface that draws a plan on a close-up places it from the world cell and measures
+it against the dot rather than assuming they agree.
+
 **A ribbon event can sit at a road's exact end**, past the arrival waypoint, where a half-open strip
 filter drops it, a border whose realm the arrival town stands in included. `stripFor` in
 `src/itinerary/dress/layout.ts` tests a half-open interval, so
