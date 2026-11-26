@@ -85,3 +85,24 @@ test("a capital or seat is walled with one keep, a town walled with none, a vill
     assert.equal(keeps(p), 0, `seed ${p.seed} index ${p.i} village has no keep`);
   }
 });
+
+// Alex, 2026-11-26: ruling 3 of Issue #793 comment 7181779471, a limit every town holds by comment 7192821132 (D1).
+const RULED_POINTS = 1950;
+
+test("no plan passes the ruled 1,950 points", () => {
+  const points = (plan: ReturnType<typeof planTown>): number =>
+    (plan.wall?.length ?? 0) +
+    plan.streets.reduce((a, s) => a + s.length, 0) +
+    plan.blocks.reduce((a, b) => a + b.length, 0) +
+    plan.landmarks.length +
+    plan.gates.length;
+  const plans = [29, 181].flatMap((seed) => {
+    const world = worldFor(seed);
+    return world.settlements.map((_, i) => ({ seed, i, n: points(planTown(world, i)) }));
+  });
+  assert.ok(
+    plans.some((p) => p.seed === 181 && p.i === 0 && p.n > 1500),
+    "seed 181's capital is a plan near the limit",
+  );
+  for (const p of plans) assert.ok(p.n <= RULED_POINTS, `seed ${p.seed} index ${p.i} holds ${p.n} points`);
+});
