@@ -12,6 +12,7 @@ export async function cd44CarryFiles({
   restSeeing,
   shutAndFold,
 }: DragKit): Promise<void> {
+  // Wiring: whatever sheet the steps before left on the table comes off, so this carry files a survey the table does not hold.
   await evaluate<boolean>(
     `(() => { const off = document.querySelector("#cuttings .off"); if (off) off.click(); return !!off; })()`,
   );
