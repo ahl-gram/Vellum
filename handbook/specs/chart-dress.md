@@ -25,9 +25,10 @@ sheet keeps the dress it was drawn in rather than being harmonized to its neighb
 
 **The prospect plate's antique is hand-coloured, its ink is plain.** The engraved town (Issue #754)
 lays a limner's washes over its hatching on the antique dress alone: roofs, grass, wood, water, the
-far hills, the people's skin and the cartouche, each a token in the `limner` group on `MapStyle` in
-`src/render/style.ts`, and every other dress carries `limner: null` and draws the plate in line. The
-people's clothes are the realm's tinctures, through the same heraldic palette the arms use.
+far hills, the ground a bird's-eye looks down on, the people's skin and the cartouche, each a token in
+the `limner` group on `MapStyle` in `src/render/style.ts`, and every other dress carries
+`limner: null` and draws the plate in line. The people's clothes are the realm's tinctures, through the
+same heraldic palette the arms use.
 
 **The ribbon plate's antique is painted, its ink is plain.** The Wayfarer's Ribbon draws its antique
 dress as the painted ribbon of `design/ribbon-limner/c-painted-42.png`: cloth-edged strips in a land
