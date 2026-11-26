@@ -39,6 +39,7 @@ export default defineConfig({
   compressHTML: false,
   build: { inlineStylesheets: "always" },
   publicDir: `./${GENERATED}`,
-  vite: { plugins: [publicDirIndexes()] },
+  // 2026-11-26, measured at 7bc9a49b (Issue #1392): Astro writes a processed page script into its page only under this limit and otherwise emits a fingerprinted file; the largest, the Primer's own, is 11341 bytes (the index's 3240, the shell's 2362), so 16384 leaves it 5043 bytes to grow.
+  vite: { plugins: [publicDirIndexes()], build: { assetsInlineLimit: 16384 } },
   integrations: [servedSources()],
 });

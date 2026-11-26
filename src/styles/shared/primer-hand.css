@@ -87,25 +87,8 @@
   letter-spacing: 0.08em;
 }
 .primer-slip-dots {
-  display: flex;
-  gap: 0.22rem;
   margin-left: auto;
   margin-right: 1.1rem;
-}
-.primer-slip-dots i {
-  display: block;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  border: 1px solid var(--ink-brown);
-}
-.primer-slip-dots i.on {
-  background: var(--iron-red);
-  border-color: var(--iron-red);
-}
-.primer-slip-dots i.now {
-  background: var(--control-gold);
-  border-color: var(--ink-dark);
 }
 .primer-slip-act {
   flex: 1 1 auto;

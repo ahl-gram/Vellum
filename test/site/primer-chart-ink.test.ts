@@ -117,3 +117,22 @@ test("CI3 the open room alone is lit, and the hand stands at its first step this
   assert.deepEqual(read(chart, ".lit", "data-halo"), []);
   assert.equal(hand().classList.contains("on"), false);
 });
+
+test("CI4 the hand stands at the step the page shows, wherever it falls in the room, and leaves the chart when the page shows none (Issue #1392 C7)", () => {
+  const explorer = room("explorer");
+  const third = explorer.steps[2];
+  assert.ok(third, "the Explorer has a third step");
+  const chart = chartOf();
+  const hand = chart.querySelector(".col-next");
+  assert.ok(hand, "the hand is in the markup");
+  const mark = chart.querySelector(`[data-step="${third.id}"]`)?.getAttribute("data-hand");
+  assert.ok(mark, "the third step has a mark for the hand");
+  const first = chart.querySelector(`[data-step="${explorer.steps[0]?.id}"]`)?.getAttribute("data-hand");
+  assert.notEqual(mark, first, "the third step's mark is not the room's first");
+
+  lightChart(chart, explorer, new Set(), desktop, third.id);
+  assert.equal(hand.getAttribute("transform"), mark);
+  assert.ok(hand.classList.contains("on"));
+  lightChart(chart, explorer, new Set(), desktop, null);
+  assert.equal(hand.classList.contains("on"), false);
+});

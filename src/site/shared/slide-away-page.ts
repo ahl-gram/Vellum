@@ -106,6 +106,27 @@ function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: number)
   };
 }
 
+export function watchPointer(
+  doc: Document,
+  slide: SlideAway,
+  head: HTMLElement,
+  folioSpot: (x: number, y: number) => Spot,
+): void {
+  doc.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!steers(e.pointerType) || e.buttons !== 0) return;
+      const x = pageX(e.clientX, window.scrollX);
+      const y = pageY(e.clientY, window.scrollY);
+      slide.point(spotOf(head, "top", x, y), folioSpot(x, y));
+    },
+    { passive: true },
+  );
+  doc.documentElement.addEventListener("pointerleave", (e) => {
+    if (steers(e.pointerType)) slide.point(OFF, OFF);
+  });
+}
+
 function watchLayout(parts: RoomSlideParts, head: HTMLElement, folio: HTMLElement, remeasure: () => void): void {
   new MutationObserver(remeasure).observe(parts.sheet, { attributes: true, attributeFilter: ["style"] });
   let seen = reservesOf(parts.frame);
@@ -154,22 +175,10 @@ function watchInput(
     },
     true,
   );
-  document.addEventListener(
-    "pointermove",
-    (e) => {
-      if (!steers(e.pointerType) || e.buttons !== 0) return;
-      const x = pageX(e.clientX, window.scrollX);
-      const y = pageY(e.clientY, window.scrollY);
-      slide.point(spotOf(head, "top", x, y), covered() ? OFF : spotOf(folio, "bottom", x, y));
-    },
-    { passive: true },
-  );
-  document.documentElement.addEventListener("pointerleave", (e) => {
-    if (steers(e.pointerType)) slide.point(OFF, OFF);
-  });
+  watchPointer(document, slide, head, (x, y) => (covered() ? OFF : spotOf(folio, "bottom", x, y)));
 }
 
-const bindOnPage = (head: HTMLElement, folio: HTMLElement): SlideAway =>
+export const bindOnPage = (head: HTMLElement, folio: HTMLElement | null): SlideAway =>
   bindSlideAway({
     head,
     folio,

@@ -24,7 +24,7 @@ const { sections, kind, where = "the section you are reading is inked" } = Astro
 </Slip>
 <script>
   import { bindSlip } from "../site/shared/slip.ts";
-  import { indexInk, inViewBy, markEdges } from "../site/shared/index-ink.ts";
+  import { indexInk, inkOnChange, inViewBy, markEdges } from "../site/shared/index-ink.ts";
   import { findMarks, sectionEmpty } from "../site/glossary/term-find.ts";
 
   const slip = document.getElementById("index");
@@ -75,6 +75,7 @@ const { sections, kind, where = "the section you are reading is inked" } = Astro
     });
     window.addEventListener("scroll", ink, { passive: true });
     window.addEventListener("resize", () => { place(); ink(); });
+    inkOnChange(document.querySelector(".sheet"), ink);
     document.fonts?.ready.then(place);
     place();
     ink();

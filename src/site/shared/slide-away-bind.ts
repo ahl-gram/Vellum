@@ -17,7 +17,7 @@ export interface Spot {
 export const OFF: Spot = { on: false, near: false };
 export interface SlideAwayDeps {
   readonly head: HTMLElement;
-  readonly folio: HTMLElement;
+  readonly folio: HTMLElement | null;
   readonly atelier: HTMLDetailsElement | null;
   readonly reduce: () => boolean;
   readonly focusVisible: (target: EventTarget | null) => boolean;
@@ -37,7 +37,8 @@ interface Piece {
   point(spot: Spot, away: boolean, hold: (on: boolean) => void): void;
 }
 
-function pieceOf(el: HTMLElement, deps: SlideAwayDeps): Piece {
+function pieceOf(el: HTMLElement | null, deps: SlideAwayDeps): Piece {
+  if (el === null) return { held: new Set(), place() {}, point() {} };
   const held = new Set<Hold>();
   let written = "";
   let ease = 0;

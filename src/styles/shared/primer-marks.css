@@ -63,7 +63,7 @@
 :is(.primer, .primer-slip) .ch.btn {
   font-family: var(--font-body);
 }
-:is(.primer li.step.sealed .num, .primer-slip .primer-seal) {
+:is(.primer li.step.sealed .num, .primer-slip .primer-seal, .primer .walk-done .primer-seal) {
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -78,4 +78,30 @@
   box-shadow:
     0 1px 2px rgb(from var(--chart-ink) r g b / 0.5),
     inset 0 0 0 2px rgb(255 255 255 / 0.12);
+}
+.primer .walk-done .primer-seal {
+  width: 1.6rem;
+  height: 1.6rem;
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: 0.78rem;
+}
+:is(.primer, .primer-slip) .dots {
+  display: flex;
+  gap: 0.22rem;
+}
+:is(.primer, .primer-slip) .dots i {
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--ink-brown);
+}
+:is(.primer, .primer-slip) .dots i.on {
+  background: var(--iron-red);
+  border-color: var(--iron-red);
+}
+:is(.primer, .primer-slip) .dots i.now {
+  background: var(--control-gold);
+  border-color: var(--ink-dark);
 }
