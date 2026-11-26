@@ -280,6 +280,7 @@ type Head = {
   trail: { x: number; y: number };
   bandFoot: number;
   stepTop: number;
+  chartTop: number;
 };
 
 const HEAD: Payload<Head> = `(() => {
@@ -297,8 +298,12 @@ const HEAD: Payload<Head> = `(() => {
     trail: { x: t.x + 12, y: t.y + t.height / 2 },
     bandFoot: +parseFloat(getComputedStyle(document.querySelector(".band"), "::after").top).toFixed(1),
     stepTop: step ? +step.getBoundingClientRect().top.toFixed(1) : -1,
+    chartTop: +document.querySelector(".primer nav.col-head").getBoundingClientRect().top.toFixed(1),
   };
 })()`;
+
+// 2026-11-26: the chart's top in the ruled a3 still at 1280x800, measured by the plate reader on the stills (Issue #1392 comment 7193973389).
+const A3_CHART_TOP = 593.8;
 
 export async function ix12HeadAway(k: DocRoomsKit): Promise<void> {
   const { evaluate, send, check, stable, goto } = k;
@@ -310,14 +315,16 @@ export async function ix12HeadAway(k: DocRoomsKit): Promise<void> {
   await mouseMove(send, rest.trail.x + 1, rest.trail.y);
   const home = await stable(HEAD, "primer-head-brought-back", { departed: (d) => d.ty !== rest.ty });
   check(
-    "IX12 on the Primer at rest the head cluster stands tucked away, its nav's ink above the window and its thin line's ink inside the band; a real mouse brought to rest on the thin line brings the nav's ink into the window over the band's ground, past the thin line's foot, and the step under it does not move (Issue #1392 D3)",
+    "IX12 on the Primer at rest the head cluster stands tucked away, its nav's ink above the window and its thin line's ink inside the band; a real mouse brought to rest on the thin line brings the nav's ink into the window over the band's ground, past the thin line's foot, and the step under it does not move; the chart of lessons stands at the ruled a3 still's 593.8 px, a clear gap under the walk's row (Issue #1392 D3, ruling of 2026-11-26)",
     rest.nav[1] <= 0 &&
       rest.where[0] >= 0 &&
       rest.where[1] <= rest.bandFoot &&
       home.nav[0] >= 0 &&
       home.bandFoot >= home.where[1] &&
       home.stepTop === rest.stepTop &&
-      rest.stepTop > 0,
+      rest.stepTop > 0 &&
+      Math.abs(rest.chartTop - A3_CHART_TOP) <= 1 &&
+      home.chartTop === rest.chartTop,
     `rest ${JSON.stringify(rest)}; home ${JSON.stringify(home)}`,
   );
 }
