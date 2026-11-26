@@ -8,6 +8,7 @@ import { bridgesOn, churchAt, harbourAt, keepAt, marketAt, PLOT } from "./landma
 import { blocksOf, corridor, plotMask, type Plot } from "./network.ts";
 import { HALF_WIDTH, landStreets } from "./streets-land.ts";
 import { streetVillage } from "./villages.ts";
+import { withinBudget } from "./budget.ts";
 
 function gatesOn(world: World, wall: ReadonlyArray<P>): PlanGate[] {
   const out: PlanGate[] = [];
@@ -57,7 +58,7 @@ export function planTown(world: World, index: number): TownPlan {
   const R = radiusFor(kind, s.score);
   const G = readGround(world, { x: s.x, y: s.y }, R);
   const base = { seed: world.recipe.seed, index, centre: { x: s.x, y: s.y }, radius: R };
-  if (kind === "village") return village(G, base, rng.fork("village"));
+  if (kind === "village") return withinBudget(village(G, base, rng.fork("village")));
 
   const fp = footprint(G, rng.fork("wall"));
   const wall = fp.ring;
@@ -98,7 +99,7 @@ export function planTown(world: World, index: number): TownPlan {
     ...bridges,
     ...(harbour ? [{ kind: "harbour" as const, at: harbour }] : []),
   ];
-  return { ...base, wall, gates, streets, blocks, landmarks, quay: fp.quay };
+  return withinBudget({ ...base, wall, gates, streets, blocks, landmarks, quay: fp.quay });
 }
 
 function village(G: Ground, base: Pick<TownPlan, "seed" | "index" | "centre" | "radius">, rng: Rng): TownPlan {
