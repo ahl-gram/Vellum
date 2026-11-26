@@ -4,6 +4,7 @@ import { clearSeals, readSeals } from "../shared/primer/seals.ts";
 import type { Device, Only } from "../shared/primer/hand-steps.ts";
 import type { ArrivalRoom } from "./arrival.ts";
 import { inkChart, lightChart } from "./chart-ink.ts";
+import { holdAddress } from "./hold-address.ts";
 import { landing, stepAfter, stepBefore, type Aim } from "./walk.ts";
 import { buildDone, buildRow } from "./walk-row.ts";
 import { SEALED, WALK_OPENING } from "./words.ts";
@@ -146,11 +147,13 @@ export function bindPrimer(doc: Document = document): void {
   };
 
   primer.classList.add("walking");
+  window.history.scrollRestoration = "manual";
   const opening = primer.querySelector(".opening p:not(.lede)");
   if (opening !== null) opening.textContent = WALK_OPENING;
   drawSeals();
   const aim = aimOf(location.hash.slice(1));
   land(aim, aim.kind !== "none");
+  if (aim.kind !== "none") holdAddress(window, doc);
 
   doc.addEventListener("click", (e) => {
     const el = e.target instanceof Element ? e.target : null;
@@ -174,6 +177,12 @@ export function bindPrimer(doc: Document = document): void {
   });
   window.addEventListener("hashchange", () => landAt(location.hash.slice(1)));
   window.addEventListener("popstate", () => landAt(location.hash.slice(1)));
+  window.addEventListener("pageshow", (e) => {
+    if (!e.persisted) return;
+    drawSeals();
+    if (shown !== null && sealed.has(shown)) land({ kind: "step", room: openId, step: shown }, true);
+    else show(shown);
+  });
   primer.querySelector(".wipe")?.addEventListener("click", () => {
     clearSeals(device);
     drawSeals();

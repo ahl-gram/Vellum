@@ -83,7 +83,7 @@ const foldedOf = (document: Document) =>
   ]);
 
 function bound(hash: string, sealed: string, press?: string) {
-  const { document, Event, scrolled, tops, error } = load("", hash, sealed);
+  const { document, Event, scrolled, tops, replaced, error } = load("", hash, sealed);
   if (press !== undefined)
     document.querySelector(`#index a.sec[href="#${press}"]`)?.dispatchEvent(new Event("click", { bubbles: true }));
   const folded = foldedOf(document);
@@ -96,6 +96,7 @@ function bound(hash: string, sealed: string, press?: string) {
     error,
     scrolled,
     tops,
+    replaced,
     folded,
     lessons,
     now,
@@ -147,6 +148,7 @@ test("PB1 a hash that is not a valid percent-encoding leaves the page as bound a
 test("PB2 a hash naming something outside a room is where the reader lands, whatever the seals say (Issue #1251 skeptic)", () => {
   const got = bound("#afterward", "a1");
   assert.deepEqual(got.scrolled, [], "the resume room's head is not scrolled to over the address the reader came by");
+  assert.deepEqual(got.replaced, [], "its address is left for the browser's own jump");
   assert.deepEqual(
     got.folded,
     [
@@ -157,7 +159,7 @@ test("PB2 a hash naming something outside a room is where the reader lands, what
   );
 });
 
-test("PB3 a returner with no address resumes at the first room with a step still to seal, its step shown with no scroll; a hash naming a lesson opens its room at the lesson's first step, the page brought to its top (Issue #1392 C6, C14)", () => {
+test("PB3 a returner with no address resumes at the first room with a step still to seal, its step shown with no scroll and no address held; a hash naming a lesson opens its room at the lesson's first step, asks the window for its top and holds its address from the browser's own jump (Issue #1392 C6, C14, C24)", () => {
   const back = bound("", "a1");
   assert.deepEqual(back.folded, [
     ["a", true],
@@ -165,6 +167,7 @@ test("PB3 a returner with no address resumes at the first room with a step still
   ]);
   assert.deepEqual(back.scrolled, []);
   assert.deepEqual(back.tops, []);
+  assert.deepEqual(back.replaced, []);
   assert.deepEqual(back.now, ["b1"]);
   const named = bound("#b-one", "");
   assert.deepEqual(named.folded, [
@@ -172,6 +175,7 @@ test("PB3 a returner with no address resumes at the first room with a step still
     ["b", false],
   ]);
   assert.deepEqual(named.tops, [[0, 0]]);
+  assert.deepEqual(named.replaced, ["/primer/"]);
   assert.deepEqual(named.now, ["b1"]);
 });
 
@@ -255,7 +259,7 @@ test("PB8 the page walks: its first step alone and its lesson marked, the chart 
   assert.equal(document.querySelector("li.now"), null);
 });
 
-test("PB9 a hash naming a sealed step lands past it with a Done line holding its seal and act, at the room's end where nothing is left, the page brought to its top (Issue #1392 D5, C6, C14)", () => {
+test("PB9 a hash naming a sealed step lands past it with a Done line holding its seal and act, at the room's end where nothing is left, and asks the window for its top (Issue #1392 D5, C6, C14)", () => {
   const got = bound("#a1", "a1");
   assert.equal(got.document.querySelector(".walk-done")?.textContent, "1Done: Press a1");
   assert.equal(got.document.querySelector(".primer")?.classList.contains("room-end"), true);
@@ -305,4 +309,32 @@ test("PB10 Skip and Back keep the keyboard on the walk: the press used takes the
   const fresh = load("", "", "");
   fresh.document.querySelector(".walk-skip")?.dispatchEvent(new fresh.Event("click", { bubbles: true }));
   assert.deepEqual(fresh.focused, [], "a press that held no focus hands none");
+});
+
+test("PB13 the Primer lands itself on every load: it asks the browser not to put back a scroll it left, so a reload lands at the top like any landing (Issue #1392 comment 7201280596, D8)", () => {
+  const { win } = load("", "", "");
+  assert.equal(win.history.scrollRestoration, "manual");
+});
+
+test("PB12 the browser's Back to the page it kept reads the seals again: the step shown, sealed while the reader was away, lands past it with its Done line at the page's top, and a step not sealed stays shown with no Done line; a page's first showing does nothing (Issue #1392 D1, D5, comment 7201280596)", () => {
+  const { document, listeners, store, tops } = load("", "", "");
+  const shown = (persisted: boolean): void => {
+    for (const run of listeners.get("pageshow") ?? []) run({ persisted });
+  };
+  const now = (): string | undefined => document.querySelector("li.now")?.id;
+  const done = (): string | null => document.querySelector(".walk-done")?.textContent ?? null;
+  shown(true);
+  assert.equal(now(), "a1");
+  assert.equal(done(), null);
+  assert.equal(document.querySelector(".walk .walk-skip") === null, false, "the row stands");
+  store.setItem(PRIMER_STORE_KEY, "a1");
+  shown(false);
+  assert.equal(now(), "a1");
+  assert.equal(done(), null);
+  assert.equal(document.querySelector("#a1")?.classList.contains("sealed"), false, "a first showing reads nothing");
+  shown(true);
+  assert.equal(done(), "1Done: Press a1");
+  assert.equal(document.querySelector(".primer")?.classList.contains("room-end"), true);
+  assert.equal(document.querySelector("#a1")?.classList.contains("sealed"), true);
+  assert.deepEqual(tops[tops.length - 1], [0, 0]);
 });
