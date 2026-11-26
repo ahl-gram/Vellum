@@ -76,7 +76,7 @@ function transects(
   return { backdrop, foreground };
 }
 
-function prospectKind(world: World, s: Site, index: number): ProspectKind {
+export function prospectKind(world: World, s: Site, index: number): ProspectKind {
   if (s.kind === "capital") return "capital";
   if (world.realms.seats.includes(index)) return "seat";
   return s.kind === "farmstead" || s.kind === "mill" ? "hamlet" : s.kind;
