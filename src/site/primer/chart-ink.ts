@@ -33,6 +33,7 @@ export function lightChart(
   room: ArrivalRoom | undefined,
   sealed: ReadonlySet<string>,
   device: Device,
+  _step?: string | null,
 ): void {
   for (const light of chart.querySelectorAll("[data-halo]")) {
     light.classList.toggle("lit", room !== undefined && light.getAttribute("data-halo") === room.id);
