@@ -2,7 +2,7 @@ import { stepAddress, type HandStep, type SealWhen } from "./hand-steps.ts";
 import { ASIDE, BACK, DONE, FROM, headOf, MARKS, NEXT_STEP, onward } from "./hand-words.ts";
 import { segmentsOf } from "./segments.ts";
 
-const make = <K extends keyof HTMLElementTagNameMap>(
+export const make = <K extends keyof HTMLElementTagNameMap>(
   doc: Document,
   tag: K,
   className: string,
@@ -14,14 +14,18 @@ const make = <K extends keyof HTMLElementTagNameMap>(
   return el;
 };
 
-const dotsOf = (step: HandStep, sealed: ReadonlySet<string>, done: boolean): readonly string[] =>
-  step.siblings.map((id) => (id === step.id ? (done ? "on" : "now") : sealed.has(id) ? "on" : ""));
+export const dotsOf = (
+  siblings: readonly string[],
+  id: string,
+  sealed: ReadonlySet<string>,
+  done: boolean,
+): readonly string[] => siblings.map((s) => (s === id ? (done ? "on" : "now") : sealed.has(s) ? "on" : ""));
 
 export function buildNote(doc: Document, step: HandStep, sealed: ReadonlySet<string>, when: SealWhen): HTMLElement {
   const note = make(doc, "aside", "primer-slip");
   const head = make(doc, "p", "primer-slip-head");
-  const dots = make(doc, "span", "primer-slip-dots");
-  for (const on of dotsOf(step, sealed, false)) {
+  const dots = make(doc, "span", "primer-slip-dots dots");
+  for (const on of dotsOf(step.siblings, step.id, sealed, false)) {
     const dot = make(doc, "i", on);
     dot.setAttribute("aria-hidden", "true");
     dots.append(dot);
@@ -62,7 +66,7 @@ export function markDone(note: HTMLElement, step: HandStep, sealed: ReadonlySet<
   const row = note.querySelector(".primer-slip-row");
   if (row === null || row.querySelector(".primer-slip-done") !== null) return;
   [...note.querySelectorAll(".primer-slip-dots i")].forEach((dot, i) => {
-    dot.setAttribute("class", dotsOf(step, sealed, true)[i] ?? "");
+    dot.setAttribute("class", dotsOf(step.siblings, step.id, sealed, true)[i] ?? "");
   });
   const done = make(doc, "span", "primer-slip-done");
   done.append(make(doc, "b", "primer-seal", String(step.n)), doc.createTextNode(DONE));
