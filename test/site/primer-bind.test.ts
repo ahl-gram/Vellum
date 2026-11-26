@@ -311,7 +311,11 @@ test("PB10 Skip and Back keep the keyboard on the walk: the press used takes the
 
   const fresh = load("", "", "");
   fresh.document.querySelector(".walk-skip")?.dispatchEvent(new fresh.Event("click", { bubbles: true }));
-  assert.deepEqual(fresh.focused, [], "a press that held no focus hands none");
+  assert.deepEqual(
+    fresh.focused.map((f) => f.el.className),
+    [],
+    "a press that held no focus hands none",
+  );
 });
 
 test("PB13 the Primer lands itself on every load: it asks the browser not to put back a scroll it left, so a reload lands at the top like any landing (Issue #1392 comment 7201280596, D8)", () => {
