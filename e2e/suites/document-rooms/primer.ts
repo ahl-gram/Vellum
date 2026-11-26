@@ -1,4 +1,4 @@
-import { sendClick } from "../../support/input.ts";
+import { mouseMove, sendClick } from "../../support/input.ts";
 import { primerPage } from "../../../src/site/primer/page.ts";
 import { LADDERS } from "../../../src/site/shared/primer/ladders.ts";
 import { emitSeals, PRIMER_STORE_KEY } from "../../../src/site/shared/primer/seals.ts";
@@ -264,5 +264,56 @@ export async function ix11ChartPress(k: DocRoomsKit): Promise<void> {
       after.errors === 0 &&
       lands(after),
     `arrived ${JSON.stringify(arrived)}; under ${JSON.stringify(under)}; before ${JSON.stringify(before)}; landed ${JSON.stringify(landed)}; aim ${JSON.stringify(aim)}; after ${JSON.stringify(after)}`,
+  );
+}
+
+type Head = {
+  bound: boolean;
+  fonts: boolean;
+  ty: string;
+  nav: [number, number];
+  where: [number, number];
+  trail: { x: number; y: number };
+  bandFoot: number;
+  stepTop: number;
+};
+
+const HEAD: Payload<Head> = `(() => {
+  const r = document.createRange();
+  const ink = (el) => { r.selectNodeContents(el); const b = r.getBoundingClientRect(); return [+b.top.toFixed(1), +b.bottom.toFixed(1)]; };
+  const head = document.querySelector("header.chrome");
+  const t = head.querySelector(".trail").getBoundingClientRect();
+  const step = [...document.querySelectorAll(".primer li.step")].find((li) => li.getBoundingClientRect().height > 0);
+  return {
+    bound: !!document.querySelector(".primer[data-bound]"),
+    fonts: document.fonts.status === "loaded",
+    ty: getComputedStyle(head).translate,
+    nav: ink(head.querySelector("nav.rooms")),
+    where: ink(head.querySelector(".where")),
+    trail: { x: t.x + 12, y: t.y + t.height / 2 },
+    bandFoot: +parseFloat(getComputedStyle(document.querySelector(".band"), "::after").top).toFixed(1),
+    stepTop: step ? +step.getBoundingClientRect().top.toFixed(1) : -1,
+  };
+})()`;
+
+export async function ix12HeadAway(k: DocRoomsKit): Promise<void> {
+  const { evaluate, send, check, stable, goto } = k;
+  await goto(PRIMER);
+  await evaluate(put(PRIMER_STORE_KEY, null));
+  await goto(PRIMER);
+  const rest = await stable(HEAD, "primer-head-at-rest", { departed: (d) => d.bound && d.fonts && d.ty !== "none" });
+  await mouseMove(send, rest.trail.x, rest.trail.y);
+  await mouseMove(send, rest.trail.x + 1, rest.trail.y);
+  const home = await stable(HEAD, "primer-head-brought-back", { departed: (d) => d.ty !== rest.ty });
+  check(
+    "IX12 on the Primer at rest the head cluster stands tucked away, its nav's ink above the window and its thin line's ink inside the band; a real mouse brought to rest on the thin line brings the nav's ink into the window over the band's ground, past the thin line's foot, and the step under it does not move (Issue #1392 D3)",
+    rest.nav[1] <= 0 &&
+      rest.where[0] >= 0 &&
+      rest.where[1] <= rest.bandFoot &&
+      home.nav[0] >= 0 &&
+      home.bandFoot >= home.where[1] &&
+      home.stepTop === rest.stepTop &&
+      rest.stepTop > 0,
+    `rest ${JSON.stringify(rest)}; home ${JSON.stringify(home)}`,
   );
 }
