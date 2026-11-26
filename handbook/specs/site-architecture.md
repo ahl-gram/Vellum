@@ -187,8 +187,9 @@ SVG remains the byte-faithful artifact.
   unadopted veil" is what proves it still happens.
 - **A layout `<script>` MAY import a `.ts` module.** This corrects how #289 is usually cited. An
   Astro-processed script, meaning one WITHOUT `is:inline`, is inlined into every page's html and
-  emits no file while its chunk stays under the bundler's default inline limit, which this repo does
-  not configure. #289's own precedent is an `is:inline` script with no imports, which can never
+  emits no file while its chunk stays under the bundler's inline limit, which `astro.config.ts`
+  raises above Vite's default (`vite.build.assetsInlineLimit`, its value and its reason at the line),
+  so the Primer's own script stays in its page (Issue #1392). #289's own precedent is an `is:inline` script with no imports, which can never
   import anything, so it settles nothing about a processed one.
 - **The cliff is guarded, not silent.** If such a chunk ever crosses the inline limit, the build
   emits a module file and the test "the deploy artifact serves no raw app source, no `.d.ts`, and no

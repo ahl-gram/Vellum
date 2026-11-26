@@ -879,7 +879,7 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
 });
 
 test("the shell's own script rides every page, inlined by Astro rather than emitted as a file (#483 ruling, option 1)", () => {
-  // The chunk is under Vite's 4096-byte inline limit, so Astro inlines it; "the deploy artifact serves no raw app source" below reds if it ever crosses.
+  // The chunk is under the inline limit astro.config.ts sets, so Astro inlines it; "the deploy artifact serves no raw app source" below reds if it ever crosses.
   for (const p of PAGES) {
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
