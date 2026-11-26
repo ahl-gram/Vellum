@@ -120,7 +120,7 @@ export async function cd38BackRebuilt({
   pressById,
 }: TableKit): Promise<void> {
   await go(`${DRESS}&table=${ONE}`);
-  // The cache is refused by evicting the Explorer with a channel message the Prospect page posts (`armColdBack` and `evictColdBack` in `e2e/support/cold-back.ts`), a deliberately artificial instrument (Gate 2 item 14), and the check asserts its own premise, that the document really was re-created, so a browser that restores it anyway reds here instead of quietly measuring CD37 a second time.
+  // The cache is refused by evicting the Explorer with a channel message the Prospect page posts, a deliberately artificial instrument (Gate 2 item 14).
   await evaluate(`window.__cd634 = "cold"`);
   await armColdBack(evaluate);
   await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
