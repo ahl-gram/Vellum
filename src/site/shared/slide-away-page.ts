@@ -96,7 +96,7 @@ function measure(
   };
 }
 
-function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: number): Spot {
+export function spotOf(el: HTMLElement, toward: "top" | "bottom", x: number, y: number): Spot {
   const home = rectOf(el);
   if (home === null) return OFF;
   const reach = reachOf(getComputedStyle(el, "::before"));
@@ -169,7 +169,7 @@ function watchInput(
   });
 }
 
-const bindOnPage = (head: HTMLElement, folio: HTMLElement): SlideAway =>
+export const bindOnPage = (head: HTMLElement, folio: HTMLElement | null): SlideAway =>
   bindSlideAway({
     head,
     folio,

@@ -15,7 +15,7 @@ const first = page.rooms[0]?.id ?? AFTERWARD;
 const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 ---
 
-<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/primer-marks.css", "/shared/chart-of-lessons.css", "/shared/document-room.css"]} desk="open">
+<BaseLayout room={ROOM} description={DESCRIPTION} path="/primer/" extraCss={["/shared/primer-marks.css", "/shared/chart-of-lessons.css", "/shared/document-room.css", "/shared/slide-away.css"]} desk="open">
 <Fog />
 <RoomFolio slot="desk" region room={ROOM} tagline={TAGLINE}>
   <p class="dateline">{page.dateline}</p>
@@ -71,8 +71,10 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 </div>
 </div>
 <script>
+  import { bindHeadAway } from "../../site/primer/head-away.ts";
   import { bindPrimer } from "../../site/primer/bind.ts";
 
+  bindHeadAway();
   bindPrimer();
 </script>
 </BaseLayout>
