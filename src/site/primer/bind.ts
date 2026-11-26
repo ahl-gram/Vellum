@@ -2,12 +2,15 @@ import { TOUCH_PRIMARY } from "../shared/chart-touch.ts";
 import { prefersReduce } from "../shared/reduced-motion.ts";
 import { clearSeals, readSeals } from "../shared/primer/seals.ts";
 import type { Device, Only } from "../shared/primer/hand-steps.ts";
-import { roomOnArrival, type ArrivalRoom } from "./arrival.ts";
+import type { ArrivalRoom } from "./arrival.ts";
 import { inkChart, lightChart } from "./chart-ink.ts";
-import { SEALED } from "./words.ts";
+import { landing, stepAfter, stepBefore, type Aim } from "./walk.ts";
+import { buildDone, buildRow } from "./walk-row.ts";
+import { SEALED, WALK_OPENING } from "./words.ts";
 
 const ONLY: ReadonlySet<string> = new Set(["touch", "motion"]);
 const device = (): Storage => localStorage;
+const NONE: Aim = { kind: "none" };
 
 export function bindPrimer(doc: Document = document): void {
   const primer = doc.querySelector<HTMLElement>(".primer");
@@ -23,23 +26,23 @@ export function bindPrimer(doc: Document = document): void {
   }));
   const here: Device = { touch: matchMedia(TOUCH_PRIMARY).matches, motion: !prefersReduce() };
   const chart = primer.querySelector(".col-chart");
+  const chartNode = chart?.closest("nav.col-head") ?? chart;
+  const closing = primer.querySelector(".closing");
   let sealed: ReadonlySet<string> = new Set();
+  let openId = "";
+  let shown: string | null = null;
   const lessons = [...doc.querySelectorAll<HTMLElement>("#index .index > li[data-sec]")].flatMap((row) => {
     const list = row.querySelector<HTMLElement>(".entries");
     return list === null ? [] : [{ id: row.dataset["sec"] ?? "", list }];
   });
   const open = (id: string): void => {
+    openId = id;
     for (const l of lessons) l.list.hidden = l.id !== id;
     for (const room of rooms) {
       const on = idOf(room) === id;
       room.classList.toggle("folded", !on);
       const body = room.querySelector<HTMLElement>(".room-body");
-      const press = room.querySelector<HTMLElement>(".unfold");
       if (body !== null) body.hidden = !on;
-      if (press !== null) {
-        press.hidden = on;
-        press.setAttribute("aria-expanded", String(on));
-      }
     }
     if (chart !== null)
       lightChart(
@@ -49,10 +52,15 @@ export function bindPrimer(doc: Document = document): void {
         here,
       );
   };
-  const roomOf = (id: string): string | null => {
-    if (id === "") return null;
-    const room = doc.getElementById(id)?.closest("section.room");
-    return room ? idOf(room) : null;
+  const aimOf = (id: string): Aim => {
+    const el = id === "" ? null : doc.getElementById(id);
+    const room = el === null ? null : el.closest("section.room");
+    if (el === null || room === null) return NONE;
+    if (el.matches("li.step")) return { kind: "step", room: idOf(room), step: el.id };
+    if (el.matches("section.lesson")) {
+      return { kind: "lesson", room: idOf(room), first: el.querySelector("li.step")?.id ?? "" };
+    }
+    return { kind: "room", room: idOf(room) };
   };
   const drawSeals = (): void => {
     sealed = readSeals(device);
@@ -71,45 +79,95 @@ export function bindPrimer(doc: Document = document): void {
     }
     if (chart !== null) inkChart(chart, arrival, sealed, here);
   };
-  const show = (id: string): void => doc.getElementById(id)?.scrollIntoView({ block: "start", inline: "nearest" });
+  const clearDone = (): void => {
+    for (const line of [...primer.querySelectorAll(".walk-done")]) line.remove();
+  };
+  const show = (step: string | null): void => {
+    shown = step;
+    for (const el of [...primer.querySelectorAll(".now, .walk")]) {
+      if (el.classList.contains("walk")) el.remove();
+      else el.classList.remove("now");
+    }
+    primer.classList.toggle("room-end", step === null);
+    const li = step === null ? null : doc.getElementById(step);
+    const lesson = li?.closest("section.lesson") ?? null;
+    const list = li?.closest("ol") ?? null;
+    if (step !== null && li !== null && lesson !== null && list !== null) {
+      li.classList.add("now");
+      lesson.classList.add("now");
+      const title = lesson.querySelector("h3")?.childNodes[1]?.textContent?.trim() ?? "";
+      const siblings = [...lesson.querySelectorAll("li.step")].map((s) => s.id);
+      const first = arrival.find((r) => r.id === openId)?.steps[0]?.id === step;
+      list.after(buildRow(doc, title, siblings, step, sealed, first));
+    }
+    if (chart !== null)
+      lightChart(
+        chart,
+        arrival.find((r) => r.id === openId),
+        sealed,
+        here,
+        step,
+      );
+  };
+  const land = (aim: Aim, top: boolean): void => {
+    const l = landing(arrival, aim, sealed, here);
+    if (l === null) return;
+    open(l.room);
+    clearDone();
+    primer.classList.toggle("walk-end", l.end);
+    if (chartNode !== null && closing !== null) {
+      if (l.end) closing.after(chartNode);
+      else closing.before(chartNode);
+    }
+    show(l.step);
+    const done = l.done === null ? null : doc.getElementById(l.done);
+    const body = rooms.find((r) => idOf(r) === l.room)?.querySelector(".room-body");
+    if (done !== null && body !== null && body !== undefined) {
+      body.prepend(
+        buildDone(
+          doc,
+          done.querySelector(".num")?.textContent.trim() ?? "",
+          done.querySelector(".act")?.textContent.trim() ?? "",
+        ),
+      );
+    }
+    if (top) window.scrollTo(0, 0);
+  };
+  const landAt = (hash: string): void => {
+    const aim = aimOf(hash);
+    if (aim.kind !== "none") land(aim, true);
+  };
 
-  const hash = location.hash.slice(1);
-  const target = roomOf(hash);
+  primer.classList.add("walking");
+  const opening = primer.querySelector(".opening p:not(.lede)");
+  if (opening !== null) opening.textContent = WALK_OPENING;
   drawSeals();
-  const first = roomOnArrival(arrival, target, sealed, here);
-  if (first !== null) {
-    open(first);
-    if (target !== null) show(hash);
-    else if (first !== arrival[0]?.id && (hash === "" || doc.getElementById(hash) === null)) show(first);
-  }
+  const aim = aimOf(location.hash.slice(1));
+  land(aim, aim.kind !== "none");
 
   doc.addEventListener("click", (e) => {
     const el = e.target instanceof Element ? e.target : null;
-    const press = el?.closest(".unfold");
+    const press = el?.closest(".walk button");
     if (press) {
-      const room = press.closest("section.room");
-      if (room) {
-        open(idOf(room));
-        show(idOf(room));
-      }
+      const room = arrival.find((r) => r.id === openId);
+      if (press.hasAttribute("disabled") || room === undefined || shown === null) return;
+      clearDone();
+      show(press.classList.contains("walk-skip") ? stepAfter(room, shown) : stepBefore(room, shown));
       return;
     }
-    const link = el?.closest('a[href^="#"]');
-    const room = link ? roomOf((link.getAttribute("href") ?? "").slice(1)) : null;
-    if (room !== null) open(room);
+    const href = el?.closest('a[href^="#"]')?.getAttribute("href") ?? "";
+    const aim = aimOf(href.slice(1));
+    if (aim.kind === "none") return;
+    e.preventDefault();
+    window.history.pushState(null, "", href);
+    land(aim, true);
   });
-  window.addEventListener("hashchange", () => {
-    const room = roomOf(location.hash.slice(1));
-    if (room !== null) open(room);
-  });
+  window.addEventListener("hashchange", () => landAt(location.hash.slice(1)));
+  window.addEventListener("popstate", () => landAt(location.hash.slice(1)));
   primer.querySelector(".wipe")?.addEventListener("click", () => {
     clearSeals(device);
     drawSeals();
-    const home = arrival[0]?.id;
-    if (home !== undefined) {
-      open(home);
-      show(home);
-    }
+    land(NONE, true);
   });
   primer.setAttribute("data-bound", "");
 }

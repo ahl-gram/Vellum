@@ -93,11 +93,8 @@ export function entryCountFaults(doc: Document): string[] {
 }
 
 export function openFaults(doc: Document): string[] {
-  const presses = [...doc.querySelectorAll(".primer .unfold")];
   return faults([
-    presses.length > 0 || "the page has no fold press to read",
     doc.querySelector(".primer .room-body[hidden]") === null || "a room is folded before any script runs",
-    presses.every((p) => p.hasAttribute("hidden")) || "a fold press shows before any script runs",
     doc.querySelector(".primer li.step.sealed") === null || "a step is sealed before any script runs",
     doc.querySelector("#index .entries") !== null || "the index lists no lessons to read",
     doc.querySelector("#index .entries[hidden]") === null ||

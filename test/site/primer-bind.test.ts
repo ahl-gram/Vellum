@@ -209,7 +209,7 @@ test("PB8 the page walks: its first step alone and its lesson marked, the chart 
   const { document, Event, error } = load(`<nav class="col-head">${CHART}</nav>`, "", "");
   assert.equal(error, null);
   const primer = document.querySelector(".primer")!;
-  const nowIds = (): string[] => [...document.querySelectorAll(".now")].map((e) => e.id);
+  const nowIds = (): string[] => [...document.querySelectorAll(".now[id]")].map((e) => e.id);
   const press = (selector: string): void => {
     document.querySelector(selector)?.dispatchEvent(new Event("click", { bubbles: true }));
   };

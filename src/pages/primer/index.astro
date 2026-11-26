@@ -7,7 +7,7 @@ import ChartOfLessons from "../../layouts/ChartOfLessons.astro";
 import { LEANED_ON } from "../../site/shared/primer/ladders.ts";
 import { AFTERWARD, primerPage } from "../../site/primer/page.ts";
 import { chartFrame } from "../../site/primer/pictures.ts";
-import { CLOSING_HEAD, CLOSING_VERB, CLOSING_WHERE, DESCRIPTION, LEDE, NEXT, ROOM, TAGLINE, TRY, UNFOLD, WHERE, WIPE } from "../../site/primer/words.ts";
+import { CLOSING_HEAD, CLOSING_VERB, CLOSING_WHERE, DESCRIPTION, LEDE, NEXT, ROOM, TAGLINE, TRY, WHERE, WIPE } from "../../site/primer/words.ts";
 
 const page = primerPage();
 const FRAME = chartFrame();
@@ -30,7 +30,7 @@ const [faq, glossary] = LEANED_ON.map((route) => `..${route}`);
 </div>
 {page.rooms.map((r) => (
   <section class={r.of === undefined ? "room" : "room sub"} data-route={r.route}>
-    <div class="room-head"><h2 id={r.id}>{r.name}{r.of !== undefined && <span class="of">{r.of}</span>}</h2><button class="unfold" type="button" aria-controls={`${r.id}-steps`} aria-expanded="true" hidden>{UNFOLD} ›</button></div>
+    <div class="room-head"><h2 id={r.id}>{r.name}{r.of !== undefined && <span class="of">{r.of}</span>}</h2></div>
     <p class="what">{r.what}{r.entered !== undefined && <Fragment> <span class="entered">{r.entered}</span></Fragment>}</p>
     <div class="room-body" id={`${r.id}-steps`}>
       {r.lessons.map((l) => (

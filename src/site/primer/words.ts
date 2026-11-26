@@ -7,7 +7,6 @@ export const TRY = "Try it";
 export const OPENS = (room: string): string => `opens ${room} at this step`;
 export const OF = (room: string): string => `a room of ${room}`;
 export const ENTERED = (how: string): string => `You come to it ${how}.`;
-export const UNFOLD = "open these steps";
 export const BACK_A_STEP = "‹ Back a step";
 export const SKIP_THIS_STEP = "Skip this step ›";
 export const DONE_LINE = (act: string): string => `Done: ${act}`;
