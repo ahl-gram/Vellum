@@ -20,6 +20,8 @@ export const UNIT_SECONDS: Readonly<Record<string, number>> = {
   "test/prospect/letter.test.ts": 28,
   "test/prospect/plate-e-world.test.ts": 20,
   "test/prospect/surroundings.test.ts": 14,
+  "test/prospect/town-plan-world.test.ts": 15,
+  "test/prospect/town-plan.test.ts": 22,
   "test/render/cartouche-engraving.test.ts": 6,
   "test/render/close-up-name-room.test.ts": 45,
   "test/render/close-up-names.test.ts": 23,

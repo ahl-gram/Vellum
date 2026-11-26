@@ -4,7 +4,7 @@ import type { PlanPoint, TownPlan } from "./types.ts";
 
 export const PLAN_POINTS = 1950;
 const LADDER_STEP = 0.001;
-const LADDER_STEPS = 40;
+const LADDER_STEPS = 40; // 2026-11-26: the 7 capitals of seeds 43 to 300 over the limit need at most 3 steps (seed 181) and their non-block points reach at most 627, so 40 steps hold the limit with room (Issue #793 PR #1497)
 
 const count = (lines: ReadonlyArray<ReadonlyArray<PlanPoint>>): number => lines.reduce((a, l) => a + l.length, 0);
 

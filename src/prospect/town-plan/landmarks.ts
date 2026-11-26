@@ -1,8 +1,7 @@
 import type { PlanGate, PlanLandmark } from "./types.ts";
 import { dist, distanceToPolyline, insideRing, lineLineCrossings, type P } from "./geom.ts";
-import { nodeP, type Ground } from "./ground.ts";
+import { nodeP, type Ground, type PlanKind } from "./ground.ts";
 import type { Mask } from "./lattice.ts";
-import type { PlanKind } from "./ground.ts";
 
 // Cells: the open ground each landmark keeps clear of houses.
 export const PLOT = {

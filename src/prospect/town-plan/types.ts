@@ -1,5 +1,5 @@
 export type PlanPoint = { readonly x: number; readonly y: number }; // grid space, in cells: x east, y south
-export type PlanGate = { readonly at: PlanPoint; readonly road: number }; // road: an index into world.roads
+export type PlanGate = { readonly at: PlanPoint; readonly road: number };
 export type LandmarkKind = "market" | "keep" | "church" | "bridge" | "harbour";
 export type PlanLandmark = { readonly kind: LandmarkKind; readonly at: PlanPoint };
 export type TownPlan = {
