@@ -46,6 +46,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   Popovers stand down with the scrim instead.
 - **The head cluster pins its own line-height**, because a page sheet sets the body's for reading and
   the cluster must not inherit it.
+- **The head cluster takes no pointer, and everything in it inherits that.** `header.chrome` is `pointer-events: none` in `src/styles/shared/shell.css`, so the hand passes through the cluster to the chart beneath it (`CL5` in `e2e/suites/cluster.ts`), and since the property inherits, a piece seated in the cluster is dead to a mouse and to a tap until a rule gives it back: a link or a fold's `summary` takes the shell's own (`header.chrome :is(a, summary)` there), and a panel the cluster carries declares its own (`.atelier` in `src/styles/shared/chart-of-the-atelier.css`, `.primer-slip` in `src/styles/shared/primer-hand.css`). A new `button` seated there without one reads as correct in every rule and a keyboard still reaches it, so give it its allowance in the change that seats it, and press it for real in its check, never through `element.click()` (Issue #513 comment 5781877210).
 - **An absolutely positioned box wider than the 1024 page fails two ways, by the body it lands in.**
   On a page that scrolls, a phone's or a tablet's browser shrinks the whole page further to fit it,
   and clipping overflow at the root does not stop that, while a desktop window scrolls sideways past
@@ -104,6 +105,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   check asserts a visibility that depends on the environment only under the matching `matchMedia`
   condition, and pins the rule's own scoping by reading the CSSOM, which reproduces a failure only
   CI's machine shows on any machine.
+- **In an SVG drawing a stylesheet's `r` outranks every circle's own `r` attribute.** `r` is a CSS property, and an SVG attribute is only a presentation hint that any rule in a sheet beats, so one value written for a class of circles flattens every size the markup gave them: the chart of the atelier's capital, town and village pips collapsed into one size that way in its round (`design/nav-wayfinding/README.md`). Both drawings on the site size their pips per rank by attribute (`PIP_R` in `src/layouts/atelier-chart.ts`), so a sheet leaves `r` to the attribute, or writes it once per rank.
 
 These are about looking rather than the cascade, and belong beside them:
 
