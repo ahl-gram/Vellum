@@ -1,0 +1,1546 @@
+{
+ "stills": [
+  {
+   "file": "plan-control-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 265829,
+   "ms": 1412.44475
+  },
+  {
+   "file": "bird-control-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 363874,
+   "ms": 10.18337500000007
+  },
+  {
+   "file": "prof-control-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 205549,
+   "ms": 8.848041999999623
+  },
+  {
+   "file": "plan-land-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 155776,
+   "ms": 32.97337500000003
+  },
+  {
+   "file": "bird-land-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 605153,
+   "ms": 17.427042000000256
+  },
+  {
+   "file": "prof-land-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 232138,
+   "ms": 6.577125000000251
+  },
+  {
+   "file": "plan-grid-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 158888,
+   "ms": 25.771999999999935
+  },
+  {
+   "file": "bird-grid-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 688528,
+   "ms": 15.723834000000352
+  },
+  {
+   "file": "prof-grid-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 230720,
+   "ms": 5.378124999999727
+  },
+  {
+   "file": "plan-control-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 626979,
+   "ms": 66.67429099999981
+  },
+  {
+   "file": "bird-control-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 417588,
+   "ms": 8.90899999999965
+  },
+  {
+   "file": "prof-control-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 205404,
+   "ms": 5.787374999999884
+  },
+  {
+   "file": "plan-land-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 181638,
+   "ms": 29.745750000000044
+  },
+  {
+   "file": "bird-land-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 702070,
+   "ms": 17.406333999999788
+  },
+  {
+   "file": "prof-land-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 231947,
+   "ms": 5.150875000000269
+  },
+  {
+   "file": "plan-grid-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 194540,
+   "ms": 26.01491699999997
+  },
+  {
+   "file": "bird-grid-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 813087,
+   "ms": 16.841791000000285
+  },
+  {
+   "file": "prof-grid-capital-laukuwelua-ink.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 230529,
+   "ms": 4.9690410000002885
+  },
+  {
+   "file": "bird-land-lean-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "land-lean",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 409338,
+   "ms": 12.711459000000104
+  },
+  {
+   "file": "bird-grid-lean-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "grid-lean",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 449378,
+   "ms": 12.633834000000206
+  },
+  {
+   "file": "plan-land-open-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "plan",
+   "arm": "land-open",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 153356,
+   "ms": 25.398916999999983
+  },
+  {
+   "file": "bird-land-open-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "bird",
+   "arm": "land-open",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 598312,
+   "ms": 13.677291999999852
+  },
+  {
+   "file": "prof-land-true-capital-laukuwelua-antique.svg",
+   "place": "capital-laukuwelua",
+   "view": "prof",
+   "arm": "land-true",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 192643,
+   "ms": 4.550416000000041
+  },
+  {
+   "file": "plan-control-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 234484,
+   "ms": 1375.2694159999996
+  },
+  {
+   "file": "bird-control-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 413215,
+   "ms": 6.804207999999562
+  },
+  {
+   "file": "prof-control-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 217795,
+   "ms": 5.40795800000069
+  },
+  {
+   "file": "plan-land-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 161761,
+   "ms": 35.529084000000694
+  },
+  {
+   "file": "bird-land-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 510316,
+   "ms": 12.624916000000667
+  },
+  {
+   "file": "prof-land-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 233863,
+   "ms": 4.873708000000079
+  },
+  {
+   "file": "plan-grid-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 164671,
+   "ms": 35.09716599999956
+  },
+  {
+   "file": "bird-grid-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 595169,
+   "ms": 12.892374999999447
+  },
+  {
+   "file": "prof-grid-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 234332,
+   "ms": 4.967749999999796
+  },
+  {
+   "file": "plan-control-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 463709,
+   "ms": 39.41291700000056
+  },
+  {
+   "file": "bird-control-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 475195,
+   "ms": 7.848417000000154
+  },
+  {
+   "file": "prof-control-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 218038,
+   "ms": 4.01470800000061
+  },
+  {
+   "file": "plan-land-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 183394,
+   "ms": 35.77612500000032
+  },
+  {
+   "file": "bird-land-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 580302,
+   "ms": 12.520457999999962
+  },
+  {
+   "file": "prof-land-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 234060,
+   "ms": 4.946458999999777
+  },
+  {
+   "file": "plan-grid-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 192394,
+   "ms": 35.39900000000034
+  },
+  {
+   "file": "bird-grid-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 693408,
+   "ms": 13.80120799999986
+  },
+  {
+   "file": "prof-grid-capital-grurgthohold-ink.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "capital",
+   "bytes": 234529,
+   "ms": 4.567791000000398
+  },
+  {
+   "file": "prof-land-true-capital-grurgthohold-antique.svg",
+   "place": "capital-grurgthohold",
+   "view": "prof",
+   "arm": "land-true",
+   "dress": "antique",
+   "kind": "capital",
+   "bytes": 195485,
+   "ms": 4.564582999999402
+  },
+  {
+   "file": "plan-control-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 153288,
+   "ms": 1380.9403750000001
+  },
+  {
+   "file": "bird-control-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 279611,
+   "ms": 5.152665999999954
+  },
+  {
+   "file": "prof-control-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 175893,
+   "ms": 3.102458999999726
+  },
+  {
+   "file": "plan-land-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 152374,
+   "ms": 23.717125000000124
+  },
+  {
+   "file": "bird-land-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 441737,
+   "ms": 9.612833000000137
+  },
+  {
+   "file": "prof-land-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 195802,
+   "ms": 4.208332999999584
+  },
+  {
+   "file": "plan-grid-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 153605,
+   "ms": 22.578999999999724
+  },
+  {
+   "file": "bird-grid-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 495377,
+   "ms": 9.688750000000255
+  },
+  {
+   "file": "prof-grid-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 198252,
+   "ms": 4.045624999999745
+  },
+  {
+   "file": "plan-control-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 433773,
+   "ms": 43.157250000000204
+  },
+  {
+   "file": "bird-control-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 313553,
+   "ms": 4.611667000000125
+  },
+  {
+   "file": "prof-control-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 176435,
+   "ms": 2.957666000000245
+  },
+  {
+   "file": "plan-land-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 178323,
+   "ms": 24.92133300000023
+  },
+  {
+   "file": "bird-land-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 506607,
+   "ms": 11.576124999999593
+  },
+  {
+   "file": "prof-land-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 196344,
+   "ms": 4.291292000000794
+  },
+  {
+   "file": "plan-grid-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 187364,
+   "ms": 23.52770799999962
+  },
+  {
+   "file": "bird-grid-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 580462,
+   "ms": 11.510458000000654
+  },
+  {
+   "file": "prof-grid-seat-mectlan-ink.svg",
+   "place": "seat-mectlan",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "seat",
+   "bytes": 198794,
+   "ms": 3.8823330000004717
+  },
+  {
+   "file": "bird-land-lean-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "land-lean",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 326279,
+   "ms": 9.527333999999428
+  },
+  {
+   "file": "bird-grid-lean-seat-mectlan-antique.svg",
+   "place": "seat-mectlan",
+   "view": "bird",
+   "arm": "grid-lean",
+   "dress": "antique",
+   "kind": "seat",
+   "bytes": 342322,
+   "ms": 9.36804100000063
+  },
+  {
+   "file": "plan-control-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 190210,
+   "ms": 1331.3646670000007
+  },
+  {
+   "file": "bird-control-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 263431,
+   "ms": 4.955583999999362
+  },
+  {
+   "file": "prof-control-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 177047,
+   "ms": 2.774334000001545
+  },
+  {
+   "file": "plan-land-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 121830,
+   "ms": 15.66754199999923
+  },
+  {
+   "file": "bird-land-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 340153,
+   "ms": 7.954665999999634
+  },
+  {
+   "file": "prof-land-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 201571,
+   "ms": 3.8381250000002183
+  },
+  {
+   "file": "plan-grid-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 120936,
+   "ms": 15.09375
+  },
+  {
+   "file": "bird-grid-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 345788,
+   "ms": 7.520957999999155
+  },
+  {
+   "file": "prof-grid-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 201370,
+   "ms": 3.6859170000006998
+  },
+  {
+   "file": "plan-control-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 320159,
+   "ms": 32.836083999998664
+  },
+  {
+   "file": "bird-control-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 286277,
+   "ms": 5.404791999999361
+  },
+  {
+   "file": "prof-control-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 177390,
+   "ms": 2.751583000001119
+  },
+  {
+   "file": "plan-land-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 138707,
+   "ms": 16.604833999999755
+  },
+  {
+   "file": "bird-land-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 370640,
+   "ms": 7.812458999998853
+  },
+  {
+   "file": "prof-land-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 201868,
+   "ms": 3.9760000000005675
+  },
+  {
+   "file": "plan-grid-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 142009,
+   "ms": 16.14104199999929
+  },
+  {
+   "file": "bird-grid-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 379608,
+   "ms": 8.3403330000001
+  },
+  {
+   "file": "prof-grid-town-tau-ink.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "town",
+   "bytes": 201667,
+   "ms": 3.669624999998632
+  },
+  {
+   "file": "bird-land-lean-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "land-lean",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 273965,
+   "ms": 7.311041999999361
+  },
+  {
+   "file": "bird-grid-lean-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "grid-lean",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 279415,
+   "ms": 6.158750000000509
+  },
+  {
+   "file": "plan-land-open-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "plan",
+   "arm": "land-open",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 120672,
+   "ms": 15.470375000000786
+  },
+  {
+   "file": "bird-land-open-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "bird",
+   "arm": "land-open",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 336863,
+   "ms": 6.817957999999635
+  },
+  {
+   "file": "prof-land-true-town-tau-antique.svg",
+   "place": "town-tau",
+   "view": "prof",
+   "arm": "land-true",
+   "dress": "antique",
+   "kind": "town",
+   "bytes": 166667,
+   "ms": 3.324124999999185
+  },
+  {
+   "file": "plan-control-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 190116,
+   "ms": 1640.783125
+  },
+  {
+   "file": "bird-control-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 264139,
+   "ms": 4.3734170000007
+  },
+  {
+   "file": "prof-control-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 151641,
+   "ms": 2.7600000000002183
+  },
+  {
+   "file": "plan-land-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 83217,
+   "ms": 6.1680840000008175
+  },
+  {
+   "file": "bird-land-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 239818,
+   "ms": 4.324916999999914
+  },
+  {
+   "file": "prof-land-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 158013,
+   "ms": 3.0120829999996204
+  },
+  {
+   "file": "plan-grid-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 83938,
+   "ms": 5.740582999998878
+  },
+  {
+   "file": "bird-grid-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 240682,
+   "ms": 3.8880840000001626
+  },
+  {
+   "file": "prof-grid-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 162846,
+   "ms": 2.954583000000639
+  },
+  {
+   "file": "plan-control-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 341110,
+   "ms": 28.38970899999913
+  },
+  {
+   "file": "bird-control-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 268082,
+   "ms": 3.8742500000007567
+  },
+  {
+   "file": "prof-control-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 150432,
+   "ms": 2.2744579999998678
+  },
+  {
+   "file": "plan-land-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 90719,
+   "ms": 5.676250000000437
+  },
+  {
+   "file": "bird-land-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 233940,
+   "ms": 3.9545839999991586
+  },
+  {
+   "file": "prof-land-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 156758,
+   "ms": 2.8863340000007156
+  },
+  {
+   "file": "plan-grid-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 91534,
+   "ms": 5.773041999998895
+  },
+  {
+   "file": "bird-grid-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 234404,
+   "ms": 4.056749999999738
+  },
+  {
+   "file": "prof-grid-village-lokai-ink.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 161591,
+   "ms": 2.8658329999998386
+  },
+  {
+   "file": "prof-land-true-village-lokai-antique.svg",
+   "place": "village-lokai",
+   "view": "prof",
+   "arm": "land-true",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 148417,
+   "ms": 2.719959000000017
+  },
+  {
+   "file": "plan-control-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 107868,
+   "ms": 1600.1833749999987
+  },
+  {
+   "file": "bird-control-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 147981,
+   "ms": 4.358916999999565
+  },
+  {
+   "file": "prof-control-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 141048,
+   "ms": 2.749959000000672
+  },
+  {
+   "file": "plan-land-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 80302,
+   "ms": 5.032250000000204
+  },
+  {
+   "file": "bird-land-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 128303,
+   "ms": 4.635333000000173
+  },
+  {
+   "file": "prof-land-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 148702,
+   "ms": 3.146792000001369
+  },
+  {
+   "file": "plan-grid-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 81334,
+   "ms": 4.729666999999608
+  },
+  {
+   "file": "bird-grid-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 131886,
+   "ms": 4.294416000000638
+  },
+  {
+   "file": "prof-grid-village-haireno-antique.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 151429,
+   "ms": 3.0740830000013375
+  },
+  {
+   "file": "plan-control-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 336321,
+   "ms": 29.16437500000029
+  },
+  {
+   "file": "bird-control-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 156087,
+   "ms": 4.218375000000378
+  },
+  {
+   "file": "prof-control-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 139555,
+   "ms": 2.5150830000002316
+  },
+  {
+   "file": "plan-land-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 87126,
+   "ms": 5.606040999999095
+  },
+  {
+   "file": "bird-land-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 130767,
+   "ms": 4.159041999999317
+  },
+  {
+   "file": "prof-land-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 147163,
+   "ms": 2.8524170000000595
+  },
+  {
+   "file": "plan-grid-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 88196,
+   "ms": 4.444333999999799
+  },
+  {
+   "file": "bird-grid-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 134728,
+   "ms": 4.014208000000508
+  },
+  {
+   "file": "prof-grid-village-haireno-ink.svg",
+   "place": "village-haireno",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 149890,
+   "ms": 2.8059999999986758
+  },
+  {
+   "file": "plan-control-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 155480,
+   "ms": 1653.1334580000002
+  },
+  {
+   "file": "bird-control-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 234920,
+   "ms": 6.31000000000131
+  },
+  {
+   "file": "prof-control-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "control",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 132293,
+   "ms": 2.5643330000002607
+  },
+  {
+   "file": "plan-land-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 94683,
+   "ms": 13.701834000001327
+  },
+  {
+   "file": "bird-land-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 226866,
+   "ms": 3.7622919999994338
+  },
+  {
+   "file": "prof-land-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "land",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 134897,
+   "ms": 2.855833999999959
+  },
+  {
+   "file": "plan-grid-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 93572,
+   "ms": 13.32549999999901
+  },
+  {
+   "file": "bird-grid-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 220423,
+   "ms": 3.672042000000147
+  },
+  {
+   "file": "prof-grid-village-voorea-antique.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "antique",
+   "kind": "village",
+   "bytes": 139874,
+   "ms": 2.7698749999999563
+  },
+  {
+   "file": "plan-control-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 227269,
+   "ms": 60.77466699999968
+  },
+  {
+   "file": "bird-control-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 245545,
+   "ms": 3.538458000000901
+  },
+  {
+   "file": "prof-control-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "control",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 132097,
+   "ms": 2.1193340000008902
+  },
+  {
+   "file": "plan-land-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 106110,
+   "ms": 13.773083000000042
+  },
+  {
+   "file": "bird-land-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 232579,
+   "ms": 3.8491250000006403
+  },
+  {
+   "file": "prof-land-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "land",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 134655,
+   "ms": 2.7789579999989655
+  },
+  {
+   "file": "plan-grid-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "plan",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 104423,
+   "ms": 13.089125000000422
+  },
+  {
+   "file": "bird-grid-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "bird",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 224878,
+   "ms": 3.720707999998922
+  },
+  {
+   "file": "prof-grid-village-voorea-ink.svg",
+   "place": "village-voorea",
+   "view": "prof",
+   "arm": "grid",
+   "dress": "ink",
+   "kind": "village",
+   "bytes": 139632,
+   "ms": 3.0161669999997684
+  }
+ ],
+ "plans": [
+  {
+   "place": "capital-laukuwelua",
+   "direction": "land",
+   "ms": 123.8415,
+   "gates": 4,
+   "streets": 42,
+   "blocks": 49,
+   "vertices": 1649,
+   "landmarks": "market keep church bridge bridge bridge harbour"
+  },
+  {
+   "place": "capital-laukuwelua",
+   "direction": "grid",
+   "ms": 53.835750000000075,
+   "gates": 4,
+   "streets": 56,
+   "blocks": 94,
+   "vertices": 1150,
+   "landmarks": "market keep church bridge harbour"
+  },
+  {
+   "place": "capital-grurgthohold",
+   "direction": "land",
+   "ms": 62.69354199999998,
+   "gates": 2,
+   "streets": 37,
+   "blocks": 47,
+   "vertices": 1354,
+   "landmarks": "market keep church bridge bridge bridge bridge harbour"
+  },
+  {
+   "place": "capital-grurgthohold",
+   "direction": "grid",
+   "ms": 51.18208400000003,
+   "gates": 2,
+   "streets": 36,
+   "blocks": 70,
+   "vertices": 858,
+   "landmarks": "market keep church bridge bridge bridge harbour"
+  },
+  {
+   "place": "seat-mectlan",
+   "direction": "land",
+   "ms": 66.29279200000019,
+   "gates": 3,
+   "streets": 43,
+   "blocks": 47,
+   "vertices": 1411,
+   "landmarks": "market keep church bridge bridge"
+  },
+  {
+   "place": "seat-mectlan",
+   "direction": "grid",
+   "ms": 35.98108299999967,
+   "gates": 3,
+   "streets": 32,
+   "blocks": 70,
+   "vertices": 876,
+   "landmarks": "market keep church bridge bridge"
+  },
+  {
+   "place": "town-tau",
+   "direction": "land",
+   "ms": 20.616917000000285,
+   "gates": 5,
+   "streets": 21,
+   "blocks": 21,
+   "vertices": 663,
+   "landmarks": "market church bridge harbour"
+  },
+  {
+   "place": "town-tau",
+   "direction": "grid",
+   "ms": 20.75300000000061,
+   "gates": 5,
+   "streets": 26,
+   "blocks": 40,
+   "vertices": 461,
+   "landmarks": "market church bridge harbour"
+  },
+  {
+   "place": "village-lokai",
+   "direction": "land",
+   "ms": 2.3696660000005068,
+   "gates": 0,
+   "streets": 1,
+   "blocks": 2,
+   "vertices": 97,
+   "landmarks": "market church"
+  },
+  {
+   "place": "village-lokai",
+   "direction": "grid",
+   "ms": 2.269624999998996,
+   "gates": 0,
+   "streets": 2,
+   "blocks": 4,
+   "vertices": 95,
+   "landmarks": "market church harbour"
+  },
+  {
+   "place": "village-haireno",
+   "direction": "land",
+   "ms": 1.6111670000009326,
+   "gates": 0,
+   "streets": 1,
+   "blocks": 2,
+   "vertices": 85,
+   "landmarks": "market church"
+  },
+  {
+   "place": "village-haireno",
+   "direction": "grid",
+   "ms": 1.558999999999287,
+   "gates": 0,
+   "streets": 2,
+   "blocks": 2,
+   "vertices": 93,
+   "landmarks": "market church harbour"
+  },
+  {
+   "place": "village-voorea",
+   "direction": "land",
+   "ms": 2.919083999999202,
+   "gates": 0,
+   "streets": 2,
+   "blocks": 3,
+   "vertices": 164,
+   "landmarks": "market church bridge"
+  },
+  {
+   "place": "village-voorea",
+   "direction": "grid",
+   "ms": 2.11462500000016,
+   "gates": 0,
+   "streets": 3,
+   "blocks": 7,
+   "vertices": 94,
+   "landmarks": "market church bridge bridge"
+  }
+ ]
+}
