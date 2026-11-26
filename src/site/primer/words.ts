@@ -8,6 +8,11 @@ export const OPENS = (room: string): string => `opens ${room} at this step`;
 export const OF = (room: string): string => `a room of ${room}`;
 export const ENTERED = (how: string): string => `You come to it ${how}.`;
 export const UNFOLD = "open these steps";
+export const BACK_A_STEP = "‹ Back a step";
+export const SKIP_THIS_STEP = "Skip this step ›";
+export const DONE_LINE = (act: string): string => `Done: ${act}`;
+export const WALK_OPENING =
+  "Press Try it and its room opens already set for this step, with a hand pointing at what to press; Skip this step moves on, so you may skip whatever you know. Nothing you do there can spoil a world: every world comes back from its number.";
 export const NEXT = "Turn the page to";
 export const SEALED = "done, kept in this browser";
 export const LEDE = "Each step is one small thing to do, and each comes easy once the one before it is done.";
