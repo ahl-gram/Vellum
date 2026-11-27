@@ -14,6 +14,8 @@ export const UNIT_SECONDS: Readonly<Record<string, number>> = {
   "test/itinerary/ribbon-painted.test.ts": 7,
   "test/itinerary/ribbon-seat-pins.test.ts": 6,
   "test/itinerary/ribbon-seats.test.ts": 5,
+  "test/prospect/birdseye-world.test.ts": 34,
+  "test/prospect/birdseye.test.ts": 13,
   "test/prospect/compose-world.test.ts": 7,
   "test/prospect/input.test.ts": 17,
   "test/prospect/key-world.test.ts": 16,
