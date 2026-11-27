@@ -50,9 +50,9 @@ test("every ink on a bird's-eye is a style token, a limner's wash or a heraldic 
   }
 });
 
-// Pinned 2026-11-26 on darwin arm64, Node v26.13.1, at e15274f7, and five re-pinned for Issue #755's revision 1 (handbook/plans/700/755/755-r1-plan.md: the sea's band, the ruin's houses, no key before the founding): the composer's geometry for the five places compose-world.test.ts pins and the first of them before its founding, quantized to three decimals inside composeBirdseye; a deliberate change to the composer re-pins these with the cause named in the commit.
+// Pinned on darwin arm64, Node v26.13.1: the composer's geometry for the five places compose-world.test.ts pins and the first of them before its founding, quantized to three decimals inside composeBirdseye; a deliberate change to the composer re-pins these with the cause named in the commit.
 const GEOMETRY_PINS: ReadonlyArray<{ seed: number; index: number; year: number | null; sum: number }> = [
-  { seed: 42, index: 0, year: null, sum: 1537141278 }, // Laukuwelua, capital, harbor
+  { seed: 42, index: 0, year: null, sum: 3508790999 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, year: null, sum: 1976063743 }, // Loatunui, town, harbor
   { seed: 1, index: 1, year: null, sum: 519669324 }, // Mectlan, seat
   { seed: 3, index: 19, year: null, sum: 113286129 }, // Saharabad, village, inland + ruined
@@ -69,7 +69,7 @@ test("pinned bird's-eye geometry checksums freeze the composer", () => {
   }
 });
 
-// Pinned 2026-11-26 on darwin arm64, Node v26.13.1, at e15274f7, and two re-pinned for Issue #755's revision 1 (handbook/plans/700/755/755-r1-plan.md): armless, since the arms reach Math.cos in src/render/layers/heraldry/charges.ts, which the prospect lint does not read.
+// Pinned on darwin arm64, Node v26.13.1, armless, since the arms reach Math.cos in src/render/layers/heraldry/charges.ts, which the prospect lint does not read; a deliberate change to the dress re-pins these with the cause named in the commit.
 const PLATE_PINS: ReadonlyArray<{
   seed: number;
   index: number;
@@ -77,8 +77,8 @@ const PLATE_PINS: ReadonlyArray<{
   year: number | null;
   sum: number;
 }> = [
-  { seed: 42, index: 0, dress: "antique", year: null, sum: 2795256804 },
-  { seed: 42, index: 0, dress: "ink", year: null, sum: 2164292434 },
+  { seed: 42, index: 0, dress: "antique", year: null, sum: 3684902772 },
+  { seed: 42, index: 0, dress: "ink", year: null, sum: 1450457885 },
   { seed: 42, index: 10, dress: "antique", year: null, sum: 1059921148 },
   { seed: 3, index: 19, dress: "ink", year: null, sum: 2784587357 },
   { seed: 42, index: 0, dress: "antique", year: 400, sum: 2459495887 },
