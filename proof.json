@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "sha": "3db1695604906416b390f0709b9040998bfb48eb",
+  "entries": [
+    {
+      "id": "pb20-f1-ternary-swapped",
+      "patch": "diff --git a/src/site/explorer/prospect-job.ts b/src/site/explorer/prospect-job.ts\nindex 89d63dd..c1200a4 100644\n--- a/src/site/explorer/prospect-job.ts\n+++ b/src/site/explorer/prospect-job.ts\n@@ -58,7 +58,7 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla\n   const index = resolveProspectIndex(world, spec.index);\n   const year = spec.year ?? world.title.year;\n   const s = world.settlements[index]!;\n-  const plate = (spec.view === \"above\" ? engravedBirdseyePlate : engravedProspectPlate)(\n+  const plate = (spec.view === \"above\" ? engravedProspectPlate : engravedBirdseyePlate)(\n     world,\n     index,\n     STYLES[spec.dress],\n",
+      "e2e": {
+        "suites": "prospect",
+        "expect": [
+          "PB20"
+        ]
+      }
+    },
+    {
+      "id": "pb20-f2-boot-ignores-addr-view",
+      "patch": "diff --git a/src/site/prospect/app.ts b/src/site/prospect/app.ts\nindex 52771c1..6f28362 100644\n--- a/src/site/prospect/app.ts\n+++ b/src/site/prospect/app.ts\n@@ -92,7 +92,7 @@ const overrides: TableOverrides =\n         ...overridesOfLand(addr),\n       };\n \n-let view: PlateView = addr.view ?? \"rise\";\n+let view: PlateView = \"rise\";\n let last: ReturnType<NonNullable<Window[\"__vellumProspectState\"]>> = null;\n let lastUrl: string | null = null;\n let drawGen = 0;\n",
+      "e2e": {
+        "suites": "prospect",
+        "expect": [
+          "PB20"
+        ]
+      }
+    },
+    {
+      "id": "pb20-f3-filing-says-rise",
+      "patch": "diff --git a/src/site/prospect/app.ts b/src/site/prospect/app.ts\nindex 52771c1..17fd42d 100644\n--- a/src/site/prospect/app.ts\n+++ b/src/site/prospect/app.ts\n@@ -116,7 +116,7 @@ function filedItem(): TableItem | null {\n         style: addr.style ?? \"antique\",\n         index: last.index,\n         year: last.year,\n-        view: last.view,\n+        view: \"rise\",\n       });\n }\n \n",
+      "e2e": {
+        "suites": "prospect",
+        "expect": [
+          "PB20"
+        ]
+      }
+    },
+    {
+      "id": "pb20-f4-viewhash-keeps-key",
+      "patch": "diff --git a/src/site/prospect/address.ts b/src/site/prospect/address.ts\nindex eecc224..14e73a0 100644\n--- a/src/site/prospect/address.ts\n+++ b/src/site/prospect/address.ts\n@@ -43,6 +43,6 @@ export function yearHash(hash: string, year: number): string {\n }\n \n export function viewHash(hash: string, view: PlateView): string {\n-  const keys = [...keptKeys(hash, /^view(=|$)/), ...(view === \"above\" ? [\"view=above\"] : [])];\n+  const keys = [...keptKeys(hash, /^zz(=|$)/), ...(view === \"above\" ? [\"view=above\"] : [])];\n   return keys.length === 0 ? \"\" : \"#\" + keys.join(\"&\");\n }\n",
+      "e2e": {
+        "suites": "prospect",
+        "expect": [
+          "PB20"
+        ]
+      }
+    },
+    {
+      "id": "pb15-keyboard-walk-from-the-rise",
+      "patch": "diff --git a/e2e/suites/prospect/gestures.ts b/e2e/suites/prospect/gestures.ts\nindex 1dbc15f..19466a7 100644\n--- a/e2e/suites/prospect/gestures.ts\n+++ b/e2e/suites/prospect/gestures.ts\n@@ -90,7 +90,7 @@ async function pb15Held(k: ProspectKit): Promise<{ under: Press; away: Press; ke\n   const under = await held(k, \"prospect-dim-hovered\", (p) => p.hover && p.dim);\n   await parkMouse();\n   const away = await held(k, \"prospect-dim-at-rest\", (p) => !p.hover);\n-  await evaluate(`(() => { document.querySelector('#pp-view [data-view=\"above\"]').focus(); return true; })()`);\n+  await evaluate(`(() => { document.querySelector('#pp-view [data-view=\"rise\"]').focus(); return true; })()`);\n   await sendKey(send, \"Tab\", \"Tab\", 9);\n   const keyed = await held(k, \"prospect-dim-keyed\", (p) => p.active);\n   await pressAt(keyed.x, keyed.y);\n",
+      "e2e": {
+        "suites": "prospect",
+        "expect": [
+          "PB15"
+        ]
+      }
+    },
+    {
+      "id": "b3-second-plate-left-out",
+      "patch": "diff --git a/src/atlas/compose.ts b/src/atlas/compose.ts\nindex 5249ffa..092927e 100644\n--- a/src/atlas/compose.ts\n+++ b/src/atlas/compose.ts\n@@ -196,11 +196,6 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb\n       title: `The Prospect of ${name}`,\n       svg: prospectPlate(world, capital, dress, world.title.year, width),\n     },\n-    {\n-      key: \"birdseye-capital\",\n-      title: `The Bird's-eye of ${name}`,\n-      svg: birdseyePlate(world, capital, dress, world.title.year, width),\n-    },\n   ];\n }\n \n",
+      "e2e": {
+        "suites": "fallback",
+        "expect": [
+          "B3"
+        ]
+      }
+    }
+  ]
+}
