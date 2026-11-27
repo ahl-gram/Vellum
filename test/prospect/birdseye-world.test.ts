@@ -13,7 +13,7 @@ import type { Box, TownItem } from "../../src/prospect/birdseye/types.ts";
 import type { Pt } from "../../src/prospect/geometry.ts";
 import { SAMPLE_STEP, SY } from "../../src/prospect/birdseye/window.ts";
 import { COAST_WIDTH } from "../../src/prospect/dress/birdseye-land.ts";
-import { KEY_ENTRIES, planKey } from "../../src/prospect/birdseye/names.ts";
+import { KEY_ENTRIES, planKey, withinKey, type KeyDraft } from "../../src/prospect/birdseye/names.ts";
 import { firstTownsByRoad } from "../../test-support/road-walk.ts";
 import { worldFor } from "../../test-support/seed-worlds.ts";
 
@@ -200,6 +200,31 @@ test("the sea's name stands clear of the land, the coast, the town, the ships, t
     onLand(inked(seat.boxes.seaName, SAMPLE_STEP * SY), seat.geometry.strips),
     "one sample row higher seed 1 index 18's name would lie on land",
   );
+});
+
+test("a key holds at most eight lines and keeps its sea wherever the sea falls", () => {
+  const gates: KeyDraft[] = Array.from({ length: 12 }, (_, i) => ({
+    label: `Gate ${i}`,
+    at: { x: i, y: 0 },
+    of: "gate",
+  }));
+  const sea: KeyDraft = { label: "The Sea", at: null, of: "sea" };
+  const river: KeyDraft = { label: "The River", at: null, of: "world" };
+  for (let before = 0; before <= gates.length; before++) {
+    const drafts = [...gates.slice(0, before), sea, river];
+    const kept = withinKey(drafts).map((d) => d.label);
+    const where = `${before} lines before the sea`;
+    assert.equal(kept.length, Math.min(drafts.length, KEY_ENTRIES), `${where}: the key's length`);
+    assert.ok(kept.includes("The Sea"), `${where}: the key names the sea`);
+    const same = Math.min(before, KEY_ENTRIES - 1);
+    assert.deepEqual(
+      kept.slice(0, same),
+      drafts.slice(0, same).map((d) => d.label),
+      `${where}: the lines before the last are kept in order`,
+    );
+  }
+  const bare = gates.slice(0, 10);
+  assert.deepEqual(withinKey(bare), bare.slice(0, KEY_ENTRIES), "a key with no sea takes the plain cut");
 });
 
 test("before its founding a place has no town and no key, and a ruin keeps the ruled still's houses and no church or market", () => {
