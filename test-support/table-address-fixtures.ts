@@ -27,6 +27,7 @@ export const prospect: ProspectItem = {
   style: "ink",
   index: 3,
   year: 814,
+  view: "rise",
 };
 
 export const hashOf = (value: string): string => `#seed=42&style=antique&${TABLE_KEY}=${value}`;

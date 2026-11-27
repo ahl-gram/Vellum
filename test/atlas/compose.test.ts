@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { composeAtlas, prospectPlates, ribbonPlates } from "../../src/atlas/compose.ts";
 import { RIBBON_H, RIBBON_W } from "../../src/itinerary/finished.ts";
+import { birdseyePlate } from "../../src/prospect/birdseye/plate.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
@@ -109,13 +110,52 @@ test("#412 the atlas carries the capital's prospect at the present year", () => 
   const world = generateWorld(defaultRecipe(42));
   const atlas = composeAtlas(world);
 
-  assert.equal(atlas.prospects.length, 1);
+  assert.equal(atlas.prospects.length, 2);
   const plate = atlas.prospects[0]!;
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   assert.ok(capital >= 0, "fixture should have a capital");
   assert.equal(plate.key, "prospect-capital");
   assert.equal(plate.title, `The Prospect of ${world.settlements[capital]!.name}`);
   assert.equal(plate.svg, prospectPlate(world, capital, STYLES.antique, world.title.year, 1500));
+});
+
+test("#755 the atlas carries the capital from above, after its prospect, at the present year", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const atlas = composeAtlas(world);
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  assert.equal(atlas.prospects.length, 2);
+  const plate = atlas.prospects[1]!;
+  assert.equal(plate.key, "birdseye-capital");
+  assert.equal(plate.title, `The Bird's-eye of ${world.settlements[capital]!.name}`);
+  assert.equal(plate.svg, birdseyePlate(world, capital, STYLES.antique, world.title.year, 1500));
+});
+
+test("#755 the capital from above wears the banners' dress, at the atlas's width", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  assert.equal(
+    composeAtlas(world, { bannerStyle: "ink" }).prospects[1]!.svg,
+    birdseyePlate(world, capital, STYLES.ink, world.title.year, 1500),
+  );
+  assert.equal(
+    composeAtlas(world, { width: 750 }).prospects[1]!.svg,
+    birdseyePlate(world, capital, STYLES.antique, world.title.year, 750),
+  );
+});
+
+test("#755 the capital from above reads the world's own present year", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  const early = { ...world, title: { ...world.title, year: 400 } };
+  assert.equal(
+    prospectPlates(early, "antique", 1500)[1]!.svg,
+    birdseyePlate(early, capital, STYLES.antique, 400, 1500),
+  );
+  assert.notEqual(
+    birdseyePlate(early, capital, STYLES.antique, 400, 1500),
+    birdseyePlate(world, capital, STYLES.antique, world.title.year, 1500),
+    "year 400 predates the founding, so its plate must differ from the present one",
+  );
 });
 
 test("#412 the prospect's dress follows the banners: ink banners open an ink plate", () => {
@@ -154,7 +194,7 @@ test("#412 the composer reads the world's own present year, not a fixed one", ()
   const early = { ...world, title: { ...world.title, year: 400 } };
 
   const plates = prospectPlates(early, "antique", 1500);
-  assert.equal(plates.length, 1);
+  assert.equal(plates.length, 2);
   assert.equal(plates[0]!.svg, prospectPlate(early, capital, STYLES.antique, 400, 1500));
   assert.notEqual(
     plates[0]!.svg,
@@ -293,6 +333,6 @@ test("a single-realm world (city-state) still composes a banner and a survey", (
 
   assert.match(atlas.hero.svg, /^<svg/);
   assert.ok(atlas.regions.length >= 1, "the capital environs at least");
-  assert.equal(atlas.prospects.length, 1, "the capital's prospect");
+  assert.equal(atlas.prospects.length, 2, "the capital's prospect and the capital from above");
   assert.match(atlas.bannersHtml, /Banners of the Realms/);
 });

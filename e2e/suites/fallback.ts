@@ -87,8 +87,8 @@ async function b3InlineAtlas({ evaluate, check, waitSettled }: SuiteContext): Pr
     true,
   );
   check(
-    "B3 fallback: inline atlas job composes a full atlas (hero + plates + the lettered prospect + gazetteer)",
-    fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0 && fb.prospects === 1 && fb.lettered,
+    "B3 fallback: inline atlas job composes a full atlas (hero + plates + the lettered prospect and the capital from above + gazetteer)",
+    fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0 && fb.prospects === 2 && fb.lettered,
     JSON.stringify(fb),
   );
 }

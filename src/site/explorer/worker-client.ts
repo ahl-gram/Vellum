@@ -18,6 +18,7 @@ import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { MapType, UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
+import type { PlateView } from "../shared/address-grammar.ts";
 
 export interface DrawJob {
   readonly kind: "draw";
@@ -55,6 +56,7 @@ export interface ProspectJob {
   readonly index: number | null;
   readonly dress: PlateDress;
   readonly year: number | null;
+  readonly view: PlateView;
 }
 
 export interface RibbonJob {

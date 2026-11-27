@@ -2,6 +2,7 @@ import { createRng } from "../core/rng.ts";
 import { ribbonPlate } from "../itinerary/finished.ts";
 import { defaultJourney } from "../itinerary/route.ts";
 import { plateDressFor } from "../prospect/dress/context.ts";
+import { birdseyePlate } from "../prospect/birdseye/plate.ts";
 import { prospectPlate } from "../prospect/finished.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
@@ -187,11 +188,18 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
 export function prospectPlates(world: World, bannerStyle: StyleName, width: number): AtlasPlate[] {
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   if (capital < 0) return [];
+  const name = world.settlements[capital]!.name;
+  const dress = STYLES[plateDressFor(bannerStyle)];
   return [
     {
       key: "prospect-capital",
-      title: `The Prospect of ${world.settlements[capital]!.name}`,
-      svg: prospectPlate(world, capital, STYLES[plateDressFor(bannerStyle)], world.title.year, width),
+      title: `The Prospect of ${name}`,
+      svg: prospectPlate(world, capital, dress, world.title.year, width),
+    },
+    {
+      key: "birdseye-capital",
+      title: `The Bird's-eye of ${name}`,
+      svg: birdseyePlate(world, capital, dress, world.title.year, width),
     },
   ];
 }

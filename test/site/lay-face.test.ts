@@ -10,6 +10,7 @@ const plate = (index: number): ProspectItem => ({
   style: "antique",
   index,
   year: 1059,
+  view: "rise",
 });
 const table = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => plate(i + 10));
 

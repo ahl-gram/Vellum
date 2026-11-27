@@ -24,6 +24,8 @@ export const STYLE_NAMES = Object.keys(STYLE_KEYS) as readonly StyleName[];
 export const MAP_TYPES = Object.keys(TYPE_KEYS) as readonly MapType[];
 export const CLIMATE_BANDS = Object.keys(BAND_KEYS) as readonly ClimateBand[];
 export const THEME_NAMES = Object.keys(THEME_KEYS) as readonly ThemeName[];
+export const PLATE_VIEWS = ["rise", "above"] as const;
+export type PlateView = (typeof PLATE_VIEWS)[number];
 
 export const LAND_MIN = 0.1;
 export const LAND_MAX = 0.7;

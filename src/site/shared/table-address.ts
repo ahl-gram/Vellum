@@ -21,6 +21,7 @@ import {
   landFromAddress,
   oneOf,
   overridesOfLand,
+  type PlateView,
 } from "./address-grammar.ts";
 import { readShapeKeys, shapeOf, shapePairs, type ShapeOverrides } from "./shape-address.ts";
 import { seedFromHash } from "../explorer/address.ts";
@@ -88,6 +89,7 @@ export interface ProspectItem extends TableWorld {
   readonly style: StyleName;
   readonly index: number | null;
   readonly year: number | null;
+  readonly view: PlateView;
 }
 
 export type TableItem = SurveyItem | ProspectItem;
@@ -183,8 +185,10 @@ function readItem(chunk: string): TableItem | null {
     const yearRaw = fields.get("year");
     // The one year grammar, imported rather than copied: digits making a positive whole number.
     const year = yearRaw === undefined ? undefined : parseYear(yearRaw);
-    if (index === null || year === null) return null;
-    return { kind: "prospect", ...world, style, index: index ?? null, year: year ?? null };
+    const viewRaw = fields.get("view");
+    const view: PlateView | null = viewRaw === undefined ? "rise" : viewRaw === "above" ? "above" : null;
+    if (index === null || year === null || view === null) return null;
+    return { kind: "prospect", ...world, style, index: index ?? null, year: year ?? null, view };
   }
   return null;
 }
@@ -233,6 +237,7 @@ const dressFields = (item: TableItem): string[] =>
     : [
         ...(item.index !== null ? [`i${PAIR}${item.index}`] : []),
         ...(item.year !== null ? [`year${PAIR}${item.year}`] : []),
+        ...(item.view === "above" ? [`view${PAIR}above`] : []),
       ];
 
 const emitItem = (item: TableItem): string =>
@@ -295,6 +300,7 @@ export function prospectItemFrom(c: {
   readonly style: StyleName;
   readonly index: number | null;
   readonly year: number | null;
+  readonly view: PlateView;
 }): ProspectItem | null {
   if (!Number.isInteger(c.seed) || c.seed < 0) return null;
   if (c.index === null || !Number.isInteger(c.index) || c.index < 0) return null;
@@ -306,6 +312,7 @@ export function prospectItemFrom(c: {
     style: plateDressFor(c.style),
     index: c.index,
     year: c.year,
+    view: c.view,
   };
 }
 

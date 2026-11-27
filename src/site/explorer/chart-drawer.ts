@@ -72,6 +72,7 @@ export function filingAt(at: {
     style: at.sheet.style,
     index: at.index,
     year: at.sheet.presentYear,
+    view: "rise",
   });
 }
 
@@ -128,7 +129,8 @@ export const placeholderTitle = (item: TableItem): string => `Chart \u2116 ${ite
 export function subOf(item: TableItem): string {
   if (item.kind === "prospect") {
     const dress = dressOf(plateDressFor(item.style));
-    return item.year === null ? `a prospect, ${dress}` : `a prospect, ${dress}, ${item.year}`;
+    const what = item.view === "above" ? "a bird's-eye" : "a prospect";
+    return item.year === null ? `${what}, ${dress}` : `${what}, ${dress}, ${item.year}`;
   }
   return `band ${item.rung}, ${dressOf(item.style)}`;
 }
@@ -138,7 +140,7 @@ export function thumbNames(res: RegionResult | ProspectResult): {
   readonly worldTitle: string;
 } {
   return "name" in res
-    ? { title: prospectTitle(res.name), worldTitle: res.title }
+    ? { title: prospectTitle(res.name, res.view), worldTitle: res.title }
     : { title: res.title, worldTitle: res.worldTitle };
 }
 
@@ -176,6 +178,7 @@ export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
       index: item.index,
       dress: plateDressFor(item.style),
       year: item.year,
+      view: item.view,
     };
   }
   const band = LOD_BANDS[item.rung] as LodBand;

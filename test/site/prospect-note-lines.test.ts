@@ -25,8 +25,11 @@ test("whereLine is the epithet with the founding, except before the founding, wh
 
 test("subLine is the world with the former name when there is one, else the room's line", () => {
   assert.equal(
-    subLine({ title: "The Isle of Rahai", formerName: "Haitani" }),
+    subLine({ title: "The Isle of Rahai", formerName: "Haitani", view: "rise" }),
     "The Isle of Rahai · once called Haitani",
   );
-  assert.equal(subLine({ title: "The Isle of Rahai" }), "The Isle of Rahai · drawn side-on from the town's own ground");
+  assert.equal(
+    subLine({ title: "The Isle of Rahai", view: "rise" }),
+    "The Isle of Rahai · drawn side-on from the town's own ground",
+  );
 });

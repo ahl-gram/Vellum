@@ -101,6 +101,25 @@ test("#412 the atlas carries the capital's prospect plate", async () => {
   }
 });
 
+test("#755 the atlas writes the capital from above beside its prospect, anchored like every plate", async () => {
+  const dir = "out/test-atlas-birdseye";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(42, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    const section = html.slice(html.indexOf("<h2>The Prospect of the Capital</h2>"));
+    assert.ok(html.includes("<h2>The Prospect of the Capital</h2>"), "the prospect's section was found");
+    const rise = section.indexOf('<figure><a href="prospect-capital.svg">');
+    const above = section.indexOf('<figure><a href="birdseye-capital.svg"><img src="birdseye-capital.svg"');
+    assert.ok(rise >= 0 && above > rise, "the capital from above is anchored after the prospect, in its section");
+    assert.ok(above < section.indexOf("</section>"), "and inside the section");
+    const svg = await readFile(join(dir, "birdseye-capital.svg"), "utf8");
+    assert.match(svg, /^<svg/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("the atlas joins the motion folio: links /shared/motion.css and its figures lift under the hand (#130)", async () => {
   const seed = 42;
   const dir = "out/test-atlas-motion";

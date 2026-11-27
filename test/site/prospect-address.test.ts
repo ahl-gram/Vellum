@@ -23,6 +23,7 @@ test("parseProspectAddress reads the Explorer's world keys plus i and year", () 
     shape: {},
     index: 3,
     year: 814,
+    view: null,
   });
 });
 
@@ -38,6 +39,7 @@ test("parseProspectAddress: absent keys are null and never default to zero (pres
     shape: {},
     index: null,
     year: null,
+    view: null,
   });
   assert.equal(parseProspectAddress("#seed=0&i=0").seed, 0, "an explicit 0 is a real seed");
   assert.equal(parseProspectAddress("#seed=0&i=0").index, 0, "an explicit 0 is a real index");

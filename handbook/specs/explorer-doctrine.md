@@ -122,7 +122,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   `src/site/shared/table-address.ts`.** `emitTable` and `parseTableValue` there both cut the list at
   `TABLE_CAP`, so a sheet appended past the cap is dropped silently on the next write rather than
   refused; and `sameSheet` beside `layOnTable` compares emitted items byte for byte, so one prospect
-  spelled two ways would seat twice.
+  spelled two ways would seat twice. A prospect sheet carries its view (`view` on `ProspectItem` in
+  `src/site/shared/table-address.ts`), so one place in one year from the rise and from above are two
+  sheets, and the view from above is spelled `view-above` alone.
 
 ## The camera, the gesture and the fit
 

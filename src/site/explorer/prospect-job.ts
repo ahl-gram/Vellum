@@ -1,12 +1,14 @@
 // The prospect job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts so the two transports cannot drift apart.
 import type { ProspectDress } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
+import { engravedBirdseyePlate } from "../../prospect/birdseye/plate.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
 import { roadMask, roadReachable } from "../../itinerary/route.ts";
 import type { PlateEra } from "../../prospect/caption.ts";
 import { STYLES } from "../../render/style.ts";
 import type { World } from "../../world/types.ts";
+import type { PlateView } from "../shared/address-grammar.ts";
 
 export type PlateDress = ProspectDress;
 
@@ -22,6 +24,7 @@ export interface ProspectSpec {
   readonly index: number | null;
   readonly dress: PlateDress;
   readonly year: number | null;
+  readonly view: PlateView;
 }
 
 export interface PlateKeyRow {
@@ -43,6 +46,7 @@ export interface ProspectPlateResult {
   readonly key: ReadonlyArray<PlateKeyRow>;
   readonly note: string;
   readonly roads: boolean;
+  readonly view: PlateView;
 }
 
 const settlementNote = (world: World, index: number): string =>
@@ -54,7 +58,12 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
   const index = resolveProspectIndex(world, spec.index);
   const year = spec.year ?? world.title.year;
   const s = world.settlements[index]!;
-  const plate = engravedProspectPlate(world, index, STYLES[spec.dress], year);
+  const plate = (spec.view === "above" ? engravedBirdseyePlate : engravedProspectPlate)(
+    world,
+    index,
+    STYLES[spec.dress],
+    year,
+  );
   return {
     svg: plate.svg,
     name: s.name,
@@ -69,5 +78,6 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
     key: plate.key.map(({ letter, label }) => ({ letter, label })),
     note: settlementNote(world, index),
     roads: roadReachable(world, roadMask(world), index).length > 0,
+    view: spec.view,
   };
 }

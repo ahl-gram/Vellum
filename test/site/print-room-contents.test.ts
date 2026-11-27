@@ -106,6 +106,25 @@ function checkBoundBackRows(li: readonly string[]): void {
   );
 }
 
+test("#755 row viii names the prospect and the bird's-eye of the capital, each a turn and a thumbnail", () => {
+  const html = contentsRows({
+    ...DATA,
+    prospects: [
+      ref("prospect-capital", "The Prospect of Laukuwelua"),
+      ref("birdseye-capital", "The Bird's-eye of Laukuwelua"),
+    ],
+  });
+  const eighth = rows(html)[7]!;
+  assert.ok(
+    eighth.includes(
+      'The prospect of <em>Laukuwelua</em></button>, <button class="turn" type="button" data-plate="birdseye-capital">the bird\'s-eye of <em>Laukuwelua</em>',
+    ),
+    eighth,
+  );
+  const figures = [...eighth.matchAll(/<figure[^>]*data-plate="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(figures, ["prospect-capital", "birdseye-capital"]);
+});
+
 test("bound, every plate is a turn and a thumbnail, the regions and the prospect are named, the counts ride the last three rows", () => {
   const html = contentsRows(DATA);
   const li = rows(html);
@@ -254,5 +273,12 @@ test("the folio's plate line names the plate by its row's numeral and reads the 
     () => numeralOf(NUMERALS.length),
     RangeError,
     "a row past the table throws rather than printing an arabic numeral among the romans",
+  );
+});
+
+test("#755 the plate line names the bird's-eye in the sentence's case", () => {
+  assert.equal(
+    plateLine("prospect", "The Bird's-eye of Laukuwelua"),
+    "plate viii of the bound atlas · the bird's-eye of Laukuwelua",
   );
 });

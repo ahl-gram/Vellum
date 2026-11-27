@@ -16,6 +16,7 @@ export type Prospect = {
   keyRows: number;
   roads: boolean;
   svgLength: number;
+  view: string;
   blob: boolean;
   shown: boolean;
   status: string | null;
@@ -44,6 +45,8 @@ export const HOP_TRIES = 100;
 // 2026-10-25: the Glass read home 7 or 8 reads after 0 (309 to 361 ms: one glide, `glideMs` in `src/site/shared/zoom-keys.ts`, and a read) in 10 of 10 presses across this kit and the Ribbon's; 60 reads of 50 ms, the budget of the loop this wait replaced and at least 3 s, keeps 2.5 times the slowest at CI's 3.3 (`REDRAFT_TRIES` in `e2e/suites/zoom/kit.ts`).
 export const GLASS_HOME_TRIES = 60;
 
+export const STATE: Payload<Prospect | null> = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,view:st.view,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
+
 export function prospectKit(ctx: SuiteContext) {
   const { evaluate, send, sleep, PORT } = ctx;
   const settle = makeSettle({ evaluate, sleep, tolerant: true });
@@ -55,7 +58,6 @@ export function prospectKit(ctx: SuiteContext) {
     await settle<boolean>(`!document.getElementById("pp-plate")`, (away) => away, "prospect-goto-away", HOP_TRIES);
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE: Payload<Prospect | null> = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
   const opened = (label: string) =>
     settle(STATE, (s) => s.blob && s.status === "", `prospect page never drew: ${label}`, 300);

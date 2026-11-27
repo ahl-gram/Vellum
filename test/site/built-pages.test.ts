@@ -211,7 +211,7 @@ test("the Print Room as authored in the built page: the folio's one h1 and its t
   assert.deepEqual(pr36Faults(documentOf(page("/print-room/"))), []);
 });
 
-test("the Prospect's markup in the built page: the folio's one h1 and tagline, the year control a form whose label names the year field, the engraver's note slip in order with its filing press before the chart folio, the roads out, the plate the transform target's one face, the pill, the warning and the notice in the stage, the folio's lines (from e2e PB12, less the year field's accessible name and the Ribbon road's script-written verb)", () => {
+test("the Prospect's markup in the built page: the folio's one h1 and tagline, the year control a form whose label names the year field, the engraver's note slip in order with the view's pair at its head and its filing press before the chart folio, the roads out, the plate the transform target's one face, the pill, the warning and the notice in the stage, the folio's lines (from e2e PB12, less the year field's accessible name and the Ribbon road's script-written verb)", () => {
   assert.deepEqual(pb12Faults(documentOf(page("/prospect/"))), []);
 });
 

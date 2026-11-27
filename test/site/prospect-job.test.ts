@@ -45,7 +45,7 @@ test("resolveProspectIndex passes a valid index through and falls back to the ca
 });
 
 test("prospectResultFor renders through prospectPlate byte-for-byte and defaults the year to the present", () => {
-  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
+  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null, view: "rise" });
   assert.equal(res.svg, prospectPlate(world, 1, STYLES.ink, world.title.year));
   assert.equal(res.year, world.title.year, "a null year is the present year");
   assert.equal(res.presentYear, world.title.year);
@@ -55,13 +55,13 @@ test("prospectResultFor renders through prospectPlate byte-for-byte and defaults
 });
 
 test("prospectResultFor honors an explicit viewing year (the year is a pure era filter, #241)", () => {
-  const res = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
+  const res = prospectResultFor(world, { index: 1, dress: "antique", year: 300, view: "rise" });
   assert.equal(res.svg, prospectPlate(world, 1, STYLES.antique, 300));
   assert.equal(res.year, 300);
 });
 
 test("prospectResultFor with no index opens the capital's plate", () => {
-  const res = prospectResultFor(world, { index: null, dress: "antique", year: null });
+  const res = prospectResultFor(world, { index: null, dress: "antique", year: null, view: "rise" });
   assert.equal(res.index, capital);
   assert.equal(res.name, world.settlements[capital]!.name);
   assert.equal(res.svg, prospectPlate(world, capital, STYLES.antique, world.title.year));
@@ -70,18 +70,18 @@ test("prospectResultFor with no index opens the capital's plate", () => {
 test("prospectResultFor carries the former name through to the page (#49)", () => {
   const i = world.settlements.findIndex((s) => s.formerName !== undefined);
   assert.equal(
-    prospectResultFor(world, { index: i, dress: "antique", year: null }).formerName,
+    prospectResultFor(world, { index: i, dress: "antique", year: null, view: "rise" }).formerName,
     world.settlements[i]!.formerName,
   );
   const j = world.settlements.findIndex((s) => s.formerName === undefined && !s.ruined);
-  const plain = prospectResultFor(world, { index: j, dress: "antique", year: null });
+  const plain = prospectResultFor(world, { index: j, dress: "antique", year: null, view: "rise" });
   assert.equal(plain.formerName, undefined);
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
 });
 
 // The note is Today's card's (Issue #494 ruling 4 was made on a preview carrying it), NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it.
 test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and Today's card's note for the town", () => {
-  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
+  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null, view: "rise" });
   const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);
   assert.equal(res.era, e.era);
   assert.equal(res.epithet, e.caption.epithet);
@@ -96,12 +96,12 @@ test("prospectResultFor carries the engraver's note: the era, the epithet, the f
     createLoreWriter(world, createRng(42).fork("seed-of-the-day")).settlementNote(world.settlements[i]!);
   assert.equal(res.note, todays(1));
   assert.equal(
-    prospectResultFor(world, { index: capital, dress: "antique", year: null }).note,
+    prospectResultFor(world, { index: capital, dress: "antique", year: null, view: "rise" }).note,
     todays(capital),
     "the capital's note is the line Today's card shows for this seed",
   );
   assert.notEqual(res.note, todays(capital), "premise: the fork is not handing every town one note");
-  const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
+  const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300, view: "rise" });
   assert.equal(early.era, "before-founding");
   const town = new Set([
     "The Keep",
@@ -123,10 +123,10 @@ test("prospectResultFor says whether a road leaves the place: yes for a roaded t
   const mask = roadMask(world);
   const orphan = world.settlements.findIndex((_, i) => roadReachable(world, mask, i).length === 0);
   assert.ok(orphan >= 0, "premise: seed 42 has a settlement no road leaves");
-  assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null }).roads, true);
-  assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null }).roads, false);
+  assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null, view: "rise" }).roads, true);
+  assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null, view: "rise" }).roads, false);
   assert.equal(
-    prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads,
+    prospectResultFor(world, { index: capital, dress: "antique", year: null, view: "rise" }).roads,
     true,
     "the capital is the road network's root",
   );
@@ -163,7 +163,16 @@ const post = (job: RenderJob): { readonly id: number; readonly answered: Promise
   scope.onmessage!({ data: { ...job, id } });
   return { id, answered };
 };
-const PROSPECT: ProspectJob = { kind: "prospect", seed: 42, overrides: {}, index: 1, dress: "ink", year: 300 };
+const PROSPECT: ProspectJob = {
+  kind: "prospect",
+  seed: 42,
+  overrides: {},
+  index: 1,
+  dress: "ink",
+  year: 300,
+  view: "rise",
+};
+const BIRDSEYE: ProspectJob = { ...PROSPECT, view: "above" };
 const ATLAS: AtlasJob = { kind: "atlas", seed: 42, overrides: {}, width: 1500, bannerStyle: "ink" };
 const DRAW: DrawJob = {
   kind: "draw",
@@ -216,7 +225,7 @@ test("a job that fails comes back as its own error and leaves the jobs behind it
 
 test("the worker and the backup copy answer a plate job alike, byte for byte (Issue #801)", async () => {
   await theWorker();
-  for (const plate of [PROSPECT, ATLAS]) {
+  for (const plate of [PROSPECT, BIRDSEYE, ATLAS]) {
     const { id, answered } = post(plate);
     assert.deepEqual(
       await answered,

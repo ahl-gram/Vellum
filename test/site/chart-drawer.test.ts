@@ -172,7 +172,7 @@ test("a sheet differing in ANY field the address carries is a different sheet (#
 });
 
 test("a prospect is told from a survey, and from another prospect (#520)", () => {
-  const p1: TableItem = { kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059 };
+  const p1: TableItem = { kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059, view: "rise" };
   assert.equal(layOnTable([surveyAt(4)], p1).refused, false, "a prospect is never the survey beside it");
   assert.equal(layOnTable([p1], p1).refused, true, "the same prospect twice is refused");
   assert.equal(layOnTable([p1], { ...p1, index: 4 }).refused, false, "a different plate is a different prospect");
@@ -198,6 +198,7 @@ const prospect = (over: Partial<ProspectItem> = {}): ProspectItem => ({
   style: "ink",
   index: 3,
   year: 1059,
+  view: "rise",
   ...over,
 });
 
@@ -223,7 +224,13 @@ test("CT2 thumbJobFor hands EVERY table item a job, so no kind can be left draft
 });
 
 test("CT3 thumbNames takes a prospect's name from the TOWN and its world line from the job's own title, which is the world's (#522)", () => {
-  const prospectRes = { ok: true, name: "Paukilua", title: "The Isle of Rahai", svg: "" } as unknown as ProspectResult;
+  const prospectRes = {
+    ok: true,
+    name: "Paukilua",
+    title: "The Isle of Rahai",
+    svg: "",
+    view: "rise",
+  } as unknown as ProspectResult;
   assert.deepEqual(thumbNames(prospectRes), { title: "The Prospect of Paukilua", worldTitle: "The Isle of Rahai" });
   const regionRes = {
     ok: true,

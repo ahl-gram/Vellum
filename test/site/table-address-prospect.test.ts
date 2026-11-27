@@ -15,7 +15,7 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
 });
 
 test("TP1 prospectItemFrom normalises the dress through plateDressFor, so the plate a cutting shows and the dress its address states cannot disagree (#237, #522)", () => {
-  const at = { seed: 42, overrides: {}, index: 3, year: 814 } as const;
+  const at = { seed: 42, overrides: {}, index: 3, year: 814, view: "rise" } as const;
   assert.equal(prospectItemFrom({ ...at, style: "ink" })?.style, "ink");
   assert.equal(prospectItemFrom({ ...at, style: "antique" })?.style, "antique");
   // The two styles that have no plate of their own: plateDressFor sends both to the antique plate, so the address says antique too.
@@ -24,7 +24,7 @@ test("TP1 prospectItemFrom normalises the dress through plateDressFor, so the pl
 });
 
 test("TP2b one plate filed twice is refused rather than seated twice, which is what the shared spelling buys (#522)", () => {
-  const item = prospectItemFrom({ seed: 42, overrides: {}, style: "topographic", index: 3, year: 814 });
+  const item = prospectItemFrom({ seed: 42, overrides: {}, style: "topographic", index: 3, year: 814, view: "rise" });
   assert.ok(item);
   const laid = layOnTable(layOnTable([], item).items, item);
   assert.equal(laid.refused, true, "the second filing is refused as a duplicate");
@@ -33,8 +33,8 @@ test("TP2b one plate filed twice is refused rather than seated twice, which is w
 });
 
 test("TP3 the same town at two different years is TWO sheets, which is what lets a reader turn the year back and gather a run of one place (#522, ruled 2026-09-17)", () => {
-  const then = prospectItemFrom({ seed: 42, overrides: {}, style: "ink", index: 3, year: 814 });
-  const now = prospectItemFrom({ seed: 42, overrides: {}, style: "ink", index: 3, year: 1059 });
+  const then = prospectItemFrom({ seed: 42, overrides: {}, style: "ink", index: 3, year: 814, view: "rise" });
+  const now = prospectItemFrom({ seed: 42, overrides: {}, style: "ink", index: 3, year: 1059, view: "rise" });
   assert.ok(then && now);
   assert.notEqual(emitTable([then]), emitTable([now]), "the year is part of the sheet's identity");
   const laid = layOnTable(layOnTable([], then).items, now);
@@ -43,7 +43,7 @@ test("TP3 the same town at two different years is TWO sheets, which is what lets
 });
 
 test("TP4 prospectItemFrom refuses what would emit a colliding or unreadable address: a null index emits no i at all and would collide with a hand-typed capital (#522)", () => {
-  const at = { seed: 42, overrides: {}, style: "ink" } as const;
+  const at = { seed: 42, overrides: {}, style: "ink", view: "rise" } as const;
   assert.equal(
     prospectItemFrom({ ...at, index: null, year: 814 }),
     null,
@@ -57,7 +57,7 @@ test("TP4 prospectItemFrom refuses what would emit a colliding or unreadable add
     "the year is the Explorer's present or the page's drawn year, never absent",
   );
   assert.equal(prospectItemFrom({ ...at, index: 3, year: 0 }), null);
-  assert.equal(prospectItemFrom({ seed: -1, overrides: {}, style: "ink", index: 3, year: 814 }), null);
+  assert.equal(prospectItemFrom({ seed: -1, overrides: {}, style: "ink", index: 3, year: 814, view: "rise" }), null);
 });
 
 test("TP5 a built item round-trips through the grammar unchanged, so what the doors file is what the Explorer restores (#522)", () => {
@@ -67,6 +67,7 @@ test("TP5 a built item round-trips through the grammar unchanged, so what the do
     style: "ink",
     index: 3,
     year: 814,
+    view: "rise",
   });
   assert.ok(item);
   assert.deepEqual(parseTable(hashOf(emitTable([item]))), [item]);
