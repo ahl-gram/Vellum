@@ -31,7 +31,7 @@ test("placeOfJob names a real place and nothing else (Issue #854)", () => {
       { kind: "draw", seed, overrides, render },
       { kind: "region", seed, overrides, window: { u0: 0, v0: 0, u1: 1, v1: 1 }, gridW: 8, gridH: 8, band: 1, render },
       { kind: "atlas", seed, overrides },
-      { kind: "prospect", seed, overrides, index: 1, dress: "antique" as never, year: 800 },
+      { kind: "prospect", seed, overrides, index: 1, dress: "antique" as never, year: 800, view: "rise" },
       { kind: "ribbon", seed, overrides, from: 1, to: 2, dress: "antique" as never },
     ];
   };

@@ -267,10 +267,12 @@ function bindPlates(
   surveyRows = null;
   stage.setWorld(
     (s) =>
-      runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year, view: "rise" }).then((r) => ({
-        svg: r.svg,
-        name: r.name,
-      })),
+      runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year, view: "rise" }).then(
+        (r) => ({
+          svg: r.svg,
+          name: r.name,
+        }),
+      ),
     (s) => prospectHrefFor(forSeed, s),
   );
 }

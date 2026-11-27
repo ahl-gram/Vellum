@@ -18,7 +18,7 @@ test("a sheet carries its world's naming tongue and never its sentence, two tong
   useCommittedGazetteer();
   const f = foundWorld(FLAGSHIP) as Founding;
   const filed = (overrides: ReturnType<typeof recipeOverrides>) =>
-    prospectItemFrom({ seed: f.seed, overrides, style: "antique", index: 0, year: 891 });
+    prospectItemFrom({ seed: f.seed, overrides, style: "antique", index: 0, year: 891, view: "rise" });
   const item = filed(recipeOverrides(f));
   assert.ok(item !== null);
   assert.equal(item.overrides.culture, "norden");

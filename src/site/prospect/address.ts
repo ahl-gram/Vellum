@@ -35,6 +35,6 @@ export function yearHash(hash: string, year: number): string {
   return "#" + [...keptKeys(hash, /^year(=|$)/), `year=${year}`].join("&");
 }
 
-export function viewHash(hash: string, _view: PlateView): string {
-  return hash;
+export function viewHash(hash: string, view: PlateView): string {
+  return "#" + [...keptKeys(hash, /^view(=|$)/), `view=${view}`].join("&");
 }

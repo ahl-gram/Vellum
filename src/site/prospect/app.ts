@@ -92,7 +92,7 @@ const overrides: TableOverrides =
         ...overridesOfLand(addr),
       };
 
-let view: PlateView = addr.view ?? "rise";
+const view: PlateView = addr.view ?? "rise";
 let last: ReturnType<NonNullable<Window["__vellumProspectState"]>> = null;
 let lastUrl: string | null = null;
 let drawGen = 0;
