@@ -20,8 +20,8 @@ import {
   TRAVERSAL,
 } from "../shared/table-store.ts";
 import { errorText } from "../shared/error-text.ts";
-import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
-import { overridesOfLand, type PlateView } from "../shared/address-grammar.ts";
+import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, viewHash, yearHash } from "./address.ts";
+import { overridesOfLand, oneOf, PLATE_VIEWS, type PlateView } from "../shared/address-grammar.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import { $ } from "../shared/by-id.ts";
@@ -92,7 +92,7 @@ const overrides: TableOverrides =
         ...overridesOfLand(addr),
       };
 
-const view: PlateView = addr.view ?? "rise";
+let view: PlateView = addr.view ?? "rise";
 let last: ReturnType<NonNullable<Window["__vellumProspectState"]>> = null;
 let lastUrl: string | null = null;
 let drawGen = 0;
@@ -199,6 +199,7 @@ function draw(year: number | null, writeAddress: boolean): void {
         svgLength: res.svg.length,
         view: res.view,
       };
+      paintView();
       // AFTER `last`, never before it: the press files what `last` names, and painted a beat early it reads the previous plate or none at all.
       paintLay();
       void bootHandOnce();
@@ -219,6 +220,24 @@ yearForm.addEventListener("submit", (e) => {
   if (last !== null && year === last.year) return;
   draw(year, true);
 });
+
+const viewPresses = [...document.querySelectorAll<HTMLButtonElement>("#pp-view [data-view]")];
+
+function paintView(): void {
+  for (const press of viewPresses) press.setAttribute("aria-pressed", String(press.dataset["view"] === view));
+}
+
+function setView(next: PlateView): void {
+  if (next === view) return;
+  view = next;
+  history.replaceState(null, "", viewHash(location.hash, view));
+  paintView();
+  draw(last === null ? addr.year : last.year, last !== null);
+}
+
+for (const press of viewPresses)
+  press.addEventListener("click", () => setView(oneOf(press.dataset["view"] ?? null, PLATE_VIEWS) ?? "rise"));
+paintView();
 
 chartLink.href = chartTarget(location.hash);
 ribbonLink.style.display = "none";

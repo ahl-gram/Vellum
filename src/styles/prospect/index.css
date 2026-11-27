@@ -102,6 +102,31 @@
   margin: 0;
   text-align: left;
 }
+#pp-view {
+  display: flex;
+  margin: 0.7rem 0 0;
+}
+#pp-view button {
+  font-family: var(--font-display, "Iowan Old Style", "Palatino", Georgia, serif);
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.7rem 0.3rem;
+  border-radius: 0;
+  color: var(--ink-dark);
+  background: var(--control-cream);
+  border: 1px solid var(--line-tan);
+}
+#pp-view button + button {
+  border-left: 0;
+}
+#pp-view button:hover {
+  background: var(--parchment-bright);
+}
+#pp-view button[aria-pressed="true"],
+#pp-view button[aria-pressed="true"]:hover {
+  color: var(--chart-paper);
+  background: var(--ink-dark);
+}
 
 @media print {
   .stage {

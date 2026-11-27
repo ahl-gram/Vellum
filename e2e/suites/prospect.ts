@@ -6,6 +6,7 @@ import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
 import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
 import { pb1cRoadOut } from "./prospect/way-in.ts";
 import { pb17Boot, pb18TableHomes, pb19PlaceLink } from "./prospect/room.ts";
+import { pb20ViewSwitch } from "./prospect/view.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -31,6 +32,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("PB17", () => pb17Boot(k));
   await step("PB18", () => pb18TableHomes(k));
   await step("PB19", () => pb19PlaceLink(k));
+  await step("PB20", () => pb20ViewSwitch(k));
   pb10NoErrors(ctx, errBase, httpBase);
 }
 
