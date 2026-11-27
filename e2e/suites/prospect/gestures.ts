@@ -90,7 +90,7 @@ async function pb15Held(k: ProspectKit): Promise<{ under: Press; away: Press; ke
   const under = await held(k, "prospect-dim-hovered", (p) => p.hover && p.dim);
   await parkMouse();
   const away = await held(k, "prospect-dim-at-rest", (p) => !p.hover);
-  await evaluate(`(() => { document.querySelector("#note .slip-fold").focus(); return true; })()`);
+  await evaluate(`(() => { document.querySelector('#pp-view [data-view="above"]').focus(); return true; })()`);
   await sendKey(send, "Tab", "Tab", 9);
   const keyed = await held(k, "prospect-dim-keyed", (p) => p.active);
   await pressAt(keyed.x, keyed.y);
