@@ -13,6 +13,7 @@ import type { Box, TownItem } from "../../src/prospect/birdseye/types.ts";
 import type { Pt } from "../../src/prospect/geometry.ts";
 import { SAMPLE_STEP, SY } from "../../src/prospect/birdseye/window.ts";
 import { COAST_WIDTH } from "../../src/prospect/dress/birdseye-land.ts";
+import { KEY_ENTRIES, planKey } from "../../src/prospect/birdseye/names.ts";
 import { firstTownsByRoad } from "../../test-support/road-walk.ts";
 import { worldFor } from "../../test-support/seed-worlds.ts";
 
@@ -132,19 +133,29 @@ const inked = (b: Box, raise = 0): Box => {
   return { x0: b.x0 - reach, x1: b.x1 + reach, y0: b.y0 - reach - raise, y1: b.y1 + reach - raise };
 };
 
-test("the sea's name stands clear of the land, the coast, the town, the ships, the neighbours and the key", () => {
+test("the sea's name stands clear of the land, the coast, the town, the ships, the neighbours and the key, and every harbour plate's key names its sea", () => {
   const stenernfjord = places(29).find((p) => p.index === 8)!;
   assert.ok(
     stenernfjord.input.harbor && eraFor(stenernfjord.input, stenernfjord.year) === "standing",
     "seed 29 index 8 is a standing harbour place",
   );
   let named = 0;
+  let keyed = 0;
+  let ruins = 0;
   for (const p of [...SEEDS.flatMap((seed) => places(seed)), stenernfjord]) {
-    if (!p.input.harbor || eraFor(p.input, p.year) !== "standing") continue;
-    const { boxes, geometry } = engraveBirdseye(p.w, p.input, STYLES.antique, p.year);
-    if (boxes.seaName === null) continue;
-    named++;
+    if (!p.input.harbor) continue;
+    const era = eraFor(p.input, p.year);
+    const { boxes, geometry, key } = engraveBirdseye(p.w, p.input, STYLES.antique, p.year);
+    const sea = plateSurroundings(p.w, p.index, p.year).seaName;
     const where = `seed ${p.input.seed} index ${p.index}`;
+    assert.ok(sea !== null && key.some((k) => k.label === sea), `${where}: the key does not name the sea`);
+    if (era === "ruined") ruins++;
+    if (boxes.seaName === null) {
+      keyed++;
+      continue;
+    }
+    if (era !== "standing") continue;
+    named++;
     assert.ok(!onLand(inked(boxes.seaName), geometry.strips), `${where}: the sea's name lies on land`);
     assert.ok(!onCoast(inked(boxes.seaName), geometry.coast), `${where}: the sea's name touches the coast`);
     const others: ReadonlyArray<readonly [string, ReadonlyArray<Box>]> = [
@@ -158,6 +169,30 @@ test("the sea's name stands clear of the land, the coast, the town, the ships, t
       for (const b of list) assert.ok(!meets(boxes.seaName, b), `${where}: the sea's name meets ${what}`);
   }
   assert.ok(named >= 10, `at least ten harbour places draw the sea's name (${named})`);
+  assert.ok(keyed >= 10, `at least ten harbour places leave the sea's name to the key (${keyed})`);
+  assert.ok(ruins >= 1, `the harbour places include a ruin (${ruins})`);
+  const laukuwelua = places(42).find((p) => p.index === 0)!;
+  const around = plateSurroundings(laukuwelua.w, 0, laukuwelua.year);
+  const own = planKey(laukuwelua.w, planTown(laukuwelua.w, 0), "capital", around.seaName, around.riverName).filter(
+    (d) => d.at !== null,
+  );
+  assert.ok(own.length >= KEY_ENTRIES, `Laukuwelua's landmarks and gates fill the key on their own (${own.length})`);
+  const full = engraveBirdseye(laukuwelua.w, laukuwelua.input, STYLES.antique, laukuwelua.year);
+  assert.equal(full.boxes.seaName, null, "no water holds Laukuwelua's sea's name");
+  assert.deepEqual(
+    full.key.map((k) => k.label),
+    [
+      "The Keep",
+      "The Great Church",
+      "The Market",
+      "The Bridges",
+      "The Quay",
+      "The Pong Gate",
+      "The Noloatatani Gate",
+      "The Great Woaku",
+    ],
+    "Laukuwelua's last gate gives its line to the sea",
+  );
   const pelo = places(1).find((p) => p.index === 18)!;
   const seat = engraveBirdseye(pelo.w, pelo.input, STYLES.antique, pelo.year);
   assert.ok(seat.boxes.seaName !== null, "seed 1 index 18 names its sea");

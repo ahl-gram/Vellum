@@ -8,7 +8,7 @@ import { runBox } from "../letter/letter.ts";
 import type { BirdseyeKind, BirdseyeWindow, Neighbour, SeaBand } from "./types.ts";
 import { HALF_U, SAMPLE_STEP, SY, V_FAR, V_NEAR, project, sampleAt, toUV } from "./window.ts";
 
-export type KeyOf = "keep" | "church" | "market" | "bridge" | "quay" | "gate" | "world";
+export type KeyOf = "keep" | "church" | "market" | "bridge" | "quay" | "gate" | "sea" | "world";
 export type KeyDraft = { readonly label: string; readonly at: PlanPoint | null; readonly of: KeyOf };
 
 export const KEY_ENTRIES = 8;
@@ -20,6 +20,7 @@ export const TAG_LIFT: Readonly<Record<KeyOf, number>> = {
   bridge: 8,
   quay: 8,
   gate: 17,
+  sea: 0,
   world: 0,
 };
 
@@ -103,9 +104,13 @@ export function planKey(
     const town = gateTown(world, plan, gate);
     if (town !== null) drafts.push({ label: `The ${world.settlements[town]!.name} Gate`, at: gate.at, of: "gate" });
   }
-  if (seaName !== null) drafts.push({ label: seaName, at: null, of: "world" });
+  if (seaName !== null) drafts.push({ label: seaName, at: null, of: "sea" });
   if (riverName !== null) drafts.push({ label: riverName, at: null, of: "world" });
   return drafts;
+}
+
+export function withinKey(drafts: ReadonlyArray<KeyDraft>): KeyDraft[] {
+  return drafts.slice(0, KEY_ENTRIES);
 }
 
 const COUNT = { capital: 7, town: 5 } as const;
