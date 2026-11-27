@@ -110,7 +110,8 @@ export function planKey(
 }
 
 export function withinKey(drafts: ReadonlyArray<KeyDraft>): KeyDraft[] {
-  return drafts.slice(0, KEY_ENTRIES);
+  const sea = drafts.findIndex((d) => d.of === "sea");
+  return sea < KEY_ENTRIES ? drafts.slice(0, KEY_ENTRIES) : [...drafts.slice(0, KEY_ENTRIES - 1), drafts[sea]!];
 }
 
 const COUNT = { capital: 7, town: 5 } as const;
