@@ -72,6 +72,7 @@ export function filingAt(at: {
     style: at.sheet.style,
     index: at.index,
     year: at.sheet.presentYear,
+    view: "above",
   });
 }
 
@@ -138,7 +139,7 @@ export function thumbNames(res: RegionResult | ProspectResult): {
   readonly worldTitle: string;
 } {
   return "name" in res
-    ? { title: prospectTitle(res.name), worldTitle: res.title }
+    ? { title: prospectTitle(res.name, res.view), worldTitle: res.title }
     : { title: res.title, worldTitle: res.worldTitle };
 }
 
@@ -176,6 +177,7 @@ export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
       index: item.index,
       dress: plateDressFor(item.style),
       year: item.year,
+      view: "rise",
     };
   }
   const band = LOD_BANDS[item.rung] as LodBand;

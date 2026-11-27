@@ -3,7 +3,7 @@ import type { Room } from "../shared/room.ts";
 import { bindZoomRoom } from "../shared/zoom-room.ts";
 import { contentsRow } from "../shared/contents-row.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
-import { eraLine, prospectTitle, subLine, whereLine } from "./note-lines.ts";
+import { eraLine, plateName, prospectTitle, subLine, whereLine } from "./note-lines.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";
 
 export interface RoomFurniture {
@@ -41,14 +41,14 @@ export function bindProspectRoom(roomEls: RoomFurniture): Sheet {
 
 type Facts = Omit<ProspectPlateResult, "svg">;
 
-export function showPlate(roomEls: RoomFurniture, res: Pick<Facts, "name">, seed: number, url: string): void {
+export function showPlate(roomEls: RoomFurniture, res: Pick<Facts, "name" | "view">, seed: number, url: string): void {
   roomEls.plate.src = url;
-  roomEls.plate.alt = `The prospect of ${res.name}, chart ${seed}`;
+  roomEls.plate.alt = `${plateName(res.name, res.view)}, chart ${seed}`;
   roomEls.plate.hidden = false;
 }
 
 export function writeFolio(roomEls: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
-  roomEls.folioTitle.textContent = `${prospectTitle(res.name)} · Chart № ${seed}`;
+  roomEls.folioTitle.textContent = `${prospectTitle(res.name, res.view)} · Chart № ${seed}`;
   roomEls.folioSub.textContent = subLine(res);
   roomEls.pressed.textContent = `pressed in ${ms}ms · ${dress}`;
 }

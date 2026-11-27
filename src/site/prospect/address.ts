@@ -1,6 +1,6 @@
-// The prospect page's address grammar, pure and DOM-free like src/site/explorer/address.ts: the SAME hash keys the Explorer writes (presence-gated, allowlisted, clamped, so a crafted hash can never push the engine out of range) plus its own `i` and `year`.
+// The prospect page's address grammar, pure and DOM-free like src/site/explorer/address.ts: the SAME hash keys the Explorer writes (presence-gated, allowlisted, clamped, so a crafted hash can never push the engine out of range) plus its own `i`, `year` and `view`.
 import { parseYear } from "../shared/year.ts";
-import { keptKeys, readWorldKeys, type WorldKeys } from "../shared/address-grammar.ts";
+import { keptKeys, readWorldKeys, type PlateView, type WorldKeys } from "../shared/address-grammar.ts";
 import { seedFromHash } from "../explorer/address.ts";
 
 export { parseYear };
@@ -8,12 +8,18 @@ export { parseYear };
 export interface ProspectAddress extends WorldKeys {
   readonly index: number | null;
   readonly year: number | null;
+  readonly view: PlateView | null;
 }
 
 export function parseProspectAddress(hash: string): ProspectAddress {
   const p = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
   const yearRaw = p.get("year");
-  return { ...readWorldKeys(p), index: seedFromHash(p.get("i")), year: yearRaw === null ? null : parseYear(yearRaw) };
+  return {
+    ...readWorldKeys(p),
+    index: seedFromHash(p.get("i")),
+    year: yearRaw === null ? null : parseYear(yearRaw),
+    view: null,
+  };
 }
 
 export function chartTarget(hash: string): string {
@@ -27,4 +33,8 @@ export function ribbonTarget(hash: string, index: number): string {
 
 export function yearHash(hash: string, year: number): string {
   return "#" + [...keptKeys(hash, /^year(=|$)/), `year=${year}`].join("&");
+}
+
+export function viewHash(hash: string, _view: PlateView): string {
+  return hash;
 }
