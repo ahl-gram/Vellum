@@ -224,6 +224,8 @@ holds no control** (Alex, 2026-10-06, Issue #762: lean), decided on the row as i
 the shed never undoes itself. **Provisional until the post-use review:** where the risen row stands,
 and the chart's slide with the fold.
 
+**The Prospect turns its plate between the view from the rise and the view from above with a pair of presses at the head of the engraver's note** (Alex, 2026-11-26, Issue #755 comment 7203257230, D1 (b); its seat, words and the chart folio's line, comment 7208662448, D1 (c)), "from the rise" and "from above" in the display face, the drawn one lit dark with chart-paper words, the other cream (`#pp-view` in `src/styles/prospect/index.css`); the room folio keeps its one control, the year. **Provisional until the post-use review (Issue #796):** the pair's seat, words and dress, and the bird's-eye's line in the chart folio.
+
 **On the Explorer the slip stands inboard of the Drawer tab**: its inset is a token only the Explorer's
 sheet changes (`--slip-right` in `src/styles/explorer/index.css`), and the room's fit and the Glass
 read the inset off the slip itself (`slipInset` in `src/site/shared/room-seats.ts`), so the open slip
