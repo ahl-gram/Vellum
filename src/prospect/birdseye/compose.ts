@@ -13,7 +13,7 @@ import { waysIn } from "./ways.ts";
 import { scatterIn } from "./scatter.ts";
 import { townLayer } from "./town.ts";
 import { harbourOf } from "./harbour.ts";
-import { KEY_ENTRIES, TAG_LIFT, neighboursIn, planKey, seaBands } from "./names.ts";
+import { KEY_ENTRIES, TAG_LIFT, neighboursIn, planKey, seaBands, seaRise } from "./names.ts";
 
 /** Every number in the geometry to three decimals, so the plate's bytes are a function of rounded values: libm drift in world.elev moves one only where it sits within that much of a boundary. */
 export function quantized<T>(value: T): T {
@@ -46,19 +46,22 @@ export function composeBirdseye(
   const { hatch, shade } = hillStrokes(w, input.siteRel);
   const { rivers, roads } = waysIn(world, w);
   const sea = input.harbor ? surroundings.seaName : null;
-  const key = planKey(world, plan, kind, sea, surroundings.riverName)
-    .filter((d) => era === "standing" || d.of === "world" || (era === "ruined" && d.of === "bridge"))
-    .slice(0, KEY_ENTRIES)
-    .map((d, i): PlateKeyEntry => {
-      const a = d.at === null ? null : to(d.at);
-      return {
-        letter: String(i + 1),
-        label: d.label,
-        x: a?.x ?? null,
-        y: a === null ? null : a.y - TAG_LIFT[d.of],
-        town: null,
-      };
-    });
+  const key: PlateKeyEntry[] =
+    era === "before-founding"
+      ? []
+      : planKey(world, plan, kind, sea, surroundings.riverName)
+          .filter((d) => era === "standing" || d.of === "world" || (era === "ruined" && d.of === "bridge"))
+          .slice(0, KEY_ENTRIES)
+          .map((d, i): PlateKeyEntry => {
+            const a = d.at === null ? null : to(d.at);
+            return {
+              letter: String(i + 1),
+              label: d.label,
+              x: a?.x ?? null,
+              y: a === null ? null : a.y - TAG_LIFT[d.of],
+              town: null,
+            };
+          });
   return quantized({
     seed: input.seed,
     index: input.index,
@@ -80,7 +83,7 @@ export function composeBirdseye(
       year,
       createRng(input.seed).fork(`prospect:${input.index}:c:neighbours`),
     ),
-    seaName: sea === null ? null : { text: sea.toUpperCase(), bands: seaBands(w) },
+    seaName: sea === null ? null : { text: sea.toUpperCase(), bands: seaBands(w, seaRise(sea.toUpperCase())) },
     key,
   });
 }

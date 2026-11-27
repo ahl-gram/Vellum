@@ -9,6 +9,7 @@ import type { Surroundings } from "../surroundings.ts";
 import { createLettering, runBox, type Lettering, type RunSpec } from "../letter/letter.ts";
 import type { BirdseyeGeometry, Box } from "../birdseye/types.ts";
 import { SAMPLE_STEP, SX, VIEW_BOTTOM, VIEW_TOP } from "../birdseye/window.ts";
+import { SEA_NAME_RUN } from "../birdseye/names.ts";
 import { engraver, stroke, type Engraver } from "./burin.ts";
 import { bankOf } from "./birdseye-bank.ts";
 import { landNodes, scatterNodes, seaNodes } from "./birdseye-land.ts";
@@ -77,17 +78,7 @@ function neighbourNames(e: Engraver, letters: Lettering, g: BirdseyeGeometry) {
 function seaNameAt(e: Engraver, letters: Lettering, g: BirdseyeGeometry, avoid: ReadonlyArray<Box>) {
   if (g.seaName === null) return null;
   const { text, bands } = g.seaName;
-  const spec = (x: number, y: number): RunSpec => ({
-    text,
-    x,
-    y,
-    size: 9,
-    italic: true,
-    anchor: "middle",
-    spacing: 3,
-    fill: e.ink,
-    opacity: 0.8,
-  });
+  const spec = (x: number, y: number): RunSpec => ({ text, x, y, ...SEA_NAME_RUN, fill: e.ink, opacity: 0.8 });
   const whole = runBox(spec(0, 0));
   const half = (whole.x1 - whole.x0) / 2;
   const col = SAMPLE_STEP * SX;

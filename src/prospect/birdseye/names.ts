@@ -4,8 +4,9 @@ import { sampleBilinear } from "../transect.ts";
 import { ruinedBy } from "../surroundings.ts";
 import type { PlanGate, PlanPoint, TownPlan } from "../town-plan/types.ts";
 import { dist, insideRing } from "../town-plan/geom.ts";
+import { runBox } from "../letter/letter.ts";
 import type { BirdseyeKind, BirdseyeWindow, Neighbour, SeaBand } from "./types.ts";
-import { HALF_U, V_FAR, V_NEAR, project, sampleAt, toUV } from "./window.ts";
+import { HALF_U, SAMPLE_STEP, SY, V_FAR, V_NEAR, project, sampleAt, toUV } from "./window.ts";
 
 export type KeyOf = "keep" | "church" | "market" | "bridge" | "quay" | "gate" | "world";
 export type KeyDraft = { readonly label: string; readonly at: PlanPoint | null; readonly of: KeyOf };
@@ -127,15 +128,21 @@ export function neighboursIn(world: World, w: BirdseyeWindow, index: number, yea
   return out;
 }
 
-const SEA_BAND = 3;
+export const SEA_NAME_RUN = { size: 9, italic: true, anchor: "middle", spacing: 3 } as const;
 
-export function seaBands(w: BirdseyeWindow): SeaBand[] {
+export function seaRise(text: string): number {
+  return -runBox({ text, x: 0, y: 0, fill: "none", ...SEA_NAME_RUN }).top;
+}
+
+export function seaBands(w: BirdseyeWindow, rise: number): SeaBand[] {
+  const deep = Math.ceil(rise / (SAMPLE_STEP * SY)) + 1;
   const open = (i: number, j: number): boolean => {
-    for (let k = 0; k < SEA_BAND; k++) if (sampleAt(w, i, j + k).land) return false;
+    if (j > 0 && sampleAt(w, i, j - 1).land) return false;
+    for (let k = 0; k < deep; k++) if (sampleAt(w, i, j + k).land) return false;
     return true;
   };
   const out: SeaBand[] = [];
-  for (let j = 0; j + SEA_BAND <= w.rows; j++) {
+  for (let j = 0; j + deep <= w.rows; j++) {
     let i = 0;
     while (i < w.cols) {
       if (!open(i, j)) {

@@ -20,7 +20,7 @@ export function townGround(world: World, centre: PlanPoint, wall: ReadonlyArray<
     .map((r) => simplify(chaikin(r, true), 0.03, true));
 }
 
-type Draft = { readonly key: number; readonly item: TownItem };
+type Draft = { readonly key: number; readonly lean: number; readonly item: TownItem };
 
 function bridgeDirection(world: World, at: PlanPoint): PlanPoint {
   let t: PlanPoint = { x: 1, y: 0 };
@@ -65,10 +65,11 @@ export function townLayer(
   if (era === "before-founding") return null;
   const to = projector(world, w);
   const standing = era === "standing";
-  const ruin = createRng(plan.seed).fork(`prospect:${plan.index}:c:ruin`);
+  const lean = leanHouses(plan, kind);
+  const pick = createRng(plan.seed).fork(`spike-ruin:${plan.index}`);
   const drafts: Draft[] = [];
-  for (const lh of leanHouses(plan, kind)) {
-    if (!standing && ruin.next() < 0.7) continue;
+  lean.forEach((lh, at) => {
+    if (!standing && pick.next() >= 0.3) return;
     const a = to(lh.at);
     const item: TownItem = {
       kind: "house",
@@ -80,29 +81,31 @@ export function townLayer(
       h: 0,
       window: false,
     };
-    drafts.push({ key: a.y, item });
-  }
+    drafts.push({ key: a.y, lean: at, item });
+  });
   if (standing) {
     for (const l of plan.landmarks) {
       const a = to(l.at);
       if (l.kind === "church") {
         const great = kind === "capital" || kind === "seat";
-        drafts.push({ key: a.y + 0.5, item: { kind: "church", x: a.x, y: a.y, great, window: false } });
+        drafts.push({ key: a.y + 0.5, lean: -1, item: { kind: "church", x: a.x, y: a.y, great, window: false } });
       } else if (l.kind === "keep") {
         drafts.push({
           key: a.y + 0.5,
+          lean: -1,
           item: { kind: "keep", x: a.x, y: a.y, scale: kind === "capital" ? 1 : 0.8, window: false },
         });
       } else if (l.kind === "market") {
-        drafts.push({ key: a.y, item: { kind: "market", x: a.x, y: a.y } });
+        drafts.push({ key: a.y, lean: -1, item: { kind: "market", x: a.x, y: a.y } });
       }
     }
   }
   drafts.sort((p, q) => p.key - q.key);
   const draw = createRng(plan.seed).fork(`mock-birdseye:${plan.index}:land`);
-  const items = drafts.map(({ item }): TownItem => {
+  const heights = standing ? [] : lean.map(() => 2.2 + draw.next() * 1.6);
+  const items = drafts.map(({ lean: at, item }): TownItem => {
     if (item.kind === "house") {
-      const h = 2.2 + draw.next() * 1.6;
+      const h = standing ? 2.2 + draw.next() * 1.6 : heights[at]!;
       return { ...item, h, window: draw.next() < 0.6 && h > 3 };
     }
     if (item.kind === "church" || item.kind === "keep") return { ...item, window: draw.next() < 0.6 };
