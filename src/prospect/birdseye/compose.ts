@@ -13,7 +13,7 @@ import { waysIn } from "./ways.ts";
 import { scatterIn } from "./scatter.ts";
 import { townLayer } from "./town.ts";
 import { harbourOf } from "./harbour.ts";
-import { KEY_ENTRIES, TAG_LIFT, neighboursIn, planKey, seaBands, seaRise } from "./names.ts";
+import { TAG_LIFT, neighboursIn, planKey, seaBands, seaRise, withinKey } from "./names.ts";
 
 /** Every number in the geometry to three decimals, so the plate's bytes are a function of rounded values: libm drift in world.elev moves one only where it sits within that much of a boundary. */
 export function quantized<T>(value: T): T {
@@ -49,19 +49,20 @@ export function composeBirdseye(
   const key: PlateKeyEntry[] =
     era === "before-founding"
       ? []
-      : planKey(world, plan, kind, sea, surroundings.riverName)
-          .filter((d) => era === "standing" || d.of === "world" || d.of === "bridge")
-          .slice(0, KEY_ENTRIES)
-          .map((d, i): PlateKeyEntry => {
-            const a = d.at === null ? null : to(d.at);
-            return {
-              letter: String(i + 1),
-              label: d.label,
-              x: a?.x ?? null,
-              y: a === null ? null : a.y - TAG_LIFT[d.of],
-              town: null,
-            };
-          });
+      : withinKey(
+          planKey(world, plan, kind, sea, surroundings.riverName).filter(
+            (d) => era === "standing" || d.of === "sea" || d.of === "world" || d.of === "bridge",
+          ),
+        ).map((d, i): PlateKeyEntry => {
+          const a = d.at === null ? null : to(d.at);
+          return {
+            letter: String(i + 1),
+            label: d.label,
+            x: a?.x ?? null,
+            y: a === null ? null : a.y - TAG_LIFT[d.of],
+            town: null,
+          };
+        });
   return quantized({
     seed: input.seed,
     index: input.index,
