@@ -50,7 +50,7 @@ export function composeBirdseye(
     era === "before-founding"
       ? []
       : planKey(world, plan, kind, sea, surroundings.riverName)
-          .filter((d) => era === "standing" || d.of === "world" || (era === "ruined" && d.of === "bridge"))
+          .filter((d) => era === "standing" || d.of === "world" || d.of === "bridge")
           .slice(0, KEY_ENTRIES)
           .map((d, i): PlateKeyEntry => {
             const a = d.at === null ? null : to(d.at);
