@@ -43,7 +43,10 @@ const row = (i: number, on: boolean, text: string, platesHtml = ""): string =>
   `<li${on ? ' class="on"' : ""}>${contentsRowHtml(numeralOf(i), text)}${platesHtml}</li>`;
 const count = (n: number, noun: string): string => `<span class="n">&middot; ${n} ${noun}</span>`;
 const lower = (p: PlateRef): string => p.title.toLowerCase();
-const capitalOf = (p: PlateRef): string => p.title.replace(/^The Prospect of /, "");
+const ofCapital = (p: PlateRef, first: boolean): string => {
+  const [, noun = "prospect", place = p.title] = /^The ([\w'-]+) of (.+)$/.exec(p.title) ?? [];
+  return `${first ? "The" : "the"} ${noun.toLowerCase()} of <em>${escapeXml(place)}</em>`;
+};
 const survey = (name: string): string => `A thematic survey of <em>${escapeXml(name)}</em>`;
 
 function otherPlateRows(atlas: ContentsData, here: string | null, on: (ps: readonly PlateRef[]) => boolean): string[] {
@@ -69,7 +72,7 @@ function otherPlateRows(atlas: ContentsData, here: string | null, on: (ps: reado
       SECTION_ROW.prospect,
       on(atlas.prospects),
       atlas.prospects.length > 0
-        ? atlas.prospects.map((p) => turn(p, here, `The prospect of <em>${escapeXml(capitalOf(p))}</em>`)).join(", ")
+        ? atlas.prospects.map((p, i) => turn(p, here, ofCapital(p, i === 0))).join(", ")
         : "The prospect of the capital: none for this world",
       plates(atlas.prospects, here),
     ),
@@ -136,7 +139,7 @@ export function plateCounts(html: {
 }
 
 const lowerNoun = (title: string): string =>
-  title.replace(/^The (\w+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
+  title.replace(/^The ([\w'-]+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
 
 export function plateLine(section: PlateSection, title: string, ordinal = 0): string {
   const what: Record<PlateSection, string> = {

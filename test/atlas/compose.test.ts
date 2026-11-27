@@ -151,6 +151,11 @@ test("#755 the capital from above reads the world's own present year", () => {
     prospectPlates(early, "antique", 1500)[1]!.svg,
     birdseyePlate(early, capital, STYLES.antique, 400, 1500),
   );
+  assert.notEqual(
+    birdseyePlate(early, capital, STYLES.antique, 400, 1500),
+    birdseyePlate(world, capital, STYLES.antique, world.title.year, 1500),
+    "year 400 predates the founding, so its plate must differ from the present one",
+  );
 });
 
 test("#412 the prospect's dress follows the banners: ink banners open an ink plate", () => {

@@ -27,6 +27,7 @@ export function pb12Faults(doc: Document): string[] {
   const pill = doc.getElementById("pp-status");
   const warning = doc.getElementById("pp-warning");
   const lay = q("#pp-lay");
+  const view = q("#pp-view");
   return faults([
     same(h1sOf(doc, corner), ["corner room-name: The Prospect"]) || "one h1, the folio's name",
     taglineOf(corner) === "the second camera" || "the tagline",
@@ -68,6 +69,7 @@ export function pb12Faults(doc: Document): string[] {
       ["The engraver's note", "The Engraver's Note", "Fold the engraver's note away"],
     ) || "the slip's head",
     same(kids(q(".slip-body")), [
+      "DIV#pp-view.pp-view",
       "P#pp-note.note-prose",
       "P#pp-key-head.key-head",
       "OL#pp-key.contents.plate-key",
@@ -75,6 +77,25 @@ export function pb12Faults(doc: Document): string[] {
       "P.era-gloss",
       "DIV.pp-file",
     ]) || "the slip's body in order",
+    same(
+      view && [
+        view.getAttribute("role"),
+        view.getAttribute("aria-label"),
+        ...[...view.children].map((b) => [
+          b.tagName,
+          b.getAttribute("type"),
+          b.getAttribute("data-view"),
+          b.getAttribute("aria-pressed"),
+          text(b),
+        ]),
+      ],
+      [
+        "group",
+        "The view",
+        ["BUTTON", "button", "rise", "true", "from the rise"],
+        ["BUTTON", "button", "above", "false", "from above"],
+      ],
+    ) || "the view's pair, a labelled group of two presses, the rise lit",
     same([text(q("#pp-key-head")), text(q(".era-gloss"))], ["The key to the plate", ERA_GLOSS]) ||
       "the key's head and the era gloss",
     (same(kids(q(".pp-file")), ["BUTTON#pp-lay.pp-lay", "P#pp-lay-count.pp-lay-count"]) &&
