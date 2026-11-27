@@ -3,7 +3,7 @@ import type { PlateView } from "../shared/address-grammar.ts";
 
 type Facts = Omit<ProspectPlateResult, "svg">;
 
-const NOUN: Readonly<Record<PlateView, string>> = { rise: "Prospect", above: "Prospect" };
+const NOUN: Readonly<Record<PlateView, string>> = { rise: "Prospect", above: "Bird's-eye" };
 
 /** One spelling of a plate's name for both site surfaces that show one, the Prospect's folio and the Chart Table's cutting; a prospect job's own `title` is the WORLD's, so neither can take it from the result. */
 export const prospectTitle = (name: string, view: PlateView): string => `The ${NOUN[view]} of ${name}`;
@@ -22,7 +22,7 @@ export function whereLine(r: Pick<Facts, "era" | "epithet" | "founded">): string
 
 const DRAWN: Readonly<Record<PlateView, string>> = {
   rise: "drawn side-on from the town's own ground",
-  above: "drawn side-on from the town's own ground",
+  above: "drawn from above, as a bird sees the town and its country",
 };
 
 export function subLine(r: Pick<Facts, "title" | "formerName" | "view">): string {

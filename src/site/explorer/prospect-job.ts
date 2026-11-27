@@ -1,6 +1,7 @@
 // The prospect job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts so the two transports cannot drift apart.
 import type { ProspectDress } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
+import { engravedBirdseyePlate } from "../../prospect/birdseye/plate.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
 import { roadMask, roadReachable } from "../../itinerary/route.ts";
@@ -57,7 +58,12 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
   const index = resolveProspectIndex(world, spec.index);
   const year = spec.year ?? world.title.year;
   const s = world.settlements[index]!;
-  const plate = engravedProspectPlate(world, index, STYLES[spec.dress], year);
+  const plate = (spec.view === "above" ? engravedBirdseyePlate : engravedProspectPlate)(
+    world,
+    index,
+    STYLES[spec.dress],
+    year,
+  );
   return {
     svg: plate.svg,
     name: s.name,

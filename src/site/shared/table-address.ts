@@ -185,8 +185,10 @@ function readItem(chunk: string): TableItem | null {
     const yearRaw = fields.get("year");
     // The one year grammar, imported rather than copied: digits making a positive whole number.
     const year = yearRaw === undefined ? undefined : parseYear(yearRaw);
-    if (index === null || year === null) return null;
-    return { kind: "prospect", ...world, style, index: index ?? null, year: year ?? null, view: "rise" };
+    const viewRaw = fields.get("view");
+    const view: PlateView | null = viewRaw === undefined ? "rise" : viewRaw === "above" ? "above" : null;
+    if (index === null || year === null || view === null) return null;
+    return { kind: "prospect", ...world, style, index: index ?? null, year: year ?? null, view };
   }
   return null;
 }
@@ -235,6 +237,7 @@ const dressFields = (item: TableItem): string[] =>
     : [
         ...(item.index !== null ? [`i${PAIR}${item.index}`] : []),
         ...(item.year !== null ? [`year${PAIR}${item.year}`] : []),
+        ...(item.view === "above" ? [`view${PAIR}above`] : []),
       ];
 
 const emitItem = (item: TableItem): string =>
