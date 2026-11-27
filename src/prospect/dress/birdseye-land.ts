@@ -24,6 +24,8 @@ export function seaNodes(e: Engraver, rng: Rng): SvgNode[] {
 const strokes = (list: BirdseyeGeometry["hatch"]): string =>
   list.map((s) => `M${r1(s.from.x)} ${r1(s.from.y)}l${r1(s.by.x)} ${r1(s.by.y)}`).join("");
 
+export const COAST_WIDTH = 0.9;
+
 export function landNodes(e: Engraver, g: BirdseyeGeometry): SvgNode[] {
   const ground = washOr(e, "ground");
   const out: SvgNode[] = g.strips.map((strip) =>
@@ -33,7 +35,7 @@ export function landNodes(e: Engraver, g: BirdseyeGeometry): SvgNode[] {
     el("path", {
       d: g.coast.map(([a, b]) => `M${r1(a.x)} ${r1(a.y)}L${r1(b.x)} ${r1(b.y)}`).join(""),
       fill: "none",
-      ...stroke(e, 0.9),
+      ...stroke(e, COAST_WIDTH),
     }),
     el("path", { d: strokes(g.hatch), fill: "none", stroke: e.ink, "stroke-width": 0.38, "stroke-opacity": 0.55 }),
     el("path", { d: strokes(g.shade), fill: "none", stroke: e.ink, "stroke-width": 0.45, "stroke-opacity": 0.6 }),

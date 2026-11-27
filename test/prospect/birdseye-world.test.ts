@@ -10,6 +10,9 @@ import { insideRing } from "../../src/prospect/town-plan/geom.ts";
 import { composeBirdseye } from "../../src/prospect/birdseye/compose.ts";
 import { BIRDSEYE_LIMIT_KB, engraveBirdseye, utf8Bytes } from "../../src/prospect/birdseye/plate.ts";
 import type { Box, TownItem } from "../../src/prospect/birdseye/types.ts";
+import type { Pt } from "../../src/prospect/geometry.ts";
+import { SAMPLE_STEP, SY } from "../../src/prospect/birdseye/window.ts";
+import { COAST_WIDTH } from "../../src/prospect/dress/birdseye-land.ts";
 import { firstTownsByRoad } from "../../test-support/road-walk.ts";
 import { worldFor } from "../../test-support/seed-worlds.ts";
 
@@ -107,40 +110,85 @@ test("a gate is named for the first town its road reaches", () => {
 const meets = (a: Box, b: Box): boolean =>
   Math.min(a.x1, b.x1) > Math.max(a.x0, b.x0) && Math.min(a.y1, b.y1) > Math.max(a.y0, b.y0);
 
-test("the sea's name stands clear of the town, the ships, the neighbours and the key", () => {
+const touches = (a: Pt, c: Pt, b: Box): boolean => {
+  if (Math.max(a.x, c.x) < b.x0 || Math.min(a.x, c.x) > b.x1 || Math.max(a.y, c.y) < b.y0 || Math.min(a.y, c.y) > b.y1)
+    return false;
+  const side = (x: number, y: number): number => Math.sign((c.x - a.x) * (y - a.y) - (c.y - a.y) * (x - a.x));
+  const corners = [side(b.x0, b.y0), side(b.x1, b.y0), side(b.x1, b.y1), side(b.x0, b.y1)];
+  return !corners.every((s) => s > 0) && !corners.every((s) => s < 0);
+};
+
+const onLand = (b: Box, strips: ReadonlyArray<ReadonlyArray<Pt>>): boolean =>
+  strips.some(
+    (s) =>
+      s.some((p, i) => touches(p, s[(i + 1) % s.length]!, b)) ||
+      insideRing({ x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 }, s),
+  );
+
+const onCoast = (b: Box, coast: ReadonlyArray<readonly [Pt, Pt]>): boolean => coast.some(([a, c]) => touches(a, c, b));
+
+const inked = (b: Box, raise = 0): Box => {
+  const reach = COAST_WIDTH / 2;
+  return { x0: b.x0 - reach, x1: b.x1 + reach, y0: b.y0 - reach - raise, y1: b.y1 + reach - raise };
+};
+
+test("the sea's name stands clear of the land, the coast, the town, the ships, the neighbours and the key", () => {
+  const stenernfjord = places(29).find((p) => p.index === 8)!;
+  assert.ok(
+    stenernfjord.input.harbor && eraFor(stenernfjord.input, stenernfjord.year) === "standing",
+    "seed 29 index 8 is a standing harbour place",
+  );
   let named = 0;
-  for (const seed of SEEDS) {
-    for (const p of places(seed)) {
-      if (!p.input.harbor || eraFor(p.input, p.year) !== "standing") continue;
-      const { boxes } = engraveBirdseye(p.w, p.input, STYLES.antique, p.year);
-      if (boxes.seaName === null) continue;
-      named++;
-      const where = `seed ${seed} index ${p.index}`;
-      const others: ReadonlyArray<readonly [string, ReadonlyArray<Box>]> = [
-        ["town", boxes.town === null ? [] : [boxes.town]],
-        ["a ship", boxes.ships],
-        ["a neighbour", boxes.names],
-        ["the key", boxes.key],
-        ["the bank", [boxes.bank]],
-      ];
-      for (const [what, list] of others)
-        for (const b of list) assert.ok(!meets(boxes.seaName, b), `${where}: the sea's name meets ${what}`);
-    }
+  for (const p of [...SEEDS.flatMap((seed) => places(seed)), stenernfjord]) {
+    if (!p.input.harbor || eraFor(p.input, p.year) !== "standing") continue;
+    const { boxes, geometry } = engraveBirdseye(p.w, p.input, STYLES.antique, p.year);
+    if (boxes.seaName === null) continue;
+    named++;
+    const where = `seed ${p.input.seed} index ${p.index}`;
+    assert.ok(!onLand(inked(boxes.seaName), geometry.strips), `${where}: the sea's name lies on land`);
+    assert.ok(!onCoast(inked(boxes.seaName), geometry.coast), `${where}: the sea's name touches the coast`);
+    const others: ReadonlyArray<readonly [string, ReadonlyArray<Box>]> = [
+      ["town", boxes.town === null ? [] : [boxes.town]],
+      ["a ship", boxes.ships],
+      ["a neighbour", boxes.names],
+      ["the key", boxes.key],
+      ["the bank", [boxes.bank]],
+    ];
+    for (const [what, list] of others)
+      for (const b of list) assert.ok(!meets(boxes.seaName, b), `${where}: the sea's name meets ${what}`);
   }
   assert.ok(named >= 10, `at least ten harbour places draw the sea's name (${named})`);
+  const pelo = places(1).find((p) => p.index === 18)!;
+  const seat = engraveBirdseye(pelo.w, pelo.input, STYLES.antique, pelo.year);
+  assert.ok(seat.boxes.seaName !== null, "seed 1 index 18 names its sea");
+  assert.ok(
+    onLand(inked(seat.boxes.seaName, SAMPLE_STEP * SY), seat.geometry.strips),
+    "one sample row higher seed 1 index 18's name would lie on land",
+  );
 });
 
-test("before its founding a place has no town, and a ruin keeps no church or market and fewer houses", () => {
-  const an400 = places(42).find((p) => p.index === 0)!;
+test("before its founding a place has no town and no key, and a ruin keeps the ruled still's houses and no church or market", () => {
+  const seed42 = places(42);
+  const an400 = seed42.find((p) => p.index === 0)!;
   const early = bird(an400, 400);
   assert.equal(early.era, "before-founding");
+  const around = plateSurroundings(an400.w, 0, 400);
+  assert.ok(
+    an400.input.harbor && around.seaName !== null && around.riverName !== null,
+    "the capital has a sea and a river a key could name",
+  );
   assert.equal(early.town, null, "no town before the founding");
   assert.deepEqual(early.harbour.ships, [], "no ship before the founding");
-  assert.ok(early.key.length > 0, "the key still names the sea and the river");
-  assert.ok(
-    early.key.every((k) => k.x === null),
-    "and points at nothing",
+  assert.deepEqual(early.key, [], "no key before the founding");
+  assert.deepEqual(
+    engraveBirdseye(an400.w, an400.input, STYLES.antique, 400).boxes.key,
+    [],
+    "and no key panel on the plate",
   );
+  const lokai = seed42.find((p) => p.index === 10)!;
+  const unfounded = lokai.input.founded - 1;
+  assert.equal(eraFor(lokai.input, unfounded), "before-founding", "seed 42 index 10 a year before its founding");
+  assert.deepEqual(bird(lokai, unfounded).key, [], "a village before its founding has no key either");
   const houses = (items: ReadonlyArray<TownItem> | undefined): number =>
     (items ?? []).filter((i) => i.kind === "house").length;
   let ruins = 0;
@@ -166,6 +214,17 @@ test("before its founding a place has no town, and a ruin keeps no church or mar
     }
   }
   assert.equal(ruins, 6, "seeds 1, 7 and 42 hold six ruins");
+  const homaitani = seed42.find((p) => p.index === 22)!;
+  assert.deepEqual(
+    (bird(homaitani).town?.items ?? []).flatMap((i) => (i.kind === "house" ? [{ h: i.h, window: i.window }] : [])),
+    [
+      { h: 2.934, window: false },
+      { h: 3.356, window: false },
+      { h: 2.391, window: false },
+      { h: 3.708, window: true },
+    ],
+    "Homaitani's ruin stands the four houses the ruled still draws, at its heights and windows",
+  );
 });
 
 test("no bird's-eye passes its limit, and the heaviest stands as many houses as fit", () => {
